@@ -46,7 +46,7 @@ public class BoxStore implements Closeable {
     volatile int commitCount;
 
     BoxStore(BoxStoreBuilder builder) {
-        this.directory = builder.dbFile;
+        this.directory = builder.directory;
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
                 throw new RuntimeException("Could not create directory: " +

@@ -35,7 +35,7 @@ public abstract class AbstractObjectBoxTest {
     }
 
     protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
-        return new BoxStoreBuilder(boxStoreDir, createTestModel(withIndex));
+        return new BoxStoreBuilder(createTestModel(withIndex)).directory(boxStoreDir);
     }
 
     protected Box<TestEntity> getTestEntityBox() {
