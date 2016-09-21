@@ -4,6 +4,35 @@ import java.io.File;
 import java.lang.reflect.Method;
 
 public class BoxStoreBuilder {
+
+    private static BoxStore defaultStore;
+
+    /**
+     * Convenience singleton instance.
+     * <p>
+     * Note: for better testability, you can usually avoid singletons by storing
+     * a {@link BoxStore} instance in some application scope object and pass it along.
+     */
+    public static synchronized BoxStore defaultStore() {
+        if (defaultStore == null) {
+            throw new IllegalStateException("Please call buildDefault() before calling this method");
+        }
+        return defaultStore;
+    }
+
+    /**
+     * Clears the convenience instance.
+     * <p>
+     * Note: This is usually not required (for testability, please see the comment of     * {@link #defaultStore()}).
+     *
+     * @return true if a default store was available before
+     */
+    public static synchronized boolean clearDefaultStore() {
+        boolean existedBefore = defaultStore != null;
+        defaultStore = null;
+        return existedBefore;
+    }
+
     final byte[] model;
 
     /** BoxStore uses this */
@@ -59,6 +88,10 @@ public class BoxStoreBuilder {
         return this;
     }
 
+    /**
+     * For Android, ObjectBox needs the Context if you want to store your data in the files directory of your app.
+     * If you have a java.io.File object with an absolute path, you can call {@link #directory(File)} instead.
+     */
     public BoxStoreBuilder androidContext(Object context) {
         if (context == null) {
             throw new NullPointerException("Context may not be null");
@@ -105,7 +138,6 @@ public class BoxStoreBuilder {
             if (directory.exists() && !directory.isDirectory()) {
                 throw new IllegalArgumentException("Given directory file exists but actually is not a directory: " +
                         directory.getAbsolutePath());
-
             }
         } else {
             if (name == null) {
@@ -118,6 +150,16 @@ public class BoxStoreBuilder {
             }
         }
         return new BoxStore(this);
+    }
+
+    public BoxStore buildDefault() {
+        synchronized (BoxStoreBuilder.class) {
+            if (defaultStore != null) {
+                throw new IllegalStateException("Default store was already built before. ");
+            }
+            defaultStore = build();
+            return defaultStore;
+        }
     }
 
 }
