@@ -5,9 +5,9 @@ import com.google.flatbuffers.FlatBufferBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
-import objectstore.model.Model;
-import objectstore.model.ModelEntity;
-import objectstore.model.ModelProperty;
+import io.objectbox.model.Model;
+import io.objectbox.model.ModelEntity;
+import io.objectbox.model.ModelProperty;
 
 public class ModelBuilder {
     final FlatBufferBuilder fbb = new FlatBufferBuilder();

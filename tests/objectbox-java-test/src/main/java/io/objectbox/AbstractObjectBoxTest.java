@@ -1,14 +1,14 @@
 package io.objectbox;
 
-import io.objectbox.ModelBuilder.EntityBuilder;
 import org.junit.After;
 import org.junit.Before;
 
 import java.io.File;
 import java.util.Random;
 
-import objectstore.PropertyFlags;
-import objectstore.PropertyType;
+import io.objectbox.ModelBuilder.EntityBuilder;
+import io.objectbox.model.PropertyFlags;
+import io.objectbox.model.PropertyType;
 
 public abstract class AbstractObjectBoxTest {
     protected File boxStoreDir;
