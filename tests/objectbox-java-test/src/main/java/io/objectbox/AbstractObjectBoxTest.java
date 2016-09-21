@@ -35,11 +35,12 @@ public abstract class AbstractObjectBoxTest {
     }
 
     protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
-        return new BoxStoreBuilder(createTestModel(withIndex)).directory(boxStoreDir);
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(withIndex)).directory(boxStoreDir);
+        builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class);
+        return builder;
     }
 
     protected Box<TestEntity> getTestEntityBox() {
-        store.registerEntityClass("TestEntity", TestEntity.class, TestEntityCursor.class);
         return store.boxFor(TestEntity.class);
     }
 

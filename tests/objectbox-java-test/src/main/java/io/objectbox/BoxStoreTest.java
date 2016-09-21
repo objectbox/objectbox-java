@@ -35,7 +35,6 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void testRegistration() {
-        store.registerEntityClass("TestEntity", TestEntity.class, TestEntityCursor.class);
         assertEquals("TestEntity", store.getEntityName(TestEntity.class));
         assertEquals(TestEntityCursor.class, store.getEntityCursorClass(TestEntity.class));
     }

@@ -2,8 +2,21 @@ package io.objectbox;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BoxStoreBuilder {
+    static class EntityClasses<T> {
+        final String entityName;
+        final Class<T> entityClass;
+        final Class<? extends Cursor<T>> cursorClass;
+
+        public EntityClasses(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass) {
+            this.entityName = entityName;
+            this.entityClass = entityClass;
+            this.cursorClass = cursorClass;
+        }
+    }
 
     final byte[] model;
 
@@ -21,6 +34,8 @@ public class BoxStoreBuilder {
     ModelUpdate modelUpdate;
 
     private boolean android;
+
+    List<EntityClasses> entityClasses = new ArrayList<>();
 
     public BoxStoreBuilder(byte[] model) {
         this.model = model;
@@ -91,6 +106,11 @@ public class BoxStoreBuilder {
         }
         baseDirectory = baseDir;
         android = true;
+        return this;
+    }
+
+    public <T> BoxStoreBuilder entity(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass) {
+        entityClasses.add(new EntityClasses<T>(entityName, entityClass, cursorClass));
         return this;
     }
 

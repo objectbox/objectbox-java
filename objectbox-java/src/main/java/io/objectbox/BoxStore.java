@@ -12,6 +12,8 @@ import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.objectbox.BoxStoreBuilder.EntityClasses;
+
 public class BoxStore implements Closeable {
     static {
         LibInit.init();
@@ -65,7 +67,6 @@ public class BoxStore implements Closeable {
     static native long nativeCreateIndex(long store, String name, int entityId, int propertyId);
 
 
-
     private final File directory;
     private final long store;
     private final Map<Class, String> entityNameByClass;
@@ -96,6 +97,11 @@ public class BoxStore implements Closeable {
         store = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.model);
         entityNameByClass = new HashMap<>();
         entityCursorClassByClass = new HashMap<>();
+
+        for (EntityClasses entity : builder.entityClasses) {
+            entityNameByClass.put(entity.entityClass, entity.entityName);
+            entityCursorClassByClass.put(entity.entityClass, entity.cursorClass);
+        }
     }
 
     @Override
@@ -108,11 +114,6 @@ public class BoxStore implements Closeable {
         if (closed) {
             throw new IllegalStateException("Store is closed");
         }
-    }
-
-    public <T> void registerEntityClass(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass) {
-        entityNameByClass.put(entityClass, entityName);
-        entityCursorClassByClass.put(entityClass, (Class) cursorClass);
     }
 
     String getEntityName(Class entityClass) {

@@ -19,7 +19,6 @@ public class PerformanceTest extends AbstractObjectBoxTest {
         // We need more space
         BoxStore boxStore = createBoxStoreBuilder(withIndex).maxSizeInKByte(100 * 1024).build();
         // boxStore.dropAllData();
-        boxStore.registerEntityClass("TestEntity", TestEntity.class, TestEntityCursor.class);
         return boxStore;
     }
 

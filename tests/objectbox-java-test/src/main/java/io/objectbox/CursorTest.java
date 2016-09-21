@@ -19,11 +19,6 @@ import static org.junit.Assert.fail;
 
 public class CursorTest extends AbstractObjectBoxTest {
 
-    @Before
-    public void registerEntities() {
-        store.registerEntityClass("TestEntity", TestEntity.class, TestEntityCursor.class);
-    }
-
     @Override
     protected BoxStore createBoxStore() {
         return createBoxStore(true);
