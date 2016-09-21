@@ -5,34 +5,6 @@ import java.lang.reflect.Method;
 
 public class BoxStoreBuilder {
 
-    private static BoxStore defaultStore;
-
-    /**
-     * Convenience singleton instance.
-     * <p>
-     * Note: for better testability, you can usually avoid singletons by storing
-     * a {@link BoxStore} instance in some application scope object and pass it along.
-     */
-    public static synchronized BoxStore defaultStore() {
-        if (defaultStore == null) {
-            throw new IllegalStateException("Please call buildDefault() before calling this method");
-        }
-        return defaultStore;
-    }
-
-    /**
-     * Clears the convenience instance.
-     * <p>
-     * Note: This is usually not required (for testability, please see the comment of     * {@link #defaultStore()}).
-     *
-     * @return true if a default store was available before
-     */
-    public static synchronized boolean clearDefaultStore() {
-        boolean existedBefore = defaultStore != null;
-        defaultStore = null;
-        return existedBefore;
-    }
-
     final byte[] model;
 
     /** BoxStore uses this */
@@ -153,13 +125,8 @@ public class BoxStoreBuilder {
     }
 
     public BoxStore buildDefault() {
-        synchronized (BoxStoreBuilder.class) {
-            if (defaultStore != null) {
-                throw new IllegalStateException("Default store was already built before. ");
-            }
-            defaultStore = build();
-            return defaultStore;
-        }
+        BoxStore store = build();
+        BoxStore.setDefault(store);
+        return store;
     }
-
 }

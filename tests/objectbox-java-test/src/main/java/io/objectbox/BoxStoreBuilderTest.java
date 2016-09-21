@@ -19,15 +19,15 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
 
     @Before
     public void setUpBox() {
-        BoxStoreBuilder.clearDefaultStore();
+        BoxStore.clearDefaultStore();
         builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir);
     }
 
     @Test
     public void testDefaultStore() {
         BoxStore boxStore = builder.buildDefault();
-        assertSame(boxStore, BoxStoreBuilder.defaultStore());
-        assertSame(boxStore, BoxStoreBuilder.defaultStore());
+        assertSame(boxStore, BoxStore.getDefault());
+        assertSame(boxStore, BoxStore.getDefault());
         try {
             builder.buildDefault();
             fail("Should have thrown");
@@ -38,21 +38,21 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
 
     @Test
     public void testClearDefaultStore() {
-        BoxStore boxStore = builder.buildDefault();
-        BoxStoreBuilder.clearDefaultStore();
+        builder.buildDefault();
+        BoxStore.clearDefaultStore();
         try {
-            BoxStoreBuilder.defaultStore();
+            BoxStore.getDefault();
             fail("Should have thrown");
         } catch (IllegalStateException expected) {
             // OK
         }
-        boxStore = builder.buildDefault();
-        assertSame(boxStore, BoxStoreBuilder.defaultStore());
+        BoxStore boxStore = builder.buildDefault();
+        assertSame(boxStore, BoxStore.getDefault());
     }
 
     @Test(expected = IllegalStateException.class)
     public void testDefaultStoreNull() {
-        BoxStoreBuilder.defaultStore();
+        BoxStore.getDefault();
     }
 
 }

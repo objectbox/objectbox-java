@@ -17,6 +17,41 @@ public class BoxStore implements Closeable {
         LibInit.init();
     }
 
+    private static BoxStore defaultStore;
+
+    /**
+     * Convenience singleton instance which gets set up using {@link BoxStoreBuilder#buildDefault()}.
+     * <p>
+     * Note: for better testability, you can usually avoid singletons by storing
+     * a {@link BoxStore} instance in some application scope object and pass it along.
+     */
+    public static synchronized BoxStore getDefault() {
+        if (defaultStore == null) {
+            throw new IllegalStateException("Please call buildDefault() before calling this method");
+        }
+        return defaultStore;
+    }
+
+    static synchronized void setDefault(BoxStore store) {
+        if (defaultStore != null) {
+            throw new IllegalStateException("Default store was already built before. ");
+        }
+        defaultStore = store;
+    }
+
+    /**
+     * Clears the convenience instance.
+     * <p>
+     * Note: This is usually not required (for testability, please see the comment of     * {@link #getDefault()}).
+     *
+     * @return true if a default store was available before
+     */
+    public static synchronized boolean clearDefaultStore() {
+        boolean existedBefore = defaultStore != null;
+        defaultStore = null;
+        return existedBefore;
+    }
+
     static native long nativeCreate(String directory, long maxDbSizeInKByte, byte[] model);
 
     static native void nativeDelete(long store);
@@ -28,6 +63,8 @@ public class BoxStore implements Closeable {
     static native long nativeBeginReadTx(long store);
 
     static native long nativeCreateIndex(long store, String name, int entityId, int propertyId);
+
+
 
     private final File directory;
     private final long store;
