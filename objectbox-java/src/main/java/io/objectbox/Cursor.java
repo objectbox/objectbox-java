@@ -55,12 +55,14 @@ public abstract class Cursor<T> implements Closeable {
 
     protected final Transaction tx;
     protected final long cursor;
+    protected final Properties properties;
 
     protected boolean closed;
 
-    protected Cursor(Transaction tx, long cursor) {
+    protected Cursor(Transaction tx, long cursor, Properties properties) {
         this.tx = tx;
         this.cursor = cursor;
+        this.properties = properties;
     }
 
     @Override
@@ -72,6 +74,10 @@ public abstract class Cursor<T> implements Closeable {
     protected abstract long getId(T entity);
 
     public abstract long put(T entity);
+
+    public Properties getProperties() {
+        return properties;
+    }
 
     public T get(long key) {
         return (T) nativeGetEntity(cursor, key);

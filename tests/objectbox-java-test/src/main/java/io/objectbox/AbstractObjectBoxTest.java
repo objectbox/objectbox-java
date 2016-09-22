@@ -34,6 +34,12 @@ public abstract class AbstractObjectBoxTest {
         return createBoxStoreBuilder(withIndex).build();
     }
 
+    protected BoxStoreBuilder createBoxStoreBuilderWithTwoEntities(boolean withIndex) {
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModelWithTwoEntities(withIndex)).directory(boxStoreDir);
+        builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class);
+        return builder.entity("TestEntityMinimal", TestEntityMinimal.class, TestEntityMinimalCursor.class);
+    }
+
     protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(withIndex)).directory(boxStoreDir);
         builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class);
@@ -104,7 +110,18 @@ public abstract class AbstractObjectBoxTest {
 
     byte[] createTestModel(boolean withIndex) {
         ModelBuilder modelBuilder = new ModelBuilder();
+        addTestEntity(modelBuilder, withIndex);
+        return modelBuilder.build();
+    }
 
+    byte[] createTestModelWithTwoEntities(boolean withIndex) {
+        ModelBuilder modelBuilder = new ModelBuilder();
+        addTestEntity(modelBuilder, withIndex);
+        addTestEntityMinimal(modelBuilder, withIndex);
+        return modelBuilder.build();
+    }
+
+    private void addTestEntity(ModelBuilder modelBuilder, boolean withIndex) {
         EntityBuilder entityBuilder = modelBuilder.entity("TestEntity");
         entityBuilder.property("id", PropertyType.Long, PropertyFlags.ID);
         entityBuilder.property("simpleBoolean", PropertyType.Bool, 0);
@@ -117,8 +134,13 @@ public abstract class AbstractObjectBoxTest {
         entityBuilder.property("simpleString", PropertyType.String, withIndex ? PropertyFlags.INDEXED : 0);
         entityBuilder.property("simpleByteArray", PropertyType.ByteVector, 0);
         entityBuilder.entityDone();
+    }
 
-        return modelBuilder.build();
+    private void addTestEntityMinimal(ModelBuilder modelBuilder, boolean withIndex) {
+        EntityBuilder entityBuilder = modelBuilder.entity("TestEntityMinimal");
+        entityBuilder.property("id", PropertyType.Long, PropertyFlags.ID);
+        entityBuilder.property("text", PropertyType.String, withIndex ? PropertyFlags.INDEXED : 0);
+        entityBuilder.entityDone();
     }
 
 }

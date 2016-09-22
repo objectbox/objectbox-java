@@ -31,22 +31,13 @@ public class Box<T> {
             return cursor;
         } else {
             cursor = threadLocalReader.get();
-            if (cursor != null) {
-                if (cursor.isObsolete()) {
-                    Transaction tx = cursor.getTx();
+            if (cursor == null || cursor.isObsolete()) {
+                if(cursor != null) {
                     cursor.close();
-                    tx.reset();
-                    cursor = tx.createCursor(entityClass);
-                    synchronized (readers) {
-                        readers.add(new WeakReference<Cursor<T>>(cursor));
-                    }
-                    threadLocalReader.set(cursor);
                 }
-            } else {
-                Transaction tx = store.beginReadTx();
-                cursor = tx.createCursor(entityClass);
+                cursor = store.sharedReadTx().createCursor(entityClass);
                 synchronized (readers) {
-                    readers.add(new WeakReference<Cursor<T>>(cursor));
+                    readers.add(new WeakReference<>(cursor));
                 }
                 threadLocalReader.set(cursor);
             }
@@ -57,7 +48,7 @@ public class Box<T> {
     private Cursor<T> getTxCursor() {
         Transaction activeTx = store.activeTx.get();
         if (activeTx != null) {
-            if(activeTx.isClosed()) {
+            if (activeTx.isClosed()) {
                 throw new IllegalStateException("Active TX is closed");
             }
             Cursor cursor = txCursor.get();

@@ -11,22 +11,22 @@ public final class PropertyFlags {
    * One long property on an entity must be the ID
    */
   public static final byte ID = 1;
-  public static final byte INDEXED = 2;
+  /**
+   * On languages like Java, a non-primitive type is used (aka wrapper types, allowing null)
+   */
+  public static final byte NON_PRIMITIVE_TYPE = 2;
   /**
    * Unused yet
    */
-  public static final byte INDEX_PARTIAL_SKIP_NULL = 4;
+  public static final byte NOT_NULL = 4;
+  public static final byte INDEXED = 8;
+  /**
+   * Unused yet
+   */
+  public static final byte INDEX_PARTIAL_SKIP_NULL = 16;
   /**
    * Unused yet: Unique index
    */
-  public static final byte UNIQUE = 8;
-  /**
-   * Unused yet
-   */
-  public static final byte NOT_NULL = 16;
-
-  public static final String[] names = { "ID", "INDEXED", "", "INDEX_PARTIAL_SKIP_NULL", "", "", "", "UNIQUE", "", "", "", "", "", "", "", "NOT_NULL", };
-
-  public static String name(int e) { return names[e - ID]; }
+  public static final byte UNIQUE = 32;
 }
 

@@ -33,6 +33,11 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         assertSame(box1, box2);
     }
 
+    @Test(expected = RuntimeException.class)
+    public void testBoxForUnknownEntity() {
+        store.boxFor(getClass());
+    }
+
     @Test
     public void testRegistration() {
         assertEquals("TestEntity", store.getEntityName(TestEntity.class));

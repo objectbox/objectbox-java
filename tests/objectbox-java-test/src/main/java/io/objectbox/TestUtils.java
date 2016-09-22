@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import de.greenrobot.common.io.FileUtils;
-import de.greenrobot.common.io.IoUtils;
+import org.greenrobot.essentials.io.FileUtils;
+import org.greenrobot.essentials.io.IoUtils;
 
 /**
  * Created by markus.

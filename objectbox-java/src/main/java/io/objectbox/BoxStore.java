@@ -74,6 +74,8 @@ public class BoxStore implements Closeable {
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
 
+    private final ThreadLocal<Transaction> sharedReadTx = new ThreadLocal<>();
+
     /** Set when running inside TX */
     final ThreadLocal<Transaction> activeTx = new ThreadLocal<>();
 
@@ -136,6 +138,26 @@ public class BoxStore implements Closeable {
         return tx;
     }
 
+    /**
+     * Returns a per-thread managed transaction.
+     */
+    public Transaction sharedReadTx() {
+        Transaction tx = sharedReadTx.get();
+        if(tx != null && !tx.isClosed()) {
+            if(tx.isObsolete()) {
+                tx.reset();
+            }
+        } else {
+            tx = beginReadTx();
+            sharedReadTx.set(tx);
+        }
+        return tx;
+    }
+
+    /**
+     * Begins a transaction for read access only. Note: there may be only one read transaction per thread, so you
+     * should usually prefer {@link #sharedReadTx()} instead.
+     */
     public Transaction beginReadTx() {
         checkOpen();
         // initialCommitCount should be acquired before starting the tx. In race conditions, there is a chance the
@@ -217,6 +239,10 @@ public class BoxStore implements Closeable {
     public <T> Box<T> boxFor(Class<T> entityClass) {
         Box box = boxes.get(entityClass);
         if (box == null) {
+            if (!entityNameByClass.containsKey(entityClass)) {
+                throw new IllegalArgumentException(entityClass +
+                        " is not a known entity. Please add it and trigger generation again.");
+            }
             // Ensure a box is created just once
             synchronized (boxes) {
                 box = boxes.get(entityClass);

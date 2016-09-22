@@ -139,4 +139,36 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertEquals(2, box.count());
     }
 
+    @Test
+    public void testPutAndGetTwoEntities() {
+        store.close();
+        store = createBoxStoreBuilderWithTwoEntities(false).build();
+        box = store.boxFor(TestEntity.class);
+
+        TestEntity entity = new TestEntity();
+        entity.setSimpleInt(1977);
+        long key = box.put(entity);
+        TestEntity entityRead = box.get(key);
+        assertEquals(1977, entityRead.getSimpleInt());
+
+        Box<TestEntityMinimal> box2 = store.boxFor(TestEntityMinimal.class);
+        TestEntityMinimal entity2 = new TestEntityMinimal();
+        entity2.setText("foo");
+        long key2 = box2.put(entity2);
+        TestEntityMinimal entity2Read = box2.get(key2);
+        assertEquals("foo", entity2Read.getText());
+    }
+
+    @Test
+    public void testTwoReaders() {
+        store.close();
+        store = createBoxStoreBuilderWithTwoEntities(false).build();
+        box = store.boxFor(TestEntity.class);
+        box.count();
+
+        Box<TestEntityMinimal> box2 = store.boxFor(TestEntityMinimal.class);
+        box2.count();
+        box.count();
+    }
+
 }
