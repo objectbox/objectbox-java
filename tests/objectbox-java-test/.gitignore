@@ -1,6 +1,0 @@
-objectstore.dll
-libobjectstore.so
-temp-object-store-test*/
-
-# Java crash reports
-hs_err_pid*.log
