@@ -2,7 +2,7 @@ package io.objectbox;
 
 class LibInit {
     static {
-        System.loadLibrary("objectstore");
+        System.loadLibrary("objectbox");
     }
 
     static void init() {
