@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -170,5 +171,15 @@ public class BoxTest extends AbstractObjectBoxTest {
         box2.count();
         box.count();
     }
+
+    @Test
+    public void testCollectionsNull() {
+        box.put((Collection) null);
+        box.put((TestEntity[]) null);
+        box.remove((Collection) null);
+        box.remove((long[]) null);
+        box.removeByKeys(null);
+    }
+
 
 }

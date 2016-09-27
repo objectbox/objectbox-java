@@ -32,7 +32,7 @@ public class Box<T> {
         } else {
             cursor = threadLocalReader.get();
             if (cursor == null || cursor.isObsolete()) {
-                if(cursor != null) {
+                if (cursor != null) {
                     cursor.close();
                 }
                 cursor = store.sharedReadTx().createCursor(entityClass);
@@ -144,6 +144,14 @@ public class Box<T> {
         }
     }
 
+    /**
+     * Puts the given object in the box (aka persisting it). If this is a new entity (its ID property is 0), a new ID
+     * will be assigned to the entity (and returned). If the entity was already put in the box before, it will be
+     * overwritten.
+     *
+     * Performance note: if you want to put several entities, consider {@link #put(Collection)},
+     * {@link #put(Object[])}, {@link BoxStore#runInTx(Runnable)}, etc. instead.
+     */
     public long put(T entity) {
         Cursor<T> cursor = getWriter();
         try {
@@ -155,7 +163,14 @@ public class Box<T> {
         }
     }
 
+    /**
+     * Puts the given entities in a box using a single transaction.
+     */
     public void put(T... entities) {
+        if (entities == null || entities.length == 0) {
+            return;
+        }
+
         Cursor<T> cursor = getWriter();
         try {
             for (T entity : entities) {
@@ -167,7 +182,14 @@ public class Box<T> {
         }
     }
 
+    /**
+     * Puts the given entities in a box using a single transaction.
+     */
     public void put(Collection<T> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return;
+        }
+
         Cursor<T> cursor = getWriter();
         try {
             for (T entity : entities) {
@@ -190,6 +212,10 @@ public class Box<T> {
     }
 
     public void remove(long... keys) {
+        if (keys == null || keys.length == 0) {
+            return;
+        }
+
         Cursor<T> cursor = getWriter();
         try {
             for (long key : keys) {
@@ -201,7 +227,13 @@ public class Box<T> {
         }
     }
 
+    /**
+     * Due to type erasure collision, we cannot simply use "remove" as a method name here.
+     */
     public void removeByKeys(Collection<Long> keys) {
+        if (keys == null || keys.isEmpty()) {
+            return;
+        }
         Cursor<T> cursor = getWriter();
         try {
             for (long key : keys) {
@@ -225,6 +257,9 @@ public class Box<T> {
     }
 
     public void remove(T... entities) {
+        if (entities == null || entities.length == 0) {
+            return;
+        }
         Cursor<T> cursor = getWriter();
         try {
             for (T entity : entities) {
@@ -238,6 +273,9 @@ public class Box<T> {
     }
 
     public void remove(Collection<T> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return;
+        }
         Cursor<T> cursor = getWriter();
         try {
             for (T entity : entities) {
