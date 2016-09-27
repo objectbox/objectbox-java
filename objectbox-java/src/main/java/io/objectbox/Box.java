@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * A box to store objects of a particular class.
- * <p/>
+ * <p>
  * Thread-safe.
  */
 public class Box<T> {
