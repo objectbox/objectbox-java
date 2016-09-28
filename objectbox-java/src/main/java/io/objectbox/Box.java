@@ -124,6 +124,22 @@ public class Box<T> {
         return getReader().count();
     }
 
+    public List<T> find(String propertyName, String value) {
+        return getReader().find(propertyName, value);
+    }
+
+    public List<T> find(String propertyName, long value) {
+        return getReader().find(propertyName, value);
+    }
+
+    public List<T> find(Property property, String value) {
+        return getReader().find(property.dbName, value);
+    }
+
+    public List<T> find(Property property, long value) {
+        return getReader().find(property.dbName, value);
+    }
+
     public List<T> getAll() {
         Cursor<T> cursor = getReader();
         T first = cursor.first();
@@ -148,7 +164,7 @@ public class Box<T> {
      * Puts the given object in the box (aka persisting it). If this is a new entity (its ID property is 0), a new ID
      * will be assigned to the entity (and returned). If the entity was already put in the box before, it will be
      * overwritten.
-     *
+     * <p>
      * Performance note: if you want to put several entities, consider {@link #put(Collection)},
      * {@link #put(Object[])}, {@link BoxStore#runInTx(Runnable)}, etc. instead.
      */

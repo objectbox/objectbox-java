@@ -181,5 +181,24 @@ public class BoxTest extends AbstractObjectBoxTest {
         box.removeByKeys(null);
     }
 
+    @Test
+    public void testFind() {
+        put("banana");
+        put("apple");
+        put("banana");
 
+        List<TestEntity> list = box.find(new Property(2, String.class, "wrongname", false, "simpleString"), "banana");
+        assertEquals(2, list.size());
+        assertEquals(1, list.get(0).getId());
+        assertEquals(3, list.get(1).getId());
+    }
+
+    private TestEntity put(String simpleString) {
+        TestEntity entity = new TestEntity();
+        entity.setSimpleString(simpleString);
+        long key = box.put(entity);
+        assertTrue(key != 0);
+        assertEquals(key, entity.getId());
+        return entity;
+    }
 }
