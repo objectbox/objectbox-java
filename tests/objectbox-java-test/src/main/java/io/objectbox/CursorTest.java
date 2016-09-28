@@ -1,13 +1,13 @@
 package io.objectbox;
 
 import io.objectbox.exception.DbException;
-import org.junit.Before;
+
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 
 
 import static org.junit.Assert.assertEquals;
@@ -177,19 +177,43 @@ public class CursorTest extends AbstractObjectBoxTest {
         transaction.abort();
     }
 
+    @Test
+    public void testFindScalars() {
+        Transaction transaction1 = store.beginTx();
+        Cursor<TestEntity> cursor1 = transaction1.createCursor(TestEntity.class);
+        putEntity(cursor1, 0, "nope", 2015);
+        putEntity(cursor1, 0, "foo", 2016);
+        putEntity(cursor1, 0, "bar", 2016);
+        putEntity(cursor1, 0, "nope", 2017);
+        cursor1.close();
+        transaction1.commit();
+
+        Transaction transaction = store.beginReadTx();
+        Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
+        List<TestEntity> result = cursor.find("simpleInt", 2016);
+        assertEquals(2, result.size());
+
+        assertEquals("foo", result.get(0).getSimpleString());
+        assertEquals("bar", result.get(1).getSimpleString());
+
+        cursor.close();
+        transaction.abort();
+    }
+
     private void insertTestEntities(String... texts) {
         Transaction transaction = store.beginTx();
         Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
         for (String text : texts) {
-            putEntity(cursor, 0, text);
+            putEntity(cursor, 0, text, 0);
         }
         cursor.close();
         transaction.commit();
     }
 
-    private TestEntity putEntity(Cursor<TestEntity> cursor, long id, String text) {
+    private TestEntity putEntity(Cursor<TestEntity> cursor, long id, String text, int number) {
         TestEntity entity = new TestEntity();
         entity.setSimpleString(text);
+        entity.setSimpleInt(number);
         entity.setId(id);
         cursor.put(entity);
         return entity;

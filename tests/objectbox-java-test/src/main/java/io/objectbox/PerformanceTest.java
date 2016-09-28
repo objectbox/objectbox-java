@@ -57,7 +57,7 @@ public class PerformanceTest extends AbstractObjectBoxTest {
         long start = System.nanoTime();
         TestEntity foundEntity = findString ?
                 cursor.find("simpleString", entity.getSimpleString()) :
-                cursor.find("simpleLong", entity.getSimpleLong());
+                cursor.find("simpleLong", entity.getSimpleLong()).get(0);
         long time = System.nanoTime() - start;
         cursor.close();
         transaction.abort();

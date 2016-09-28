@@ -1,6 +1,7 @@
 package io.objectbox;
 
 import java.io.Closeable;
+import java.util.List;
 
 /**
  * Created by markus.
@@ -25,7 +26,7 @@ public abstract class Cursor<T> implements Closeable {
 
     static native long nativeCount(long cursor);
 
-    static native Object nativeFindLong(long cursor, String propertyName, long value);
+    static native List nativeFindScalar(long cursor, String propertyName, long value);
 
     static native Object nativeFindString(long cursor, String propertyName, String value);
 
@@ -126,8 +127,8 @@ public abstract class Cursor<T> implements Closeable {
         return nativePropertyId(cursor, propertyName);
     }
 
-    public T find(String propertyName, long value) {
-        return (T) nativeFindLong(cursor, propertyName, value);
+    public List<T> find(String propertyName, long value) {
+        return nativeFindScalar(cursor, propertyName, value);
     }
 
     public T find(String propertyName, String value) {
