@@ -93,7 +93,7 @@ public class CursorTest extends AbstractObjectBoxTest {
 
         // and find via index
         assertEquals(key, cursor.lookupKeyUsingIndex(9, value1));
-        assertEquals(key, cursor.find("simpleString", value1).getId());
+        assertEquals(key, cursor.find("simpleString", value1).get(0).getId());
 
         // change entity values
         String value2 = "lala123";
@@ -104,10 +104,10 @@ public class CursorTest extends AbstractObjectBoxTest {
         cursor.put(entityRead);
 
         // indexes ok?
-        assertNull(cursor.find("simpleString", value1));
-        assertEquals(-1, cursor.lookupKeyUsingIndex(9, value1));
+        assertEquals(0, cursor.find("simpleString", value1).size());
+        assertEquals(0, cursor.lookupKeyUsingIndex(9, value1));
 
-        assertEquals(key, cursor.find("simpleString", value2).getId());
+        assertEquals(key, cursor.find("simpleString", value2).get(0).getId());
 
         // get the changed entity
         entityRead = cursor.get(key);
@@ -122,8 +122,8 @@ public class CursorTest extends AbstractObjectBoxTest {
         cursor.deleteEntity(key);
 
         // not in any index anymore
-        assertNull(cursor.find("simpleString", value1));
-        assertNull(cursor.find("simpleString", value2));
+        assertEquals(0, cursor.find("simpleString", value1).size());
+        assertEquals(0, cursor.find("simpleString", value2).size());
 
         cursor.close();
         transaction.abort();
@@ -153,7 +153,7 @@ public class CursorTest extends AbstractObjectBoxTest {
 
         Transaction transaction = store.beginTx();
         Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
-        TestEntity entityRead = cursor.find("simpleString", "find me");
+        TestEntity entityRead = cursor.find("simpleString", "find me").get(0);
         assertNotNull(entityRead);
         assertEquals(1, entityRead.getId());
 
@@ -162,7 +162,7 @@ public class CursorTest extends AbstractObjectBoxTest {
 
         transaction = store.beginTx();
         cursor = transaction.createCursor(TestEntity.class);
-        entityRead = cursor.find("simpleString", "not me");
+        entityRead = cursor.find("simpleString", "not me").get(0);
         assertNotNull(entityRead);
         assertEquals(2, entityRead.getId());
 
@@ -171,7 +171,7 @@ public class CursorTest extends AbstractObjectBoxTest {
 
         transaction = store.beginTx();
         cursor = transaction.createCursor(TestEntity.class);
-        assertNull(cursor.find("simpleString", "non-existing"));
+        assertEquals(0, cursor.find("simpleString", "non-existing").size());
 
         cursor.close();
         transaction.abort();
@@ -233,7 +233,7 @@ public class CursorTest extends AbstractObjectBoxTest {
 
         assertEquals(2, cursor.lookupKeyUsingIndex(9, "not me"));
         assertEquals(1, cursor.lookupKeyUsingIndex(9, "find me"));
-        assertEquals(-1, cursor.lookupKeyUsingIndex(9, "peter pan"));
+        assertEquals(0, cursor.lookupKeyUsingIndex(9, "peter pan"));
 
         cursor.close();
         transaction.abort();
@@ -247,10 +247,10 @@ public class CursorTest extends AbstractObjectBoxTest {
         Transaction transaction = store.beginTx();
         Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
 
-        assertEquals(-1, cursor.lookupKeyUsingIndex(9, "a"));
+        assertEquals(0, cursor.lookupKeyUsingIndex(9, "a"));
         assertEquals(2, cursor.lookupKeyUsingIndex(9, "aa"));
         assertEquals(1, cursor.lookupKeyUsingIndex(9, "aaa"));
-        assertEquals(-1, cursor.lookupKeyUsingIndex(9, "aaaa"));
+        assertEquals(0, cursor.lookupKeyUsingIndex(9, "aaaa"));
 
         cursor.close();
         transaction.abort();

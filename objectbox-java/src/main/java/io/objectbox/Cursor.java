@@ -28,7 +28,7 @@ public abstract class Cursor<T> implements Closeable {
 
     static native List nativeFindScalar(long cursor, String propertyName, long value);
 
-    static native Object nativeFindString(long cursor, String propertyName, String value);
+    static native List nativeFindString(long cursor, String propertyName, String value);
 
     // TODO not implemented
     static native long nativeGetKey(long cursor);
@@ -131,10 +131,13 @@ public abstract class Cursor<T> implements Closeable {
         return nativeFindScalar(cursor, propertyName, value);
     }
 
-    public T find(String propertyName, String value) {
-        return (T) nativeFindString(cursor, propertyName, value);
+    public List<T> find(String propertyName, String value) {
+        return nativeFindString(cursor, propertyName, value);
     }
 
+    /**
+     * @return key or 0 if not found
+     */
     public long lookupKeyUsingIndex(int propertyId, String value) {
         return nativeLookupKeyUsingIndex(cursor, propertyId, value);
     }

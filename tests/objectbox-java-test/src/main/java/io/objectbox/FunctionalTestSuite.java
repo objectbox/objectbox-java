@@ -6,11 +6,12 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+        BoxTest.class,
         BoxStoreTest.class,
+        BoxStoreBuilderTest.class,
         CursorTest.class,
         CursorBytesTest.class,
         TransactionTest.class,
-        BoxTest.class
 })
 public class FunctionalTestSuite {
 }
