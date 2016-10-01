@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 
 import io.objectbox.ModelBuilder.EntityBuilder;
@@ -17,7 +18,7 @@ public abstract class AbstractObjectBoxTest {
     protected boolean runExtensiveTests;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws IOException {
         // This works with Android without needing any context
         File tempFile = File.createTempFile("object-store-test", "");
         tempFile.delete();
