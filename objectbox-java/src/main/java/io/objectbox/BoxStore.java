@@ -54,6 +54,8 @@ public class BoxStore implements Closeable {
         return existedBefore;
     }
 
+    public static native String getVersionNative();
+
     static native long nativeCreate(String directory, long maxDbSizeInKByte, byte[] model);
 
     static native void nativeDelete(long store);
@@ -66,6 +68,9 @@ public class BoxStore implements Closeable {
 
     static native long nativeCreateIndex(long store, String name, int entityId, int propertyId);
 
+    public static String getVersion() {
+        return "0.9.0-2016100213";
+    }
 
     private final File directory;
     private final long store;
