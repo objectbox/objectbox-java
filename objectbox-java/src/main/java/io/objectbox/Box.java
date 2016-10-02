@@ -116,6 +116,10 @@ public class Box<T> {
         }
     }
 
+    public int getPropertyId(String propertyName) {
+        return getReader().getPropertyId(propertyName);
+    }
+
     public T get(long key) {
         return getReader().get(key);
     }
@@ -130,6 +134,10 @@ public class Box<T> {
 
     public List<T> find(String propertyName, long value) {
         return getReader().find(propertyName, value);
+    }
+
+    public List<T> find(int propertyId, String value) {
+        return getReader().find(propertyId, value);
     }
 
     public List<T> find(Property property, String value) {

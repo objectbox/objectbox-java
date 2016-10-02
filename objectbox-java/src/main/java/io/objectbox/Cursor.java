@@ -30,6 +30,8 @@ public abstract class Cursor<T> implements Closeable {
 
     static native List nativeFindString(long cursor, String propertyName, String value);
 
+    static native List nativeFindStringPropertyId(long cursor, int propertyId, String value);
+
     // TODO not implemented
     static native long nativeGetKey(long cursor);
 
@@ -133,6 +135,10 @@ public abstract class Cursor<T> implements Closeable {
 
     public List<T> find(String propertyName, String value) {
         return nativeFindString(cursor, propertyName, value);
+    }
+
+    public List<T> find(int propertyId, String value) {
+        return nativeFindStringPropertyId(cursor, propertyId, value);
     }
 
     /**
