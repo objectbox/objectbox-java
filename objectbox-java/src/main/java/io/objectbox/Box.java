@@ -136,6 +136,10 @@ public class Box<T> {
         return getReader().find(propertyName, value);
     }
 
+    public List<T> find(int propertyId, long value) {
+        return getReader().find(propertyId, value);
+    }
+
     public List<T> find(int propertyId, String value) {
         return getReader().find(propertyId, value);
     }
@@ -166,6 +170,11 @@ public class Box<T> {
             }
             return list;
         }
+    }
+
+    /** Does not work yet, also probably won't be faster than {@link Box#getAll()}. */
+    public List<T> getAll2() {
+        return getReader().getAll();
     }
 
     /**

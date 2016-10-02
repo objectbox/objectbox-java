@@ -69,7 +69,7 @@ public class BoxStore implements Closeable {
     static native long nativeCreateIndex(long store, String name, int entityId, int propertyId);
 
     public static String getVersion() {
-        return "0.9.0-2016100213";
+        return "0.9.0-2016100214";
     }
 
     private final File directory;

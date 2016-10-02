@@ -182,10 +182,10 @@ public class BoxTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testFind() {
-        put("banana");
-        put("apple");
-        put("banana");
+    public void testFindString() {
+        put("banana", 0);
+        put("apple", 0);
+        put("banana", 0);
 
         List<TestEntity> list = box.find(new Property(2, String.class, "wrongname", false, "simpleString"), "banana");
         assertEquals(2, list.size());
@@ -193,9 +193,47 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertEquals(3, list.get(1).getId());
     }
 
-    private TestEntity put(String simpleString) {
+    @Test
+    public void testFindString_preparedPropertyId() {
+        put("banana", 0);
+        put("apple", 0);
+        put("banana", 0);
+        int propertyId = box.getPropertyId("simpleString");
+        List<TestEntity> list = box.find(propertyId, "banana");
+        assertEquals(2, list.size());
+        assertEquals(1, list.get(0).getId());
+        assertEquals(3, list.get(1).getId());
+    }
+
+    @Test
+    public void testFindInt() {
+        put(null, 42);
+        put(null, 23);
+        put(null, 42);
+
+        List<TestEntity> list = box.find(new Property(2, int.class, "wrongname", false, "simpleInt"), 42);
+        assertEquals(2, list.size());
+        assertEquals(1, list.get(0).getId());
+        assertEquals(3, list.get(1).getId());
+    }
+
+    @Test
+    public void testFindInt_preparedPropertyId() {
+        put(null, 42);
+        put(null, 23);
+        put(null, 42);
+
+        int propertyId = box.getPropertyId("simpleInt");
+        List<TestEntity> list = box.find(propertyId, 42);
+        assertEquals(2, list.size());
+        assertEquals(1, list.get(0).getId());
+        assertEquals(3, list.get(1).getId());
+    }
+
+    private TestEntity put(String simpleString, int simpleInt) {
         TestEntity entity = new TestEntity();
         entity.setSimpleString(simpleString);
+        entity.setSimpleInt(simpleInt);
         long key = box.put(entity);
         assertTrue(key != 0);
         assertEquals(key, entity.getId());

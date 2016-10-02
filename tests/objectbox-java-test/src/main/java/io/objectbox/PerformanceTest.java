@@ -2,7 +2,6 @@ package io.objectbox;
 
 import org.junit.Test;
 
-
 import java.util.List;
 
 
@@ -124,7 +123,7 @@ public class PerformanceTest extends AbstractObjectBoxTest {
         TestEntity e = new TestEntity();
         setScalarsToRandomValues(e);
         e.setSimpleString(simpleString);
-        byte[] bytes = { 42, -17, 23, 0, 127, -128 };
+        byte[] bytes = {42, -17, 23, 0, 127, -128};
         e.setSimpleByteArray(bytes);
         return e;
     }
@@ -185,6 +184,18 @@ public class PerformanceTest extends AbstractObjectBoxTest {
             TestEntity testEntity = entitiesRead[i];
             assertEqualEntity(message, entity, testEntity);
         }
+
+//        entitiesRead = null;
+//        System.gc();
+//
+//        start = time();
+//        transaction = store.beginReadTx();
+//        cursor = transaction.createCursor(TestEntity.class);
+//        List<TestEntity> entitiesList = cursor.getAll();
+//        cursor.close();
+//        transaction.abort();
+//        time = time() - start;
+//        log("Read(2) " + entitiesList.size() + " entities: " + time + "ms, " + valuesPerSec(count, time));
     }
 
     private void bulkUpdate(int count, TestEntity[] entities, String withOrWithoutIndex, String newStringBaseValue) {

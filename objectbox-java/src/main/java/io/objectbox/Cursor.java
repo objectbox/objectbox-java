@@ -18,6 +18,8 @@ public abstract class Cursor<T> implements Closeable {
 
     static native boolean nativeSeek(long cursor, long key);
 
+    static native Object nativeGetAllEntities(long cursor);
+
     static native Object nativeGetEntity(long cursor, long key);
 
     static native Object nativeNextEntity(long cursor);
@@ -29,6 +31,8 @@ public abstract class Cursor<T> implements Closeable {
     static native List nativeFindScalar(long cursor, String propertyName, long value);
 
     static native List nativeFindString(long cursor, String propertyName, String value);
+
+    static native List nativeFindScalarPropertyId(long cursor, int propertyId, long value);
 
     static native List nativeFindStringPropertyId(long cursor, int propertyId, String value);
 
@@ -94,6 +98,11 @@ public abstract class Cursor<T> implements Closeable {
         return (T) nativeFirstEntity(cursor);
     }
 
+    /** Does not work yet, also probably won't be faster than {@link Box#getAll()}. */
+    public List<T> getAll() {
+        return (List) nativeGetAllEntities(cursor);
+    }
+
     public void deleteEntity(long key) {
         nativeDeleteEntity(cursor, key);
     }
@@ -135,6 +144,10 @@ public abstract class Cursor<T> implements Closeable {
 
     public List<T> find(String propertyName, String value) {
         return nativeFindString(cursor, propertyName, value);
+    }
+
+    public List<T> find(int propertyId, long value) {
+        return nativeFindScalarPropertyId(cursor, propertyId, value);
     }
 
     public List<T> find(int propertyId, String value) {

@@ -16,6 +16,8 @@
 
 package io.objectbox;
 
+import io.objectbox.query.WhereCondition.PropertyCondition;
+
 /**
  * Meta data describing a property
  *
@@ -34,6 +36,11 @@ public class Property {
         this.name = name;
         this.primaryKey = primaryKey;
         this.dbName = dbName;
+    }
+
+    /** Creates an "equal ('=')" condition  for this property. */
+    public PropertyCondition eq(Object value) {
+        return new PropertyCondition(this, value);
     }
 
 }
