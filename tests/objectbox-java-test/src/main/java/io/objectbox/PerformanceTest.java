@@ -124,6 +124,8 @@ public class PerformanceTest extends AbstractObjectBoxTest {
         TestEntity e = new TestEntity();
         setScalarsToRandomValues(e);
         e.setSimpleString(simpleString);
+        byte[] bytes = { 42, -17, 23, 0, 127, -128 };
+        e.setSimpleByteArray(bytes);
         return e;
     }
 
