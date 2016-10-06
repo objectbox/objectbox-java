@@ -10,6 +10,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+// NOTE: Sizes must be multiple of 4 (currently not enforced)
 public class CursorBytesTest extends AbstractObjectBoxTest {
     static final boolean EXTENSIVE = false;
 
@@ -28,14 +29,14 @@ public class CursorBytesTest extends AbstractObjectBoxTest {
     public void testFirstLastNextPrev() {
         Transaction transaction = store.beginTx();
         KeyValueCursor cursor = transaction.createKeyValueCursor();
-        cursor.put(1, new byte[]{1, 2, 3});
+        cursor.put(1, new byte[]{1, 2, 3, 4});
         cursor.put(2, new byte[]{2, 3, 4, 5});
-        cursor.put(4, new byte[]{4, 5, 6, 7, 8});
-        cursor.put(8, new byte[]{8, 9, 10, 11, 12, 13});
+        cursor.put(4, new byte[]{4, 5, 6, 7});
+        cursor.put(8, new byte[]{8, 9, 10, 11, 12, 13, 14, 15});
 
-        assertTrue(Arrays.equals(new byte[]{1, 2, 3}, cursor.getFirst()));
+        assertTrue(Arrays.equals(new byte[]{1, 2, 3, 4}, cursor.getFirst()));
         assertTrue(Arrays.equals(new byte[]{2, 3, 4, 5}, cursor.getNext()));
-        assertTrue(Arrays.equals(new byte[]{4, 5, 6, 7, 8}, cursor.getNext()));
+        assertTrue(Arrays.equals(new byte[]{4, 5, 6, 7}, cursor.getNext()));
         assertTrue(Arrays.equals(new byte[]{2, 3, 4, 5}, cursor.getPrev()));
         // getLast is currently unsupported
 //        assertTrue(Arrays.equals(new byte[]{8, 9, 10, 11, 12, 13}, cursor.getLast()));
@@ -67,17 +68,17 @@ public class CursorBytesTest extends AbstractObjectBoxTest {
     public void testGetEqualOrGreater() {
         Transaction transaction = store.beginTx();
         KeyValueCursor cursor = transaction.createKeyValueCursor();
-        cursor.put(1, new byte[]{1, 1});
-        cursor.put(2, new byte[]{2, 1});
-        cursor.put(4, new byte[]{4, 1});
-        cursor.put(4, new byte[]{4, 2});
-        cursor.put(8, new byte[]{8, 1});
-        cursor.put(16, new byte[]{16, 1});
+        cursor.put(1, new byte[]{1, 1, 0, 0});
+        cursor.put(2, new byte[]{2, 1, 0, 0});
+        cursor.put(4, new byte[]{4, 1, 0, 0});
+        cursor.put(4, new byte[]{4, 2, 0, 0});
+        cursor.put(8, new byte[]{8, 1, 0, 0});
+        cursor.put(16, new byte[]{16, 1, 0, 0});
 
-        assertTrue(Arrays.equals(new byte[]{4, 2}, cursor.getEqualOrGreater(3)));
-        assertTrue(Arrays.equals(new byte[]{4, 2}, cursor.getCurrent()));
-        assertTrue(Arrays.equals(new byte[]{8, 1}, cursor.getNext()));
-        assertTrue(Arrays.equals(new byte[]{8, 1}, cursor.getCurrent()));
+        assertTrue(Arrays.equals(new byte[]{4, 2, 0, 0}, cursor.getEqualOrGreater(3)));
+        assertTrue(Arrays.equals(new byte[]{4, 2, 0, 0}, cursor.getCurrent()));
+        assertTrue(Arrays.equals(new byte[]{8, 1, 0, 0}, cursor.getNext()));
+        assertTrue(Arrays.equals(new byte[]{8, 1, 0, 0}, cursor.getCurrent()));
         assertEquals(8, cursor.getKey());
 
         cursor.getFirst();
@@ -88,9 +89,9 @@ public class CursorBytesTest extends AbstractObjectBoxTest {
         cursor.getEqualOrGreater(4);
         assertEquals(4, cursor.getKey());
 
-        assertTrue(Arrays.equals(new byte[]{4, 2}, cursor.getCurrent()));
-        assertTrue(Arrays.equals(new byte[]{8, 1}, cursor.getNext()));
-        assertTrue(Arrays.equals(new byte[]{8, 1}, cursor.getCurrent()));
+        assertTrue(Arrays.equals(new byte[]{4, 2, 0, 0}, cursor.getCurrent()));
+        assertTrue(Arrays.equals(new byte[]{8, 1, 0, 0}, cursor.getNext()));
+        assertTrue(Arrays.equals(new byte[]{8, 1, 0, 0}, cursor.getCurrent()));
         assertEquals(8, cursor.getKey());
 /*
 
