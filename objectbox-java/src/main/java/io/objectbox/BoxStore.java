@@ -56,6 +56,11 @@ public class BoxStore implements Closeable {
 
     public static native String getVersionNative();
 
+    /**
+     * Diagnostics: If this method crashes on a device, please send us the logcat output.
+     */
+    public static native void testUnalignedMemoryAccess();
+
     static native long nativeCreate(String directory, long maxDbSizeInKByte, byte[] model);
 
     static native void nativeDelete(long store);

@@ -11,6 +11,11 @@ import static org.junit.Assert.assertTrue;
 public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
+    public void testUnalignedMemoryAccess() {
+        BoxStore.testUnalignedMemoryAccess();
+    }
+
+    @Test
     public void testClose() {
         assertFalse(store.isClosed());
         store.close();
