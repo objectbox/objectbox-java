@@ -1,12 +1,13 @@
 package io.objectbox;
 
-import io.objectbox.exception.DbException;
 import org.junit.Test;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import io.objectbox.exception.DbException;
 
 
 import static org.junit.Assert.assertArrayEquals;
@@ -18,11 +19,11 @@ import static org.junit.Assert.fail;
 
 public class TransactionTest extends AbstractObjectBoxTest {
 
-    private void prepareOneEntryWith123() {
+    private void prepareOneEntryWith1230() {
         // prepare the data
         Transaction transaction = store.beginTx();
         KeyValueCursor cursor = transaction.createKeyValueCursor();
-        cursor.put(123, new byte[]{1, 2, 3});
+        cursor.put(123, new byte[]{1, 2, 3, 0});
         cursor.close();
         assertEquals(true, transaction.isActive());
         transaction.commit();
@@ -31,38 +32,38 @@ public class TransactionTest extends AbstractObjectBoxTest {
 
     @Test
     public void testTransactionCommitAndAbort() {
-        prepareOneEntryWith123();
+        prepareOneEntryWith1230();
 
         Transaction transaction = store.beginTx();
         KeyValueCursor cursor = transaction.createKeyValueCursor();
-        cursor.put(123, new byte[]{3, 2, 1});
-        assertArrayEquals(new byte[]{3, 2, 1}, cursor.get(123));
+        cursor.put(123, new byte[]{3, 2, 1, 0});
+        assertArrayEquals(new byte[]{3, 2, 1, 0}, cursor.get(123));
         cursor.close();
         transaction.abort();
 
         transaction = store.beginTx();
         cursor = transaction.createKeyValueCursor();
-        assertArrayEquals(new byte[]{1, 2, 3}, cursor.get(123));
+        assertArrayEquals(new byte[]{1, 2, 3, 0}, cursor.get(123));
         cursor.close();
         transaction.abort();
     }
 
     @Test
     public void testReadTransactionWhileWriting() {
-        prepareOneEntryWith123();
+        prepareOneEntryWith1230();
 
         Transaction txWrite = store.beginTx();
         Transaction txRead = store.beginReadTx();
 
         // start writing
         KeyValueCursor cursorWrite = txWrite.createKeyValueCursor();
-        cursorWrite.put(123, new byte[]{3, 2, 1});
-        assertArrayEquals(new byte[]{3, 2, 1}, cursorWrite.get(123));
+        cursorWrite.put(123, new byte[]{3, 2, 1, 0});
+        assertArrayEquals(new byte[]{3, 2, 1, 0}, cursorWrite.get(123));
         cursorWrite.close();
 
         // start reading the old value
         KeyValueCursor cursorRead = txRead.createKeyValueCursor();
-        assertArrayEquals(new byte[]{1, 2, 3}, cursorRead.get(123));
+        assertArrayEquals(new byte[]{1, 2, 3, 0}, cursorRead.get(123));
         cursorRead.close();
 
         // commit writing
@@ -81,7 +82,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
         // start reading again and get the new value
         txRead = store.beginReadTx();
         cursorRead = txRead.createKeyValueCursor();
-        assertArrayEquals(new byte[]{3, 2, 1}, cursorRead.get(123));
+        assertArrayEquals(new byte[]{3, 2, 1, 0}, cursorRead.get(123));
         cursorRead.close();
 
         txRead.abort();
@@ -91,33 +92,33 @@ public class TransactionTest extends AbstractObjectBoxTest {
 
     @Test
     public void testTransactionReset() {
-        prepareOneEntryWith123();
+        prepareOneEntryWith1230();
 
         // write transaction
 
         Transaction transaction = store.beginTx();
         KeyValueCursor cursor = transaction.createKeyValueCursor();
-        cursor.put(123, new byte[]{3, 2, 1});
-        assertArrayEquals(new byte[]{3, 2, 1}, cursor.get(123));
+        cursor.put(123, new byte[]{3, 2, 1, 0});
+        assertArrayEquals(new byte[]{3, 2, 1, 0}, cursor.get(123));
         cursor.close();
         transaction.reset();
         assertEquals(true, transaction.isActive());
 
         cursor = transaction.createKeyValueCursor();
-        assertArrayEquals(new byte[]{1, 2, 3}, cursor.get(123));
+        assertArrayEquals(new byte[]{1, 2, 3, 0}, cursor.get(123));
         cursor.close();
         transaction.abort();
 
         transaction.reset();
         cursor = transaction.createKeyValueCursor();
-        cursor.put(123, new byte[]{3, 2, 1});
-        assertArrayEquals(new byte[]{3, 2, 1}, cursor.get(123));
+        cursor.put(123, new byte[]{3, 2, 1, 0});
+        assertArrayEquals(new byte[]{3, 2, 1, 0}, cursor.get(123));
         cursor.close();
         transaction.commit();
 
         transaction.reset();
         cursor = transaction.createKeyValueCursor();
-        assertArrayEquals(new byte[]{3, 2, 1}, cursor.get(123));
+        assertArrayEquals(new byte[]{3, 2, 1, 0}, cursor.get(123));
         cursor.close();
         transaction.commit();
 
@@ -125,13 +126,13 @@ public class TransactionTest extends AbstractObjectBoxTest {
 
         transaction = store.beginReadTx();
         cursor = transaction.createKeyValueCursor();
-        assertArrayEquals(new byte[]{3, 2, 1}, cursor.get(123));
+        assertArrayEquals(new byte[]{3, 2, 1, 0}, cursor.get(123));
         cursor.close();
         transaction.reset();
         assertEquals(true, transaction.isActive());
 
         cursor = transaction.createKeyValueCursor();
-        assertArrayEquals(new byte[]{3, 2, 1}, cursor.get(123));
+        assertArrayEquals(new byte[]{3, 2, 1, 0}, cursor.get(123));
         cursor.close();
         transaction.abort();
     }
@@ -159,7 +160,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
     /*
     @Test
     public void testTransactionUsingAfterStoreClosed() {
-        prepareOneEntryWith123();
+        prepareOneEntryWith1230();
 
         // write transaction
         Transaction transaction = store.beginTx();

@@ -51,9 +51,9 @@ public class CursorBytesTest extends AbstractObjectBoxTest {
         Transaction transaction = store.beginTx();
         KeyValueCursor cursor = transaction.createKeyValueCursor();
 
-        cursor.put(1, new byte[]{1, 1});
-        cursor.put(2, new byte[]{2, 1});
-        cursor.put(4, new byte[]{4, 1});
+        cursor.put(1, new byte[]{1, 1, 0, 0});
+        cursor.put(2, new byte[]{2, 1, 0, 0});
+        cursor.put(4, new byte[]{4, 1, 0, 0});
 
         assertTrue(cursor.removeAt(2));
 
@@ -61,7 +61,7 @@ public class CursorBytesTest extends AbstractObjectBoxTest {
         assertTrue(cursor.seek(1));
         byte[] next = cursor.getNext();
         assertNotNull(next);
-        assertTrue(Arrays.equals(new byte[]{4, 1}, next));
+        assertTrue(Arrays.equals(new byte[]{4, 1, 0, 0}, next));
     }
 
     @Test
