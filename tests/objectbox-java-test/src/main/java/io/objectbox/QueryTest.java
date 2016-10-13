@@ -72,6 +72,9 @@ public class QueryTest extends AbstractObjectBoxTest {
         int count = entities.size();
         assertEquals(1, box.query().equal(SimpleString, "banana").build().findUnique().getId());
         assertEquals(count - 1, box.query().notEqual(SimpleString, "banana").build().count());
+        assertEquals(4, box.query().startsWith(SimpleString, "ba").endsWith(SimpleString, "shake").build().findUnique()
+                .getId());
+        assertEquals(2, box.query().contains(SimpleString, "nana").build().count());
     }
 
     private List<TestEntity> putTestEntitiesScalars() {

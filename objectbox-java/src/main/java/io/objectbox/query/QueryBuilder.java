@@ -36,6 +36,12 @@ public class QueryBuilder<T> {
 
     private static native void nativeNotEqual(long handle, int propertyId, String value);
 
+    private static native void nativeContains(long handle, int propertyId, String value);
+
+    private static native void nativeStartsWith(long handle, int propertyId, String value);
+
+    private static native void nativeEndsWith(long handle, int propertyId, String value);
+
     @Internal
     public QueryBuilder(Box<T> box, long storeHandle, String entityName) {
         this.box = box;
@@ -99,6 +105,21 @@ public class QueryBuilder<T> {
 
     public QueryBuilder<T> notEqual(Property property, String value) {
         nativeNotEqual(handle, property.getId(), value);
+        return this;
+    }
+
+    public QueryBuilder<T> contains(Property property, String value) {
+        nativeContains(handle, property.getId(), value);
+        return this;
+    }
+
+    public QueryBuilder<T> startsWith(Property property, String value) {
+        nativeStartsWith(handle, property.getId(), value);
+        return this;
+    }
+
+    public QueryBuilder<T> endsWith(Property property, String value) {
+        nativeEndsWith(handle, property.getId(), value);
         return this;
     }
 
