@@ -5,10 +5,12 @@ import com.google.flatbuffers.FlatBufferBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.model.Model;
 import io.objectbox.model.ModelEntity;
 import io.objectbox.model.ModelProperty;
 
+@Internal
 public class ModelBuilder {
     final FlatBufferBuilder fbb = new FlatBufferBuilder();
     final List<Integer> entityOffsets = new ArrayList<>();

@@ -13,10 +13,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.objectbox.BoxStoreBuilder.EntityClasses;
+import io.objectbox.annotation.apihint.Beta;
+import io.objectbox.annotation.apihint.Internal;
 
+@Beta
 public class BoxStore implements Closeable {
     static {
-        LibInit.init();
+        System.loadLibrary("objectbox");
     }
 
     private static BoxStore defaultStore;
@@ -74,11 +77,11 @@ public class BoxStore implements Closeable {
     static native long nativeCreateIndex(long store, String name, int entityId, int propertyId);
 
     public static String getVersion() {
-        return "0.9.0-2016100214";
+        return "0.9.0-20161013";
     }
 
     private final File directory;
-    private final long store;
+    private final long handle;
     private final Map<Class, String> entityNameByClass;
     private final Map<Class, Class<Cursor>> entityCursorClassByClass;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
@@ -106,7 +109,7 @@ public class BoxStore implements Closeable {
         if (!directory.isDirectory()) {
             throw new RuntimeException("Is not a directory: " + directory.getAbsolutePath());
         }
-        store = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.model);
+        handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.model);
         entityNameByClass = new HashMap<>();
         entityCursorClassByClass = new HashMap<>();
 
@@ -140,7 +143,7 @@ public class BoxStore implements Closeable {
         checkOpen();
         // Because write TXs are typically not cached, initialCommitCount is not as relevant than for read TXs.
         int initialCommitCount = commitCount;
-        long nativeTx = nativeBeginTx(store);
+        long nativeTx = nativeBeginTx(handle);
         Transaction tx = new Transaction(this, nativeTx, initialCommitCount);
         synchronized (transactions) {
             transactions.add(tx);
@@ -176,7 +179,7 @@ public class BoxStore implements Closeable {
         // updated resulting in querying obsolete data until another commit is done.
         // TODO add multithreaded test for this
         int initialCommitCount = commitCount;
-        long nativeTx = nativeBeginReadTx(store);
+        long nativeTx = nativeBeginReadTx(handle);
         Transaction tx = new Transaction(this, nativeTx, initialCommitCount);
         synchronized (transactions) {
             transactions.add(tx);
@@ -198,7 +201,7 @@ public class BoxStore implements Closeable {
             for (Transaction t : transactionsToClose) {
                 t.close();
             }
-            nativeDelete(store);
+            nativeDelete(handle);
         }
     }
 
@@ -232,7 +235,7 @@ public class BoxStore implements Closeable {
     }
 
     public void dropAllData() {
-        nativeDropAllData(store);
+        nativeDropAllData(handle);
     }
 
     public void txCommitted(Transaction tx) {
@@ -328,5 +331,10 @@ public class BoxStore implements Closeable {
                 }
             }
         }.start();
+    }
+
+    @Internal
+    long internalHandle() {
+        return handle;
     }
 }

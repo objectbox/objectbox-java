@@ -133,7 +133,7 @@ public class BoxStoreBuilder {
             }
         } else {
             if (name == null) {
-                name = "default";
+                name = "objectbox";
             }
             if (baseDirectory != null) {
                 directory = new File(baseDirectory, name);

@@ -6,11 +6,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import io.objectbox.annotation.apihint.Beta;
+import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.query.QueryBuilder;
+
 /**
  * A box to store objects of a particular class.
  * <p>
  * Thread-safe.
  */
+@Beta
 public class Box<T> {
     private final BoxStore store;
     private final Class<T> entityClass;
@@ -331,7 +336,16 @@ public class Box<T> {
         }
     }
 
+    public QueryBuilder query() {
+        return new QueryBuilder(this, store.internalHandle(), store.getEntityName(entityClass));
+    }
+
     public BoxStore getStore() {
         return store;
+    }
+
+    @Internal
+    public long internalReaderHandle() {
+        return getReader().internalHandle();
     }
 }

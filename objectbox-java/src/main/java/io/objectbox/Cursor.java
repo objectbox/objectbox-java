@@ -3,9 +3,13 @@ package io.objectbox;
 import java.io.Closeable;
 import java.util.List;
 
+import io.objectbox.annotation.apihint.Beta;
+import io.objectbox.annotation.apihint.Internal;
+
 /**
  * Created by markus.
  */
+@Beta
 public abstract class Cursor<T> implements Closeable {
     protected static final int PUT_FLAG_FIRST = 1 << 0;
     protected static final int PUT_FLAG_COMPLETE = 1 << 1;
@@ -174,4 +178,8 @@ public abstract class Cursor<T> implements Closeable {
         return closed;
     }
 
+    @Internal
+    long internalHandle() {
+        return cursor;
+    }
 }
