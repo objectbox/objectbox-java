@@ -13,6 +13,7 @@ public class Query<T> {
     private native static Object nativeFindFirst(long handle, long cursorHandle);
     private native static Object nativeFindUnique(long handle, long cursorHandle);
     private native static List nativeFindAll(long handle, long cursorHandle);
+    private native static long nativeCount(long handle, long cursorHandle);
 
     private final Box<T> box;
     private final long handle;
@@ -35,6 +36,11 @@ public class Query<T> {
     public List<T> findAll() {
         long cursorHandle = box.internalReaderHandle();
         return nativeFindAll(handle, cursorHandle);
+    }
+
+    public long count() {
+        long cursorHandle = box.internalReaderHandle();
+        return nativeCount(handle, cursorHandle);
     }
 
 }

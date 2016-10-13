@@ -36,6 +36,7 @@ public class QueryTest extends AbstractObjectBoxTest {
         putTestEntities();
 
         Query<TestEntity> query = box.query().equal(SimpleInt, 2007).build();
+        assertEquals(1, query.count());
         assertEquals(8, query.findFirst().getId());
         assertEquals(8, query.findUnique().getId());
         List<TestEntity> all = query.findAll();
@@ -49,6 +50,7 @@ public class QueryTest extends AbstractObjectBoxTest {
         Query<TestEntity> query = box.query().build();
         List<TestEntity> all = query.findAll();
         assertEquals(entities.size(), all.size());
+        assertEquals(entities.size(), query.count());
     }
 
     private List<TestEntity> putTestEntities() {
