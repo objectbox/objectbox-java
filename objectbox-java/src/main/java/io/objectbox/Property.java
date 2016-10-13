@@ -16,6 +16,7 @@
 
 package io.objectbox;
 
+import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.query.WhereCondition.PropertyCondition;
 
 /**
@@ -30,6 +31,8 @@ public class Property {
     public final boolean primaryKey;
     public final String dbName;
 
+    private int id;
+
     public Property(int ordinal, Class<?> type, String name, boolean primaryKey, String dbName) {
         this.ordinal = ordinal;
         this.type = type;
@@ -43,4 +46,17 @@ public class Property {
         return new PropertyCondition(this, value);
     }
 
+    @Internal
+    public int getId() {
+        return id;
+    }
+
+    void setId(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Property \"" + name + "\" (ID: " + id + ")";
+    }
 }

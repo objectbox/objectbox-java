@@ -3,7 +3,7 @@ package io.objectbox;
 public class TestEntityCursor extends Cursor<TestEntity> {
 
     public TestEntityCursor(Transaction tx, long cursor) {
-        super(tx, cursor, null);
+        super(tx, cursor, new TestEntityProperties());
     }
 
     @Override

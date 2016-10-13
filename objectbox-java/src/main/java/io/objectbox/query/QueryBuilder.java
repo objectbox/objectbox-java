@@ -1,6 +1,7 @@
 package io.objectbox.query;
 
 import io.objectbox.Box;
+import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Internal;
 
 /**
@@ -17,9 +18,15 @@ public class QueryBuilder<T> {
 
     private static native long nativeBuild(long handle);
 
+    private static native void nativeEqual(long handle, int propertyId, long value);
+
     @Internal
     public QueryBuilder(Box<T> box, long storeHandle, String entityName) {
         this.box = box;
+
+        // This ensures that all properties have been set
+        box.getProperties();
+
         handle = nativeCreate(storeHandle, entityName);
     }
 
@@ -47,5 +54,10 @@ public class QueryBuilder<T> {
         Query<T> query = new Query<T>(box, queryHandle);
         close();
         return query;
+    }
+
+    public QueryBuilder<T> equal(Property property, long value) {
+        nativeEqual(handle, property.getId(), value);
+        return this;
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.annotation.apihint.Temporary;
 
 /**
  * Created by markus.
@@ -74,6 +75,17 @@ public abstract class Cursor<T> implements Closeable {
         this.tx = tx;
         this.cursor = cursor;
         this.properties = properties;
+
+        Property[] allProperties = properties.getAllProperties();
+        for (Property property : allProperties) {
+            if (property.getId() == 0) {
+                int id = getPropertyId(property.dbName);
+                if (id <= 0) {
+                    throw new IllegalStateException("Illegal property ID " + id + " for " + property);
+                }
+                property.setId(id);
+            }
+        }
     }
 
     @Override
@@ -142,18 +154,22 @@ public abstract class Cursor<T> implements Closeable {
         return nativePropertyId(cursor, propertyName);
     }
 
+    @Temporary
     public List<T> find(String propertyName, long value) {
         return nativeFindScalar(cursor, propertyName, value);
     }
 
+    @Temporary
     public List<T> find(String propertyName, String value) {
         return nativeFindString(cursor, propertyName, value);
     }
 
+    @Temporary
     public List<T> find(int propertyId, long value) {
         return nativeFindScalarPropertyId(cursor, propertyId, value);
     }
 
+    @Temporary
     public List<T> find(int propertyId, String value) {
         return nativeFindStringPropertyId(cursor, propertyId, value);
     }

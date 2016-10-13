@@ -25,6 +25,8 @@ public class Box<T> {
     private final ThreadLocal<Cursor<T>> threadLocalReader = new ThreadLocal<>();
     private final List<WeakReference<Cursor<T>>> readers = new ArrayList<>();
 
+    private Properties properties;
+
     Box(BoxStore store, Class<T> entityClass) {
         this.store = store;
         this.entityClass = entityClass;
@@ -344,8 +346,17 @@ public class Box<T> {
         return store;
     }
 
+    // Returned Property object will have an ID set
+    public synchronized Properties getProperties() {
+        if (properties == null) {
+            properties = getReader().getProperties();
+        }
+        return properties;
+    }
+
     @Internal
     public long internalReaderHandle() {
         return getReader().internalHandle();
     }
+
 }
