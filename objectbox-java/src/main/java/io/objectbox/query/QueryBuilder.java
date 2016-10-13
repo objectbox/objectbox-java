@@ -20,6 +20,8 @@ public class QueryBuilder<T> {
 
     private static native long nativeBuild(long handle);
 
+    // ------------------------------ Integers ------------------------------
+
     private static native void nativeEqual(long handle, int propertyId, long value);
 
     private static native void nativeNotEqual(long handle, int propertyId, long value);
@@ -27,6 +29,12 @@ public class QueryBuilder<T> {
     private static native void nativeLess(long handle, int propertyId, long value);
 
     private static native void nativeGreater(long handle, int propertyId, long value);
+
+    // ------------------------------ Strings ------------------------------
+
+    private static native void nativeEqual(long handle, int propertyId, String value);
+
+    private static native void nativeNotEqual(long handle, int propertyId, String value);
 
     @Internal
     public QueryBuilder(Box<T> box, long storeHandle, String entityName) {
@@ -83,4 +91,15 @@ public class QueryBuilder<T> {
         nativeGreater(handle, property.getId(), value);
         return this;
     }
+
+    public QueryBuilder<T> equal(Property property, String value) {
+        nativeEqual(handle, property.getId(), value);
+        return this;
+    }
+
+    public QueryBuilder<T> notEqual(Property property, String value) {
+        nativeNotEqual(handle, property.getId(), value);
+        return this;
+    }
+
 }

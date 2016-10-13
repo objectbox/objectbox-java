@@ -181,10 +181,10 @@ public class CursorTest extends AbstractObjectBoxTest {
     public void testFindScalars() {
         Transaction transaction1 = store.beginTx();
         Cursor<TestEntity> cursor1 = transaction1.createCursor(TestEntity.class);
-        putEntity(cursor1, 0, "nope", 2015);
-        putEntity(cursor1, 0, "foo", 2016);
-        putEntity(cursor1, 0, "bar", 2016);
-        putEntity(cursor1, 0, "nope", 2017);
+        putEntity(cursor1, "nope", 2015);
+        putEntity(cursor1, "foo", 2016);
+        putEntity(cursor1, "bar", 2016);
+        putEntity(cursor1, "nope", 2017);
         cursor1.close();
         transaction1.commit();
 
@@ -204,19 +204,10 @@ public class CursorTest extends AbstractObjectBoxTest {
         Transaction transaction = store.beginTx();
         Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
         for (String text : texts) {
-            putEntity(cursor, 0, text, 0);
+            putEntity(cursor, text, 0);
         }
         cursor.close();
         transaction.commit();
-    }
-
-    private TestEntity putEntity(Cursor<TestEntity> cursor, long id, String text, int number) {
-        TestEntity entity = new TestEntity();
-        entity.setSimpleString(text);
-        entity.setSimpleInt(number);
-        entity.setId(id);
-        cursor.put(entity);
-        return entity;
     }
 
     @Test
@@ -301,4 +292,13 @@ public class CursorTest extends AbstractObjectBoxTest {
         assertEquals(4, cursor.getPropertyId("simpleShort"));
         transaction.abort();
     }
+
+    private TestEntity putEntity(Cursor<TestEntity> cursor, String text, int number) {
+        TestEntity entity = new TestEntity();
+        entity.setSimpleString(text);
+        entity.setSimpleInt(number);
+        cursor.put(entity);
+        return entity;
+    }
+
 }
