@@ -11,6 +11,7 @@ import io.objectbox.query.Query;
 
 
 import static io.objectbox.TestEntityProperties.SimpleInt;
+import static io.objectbox.TestEntityProperties.SimpleShort;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -32,7 +33,7 @@ public class QueryTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testQueryConditions() {
+    public void testScalarEqual() {
         putTestEntities();
 
         Query<TestEntity> query = box.query().equal(SimpleInt, 2007).build();
@@ -53,11 +54,26 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals(entities.size(), query.count());
     }
 
+    @Test
+    public void testScalarNotEqual() {
+        List<TestEntity> entities = putTestEntities();
+        Query<TestEntity> query = box.query().notEqual(SimpleInt, 2007).notEqual(SimpleInt, 2002).build();
+        assertEquals(entities.size()-2, query.count());
+    }
+
+    @Test
+    public void testScalarLessAndGreater() {
+        putTestEntities();
+        Query<TestEntity> query = box.query().greater(SimpleInt, 2003).less(SimpleShort, 207).build();
+        assertEquals(3, query.count());
+    }
+
     private List<TestEntity> putTestEntities() {
         List<TestEntity> entities = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             TestEntity entity = new TestEntity();
             entity.setSimpleInt(2000 + i);
+            entity.setSimpleShort((short) (200 + i));
             entities.add(entity);
         }
         box.put(entities);
