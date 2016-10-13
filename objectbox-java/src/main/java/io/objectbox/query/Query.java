@@ -3,13 +3,15 @@ package io.objectbox.query;
 import java.util.List;
 
 import io.objectbox.Box;
+import io.objectbox.annotation.apihint.Beta;
 
 /**
  * Created by Markus on 13.10.2016.
  */
+@Beta
 public class Query<T> {
-    private native static Object nativefindFirst(long handle, long cursorHandle);
-    private native static Object nativefindUnique(long handle, long cursorHandle);
+    private native static Object nativeFindFirst(long handle, long cursorHandle);
+    private native static Object nativeFindUnique(long handle, long cursorHandle);
     private native static List nativeFindAll(long handle, long cursorHandle);
 
     private final Box<T> box;
@@ -22,7 +24,17 @@ public class Query<T> {
 
     public T findFirst() {
         long cursorHandle = box.internalReaderHandle();
-        return (T) nativefindFirst(handle, cursorHandle);
+        return (T) nativeFindFirst(handle, cursorHandle);
+    }
+
+    public T findUnique() {
+        long cursorHandle = box.internalReaderHandle();
+        return (T) nativeFindUnique(handle, cursorHandle);
+    }
+
+    public List<T> findAll() {
+        long cursorHandle = box.internalReaderHandle();
+        return nativeFindAll(handle, cursorHandle);
     }
 
 }

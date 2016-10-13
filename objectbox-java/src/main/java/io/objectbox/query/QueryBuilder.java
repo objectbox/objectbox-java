@@ -2,11 +2,13 @@ package io.objectbox.query;
 
 import io.objectbox.Box;
 import io.objectbox.Property;
+import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 
 /**
  * Created by Markus on 13.10.2016.
  */
+@Experimental
 public class QueryBuilder<T> {
     private final Box<T> box;
 

@@ -338,8 +338,8 @@ public class Box<T> {
         }
     }
 
-    public QueryBuilder query() {
-        return new QueryBuilder(this, store.internalHandle(), store.getEntityName(entityClass));
+    public QueryBuilder<T> query() {
+        return new QueryBuilder<T>(this, store.internalHandle(), store.getEntityName(entityClass));
     }
 
     public BoxStore getStore() {
