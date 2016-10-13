@@ -38,7 +38,7 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals(1, query.count());
         assertEquals(8, query.findFirst().getId());
         assertEquals(8, query.findUnique().getId());
-        List<TestEntity> all = query.findAll();
+        List<TestEntity> all = query.find();
         assertEquals(1, all.size());
         assertEquals(8, all.get(0).getId());
     }
@@ -47,7 +47,7 @@ public class QueryTest extends AbstractObjectBoxTest {
     public void testNoConditions() {
         List<TestEntity> entities = putTestEntitiesScalars();
         Query<TestEntity> query = box.query().build();
-        List<TestEntity> all = query.findAll();
+        List<TestEntity> all = query.find();
         assertEquals(entities.size(), all.size());
         assertEquals(entities.size(), query.count());
     }
@@ -64,6 +64,20 @@ public class QueryTest extends AbstractObjectBoxTest {
         putTestEntitiesScalars();
         Query<TestEntity> query = box.query().greater(SimpleInt, 2003).less(SimpleShort, 207).build();
         assertEquals(3, query.count());
+    }
+
+    @Test
+    public void testOffsetLimit() {
+        putTestEntitiesScalars();
+        Query<TestEntity> query = box.query().greater(SimpleInt, 2002).less(SimpleShort, 208).build();
+        assertEquals(5, query.count());
+        assertEquals(4, query.find(1, 0).size());
+        assertEquals(1, query.find(4, 0).size());
+        assertEquals(2, query.find(0, 2).size());
+        List<TestEntity> list = query.find(1, 2);
+        assertEquals(2, list.size());
+        assertEquals(2004, list.get(0).getSimpleInt());
+        assertEquals(2005, list.get(1).getSimpleInt());
     }
 
     @Test

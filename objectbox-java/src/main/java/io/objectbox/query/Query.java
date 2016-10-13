@@ -12,7 +12,7 @@ import io.objectbox.annotation.apihint.Beta;
 public class Query<T> {
     private native static Object nativeFindFirst(long handle, long cursorHandle);
     private native static Object nativeFindUnique(long handle, long cursorHandle);
-    private native static List nativeFindAll(long handle, long cursorHandle);
+    private native static List nativeFind(long handle, long cursorHandle, long offset, long limit);
     private native static long nativeCount(long handle, long cursorHandle);
 
     private final Box<T> box;
@@ -33,9 +33,14 @@ public class Query<T> {
         return (T) nativeFindUnique(handle, cursorHandle);
     }
 
-    public List<T> findAll() {
+    public List<T> find() {
         long cursorHandle = box.internalReaderHandle();
-        return nativeFindAll(handle, cursorHandle);
+        return nativeFind(handle, cursorHandle, 0, 0);
+    }
+
+    public List<T> find(long offset, long limit) {
+        long cursorHandle = box.internalReaderHandle();
+        return nativeFind(handle, cursorHandle, offset, limit);
     }
 
     public long count() {
