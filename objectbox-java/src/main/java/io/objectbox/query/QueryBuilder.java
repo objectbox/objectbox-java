@@ -20,6 +20,12 @@ public class QueryBuilder<T> {
 
     private static native long nativeBuild(long handle);
 
+    // ------------------------------ (Not)Null------------------------------
+
+    private static native void nativeNull(long handle, int propertyId);
+
+    private static native void nativeNotNull(long handle, int propertyId);
+
     // ------------------------------ Integers ------------------------------
 
     private static native void nativeEqual(long handle, int propertyId, long value);
@@ -29,6 +35,12 @@ public class QueryBuilder<T> {
     private static native void nativeLess(long handle, int propertyId, long value);
 
     private static native void nativeGreater(long handle, int propertyId, long value);
+
+    private static native void nativeBetween(long handle, int propertyId, long value1, long value2);
+
+    private static native void nativeIn(long handle, int propertyId, int[] values);
+
+    private static native void nativeIn(long handle, int propertyId, long[] values);
 
     // ------------------------------ Strings ------------------------------
 
@@ -41,6 +53,12 @@ public class QueryBuilder<T> {
     private static native void nativeStartsWith(long handle, int propertyId, String value);
 
     private static native void nativeEndsWith(long handle, int propertyId, String value);
+
+    // ------------------------------ FPs ------------------------------
+    private static native void nativeLess(long handle, int propertyId, double value);
+
+    private static native void nativeGreater(long handle, int propertyId, double value);
+
 
     @Internal
     public QueryBuilder(Box<T> box, long storeHandle, String entityName) {
@@ -78,6 +96,16 @@ public class QueryBuilder<T> {
         return query;
     }
 
+    public QueryBuilder<T> isNull(Property property) {
+        nativeNull(handle, property.getId());
+        return this;
+    }
+
+    public QueryBuilder<T> notNull(Property property) {
+        nativeNotNull(handle, property.getId());
+        return this;
+    }
+
     public QueryBuilder<T> equal(Property property, long value) {
         nativeEqual(handle, property.getId(), value);
         return this;
@@ -95,6 +123,22 @@ public class QueryBuilder<T> {
 
     public QueryBuilder<T> greater(Property property, long value) {
         nativeGreater(handle, property.getId(), value);
+        return this;
+    }
+
+    public QueryBuilder<T> between(Property property, long value1, long value2) {
+        nativeBetween(handle, property.getId(), value1, value2);
+        return this;
+    }
+
+    // FIXME DbException: invalid unordered_map<K, T> key
+    public QueryBuilder<T> in(Property property, long[] values) {
+        nativeIn(handle, property.getId(), values);
+        return this;
+    }
+
+    public QueryBuilder<T> in(Property property, int[] values) {
+        nativeIn(handle, property.getId(), values);
         return this;
     }
 
@@ -120,6 +164,17 @@ public class QueryBuilder<T> {
 
     public QueryBuilder<T> endsWith(Property property, String value) {
         nativeEndsWith(handle, property.getId(), value);
+        return this;
+    }
+
+
+    public QueryBuilder<T> less(Property property, double value) {
+        nativeLess(handle, property.getId(), value);
+        return this;
+    }
+
+    public QueryBuilder<T> greater(Property property, double value) {
+        nativeGreater(handle, property.getId(), value);
         return this;
     }
 

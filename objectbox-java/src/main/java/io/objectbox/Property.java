@@ -16,13 +16,15 @@
 
 package io.objectbox;
 
+import java.util.Collection;
+
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.query.WhereCondition.PropertyCondition;
+import io.objectbox.query.QueryCondition;
+import io.objectbox.query.QueryCondition.PropertyCondition;
+import io.objectbox.query.QueryCondition.PropertyCondition.Operation;
 
 /**
  * Meta data describing a property
- *
- * @author Markus
  */
 public class Property {
     public final int ordinal;
@@ -42,8 +44,50 @@ public class Property {
     }
 
     /** Creates an "equal ('=')" condition  for this property. */
-    public PropertyCondition eq(Object value) {
-        return new PropertyCondition(this, value);
+    public QueryCondition eq(Object value) {
+        return new PropertyCondition(this, Operation.EQUALS, value);
+    }
+
+    /** Creates an "not equal ('<>')" condition  for this property. */
+    public QueryCondition notEq(Object value) {
+        return new PropertyCondition(this, Operation.NOT_EQUALS, value);
+    }
+
+    /** Creates an "BETWEEN ... AND ..." condition  for this property. */
+    public QueryCondition between(Object value1, Object value2) {
+        Object[] values = {value1, value2};
+        return new PropertyCondition(this, Operation.BETWEEN, values);
+    }
+
+    /** Creates an "IN (..., ..., ...)" condition  for this property. */
+    public QueryCondition in(Object... inValues) {
+        return new PropertyCondition(this, Operation.IN, inValues);
+    }
+
+    /** Creates an "IN (..., ..., ...)" condition  for this property. */
+    public QueryCondition in(Collection<?> inValues) {
+        return in(inValues.toArray());
+    }
+
+    /** Creates an "greater than ('>')" condition  for this property. */
+    public QueryCondition gt(Object value) {
+        return new PropertyCondition(this, Operation.GREATER_THAN, value);
+    }
+
+    /** Creates an "less than ('<')" condition  for this property. */
+    public QueryCondition lt(Object value) {
+        return new PropertyCondition(this, Operation.LESS_THAN, value);
+    }
+
+
+    /** Creates an "IS NULL" condition  for this property. */
+    public QueryCondition isNull() {
+        return new PropertyCondition(this, Operation.IS_NULL, null);
+    }
+
+    /** Creates an "IS NOT NULL" condition  for this property. */
+    public QueryCondition isNotNull() {
+        return new PropertyCondition(this, Operation.IS_NOT_NULL, null);
     }
 
     @Internal
