@@ -3,7 +3,7 @@ package io.objectbox;
 public class TestEntityMinimalCursor extends Cursor<TestEntityMinimal> {
 
     public TestEntityMinimalCursor(Transaction tx, long cursor) {
-        super(tx, cursor, null);
+        super(tx, cursor, new DummyProperties());
     }
 
     @Override
@@ -19,5 +19,22 @@ public class TestEntityMinimalCursor extends Cursor<TestEntityMinimal> {
         );
         entity.setId(key);
         return key;
+    }
+
+    private static class DummyProperties implements Properties {
+        @Override
+        public Property[] getAllProperties() {
+            return new Property[0];
+        }
+
+        @Override
+        public Property getIdProperty() {
+            return null;
+        }
+
+        @Override
+        public String getDbName() {
+            return null;
+        }
     }
 }
