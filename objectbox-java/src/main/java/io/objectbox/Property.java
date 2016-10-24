@@ -79,7 +79,6 @@ public class Property {
         return new PropertyCondition(this, Operation.LESS_THAN, value);
     }
 
-
     /** Creates an "IS NULL" condition  for this property. */
     public QueryCondition isNull() {
         return new PropertyCondition(this, Operation.IS_NULL, null);
@@ -88,6 +87,27 @@ public class Property {
     /** Creates an "IS NOT NULL" condition  for this property. */
     public QueryCondition isNotNull() {
         return new PropertyCondition(this, Operation.IS_NOT_NULL, null);
+    }
+
+    /**
+     * @see io.objectbox.query.QueryBuilder#contains(Property, String)
+     */
+    public QueryCondition contains(String value) {
+        return new PropertyCondition(this, Operation.CONTAINS, value);
+    }
+
+    /**
+     * @see io.objectbox.query.QueryBuilder#startsWith(Property, String)
+     */
+    public QueryCondition startsWith(String value) {
+        return new PropertyCondition(this, Operation.STARTS_WITH, value);
+    }
+
+    /**
+     * @see io.objectbox.query.QueryBuilder#endsWith(Property, String)
+     */
+    public QueryCondition endsWith(String value) {
+        return new PropertyCondition(this, Operation.ENDS_WITH, value);
     }
 
     @Internal

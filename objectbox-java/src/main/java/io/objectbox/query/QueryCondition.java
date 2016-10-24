@@ -59,7 +59,10 @@ public interface QueryCondition {
             GREATER_THAN,
             LESS_THAN,
             IS_NULL,
-            IS_NOT_NULL
+            IS_NOT_NULL,
+            CONTAINS,
+            STARTS_WITH,
+            ENDS_WITH
         }
 
         public final Property property;
@@ -140,6 +143,15 @@ public interface QueryCondition {
                 queryBuilder.isNull(property);
             } else if (operation == Operation.IS_NOT_NULL) {
                 queryBuilder.notNull(property);
+            } else if (operation == Operation.CONTAINS) {
+                // no need for greenDAO compat, so only String was allowed
+                queryBuilder.contains(property, (String) value);
+            } else if (operation == Operation.STARTS_WITH) {
+                // no need for greenDAO compat, so only String was allowed
+                queryBuilder.startsWith(property, (String) value);
+            } else if (operation == Operation.ENDS_WITH) {
+                // no need for greenDAO compat, so only String was allowed
+                queryBuilder.endsWith(property, (String) value);
             } else {
                 throw new UnsupportedOperationException("This operation is not known.");
             }
