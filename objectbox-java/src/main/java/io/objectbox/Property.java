@@ -19,6 +19,7 @@ package io.objectbox;
 import java.util.Collection;
 
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.converter.PropertyConverter;
 import io.objectbox.query.QueryCondition;
 import io.objectbox.query.QueryCondition.PropertyCondition;
 import io.objectbox.query.QueryCondition.PropertyCondition.Operation;
@@ -32,15 +33,22 @@ public class Property {
     public final String name;
     public final boolean primaryKey;
     public final String dbName;
+    public final Class<PropertyConverter> converterClass;
 
     private int id;
 
     public Property(int ordinal, Class<?> type, String name, boolean primaryKey, String dbName) {
+        this(ordinal, type, name, primaryKey, dbName, null);
+    }
+
+    public Property(int ordinal, Class<?> type, String name, boolean primaryKey, String dbName,
+                    Class<PropertyConverter> converterClass) {
         this.ordinal = ordinal;
         this.type = type;
         this.name = name;
         this.primaryKey = primaryKey;
         this.dbName = dbName;
+        this.converterClass = converterClass;
     }
 
     /** Creates an "equal ('=')" condition  for this property. */

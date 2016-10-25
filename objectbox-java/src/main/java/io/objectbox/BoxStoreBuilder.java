@@ -11,7 +11,7 @@ public class BoxStoreBuilder {
         final Class<T> entityClass;
         final Class<? extends Cursor<T>> cursorClass;
 
-        public EntityClasses(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass) {
+        EntityClasses(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass) {
             this.entityName = entityName;
             this.entityClass = entityClass;
             this.cursorClass = cursorClass;
@@ -109,9 +109,9 @@ public class BoxStoreBuilder {
         return this;
     }
 
-    public <T> BoxStoreBuilder entity(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass) {
-        entityClasses.add(new EntityClasses<T>(entityName, entityClass, cursorClass));
-        return this;
+    public <T> void entity(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass) {
+        EntityClasses<T> info = new EntityClasses<>(entityName, entityClass, cursorClass);
+        entityClasses.add(info);
     }
 
     public BoxStoreBuilder modelUpdate(ModelUpdate modelUpdate) {
