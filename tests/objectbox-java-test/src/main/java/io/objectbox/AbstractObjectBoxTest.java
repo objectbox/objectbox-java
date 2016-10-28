@@ -38,7 +38,8 @@ public abstract class AbstractObjectBoxTest {
     protected BoxStoreBuilder createBoxStoreBuilderWithTwoEntities(boolean withIndex) {
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModelWithTwoEntities(withIndex)).directory(boxStoreDir);
         builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class);
-        return builder.entity("TestEntityMinimal", TestEntityMinimal.class, TestEntityMinimalCursor.class);
+        builder.entity("TestEntityMinimal", TestEntityMinimal.class, TestEntityMinimalCursor.class);
+        return builder;
     }
 
     protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
