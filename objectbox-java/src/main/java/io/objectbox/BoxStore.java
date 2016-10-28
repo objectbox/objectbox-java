@@ -124,17 +124,21 @@ public class BoxStore implements Closeable {
         entityCursorClassByClass = new HashMap<>();
 
         for (EntityClasses entity : builder.entityClasses) {
-            entityNameByClass.put(entity.entityClass, entity.entityName);
-            entityCursorClassByClass.put(entity.entityClass, entity.cursorClass);
-            int entityId = nativeRegisterEntityClass(handle, entity.entityName, entity.entityClass);
-            for (Property property : entity.properties.getAllProperties()) {
-                if (property.customType != null) {
-                    if (property.converterClass == null) {
-                        throw new RuntimeException("No converter class for custom type");
+            try {
+                entityNameByClass.put(entity.entityClass, entity.entityName);
+                entityCursorClassByClass.put(entity.entityClass, entity.cursorClass);
+                int entityId = nativeRegisterEntityClass(handle, entity.entityName, entity.entityClass);
+                for (Property property : entity.properties.getAllProperties()) {
+                    if (property.customType != null) {
+                        if (property.converterClass == null) {
+                            throw new RuntimeException("No converter class for custom type");
+                        }
+                        nativeRegisterCustomType(handle, entityId, 0, property.dbName, property.converterClass,
+                                property.customType);
                     }
-                    nativeRegisterCustomType(handle, entityId, 0, property.dbName, property.converterClass,
-                            property.customType);
                 }
+            } catch (RuntimeException e) {
+                throw new RuntimeException("Could not setup up entity " + entity.entityClass, e);
             }
         }
     }
