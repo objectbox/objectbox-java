@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.objectbox.BoxStoreBuilder.EntityClasses;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.converter.PropertyConverter;
 
 @Beta
 public class BoxStore implements Closeable {
@@ -76,6 +77,15 @@ public class BoxStore implements Closeable {
 
     static native long nativeCreateIndex(long store, String name, int entityId, int propertyId);
 
+
+    /** @return entity ID */
+    // TODO only use ids once we have them in Java
+    static native int nativeRegisterEntityClass(long store, String entityName, Class entityClass);
+
+    // TODO only use ids once we have them in Java
+    static native void nativeRegisterCustomType(long store, int entityId, int propertyId, String propertyName,
+                                                Class<? extends PropertyConverter> converterClass, Class customType);
+
     public static String getVersion() {
         return "0.9.0-20161013";
     }
@@ -116,6 +126,16 @@ public class BoxStore implements Closeable {
         for (EntityClasses entity : builder.entityClasses) {
             entityNameByClass.put(entity.entityClass, entity.entityName);
             entityCursorClassByClass.put(entity.entityClass, entity.cursorClass);
+            int entityId = nativeRegisterEntityClass(handle, entity.entityName, entity.entityClass);
+            for (Property property : entity.properties.getAllProperties()) {
+                if (property.customType != null) {
+                    if (property.converterClass == null) {
+                        throw new RuntimeException("No converter class for custom type");
+                    }
+                    nativeRegisterCustomType(handle, entityId, 0, property.dbName, property.converterClass,
+                            property.customType);
+                }
+            }
         }
     }
 
@@ -156,8 +176,8 @@ public class BoxStore implements Closeable {
      */
     public Transaction sharedReadTx() {
         Transaction tx = sharedReadTx.get();
-        if(tx != null && !tx.isClosed()) {
-            if(tx.isObsolete()) {
+        if (tx != null && !tx.isClosed()) {
+            if (tx.isObsolete()) {
                 tx.reset();
             }
         } else {

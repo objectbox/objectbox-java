@@ -37,14 +37,29 @@ public abstract class AbstractObjectBoxTest {
 
     protected BoxStoreBuilder createBoxStoreBuilderWithTwoEntities(boolean withIndex) {
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModelWithTwoEntities(withIndex)).directory(boxStoreDir);
-        builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class);
-        builder.entity("TestEntityMinimal", TestEntityMinimal.class, TestEntityMinimalCursor.class);
+        builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class, new TestEntityProperties());
+        builder.entity("TestEntityMinimal", TestEntityMinimal.class, TestEntityMinimalCursor.class,  new Properties() {
+            @Override
+            public Property[] getAllProperties() {
+                return new Property[0];
+            }
+
+            @Override
+            public Property getIdProperty() {
+                return null;
+            }
+
+            @Override
+            public String getDbName() {
+                return null;
+            }
+        });
         return builder;
     }
 
     protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(withIndex)).directory(boxStoreDir);
-        builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class);
+        builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class, new TestEntityProperties());
         return builder;
     }
 

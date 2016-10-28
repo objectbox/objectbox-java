@@ -5,16 +5,21 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.objectbox.annotation.apihint.Internal;
+
 public class BoxStoreBuilder {
     static class EntityClasses<T> {
         final String entityName;
         final Class<T> entityClass;
         final Class<? extends Cursor<T>> cursorClass;
+        final Properties properties;
 
-        EntityClasses(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass) {
+        EntityClasses(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass,
+                      Properties properties) {
             this.entityName = entityName;
             this.entityClass = entityClass;
             this.cursorClass = cursorClass;
+            this.properties = properties;
         }
     }
 
@@ -109,8 +114,10 @@ public class BoxStoreBuilder {
         return this;
     }
 
-    public <T> void entity(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass) {
-        EntityClasses<T> info = new EntityClasses<>(entityName, entityClass, cursorClass);
+    @Internal
+    public <T> void entity(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass,
+                           Properties properties) {
+        EntityClasses<T> info = new EntityClasses<>(entityName, entityClass, cursorClass, properties);
         entityClasses.add(info);
     }
 
