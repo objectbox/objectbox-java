@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.FIELD)
-/** TODO  public */ @interface Convert {
+public @interface Convert {
     /** Converter class */
     Class<? extends PropertyConverter> converter();
 

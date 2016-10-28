@@ -17,7 +17,6 @@
 package io.objectbox.converter;
 
 /**
- * NOT supported yet.
  * To use custom types in your entity, implement this to convert db values to entity values and back.
  * <p>
  * Notes for implementations:

@@ -29,26 +29,33 @@ import io.objectbox.query.QueryCondition.PropertyCondition.Operation;
  */
 public class Property {
     public final int ordinal;
+
+    /** One of the supported types to be mapped to the DB. */
     public final Class<?> type;
+
     public final String name;
     public final boolean primaryKey;
     public final String dbName;
-    public final Class<PropertyConverter> converterClass;
+    public final Class<? extends PropertyConverter> converterClass;
+
+    /** Type, which is converted to a type supported by the DB. */
+    public final Class customType;
 
     private int id;
 
     public Property(int ordinal, Class<?> type, String name, boolean primaryKey, String dbName) {
-        this(ordinal, type, name, primaryKey, dbName, null);
+        this(ordinal, type, name, primaryKey, dbName, null, null);
     }
 
     public Property(int ordinal, Class<?> type, String name, boolean primaryKey, String dbName,
-                    Class<PropertyConverter> converterClass) {
+                    Class<? extends PropertyConverter> converterClass, Class customType) {
         this.ordinal = ordinal;
         this.type = type;
         this.name = name;
         this.primaryKey = primaryKey;
         this.dbName = dbName;
         this.converterClass = converterClass;
+        this.customType = customType;
     }
 
     /** Creates an "equal ('=')" condition  for this property. */
