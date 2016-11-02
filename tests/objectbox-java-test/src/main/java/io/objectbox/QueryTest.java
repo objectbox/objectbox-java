@@ -128,6 +128,22 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals(3, query.count());
     }
 
+    @Test
+    // Android JNI seems to have a limit of 512 local jobject references. Internally, we must delete those temporary
+    // references when processing lists. This is the test for that.
+    public void testBigResultList() {
+        List<TestEntity> entities = new ArrayList<>();
+        String sameValueForAll = "schrodinger";
+        for (int i = 0; i < 10000; i++) {
+            TestEntity entity = createTestEntity(sameValueForAll, i);
+            entities.add(entity);
+        }
+        box.put(entities);
+        int count = entities.size();
+        List<TestEntity> entitiesQueried = box.query().equal(SimpleString, sameValueForAll).build().find();
+        assertEquals(count, entitiesQueried.size());
+    }
+
     private List<TestEntity> putTestEntitiesScalars() {
         List<TestEntity> entities = new ArrayList<>();
         for (int i = 0; i < 10; i++) {

@@ -11,6 +11,7 @@ import org.junit.runners.Suite.SuiteClasses;
         BoxStoreBuilderTest.class,
         CursorTest.class,
         CursorBytesTest.class,
+        QueryTest.class,
         TransactionTest.class,
 })
 public class FunctionalTestSuite {
