@@ -63,7 +63,7 @@ public class Property {
         return new PropertyCondition(this, Operation.EQUALS, value);
     }
 
-    /** Creates an "not equal ('<>')" condition  for this property. */
+    /** Creates an "not equal ('&lt;&gt;')" condition  for this property. */
     public QueryCondition notEq(Object value) {
         return new PropertyCondition(this, Operation.NOT_EQUALS, value);
     }
@@ -84,12 +84,12 @@ public class Property {
         return in(inValues.toArray());
     }
 
-    /** Creates an "greater than ('>')" condition  for this property. */
+    /** Creates an "greater than ('&gt;')" condition  for this property. */
     public QueryCondition gt(Object value) {
         return new PropertyCondition(this, Operation.GREATER_THAN, value);
     }
 
-    /** Creates an "less than ('<')" condition  for this property. */
+    /** Creates an "less than ('&lt;')" condition  for this property. */
     public QueryCondition lt(Object value) {
         return new PropertyCondition(this, Operation.LESS_THAN, value);
     }
