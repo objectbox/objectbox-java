@@ -10,23 +10,31 @@ public final class PropertyFlags {
   /**
    * One long property on an entity must be the ID
    */
-  public static final byte ID = 1;
+  public static final int ID = 1;
   /**
    * On languages like Java, a non-primitive type is used (aka wrapper types, allowing null)
    */
-  public static final byte NON_PRIMITIVE_TYPE = 2;
+  public static final int NON_PRIMITIVE_TYPE = 2;
   /**
    * Unused yet
    */
-  public static final byte NOT_NULL = 4;
-  public static final byte INDEXED = 8;
+  public static final int NOT_NULL = 4;
+  public static final int INDEXED = 8;
   /**
    * Unused yet
    */
-  public static final byte INDEX_PARTIAL_SKIP_NULL = 16;
+  public static final int INDEX_PARTIAL_SKIP_NULL = 16;
   /**
    * Unused yet: Unique index
    */
-  public static final byte UNIQUE = 32;
+  public static final int UNIQUE = 32;
+  /**
+   * Unused yet: Use a persisted sequence to enforce ID to rise monotonic (no ID reuse)
+   */
+  public static final int ID_MONOTONIC_SEQUENCE = 64;
+  /**
+   * Allow IDs to be assigned by the developer
+   */
+  public static final int ID_SELF_ASSIGNABLE = 128;
 }
 

@@ -15,27 +15,27 @@ public final class ModelProperty extends Table {
 
   public String name() { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
-  public int type() { int o = __offset(6); return o != 0 ? bb.get(o + bb_pos) & 0xFF : 0; }
+  public int type() { int o = __offset(6); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
   /**
    * bit flags: e.g. indexed, not-nullable
    */
-  public int flags() { int o = __offset(8); return o != 0 ? bb.get(o + bb_pos) & 0xFF : 0; }
+  public long flags() { int o = __offset(8); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
 
   public static int createModelProperty(FlatBufferBuilder builder,
       int nameOffset,
       int type,
-      int flags) {
+      long flags) {
     builder.startObject(3);
-    ModelProperty.addName(builder, nameOffset);
     ModelProperty.addFlags(builder, flags);
+    ModelProperty.addName(builder, nameOffset);
     ModelProperty.addType(builder, type);
     return ModelProperty.endModelProperty(builder);
   }
 
   public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(3); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(0, nameOffset, 0); }
-  public static void addType(FlatBufferBuilder builder, int type) { builder.addByte(1, (byte)type, 0); }
-  public static void addFlags(FlatBufferBuilder builder, int flags) { builder.addByte(2, (byte)flags, 0); }
+  public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(1, (short)type, 0); }
+  public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(2, (int)flags, 0); }
   public static int endModelProperty(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
