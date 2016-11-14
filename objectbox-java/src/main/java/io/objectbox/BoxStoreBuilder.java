@@ -8,6 +8,9 @@ import java.util.List;
 import io.objectbox.annotation.apihint.Internal;
 
 public class BoxStoreBuilder {
+
+    public static final String DEFAULT_NAME = "objectbox";
+
     static class EntityClasses<T> {
         final String entityName;
         final Class<T> entityClass;
@@ -140,7 +143,7 @@ public class BoxStoreBuilder {
             }
         } else {
             if (name == null) {
-                name = "objectbox";
+                name = DEFAULT_NAME;
             }
             if (baseDirectory != null) {
                 directory = new File(baseDirectory, name);
