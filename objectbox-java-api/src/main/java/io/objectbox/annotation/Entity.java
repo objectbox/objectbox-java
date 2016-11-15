@@ -14,7 +14,10 @@ import java.lang.annotation.Target;
 public @interface Entity {
 
     /**
-     * Specifies the name on the DB side (e.g. table name) this entity maps to. By default, the name is based on the entities class name.
+     * Specifies the name on the DB side (e.g. table name) this entity maps to.
+     * By default, the name is based on the entities class name.
+     * <p>
+     * Note: if you intent to rename an entity, consider using refId instead.
      */
     String nameInDb() default "";
 
@@ -51,5 +54,13 @@ public @interface Entity {
 //     * Define a protobuf class of this entity to create an additional, special DAO for.
 //     */
 //    Class protobuf() default void.class;
+
+    /**
+     * RefIDs identify entities (and properties) uniquely in the meta object model file (objectmodel.json).
+     * With refIDs you can map entities to their meta model representation in a stable way without its name.
+     * Once a refID is set, you can rename the entity as often as you like - ObjectBox keeps track of it automatically.
+     * Thus, it is advisable to lookup the refID in objectmodel.json and use it here before renaming a entity.
+     */
+    long refId() default 0;
 
 }
