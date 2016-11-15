@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Annotation for entities
  * ObjectBox only persist objects of classes which are marked with this annotation
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
 public @interface Entity {
 
