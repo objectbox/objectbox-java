@@ -17,11 +17,59 @@ public class ModelBuilder {
 
     long version = 1;
 
+    public class PropertyBuilder {
+        boolean finished;
+
+        public PropertyBuilder(String name, int type) {
+            int propertyNameOffset = fbb.createString(name);
+            ModelProperty.startModelProperty(fbb);
+            ModelProperty.addName(fbb, propertyNameOffset);
+            ModelProperty.addType(fbb, type);
+        }
+
+        public PropertyBuilder id(int id) {
+            checkNotFinished();
+            ModelProperty.addId(fbb, id);
+            return this;
+        }
+
+        public PropertyBuilder indexId(int indexId) {
+            checkNotFinished();
+            ModelProperty.addIndexId(fbb, indexId);
+            return this;
+        }
+
+        public PropertyBuilder refId(int refId) {
+            checkNotFinished();
+            ModelProperty.addRefId(fbb, refId);
+            return this;
+        }
+
+        public PropertyBuilder flags(int flags) {
+            checkNotFinished();
+            ModelProperty.addFlags(fbb, flags);
+            return this;
+        }
+
+        private void checkNotFinished() {
+            if (finished) {
+                throw new IllegalStateException("Already finished");
+            }
+        }
+
+        public int finish() {
+            checkNotFinished();
+            finished = true;
+            return ModelProperty.endModelProperty(fbb);
+        }
+    }
+
     public class EntityBuilder {
         final String name;
         final int id;
         final long refId;
         final List<Integer> propertyOffsets = new ArrayList<>();
+        private PropertyBuilder propertyBuilder;
 
         EntityBuilder(String name, int id, long refId) {
             this.name = name;
@@ -29,20 +77,21 @@ public class ModelBuilder {
             this.refId = refId;
         }
 
-        public EntityBuilder property(String name, int id, long refId, int type, int flags) {
-            int propertyNameOffset = fbb.createString(name);
-            ModelProperty.startModelProperty(fbb);
-            ModelProperty.addName(fbb, propertyNameOffset);
-            ModelProperty.addRefId(fbb, refId);
-            ModelProperty.addId(fbb, id);
-            ModelProperty.addType(fbb, type);
-            ModelProperty.addFlags(fbb, flags);
-            int offset = ModelProperty.endModelProperty(fbb);
-            propertyOffsets.add(offset);
-            return this;
+        public PropertyBuilder property(String name, int type) {
+            checkFinishProperty();
+            propertyBuilder = new PropertyBuilder(name, type);
+            return propertyBuilder;
+        }
+
+        void checkFinishProperty() {
+            if (propertyBuilder != null) {
+                propertyOffsets.add(propertyBuilder.finish());
+                propertyBuilder = null;
+            }
         }
 
         public ModelBuilder entityDone() {
+            checkFinishProperty();
             int testEntityNameOffset = fbb.createString(name);
             int propertiesOffset = createVector(propertyOffsets);
             ModelEntity.startModelEntity(fbb);

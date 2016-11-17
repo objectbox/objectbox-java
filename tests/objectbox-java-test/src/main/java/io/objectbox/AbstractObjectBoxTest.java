@@ -142,24 +142,23 @@ public abstract class AbstractObjectBoxTest {
 
     private void addTestEntity(ModelBuilder modelBuilder, boolean withIndex) {
         EntityBuilder entityBuilder = modelBuilder.entity("TestEntity", ++lastEntityId, ++lastRefId);
-        int pid = 1;
-        entityBuilder.property("id", pid++, ++lastRefId, PropertyType.Long, PropertyFlags.ID);
-        entityBuilder.property("simpleBoolean", pid++, ++lastRefId, PropertyType.Bool, 0);
-        entityBuilder.property("simpleByte", pid++, ++lastRefId, PropertyType.Byte, 0);
-        entityBuilder.property("simpleShort", pid++, ++lastRefId, PropertyType.Short, 0);
-        entityBuilder.property("simpleInt", pid++, ++lastRefId, PropertyType.Int, 0);
-        entityBuilder.property("simpleLong", pid++, ++lastRefId, PropertyType.Long, 0);
-        entityBuilder.property("simpleFloat", pid++, ++lastRefId, PropertyType.Float, 0);
-        entityBuilder.property("simpleDouble", pid++, ++lastRefId, PropertyType.Double, 0);
-        entityBuilder.property("simpleString", pid++, ++lastRefId, PropertyType.String, withIndex ? PropertyFlags.INDEXED : 0);
-        entityBuilder.property("simpleByteArray", pid++, ++lastRefId, PropertyType.ByteVector, 0);
+        entityBuilder.property("id", PropertyType.Long).flags(PropertyFlags.ID);
+        entityBuilder.property("simpleBoolean", PropertyType.Bool);
+        entityBuilder.property("simpleByte", PropertyType.Byte);
+        entityBuilder.property("simpleShort", PropertyType.Short);
+        entityBuilder.property("simpleInt", PropertyType.Int);
+        entityBuilder.property("simpleLong", PropertyType.Long);
+        entityBuilder.property("simpleFloat", PropertyType.Float);
+        entityBuilder.property("simpleDouble", PropertyType.Double);
+        entityBuilder.property("simpleString", PropertyType.String).flags(withIndex ? PropertyFlags.INDEXED : 0);
+        entityBuilder.property("simpleByteArray", PropertyType.ByteVector);
         entityBuilder.entityDone();
     }
 
     private void addTestEntityMinimal(ModelBuilder modelBuilder, boolean withIndex) {
         EntityBuilder entityBuilder = modelBuilder.entity("TestEntityMinimal", ++lastEntityId, ++lastRefId);
-        entityBuilder.property("id", 1, ++lastRefId, PropertyType.Long, PropertyFlags.ID);
-        entityBuilder.property("text", 2, ++lastRefId, PropertyType.String, withIndex ? PropertyFlags.INDEXED : 0);
+        entityBuilder.property("id", PropertyType.Long).flags(PropertyFlags.ID);
+        entityBuilder.property("text", PropertyType.String).flags(withIndex ? PropertyFlags.INDEXED : 0);
         entityBuilder.entityDone();
     }
 
