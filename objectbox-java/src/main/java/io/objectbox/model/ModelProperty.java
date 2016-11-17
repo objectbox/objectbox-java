@@ -15,27 +15,38 @@ public final class ModelProperty extends Table {
 
   public String name() { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
-  public int type() { int o = __offset(6); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
+  /**
+   * Pseudo unique ID to match and verify external managed IDs
+   */
+  public long refId() { int o = __offset(6); return o != 0 ? bb.getLong(o + bb_pos) : 0; }
+  public long id() { int o = __offset(8); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public int type() { int o = __offset(10); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
   /**
    * bit flags: e.g. indexed, not-nullable
    */
-  public long flags() { int o = __offset(8); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public long flags() { int o = __offset(12); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
 
   public static int createModelProperty(FlatBufferBuilder builder,
       int nameOffset,
+      long refId,
+      long id,
       int type,
       long flags) {
-    builder.startObject(3);
+    builder.startObject(5);
+    ModelProperty.addRefId(builder, refId);
     ModelProperty.addFlags(builder, flags);
+    ModelProperty.addId(builder, id);
     ModelProperty.addName(builder, nameOffset);
     ModelProperty.addType(builder, type);
     return ModelProperty.endModelProperty(builder);
   }
 
-  public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(3); }
+  public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(5); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(0, nameOffset, 0); }
-  public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(1, (short)type, 0); }
-  public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(2, (int)flags, 0); }
+  public static void addRefId(FlatBufferBuilder builder, long refId) { builder.addLong(1, refId, 0); }
+  public static void addId(FlatBufferBuilder builder, long id) { builder.addInt(2, (int)id, 0); }
+  public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(3, (short)type, 0); }
+  public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(4, (int)flags, 0); }
   public static int endModelProperty(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
