@@ -19,16 +19,22 @@ public class ModelBuilder {
 
     public class EntityBuilder {
         final String name;
+        final int id;
+        final long refId;
         final List<Integer> propertyOffsets = new ArrayList<>();
 
-        EntityBuilder(String name) {
+        EntityBuilder(String name, int id, long refId) {
             this.name = name;
+            this.id = id;
+            this.refId = refId;
         }
 
-        public EntityBuilder property(String name, int type, int flags) {
+        public EntityBuilder property(String name, int id, long refId, int type, int flags) {
             int propertyNameOffset = fbb.createString(name);
             ModelProperty.startModelProperty(fbb);
             ModelProperty.addName(fbb, propertyNameOffset);
+            ModelProperty.addRefId(fbb, refId);
+            ModelProperty.addId(fbb, id);
             ModelProperty.addType(fbb, type);
             ModelProperty.addFlags(fbb, flags);
             int offset = ModelProperty.endModelProperty(fbb);
@@ -42,6 +48,8 @@ public class ModelBuilder {
             ModelEntity.startModelEntity(fbb);
             ModelEntity.addName(fbb, testEntityNameOffset);
             ModelEntity.addProperties(fbb, propertiesOffset);
+            ModelEntity.addRefId(fbb, refId);
+            ModelEntity.addId(fbb, id);
             entityOffsets.add(ModelEntity.endModelEntity(fbb));
             return ModelBuilder.this;
         }
@@ -60,8 +68,8 @@ public class ModelBuilder {
         return this;
     }
 
-    public EntityBuilder entity(String name) {
-        return new EntityBuilder(name);
+    public EntityBuilder entity(String name, int id, long refId) {
+        return new EntityBuilder(name, id, refId);
     }
 
     public byte[] build() {
