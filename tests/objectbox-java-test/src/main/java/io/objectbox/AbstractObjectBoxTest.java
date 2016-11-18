@@ -141,7 +141,7 @@ public abstract class AbstractObjectBoxTest {
     }
 
     private void addTestEntity(ModelBuilder modelBuilder, boolean withIndex) {
-        EntityBuilder entityBuilder = modelBuilder.entity("TestEntity", ++lastEntityId, ++lastRefId);
+        EntityBuilder entityBuilder = modelBuilder.entity("TestEntity").id(++lastEntityId).refId(++lastRefId);
         entityBuilder.property("id", PropertyType.Long).flags(PropertyFlags.ID);
         entityBuilder.property("simpleBoolean", PropertyType.Bool);
         entityBuilder.property("simpleByte", PropertyType.Byte);
@@ -156,7 +156,7 @@ public abstract class AbstractObjectBoxTest {
     }
 
     private void addTestEntityMinimal(ModelBuilder modelBuilder, boolean withIndex) {
-        EntityBuilder entityBuilder = modelBuilder.entity("TestEntityMinimal", ++lastEntityId, ++lastRefId);
+        EntityBuilder entityBuilder = modelBuilder.entity("TestEntityMinimal").id(++lastEntityId).refId(++lastRefId);
         entityBuilder.property("id", PropertyType.Long).flags(PropertyFlags.ID);
         entityBuilder.property("text", PropertyType.String).flags(withIndex ? PropertyFlags.INDEXED : 0);
         entityBuilder.entityDone();

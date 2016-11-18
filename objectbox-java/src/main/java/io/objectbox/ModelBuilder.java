@@ -16,6 +16,8 @@ public class ModelBuilder {
     final List<Integer> entityOffsets = new ArrayList<>();
 
     long version = 1;
+    Long lastEntityId;
+    Long lastIndexId;
 
     public class PropertyBuilder {
         boolean finished;
@@ -66,18 +68,37 @@ public class ModelBuilder {
 
     public class EntityBuilder {
         final String name;
-        final int id;
-        final long refId;
         final List<Integer> propertyOffsets = new ArrayList<>();
-        private PropertyBuilder propertyBuilder;
 
-        EntityBuilder(String name, int id, long refId) {
+        Integer id;
+        Long refId;
+        PropertyBuilder propertyBuilder;
+        boolean finished;
+
+        EntityBuilder(String name) {
             this.name = name;
+        }
+
+        public EntityBuilder id(int id) {
+            checkNotFinished();
             this.id = id;
+            return this;
+        }
+
+        public EntityBuilder refId(long refId) {
+            checkNotFinished();
             this.refId = refId;
+            return this;
+        }
+
+        private void checkNotFinished() {
+            if (finished) {
+                throw new IllegalStateException("Already finished");
+            }
         }
 
         public PropertyBuilder property(String name, int type) {
+            checkNotFinished();
             checkFinishProperty();
             propertyBuilder = new PropertyBuilder(name, type);
             return propertyBuilder;
@@ -91,14 +112,20 @@ public class ModelBuilder {
         }
 
         public ModelBuilder entityDone() {
+            checkNotFinished();
             checkFinishProperty();
+            finished = true;
             int testEntityNameOffset = fbb.createString(name);
             int propertiesOffset = createVector(propertyOffsets);
             ModelEntity.startModelEntity(fbb);
             ModelEntity.addName(fbb, testEntityNameOffset);
             ModelEntity.addProperties(fbb, propertiesOffset);
-            ModelEntity.addRefId(fbb, refId);
-            ModelEntity.addId(fbb, id);
+            if (refId != null) {
+                ModelEntity.addRefId(fbb, refId);
+            }
+            if (id != null) {
+                ModelEntity.addId(fbb, id);
+            }
             entityOffsets.add(ModelEntity.endModelEntity(fbb));
             return ModelBuilder.this;
         }
@@ -117,8 +144,18 @@ public class ModelBuilder {
         return this;
     }
 
-    public EntityBuilder entity(String name, int id, long refId) {
-        return new EntityBuilder(name, id, refId);
+    public EntityBuilder entity(String name) {
+        return new EntityBuilder(name);
+    }
+
+    public ModelBuilder lastEntityId(long lastEntityId) {
+        this.lastEntityId = lastEntityId;
+        return this;
+    }
+
+    public ModelBuilder lastIndexId(long lastIndexId) {
+        this.lastIndexId = lastIndexId;
+        return this;
     }
 
     public byte[] build() {
@@ -128,6 +165,12 @@ public class ModelBuilder {
         Model.addName(fbb, nameOffset);
         Model.addVersion(fbb, 1);
         Model.addEntities(fbb, entityVectorOffset);
+        if (lastEntityId != null) {
+            Model.addLastEntityId(fbb, lastEntityId);
+        }
+        if (lastIndexId != null) {
+            Model.addLastIndexId(fbb, lastIndexId);
+        }
         int offset = Model.endModel(fbb);
 
         fbb.finish(offset);
