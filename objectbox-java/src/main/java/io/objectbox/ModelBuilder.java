@@ -39,7 +39,7 @@ public class ModelBuilder {
             return this;
         }
 
-        public PropertyBuilder refId(int refId) {
+        public PropertyBuilder refId(long refId) {
             checkNotFinished();
             ModelProperty.addRefId(fbb, refId);
             return this;
