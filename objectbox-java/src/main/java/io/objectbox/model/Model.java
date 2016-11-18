@@ -28,24 +28,32 @@ public final class Model extends Table {
   public ModelEntity entities(int j) { return entities(new ModelEntity(), j); }
   public ModelEntity entities(ModelEntity obj, int j) { int o = __offset(8); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
   public int entitiesLength() { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; }
+  public long lastEntityId() { int o = __offset(10); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public long lastIndexId() { int o = __offset(12); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
 
   public static int createModel(FlatBufferBuilder builder,
       int nameOffset,
       long version,
-      int entitiesOffset) {
-    builder.startObject(3);
+      int entitiesOffset,
+      long lastEntityId,
+      long lastIndexId) {
+    builder.startObject(5);
     Model.addVersion(builder, version);
+    Model.addLastIndexId(builder, lastIndexId);
+    Model.addLastEntityId(builder, lastEntityId);
     Model.addEntities(builder, entitiesOffset);
     Model.addName(builder, nameOffset);
     return Model.endModel(builder);
   }
 
-  public static void startModel(FlatBufferBuilder builder) { builder.startObject(3); }
+  public static void startModel(FlatBufferBuilder builder) { builder.startObject(5); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(0, nameOffset, 0); }
   public static void addVersion(FlatBufferBuilder builder, long version) { builder.addLong(1, version, 0); }
   public static void addEntities(FlatBufferBuilder builder, int entitiesOffset) { builder.addOffset(2, entitiesOffset, 0); }
   public static int createEntitiesVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
   public static void startEntitiesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
+  public static void addLastEntityId(FlatBufferBuilder builder, long lastEntityId) { builder.addInt(3, (int)lastEntityId, 0); }
+  public static void addLastIndexId(FlatBufferBuilder builder, long lastIndexId) { builder.addInt(4, (int)lastIndexId, 0); }
   public static int endModel(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
