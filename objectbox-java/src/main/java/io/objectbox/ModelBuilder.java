@@ -16,8 +16,8 @@ public class ModelBuilder {
     final List<Integer> entityOffsets = new ArrayList<>();
 
     long version = 1;
-    Long lastEntityId;
-    Long lastIndexId;
+    Integer lastEntityId;
+    Integer lastIndexId;
 
     public class PropertyBuilder {
         boolean finished;
@@ -148,12 +148,12 @@ public class ModelBuilder {
         return new EntityBuilder(name);
     }
 
-    public ModelBuilder lastEntityId(long lastEntityId) {
+    public ModelBuilder lastEntityId(int lastEntityId) {
         this.lastEntityId = lastEntityId;
         return this;
     }
 
-    public ModelBuilder lastIndexId(long lastIndexId) {
+    public ModelBuilder lastIndexId(int lastIndexId) {
         this.lastIndexId = lastIndexId;
         return this;
     }
