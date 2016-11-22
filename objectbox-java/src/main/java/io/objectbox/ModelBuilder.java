@@ -72,6 +72,7 @@ public class ModelBuilder {
 
         Integer id;
         Long refId;
+        Integer lastEntityId;
         PropertyBuilder propertyBuilder;
         boolean finished;
 
@@ -88,6 +89,12 @@ public class ModelBuilder {
         public EntityBuilder refId(long refId) {
             checkNotFinished();
             this.refId = refId;
+            return this;
+        }
+
+        public EntityBuilder lastEntityId(int lastEntityId) {
+            checkNotFinished();
+            this.lastEntityId = lastEntityId;
             return this;
         }
 
@@ -125,6 +132,9 @@ public class ModelBuilder {
             }
             if (id != null) {
                 ModelEntity.addId(fbb, id);
+            }
+            if (lastEntityId != null) {
+                ModelEntity.addLastPropertyId(fbb, lastEntityId);
             }
             entityOffsets.add(ModelEntity.endModelEntity(fbb));
             return ModelBuilder.this;
