@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * they are equal to using this
  * </p>
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 /** TODO public */ @interface NotNull {
 }

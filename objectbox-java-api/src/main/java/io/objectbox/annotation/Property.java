@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Optional: configures the mapped column for a persistent field.
  * This annotation is also applicable with @ToOne without additional foreign key property
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 public @interface Property {
     /**

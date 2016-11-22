@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 /**
  * Specifies {@link PropertyConverter} for the field to support custom types
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 public @interface Convert {
     /** Converter class */

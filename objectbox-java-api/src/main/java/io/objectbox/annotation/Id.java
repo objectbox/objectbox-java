@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Marks field is the primary key of the entity's table
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 public @interface Id {
     /**

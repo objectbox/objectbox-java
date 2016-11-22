@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Specifies that the property should be indexed, which is highly recommended if you do queries using this property.
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 public @interface Index {
 //    /**

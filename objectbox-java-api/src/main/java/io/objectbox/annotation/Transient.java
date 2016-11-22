@@ -4,12 +4,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import static java.lang.annotation.RetentionPolicy.CLASS;
 
 /**
  * Transient fields are not persisted in the database.
  */
-@Retention(SOURCE)
+@Retention(CLASS)
 @Target(ElementType.FIELD)
 public @interface Transient {
 }
