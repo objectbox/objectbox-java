@@ -143,6 +143,7 @@ public class BoxTest extends AbstractObjectBoxTest {
     @Test
     public void testPutAndGetTwoEntities() {
         store.close();
+        store.deleteAllFiles();
         store = createBoxStoreBuilderWithTwoEntities(false).build();
         box = store.boxFor(TestEntity.class);
 
@@ -163,6 +164,7 @@ public class BoxTest extends AbstractObjectBoxTest {
     @Test
     public void testTwoReaders() {
         store.close();
+        store.deleteAllFiles();
         store = createBoxStoreBuilderWithTwoEntities(false).build();
         box = store.boxFor(TestEntity.class);
         box.count();
