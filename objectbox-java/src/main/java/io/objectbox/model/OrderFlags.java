@@ -17,15 +17,15 @@ public final class OrderFlags {
    */
   public static final int UNSIGNED = 4;
   /**
-   * Unused yet
+   * null values will be put first (Default)
    */
-  public static final int NULLS_LAST = 8;
+  public static final int NULLS_FIRST = 8;
   /**
-   * Unused yet (Default)
+   * null values will be put last
    */
-  public static final int NULLS_FIRST = 16;
+  public static final int NULLS_LAST = 16;
   /**
-   * Unused yet
+   * null values are equal to zero (scalars) or empty strings ("")
    */
   public static final int NULLS_ZERO = 32;
 }
