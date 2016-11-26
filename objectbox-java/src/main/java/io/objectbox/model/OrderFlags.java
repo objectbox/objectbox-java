@@ -7,26 +7,31 @@ package io.objectbox.model;
  */
 public final class OrderFlags {
   private OrderFlags() { }
+  /**
+   * Reverts the order from ascending (default) to descending.
+   */
   public static final int DESCENDING = 1;
   /**
-   * For strings only
+   * Makes upper case letters (e.g. "Z") be sorted before lower case letters (e.g. "a").
+   * If not specified, the default is case insensitive for ASCII characters.
    */
-  public static final int IGNORE_CASE_ASCII = 2;
+  public static final int CASE_SENSITIVE = 2;
   /**
-   * For scalars only
+   * For scalars only: changes the comparison to unsigned (default is signed).
    */
   public static final int UNSIGNED = 4;
   /**
-   * null values will be put first (Default)
+   * null values will be put last.
+   * If not specified, by default null values will be put first.
    */
-  public static final int NULLS_FIRST = 8;
+  public static final int NULLS_LAST = 8;
   /**
-   * null values will be put last
+   * null values should be treated equal to zero (scalars only).
    */
-  public static final int NULLS_LAST = 16;
-  /**
-   * null values are equal to zero (scalars) or empty strings ("")
-   */
-  public static final int NULLS_ZERO = 32;
+  public static final int NULLS_ZERO = 16;
+
+  public static final String[] names = { "DESCENDING", "CASE_SENSITIVE", "", "UNSIGNED", "", "", "", "NULLS_LAST", "", "", "", "", "", "", "", "NULLS_ZERO", };
+
+  public static String name(int e) { return names[e - DESCENDING]; }
 }
 
