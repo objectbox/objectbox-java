@@ -7,14 +7,23 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.model.OrderFlags;
 
 /**
- * Created by Markus on 13.10.2016.
+ * With QueryBuilder you define custom queries returning matching entities. Using the methods of this class you can
+ * select (filter) results for specific data (for example #{@link #equal(Property, String)} and
+ * {@link #isNull(Property)}) and select an sort order for the resulting list (see {@link #order(Property)} and its overloads).
+ * <p>
+ * Use {@link #build()} to conclude your query definitions and to get a {@link Query} object, which is used to actually get results.
+ * <p>
+ * Note: Currently you can only query for complete entities. Returning individual property values or aggregates are
+ * currently not available. Keep in mind that ObjectBox is very fast and the overhead to create an entity is very low.
+ *
+ * @param <T> Entity class associated with this query builder.
  */
 @Experimental
 public class QueryBuilder<T> {
+
     /**
      * Reverts the order from ascending (default) to descending.
      */
-
     public final static int DESCENDING = OrderFlags.DESCENDING;
 
     /**
@@ -132,6 +141,7 @@ public class QueryBuilder<T> {
      * Shorthand for {@link #order(Property, int)} with flags equal to 0.
      *
      * @see #order(Property, int)
+     * @see #orderDesc(Property)
      */
     public QueryBuilder<T> order(Property property) {
         return order(property, 0);
@@ -142,6 +152,7 @@ public class QueryBuilder<T> {
      * Shorthand for {@link #order(Property, int)} with flags equal to {@link #DESCENDING}.
      *
      * @see #order(Property, int)
+     * @see #order(Property)
      */
     public QueryBuilder<T> orderDesc(Property property) {
         return order(property, DESCENDING);
@@ -163,6 +174,8 @@ public class QueryBuilder<T> {
      * @param flags    Bit flags that can be combined using the binary OR operator (|). Available flags are
      *                 {@link #DESCENDING}, {@link #CASE_SENSITIVE}, {@link #NULLS_LAST}, {@link #NULLS_ZERO},
      *                 and {@link #UNSIGNED}.
+     * @see #order(Property)
+     * @see #orderDesc(Property)
      */
     public QueryBuilder<T> order(Property property, int flags) {
         nativeOrder(handle, property.getId(), flags);

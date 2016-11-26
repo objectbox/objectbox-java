@@ -6,7 +6,11 @@ import io.objectbox.Box;
 import io.objectbox.annotation.apihint.Beta;
 
 /**
- * Created by Markus on 13.10.2016.
+ * A repeatable query returning entities.
+ *
+ * @param <T> The entity class the query will return results for.
+ * @author Markus
+ * @see QueryBuilder
  */
 @Beta
 public class Query<T> {
@@ -18,7 +22,7 @@ public class Query<T> {
     private final Box<T> box;
     private final long handle;
 
-    public Query(Box<T> box, long queryHandle) {
+    Query(Box<T> box, long queryHandle) {
         this.box = box;
         handle = queryHandle;
     }
