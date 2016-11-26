@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.objectbox.query.Query;
+import io.objectbox.query.QueryBuilder;
 
 
 import static io.objectbox.TestEntityProperties.SimpleFloat;
@@ -16,6 +17,7 @@ import static io.objectbox.TestEntityProperties.SimpleShort;
 import static io.objectbox.TestEntityProperties.SimpleString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class QueryTest extends AbstractObjectBoxTest {
 
@@ -142,6 +144,37 @@ public class QueryTest extends AbstractObjectBoxTest {
         int count = entities.size();
         List<TestEntity> entitiesQueried = box.query().equal(SimpleString, sameValueForAll).build().find();
         assertEquals(count, entitiesQueried.size());
+    }
+
+    @Test
+    public void testOrder() {
+        putTestEntitiesStrings();
+        box.put(createTestEntity("BAR", 100));
+        List<TestEntity> result = box.query().order(SimpleString).build().find();
+        assertEquals(6, result.size());
+        assertEquals("apple", result.get(0).getSimpleString());
+        assertEquals("banana", result.get(1).getSimpleString());
+        assertEquals("banana milk shake", result.get(2).getSimpleString());
+        assertEquals("bar", result.get(3).getSimpleString());
+        assertEquals("BAR", result.get(4).getSimpleString());
+        assertEquals("foo bar", result.get(5).getSimpleString());
+    }
+
+    @Test
+    public void testOrderDescCaseNullLast() {
+        box.put(createTestEntity(null, 1000));
+        box.put(createTestEntity("BAR", 100));
+        putTestEntitiesStrings();
+        int flags = QueryBuilder.CASE_SENSITIVE | QueryBuilder.NULLS_LAST | QueryBuilder.DESCENDING;
+        List<TestEntity> result = box.query().order(SimpleString, flags).build().find();
+        assertEquals(7, result.size());
+        assertEquals("foo bar", result.get(0).getSimpleString());
+        assertEquals("bar", result.get(1).getSimpleString());
+        assertEquals("banana milk shake", result.get(2).getSimpleString());
+        assertEquals("banana", result.get(3).getSimpleString());
+        assertEquals("apple", result.get(4).getSimpleString());
+        assertEquals("BAR", result.get(5).getSimpleString());
+        assertNull(result.get(6).getSimpleString());
     }
 
     private List<TestEntity> putTestEntitiesScalars() {

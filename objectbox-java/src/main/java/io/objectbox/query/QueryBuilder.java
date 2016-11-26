@@ -4,12 +4,41 @@ import io.objectbox.Box;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.model.OrderFlags;
 
 /**
  * Created by Markus on 13.10.2016.
  */
 @Experimental
 public class QueryBuilder<T> {
+    /**
+     * Reverts the order from ascending (default) to descending.
+     */
+
+    public final static int DESCENDING = OrderFlags.DESCENDING;
+
+    /**
+     * Makes upper case letters (e.g. "Z") be sorted before lower case letters (e.g. "a").
+     * If not specified, the default is case insensitive for ASCII characters.
+     */
+    public final static int CASE_SENSITIVE = OrderFlags.CASE_SENSITIVE;
+
+    /**
+     * null values will be put last.
+     * If not specified, by default null values will be put first.
+     */
+    public final static int NULLS_LAST = OrderFlags.NULLS_LAST;
+
+    /**
+     * null values should be treated equal to zero (scalars only).
+     */
+    public final static int NULLS_ZERO = OrderFlags.NULLS_ZERO;
+
+    /**
+     * For scalars only: changes the comparison to unsigned (default is signed).
+     */
+    public final static int UNSIGNED = OrderFlags.UNSIGNED;
+
     private final Box<T> box;
 
     private long handle;
@@ -19,6 +48,8 @@ public class QueryBuilder<T> {
     private static native long nativeDestroy(long handle);
 
     private static native long nativeBuild(long handle);
+
+    private static native void nativeOrder(long handle, int propertyId, int flags);
 
     // ------------------------------ (Not)Null------------------------------
 
@@ -94,6 +125,48 @@ public class QueryBuilder<T> {
         Query<T> query = new Query<T>(box, queryHandle);
         close();
         return query;
+    }
+
+    /**
+     * Specifies given property to be used for sorting.
+     * Shorthand for {@link #order(Property, int)} with flags equal to 0.
+     *
+     * @see #order(Property, int)
+     */
+    public QueryBuilder<T> order(Property property) {
+        return order(property, 0);
+    }
+
+    /**
+     * Specifies given property in descending order to be used for sorting.
+     * Shorthand for {@link #order(Property, int)} with flags equal to {@link #DESCENDING}.
+     *
+     * @see #order(Property, int)
+     */
+    public QueryBuilder<T> orderDesc(Property property) {
+        return order(property, DESCENDING);
+    }
+
+    /**
+     * Defines the order with which the results are ordered (default: none).
+     * You can chain multiple order conditions. The first applied order condition will be the most relevant.
+     * Order conditions applied afterwards are only relevant if the preceding ones resulted in value equality.
+     * <p>
+     * Example:
+     * <p>
+     * queryBuilder.order(Name).orderDesc(YearOfBirth);
+     * <p>
+     * Here, "Name" defines the primary sort order. The secondary sort order "YearOfBirth" is only used to compare
+     * entries with the same "Name" values.
+     *
+     * @param property the property defining the order
+     * @param flags    Bit flags that can be combined using the binary OR operator (|). Available flags are
+     *                 {@link #DESCENDING}, {@link #CASE_SENSITIVE}, {@link #NULLS_LAST}, {@link #NULLS_ZERO},
+     *                 and {@link #UNSIGNED}.
+     */
+    public QueryBuilder<T> order(Property property, int flags) {
+        nativeOrder(handle, property.getId(), flags);
+        return this;
     }
 
     public QueryBuilder<T> isNull(Property property) {
