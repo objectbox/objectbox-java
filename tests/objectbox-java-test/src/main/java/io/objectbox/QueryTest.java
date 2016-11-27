@@ -8,6 +8,7 @@ import java.util.List;
 
 import io.objectbox.query.Query;
 import io.objectbox.query.QueryBuilder;
+import io.objectbox.query.QueryBuilder.StringOrder;
 
 
 import static io.objectbox.TestEntityProperties.SimpleFloat;
@@ -144,6 +145,14 @@ public class QueryTest extends AbstractObjectBoxTest {
         int count = entities.size();
         List<TestEntity> entitiesQueried = box.query().equal(SimpleString, sameValueForAll).build().find();
         assertEquals(count, entitiesQueried.size());
+    }
+
+    @Test
+    public void testEqualStringOrder() {
+        putTestEntitiesStrings();
+        box.put(createTestEntity("BAR", 100));
+        assertEquals(2, box.query().equal(SimpleString, "bar").build().count());
+        assertEquals(1, box.query().equal(SimpleString, "bar", StringOrder.CASE_SENSITIVE).build().count());
     }
 
     @Test

@@ -20,6 +20,13 @@ import io.objectbox.model.OrderFlags;
  */
 @Experimental
 public class QueryBuilder<T> {
+    public enum StringOrder {
+        /** The default: case insensitive ASCII characters */
+        CASE_INSENSITIVE,
+
+        /** Case matters ('a' != 'A'). */
+        CASE_SENSITIVE
+    }
 
     /**
      * Reverts the order from ascending (default) to descending.
@@ -84,15 +91,15 @@ public class QueryBuilder<T> {
 
     // ------------------------------ Strings ------------------------------
 
-    private static native void nativeEqual(long handle, int propertyId, String value);
+    private static native void nativeEqual(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private static native void nativeNotEqual(long handle, int propertyId, String value);
+    private static native void nativeNotEqual(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private static native void nativeContains(long handle, int propertyId, String value);
+    private static native void nativeContains(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private static native void nativeStartsWith(long handle, int propertyId, String value);
+    private static native void nativeStartsWith(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private static native void nativeEndsWith(long handle, int propertyId, String value);
+    private static native void nativeEndsWith(long handle, int propertyId, String value, boolean caseSensitive);
 
     // ------------------------------ FPs ------------------------------
     private static native void nativeLess(long handle, int propertyId, double value);
@@ -229,27 +236,52 @@ public class QueryBuilder<T> {
     }
 
     public QueryBuilder<T> equal(Property property, String value) {
-        nativeEqual(handle, property.getId(), value);
+        nativeEqual(handle, property.getId(), value, false);
         return this;
     }
 
     public QueryBuilder<T> notEqual(Property property, String value) {
-        nativeNotEqual(handle, property.getId(), value);
+        nativeNotEqual(handle, property.getId(), value, false);
         return this;
     }
 
     public QueryBuilder<T> contains(Property property, String value) {
-        nativeContains(handle, property.getId(), value);
+        nativeContains(handle, property.getId(), value, false);
         return this;
     }
 
     public QueryBuilder<T> startsWith(Property property, String value) {
-        nativeStartsWith(handle, property.getId(), value);
+        nativeStartsWith(handle, property.getId(), value, false);
         return this;
     }
 
     public QueryBuilder<T> endsWith(Property property, String value) {
-        nativeEndsWith(handle, property.getId(), value);
+        nativeEndsWith(handle, property.getId(), value, false);
+        return this;
+    }
+
+    public QueryBuilder<T> equal(Property property, String value, StringOrder order) {
+        nativeEqual(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE);
+        return this;
+    }
+
+    public QueryBuilder<T> notEqual(Property property, String value, StringOrder order) {
+        nativeNotEqual(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE);
+        return this;
+    }
+
+    public QueryBuilder<T> contains(Property property, String value, StringOrder order) {
+        nativeContains(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE);
+        return this;
+    }
+
+    public QueryBuilder<T> startsWith(Property property, String value, StringOrder order) {
+        nativeStartsWith(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE);
+        return this;
+    }
+
+    public QueryBuilder<T> endsWith(Property property, String value, StringOrder order) {
+        nativeEndsWith(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE);
         return this;
     }
 
