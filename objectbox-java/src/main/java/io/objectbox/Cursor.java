@@ -69,6 +69,14 @@ public abstract class Cursor<T> implements Closeable {
                                                int idStr3, String valueStr3, int idStr4, String valueStr4
     );
 
+    protected static native long collect002033(long cursor, long keyIfComplete, int flags,
+                                               int idLong1, long valueLong1, int idLong2, long valueLong2,
+                                               int idFloat1, float valueFloat1, int idFloat2, float valueFloat2,
+                                               int idFloat3, float valueFloat3,
+                                               int idDouble1, double valueDouble1, int idDouble2, double valueDouble2,
+                                               int idDouble3, double valueDouble3
+    );
+
     static native int nativePropertyId(long cursor, String propertyValue);
 
     protected final Transaction tx;
