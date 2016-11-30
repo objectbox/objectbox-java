@@ -47,6 +47,10 @@ public class Property {
         this(ordinal, type, name, primaryKey, dbName, null, null);
     }
 
+    public Property(int ordinal, Class<?> type, String name) {
+        this(ordinal, type, name, false, name, null, null);
+    }
+
     public Property(int ordinal, Class<?> type, String name, boolean primaryKey, String dbName,
                     Class<? extends PropertyConverter> converterClass, Class customType) {
         this.ordinal = ordinal;
