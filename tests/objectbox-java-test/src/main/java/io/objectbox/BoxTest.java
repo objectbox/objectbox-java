@@ -189,7 +189,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         put("apple", 0);
         put("banana", 0);
 
-        List<TestEntity> list = box.find(new Property(2, String.class, "wrongname", false, "simpleString"), "banana");
+        List<TestEntity> list = box.find(new Property(2, 0, String.class, "wrongname", false, "simpleString"), "banana");
         assertEquals(2, list.size());
         assertEquals(1, list.get(0).getId());
         assertEquals(3, list.get(1).getId());
@@ -213,7 +213,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         put(null, 23);
         put(null, 42);
 
-        List<TestEntity> list = box.find(new Property(2, int.class, "wrongname", false, "simpleInt"), 42);
+        List<TestEntity> list = box.find(new Property(2, 0, int.class, "wrongname", false, "simpleInt"), 42);
         assertEquals(2, list.size());
         assertEquals(1, list.get(0).getId());
         assertEquals(3, list.get(1).getId());

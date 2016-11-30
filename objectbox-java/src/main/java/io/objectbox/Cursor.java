@@ -97,12 +97,9 @@ public abstract class Cursor<T> implements Closeable {
 
         Property[] allProperties = properties.getAllProperties();
         for (Property property : allProperties) {
-            if (property.getId() == 0) {
+            if (!property.isIdVerified()) {
                 int id = getPropertyId(property.dbName);
-                if (id <= 0) {
-                    throw new IllegalStateException("Illegal property ID " + id + " for " + property);
-                }
-                property.setId(id);
+                property.verifyId(id);
             }
         }
     }

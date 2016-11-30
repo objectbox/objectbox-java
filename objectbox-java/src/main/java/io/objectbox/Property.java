@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
+import io.objectbox.exception.DbException;
 import io.objectbox.query.QueryCondition;
 import io.objectbox.query.QueryCondition.PropertyCondition;
 import io.objectbox.query.QueryCondition.PropertyCondition.Operation;
@@ -29,6 +30,7 @@ import io.objectbox.query.QueryCondition.PropertyCondition.Operation;
  */
 public class Property {
     public final int ordinal;
+    private int id;
 
     /** One of the supported types to be mapped to the DB. */
     public final Class<?> type;
@@ -41,19 +43,20 @@ public class Property {
     /** Type, which is converted to a type supported by the DB. */
     public final Class customType;
 
-    private int id;
+    private boolean idVerified;
 
-    public Property(int ordinal, Class<?> type, String name, boolean primaryKey, String dbName) {
-        this(ordinal, type, name, primaryKey, dbName, null, null);
+    public Property(int ordinal, int id, Class<?> type, String name, boolean primaryKey, String dbName) {
+        this(ordinal, id, type, name, primaryKey, dbName, null, null);
     }
 
-    public Property(int ordinal, Class<?> type, String name) {
-        this(ordinal, type, name, false, name, null, null);
+    public Property(int ordinal, int id, Class<?> type, String name) {
+        this(ordinal, id, type, name, false, name, null, null);
     }
 
-    public Property(int ordinal, Class<?> type, String name, boolean primaryKey, String dbName,
+    public Property(int ordinal, int id, Class<?> type, String name, boolean primaryKey, String dbName,
                     Class<? extends PropertyConverter> converterClass, Class customType) {
         this.ordinal = ordinal;
+        this.id = id;
         this.type = type;
         this.name = name;
         this.primaryKey = primaryKey;
@@ -131,11 +134,29 @@ public class Property {
 
     @Internal
     public int getId() {
+        if (this.id <= 0) {
+            throw new IllegalStateException("Illegal property ID " + id + " for " + toString());
+        }
         return id;
     }
 
-    void setId(int id) {
-        this.id = id;
+    boolean isIdVerified() {
+        return idVerified;
+    }
+
+    void verifyId(int idInDb) {
+        if (this.id == 0) {
+            // At least in tests, we allow not presetting IDs.
+            // (IDs should always be present using the ObjectBox Gradle plugin.)
+            id = idInDb;
+        }
+        if (this.id <= 0) {
+            throw new IllegalStateException("Illegal property ID " + id + " for " + toString());
+        }
+        if (this.id != idInDb) {
+            throw new DbException(toString() + " does not match ID in DB: " + idInDb);
+        }
+        idVerified = true;
     }
 
     @Override
