@@ -3,6 +3,7 @@ package io.objectbox.query;
 import java.util.List;
 
 import io.objectbox.Box;
+import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Beta;
 
 /**
@@ -20,7 +21,25 @@ public class Query<T> {
 
     private native static List nativeFind(long handle, long cursorHandle, long offset, long limit);
 
+    private native static long[] nativeFindKeysUnordered(long handle, long cursorHandle);
+
     private native static long nativeCount(long handle, long cursorHandle);
+
+    private native static long nativeSum(long handle, long cursorHandle, int propertyId);
+
+    private native static double nativeSumDouble(long handle, long cursorHandle, int propertyId);
+
+    private native static long nativeMax(long handle, long cursorHandle, int propertyId);
+
+    private native static double nativeMaxDouble(long handle, long cursorHandle, int propertyId);
+
+    private native static long nativeMin(long handle, long cursorHandle, int propertyId);
+
+    private native static double nativeMinDouble(long handle, long cursorHandle, int propertyId);
+
+    private native static double nativeAvg(long handle, long cursorHandle, int propertyId);
+
+    private native static long nativeRemove(long handle, long cursorHandle);
 
     private final Box<T> box;
     private final long handle;
@@ -49,10 +68,54 @@ public class Query<T> {
         long cursorHandle = box.internalReaderHandle();
         return nativeFind(handle, cursorHandle, offset, limit);
     }
+    public long[] findKeysUnordered() {
+        long cursorHandle = box.internalReaderHandle();
+        return nativeFindKeysUnordered(handle, cursorHandle);
+    }
 
     public long count() {
         long cursorHandle = box.internalReaderHandle();
         return nativeCount(handle, cursorHandle);
+    }
+
+    public long sum(Property property) {
+        long cursorHandle = box.internalReaderHandle();
+        return nativeSum(handle, cursorHandle, property.getId());
+    }
+
+    public double sumDouble(Property property) {
+        long cursorHandle = box.internalReaderHandle();
+        return nativeSumDouble(handle, cursorHandle, property.getId());
+    }
+
+    public long max(Property property) {
+        long cursorHandle = box.internalReaderHandle();
+        return nativeMax(handle, cursorHandle, property.getId());
+    }
+
+    public double maxDouble(Property property) {
+        long cursorHandle = box.internalReaderHandle();
+        return nativeMaxDouble(handle, cursorHandle, property.getId());
+    }
+
+    public long min(Property property) {
+        long cursorHandle = box.internalReaderHandle();
+        return nativeMin(handle, cursorHandle, property.getId());
+    }
+
+    public double minDouble(Property property) {
+        long cursorHandle = box.internalReaderHandle();
+        return nativeMinDouble(handle, cursorHandle, property.getId());
+    }
+
+    public double avg(Property property) {
+        long cursorHandle = box.internalReaderHandle();
+        return nativeAvg(handle, cursorHandle, property.getId());
+    }
+
+    public long remove() {
+        long cursorHandle = box.internalReaderHandle();
+        return nativeRemove(handle, cursorHandle);
     }
 
 }

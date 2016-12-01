@@ -114,6 +114,20 @@ public class QueryTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testAggregates() {
+        putTestEntitiesScalars();
+
+        Query<TestEntity> query = box.query().less(SimpleInt, 2002).build();
+        assertEquals(2000.5, query.avg(SimpleInt), 0.0001);
+        assertEquals(2000, query.min(SimpleInt), 0.0001);
+        assertEquals(20000, query.minDouble(SimpleFloat), 0.001);
+        assertEquals(2001, query.max(SimpleInt), 0.0001);
+        assertEquals(20000.1, query.maxDouble(SimpleFloat), 0.001);
+        assertEquals(4001, query.sum(SimpleInt), 0.0001);
+        assertEquals(40000.1, query.sumDouble(SimpleFloat), 0.001);
+    }
+
+    @Test
     public void testString() {
         List<TestEntity> entities = putTestEntitiesStrings();
         int count = entities.size();
@@ -184,6 +198,14 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals("apple", result.get(4).getSimpleString());
         assertEquals("BAR", result.get(5).getSimpleString());
         assertNull(result.get(6).getSimpleString());
+    }
+
+    @Test
+    public void testRemove() {
+        putTestEntitiesScalars();
+        Query<TestEntity> query = box.query().greater(SimpleInt, 2003).build();
+        assertEquals(6, query.remove());
+        assertEquals(4, box.count());
     }
 
     private List<TestEntity> putTestEntitiesScalars() {
