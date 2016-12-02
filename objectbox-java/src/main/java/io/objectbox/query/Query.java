@@ -5,6 +5,7 @@ import java.util.List;
 import io.objectbox.Box;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Beta;
+import io.objectbox.internal.CallWithHandle;
 
 /**
  * A repeatable query returning entities.
@@ -114,8 +115,12 @@ public class Query<T> {
     }
 
     public long remove() {
-        long cursorHandle = box.internalReaderHandle();
-        return nativeRemove(handle, cursorHandle);
+        return box.internalCallWithWriterHandle(new CallWithHandle<Long>() {
+            @Override
+            public Long call(long cursorHandle) {
+                return nativeRemove(handle, cursorHandle);
+            }
+        });
     }
 
 }

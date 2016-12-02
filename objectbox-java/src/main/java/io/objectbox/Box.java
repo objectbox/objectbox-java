@@ -8,6 +8,7 @@ import java.util.List;
 
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.internal.CallWithHandle;
 import io.objectbox.query.QueryBuilder;
 
 /**
@@ -357,6 +358,19 @@ public class Box<T> {
     @Internal
     public long internalReaderHandle() {
         return getReader().internalHandle();
+    }
+
+    @Internal
+    public <RESULT> RESULT internalCallWithWriterHandle(CallWithHandle<RESULT> task) {
+        Cursor<T> writer = getWriter();
+        RESULT result;
+        try {
+            result = task.call(writer.internalHandle());
+            commitWriter(writer);
+        } finally {
+            releaseWriter(writer);
+        }
+        return result;
     }
 
 }
