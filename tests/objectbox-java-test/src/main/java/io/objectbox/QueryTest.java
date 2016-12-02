@@ -208,6 +208,19 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals(4, box.count());
     }
 
+    @Test
+    public void testFindKeysUnordered() {
+        putTestEntitiesScalars();
+        assertEquals(10, box.query().build().findKeysUnordered().length);
+
+        Query<TestEntity> query = box.query().greater(SimpleInt, 2006).build();
+        long[] keys = query.findKeysUnordered();
+        assertEquals(3, keys.length);
+        assertEquals(8, keys[0]);
+        assertEquals(9, keys[1]);
+        assertEquals(10, keys[2]);
+    }
+
     private List<TestEntity> putTestEntitiesScalars() {
         List<TestEntity> entities = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
