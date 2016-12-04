@@ -69,42 +69,42 @@ public class QueryBuilder<T> {
 
     // ------------------------------ (Not)Null------------------------------
 
-    private static native void nativeNull(long handle, int propertyId);
+    private static native long nativeNull(long handle, int propertyId);
 
-    private static native void nativeNotNull(long handle, int propertyId);
+    private static native long nativeNotNull(long handle, int propertyId);
 
     // ------------------------------ Integers ------------------------------
 
-    private static native void nativeEqual(long handle, int propertyId, long value);
+    private static native long nativeEqual(long handle, int propertyId, long value);
 
-    private static native void nativeNotEqual(long handle, int propertyId, long value);
+    private static native long nativeNotEqual(long handle, int propertyId, long value);
 
-    private static native void nativeLess(long handle, int propertyId, long value);
+    private static native long nativeLess(long handle, int propertyId, long value);
 
-    private static native void nativeGreater(long handle, int propertyId, long value);
+    private static native long nativeGreater(long handle, int propertyId, long value);
 
-    private static native void nativeBetween(long handle, int propertyId, long value1, long value2);
+    private static native long nativeBetween(long handle, int propertyId, long value1, long value2);
 
-    private static native void nativeIn(long handle, int propertyId, int[] values);
+    private static native long nativeIn(long handle, int propertyId, int[] values);
 
-    private static native void nativeIn(long handle, int propertyId, long[] values);
+    private static native long nativeIn(long handle, int propertyId, long[] values);
 
     // ------------------------------ Strings ------------------------------
 
-    private static native void nativeEqual(long handle, int propertyId, String value, boolean caseSensitive);
+    private static native long nativeEqual(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private static native void nativeNotEqual(long handle, int propertyId, String value, boolean caseSensitive);
+    private static native long nativeNotEqual(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private static native void nativeContains(long handle, int propertyId, String value, boolean caseSensitive);
+    private static native long nativeContains(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private static native void nativeStartsWith(long handle, int propertyId, String value, boolean caseSensitive);
+    private static native long nativeStartsWith(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private static native void nativeEndsWith(long handle, int propertyId, String value, boolean caseSensitive);
+    private static native long nativeEndsWith(long handle, int propertyId, String value, boolean caseSensitive);
 
     // ------------------------------ FPs ------------------------------
-    private static native void nativeLess(long handle, int propertyId, double value);
+    private static native long nativeLess(long handle, int propertyId, double value);
 
-    private static native void nativeGreater(long handle, int propertyId, double value);
+    private static native long nativeGreater(long handle, int propertyId, double value);
 
 
     @Internal
