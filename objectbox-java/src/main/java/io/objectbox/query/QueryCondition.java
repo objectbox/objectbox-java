@@ -21,6 +21,7 @@ import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
+import io.objectbox.query.QueryBuilder.StringOrder;
 
 /**
  * Internal interface to model WHERE conditions used in queries. Use the {@link Property} objects in the DAO classes to
@@ -30,7 +31,11 @@ import io.objectbox.exception.DbException;
 @Internal
 public interface QueryCondition {
 
-    void applyTo(QueryBuilder queryBuilder);
+    void applyTo(QueryBuilder queryBuilder, StringOrder stringOrder);
+
+    void setParameterFor(Query query, Object parameter);
+
+    void setParameterFor(Query query, Object parameter1, Object parameter2);
 
     abstract class AbstractCondition implements QueryCondition {
 
@@ -80,14 +85,14 @@ public interface QueryCondition {
             this.operation = operation;
         }
 
-        public void applyTo(QueryBuilder queryBuilder) {
+        public void applyTo(QueryBuilder queryBuilder, StringOrder stringOrder) {
             if (operation == Operation.EQUALS) {
                 if (value instanceof Long) {
                     queryBuilder.equal(property, (Long) value);
                 } else if (value instanceof Integer) {
                     queryBuilder.equal(property, (Integer) value);
                 } else if (value instanceof String) {
-                    queryBuilder.equal(property, (String) value);
+                    queryBuilder.equal(property, (String) value, stringOrder);
                 }
             } else if (operation == Operation.NOT_EQUALS) {
                 if (value instanceof Long) {
@@ -95,13 +100,17 @@ public interface QueryCondition {
                 } else if (value instanceof Integer) {
                     queryBuilder.notEqual(property, (Integer) value);
                 } else if (value instanceof String) {
-                    queryBuilder.notEqual(property, (String) value);
+                    queryBuilder.notEqual(property, (String) value, stringOrder);
                 }
             } else if (operation == Operation.BETWEEN) {
                 if (values[0] instanceof Long && values[1] instanceof Long) {
                     queryBuilder.between(property, (Long) values[0], (Long) values[1]);
                 } else if (values[0] instanceof Integer && values[1] instanceof Integer) {
                     queryBuilder.between(property, (Integer) values[0], (Integer) values[1]);
+                } else if (values[0] instanceof Double && values[1] instanceof Double) {
+                    queryBuilder.between(property, (Double) values[0], (Double) values[1]);
+                } else if (values[0] instanceof Float && values[1] instanceof Float) {
+                    queryBuilder.between(property, (Float) values[0], (Float) values[1]);
                 }
             } else if (operation == Operation.IN) {
                 // just check the first value and assume all others are of the same type
@@ -145,13 +154,13 @@ public interface QueryCondition {
                 queryBuilder.notNull(property);
             } else if (operation == Operation.CONTAINS) {
                 // no need for greenDAO compat, so only String was allowed
-                queryBuilder.contains(property, (String) value);
+                queryBuilder.contains(property, (String) value, stringOrder);
             } else if (operation == Operation.STARTS_WITH) {
                 // no need for greenDAO compat, so only String was allowed
-                queryBuilder.startsWith(property, (String) value);
+                queryBuilder.startsWith(property, (String) value, stringOrder);
             } else if (operation == Operation.ENDS_WITH) {
                 // no need for greenDAO compat, so only String was allowed
-                queryBuilder.endsWith(property, (String) value);
+                queryBuilder.endsWith(property, (String) value, stringOrder);
             } else {
                 throw new UnsupportedOperationException("This operation is not known.");
             }
@@ -208,6 +217,52 @@ public interface QueryCondition {
             return values;
         }
 
+        @Override
+        public void setParameterFor(Query query, Object parameter) {
+            if (parameter == null) {
+                throw new IllegalArgumentException("The new parameter can not be null.");
+            }
+            if (operation == Operation.BETWEEN) {
+                throw new UnsupportedOperationException("The BETWEEN condition requires two parameters.");
+            }
+            if (operation == Operation.IN) {
+                throw new UnsupportedOperationException("The IN condition does not support changing parameters.");
+            }
+            if (parameter instanceof Long) {
+                query.setParameter(property, (Long) parameter);
+            } else if (parameter instanceof Integer) {
+                query.setParameter(property, (Integer) parameter);
+            } else if (parameter instanceof String) {
+                query.setParameter(property, (String) parameter);
+            } else if (parameter instanceof Double) {
+                query.setParameter(property, (Double) parameter);
+            } else if (parameter instanceof Float) {
+                query.setParameter(property, (Float) parameter);
+            } else {
+                throw new IllegalArgumentException("Only LONG, INTEGER, DOUBLE, FLOAT or STRING parameters are supported.");
+            }
+        }
+
+        @Override
+        public void setParameterFor(Query query, Object parameter1, Object parameter2) {
+            if (parameter1 == null || parameter2 == null) {
+                throw new IllegalArgumentException("The new parameters can not be null.");
+            }
+            if (operation != Operation.BETWEEN) {
+                throw new UnsupportedOperationException("Only the BETWEEN condition supports two parameters.");
+            }
+            if (parameter1 instanceof Long && parameter2 instanceof Long) {
+                query.setParameters(property, (Long) parameter1, (Long) parameter2);
+            } else if (parameter1 instanceof Integer && parameter2 instanceof Integer) {
+                query.setParameters(property, (Integer) parameter1, (Integer) parameter2);
+            }  else if (parameter1 instanceof Double && parameter2 instanceof Double) {
+                query.setParameters(property, (Double) parameter1, (Double) parameter2);
+            }  else if (parameter1 instanceof Float && parameter2 instanceof Float) {
+                query.setParameters(property, (Float) parameter1, (Float) parameter2);
+            } else {
+                throw new IllegalArgumentException("The BETWEEN condition only supports LONG, INTEGER, DOUBLE or FLOAT parameters.");
+            }
+        }
     }
 
 }

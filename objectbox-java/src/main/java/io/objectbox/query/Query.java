@@ -50,6 +50,11 @@ public class Query<T> {
     private native static void nativeSetParameters(long handle, int propertyId, String parameterAlias, long value1,
                                                    long value2);
 
+    private native static void nativeSetParameter(long handle, int propertyId, String parameterAlias, double value);
+
+    private native static void nativeSetParameters(long handle, int propertyId, String parameterAlias, double value1,
+                                                   double value2);
+
     private final Box<T> box;
     private final long handle;
 
@@ -131,11 +136,22 @@ public class Query<T> {
         nativeSetParameter(handle, property.getId(), null, value);
     }
 
+    public void setParameter(Property property, double value) {
+        nativeSetParameter(handle, property.getId(), null, value);
+    }
+
+    /**
+     * @throws NullPointerException if given date is null
+     */
     public void setParameter(Property property, Date value) {
         setParameter(property, value.getTime());
     }
 
     public void setParameters(Property property, long value1, long value2) {
+        nativeSetParameters(handle, property.getId(), null, value1, value2);
+    }
+
+    public void setParameters(Property property, double value1, double value2) {
         nativeSetParameters(handle, property.getId(), null, value1, value2);
     }
 

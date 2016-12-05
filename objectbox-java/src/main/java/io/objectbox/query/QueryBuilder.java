@@ -106,6 +106,7 @@ public class QueryBuilder<T> {
 
     private static native long nativeGreater(long handle, int propertyId, double value);
 
+    private static native long nativeBetween(long handle, int propertyId, double value1, double value2);
 
     @Internal
     public QueryBuilder(Box<T> box, long storeHandle, String entityName) {
@@ -285,7 +286,6 @@ public class QueryBuilder<T> {
         return this;
     }
 
-
     public QueryBuilder<T> less(Property property, double value) {
         nativeLess(handle, property.getId(), value);
         return this;
@@ -293,6 +293,11 @@ public class QueryBuilder<T> {
 
     public QueryBuilder<T> greater(Property property, double value) {
         nativeGreater(handle, property.getId(), value);
+        return this;
+    }
+
+    public QueryBuilder<T> between(Property property, double value1, double value2) {
+        nativeBetween(handle, property.getId(), value1, value2);
         return this;
     }
 
