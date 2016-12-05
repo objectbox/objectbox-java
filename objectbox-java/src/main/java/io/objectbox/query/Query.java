@@ -1,5 +1,6 @@
 package io.objectbox.query;
 
+import java.util.Date;
 import java.util.List;
 
 import io.objectbox.Box;
@@ -42,6 +43,13 @@ public class Query<T> {
 
     private native static long nativeRemove(long handle, long cursorHandle);
 
+    private native static void nativeSetParameter(long handle, int propertyId, String parameterAlias, String value);
+
+    private native static void nativeSetParameter(long handle, int propertyId, String parameterAlias, long value);
+
+    private native static void nativeSetParameters(long handle, int propertyId, String parameterAlias, long value1,
+                                                   long value2);
+
     private final Box<T> box;
     private final long handle;
 
@@ -69,6 +77,7 @@ public class Query<T> {
         long cursorHandle = box.internalReaderHandle();
         return nativeFind(handle, cursorHandle, offset, limit);
     }
+
     public long[] findKeysUnordered() {
         long cursorHandle = box.internalReaderHandle();
         return nativeFindKeysUnordered(handle, cursorHandle);
@@ -112,6 +121,22 @@ public class Query<T> {
     public double avg(Property property) {
         long cursorHandle = box.internalReaderHandle();
         return nativeAvg(handle, cursorHandle, property.getId());
+    }
+
+    public void setParameter(Property property, String value) {
+        nativeSetParameter(handle, property.getId(), null, value);
+    }
+
+    public void setParameter(Property property, long value) {
+        nativeSetParameter(handle, property.getId(), null, value);
+    }
+
+    public void setParameter(Property property, Date value) {
+        setParameter(property, value.getTime());
+    }
+
+    public void setParameters(Property property, long value1, long value2) {
+        nativeSetParameters(handle, property.getId(), null, value1, value2);
     }
 
     public long remove() {

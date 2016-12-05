@@ -221,6 +221,36 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals(10, keys[2]);
     }
 
+    @Test
+    public void testSetParameterScalar() {
+        putTestEntitiesScalars();
+        Query<TestEntity> query = box.query().equal(SimpleInt, 2007).build();
+        assertEquals(8, query.findUnique().getId());
+        query.setParameter(SimpleInt, 2004);
+        assertEquals(5, query.findUnique().getId());
+    }
+
+    @Test
+    public void testSetParameter2Scalars() {
+        putTestEntitiesScalars();
+        Query<TestEntity> query = box.query().between(SimpleInt, 2005, 2008).build();
+        assertEquals(4, query.count());
+        query.setParameters(SimpleInt, 2002, 2003);
+        List<TestEntity> entities = query.find();
+        assertEquals(2, entities.size());
+        assertEquals(3, entities.get(0).getId());
+        assertEquals(4, entities.get(1).getId());
+    }
+
+    @Test
+    public void testSetParameterString() {
+        putTestEntitiesStrings();
+        Query<TestEntity> query = box.query().equal(SimpleString, "banana").build();
+        assertEquals(1, query.findUnique().getId());
+        query.setParameter(SimpleString, "bar");
+        assertEquals(3, query.findUnique().getId());
+    }
+
     private List<TestEntity> putTestEntitiesScalars() {
         List<TestEntity> entities = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
