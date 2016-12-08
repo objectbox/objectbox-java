@@ -128,31 +128,37 @@ public class Query<T> {
         return nativeAvg(handle, cursorHandle, property.getId());
     }
 
-    public void setParameter(Property property, String value) {
+    public Query<T> setParameter(Property property, String value) {
         nativeSetParameter(handle, property.getId(), null, value);
+        return this;
     }
 
-    public void setParameter(Property property, long value) {
+    public Query<T> setParameter(Property property, long value) {
         nativeSetParameter(handle, property.getId(), null, value);
+        return this;
     }
 
-    public void setParameter(Property property, double value) {
+    public Query<T> setParameter(Property property, double value) {
         nativeSetParameter(handle, property.getId(), null, value);
+        return this;
     }
 
     /**
      * @throws NullPointerException if given date is null
      */
-    public void setParameter(Property property, Date value) {
+    public Query<T> setParameter(Property property, Date value) {
         setParameter(property, value.getTime());
+        return this;
     }
 
-    public void setParameters(Property property, long value1, long value2) {
+    public Query<T> setParameters(Property property, long value1, long value2) {
         nativeSetParameters(handle, property.getId(), null, value1, value2);
+        return this;
     }
 
-    public void setParameters(Property property, double value1, double value2) {
+    public Query<T> setParameters(Property property, double value1, double value2) {
         nativeSetParameters(handle, property.getId(), null, value1, value2);
+        return this;
     }
 
     public long remove() {

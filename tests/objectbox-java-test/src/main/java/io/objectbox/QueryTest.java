@@ -270,6 +270,8 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals(1, query.findUnique().getId());
         query.setParameter(SimpleString, "bar");
         assertEquals(3, query.findUnique().getId());
+
+        assertNull(query.setParameter(SimpleString, "not here!").findUnique());
     }
 
     private List<TestEntity> putTestEntitiesScalars() {
