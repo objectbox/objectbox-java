@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Defines *-to-N relation
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 /** TODO public */ @interface ToMany {
     /**

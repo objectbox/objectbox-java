@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  *
  * @see ToMany
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target({})
 /** TODO public */ @interface JoinProperty {
     /** Name of the property in the name entity, which matches {@link #referencedName()} */

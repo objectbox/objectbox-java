@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
  *
  * @see Generated
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target({ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.TYPE})
 public @interface Keep {
 }

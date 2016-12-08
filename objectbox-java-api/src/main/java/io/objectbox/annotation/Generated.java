@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  *
  * @see Keep
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target({ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD})
 public @interface Generated {
     int hash() default -1;

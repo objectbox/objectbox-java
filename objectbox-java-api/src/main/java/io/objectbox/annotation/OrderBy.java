@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * E.g.: @OrderBy("name, age DESC") List collection;
  * If used as marker (@OrderBy List collection), then collection is ordered by primary key
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 /** TODO public */ @interface OrderBy {
     /**

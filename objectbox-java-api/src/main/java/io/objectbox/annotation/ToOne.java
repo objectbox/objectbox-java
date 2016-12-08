@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Defines *-to-1 relation with base on existing property
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 /** TODO public */ @interface ToOne {
     /**

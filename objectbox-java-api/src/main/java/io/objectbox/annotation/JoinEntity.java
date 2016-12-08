@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Defines *-to-* relation with join table
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 /** TODO public */ @interface JoinEntity {
     /** Reference to join-entity class, which holds the source and the target properties */
