@@ -87,7 +87,7 @@ public class BoxStore implements Closeable {
                                                 Class<? extends PropertyConverter> converterClass, Class customType);
 
     public static String getVersion() {
-        return "0.9.0-20161013";
+        return "0.9.3-20161209";
     }
 
     private final File directory;
