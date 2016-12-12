@@ -21,12 +21,19 @@ public class Transaction implements Closeable {
 
     static native void nativeReset(long transaction);
 
+    static native void nativeRecycle(long transaction);
+
+    static native void nativeRenew(long transaction);
+
     static native long nativeCreateKeyValueCursor(long transaction);
 
     static native long nativeCreateCursor(long transaction, String entityName, Class entityClass);
 
     //static native long nativeGetStore(long transaction);
+
     static native boolean nativeIsActive(long transaction);
+
+    static native boolean nativeIsRecycled(long transaction);
 
     static native boolean nativeIsReadOnly(long transaction);
 
@@ -85,6 +92,19 @@ public class Transaction implements Closeable {
         nativeReset(transaction);
     }
 
+    /** For read transactions. */
+    public void recycle() {
+        checkOpen();
+        nativeRecycle(transaction);
+    }
+
+    /** Efficient for read transactions. */
+    public void renew() {
+        checkOpen();
+        initialCommitCount = store.commitCount;
+        nativeRenew(transaction);
+    }
+
     public KeyValueCursor createKeyValueCursor() {
         checkOpen();
         long cursor = nativeCreateKeyValueCursor(transaction);
@@ -114,6 +134,11 @@ public class Transaction implements Closeable {
     public boolean isActive() {
         checkOpen();
         return nativeIsActive(transaction);
+    }
+
+    public boolean isRecycled() {
+        checkOpen();
+        return nativeIsRecycled(transaction);
     }
 
     public boolean isClosed() {

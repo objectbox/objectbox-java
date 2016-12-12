@@ -86,8 +86,12 @@ public class BoxStore implements Closeable {
     static native void nativeRegisterCustomType(long store, int entityId, int propertyId, String propertyName,
                                                 Class<? extends PropertyConverter> converterClass, Class customType);
 
+    static native String nativeDiagnose(long store);
+
+    static native int nativeCleanStaleReadTransactions(long store);
+
     public static String getVersion() {
-        return "0.9.3-20161209";
+        return "0.9.4-20161212";
     }
 
     private final File directory;
@@ -355,6 +359,14 @@ public class BoxStore implements Closeable {
                 }
             }
         }.start();
+    }
+
+    public String diagnose() {
+        return nativeDiagnose(handle);
+    }
+
+    public int cleanStaleReadTransactions() {
+        return nativeCleanStaleReadTransactions(handle);
     }
 
     @Internal

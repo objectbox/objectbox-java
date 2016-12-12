@@ -37,7 +37,8 @@ public class BoxStoreBuilder {
     /** Ignored by BoxStore */
     private String name;
 
-    long maxSizeInKByte = 100 * 1024;
+    // 512 MB
+    long maxSizeInKByte = 512 * 1024;
 
     ModelUpdate modelUpdate;
 
