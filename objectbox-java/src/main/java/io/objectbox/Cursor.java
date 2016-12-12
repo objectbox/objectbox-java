@@ -46,6 +46,8 @@ public abstract class Cursor<T> implements Closeable {
 
     static native long nativeLookupKeyUsingIndex(long cursor, int propertyId, String value);
 
+    static native long nativeRenew(long cursor, long tx);
+
     protected static native long collect313311(long cursor, long keyIfComplete, int flags,
                                                int idStr1, String valueStr1, int idStr2, String valueStr2,
                                                int idStr3, String valueStr3,
@@ -208,6 +210,10 @@ public abstract class Cursor<T> implements Closeable {
 
     public boolean isClosed() {
         return closed;
+    }
+
+    public void renew(Transaction tx) {
+        nativeRenew(cursor, tx.internalHandle());
     }
 
     @Internal

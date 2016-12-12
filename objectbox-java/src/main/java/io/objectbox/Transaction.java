@@ -1,5 +1,6 @@
 package io.objectbox;
 
+import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 
 import java.io.Closeable;
@@ -156,6 +157,11 @@ public class Transaction implements Closeable {
      */
     public boolean isObsolete() {
         return initialCommitCount != store.commitCount;
+    }
+
+    @Internal
+    long internalHandle() {
+        return transaction;
     }
 
 }
