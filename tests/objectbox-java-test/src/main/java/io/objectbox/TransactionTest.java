@@ -287,7 +287,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testRunInReadTx_writeTxFails() {
+    public void testRunInReadTx_recursiveWriteTxFails() {
         store.runInReadTx(new Runnable() {
             @Override
             public void run() {
@@ -301,6 +301,16 @@ public class TransactionTest extends AbstractObjectBoxTest {
                 } catch (IllegalStateException e) {
                     // OK
                 }
+            }
+        });
+    }
+
+    @Test(expected = DbException.class)
+    public void testRunInReadTx_putFails() {
+        store.runInReadTx(new Runnable() {
+            @Override
+            public void run() {
+                getTestEntityBox().put(new TestEntity());
             }
         });
     }
