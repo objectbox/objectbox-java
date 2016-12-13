@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -207,7 +208,7 @@ public class CursorTest extends AbstractObjectBoxTest {
             putEntity(cursor, text, 0);
         }
         cursor.close();
-        transaction.commit();
+        transaction.commitAndClose();
     }
 
     @Test
@@ -229,7 +230,6 @@ public class CursorTest extends AbstractObjectBoxTest {
         cursor.close();
         transaction.abort();
     }
-
 
     @Test
     public void testLookupKeyUsingIndex_samePrefix() {
@@ -291,6 +291,22 @@ public class CursorTest extends AbstractObjectBoxTest {
         assertEquals(3, cursor.getPropertyId("simpleByte"));
         assertEquals(4, cursor.getPropertyId("simpleShort"));
         transaction.abort();
+    }
+
+    @Test
+    public void testRenew() throws IOException {
+        insertTestEntities("orange");
+
+        Transaction transaction = store.beginReadTx();
+        Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
+        transaction.close();
+        transaction = store.beginReadTx();
+        cursor.renew(transaction);
+        assertSame(transaction, cursor.getTx());
+        assertEquals("orange", cursor.get(1).getSimpleString());
+
+        cursor.close();
+        transaction.close();
     }
 
     private TestEntity putEntity(Cursor<TestEntity> cursor, String text, int number) {

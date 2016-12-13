@@ -86,7 +86,7 @@ public abstract class Cursor<T> implements Closeable {
 
     static native int nativePropertyId(long cursor, String propertyValue);
 
-    protected final Transaction tx;
+    protected Transaction tx;
     protected final long cursor;
     protected final Properties properties;
 
@@ -214,6 +214,7 @@ public abstract class Cursor<T> implements Closeable {
 
     public void renew(Transaction tx) {
         nativeRenew(cursor, tx.internalHandle());
+        this.tx = tx;
     }
 
     @Internal
