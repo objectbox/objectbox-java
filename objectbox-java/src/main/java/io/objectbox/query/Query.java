@@ -64,68 +64,120 @@ public class Query<T> {
     }
 
     public T findFirst() {
-        long cursorHandle = box.internalReaderHandle();
-        return (T) nativeFindFirst(handle, cursorHandle);
+        return box.internalCallWithReaderHandle(new CallWithHandle<T>() {
+            @Override
+            public T call(long cursorHandle) {
+                return (T) nativeFindFirst(handle, cursorHandle);
+            }
+        });
     }
 
     public T findUnique() {
-        long cursorHandle = box.internalReaderHandle();
-        return (T) nativeFindUnique(handle, cursorHandle);
+        return box.internalCallWithReaderHandle(new CallWithHandle<T>() {
+            @Override
+            public T call(long cursorHandle) {
+                return (T) nativeFindUnique(handle, cursorHandle);
+            }
+        });
     }
 
     public List<T> find() {
-        long cursorHandle = box.internalReaderHandle();
-        return nativeFind(handle, cursorHandle, 0, 0);
+        return box.internalCallWithReaderHandle(new CallWithHandle<List<T>>() {
+            @Override
+            public List<T> call(long cursorHandle) {
+                return nativeFind(handle, cursorHandle, 0, 0);
+            }
+        });
     }
 
-    public List<T> find(long offset, long limit) {
-        long cursorHandle = box.internalReaderHandle();
-        return nativeFind(handle, cursorHandle, offset, limit);
+    public List<T> find(final long offset, final long limit) {
+        return box.internalCallWithReaderHandle(new CallWithHandle<List<T>>() {
+            @Override
+            public List<T> call(long cursorHandle) {
+                return nativeFind(handle, cursorHandle, offset, limit);
+            }
+        });
     }
 
     public long[] findKeysUnordered() {
-        long cursorHandle = box.internalReaderHandle();
-        return nativeFindKeysUnordered(handle, cursorHandle);
+        return box.internalCallWithReaderHandle(new CallWithHandle<long[]>() {
+            @Override
+            public long[] call(long cursorHandle) {
+                return nativeFindKeysUnordered(handle, cursorHandle);
+            }
+        });
     }
 
     public long count() {
-        long cursorHandle = box.internalReaderHandle();
-        return nativeCount(handle, cursorHandle);
+        return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
+            @Override
+            public Long call(long cursorHandle) {
+                return nativeCount(handle, cursorHandle);
+            }
+        });
     }
 
-    public long sum(Property property) {
-        long cursorHandle = box.internalReaderHandle();
-        return nativeSum(handle, cursorHandle, property.getId());
+    public long sum(final Property property) {
+        return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
+            @Override
+            public Long call(long cursorHandle) {
+                return nativeSum(handle, cursorHandle, property.getId());
+            }
+        });
     }
 
-    public double sumDouble(Property property) {
-        long cursorHandle = box.internalReaderHandle();
-        return nativeSumDouble(handle, cursorHandle, property.getId());
+    public double sumDouble(final Property property) {
+        return box.internalCallWithReaderHandle(new CallWithHandle<Double>() {
+            @Override
+            public Double call(long cursorHandle) {
+                return nativeSumDouble(handle, cursorHandle, property.getId());
+            }
+        });
     }
 
-    public long max(Property property) {
-        long cursorHandle = box.internalReaderHandle();
-        return nativeMax(handle, cursorHandle, property.getId());
+    public long max(final Property property) {
+        return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
+            @Override
+            public Long call(long cursorHandle) {
+                return nativeMax(handle, cursorHandle, property.getId());
+            }
+        });
     }
 
-    public double maxDouble(Property property) {
-        long cursorHandle = box.internalReaderHandle();
-        return nativeMaxDouble(handle, cursorHandle, property.getId());
+    public double maxDouble(final Property property) {
+        return box.internalCallWithReaderHandle(new CallWithHandle<Double>() {
+            @Override
+            public Double call(long cursorHandle) {
+                return nativeMaxDouble(handle, cursorHandle, property.getId());
+            }
+        });
     }
 
-    public long min(Property property) {
-        long cursorHandle = box.internalReaderHandle();
-        return nativeMin(handle, cursorHandle, property.getId());
+    public long min(final Property property) {
+        return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
+            @Override
+            public Long call(long cursorHandle) {
+                return nativeMin(handle, cursorHandle, property.getId());
+            }
+        });
     }
 
-    public double minDouble(Property property) {
-        long cursorHandle = box.internalReaderHandle();
-        return nativeMinDouble(handle, cursorHandle, property.getId());
+    public double minDouble(final Property property) {
+        return box.internalCallWithReaderHandle(new CallWithHandle<Double>() {
+            @Override
+            public Double call(long cursorHandle) {
+                return nativeMinDouble(handle, cursorHandle, property.getId());
+            }
+        });
     }
 
-    public double avg(Property property) {
-        long cursorHandle = box.internalReaderHandle();
-        return nativeAvg(handle, cursorHandle, property.getId());
+    public double avg(final Property property) {
+        return box.internalCallWithReaderHandle(new CallWithHandle<Double>() {
+            @Override
+            public Double call(long cursorHandle) {
+                return nativeAvg(handle, cursorHandle, property.getId());
+            }
+        });
     }
 
     public Query<T> setParameter(Property property, String value) {

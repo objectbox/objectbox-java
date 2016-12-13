@@ -4,59 +4,56 @@ import org.junit.Test;
 
 public class TransactionPerfTest extends AbstractObjectBoxTest {
 
+    public static final int COUNT = 100000;
+
     @Test
-    public void testBoxReadTxPerformance() {
+    public void testBoxManagedReaderPerformance() {
         Box<TestEntity> box = getTestEntityBox();
         TestEntity entity = new TestEntity();
         entity.setSimpleString("foobar");
         long id = box.put(entity);
         long start = System.currentTimeMillis();
-        int count = 100000;
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < COUNT; i++) {
             box.get(id);
         }
         long time = System.currentTimeMillis() - start;
-        log("Read with box: " + valuesPerSec(count, time));
+        log("Read with box: " + valuesPerSec(COUNT, time));
     }
 
     @Test
-    public void testCloseReadTxPerformance() {
-        Box<TestEntity> box = getTestEntityBox();
+    public void testOneReadTxPerGetPerformance() {
+        final Box<TestEntity> box = getTestEntityBox();
         TestEntity entity = new TestEntity();
         entity.setSimpleString("foobar");
-        long id = box.put(entity);
+        final long id = box.put(entity);
         long start = System.currentTimeMillis();
-        int count = 100000;
-        try {
-            for (int i = 0; i < count; i++) {
-                Transaction tx = store.sharedReadTx();
-                box.get(id);
-                // Use with release build to prevent additional log here
-                tx.reset();
-            }
-        } finally {
-            log(store.diagnose());
+        for (int i = 0; i < COUNT; i++) {
+            store.runInReadTx(new Runnable() {
+                @Override
+                public void run() {
+                    box.get(id);
+                }
+            });
         }
         long time = System.currentTimeMillis() - start;
-        log("Read with box and reset TX: " + valuesPerSec(count, time));
+        log("Read with one TX per get: " + valuesPerSec(COUNT, time));
     }
 
     @Test
-    public void testExplicitTxPerformance() {
+    public void testInsideSingleReadTxPerformance() {
+        TestEntity entity = new TestEntity();
+        entity.setSimpleString("foobar");
         final Box<TestEntity> box = getTestEntityBox();
-        store.runInTx(new Runnable() {
+        final long id = box.put(entity);
+        store.runInReadTx(new Runnable() {
             @Override
             public void run() {
-                TestEntity entity = new TestEntity();
-                entity.setSimpleString("foobar");
-                long id = box.put(entity);
                 long start = System.currentTimeMillis();
-                int count = 100000;
-                for (int i = 0; i < count; i++) {
+                for (int i = 0; i < COUNT; i++) {
                     box.get(id);
                 }
                 long time = System.currentTimeMillis() - start;
-                log("Read with box inside write TX: " + valuesPerSec(count, time));
+                log("Read with box inside read TX: " + valuesPerSec(COUNT, time));
             }
         });
     }

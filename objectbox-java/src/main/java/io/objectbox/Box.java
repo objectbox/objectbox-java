@@ -22,7 +22,7 @@ public class Box<T> {
     private final Class<T> entityClass;
 
     /** Set when running inside TX */
-    final ThreadLocal<Cursor<T>> txCursor = new ThreadLocal<>();
+    final ThreadLocal<Cursor<T>> activeTxCursor = new ThreadLocal<>();
     private final ThreadLocal<Cursor<T>> threadLocalReader = new ThreadLocal<>();
     private final List<WeakReference<Cursor<T>>> readers = new ArrayList<>();
 
@@ -34,16 +34,20 @@ public class Box<T> {
     }
 
     private Cursor<T> getReader() {
-        Cursor<T> cursor = getTxCursor();
+        Cursor<T> cursor = getActiveTxCursor();
         if (cursor != null) {
             return cursor;
         } else {
             cursor = threadLocalReader.get();
-            if (cursor == null || cursor.isObsolete()) {
-                if (cursor != null) {
-                    cursor.close();
+            if (cursor != null) {
+                Transaction tx = cursor.tx;
+                if (tx.isClosed() || !tx.isRecycled()) {
+                    throw new IllegalStateException("Illegal reader TX state");
                 }
-                cursor = store.sharedReadTx().createCursor(entityClass);
+                tx.renew();
+                cursor.renew(tx);
+            } else {
+                cursor = store.beginReadTx().createCursor(entityClass);
                 synchronized (readers) {
                     readers.add(new WeakReference<>(cursor));
                 }
@@ -53,16 +57,16 @@ public class Box<T> {
         return cursor;
     }
 
-    private Cursor<T> getTxCursor() {
+    private Cursor<T> getActiveTxCursor() {
         Transaction activeTx = store.activeTx.get();
         if (activeTx != null) {
             if (activeTx.isClosed()) {
                 throw new IllegalStateException("Active TX is closed");
             }
-            Cursor cursor = txCursor.get();
+            Cursor cursor = activeTxCursor.get();
             if (cursor == null || cursor.getTx().isClosed()) {
                 cursor = activeTx.createCursor(entityClass);
-                txCursor.set(cursor);
+                activeTxCursor.set(cursor);
             }
             return cursor;
         }
@@ -70,7 +74,7 @@ public class Box<T> {
     }
 
     private Cursor<T> getWriter() {
-        Cursor cursor = getTxCursor();
+        Cursor cursor = getActiveTxCursor();
         if (cursor != null) {
             return cursor;
         } else {
@@ -86,7 +90,7 @@ public class Box<T> {
 
     private void commitWriter(Cursor<T> cursor) {
         // NOP if TX is ongoing
-        if (txCursor.get() == null) {
+        if (activeTxCursor.get() == null) {
             cursor.close();
             cursor.getTx().commitAndClose();
         }
@@ -94,13 +98,24 @@ public class Box<T> {
 
     private void releaseWriter(Cursor<T> cursor) {
         // NOP if TX is ongoing
-        if (txCursor.get() == null) {
+        if (activeTxCursor.get() == null) {
             Transaction tx = cursor.getTx();
             if (!tx.isClosed()) {
                 cursor.close();
                 tx.abort();
                 tx.close();
             }
+        }
+    }
+
+    private void releaseReader(Cursor<T> cursor) {
+        // NOP if TX is ongoing
+        if (activeTxCursor.get() == null) {
+            Transaction tx = cursor.getTx();
+            if (tx.isClosed() || tx.isRecycled() || !tx.isReadOnly()) {
+                throw new IllegalStateException("Illegal reader TX state");
+            }
+            tx.recycle();
         }
     }
 
@@ -117,72 +132,127 @@ public class Box<T> {
             cursorTx.close();
         }
 
-        cursor = txCursor.get();
+        cursor = activeTxCursor.get();
         if (cursor != null) {
-            txCursor.remove();
+            activeTxCursor.remove();
             cursor.close();
         }
     }
 
     public int getPropertyId(String propertyName) {
-        return getReader().getPropertyId(propertyName);
+        Cursor<T> reader = getReader();
+        try {
+            return reader.getPropertyId(propertyName);
+        } finally {
+            releaseReader(reader);
+        }
     }
 
     public T get(long key) {
-        return getReader().get(key);
+        Cursor<T> reader = getReader();
+        try {
+            return reader.get(key);
+        } finally {
+            releaseReader(reader);
+        }
+
     }
 
     public long count() {
-        return getReader().count();
+        Cursor<T> reader = getReader();
+        try {
+            return reader.count();
+        } finally {
+            releaseReader(reader);
+        }
     }
 
     public List<T> find(String propertyName, String value) {
-        return getReader().find(propertyName, value);
+        Cursor<T> reader = getReader();
+        try {
+            return reader.find(propertyName, value);
+        } finally {
+            releaseReader(reader);
+        }
     }
 
     public List<T> find(String propertyName, long value) {
-        return getReader().find(propertyName, value);
+        Cursor<T> reader = getReader();
+        try {
+            return reader.find(propertyName, value);
+        } finally {
+            releaseReader(reader);
+        }
     }
 
     public List<T> find(int propertyId, long value) {
-        return getReader().find(propertyId, value);
+        Cursor<T> reader = getReader();
+        try {
+            return reader.find(propertyId, value);
+        } finally {
+            releaseReader(reader);
+        }
     }
 
     public List<T> find(int propertyId, String value) {
-        return getReader().find(propertyId, value);
+        Cursor<T> reader = getReader();
+        try {
+            return reader.find(propertyId, value);
+        } finally {
+            releaseReader(reader);
+        }
     }
 
     public List<T> find(Property property, String value) {
-        return getReader().find(property.dbName, value);
+        Cursor<T> reader = getReader();
+        try {
+            return reader.find(property.dbName, value);
+        } finally {
+            releaseReader(reader);
+        }
     }
 
     public List<T> find(Property property, long value) {
-        return getReader().find(property.dbName, value);
+        Cursor<T> reader = getReader();
+        try {
+            return reader.find(property.dbName, value);
+        } finally {
+            releaseReader(reader);
+        }
     }
 
     public List<T> getAll() {
         Cursor<T> cursor = getReader();
-        T first = cursor.first();
-        if (first == null) {
-            return Collections.emptyList();
-        } else {
-            ArrayList<T> list = new ArrayList<>();
-            list.add(first);
-            while (true) {
-                T next = cursor.next();
-                if (next != null) {
-                    list.add(next);
-                } else {
-                    break;
+        try {
+            T first = cursor.first();
+            if (first == null) {
+                return Collections.emptyList();
+            } else {
+                ArrayList<T> list = new ArrayList<>();
+                list.add(first);
+                while (true) {
+                    T next = cursor.next();
+                    if (next != null) {
+                        list.add(next);
+                    } else {
+                        break;
+                    }
                 }
+                return list;
             }
-            return list;
+        } finally {
+            releaseReader(cursor);
         }
     }
 
     /** Does not work yet, also probably won't be faster than {@link Box#getAll()}. */
     public List<T> getAll2() {
-        return getReader().getAll();
+        Cursor<T> reader = getReader();
+        try {
+            return reader.getAll();
+        } finally {
+            releaseReader(reader);
+        }
     }
 
     /**
@@ -350,14 +420,25 @@ public class Box<T> {
     // Returned Property object will have an ID set
     public synchronized Properties getProperties() {
         if (properties == null) {
-            properties = getReader().getProperties();
+            Cursor<T> reader = getReader();
+            try {
+                properties = reader.getProperties();
+            } finally {
+                releaseReader(reader);
+            }
+
         }
         return properties;
     }
 
     @Internal
-    public long internalReaderHandle() {
-        return getReader().internalHandle();
+    public <RESULT> RESULT internalCallWithReaderHandle(CallWithHandle<RESULT> task) {
+        Cursor<T> reader = getReader();
+        try {
+            return task.call(reader.internalHandle());
+        } finally {
+            releaseReader(reader);
+        }
     }
 
     @Internal

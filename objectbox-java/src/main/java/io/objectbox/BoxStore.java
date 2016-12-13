@@ -101,8 +101,6 @@ public class BoxStore implements Closeable {
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
 
-    private final ThreadLocal<Transaction> sharedReadTx = new ThreadLocal<>();
-
     /** Set when running inside TX */
     final ThreadLocal<Transaction> activeTx = new ThreadLocal<>();
 
@@ -180,24 +178,7 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * Returns a per-thread managed transaction.
-     */
-    public Transaction sharedReadTx() {
-        Transaction tx = sharedReadTx.get();
-        if (tx != null && !tx.isClosed()) {
-            if (tx.isObsolete()) {
-                tx.reset();
-            }
-        } else {
-            tx = beginReadTx();
-            sharedReadTx.set(tx);
-        }
-        return tx;
-    }
-
-    /**
-     * Begins a transaction for read access only. Note: there may be only one read transaction per thread, so you
-     * should usually prefer {@link #sharedReadTx()} instead.
+     * Begins a transaction for read access only. Note: there may be only one read transaction per thread.
      */
     public Transaction beginReadTx() {
         checkOpen();
