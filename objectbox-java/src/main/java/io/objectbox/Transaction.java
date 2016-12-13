@@ -10,6 +10,7 @@ public class Transaction implements Closeable {
 
     private final long transaction;
     private final BoxStore store;
+    private final boolean readOnly;
 
     private int initialCommitCount;
     private boolean closed;
@@ -42,6 +43,7 @@ public class Transaction implements Closeable {
         this.store = store;
         this.transaction = transaction;
         this.initialCommitCount = initialCommitCount;
+        readOnly = nativeIsReadOnly(transaction);
     }
 
     @Override
@@ -147,8 +149,7 @@ public class Transaction implements Closeable {
     }
 
     public boolean isReadOnly() {
-        checkOpen();
-        return nativeIsReadOnly(transaction);
+        return readOnly;
     }
 
     /**

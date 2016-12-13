@@ -310,6 +310,26 @@ public class BoxStore implements Closeable {
                 tx.close();
             }
         } else {
+            if (tx.isReadOnly()) {
+                throw new IllegalStateException("Cannot start a transaction while a read only transaction is active");
+            }
+            runnable.run();
+        }
+    }
+
+    public void runInReadTx(Runnable runnable) {
+        Transaction tx = this.activeTx.get();
+        // Only if not already set, allowing to call it recursively with first (outer) TX
+        if (tx == null) {
+            tx = beginReadTx();
+            activeTx.set(tx);
+            try {
+                runnable.run();
+            } finally {
+                activeTx.remove();
+                tx.close();
+            }
+        } else {
             runnable.run();
         }
     }
@@ -329,6 +349,9 @@ public class BoxStore implements Closeable {
                 tx.close();
             }
         } else {
+            if (tx.isReadOnly()) {
+                throw new IllegalStateException("Cannot start a transaction while a read only transaction is active");
+            }
             return callable.call();
         }
     }

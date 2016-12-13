@@ -266,6 +266,46 @@ public class TransactionTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testRunInReadTx() {
+        final Box<TestEntity> box = getTestEntityBox();
+        final long[] counts = {0, 0};
+        box.put(new TestEntity());
+        store.runInReadTx(new Runnable() {
+            @Override
+            public void run() {
+                counts[0] = box.count();
+                store.runInReadTx(new Runnable() {
+                    @Override
+                    public void run() {
+                        counts[1] = box.count();
+                    }
+                });
+            }
+        });
+        assertEquals(1, counts[0]);
+        assertEquals(1, counts[1]);
+    }
+
+    @Test
+    public void testRunInReadTx_writeTxFails() {
+        store.runInReadTx(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    store.runInTx(new Runnable() {
+                        @Override
+                        public void run() {
+                        }
+                    });
+                    fail("Should have thrown");
+                } catch (IllegalStateException e) {
+                    // OK
+                }
+            }
+        });
+    }
+
+    @Test
     public void testCallInTxAsync_multiThreaded() throws InterruptedException {
         final Box<TestEntity> box = getTestEntityBox();
         final Thread mainTestThread = Thread.currentThread();
