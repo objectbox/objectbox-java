@@ -16,6 +16,7 @@ import io.objectbox.BoxStoreBuilder.EntityClasses;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
+import io.objectbox.internal.CrashReportLogger;
 
 @Beta
 public class BoxStore implements Closeable {
@@ -64,6 +65,8 @@ public class BoxStore implements Closeable {
      * Diagnostics: If this method crashes on a device, please send us the logcat output.
      */
     public static native void testUnalignedMemoryAccess();
+
+    public static native void setCrashReportLogger(CrashReportLogger crashReportLogger);
 
     static native long nativeCreate(String directory, long maxDbSizeInKByte, byte[] model);
 
