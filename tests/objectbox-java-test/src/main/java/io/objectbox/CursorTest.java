@@ -41,7 +41,7 @@ public class CursorTest extends AbstractObjectBoxTest {
         transaction.abort();
     }
 
-    @Test(expected = DbException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testPutEntityWithInvalidId() {
         TestEntity entity = new TestEntity();
         entity.setId(777);

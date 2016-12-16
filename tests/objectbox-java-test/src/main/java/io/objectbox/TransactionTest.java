@@ -137,21 +137,21 @@ public class TransactionTest extends AbstractObjectBoxTest {
         transaction.abort();
     }
 
-    @Test(expected = DbException.class)
+    @Test(expected = IllegalStateException.class)
     public void testCreateCursorAfterAbortException() {
         Transaction tx = store.beginReadTx();
         tx.abort();
         tx.createKeyValueCursor();
     }
 
-    @Test(expected = DbException.class)
+    @Test(expected = IllegalStateException.class)
     public void testCommitAfterAbortException() {
         Transaction tx = store.beginTx();
         tx.abort();
         tx.commit();
     }
 
-    @Test(expected = DbException.class)
+    @Test(expected = IllegalStateException.class)
     public void testCommitReadTxException() {
         Transaction tx = store.beginReadTx();
         tx.commit();
