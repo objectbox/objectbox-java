@@ -200,12 +200,14 @@ public class TransactionTest extends AbstractObjectBoxTest {
                     threadsOK.incrementAndGet();
                 }
             };
-            threads[i].start();
+        }
+        for (Thread thread : threads) {
+            thread.start();
         }
         for (Thread thread : threads) {
             thread.join();
         }
-        System.out.println("MDB_READERS_FULL: " + readersFull);
+        System.out.println("OK vs. MDB_READERS_FULL: " + threadsOK + " vs. " + readersFull);
 
         assertEquals(count, threadsOK.get());
     }
