@@ -33,47 +33,49 @@ public class BoxStore implements Closeable {
     static {
         String libname = "objectbox";
         String osName = System.getProperty("os.name");
-        String osArch = System.getProperty("os.arch");
         String sunArch = System.getProperty("sun.arch.data.model");
         if (osName.contains("Windows")) {
             libname += "-windows" + ("32".equals(sunArch) ? "-x86" : "-x64");
-            String path = "/native/" + libname + ".dll";
-            URL resource = BoxStore.class.getResource(path);
-            if (resource == null) {
-                System.err.println("Not available in classpath: " + resource);
-            } else {
-                checkUnpackLib(resource, new File(libname + ".dll"));
-            }
+            checkUnpackLib(libname + ".dll");
+        } else if (osName.contains("Linux")) {
+            libname += "-linux" + ("32".equals(sunArch) ? "-x86" : "-x64");
+            checkUnpackLib("lib" + libname + ".so");
         }
         System.loadLibrary(libname);
     }
 
-    private static void checkUnpackLib(URL resource, File file) {
-        URLConnection urlConnection;
-        try {
-            urlConnection = resource.openConnection();
-            int length = urlConnection.getContentLength();
-            long lastModified = urlConnection.getLastModified();
-            boolean unpack = !file.exists() || file.length() != length || file.lastModified() != lastModified;
-            if (unpack) {
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                try {
-                    OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+    private static void checkUnpackLib(String filename) {
+        String path = "/native/" + filename;
+        URL resource = BoxStore.class.getResource(path);
+        if (resource == null) {
+            System.err.println("Not available in classpath: " + path);
+        } else {
+            File file = new File(filename);
+            try {
+                URLConnection urlConnection = resource.openConnection();
+                int length = urlConnection.getContentLength();
+                long lastModified = urlConnection.getLastModified();
+                if (!file.exists() || file.length() != length ||
+                        file.lastModified() != lastModified) {
+                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                     try {
-                        IoUtils.copyAllBytes(in, out);
+                        OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+                        try {
+                            IoUtils.copyAllBytes(in, out);
+                        } finally {
+                            IoUtils.safeClose(out);
+                        }
                     } finally {
-                        IoUtils.safeClose(out);
+                        IoUtils.safeClose(in);
                     }
-                } finally {
-                    IoUtils.safeClose(in);
+                    if (lastModified > 0) {
+                        file.setLastModified(lastModified);
+                    }
                 }
-                if (lastModified > 0) {
-                    file.setLastModified(lastModified);
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
         }
     }
 
