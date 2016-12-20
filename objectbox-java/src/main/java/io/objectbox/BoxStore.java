@@ -1,7 +1,17 @@
 package io.objectbox;
 
+import org.greenrobot.essentials.io.IoUtils;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,7 +31,50 @@ import io.objectbox.internal.CrashReportLogger;
 @Beta
 public class BoxStore implements Closeable {
     static {
-        System.loadLibrary("objectbox");
+        String libname = "objectbox";
+        String osName = System.getProperty("os.name");
+        String osArch = System.getProperty("os.arch");
+        String sunArch = System.getProperty("sun.arch.data.model");
+        if (osName.contains("Windows")) {
+            libname += "-windows" + ("32".equals(sunArch) ? "-x86" : "-x64");
+            String path = "/native/" + libname + ".dll";
+            URL resource = BoxStore.class.getResource(path);
+            if (resource == null) {
+                System.err.println("Not available in classpath: " + resource);
+            } else {
+                checkUnpackLib(resource, new File(libname + ".dll"));
+            }
+        }
+        System.loadLibrary(libname);
+    }
+
+    private static void checkUnpackLib(URL resource, File file) {
+        URLConnection urlConnection;
+        try {
+            urlConnection = resource.openConnection();
+            int length = urlConnection.getContentLength();
+            long lastModified = urlConnection.getLastModified();
+            boolean unpack = !file.exists() || file.length() != length || file.lastModified() != lastModified;
+            if (unpack) {
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                try {
+                    OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+                    try {
+                        IoUtils.copyAllBytes(in, out);
+                    } finally {
+                        IoUtils.safeClose(out);
+                    }
+                } finally {
+                    IoUtils.safeClose(in);
+                }
+                if (lastModified > 0) {
+                    file.setLastModified(lastModified);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
     }
 
     private static BoxStore defaultStore;
