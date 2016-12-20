@@ -10,22 +10,23 @@ import com.google.flatbuffers.*;
 @SuppressWarnings("unused")
 public final class ModelProperty extends Table {
   public static ModelProperty getRootAsModelProperty(ByteBuffer _bb) { return getRootAsModelProperty(_bb, new ModelProperty()); }
-  public static ModelProperty getRootAsModelProperty(ByteBuffer _bb, ModelProperty obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__init(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
-  public ModelProperty __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+  public static ModelProperty getRootAsModelProperty(ByteBuffer _bb, ModelProperty obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
+  public ModelProperty __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   public String name() { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
   /**
    * Pseudo unique ID to match and verify external managed IDs
    */
-  public long refId() { int o = __offset(6); return o != 0 ? bb.getLong(o + bb_pos) : 0; }
-  public long id() { int o = __offset(8); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public long refId() { int o = __offset(6); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
+  public long id() { int o = __offset(8); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
   public int type() { int o = __offset(10); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
   /**
    * bit flags: e.g. indexed, not-nullable
    */
-  public long flags() { int o = __offset(12); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
-  public long indexId() { int o = __offset(14); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public long flags() { int o = __offset(12); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  public long indexId() { int o = __offset(14); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
 
   public static int createModelProperty(FlatBufferBuilder builder,
       int nameOffset,
@@ -46,11 +47,11 @@ public final class ModelProperty extends Table {
 
   public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(6); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(0, nameOffset, 0); }
-  public static void addRefId(FlatBufferBuilder builder, long refId) { builder.addLong(1, refId, 0); }
-  public static void addId(FlatBufferBuilder builder, long id) { builder.addInt(2, (int)id, 0); }
-  public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(3, (short)type, 0); }
-  public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(4, (int)flags, 0); }
-  public static void addIndexId(FlatBufferBuilder builder, long indexId) { builder.addInt(5, (int)indexId, 0); }
+  public static void addRefId(FlatBufferBuilder builder, long refId) { builder.addLong(1, refId, 0L); }
+  public static void addId(FlatBufferBuilder builder, long id) { builder.addInt(2, (int)id, (int)0L); }
+  public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(3, (short)type, (short)0); }
+  public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(4, (int)flags, (int)0L); }
+  public static void addIndexId(FlatBufferBuilder builder, long indexId) { builder.addInt(5, (int)indexId, (int)0L); }
   public static int endModelProperty(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

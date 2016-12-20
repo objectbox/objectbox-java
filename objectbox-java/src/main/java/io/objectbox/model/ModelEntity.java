@@ -10,23 +10,24 @@ import com.google.flatbuffers.*;
 @SuppressWarnings("unused")
 public final class ModelEntity extends Table {
   public static ModelEntity getRootAsModelEntity(ByteBuffer _bb) { return getRootAsModelEntity(_bb, new ModelEntity()); }
-  public static ModelEntity getRootAsModelEntity(ByteBuffer _bb, ModelEntity obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__init(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
-  public ModelEntity __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+  public static ModelEntity getRootAsModelEntity(ByteBuffer _bb, ModelEntity obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
+  public ModelEntity __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   public String name() { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
   /**
    * Pseudo unique ID to match and verify external managed IDs
    */
-  public long refId() { int o = __offset(6); return o != 0 ? bb.getLong(o + bb_pos) : 0; }
-  public long id() { int o = __offset(8); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public long refId() { int o = __offset(6); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
+  public long id() { int o = __offset(8); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
   public ModelProperty properties(int j) { return properties(new ModelProperty(), j); }
-  public ModelProperty properties(ModelProperty obj, int j) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public ModelProperty properties(ModelProperty obj, int j) { int o = __offset(10); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
   public int propertiesLength() { int o = __offset(10); return o != 0 ? __vector_len(o) : 0; }
   /**
    * Last (highest) id used for a property, used to define new id for properties
    */
-  public long lastPropertyId() { int o = __offset(12); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public long lastPropertyId() { int o = __offset(12); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
 
   public static int createModelEntity(FlatBufferBuilder builder,
       int nameOffset,
@@ -45,12 +46,12 @@ public final class ModelEntity extends Table {
 
   public static void startModelEntity(FlatBufferBuilder builder) { builder.startObject(5); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(0, nameOffset, 0); }
-  public static void addRefId(FlatBufferBuilder builder, long refId) { builder.addLong(1, refId, 0); }
-  public static void addId(FlatBufferBuilder builder, long id) { builder.addInt(2, (int)id, 0); }
+  public static void addRefId(FlatBufferBuilder builder, long refId) { builder.addLong(1, refId, 0L); }
+  public static void addId(FlatBufferBuilder builder, long id) { builder.addInt(2, (int)id, (int)0L); }
   public static void addProperties(FlatBufferBuilder builder, int propertiesOffset) { builder.addOffset(3, propertiesOffset, 0); }
   public static int createPropertiesVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
   public static void startPropertiesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addLastPropertyId(FlatBufferBuilder builder, long lastPropertyId) { builder.addInt(4, (int)lastPropertyId, 0); }
+  public static void addLastPropertyId(FlatBufferBuilder builder, long lastPropertyId) { builder.addInt(4, (int)lastPropertyId, (int)0L); }
   public static int endModelEntity(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

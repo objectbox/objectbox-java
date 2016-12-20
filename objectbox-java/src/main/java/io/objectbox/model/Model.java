@@ -13,8 +13,9 @@ import com.google.flatbuffers.*;
  */
 public final class Model extends Table {
   public static Model getRootAsModel(ByteBuffer _bb) { return getRootAsModel(_bb, new Model()); }
-  public static Model getRootAsModel(ByteBuffer _bb, Model obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__init(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
-  public Model __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
+  public static Model getRootAsModel(ByteBuffer _bb, Model obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
+  public Model __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   /**
    * currently always "default"
@@ -24,12 +25,12 @@ public final class Model extends Table {
   /**
    * User controlled version
    */
-  public long version() { int o = __offset(6); return o != 0 ? bb.getLong(o + bb_pos) : 0; }
+  public long version() { int o = __offset(6); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
   public ModelEntity entities(int j) { return entities(new ModelEntity(), j); }
-  public ModelEntity entities(ModelEntity obj, int j) { int o = __offset(8); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public ModelEntity entities(ModelEntity obj, int j) { int o = __offset(8); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
   public int entitiesLength() { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; }
-  public long lastEntityId() { int o = __offset(10); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
-  public long lastIndexId() { int o = __offset(12); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0; }
+  public long lastEntityId() { int o = __offset(10); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  public long lastIndexId() { int o = __offset(12); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
 
   public static int createModel(FlatBufferBuilder builder,
       int nameOffset,
@@ -48,12 +49,12 @@ public final class Model extends Table {
 
   public static void startModel(FlatBufferBuilder builder) { builder.startObject(5); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(0, nameOffset, 0); }
-  public static void addVersion(FlatBufferBuilder builder, long version) { builder.addLong(1, version, 0); }
+  public static void addVersion(FlatBufferBuilder builder, long version) { builder.addLong(1, version, 0L); }
   public static void addEntities(FlatBufferBuilder builder, int entitiesOffset) { builder.addOffset(2, entitiesOffset, 0); }
   public static int createEntitiesVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
   public static void startEntitiesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addLastEntityId(FlatBufferBuilder builder, long lastEntityId) { builder.addInt(3, (int)lastEntityId, 0); }
-  public static void addLastIndexId(FlatBufferBuilder builder, long lastIndexId) { builder.addInt(4, (int)lastIndexId, 0); }
+  public static void addLastEntityId(FlatBufferBuilder builder, long lastEntityId) { builder.addInt(3, (int)lastEntityId, (int)0L); }
+  public static void addLastIndexId(FlatBufferBuilder builder, long lastIndexId) { builder.addInt(4, (int)lastIndexId, (int)0L); }
   public static int endModel(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
