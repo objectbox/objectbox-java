@@ -32,14 +32,17 @@ import io.objectbox.internal.CrashReportLogger;
 public class BoxStore implements Closeable {
     static {
         String libname = "objectbox";
-        String osName = System.getProperty("os.name");
-        String sunArch = System.getProperty("sun.arch.data.model");
-        if (osName.contains("Windows")) {
-            libname += "-windows" + ("32".equals(sunArch) ? "-x86" : "-x64");
-            checkUnpackLib(libname + ".dll");
-        } else if (osName.contains("Linux")) {
-            libname += "-linux" + ("32".equals(sunArch) ? "-x86" : "-x64");
-            checkUnpackLib("lib" + libname + ".so");
+        // For Android, os.name is also "Linux", so we need an extra check
+        if (!System.getProperty("java.vendor").contains("Android")) {
+            String osName = System.getProperty("os.name");
+            String sunArch = System.getProperty("sun.arch.data.model");
+            if (osName.contains("Windows")) {
+                libname += "-windows" + ("32".equals(sunArch) ? "-x86" : "-x64");
+                checkUnpackLib(libname + ".dll");
+            } else if (osName.contains("Linux")) {
+                libname += "-linux" + ("32".equals(sunArch) ? "-x86" : "-x64");
+                checkUnpackLib("lib" + libname + ".so");
+            }
         }
         System.loadLibrary(libname);
     }
