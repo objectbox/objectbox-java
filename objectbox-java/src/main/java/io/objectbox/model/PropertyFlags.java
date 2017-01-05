@@ -23,7 +23,7 @@ public final class PropertyFlags {
   /**
    * Unused yet
    */
-  public static final int INDEX_PARTIAL_SKIP_NULL = 16;
+  public static final int RESERVED = 16;
   /**
    * Unused yet: Unique index
    */
@@ -36,5 +36,13 @@ public final class PropertyFlags {
    * Allow IDs to be assigned by the developer
    */
   public static final int ID_SELF_ASSIGNABLE = 128;
+  /**
+   * Unused yet
+   */
+  public static final int INDEX_PARTIAL_SKIP_NULL = 256;
+  /**
+   * Unused yet, used by References for 1) back-references and 2) to clear references to deleted objects (required for ID reuse)
+   */
+  public static final int INDEX_PARTIAL_SKIP_ZERO = 512;
 }
 

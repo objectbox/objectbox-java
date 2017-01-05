@@ -27,6 +27,11 @@ public final class ModelProperty extends Table {
    */
   public long flags() { int o = __offset(12); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
   public long indexId() { int o = __offset(14); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  /**
+   * For relations only: name of the target entity
+   */
+  public String targetEntity() { int o = __offset(16); return o != 0 ? __string(o + bb_pos) : null; }
+  public ByteBuffer targetEntityAsByteBuffer() { return __vector_as_bytebuffer(16, 1); }
 
   public static int createModelProperty(FlatBufferBuilder builder,
       int nameOffset,
@@ -34,9 +39,11 @@ public final class ModelProperty extends Table {
       long id,
       int type,
       long flags,
-      long indexId) {
-    builder.startObject(6);
+      long indexId,
+      int targetEntityOffset) {
+    builder.startObject(7);
     ModelProperty.addRefId(builder, refId);
+    ModelProperty.addTargetEntity(builder, targetEntityOffset);
     ModelProperty.addIndexId(builder, indexId);
     ModelProperty.addFlags(builder, flags);
     ModelProperty.addId(builder, id);
@@ -45,13 +52,14 @@ public final class ModelProperty extends Table {
     return ModelProperty.endModelProperty(builder);
   }
 
-  public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(6); }
+  public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(7); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(0, nameOffset, 0); }
   public static void addRefId(FlatBufferBuilder builder, long refId) { builder.addLong(1, refId, 0L); }
   public static void addId(FlatBufferBuilder builder, long id) { builder.addInt(2, (int)id, (int)0L); }
   public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(3, (short)type, (short)0); }
   public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(4, (int)flags, (int)0L); }
   public static void addIndexId(FlatBufferBuilder builder, long indexId) { builder.addInt(5, (int)indexId, (int)0L); }
+  public static void addTargetEntity(FlatBufferBuilder builder, int targetEntityOffset) { builder.addOffset(6, targetEntityOffset, 0); }
   public static int endModelProperty(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
