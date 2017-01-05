@@ -22,9 +22,9 @@ public final class PropertyType {
    */
   public static final short Date = 10;
   /**
-   * Reference to another entity
+   * Relation to another entity
    */
-  public static final short Reference = 11;
+  public static final short Relation = 11;
   public static final short Reserved1 = 12;
   public static final short Reserved2 = 13;
   public static final short Reserved3 = 14;
@@ -46,7 +46,7 @@ public final class PropertyType {
   public static final short StringVector = 30;
   public static final short DateVector = 31;
 
-  public static final String[] names = { "Unknown", "Bool", "Byte", "Short", "Char", "Int", "Long", "Float", "Double", "String", "Date", "Reference", "Reserved1", "Reserved2", "Reserved3", "Reserved4", "Reserved5", "Reserved6", "Reserved7", "Reserved8", "Reserved9", "Reserved10", "BoolVector", "ByteVector", "ShortVector", "CharVector", "IntVector", "LongVector", "FloatVector", "DoubleVector", "StringVector", "DateVector", };
+  public static final String[] names = { "Unknown", "Bool", "Byte", "Short", "Char", "Int", "Long", "Float", "Double", "String", "Date", "Relation", "Reserved1", "Reserved2", "Reserved3", "Reserved4", "Reserved5", "Reserved6", "Reserved7", "Reserved8", "Reserved9", "Reserved10", "BoolVector", "ByteVector", "ShortVector", "CharVector", "IntVector", "LongVector", "FloatVector", "DoubleVector", "StringVector", "DateVector", };
 
   public static String name(int e) { return names[e]; }
 }
