@@ -36,7 +36,7 @@ public @interface Entity {
 //
 //    /**
 //     * Whether update/delete/refresh methods should be generated.
-//     * If entity has defined {@link ToMany} or {@link io.objectbox.annotation.ToOne} relations, then it is active independently from this value
+//     * If entity has defined {@link Relation}, then it is active independently from this value
 //     */
 //    boolean active() default false;
 //

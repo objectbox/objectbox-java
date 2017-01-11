@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specifies ordering of related collection of {@link ToMany} relation
+ * Specifies ordering of related collection of {@link Relation} relation
  * E.g.: @OrderBy("name, age DESC") List collection;
  * If used as marker (@OrderBy List collection), then collection is ordered by primary key
  */

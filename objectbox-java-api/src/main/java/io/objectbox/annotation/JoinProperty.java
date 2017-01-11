@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 /**
  * Defines name and referencedName properties for relations
  *
- * @see ToMany
+ * @see Relation
  */
 @Retention(RetentionPolicy.CLASS)
 @Target({})
