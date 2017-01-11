@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import io.objectbox.annotation.apihint.Beta;
 
 /**
- * Marks the property (typ must be an entity or a List of entities) as a relation (optional?).
+ * Marks the property (type must be an entity or a List of entities) as a relation (optional?).
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
