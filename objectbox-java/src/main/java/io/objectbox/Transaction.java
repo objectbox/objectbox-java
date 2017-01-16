@@ -121,10 +121,12 @@ public class Transaction implements Closeable {
         if (entityClass == null || cursorClass == null) {
             throw new DbException("No entity info registered in store for " + entityClass);
         }
-        long cursor = nativeCreateCursor(transaction, entityName, entityClass);
+        long cursorHandle = nativeCreateCursor(transaction, entityName, entityClass);
         try {
             Constructor<Cursor<T>> constructor = cursorClass.getConstructor(Transaction.class, long.class);
-            return constructor.newInstance(this, cursor);
+            Cursor<T> cursor = constructor.newInstance(this, cursorHandle);
+            cursor.setBoxStoreForEntities(store);
+            return cursor;
         } catch (Exception e) {
             throw new RuntimeException("Could not create cursor", e);
         }

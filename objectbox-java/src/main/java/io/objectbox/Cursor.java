@@ -86,6 +86,8 @@ public abstract class Cursor<T> implements Closeable {
 
     static native int nativePropertyId(long cursor, String propertyValue);
 
+    static native void nativeSetBoxStoreForEntities(long cursor, Object boxStore);
+
     protected Transaction tx;
     protected final long cursor;
     protected final Properties properties;
@@ -220,5 +222,9 @@ public abstract class Cursor<T> implements Closeable {
     @Internal
     long internalHandle() {
         return cursor;
+    }
+
+    public void setBoxStoreForEntities(Object boxStore) {
+        nativeSetBoxStoreForEntities(cursor, boxStore);
     }
 }
