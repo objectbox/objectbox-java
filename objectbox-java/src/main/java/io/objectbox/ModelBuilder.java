@@ -23,9 +23,17 @@ public class ModelBuilder {
         boolean finished;
 
         public PropertyBuilder(String name, int type) {
+            this(name, null, type);
+        }
+
+        public PropertyBuilder(String name, String targetEntityName, int type) {
             int propertyNameOffset = fbb.createString(name);
+            int targetEntityOffset = targetEntityName != null ? fbb.createString(targetEntityName) : 0;
             ModelProperty.startModelProperty(fbb);
             ModelProperty.addName(fbb, propertyNameOffset);
+            if (targetEntityOffset != 0) {
+                ModelProperty.addTargetEntity(fbb, targetEntityOffset);
+            }
             ModelProperty.addType(fbb, type);
         }
 
@@ -105,9 +113,13 @@ public class ModelBuilder {
         }
 
         public PropertyBuilder property(String name, int type) {
+            return property(name, null, type);
+        }
+
+        public PropertyBuilder property(String name, String targetEntityName, int type) {
             checkNotFinished();
             checkFinishProperty();
-            propertyBuilder = new PropertyBuilder(name, type);
+            propertyBuilder = new PropertyBuilder(name, targetEntityName, type);
             return propertyBuilder;
         }
 
