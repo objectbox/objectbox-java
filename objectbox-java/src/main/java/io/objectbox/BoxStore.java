@@ -230,7 +230,8 @@ public class BoxStore implements Closeable {
         return entityIdByClass.get(entityClass);
     }
 
-    int getEntityIdOrThrow(Class entityClass) {
+    @Internal
+    public int getEntityIdOrThrow(Class entityClass) {
         Integer id = entityIdByClass.get(entityClass);
         if (id == null) {
             throw new DbSchemaException("No entity registered for " + entityClass);
