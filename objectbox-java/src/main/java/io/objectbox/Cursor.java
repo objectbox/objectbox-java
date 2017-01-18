@@ -86,6 +86,8 @@ public abstract class Cursor<T> implements Closeable {
 
     static native int nativePropertyId(long cursor, String propertyValue);
 
+    static native List nativeGetBacklinkEntities(long cursor, int entityId, int propertyId, long key);
+
     static native void nativeSetBoxStoreForEntities(long cursor, Object boxStore);
 
     protected Transaction tx;
@@ -222,6 +224,10 @@ public abstract class Cursor<T> implements Closeable {
     @Internal
     long internalHandle() {
         return cursor;
+    }
+
+    List<T> getBacklinkEntities(int entityId, Property relationIdProperty, long key) {
+        return nativeGetBacklinkEntities(cursor, entityId, relationIdProperty.getId(), key);
     }
 
     public void setBoxStoreForEntities(Object boxStore) {

@@ -26,6 +26,7 @@ import io.objectbox.BoxStoreBuilder.EntityClasses;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
+import io.objectbox.exception.DbSchemaException;
 import io.objectbox.internal.CrashReportLogger;
 
 @Beta
@@ -159,6 +160,7 @@ public class BoxStore implements Closeable {
     private final long handle;
     private final Map<Class, String> entityNameByClass;
     private final Map<Class, Class<Cursor>> entityCursorClassByClass;
+    private final Map<Class, Integer> entityIdByClass;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
 
@@ -185,12 +187,14 @@ public class BoxStore implements Closeable {
         handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.model);
         entityNameByClass = new HashMap<>();
         entityCursorClassByClass = new HashMap<>();
+        entityIdByClass = new HashMap<>();
 
         for (EntityClasses entity : builder.entityClasses) {
             try {
                 entityNameByClass.put(entity.entityClass, entity.entityName);
                 entityCursorClassByClass.put(entity.entityClass, entity.cursorClass);
                 int entityId = nativeRegisterEntityClass(handle, entity.entityName, entity.entityClass);
+                entityIdByClass.put(entity.entityClass, entityId);
                 for (Property property : entity.properties.getAllProperties()) {
                     if (property.customType != null) {
                         if (property.converterClass == null) {
@@ -220,6 +224,18 @@ public class BoxStore implements Closeable {
 
     String getEntityName(Class entityClass) {
         return entityNameByClass.get(entityClass);
+    }
+
+    Integer getEntityId(Class entityClass) {
+        return entityIdByClass.get(entityClass);
+    }
+
+    int getEntityIdOrThrow(Class entityClass) {
+        Integer id = entityIdByClass.get(entityClass);
+        if (id == null) {
+            throw new DbSchemaException("No entity registered for " + entityClass);
+        }
+        return id;
     }
 
     <T> Class<Cursor<T>> getEntityCursorClass(Class<T> entityClass) {

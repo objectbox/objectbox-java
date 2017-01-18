@@ -432,6 +432,16 @@ public class Box<T> {
     }
 
     @Internal
+    List<T> getBacklinkEntities(int entityId, Property relationIdProperty, long key) {
+        Cursor<T> reader = getReader();
+        try {
+            return reader.getBacklinkEntities(entityId, relationIdProperty, key);
+        } finally {
+            releaseReader(reader);
+        }
+    }
+
+    @Internal
     public <RESULT> RESULT internalCallWithReaderHandle(CallWithHandle<RESULT> task) {
         Cursor<T> reader = getReader();
         try {
