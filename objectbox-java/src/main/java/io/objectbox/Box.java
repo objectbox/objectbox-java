@@ -1,6 +1,7 @@
 package io.objectbox;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.exception.DbException;
 import io.objectbox.internal.CallWithHandle;
 import io.objectbox.query.QueryBuilder;
 
@@ -27,6 +29,7 @@ public class Box<T> {
     private final List<WeakReference<Cursor<T>>> readers = new ArrayList<>();
 
     private Properties properties;
+    private volatile Field boxStoreField;
 
     Box(BoxStore store, Class<T> entityClass) {
         this.store = store;
@@ -429,6 +432,24 @@ public class Box<T> {
 
         }
         return properties;
+    }
+
+    @Beta
+    public void attach(T entity) {
+        if (boxStoreField == null) {
+            try {
+                Field field = entityClass.getDeclaredField("__boxStore");
+                field.setAccessible(true);
+                boxStoreField = field;
+            } catch (NoSuchFieldException e) {
+                throw new DbException("Entity has no __boxStore field: "+entityClass);
+            }
+        }
+        try {
+            boxStoreField.set(entity, store);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Internal
