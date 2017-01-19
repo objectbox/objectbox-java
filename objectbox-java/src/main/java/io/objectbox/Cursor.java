@@ -94,6 +94,8 @@ public abstract class Cursor<T> implements Closeable {
     protected final long cursor;
     protected final Properties properties;
 
+    protected BoxStore boxStoreForEntities;
+
     protected boolean closed;
 
     protected Cursor(Transaction tx, long cursor, Properties properties) {
@@ -230,7 +232,8 @@ public abstract class Cursor<T> implements Closeable {
         return nativeGetBacklinkEntities(cursor, entityId, relationIdProperty.getId(), key);
     }
 
-    public void setBoxStoreForEntities(Object boxStore) {
+    public void setBoxStoreForEntities(BoxStore boxStore) {
+        boxStoreForEntities = boxStore;
         nativeSetBoxStoreForEntities(cursor, boxStore);
     }
 }

@@ -77,7 +77,7 @@ public class Box<T> {
     }
 
     private Cursor<T> getWriter() {
-        Cursor cursor = getActiveTxCursor();
+        Cursor<T> cursor = getActiveTxCursor();
         if (cursor != null) {
             return cursor;
         } else {
@@ -442,7 +442,8 @@ public class Box<T> {
                 field.setAccessible(true);
                 boxStoreField = field;
             } catch (NoSuchFieldException e) {
-                throw new DbException("Entity has no __boxStore field: "+entityClass);
+                throw new DbException("Entity cannot be attached - only active entities with relationships support " +
+                        "attaching (class has no __boxStore field) : " + entityClass);
             }
         }
         try {
