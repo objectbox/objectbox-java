@@ -1,12 +1,16 @@
 package io.objectbox;
 
+import java.io.Closeable;
+import java.lang.reflect.Constructor;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 
-import java.io.Closeable;
-import java.lang.reflect.Constructor;
-
 public class Transaction implements Closeable {
+
+    static Map<Class, Constructor> cursorConstructorCache = new ConcurrentHashMap<>();
 
     private final long transaction;
     private final BoxStore store;
@@ -123,8 +127,12 @@ public class Transaction implements Closeable {
         }
         long cursorHandle = nativeCreateCursor(transaction, entityName, entityClass);
         try {
-            Constructor<Cursor<T>> constructor = cursorClass.getConstructor(Transaction.class, long.class);
-            Cursor<T> cursor = constructor.newInstance(this, cursorHandle);
+            Constructor<Cursor<T>> cursorConstructor = cursorConstructorCache.get(cursorClass);
+            if (cursorConstructor == null) {
+                cursorConstructor = cursorClass.getConstructor(Transaction.class, long.class);
+                cursorConstructorCache.put(cursorClass, cursorConstructor);
+            }
+            Cursor<T> cursor = cursorConstructor.newInstance(this, cursorHandle);
             cursor.setBoxStoreForEntities(store);
             return cursor;
         } catch (Exception e) {
