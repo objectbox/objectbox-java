@@ -54,7 +54,7 @@ public class ToOne<SOURCE, TARGET> {
             }
         }
 
-        ensureBoxes();
+        ensureBoxes(null);
         // Do not synchronize while doing DB stuff
         TARGET targetNew = targetBox.get(targetId);
 
@@ -62,14 +62,20 @@ public class ToOne<SOURCE, TARGET> {
         return targetNew;
     }
 
-    private void ensureBoxes() {
+    private void ensureBoxes(TARGET target) {
         // Only check the property set last
         if (targetBox == null) {
             Field boxStoreField = ReflectionCache.getInstance().getField(entity.getClass(), "__boxStore");
             try {
                 boxStore = (BoxStore) boxStoreField.get(entity);
                 if (boxStore == null) {
-                    throw new DbDetachedException("Cannot resolve relation for detached entities");
+                    if (target != null) {
+                        boxStoreField = ReflectionCache.getInstance().getField(target.getClass(), "__boxStore");
+                        boxStore = (BoxStore) boxStoreField.get(target);
+                    }
+                    if (boxStore == null) {
+                        throw new DbDetachedException("Cannot resolve relation for detached entities");
+                    }
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -105,7 +111,7 @@ public class ToOne<SOURCE, TARGET> {
 
     void setAndUpdateTargetId(long targetId) {
         setTargetId(targetId);
-        ensureBoxes();
+        ensureBoxes(null);
         // TODO update on targetId in DB
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -116,8 +122,8 @@ public class ToOne<SOURCE, TARGET> {
      */
     // TODO provide a overload with a ToMany parameter, which also gets updated
     public void setTarget(final TARGET target) {
-        ensureBoxes();
         if (target != null) {
+            ensureBoxes(target);
             long targetId = targetBox.getId(target);
             if (targetId == 0) {
                 targetId = targetBox.put(target);
@@ -136,7 +142,7 @@ public class ToOne<SOURCE, TARGET> {
      */
     // TODO provide a overload with a ToMany parameter, which also gets updated
     public void setAndPutTarget(final TARGET target) {
-        ensureBoxes();
+        ensureBoxes(target);
         if (target != null) {
             long targetId = targetBox.getId(target);
             if (targetId == 0) {
@@ -158,7 +164,7 @@ public class ToOne<SOURCE, TARGET> {
      */
     // TODO provide a overload with a ToMany parameter, which also gets updated
     public void setAndPutTargetAlways(final TARGET target) {
-        ensureBoxes();
+        ensureBoxes(target);
         if (target != null) {
             boxStore.runInTx(new Runnable() {
                 @Override

@@ -25,7 +25,7 @@ public class ReflectionCache {
         Field field = fieldsForClass.get(name);
         if (field == null) {
             try {
-                field = clazz.getDeclaredField("__boxStore");
+                field = clazz.getDeclaredField(name);
                 field.setAccessible(true);
             } catch (NoSuchFieldException e) {
                 throw new IllegalStateException(e);
