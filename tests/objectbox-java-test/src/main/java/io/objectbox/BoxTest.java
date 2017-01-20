@@ -220,6 +220,13 @@ public class BoxTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testGetId() {
+        TestEntity entity = put(null, 42);
+        assertTrue(entity.getId() > 0);
+        assertEquals(entity.getId(), box.getId(entity));
+    }
+
+    @Test
     public void testFindInt_preparedPropertyId() {
         put(null, 42);
         put(null, 23);

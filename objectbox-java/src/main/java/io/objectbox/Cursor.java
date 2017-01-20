@@ -112,6 +112,13 @@ public abstract class Cursor<T> implements Closeable {
         }
     }
 
+    /** "Offline" cursor only useful for Box to retrieve the ID  of an entity. All other operations may fail. */
+    @Internal
+    protected Cursor() {
+        cursor = 0;
+        properties = null;
+    }
+
     @Override
     protected void finalize() throws Throwable {
         close();

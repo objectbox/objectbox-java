@@ -11,6 +11,7 @@ import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 import io.objectbox.internal.CallWithHandle;
+import io.objectbox.internal.ReflectionCache;
 import io.objectbox.query.QueryBuilder;
 
 /**
@@ -27,6 +28,8 @@ public class Box<T> {
     final ThreadLocal<Cursor<T>> activeTxCursor = new ThreadLocal<>();
     private final ThreadLocal<Cursor<T>> threadLocalReader = new ThreadLocal<>();
     private final List<WeakReference<Cursor<T>>> readers = new ArrayList<>();
+    // TODO Add a new generated class for this (~"EntityOps", also with relation ID helpers?), using Cursor here is work-aroundish
+    private final Cursor<T> idGetter;
 
     private Properties properties;
     private volatile Field boxStoreField;
@@ -34,6 +37,12 @@ public class Box<T> {
     Box(BoxStore store, Class<T> entityClass) {
         this.store = store;
         this.entityClass = entityClass;
+        Class<Cursor<T>> cursorClass = store.getEntityCursorClass(entityClass);
+        try {
+            idGetter = cursorClass.newInstance();
+        } catch (Exception e) {
+            throw new DbException("Box could not create cursor", e);
+        }
     }
 
     private Cursor<T> getReader() {
@@ -149,6 +158,10 @@ public class Box<T> {
         } finally {
             releaseReader(reader);
         }
+    }
+
+    public long getId(T entity) {
+        return idGetter.getId(entity);
     }
 
     public T get(long key) {
@@ -429,7 +442,6 @@ public class Box<T> {
             } finally {
                 releaseReader(reader);
             }
-
         }
         return properties;
     }
@@ -438,12 +450,10 @@ public class Box<T> {
     public void attach(T entity) {
         if (boxStoreField == null) {
             try {
-                Field field = entityClass.getDeclaredField("__boxStore");
-                field.setAccessible(true);
-                boxStoreField = field;
-            } catch (NoSuchFieldException e) {
+                boxStoreField = ReflectionCache.getInstance().getField(entityClass, "__boxStore");
+            } catch (Exception e) {
                 throw new DbException("Entity cannot be attached - only active entities with relationships support " +
-                        "attaching (class has no __boxStore field) : " + entityClass);
+                        "attaching (class has no __boxStore field(?)) : " + entityClass, e);
             }
         }
         try {

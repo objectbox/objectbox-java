@@ -6,6 +6,8 @@ public class TestEntityMinimalCursor extends Cursor<TestEntityMinimal> {
         super(tx, cursor, new DummyProperties());
     }
 
+    public TestEntityMinimalCursor() {}
+
     @Override
     protected long getId(TestEntityMinimal entity) {
         return entity.getId();

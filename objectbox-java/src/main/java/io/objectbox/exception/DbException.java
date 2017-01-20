@@ -8,6 +8,11 @@ public class DbException extends RuntimeException {
         errorCode = 0;
     }
 
+    public DbException(String message, Throwable cause) {
+        super(message, cause);
+        errorCode = 0;
+    }
+
     public DbException(String message, int errorCode) {
         super(message);
         this.errorCode = errorCode;
