@@ -30,7 +30,7 @@ import io.objectbox.query.QueryCondition.PropertyCondition.Operation;
  */
 public class Property {
     public final int ordinal;
-    private int id;
+    public final int id;
 
     /** One of the supported types to be mapped to the DB. */
     public final Class<?> type;
@@ -145,11 +145,6 @@ public class Property {
     }
 
     void verifyId(int idInDb) {
-        if (this.id == 0) {
-            // At least in tests, we allow not presetting IDs.
-            // (IDs should always be present using the ObjectBox Gradle plugin.)
-            id = idInDb;
-        }
         if (this.id <= 0) {
             throw new IllegalStateException("Illegal property ID " + id + " for " + toString());
         }
