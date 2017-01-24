@@ -1,5 +1,5 @@
 # ObjectBox
-ObjectBox is a superfast mobile database for objects. See the ObjectBox announcement for details:
+ObjectBox is a new superfast mobile database for objects. See the announcement for details:
 
 [ObjectBox – The new Mobile Database (Beta)](http://greenrobot.org/announcement/introducing-objectbox-beta/)
 
@@ -10,5 +10,7 @@ Links
 [Featues](http://greenrobot.org/objectbox/features/)
 
 [Documentation](http://greenrobot.org/objectbox/documentation/)
+
+[Examples](https://github.com/greenrobot/ObjectBoxExamples)
 
 [License](http://greenrobot.org/objectbox/license/)
