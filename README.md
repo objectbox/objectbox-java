@@ -7,7 +7,7 @@ This GitHub repo is a placeholder and will be extended in the future. Right now 
 
 Links
 -----
-[Featues](http://greenrobot.org/objectbox/features/)
+[Features](http://greenrobot.org/objectbox/features/)
 
 [Documentation](http://greenrobot.org/objectbox/documentation/)
 
