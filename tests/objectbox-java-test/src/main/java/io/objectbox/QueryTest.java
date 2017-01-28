@@ -211,10 +211,10 @@ public class QueryTest extends AbstractObjectBoxTest {
     @Test
     public void testFindKeysUnordered() {
         putTestEntitiesScalars();
-        assertEquals(10, box.query().build().findKeysUnordered().length);
+        assertEquals(10, box.query().build().findIdsUnordered().length);
 
         Query<TestEntity> query = box.query().greater(SimpleInt, 2006).build();
-        long[] keys = query.findKeysUnordered();
+        long[] keys = query.findIdsUnordered();
         assertEquals(3, keys.length);
         assertEquals(8, keys[0]);
         assertEquals(9, keys[1]);

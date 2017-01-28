@@ -99,7 +99,11 @@ public class Query<T> {
         });
     }
 
-    public long[] findKeysUnordered() {
+    /**
+     * Very efficient way to get just the IDs without creating any objects. IDs can later be used to lookup objects
+     * (lookups by ID are also very efficient in ObjectBox).
+     */
+    public long[] findIdsUnordered() {
         return box.internalCallWithReaderHandle(new CallWithHandle<long[]>() {
             @Override
             public long[] call(long cursorHandle) {
