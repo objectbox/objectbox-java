@@ -4,7 +4,7 @@ package io.objectbox.model;
 
 import java.nio.*;
 import java.lang.*;
-
+import java.util.*;
 import com.google.flatbuffers.*;
 
 @SuppressWarnings("unused")
@@ -17,9 +17,9 @@ public final class ModelProperty extends Table {
   public String name() { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
   /**
-   * Pseudo unique ID to match and verify external managed IDs
+   * Unique ID (within the model) to match and verify external managed IDs
    */
-  public long refId() { int o = __offset(6); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
+  public long uid() { int o = __offset(6); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
   public long id() { int o = __offset(8); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
   public int type() { int o = __offset(10); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
   /**
@@ -35,14 +35,14 @@ public final class ModelProperty extends Table {
 
   public static int createModelProperty(FlatBufferBuilder builder,
       int nameOffset,
-      long refId,
+      long uid,
       long id,
       int type,
       long flags,
       long indexId,
       int targetEntityOffset) {
     builder.startObject(7);
-    ModelProperty.addUid(builder, refId);
+    ModelProperty.addUid(builder, uid);
     ModelProperty.addTargetEntity(builder, targetEntityOffset);
     ModelProperty.addIndexId(builder, indexId);
     ModelProperty.addFlags(builder, flags);
@@ -54,7 +54,7 @@ public final class ModelProperty extends Table {
 
   public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(7); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(0, nameOffset, 0); }
-  public static void addUid(FlatBufferBuilder builder, long refId) { builder.addLong(1, refId, 0L); }
+  public static void addUid(FlatBufferBuilder builder, long uid) { builder.addLong(1, uid, 0L); }
   public static void addId(FlatBufferBuilder builder, long id) { builder.addInt(2, (int)id, (int)0L); }
   public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(3, (short)type, (short)0); }
   public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(4, (int)flags, (int)0L); }
