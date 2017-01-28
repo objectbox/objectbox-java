@@ -1,4 +1,4 @@
-package io.objectbox;
+package io.objectbox.query;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -6,6 +6,9 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.objectbox.AbstractObjectBoxTest;
+import io.objectbox.Box;
+import io.objectbox.TestEntity;
 import io.objectbox.query.Query;
 import io.objectbox.query.QueryBuilder;
 import io.objectbox.query.QueryBuilder.StringOrder;

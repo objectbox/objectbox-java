@@ -4,6 +4,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import io.objectbox.query.LazyListTest;
+import io.objectbox.query.QueryTest;
+
 @RunWith(Suite.class)
 @SuiteClasses({
         BoxTest.class,
@@ -12,6 +15,7 @@ import org.junit.runners.Suite.SuiteClasses;
         CursorTest.class,
         CursorBytesTest.class,
         QueryTest.class,
+        LazyListTest.class,
         TransactionTest.class,
 })
 public class FunctionalTestSuite {
