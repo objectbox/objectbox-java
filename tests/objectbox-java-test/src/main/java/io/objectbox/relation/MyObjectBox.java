@@ -32,7 +32,7 @@ public class MyObjectBox {
         EntityBuilder entityBuilder;
 
         entityBuilder = modelBuilder.entity("Customer");
-        entityBuilder.id(1).refId(3625336331812221361L).lastPropertyId(2);
+        entityBuilder.id(1).uid(3625336331812221361L).lastPropertyId(2);
         entityBuilder.property("_id", PropertyType.Long).id(1).uid(1582995887554488290L)
             .flags(PropertyFlags.ID | PropertyFlags.NOT_NULL);
         entityBuilder.property("name", PropertyType.String).id(2).uid(3080561794084640807L)
@@ -41,7 +41,7 @@ public class MyObjectBox {
 
 
         entityBuilder = modelBuilder.entity("ORDERS");
-        entityBuilder.id(3).refId(4761318278698541254L).lastPropertyId(4);
+        entityBuilder.id(3).uid(4761318278698541254L).lastPropertyId(4);
         entityBuilder.property("_id", PropertyType.Long).id(1).uid(4065349512068827171L)
             .flags(PropertyFlags.ID | PropertyFlags.ID_SELF_ASSIGNABLE | PropertyFlags.NOT_NULL);
         entityBuilder.property("date", PropertyType.Date).id(2).uid(1517800508838480650L);

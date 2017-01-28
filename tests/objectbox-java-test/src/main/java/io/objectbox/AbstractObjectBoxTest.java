@@ -152,7 +152,7 @@ public abstract class AbstractObjectBoxTest {
     }
 
     private void addTestEntity(ModelBuilder modelBuilder, boolean withIndex) {
-        EntityBuilder entityBuilder = modelBuilder.entity("TestEntity").id(++lastEntityId).refId(++lastUid);
+        EntityBuilder entityBuilder = modelBuilder.entity("TestEntity").id(++lastEntityId).uid(++lastUid);
         int pId = 0;
         entityBuilder.property("id", PropertyType.Long).id(++pId).uid(++lastUid).flags(PropertyFlags.ID);
         entityBuilder.property("simpleBoolean", PropertyType.Bool).id(++pId).uid(++lastUid);
@@ -170,7 +170,7 @@ public abstract class AbstractObjectBoxTest {
     }
 
     private void addTestEntityMinimal(ModelBuilder modelBuilder, boolean withIndex) {
-        EntityBuilder entityBuilder = modelBuilder.entity("TestEntityMinimal").id(++lastEntityId).refId(++lastUid);
+        EntityBuilder entityBuilder = modelBuilder.entity("TestEntityMinimal").id(++lastEntityId).uid(++lastUid);
         int pId = 0;
         entityBuilder.property("id", PropertyType.Long).id(++pId).uid(++lastUid).flags(PropertyFlags.ID);
         entityBuilder.property("text", PropertyType.String).id(++pId).uid(++lastUid)

@@ -49,9 +49,9 @@ public class ModelBuilder {
             return this;
         }
 
-        public PropertyBuilder uid(long refId) {
+        public PropertyBuilder uid(long uid) {
             checkNotFinished();
-            ModelProperty.addUid(fbb, refId);
+            ModelProperty.addUid(fbb, uid);
             return this;
         }
 
@@ -79,7 +79,7 @@ public class ModelBuilder {
         final List<Integer> propertyOffsets = new ArrayList<>();
 
         Integer id;
-        Long refId;
+        Long uid;
         Integer lastPropertyId;
         PropertyBuilder propertyBuilder;
         boolean finished;
@@ -94,9 +94,9 @@ public class ModelBuilder {
             return this;
         }
 
-        public EntityBuilder refId(long refId) {
+        public EntityBuilder uid(long uid) {
             checkNotFinished();
-            this.refId = refId;
+            this.uid = uid;
             return this;
         }
 
@@ -139,8 +139,8 @@ public class ModelBuilder {
             ModelEntity.startModelEntity(fbb);
             ModelEntity.addName(fbb, testEntityNameOffset);
             ModelEntity.addProperties(fbb, propertiesOffset);
-            if (refId != null) {
-                ModelEntity.addRefId(fbb, refId);
+            if (uid != null) {
+                ModelEntity.addUid(fbb, uid);
             }
             if (id != null) {
                 ModelEntity.addId(fbb, id);
