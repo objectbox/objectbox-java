@@ -15,16 +15,15 @@ public @interface Property {
     /**
      * Name of the database column for this property. Default is field name.
      * <p>
-     * Note: if you intent to rename a property, consider using refId instead.
+     * Note: if you intent to rename a property, consider using uid instead.
      */
     String nameInDb() default "";
 
-
     /**
-     * RefIDs identify properties (and entities) uniquely in the meta object model file (objectmodel.json).
-     * With refIDs you can map properties to their meta model representation in a stable way without its name.
-     * Once a refID is set, you can rename the properties as often as you like - ObjectBox keeps track of it automatically.
-     * Thus, it is advisable to lookup the refID in objectmodel.json and use it here before renaming a property.
+     * UIDs identify properties (and entities) uniquely in the meta object model file (objectmodel.json).
+     * With UIDs you can map properties to their meta model representation in a stable way without its name.
+     * Once a UID is set, you can rename the properties as often as you like - ObjectBox keeps track of it automatically.
+     * Thus, it is advisable to lookup the UID in objectmodel.json and use it here before renaming a property.
      */
-    long refId() default 0;
+    long uid() default 0;
 }

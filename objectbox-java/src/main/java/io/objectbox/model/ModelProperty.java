@@ -4,7 +4,7 @@ package io.objectbox.model;
 
 import java.nio.*;
 import java.lang.*;
-import java.util.*;
+
 import com.google.flatbuffers.*;
 
 @SuppressWarnings("unused")
@@ -42,7 +42,7 @@ public final class ModelProperty extends Table {
       long indexId,
       int targetEntityOffset) {
     builder.startObject(7);
-    ModelProperty.addRefId(builder, refId);
+    ModelProperty.addUid(builder, refId);
     ModelProperty.addTargetEntity(builder, targetEntityOffset);
     ModelProperty.addIndexId(builder, indexId);
     ModelProperty.addFlags(builder, flags);
@@ -54,7 +54,7 @@ public final class ModelProperty extends Table {
 
   public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(7); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(0, nameOffset, 0); }
-  public static void addRefId(FlatBufferBuilder builder, long refId) { builder.addLong(1, refId, 0L); }
+  public static void addUid(FlatBufferBuilder builder, long refId) { builder.addLong(1, refId, 0L); }
   public static void addId(FlatBufferBuilder builder, long id) { builder.addInt(2, (int)id, (int)0L); }
   public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(3, (short)type, (short)0); }
   public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(4, (int)flags, (int)0L); }

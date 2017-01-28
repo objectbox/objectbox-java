@@ -49,9 +49,9 @@ public class ModelBuilder {
             return this;
         }
 
-        public PropertyBuilder refId(long refId) {
+        public PropertyBuilder uid(long refId) {
             checkNotFinished();
-            ModelProperty.addRefId(fbb, refId);
+            ModelProperty.addUid(fbb, refId);
             return this;
         }
 

@@ -24,7 +24,7 @@ public abstract class AbstractObjectBoxTest {
     protected boolean runExtensiveTests;
     int lastEntityId;
     int lastIndexId;
-    long lastRefId;
+    long lastUid;
 
     @Before
     public void setUp() throws IOException {
@@ -152,28 +152,28 @@ public abstract class AbstractObjectBoxTest {
     }
 
     private void addTestEntity(ModelBuilder modelBuilder, boolean withIndex) {
-        EntityBuilder entityBuilder = modelBuilder.entity("TestEntity").id(++lastEntityId).refId(++lastRefId);
+        EntityBuilder entityBuilder = modelBuilder.entity("TestEntity").id(++lastEntityId).refId(++lastUid);
         int pId = 0;
-        entityBuilder.property("id", PropertyType.Long).id(++pId).refId(++lastRefId).flags(PropertyFlags.ID);
-        entityBuilder.property("simpleBoolean", PropertyType.Bool).id(++pId).refId(++lastRefId);
-        entityBuilder.property("simpleByte", PropertyType.Byte).id(++pId).refId(++lastRefId);
-        entityBuilder.property("simpleShort", PropertyType.Short).id(++pId).refId(++lastRefId);
-        entityBuilder.property("simpleInt", PropertyType.Int).id(++pId).refId(++lastRefId);
-        entityBuilder.property("simpleLong", PropertyType.Long).id(++pId).refId(++lastRefId);
-        entityBuilder.property("simpleFloat", PropertyType.Float).id(++pId).refId(++lastRefId);
-        entityBuilder.property("simpleDouble", PropertyType.Double).id(++pId).refId(++lastRefId);
-        entityBuilder.property("simpleString", PropertyType.String).id(++pId).refId(++lastRefId)
+        entityBuilder.property("id", PropertyType.Long).id(++pId).uid(++lastUid).flags(PropertyFlags.ID);
+        entityBuilder.property("simpleBoolean", PropertyType.Bool).id(++pId).uid(++lastUid);
+        entityBuilder.property("simpleByte", PropertyType.Byte).id(++pId).uid(++lastUid);
+        entityBuilder.property("simpleShort", PropertyType.Short).id(++pId).uid(++lastUid);
+        entityBuilder.property("simpleInt", PropertyType.Int).id(++pId).uid(++lastUid);
+        entityBuilder.property("simpleLong", PropertyType.Long).id(++pId).uid(++lastUid);
+        entityBuilder.property("simpleFloat", PropertyType.Float).id(++pId).uid(++lastUid);
+        entityBuilder.property("simpleDouble", PropertyType.Double).id(++pId).uid(++lastUid);
+        entityBuilder.property("simpleString", PropertyType.String).id(++pId).uid(++lastUid)
                 .flags(withIndex ? PropertyFlags.INDEXED : 0).indexId(withIndex ? ++lastIndexId : 0);
-        entityBuilder.property("simpleByteArray", PropertyType.ByteVector).id(++pId).refId(++lastRefId);
+        entityBuilder.property("simpleByteArray", PropertyType.ByteVector).id(++pId).uid(++lastUid);
         entityBuilder.lastPropertyId(pId);
         entityBuilder.entityDone();
     }
 
     private void addTestEntityMinimal(ModelBuilder modelBuilder, boolean withIndex) {
-        EntityBuilder entityBuilder = modelBuilder.entity("TestEntityMinimal").id(++lastEntityId).refId(++lastRefId);
+        EntityBuilder entityBuilder = modelBuilder.entity("TestEntityMinimal").id(++lastEntityId).refId(++lastUid);
         int pId = 0;
-        entityBuilder.property("id", PropertyType.Long).id(++pId).refId(++lastRefId).flags(PropertyFlags.ID);
-        entityBuilder.property("text", PropertyType.String).id(++pId).refId(++lastRefId)
+        entityBuilder.property("id", PropertyType.Long).id(++pId).uid(++lastUid).flags(PropertyFlags.ID);
+        entityBuilder.property("text", PropertyType.String).id(++pId).uid(++lastUid)
                 .flags(withIndex ? PropertyFlags.INDEXED : 0).indexId(withIndex ? ++lastIndexId : 0);
         entityBuilder.lastPropertyId(pId);
         entityBuilder.entityDone();
