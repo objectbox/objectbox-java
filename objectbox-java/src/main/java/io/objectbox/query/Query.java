@@ -57,10 +57,12 @@ public class Query<T> {
 
     private final Box<T> box;
     private final long handle;
+    private final boolean hasOrder;
 
-    Query(Box<T> box, long queryHandle) {
+    Query(Box<T> box, long queryHandle, boolean hasOrder) {
         this.box = box;
         handle = queryHandle;
+        this.hasOrder = hasOrder;
     }
 
     public T findFirst() {
@@ -103,13 +105,24 @@ public class Query<T> {
      * Very efficient way to get just the IDs without creating any objects. IDs can later be used to lookup objects
      * (lookups by ID are also very efficient in ObjectBox).
      */
-    public long[] findIdsUnordered() {
+    public long[] findIds() {
+        if(hasOrder) {
+            throw new UnsupportedOperationException("This method is currently only available for unordered queries");
+        }
         return box.internalCallWithReaderHandle(new CallWithHandle<long[]>() {
             @Override
             public long[] call(long cursorHandle) {
                 return nativeFindKeysUnordered(handle, cursorHandle);
             }
         });
+    }
+
+    public LazyList<T> findLazy() {
+        return new LazyList<>(box, findIds(), false);
+    }
+
+    public LazyList<T> findLazyCached() {
+        return new LazyList<>(box, findIds(), true);
     }
 
     public long count() {

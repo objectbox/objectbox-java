@@ -20,6 +20,7 @@ import io.objectbox.model.OrderFlags;
  */
 @Experimental
 public class QueryBuilder<T> {
+
     public enum StringOrder {
         /** The default: case insensitive ASCII characters */
         CASE_INSENSITIVE,
@@ -58,6 +59,8 @@ public class QueryBuilder<T> {
     private final Box<T> box;
 
     private long handle;
+
+    private boolean hasOrder;
 
     private static native long nativeCreate(long storeHandle, String entityName);
 
@@ -139,7 +142,7 @@ public class QueryBuilder<T> {
             throw new IllegalStateException("This QueryBuilder has already been closed. Please use a new instance.");
         }
         long queryHandle = nativeBuild(handle);
-        Query<T> query = new Query<T>(box, queryHandle);
+        Query<T> query = new Query<T>(box, queryHandle, hasOrder);
         close();
         return query;
     }
@@ -187,6 +190,7 @@ public class QueryBuilder<T> {
      */
     public QueryBuilder<T> order(Property property, int flags) {
         nativeOrder(handle, property.getId(), flags);
+        hasOrder = true;
         return this;
     }
 
