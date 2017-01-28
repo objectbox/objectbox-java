@@ -11,11 +11,11 @@ import io.objectbox.query.QueryBuilder;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
 
-import static io.objectbox.TestEntityProperties.SimpleFloat;
-import static io.objectbox.TestEntityProperties.SimpleInt;
-import static io.objectbox.TestEntityProperties.SimpleLong;
-import static io.objectbox.TestEntityProperties.SimpleShort;
-import static io.objectbox.TestEntityProperties.SimpleString;
+import static io.objectbox.TestEntity_.simpleFloat;
+import static io.objectbox.TestEntity_.simpleInt;
+import static io.objectbox.TestEntity_.simpleLong;
+import static io.objectbox.TestEntity_.simpleShort;
+import static io.objectbox.TestEntity_.simpleString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -39,15 +39,15 @@ public class QueryTest extends AbstractObjectBoxTest {
     public void testNullNotNull() {
         List<TestEntity> scalars = putTestEntitiesScalars();
         List<TestEntity> strings = putTestEntitiesStrings();
-        assertEquals(strings.size(), box.query().notNull(SimpleString).build().count());
-        assertEquals(scalars.size(), box.query().isNull(SimpleString).build().count());
+        assertEquals(strings.size(), box.query().notNull(simpleString).build().count());
+        assertEquals(scalars.size(), box.query().isNull(simpleString).build().count());
     }
 
     @Test
     public void testScalarEqual() {
         putTestEntitiesScalars();
 
-        Query<TestEntity> query = box.query().equal(SimpleInt, 2007).build();
+        Query<TestEntity> query = box.query().equal(simpleInt, 2007).build();
         assertEquals(1, query.count());
         assertEquals(8, query.findFirst().getId());
         assertEquals(8, query.findUnique().getId());
@@ -68,21 +68,21 @@ public class QueryTest extends AbstractObjectBoxTest {
     @Test
     public void testScalarNotEqual() {
         List<TestEntity> entities = putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().notEqual(SimpleInt, 2007).notEqual(SimpleInt, 2002).build();
+        Query<TestEntity> query = box.query().notEqual(simpleInt, 2007).notEqual(simpleInt, 2002).build();
         assertEquals(entities.size() - 2, query.count());
     }
 
     @Test
     public void testScalarLessAndGreater() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().greater(SimpleInt, 2003).less(SimpleShort, 207).build();
+        Query<TestEntity> query = box.query().greater(simpleInt, 2003).less(simpleShort, 2107).build();
         assertEquals(3, query.count());
     }
 
     @Test
     public void testScalarBetween() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().between(SimpleInt, 2003, 2006).build();
+        Query<TestEntity> query = box.query().between(simpleInt, 2003, 2006).build();
         assertEquals(4, query.count());
     }
 
@@ -91,18 +91,18 @@ public class QueryTest extends AbstractObjectBoxTest {
         putTestEntitiesScalars();
 
         int[] valuesInt = {1, 1, 2, 3, 2003, 2007, 2002, -1};
-        Query<TestEntity> query = box.query().in(SimpleInt, valuesInt).build();
+        Query<TestEntity> query = box.query().in(simpleInt, valuesInt).build();
         assertEquals(3, query.count());
 
-        long[] valuesLong = {1, 1, 2, 3, 203, 207, 202, -1};
-        query = box.query().in(SimpleLong, valuesLong).build();
+        long[] valuesLong = {1, 1, 2, 3, 3003, 3007, 3002, -1};
+        query = box.query().in(simpleLong, valuesLong).build();
         assertEquals(3, query.count());
     }
 
     @Test
     public void testOffsetLimit() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().greater(SimpleInt, 2002).less(SimpleShort, 208).build();
+        Query<TestEntity> query = box.query().greater(simpleInt, 2002).less(simpleShort, 2108).build();
         assertEquals(5, query.count());
         assertEquals(4, query.find(1, 0).size());
         assertEquals(1, query.find(4, 0).size());
@@ -116,32 +116,31 @@ public class QueryTest extends AbstractObjectBoxTest {
     @Test
     public void testAggregates() {
         putTestEntitiesScalars();
-
-        Query<TestEntity> query = box.query().less(SimpleInt, 2002).build();
-        assertEquals(2000.5, query.avg(SimpleInt), 0.0001);
-        assertEquals(2000, query.min(SimpleInt), 0.0001);
-        assertEquals(20000, query.minDouble(SimpleFloat), 0.001);
-        assertEquals(2001, query.max(SimpleInt), 0.0001);
-        assertEquals(20000.1, query.maxDouble(SimpleFloat), 0.001);
-        assertEquals(4001, query.sum(SimpleInt), 0.0001);
-        assertEquals(40000.1, query.sumDouble(SimpleFloat), 0.001);
+        Query<TestEntity> query = box.query().less(simpleInt, 2002).build();
+        assertEquals(2000.5, query.avg(simpleInt), 0.0001);
+        assertEquals(2000, query.min(simpleInt), 0.0001);
+        assertEquals(400, query.minDouble(simpleFloat), 0.001);
+        assertEquals(2001, query.max(simpleInt), 0.0001);
+        assertEquals(400.1, query.maxDouble(simpleFloat), 0.001);
+        assertEquals(4001, query.sum(simpleInt), 0.0001);
+        assertEquals(800.1, query.sumDouble(simpleFloat), 0.001);
     }
 
     @Test
     public void testString() {
         List<TestEntity> entities = putTestEntitiesStrings();
         int count = entities.size();
-        assertEquals(1, box.query().equal(SimpleString, "banana").build().findUnique().getId());
-        assertEquals(count - 1, box.query().notEqual(SimpleString, "banana").build().count());
-        assertEquals(4, box.query().startsWith(SimpleString, "ba").endsWith(SimpleString, "shake").build().findUnique()
+        assertEquals(1, box.query().equal(simpleString, "banana").build().findUnique().getId());
+        assertEquals(count - 1, box.query().notEqual(simpleString, "banana").build().count());
+        assertEquals(4, box.query().startsWith(simpleString, "ba").endsWith(simpleString, "shake").build().findUnique()
                 .getId());
-        assertEquals(2, box.query().contains(SimpleString, "nana").build().count());
+        assertEquals(2, box.query().contains(simpleString, "nana").build().count());
     }
 
     @Test
     public void testScalarFloatLessAndGreater() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().greater(SimpleFloat, 20000.29f).less(SimpleFloat, 20000.51f).build();
+        Query<TestEntity> query = box.query().greater(simpleFloat, 400.29f).less(simpleFloat, 400.51f).build();
         assertEquals(3, query.count());
     }
 
@@ -157,23 +156,23 @@ public class QueryTest extends AbstractObjectBoxTest {
         }
         box.put(entities);
         int count = entities.size();
-        List<TestEntity> entitiesQueried = box.query().equal(SimpleString, sameValueForAll).build().find();
+        List<TestEntity> entitiesQueried = box.query().equal(simpleString, sameValueForAll).build().find();
         assertEquals(count, entitiesQueried.size());
     }
 
     @Test
     public void testEqualStringOrder() {
         putTestEntitiesStrings();
-        box.put(createTestEntity("BAR", 100));
-        assertEquals(2, box.query().equal(SimpleString, "bar").build().count());
-        assertEquals(1, box.query().equal(SimpleString, "bar", StringOrder.CASE_SENSITIVE).build().count());
+        putTestEntity("BAR", 100);
+        assertEquals(2, box.query().equal(simpleString, "bar").build().count());
+        assertEquals(1, box.query().equal(simpleString, "bar", StringOrder.CASE_SENSITIVE).build().count());
     }
 
     @Test
     public void testOrder() {
         putTestEntitiesStrings();
-        box.put(createTestEntity("BAR", 100));
-        List<TestEntity> result = box.query().order(SimpleString).build().find();
+        putTestEntity("BAR", 100);
+        List<TestEntity> result = box.query().order(simpleString).build().find();
         assertEquals(6, result.size());
         assertEquals("apple", result.get(0).getSimpleString());
         assertEquals("banana", result.get(1).getSimpleString());
@@ -185,11 +184,11 @@ public class QueryTest extends AbstractObjectBoxTest {
 
     @Test
     public void testOrderDescCaseNullLast() {
-        box.put(createTestEntity(null, 1000));
-        box.put(createTestEntity("BAR", 100));
+        putTestEntity(null, 1000);
+        putTestEntity("BAR", 100);
         putTestEntitiesStrings();
         int flags = QueryBuilder.CASE_SENSITIVE | QueryBuilder.NULLS_LAST | QueryBuilder.DESCENDING;
-        List<TestEntity> result = box.query().order(SimpleString, flags).build().find();
+        List<TestEntity> result = box.query().order(simpleString, flags).build().find();
         assertEquals(7, result.size());
         assertEquals("foo bar", result.get(0).getSimpleString());
         assertEquals("bar", result.get(1).getSimpleString());
@@ -203,7 +202,7 @@ public class QueryTest extends AbstractObjectBoxTest {
     @Test
     public void testRemove() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().greater(SimpleInt, 2003).build();
+        Query<TestEntity> query = box.query().greater(simpleInt, 2003).build();
         assertEquals(6, query.remove());
         assertEquals(4, box.count());
     }
@@ -211,10 +210,10 @@ public class QueryTest extends AbstractObjectBoxTest {
     @Test
     public void testFindKeysUnordered() {
         putTestEntitiesScalars();
-        assertEquals(10, box.query().build().findIdsUnordered().length);
+        assertEquals(10, box.query().build().findIds().length);
 
-        Query<TestEntity> query = box.query().greater(SimpleInt, 2006).build();
-        long[] keys = query.findIdsUnordered();
+        Query<TestEntity> query = box.query().greater(simpleInt, 2006).build();
+        long[] keys = query.findIds();
         assertEquals(3, keys.length);
         assertEquals(8, keys[0]);
         assertEquals(9, keys[1]);
@@ -224,18 +223,18 @@ public class QueryTest extends AbstractObjectBoxTest {
     @Test
     public void testSetParameterInt() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().equal(SimpleInt, 2007).build();
+        Query<TestEntity> query = box.query().equal(simpleInt, 2007).build();
         assertEquals(8, query.findUnique().getId());
-        query.setParameter(SimpleInt, 2004);
+        query.setParameter(simpleInt, 2004);
         assertEquals(5, query.findUnique().getId());
     }
 
     @Test
     public void testSetParameter2Ints() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().between(SimpleInt, 2005, 2008).build();
+        Query<TestEntity> query = box.query().between(simpleInt, 2005, 2008).build();
         assertEquals(4, query.count());
-        query.setParameters(SimpleInt, 2002, 2003);
+        query.setParameters(simpleInt, 2002, 2003);
         List<TestEntity> entities = query.find();
         assertEquals(2, entities.size());
         assertEquals(3, entities.get(0).getId());
@@ -245,18 +244,18 @@ public class QueryTest extends AbstractObjectBoxTest {
     @Test
     public void testSetParameterFloat() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().greater(SimpleFloat, 20000.65).build();
+        Query<TestEntity> query = box.query().greater(simpleFloat, 400.65).build();
         assertEquals(3, query.count());
-        query.setParameter(SimpleFloat, 20000.75);
+        query.setParameter(simpleFloat, 400.75);
         assertEquals(2, query.count());
     }
 
     @Test
     public void testSetParameter2Floats() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().between(SimpleFloat, 20000.15, 20000.75).build();
+        Query<TestEntity> query = box.query().between(simpleFloat, 400.15, 400.75).build();
         assertEquals(6, query.count());
-        query.setParameters(SimpleFloat, 20000.65, 20000.85);
+        query.setParameters(simpleFloat, 400.65, 400.85);
         List<TestEntity> entities = query.find();
         assertEquals(2, entities.size());
         assertEquals(8, entities.get(0).getId());
@@ -266,32 +265,16 @@ public class QueryTest extends AbstractObjectBoxTest {
     @Test
     public void testSetParameterString() {
         putTestEntitiesStrings();
-        Query<TestEntity> query = box.query().equal(SimpleString, "banana").build();
+        Query<TestEntity> query = box.query().equal(simpleString, "banana").build();
         assertEquals(1, query.findUnique().getId());
-        query.setParameter(SimpleString, "bar");
+        query.setParameter(simpleString, "bar");
         assertEquals(3, query.findUnique().getId());
 
-        assertNull(query.setParameter(SimpleString, "not here!").findUnique());
+        assertNull(query.setParameter(simpleString, "not here!").findUnique());
     }
 
     private List<TestEntity> putTestEntitiesScalars() {
-        List<TestEntity> entities = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            TestEntity entity = createTestEntity(null, i);
-            entities.add(entity);
-        }
-        box.put(entities);
-        return entities;
-    }
-
-    private TestEntity createTestEntity(String simpleString, int nr) {
-        TestEntity entity = new TestEntity();
-        entity.setSimpleString(simpleString);
-        entity.setSimpleInt(2000 + nr);
-        entity.setSimpleShort((short) (200 + nr));
-        entity.setSimpleFloat(20000 + nr / 10f);
-        entity.setSimpleLong(200 + nr);
-        return entity;
+        return putTestEntities(10, null, 2000);
     }
 
     private List<TestEntity> putTestEntitiesStrings() {

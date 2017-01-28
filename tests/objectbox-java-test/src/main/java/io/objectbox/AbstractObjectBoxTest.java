@@ -5,11 +5,17 @@ import org.junit.Before;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import io.objectbox.ModelBuilder.EntityBuilder;
 import io.objectbox.model.PropertyFlags;
 import io.objectbox.model.PropertyType;
+
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractObjectBoxTest {
     protected File boxStoreDir;
@@ -40,7 +46,7 @@ public abstract class AbstractObjectBoxTest {
 
     protected BoxStoreBuilder createBoxStoreBuilderWithTwoEntities(boolean withIndex) {
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModelWithTwoEntities(withIndex)).directory(boxStoreDir);
-        builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class, new TestEntityProperties());
+        builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class, new TestEntity_());
         builder.entity("TestEntityMinimal", TestEntityMinimal.class, TestEntityMinimalCursor.class, new Properties() {
             @Override
             public Property[] getAllProperties() {
@@ -62,7 +68,7 @@ public abstract class AbstractObjectBoxTest {
 
     protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(withIndex)).directory(boxStoreDir);
-        builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class, new TestEntityProperties());
+        builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class, new TestEntity_());
         return builder;
     }
 
@@ -173,4 +179,37 @@ public abstract class AbstractObjectBoxTest {
         entityBuilder.entityDone();
     }
 
+    protected TestEntity createTestEntity(String simpleString, int nr) {
+        TestEntity entity = new TestEntity();
+        entity.setSimpleString(simpleString);
+        entity.setSimpleInt(nr);
+        entity.setSimpleByte((byte) (10 + nr));
+        entity.setSimpleBoolean(nr % 2 == 0);
+        entity.setSimpleShort((short) (100 + nr));
+        entity.setSimpleLong(1000 + nr);
+        entity.setSimpleFloat(200 + nr / 10f);
+        entity.setSimpleDouble(2000 + nr / 100f);
+        return entity;
+    }
+
+    protected TestEntity putTestEntity(String simpleString, int nr) {
+        TestEntity entity = createTestEntity(simpleString, nr);
+        long key = getTestEntityBox().put(entity);
+        assertTrue(key != 0);
+        assertEquals(key, entity.getId());
+        return entity;
+    }
+
+    protected List<TestEntity> putTestEntities(int count, String baseString, int baseNr) {
+        List<TestEntity> entities = new ArrayList<>();
+        for (int i = baseNr; i < baseNr + count; i++) {
+            entities.add(createTestEntity(baseString != null ? baseString + i : null, i));
+        }
+        getTestEntityBox().put(entities);
+        return entities;
+    }
+
+    protected List<TestEntity> putTestEntities(int count) {
+        return putTestEntities(count, "foo", 1);
+    }
 }
