@@ -6,18 +6,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.model.IdUid;
 import io.objectbox.model.Model;
 import io.objectbox.model.ModelEntity;
 import io.objectbox.model.ModelProperty;
 
 @Internal
 public class ModelBuilder {
+    private static final int MODEL_VERSION = 2;
+
     final FlatBufferBuilder fbb = new FlatBufferBuilder();
     final List<Integer> entityOffsets = new ArrayList<>();
 
     long version = 1;
+
     Integer lastEntityId;
+    Long lastEntityUid;
+
     Integer lastIndexId;
+    Long lastIndexUid;
 
     public class PropertyBuilder {
         boolean finished;
@@ -37,21 +44,17 @@ public class ModelBuilder {
             ModelProperty.addType(fbb, type);
         }
 
-        public PropertyBuilder id(int id) {
+        public PropertyBuilder id(int id, long uid) {
             checkNotFinished();
-            ModelProperty.addId(fbb, id);
+            int idOffset = IdUid.createIdUid(fbb, id, uid);
+            ModelProperty.addId(fbb, idOffset);
             return this;
         }
 
-        public PropertyBuilder indexId(int indexId) {
+        public PropertyBuilder indexId(int indexId, long indexUid) {
             checkNotFinished();
-            ModelProperty.addIndexId(fbb, indexId);
-            return this;
-        }
-
-        public PropertyBuilder uid(long uid) {
-            checkNotFinished();
-            ModelProperty.addUid(fbb, uid);
+            int idOffset = IdUid.createIdUid(fbb, indexId, indexUid);
+            ModelProperty.addIndexId(fbb, idOffset);
             return this;
         }
 
@@ -81,6 +84,7 @@ public class ModelBuilder {
         Integer id;
         Long uid;
         Integer lastPropertyId;
+        Long lastPropertyUid;
         PropertyBuilder propertyBuilder;
         boolean finished;
 
@@ -88,21 +92,17 @@ public class ModelBuilder {
             this.name = name;
         }
 
-        public EntityBuilder id(int id) {
+        public EntityBuilder id(int id, long uid) {
             checkNotFinished();
             this.id = id;
-            return this;
-        }
-
-        public EntityBuilder uid(long uid) {
-            checkNotFinished();
             this.uid = uid;
             return this;
         }
 
-        public EntityBuilder lastPropertyId(int lastPropertyId) {
+        public EntityBuilder lastPropertyId(int lastPropertyId, long lastPropertyUid) {
             checkNotFinished();
             this.lastPropertyId = lastPropertyId;
+            this.lastPropertyUid = lastPropertyUid;
             return this;
         }
 
@@ -139,14 +139,13 @@ public class ModelBuilder {
             ModelEntity.startModelEntity(fbb);
             ModelEntity.addName(fbb, testEntityNameOffset);
             ModelEntity.addProperties(fbb, propertiesOffset);
-            if (uid != null) {
-                ModelEntity.addUid(fbb, uid);
-            }
-            if (id != null) {
-                ModelEntity.addId(fbb, id);
+            if (id != null || uid != null) {
+                int idOffset = IdUid.createIdUid(fbb, id, uid);
+                ModelEntity.addId(fbb, idOffset);
             }
             if (lastPropertyId != null) {
-                ModelEntity.addLastPropertyId(fbb, lastPropertyId);
+                int idOffset = IdUid.createIdUid(fbb, lastPropertyId, lastPropertyUid);
+                ModelEntity.addLastPropertyId(fbb, idOffset);
             }
             entityOffsets.add(ModelEntity.endModelEntity(fbb));
             return ModelBuilder.this;
@@ -170,13 +169,15 @@ public class ModelBuilder {
         return new EntityBuilder(name);
     }
 
-    public ModelBuilder lastEntityId(int lastEntityId) {
+    public ModelBuilder lastEntityId(int lastEntityId, long lastEntityUid) {
         this.lastEntityId = lastEntityId;
+        this.lastEntityUid = lastEntityUid;
         return this;
     }
 
-    public ModelBuilder lastIndexId(int lastIndexId) {
+    public ModelBuilder lastIndexId(int lastIndexId, long lastIndexUid) {
         this.lastIndexId = lastIndexId;
+        this.lastIndexUid = lastIndexUid;
         return this;
     }
 
@@ -185,13 +186,16 @@ public class ModelBuilder {
         int entityVectorOffset = createVector(entityOffsets);
         Model.startModel(fbb);
         Model.addName(fbb, nameOffset);
+        Model.addModelVersion(fbb, MODEL_VERSION);
         Model.addVersion(fbb, 1);
         Model.addEntities(fbb, entityVectorOffset);
         if (lastEntityId != null) {
-            Model.addLastEntityId(fbb, lastEntityId);
+            int idOffset = IdUid.createIdUid(fbb, lastEntityId, lastEntityUid);
+            Model.addLastEntityId(fbb, idOffset);
         }
         if (lastIndexId != null) {
-            Model.addLastIndexId(fbb, lastIndexId);
+            int idOffset = IdUid.createIdUid(fbb, lastIndexId, lastIndexUid);
+            Model.addLastIndexId(fbb, idOffset);
         }
         int offset = Model.endModel(fbb);
 

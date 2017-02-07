@@ -26,28 +26,28 @@ public class MyObjectBox {
 
     private static byte[] getModel() {
         ModelBuilder modelBuilder = new ModelBuilder();
-        modelBuilder.lastEntityId(4);
-        modelBuilder.lastIndexId(2);
+        modelBuilder.lastEntityId(4, 5318696586219463633L);
+        modelBuilder.lastIndexId(2, 8919874872236271392L);
 
         EntityBuilder entityBuilder;
 
         entityBuilder = modelBuilder.entity("Customer");
-        entityBuilder.id(1).uid(3625336331812221361L).lastPropertyId(2);
-        entityBuilder.property("_id", PropertyType.Long).id(1).uid(1582995887554488290L)
-            .flags(PropertyFlags.ID | PropertyFlags.NOT_NULL);
-        entityBuilder.property("name", PropertyType.String).id(2).uid(3080561794084640807L)
-            .flags(PropertyFlags.INDEXED).indexId(1);
+        entityBuilder.id(1, 8247662514375611729L).lastPropertyId(2, 7412962174183812632L);
+        entityBuilder.property("_id", PropertyType.Long).id(1, 1888039726372206411L)
+                .flags(PropertyFlags.ID | PropertyFlags.NOT_NULL);
+        entityBuilder.property("name", PropertyType.String).id(2, 7412962174183812632L)
+                .flags(PropertyFlags.INDEXED).indexId(1, 5782921847050580892L);
         entityBuilder.entityDone();
 
 
         entityBuilder = modelBuilder.entity("ORDERS");
-        entityBuilder.id(3).uid(4761318278698541254L).lastPropertyId(4);
-        entityBuilder.property("_id", PropertyType.Long).id(1).uid(4065349512068827171L)
-            .flags(PropertyFlags.ID | PropertyFlags.ID_SELF_ASSIGNABLE | PropertyFlags.NOT_NULL);
-        entityBuilder.property("date", PropertyType.Date).id(2).uid(1517800508838480650L);
-        entityBuilder.property("customerId", "Customer", PropertyType.Relation).id(3).uid(7549816757665526666L)
-            .flags(PropertyFlags.NOT_NULL | PropertyFlags.INDEXED | PropertyFlags.INDEX_PARTIAL_SKIP_ZERO).indexId(2);
-        entityBuilder.property("text", PropertyType.String).id(4).uid(4188485512096015343L);
+        entityBuilder.id(3, 6367118380491771428L).lastPropertyId(4, 1061627027714085430L);
+        entityBuilder.property("_id", PropertyType.Long).id(1, 7221142423462017794L)
+                .flags(PropertyFlags.ID | PropertyFlags.ID_SELF_ASSIGNABLE | PropertyFlags.NOT_NULL);
+        entityBuilder.property("date", PropertyType.Date).id(2, 2751944693239151491L);
+        entityBuilder.property("customerId", "Customer", PropertyType.Relation).id(3, 7825181002293047239L)
+                .flags(PropertyFlags.NOT_NULL | PropertyFlags.INDEXED | PropertyFlags.INDEX_PARTIAL_SKIP_ZERO).indexId(2, 8919874872236271392L);
+        entityBuilder.property("text", PropertyType.String).id(4, 1061627027714085430L);
         entityBuilder.entityDone();
 
         return modelBuilder.build();
