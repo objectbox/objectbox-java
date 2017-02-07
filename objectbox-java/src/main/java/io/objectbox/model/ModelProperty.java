@@ -15,7 +15,7 @@ public final class ModelProperty extends Table {
   public ModelProperty __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   public IdUid id() { return id(new IdUid()); }
-  public IdUid id(IdUid obj) { int o = __offset(4); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
+  public IdUid id(IdUid obj) { int o = __offset(4); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
   public String name() { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
   public int type() { int o = __offset(8); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
@@ -24,36 +24,19 @@ public final class ModelProperty extends Table {
    */
   public long flags() { int o = __offset(10); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
   public IdUid indexId() { return indexId(new IdUid()); }
-  public IdUid indexId(IdUid obj) { int o = __offset(12); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
+  public IdUid indexId(IdUid obj) { int o = __offset(12); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
   /**
    * For relations only: name of the target entity
    */
   public String targetEntity() { int o = __offset(14); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer targetEntityAsByteBuffer() { return __vector_as_bytebuffer(14, 1); }
 
-  public static int createModelProperty(FlatBufferBuilder builder,
-      int idOffset,
-      int nameOffset,
-      int type,
-      long flags,
-      int indexIdOffset,
-      int targetEntityOffset) {
-    builder.startObject(6);
-    ModelProperty.addTargetEntity(builder, targetEntityOffset);
-    ModelProperty.addIndexId(builder, indexIdOffset);
-    ModelProperty.addFlags(builder, flags);
-    ModelProperty.addName(builder, nameOffset);
-    ModelProperty.addId(builder, idOffset);
-    ModelProperty.addType(builder, type);
-    return ModelProperty.endModelProperty(builder);
-  }
-
   public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(6); }
-  public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addOffset(0, idOffset, 0); }
+  public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addStruct(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(2, (short)type, (short)0); }
   public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(3, (int)flags, (int)0L); }
-  public static void addIndexId(FlatBufferBuilder builder, int indexIdOffset) { builder.addOffset(4, indexIdOffset, 0); }
+  public static void addIndexId(FlatBufferBuilder builder, int indexIdOffset) { builder.addStruct(4, indexIdOffset, 0); }
   public static void addTargetEntity(FlatBufferBuilder builder, int targetEntityOffset) { builder.addOffset(5, targetEntityOffset, 0); }
   public static int endModelProperty(FlatBufferBuilder builder) {
     int o = builder.endObject();

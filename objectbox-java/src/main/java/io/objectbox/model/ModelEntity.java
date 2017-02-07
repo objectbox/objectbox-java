@@ -15,35 +15,22 @@ public final class ModelEntity extends Table {
   public ModelEntity __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   public IdUid id() { return id(new IdUid()); }
-  public IdUid id(IdUid obj) { int o = __offset(4); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
+  public IdUid id(IdUid obj) { int o = __offset(4); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
   public String name() { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
   public ModelProperty properties(int j) { return properties(new ModelProperty(), j); }
   public ModelProperty properties(ModelProperty obj, int j) { int o = __offset(8); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
   public int propertiesLength() { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; }
   public IdUid lastPropertyId() { return lastPropertyId(new IdUid()); }
-  public IdUid lastPropertyId(IdUid obj) { int o = __offset(10); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
-
-  public static int createModelEntity(FlatBufferBuilder builder,
-      int idOffset,
-      int nameOffset,
-      int propertiesOffset,
-      int lastPropertyIdOffset) {
-    builder.startObject(4);
-    ModelEntity.addLastPropertyId(builder, lastPropertyIdOffset);
-    ModelEntity.addProperties(builder, propertiesOffset);
-    ModelEntity.addName(builder, nameOffset);
-    ModelEntity.addId(builder, idOffset);
-    return ModelEntity.endModelEntity(builder);
-  }
+  public IdUid lastPropertyId(IdUid obj) { int o = __offset(10); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
 
   public static void startModelEntity(FlatBufferBuilder builder) { builder.startObject(4); }
-  public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addOffset(0, idOffset, 0); }
+  public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addStruct(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addProperties(FlatBufferBuilder builder, int propertiesOffset) { builder.addOffset(2, propertiesOffset, 0); }
   public static int createPropertiesVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
   public static void startPropertiesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addLastPropertyId(FlatBufferBuilder builder, int lastPropertyIdOffset) { builder.addOffset(3, lastPropertyIdOffset, 0); }
+  public static void addLastPropertyId(FlatBufferBuilder builder, int lastPropertyIdOffset) { builder.addStruct(3, lastPropertyIdOffset, 0); }
   public static int endModelEntity(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

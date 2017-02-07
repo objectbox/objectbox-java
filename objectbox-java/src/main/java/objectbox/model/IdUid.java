@@ -11,34 +11,23 @@ import com.google.flatbuffers.*;
 /**
  * ID tuple: besides the main ID there is also a UID for verification
  */
-public final class IdUid extends Table {
-  public static IdUid getRootAsIdUid(ByteBuffer _bb) { return getRootAsIdUid(_bb, new IdUid()); }
-  public static IdUid getRootAsIdUid(ByteBuffer _bb, IdUid obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+public final class IdUid extends Struct {
   public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
   public IdUid __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public long id() { int o = __offset(4); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  public long id() { return (long)bb.getInt(bb_pos + 0) & 0xFFFFFFFFL; }
   /**
    * Unique ID (within the model) used to verify external managed IDs.
    * UIDs are also used within the model to make stable references (IDs might conflict during code merges).
    */
-  public long uid() { int o = __offset(6); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
+  public long uid() { return bb.getLong(bb_pos + 8); }
 
-  public static int createIdUid(FlatBufferBuilder builder,
-      long id,
-      long uid) {
-    builder.startObject(2);
-    IdUid.addUid(builder, uid);
-    IdUid.addId(builder, id);
-    return IdUid.endIdUid(builder);
-  }
-
-  public static void startIdUid(FlatBufferBuilder builder) { builder.startObject(2); }
-  public static void addId(FlatBufferBuilder builder, long id) { builder.addInt(0, (int)id, (int)0L); }
-  public static void addUid(FlatBufferBuilder builder, long uid) { builder.addLong(1, uid, 0L); }
-  public static int endIdUid(FlatBufferBuilder builder) {
-    int o = builder.endObject();
-    return o;
+  public static int createIdUid(FlatBufferBuilder builder, long id, long uid) {
+    builder.prep(8, 16);
+    builder.putLong(uid);
+    builder.pad(4);
+    builder.putInt((int)id);
+    return builder.offset();
   }
 }
 
