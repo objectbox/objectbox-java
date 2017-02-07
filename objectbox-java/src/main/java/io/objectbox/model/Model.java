@@ -9,7 +9,10 @@ import com.google.flatbuffers.*;
 
 @SuppressWarnings("unused")
 /**
- * There could be multiple schemas (one dbi per schema)
+ * A model describes all entities and other meta data.
+ * The current model of an app is synced against ObjectBox's persisted schema.
+ * The model itself is not persisted, and thus may change as long as both ends are consistent (Java and native).
+ * There could be multiple models/schemas (one dbi per schema) in the future.
  */
 public final class Model extends Table {
   public static Model getRootAsModel(ByteBuffer _bb) { return getRootAsModel(_bb, new Model()); }
@@ -18,43 +21,62 @@ public final class Model extends Table {
   public Model __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   /**
+   * (Meta) version of the model, which is verified by model sync (e.g. Java version must match native version)
+   */
+  public long modelVersion() { int o = __offset(4); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  /**
    * currently always "default"
    */
-  public String name() { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; }
-  public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
+  public String name() { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; }
+  public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
   /**
-   * User controlled version
+   * User controlled version, not really used at the moment
    */
-  public long version() { int o = __offset(6); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
+  public long version() { int o = __offset(8); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
   public ModelEntity entities(int j) { return entities(new ModelEntity(), j); }
-  public ModelEntity entities(ModelEntity obj, int j) { int o = __offset(8); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int entitiesLength() { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; }
-  public long lastEntityId() { int o = __offset(10); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
-  public long lastIndexId() { int o = __offset(12); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  public ModelEntity entities(ModelEntity obj, int j) { int o = __offset(10); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int entitiesLength() { int o = __offset(10); return o != 0 ? __vector_len(o) : 0; }
+  public IdUid lastEntityId() { return lastEntityId(new IdUid()); }
+  public IdUid lastEntityId(IdUid obj) { int o = __offset(12); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
+  public IdUid lastIndexId() { return lastIndexId(new IdUid()); }
+  public IdUid lastIndexId(IdUid obj) { int o = __offset(14); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
+  public IdUid lastSequenceId() { return lastSequenceId(new IdUid()); }
+  public IdUid lastSequenceId(IdUid obj) { int o = __offset(16); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
+  public IdUid lastRelationId() { return lastRelationId(new IdUid()); }
+  public IdUid lastRelationId(IdUid obj) { int o = __offset(18); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
 
   public static int createModel(FlatBufferBuilder builder,
+      long modelVersion,
       int nameOffset,
       long version,
       int entitiesOffset,
-      long lastEntityId,
-      long lastIndexId) {
-    builder.startObject(5);
+      int lastEntityIdOffset,
+      int lastIndexIdOffset,
+      int lastSequenceIdOffset,
+      int lastRelationIdOffset) {
+    builder.startObject(8);
     Model.addVersion(builder, version);
-    Model.addLastIndexId(builder, lastIndexId);
-    Model.addLastEntityId(builder, lastEntityId);
+    Model.addLastRelationId(builder, lastRelationIdOffset);
+    Model.addLastSequenceId(builder, lastSequenceIdOffset);
+    Model.addLastIndexId(builder, lastIndexIdOffset);
+    Model.addLastEntityId(builder, lastEntityIdOffset);
     Model.addEntities(builder, entitiesOffset);
     Model.addName(builder, nameOffset);
+    Model.addModelVersion(builder, modelVersion);
     return Model.endModel(builder);
   }
 
-  public static void startModel(FlatBufferBuilder builder) { builder.startObject(5); }
-  public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(0, nameOffset, 0); }
-  public static void addVersion(FlatBufferBuilder builder, long version) { builder.addLong(1, version, 0L); }
-  public static void addEntities(FlatBufferBuilder builder, int entitiesOffset) { builder.addOffset(2, entitiesOffset, 0); }
+  public static void startModel(FlatBufferBuilder builder) { builder.startObject(8); }
+  public static void addModelVersion(FlatBufferBuilder builder, long modelVersion) { builder.addInt(0, (int)modelVersion, (int)0L); }
+  public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
+  public static void addVersion(FlatBufferBuilder builder, long version) { builder.addLong(2, version, 0L); }
+  public static void addEntities(FlatBufferBuilder builder, int entitiesOffset) { builder.addOffset(3, entitiesOffset, 0); }
   public static int createEntitiesVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
   public static void startEntitiesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addLastEntityId(FlatBufferBuilder builder, long lastEntityId) { builder.addInt(3, (int)lastEntityId, (int)0L); }
-  public static void addLastIndexId(FlatBufferBuilder builder, long lastIndexId) { builder.addInt(4, (int)lastIndexId, (int)0L); }
+  public static void addLastEntityId(FlatBufferBuilder builder, int lastEntityIdOffset) { builder.addOffset(4, lastEntityIdOffset, 0); }
+  public static void addLastIndexId(FlatBufferBuilder builder, int lastIndexIdOffset) { builder.addOffset(5, lastIndexIdOffset, 0); }
+  public static void addLastSequenceId(FlatBufferBuilder builder, int lastSequenceIdOffset) { builder.addOffset(6, lastSequenceIdOffset, 0); }
+  public static void addLastRelationId(FlatBufferBuilder builder, int lastRelationIdOffset) { builder.addOffset(7, lastRelationIdOffset, 0); }
   public static int endModel(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
