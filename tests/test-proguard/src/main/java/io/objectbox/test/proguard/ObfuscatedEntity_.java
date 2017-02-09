@@ -13,9 +13,9 @@ public class ObfuscatedEntity_ implements Properties {
 
     public static final String __NAME_IN_DB = "ObfuscatedEntity";
 
-    public final static Property id = new Property(0, 0, long.class, "id", true, "id");
-    public final static Property myInt = new Property(1, 0, int.class, "myInt");
-    public final static Property myString = new Property(2, 0, String.class, "myString");
+    public final static Property id = new Property(0, 1, long.class, "id", true, "id");
+    public final static Property myInt = new Property(1, 2, int.class, "myInt");
+    public final static Property myString = new Property(2, 3, String.class, "myString");
 
     public final static Property[] __ALL_PROPERTIES = {
         id,

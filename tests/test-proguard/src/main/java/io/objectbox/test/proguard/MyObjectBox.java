@@ -25,14 +25,17 @@ public class MyObjectBox {
 
     private static byte[] getModel() {
         ModelBuilder modelBuilder = new ModelBuilder();
+        modelBuilder.lastEntityId(1, 1001L);
+        modelBuilder.lastIndexId(0, 0L);
 
         EntityBuilder entityBuilder;
 
         entityBuilder = modelBuilder.entity("ObfuscatedEntity");
-        entityBuilder.property("id", PropertyType.Long)
+        entityBuilder.id(1, 1001L).lastPropertyId(3, 1004L);
+        entityBuilder.property("id", PropertyType.Long).id(1, 1002L)
             .flags(PropertyFlags.ID);
-        entityBuilder.property("myInt", PropertyType.Int);
-        entityBuilder.property("myString", PropertyType.String);
+        entityBuilder.property("myInt", PropertyType.Int).id(2, 1003L);
+        entityBuilder.property("myString", PropertyType.String).id(3, 1004L);
         entityBuilder.entityDone();
 
         return modelBuilder.build();
