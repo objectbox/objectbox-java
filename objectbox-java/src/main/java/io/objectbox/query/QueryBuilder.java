@@ -1,5 +1,7 @@
 package io.objectbox.query;
 
+import java.util.Date;
+
 import io.objectbox.Box;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Experimental;
@@ -209,8 +211,30 @@ public class QueryBuilder<T> {
         return this;
     }
 
+    public QueryBuilder<T> equal(Property property, boolean value) {
+        nativeEqual(handle, property.getId(), value ? 1 : 0);
+        return this;
+    }
+
+    /** @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead. */
+    public QueryBuilder<T> equal(Property property, Date value) {
+        nativeEqual(handle, property.getId(), value.getTime());
+        return this;
+    }
+
     public QueryBuilder<T> notEqual(Property property, long value) {
         nativeNotEqual(handle, property.getId(), value);
+        return this;
+    }
+
+    public QueryBuilder<T> notEqual(Property property, boolean value) {
+        nativeNotEqual(handle, property.getId(), value ? 1 : 0);
+        return this;
+    }
+
+    /** @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead. */
+    public QueryBuilder<T> notEqual(Property property, Date value) {
+        nativeNotEqual(handle, property.getId(), value.getTime());
         return this;
     }
 
@@ -224,8 +248,25 @@ public class QueryBuilder<T> {
         return this;
     }
 
+    public QueryBuilder<T> less(Property property, Date value) {
+        nativeLess(handle, property.getId(), value.getTime());
+        return this;
+    }
+
+    /** @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead. */
+    public QueryBuilder<T> greater(Property property, Date value) {
+        nativeGreater(handle, property.getId(), value.getTime());
+        return this;
+    }
+
     public QueryBuilder<T> between(Property property, long value1, long value2) {
         nativeBetween(handle, property.getId(), value1, value2);
+        return this;
+    }
+
+    /** @throws NullPointerException if one of the given values is null. */
+    public QueryBuilder<T> between(Property property, Date value1, Date value2) {
+        nativeBetween(handle, property.getId(), value1.getTime(), value2.getTime());
         return this;
     }
 

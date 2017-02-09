@@ -14,6 +14,7 @@ import io.objectbox.query.QueryBuilder;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
 
+import static io.objectbox.TestEntity_.simpleBoolean;
 import static io.objectbox.TestEntity_.simpleFloat;
 import static io.objectbox.TestEntity_.simpleInt;
 import static io.objectbox.TestEntity_.simpleLong;
@@ -57,6 +58,18 @@ public class QueryTest extends AbstractObjectBoxTest {
         List<TestEntity> all = query.find();
         assertEquals(1, all.size());
         assertEquals(8, all.get(0).getId());
+    }
+
+    @Test
+    public void testBooleanEqual() {
+        putTestEntitiesScalars();
+
+        Query<TestEntity> query = box.query().equal(simpleBoolean, true).build();
+        assertEquals(5, query.count());
+        assertEquals(1, query.findFirst().getId());
+        query.setParameter(simpleBoolean, false);
+        assertEquals(5, query.count());
+        assertEquals(2, query.findFirst().getId());
     }
 
     @Test

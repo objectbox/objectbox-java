@@ -106,7 +106,7 @@ public class Query<T> {
      * (lookups by ID are also very efficient in ObjectBox).
      */
     public long[] findIds() {
-        if(hasOrder) {
+        if (hasOrder) {
             throw new UnsupportedOperationException("This method is currently only available for unordered queries");
         }
         return box.internalCallWithReaderHandle(new CallWithHandle<long[]>() {
@@ -216,8 +216,11 @@ public class Query<T> {
      * @throws NullPointerException if given date is null
      */
     public Query<T> setParameter(Property property, Date value) {
-        setParameter(property, value.getTime());
-        return this;
+        return setParameter(property, value.getTime());
+    }
+
+    public Query<T> setParameter(Property property, boolean value) {
+        return setParameter(property, value ? 1 : 0);
     }
 
     public Query<T> setParameters(Property property, long value1, long value2) {
