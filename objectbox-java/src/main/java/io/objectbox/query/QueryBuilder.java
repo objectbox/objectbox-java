@@ -90,9 +90,9 @@ public class QueryBuilder<T> {
 
     private static native long nativeBetween(long handle, int propertyId, long value1, long value2);
 
-    private static native long nativeIn(long handle, int propertyId, int[] values);
+    private static native long nativeIn(long handle, int propertyId, int[] values, boolean negate);
 
-    private static native long nativeIn(long handle, int propertyId, long[] values);
+    private static native long nativeIn(long handle, int propertyId, long[] values, boolean negate);
 
     // ------------------------------ Strings ------------------------------
 
@@ -272,12 +272,22 @@ public class QueryBuilder<T> {
 
     // FIXME DbException: invalid unordered_map<K, T> key
     public QueryBuilder<T> in(Property property, long[] values) {
-        nativeIn(handle, property.getId(), values);
+        nativeIn(handle, property.getId(), values, false);
         return this;
     }
 
     public QueryBuilder<T> in(Property property, int[] values) {
-        nativeIn(handle, property.getId(), values);
+        nativeIn(handle, property.getId(), values, false);
+        return this;
+    }
+
+    public QueryBuilder<T> notIn(Property property, long[] values) {
+        nativeIn(handle, property.getId(), values, true);
+        return this;
+    }
+
+    public QueryBuilder<T> notIn(Property property, int[] values) {
+        nativeIn(handle, property.getId(), values, true);
         return this;
     }
 

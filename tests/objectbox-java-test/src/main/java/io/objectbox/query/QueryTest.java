@@ -116,6 +116,19 @@ public class QueryTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testScalarNotIn() {
+        putTestEntitiesScalars();
+
+        int[] valuesInt = {1, 1, 2, 3, 2003, 2007, 2002, -1};
+        Query<TestEntity> query = box.query().notIn(simpleInt, valuesInt).build();
+        assertEquals(7, query.count());
+
+        long[] valuesLong = {1, 1, 2, 3, 3003, 3007, 3002, -1};
+        query = box.query().notIn(simpleLong, valuesLong).build();
+        assertEquals(7, query.count());
+    }
+
+    @Test
     public void testOffsetLimit() {
         putTestEntitiesScalars();
         Query<TestEntity> query = box.query().greater(simpleInt, 2002).less(simpleShort, 2108).build();
