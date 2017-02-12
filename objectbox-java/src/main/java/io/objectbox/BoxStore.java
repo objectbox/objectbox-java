@@ -445,29 +445,45 @@ public class BoxStore implements Closeable {
         }
     }
 
+    /**
+     * Runs the given Runnable as a transaction in a separate thread.
+     * Once the transaction completes the given callback is called (callback may be null).
+     */
     public void runInTxAsync(final Runnable runnable, final TxCallback<Void> callback) {
         new Thread() {
             @Override
             public void run() {
                 try {
                     runInTx(runnable);
-                    callback.txFinished(null, null);
+                    if (callback != null) {
+                        callback.txFinished(null, null);
+                    }
                 } catch (Throwable failure) {
-                    callback.txFinished(null, failure);
+                    if (callback != null) {
+                        callback.txFinished(null, failure);
+                    }
                 }
             }
         }.start();
     }
 
+    /**
+     * Runs the given Runnable as a transaction in a separate thread.
+     * Once the transaction completes the given callback is called (callback may be null).
+     */
     public <R> void callInTxAsync(final Callable<R> callable, final TxCallback<R> callback) {
         new Thread() {
             @Override
             public void run() {
                 try {
                     R result = callInTx(callable);
-                    callback.txFinished(result, null);
+                    if (callback != null) {
+                        callback.txFinished(result, null);
+                    }
                 } catch (Throwable failure) {
-                    callback.txFinished(null, failure);
+                    if (callback != null) {
+                        callback.txFinished(null, failure);
+                    }
                 }
             }
         }.start();
