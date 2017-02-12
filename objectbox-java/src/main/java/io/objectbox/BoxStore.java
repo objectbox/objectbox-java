@@ -1,8 +1,8 @@
 package io.objectbox;
 
 import org.greenrobot.essentials.collections.LongHashMap;
-import org.greenrobot.essentials.collections.Multimap;
-import org.greenrobot.essentials.collections.Multimap.ListType;
+import org.greenrobot.essentials.collections.MultimapSet;
+import org.greenrobot.essentials.collections.MultimapSet.SetType;
 import org.greenrobot.essentials.io.IoUtils;
 
 import java.io.BufferedInputStream;
@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -165,7 +166,7 @@ public class BoxStore implements Closeable {
     private final Map<Class, Integer> entityTypeIdByClass;
     private final LongHashMap<Class> classByEntityTypeId;
     private final int[] allEntityTypeIds;
-    private final Multimap<Integer, ObjectClassListener> listenersByEntityTypeId;
+    private final MultimapSet<Integer, ObjectClassListener> listenersByEntityTypeId;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
 
@@ -194,7 +195,7 @@ public class BoxStore implements Closeable {
         entityCursorClassByClass = new HashMap<>();
         entityTypeIdByClass = new HashMap<>();
         classByEntityTypeId = new LongHashMap<>();
-        listenersByEntityTypeId = Multimap.create(ListType.THREAD_SAFE);
+        listenersByEntityTypeId = MultimapSet.create(SetType.THREAD_SAFE);
 
         for (EntityClasses entity : builder.entityClasses) {
             try {
@@ -349,13 +350,13 @@ public class BoxStore implements Closeable {
             box.txCommitted(tx);
         }
 
-        if(entityTypeIdsAffected != null) {
+        if (entityTypeIdsAffected != null) {
             for (int entityTypeId : entityTypeIdsAffected) {
-                List<ObjectClassListener> listeners = listenersByEntityTypeId.get(entityTypeId);
-                if(listeners!=null) {
+                Collection<ObjectClassListener> listeners = listenersByEntityTypeId.get(entityTypeId);
+                if (listeners != null) {
                     Class objectClass = classByEntityTypeId.get(entityTypeId);
-                    if(objectClass == null) {
-                        throw new IllegalStateException("Untracked entity type ID: "+entityTypeId);
+                    if (objectClass == null) {
+                        throw new IllegalStateException("Untracked entity type ID: " + entityTypeId);
                     }
                     for (ObjectClassListener listener : listeners) {
                         listener.handleChanges(objectClass);

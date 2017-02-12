@@ -74,6 +74,8 @@ public class ObjectClassListenerTest extends AbstractObjectBoxTest {
         putTestEntities(1);
         assertEquals(0, classesWithChanges.size());
 
+        // Adding twice should not trigger notification twice
+        store.addObjectClassListener(objectClassListener, TestEntityMinimal.class);
         Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
         boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
         assertEquals(1, classesWithChanges.size());
