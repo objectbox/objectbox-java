@@ -21,7 +21,7 @@ public class Transaction implements Closeable {
 
     static native void nativeDestroy(long transaction);
 
-    static native void nativeCommit(long transaction);
+    static native int[] nativeCommit(long transaction);
 
     static native void nativeAbort(long transaction);
 
@@ -78,8 +78,8 @@ public class Transaction implements Closeable {
 
     public void commit() {
         checkOpen();
-        nativeCommit(transaction);
-        store.txCommitted(this);
+        int[] entityTypeIdsAffected = nativeCommit(transaction);
+        store.txCommitted(this, entityTypeIdsAffected);
     }
 
     public void commitAndClose() {

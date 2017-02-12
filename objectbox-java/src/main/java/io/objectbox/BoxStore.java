@@ -1,5 +1,8 @@
 package io.objectbox;
 
+import org.greenrobot.essentials.collections.LongHashMap;
+import org.greenrobot.essentials.collections.Multimap;
+import org.greenrobot.essentials.collections.Multimap.ListType;
 import org.greenrobot.essentials.io.IoUtils;
 
 import java.io.BufferedInputStream;
@@ -59,8 +62,7 @@ public class BoxStore implements Closeable {
                 URLConnection urlConnection = resource.openConnection();
                 int length = urlConnection.getContentLength();
                 long lastModified = urlConnection.getLastModified();
-                if (!file.exists() || file.length() != length ||
-                        file.lastModified() != lastModified) {
+                if (!file.exists() || file.length() != length || file.lastModified() != lastModified) {
                     InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                     try {
                         OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
@@ -153,14 +155,17 @@ public class BoxStore implements Closeable {
     static native int nativeCleanStaleReadTransactions(long store);
 
     public static String getVersion() {
-        return "0.9.7-2017-02-09";
+        return "0.9.8-2017-02-12";
     }
 
     private final File directory;
     private final long handle;
     private final Map<Class, String> entityNameByClass;
     private final Map<Class, Class<Cursor>> entityCursorClassByClass;
-    private final Map<Class, Integer> entityIdByClass;
+    private final Map<Class, Integer> entityTypeIdByClass;
+    private final LongHashMap<Class> classByEntityTypeId;
+    private final int[] allEntityTypeIds;
+    private final Multimap<Integer, ObjectClassListener> listenersByEntityTypeId;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
 
@@ -187,14 +192,17 @@ public class BoxStore implements Closeable {
         handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.model);
         entityNameByClass = new HashMap<>();
         entityCursorClassByClass = new HashMap<>();
-        entityIdByClass = new HashMap<>();
+        entityTypeIdByClass = new HashMap<>();
+        classByEntityTypeId = new LongHashMap<>();
+        listenersByEntityTypeId = Multimap.create(ListType.THREAD_SAFE);
 
         for (EntityClasses entity : builder.entityClasses) {
             try {
                 entityNameByClass.put(entity.entityClass, entity.entityName);
                 entityCursorClassByClass.put(entity.entityClass, entity.cursorClass);
                 int entityId = nativeRegisterEntityClass(handle, entity.entityName, entity.entityClass);
-                entityIdByClass.put(entity.entityClass, entityId);
+                entityTypeIdByClass.put(entity.entityClass, entityId);
+                classByEntityTypeId.put(entityId, entity.entityClass);
                 for (Property property : entity.properties.getAllProperties()) {
                     if (property.customType != null) {
                         if (property.converterClass == null) {
@@ -207,6 +215,12 @@ public class BoxStore implements Closeable {
             } catch (RuntimeException e) {
                 throw new RuntimeException("Could not setup up entity " + entity.entityClass, e);
             }
+        }
+        int size = classByEntityTypeId.size();
+        allEntityTypeIds = new int[size];
+        long[] entityIdsLong = classByEntityTypeId.keys();
+        for (int i = 0; i < size; i++) {
+            allEntityTypeIds[i] = (int) entityIdsLong[i];
         }
     }
 
@@ -227,12 +241,12 @@ public class BoxStore implements Closeable {
     }
 
     Integer getEntityId(Class entityClass) {
-        return entityIdByClass.get(entityClass);
+        return entityTypeIdByClass.get(entityClass);
     }
 
     @Internal
     public int getEntityIdOrThrow(Class entityClass) {
-        Integer id = entityIdByClass.get(entityClass);
+        Integer id = entityTypeIdByClass.get(entityClass);
         if (id == null) {
             throw new DbSchemaException("No entity registered for " + entityClass);
         }
@@ -325,7 +339,7 @@ public class BoxStore implements Closeable {
         nativeDropAllData(handle);
     }
 
-    public void txCommitted(Transaction tx) {
+    void txCommitted(Transaction tx, int[] entityTypeIdsAffected) {
         // Only one write TX at a time, but there is a chance two writers race after commit: thus synchronize
         synchronized (txCommitCountLock) {
             commitCount++; // Overflow is OK because we check for equality
@@ -333,6 +347,21 @@ public class BoxStore implements Closeable {
 
         for (Box box : boxes.values()) {
             box.txCommitted(tx);
+        }
+
+        if(entityTypeIdsAffected != null) {
+            for (int entityTypeId : entityTypeIdsAffected) {
+                List<ObjectClassListener> listeners = listenersByEntityTypeId.get(entityTypeId);
+                if(listeners!=null) {
+                    Class objectClass = classByEntityTypeId.get(entityTypeId);
+                    if(objectClass == null) {
+                        throw new IllegalStateException("Untracked entity type ID: "+entityTypeId);
+                    }
+                    for (ObjectClassListener listener : listeners) {
+                        listener.handleChanges(objectClass);
+                    }
+                }
+            }
         }
     }
 
@@ -454,5 +483,19 @@ public class BoxStore implements Closeable {
     @Internal
     long internalHandle() {
         return handle;
+    }
+
+    public void addObjectClassListener(ObjectClassListener objectClassListener) {
+        for (int entityTypeId : allEntityTypeIds) {
+            listenersByEntityTypeId.putElement(entityTypeId, objectClassListener);
+        }
+    }
+
+    public void addObjectClassListener(ObjectClassListener objectClassListener, Class objectClass) {
+        Integer entityTypeId = entityTypeIdByClass.get(objectClass);
+        if (entityTypeId == null) {
+            throw new IllegalArgumentException("Not a registered object class: " + objectClass);
+        }
+        listenersByEntityTypeId.putElement(entityTypeId, objectClassListener);
     }
 }
