@@ -498,4 +498,14 @@ public class BoxStore implements Closeable {
         }
         listenersByEntityTypeId.putElement(entityTypeId, objectClassListener);
     }
+
+    /**
+     * Removes the given objectClassListener from all object classes it added itself to earlier.
+     */
+    public void removeObjectClassListener(ObjectClassListener objectClassListener) {
+        for (int entityTypeId : allEntityTypeIds) {
+            listenersByEntityTypeId.removeElement(entityTypeId, objectClassListener);
+        }
+    }
+
 }

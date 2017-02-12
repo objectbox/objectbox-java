@@ -1,5 +1,6 @@
 package io.objectbox;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -15,18 +16,32 @@ public class ObjectClassListenerTest extends AbstractObjectBoxTest {
         return createBoxStoreBuilderWithTwoEntities(false).build();
     }
 
+    final List<Class> classesWithChanges = new ArrayList<>();
+    ObjectClassListener objectClassListener = new ObjectClassListener() {
+        @Override
+        public void handleChanges(Class objectClass) {
+            classesWithChanges.add(objectClass);
+        }
+    };
+
+    Runnable txRunnable = new Runnable() {
+        @Override
+        public void run() {
+            putTestEntities(3);
+            Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
+            boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
+            assertEquals(0, classesWithChanges.size());
+        }
+    };
+
+    @Before
+    public void clear() {
+        classesWithChanges.clear();
+    }
+
     @Test
     public void testTwoObjectClassesChanged_catchAllListener() {
-        final Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
-        final List<Class> classesWithChanges = new ArrayList<>();
-
-        store.addObjectClassListener(new ObjectClassListener() {
-            @Override
-            public void handleChanges(Class objectClass) {
-                classesWithChanges.add(objectClass);
-            }
-        });
-
+        store.addObjectClassListener(objectClassListener);
         store.runInTx(new Runnable() {
             @Override
             public void run() {
@@ -36,40 +51,21 @@ public class ObjectClassListenerTest extends AbstractObjectBoxTest {
         });
         assertEquals(0, classesWithChanges.size());
 
-        store.runInTx(new Runnable() {
-            @Override
-            public void run() {
-                putTestEntities(3);
-                boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
-                assertEquals(0, classesWithChanges.size());
-            }
-        });
-
+        store.runInTx(txRunnable);
         assertEquals(2, classesWithChanges.size());
         assertTrue(classesWithChanges.contains(TestEntity.class));
         assertTrue(classesWithChanges.contains(TestEntityMinimal.class));
+
+        classesWithChanges.clear();
+        store.removeObjectClassListener(objectClassListener);
+        store.runInTx(txRunnable);
+        assertEquals(0, classesWithChanges.size());
     }
 
     @Test
     public void testTwoObjectClassesChanged_oneClassListener() {
-        final Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
-        final List<Class> classesWithChanges = new ArrayList<>();
-
-        store.addObjectClassListener(new ObjectClassListener() {
-            @Override
-            public void handleChanges(Class objectClass) {
-                classesWithChanges.add(objectClass);
-            }
-        }, TestEntityMinimal.class);
-
-        store.runInTx(new Runnable() {
-            @Override
-            public void run() {
-                putTestEntities(3);
-                boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
-                assertEquals(0, classesWithChanges.size());
-            }
-        });
+        store.addObjectClassListener(objectClassListener, TestEntityMinimal.class);
+        store.runInTx(txRunnable);
 
         assertEquals(1, classesWithChanges.size());
         assertEquals(classesWithChanges.get(0), TestEntityMinimal.class);
@@ -78,8 +74,14 @@ public class ObjectClassListenerTest extends AbstractObjectBoxTest {
         putTestEntities(1);
         assertEquals(0, classesWithChanges.size());
 
+        Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
         boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
         assertEquals(1, classesWithChanges.size());
+
+        classesWithChanges.clear();
+        store.removeObjectClassListener(objectClassListener);
+        store.runInTx(txRunnable);
+        assertEquals(0, classesWithChanges.size());
     }
 
 }
