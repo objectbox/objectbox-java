@@ -1,4 +1,4 @@
-package io.objectbox;
+package io.objectbox.ideasonly;
 
 public class ModelModifier {
     public class EntityModifier {

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.ideasonly.ModelUpdate;
 
 public class BoxStoreBuilder {
 
@@ -125,7 +126,8 @@ public class BoxStoreBuilder {
         entityClasses.add(info);
     }
 
-    public BoxStoreBuilder modelUpdate(ModelUpdate modelUpdate) {
+    // Not sure this will ever be implements
+    BoxStoreBuilder modelUpdate(ModelUpdate modelUpdate) {
         throw new UnsupportedOperationException("Not yet implemented");
 //        this.modelUpdate = modelUpdate;
 //        return this;
