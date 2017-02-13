@@ -129,7 +129,7 @@ public class QueryBuilder<T> {
         super.finalize();
     }
 
-    public void close() {
+    public synchronized void close() {
         if (handle != 0) {
             nativeDestroy(handle);
             handle = 0;

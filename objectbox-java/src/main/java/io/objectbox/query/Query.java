@@ -17,6 +17,9 @@ import io.objectbox.internal.CallWithHandle;
  */
 @Beta
 public class Query<T> {
+
+    private static native long nativeDestroy(long handle);
+
     private native static Object nativeFindFirst(long handle, long cursorHandle);
 
     private native static Object nativeFindUnique(long handle, long cursorHandle);
@@ -56,13 +59,26 @@ public class Query<T> {
                                                    double value2);
 
     private final Box<T> box;
-    private final long handle;
+    private long handle;
     private final boolean hasOrder;
 
     Query(Box<T> box, long queryHandle, boolean hasOrder) {
         this.box = box;
         handle = queryHandle;
         this.hasOrder = hasOrder;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
+    }
+
+    public synchronized void close() {
+        if (handle != 0) {
+            nativeDestroy(handle);
+            handle = 0;
+        }
     }
 
     public T findFirst() {
