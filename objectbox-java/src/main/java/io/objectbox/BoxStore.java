@@ -26,6 +26,9 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import io.objectbox.BoxStoreBuilder.EntityClasses;
 import io.objectbox.annotation.apihint.Beta;
@@ -171,6 +174,7 @@ public class BoxStore implements Closeable {
     private final MultimapSet<Integer, ObjectClassObserver> listenersByEntityTypeId;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
+    private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     /** Set when running inside TX */
     final ThreadLocal<Transaction> activeTx = new ThreadLocal<>();
@@ -451,7 +455,7 @@ public class BoxStore implements Closeable {
      * Once the transaction completes the given callback is called (callback may be null).
      */
     public void runInTxAsync(final Runnable runnable, final TxCallback<Void> callback) {
-        new Thread() {
+        threadPool.submit(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -465,7 +469,7 @@ public class BoxStore implements Closeable {
                     }
                 }
             }
-        }.start();
+        });
     }
 
     /**
@@ -473,7 +477,7 @@ public class BoxStore implements Closeable {
      * Once the transaction completes the given callback is called (callback may be null).
      */
     public <R> void callInTxAsync(final Callable<R> callable, final TxCallback<R> callback) {
-        new Thread() {
+        threadPool.submit(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -487,7 +491,7 @@ public class BoxStore implements Closeable {
                     }
                 }
             }
-        }.start();
+        });
     }
 
     public String diagnose() {
@@ -571,6 +575,11 @@ public class BoxStore implements Closeable {
             }
             listenersByEntityTypeId.removeElement(entityTypeId, observer);
         }
+    }
+
+    @Internal
+    public Future internalScheduleThread(Runnable runnable) {
+        return threadPool.submit(runnable);
     }
 
 }

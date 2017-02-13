@@ -463,6 +463,10 @@ public class Box<T> {
         }
     }
 
+    public Class<T> getEntityClass() {
+        return entityClass;
+    }
+
     @Internal
     public List<T> getBacklinkEntities(int entityId, Property relationIdProperty, long key) {
         Cursor<T> reader = getReader();
