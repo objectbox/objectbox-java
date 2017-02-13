@@ -2,8 +2,12 @@ package io.objectbox.query;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import io.objectbox.Box;
+import io.objectbox.BoxStore;
+import io.objectbox.ObjectClassObserver;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.internal.CallWithHandle;
@@ -17,6 +21,8 @@ import io.objectbox.internal.CallWithHandle;
  */
 @Beta
 public class Query<T> {
+
+    private ObjectClassObserver objectClassObserver;
 
     private static native long nativeDestroy(long handle);
 
@@ -59,8 +65,9 @@ public class Query<T> {
                                                    double value2);
 
     private final Box<T> box;
-    private long handle;
     private final boolean hasOrder;
+    private long handle;
+    private Set<QueryObserver<T>> observers = new CopyOnWriteArraySet();
 
     Query(Box<T> box, long queryHandle, boolean hasOrder) {
         this.box = box;
@@ -256,6 +263,37 @@ public class Query<T> {
                 return nativeRemove(handle, cursorHandle);
             }
         });
+    }
+
+    public synchronized void subscribe(QueryObserver<T> observer) {
+        final BoxStore store = box.getStore();
+        if (objectClassObserver == null) {
+            objectClassObserver = new ObjectClassObserver() {
+                @Override
+                public void onChanges(Class objectClass) {
+                    store.internalScheduleThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            List<T> result = find();
+                            for (QueryObserver<T> observer : observers) {
+                                observer.onQueryChanges(result);
+                            }
+                        }
+                    });
+                }
+            };
+        }
+        if (observers.isEmpty()) {
+            store.subscribeWeak(objectClassObserver, box.getEntityClass());
+        }
+        observers.add(observer);
+    }
+
+    public synchronized void unsubscribe(QueryObserver<T> observer) {
+        observers.remove(observer);
+        if (observers.isEmpty() && objectClassObserver != null) {
+            box.getStore().unsubscribe(objectClassObserver);
+        }
     }
 
 }

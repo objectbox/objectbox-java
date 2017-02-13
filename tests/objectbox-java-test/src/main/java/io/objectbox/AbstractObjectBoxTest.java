@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import io.objectbox.ModelBuilder.EntityBuilder;
 import io.objectbox.ModelBuilder.PropertyBuilder;
@@ -224,4 +226,13 @@ public abstract class AbstractObjectBoxTest {
     protected List<TestEntity> putTestEntities(int count) {
         return putTestEntities(count, "foo", 1);
     }
+
+    protected void assertLatchCountedDown(CountDownLatch latch, int seconds) {
+        try {
+            assertTrue(latch.await(seconds, TimeUnit.SECONDS));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

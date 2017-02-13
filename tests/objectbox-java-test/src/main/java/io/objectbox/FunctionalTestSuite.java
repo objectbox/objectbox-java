@@ -5,6 +5,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import io.objectbox.query.LazyListTest;
+import io.objectbox.query.QueryObserverTest;
 import io.objectbox.query.QueryTest;
 
 @RunWith(Suite.class)
@@ -16,6 +17,7 @@ import io.objectbox.query.QueryTest;
         CursorBytesTest.class,
         LazyListTest.class,
         ObjectClassObserverTest.class,
+        QueryObserverTest.class,
         QueryTest.class,
         TransactionTest.class,
 })
