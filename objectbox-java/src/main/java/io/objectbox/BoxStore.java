@@ -166,7 +166,7 @@ public class BoxStore implements Closeable {
     private final Map<Class, Integer> entityTypeIdByClass;
     private final LongHashMap<Class> classByEntityTypeId;
     private final int[] allEntityTypeIds;
-    private final MultimapSet<Integer, ObjectClassListener> listenersByEntityTypeId;
+    private final MultimapSet<Integer, ObjectClassObserver> listenersByEntityTypeId;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
 
@@ -352,13 +352,13 @@ public class BoxStore implements Closeable {
 
         if (entityTypeIdsAffected != null) {
             for (int entityTypeId : entityTypeIdsAffected) {
-                Collection<ObjectClassListener> listeners = listenersByEntityTypeId.get(entityTypeId);
+                Collection<ObjectClassObserver> listeners = listenersByEntityTypeId.get(entityTypeId);
                 if (listeners != null) {
                     Class objectClass = classByEntityTypeId.get(entityTypeId);
                     if (objectClass == null) {
                         throw new IllegalStateException("Untracked entity type ID: " + entityTypeId);
                     }
-                    for (ObjectClassListener listener : listeners) {
+                    for (ObjectClassObserver listener : listeners) {
                         listener.handleChanges(objectClass);
                     }
                 }
@@ -502,26 +502,26 @@ public class BoxStore implements Closeable {
         return handle;
     }
 
-    public void addObjectClassListener(ObjectClassListener objectClassListener) {
+    public void addObjectClassObserver(ObjectClassObserver objectClassObserver) {
         for (int entityTypeId : allEntityTypeIds) {
-            listenersByEntityTypeId.putElement(entityTypeId, objectClassListener);
+            listenersByEntityTypeId.putElement(entityTypeId, objectClassObserver);
         }
     }
 
-    public void addObjectClassListener(ObjectClassListener objectClassListener, Class objectClass) {
+    public void addObjectClassObserver(ObjectClassObserver objectClassObserver, Class objectClass) {
         Integer entityTypeId = entityTypeIdByClass.get(objectClass);
         if (entityTypeId == null) {
             throw new IllegalArgumentException("Not a registered object class: " + objectClass);
         }
-        listenersByEntityTypeId.putElement(entityTypeId, objectClassListener);
+        listenersByEntityTypeId.putElement(entityTypeId, objectClassObserver);
     }
 
     /**
-     * Removes the given objectClassListener from all object classes it added itself to earlier.
+     * Removes the given objectClassObserver from all object classes it added itself to earlier.
      */
-    public void removeObjectClassListener(ObjectClassListener objectClassListener) {
+    public void removeObjectClassObserver(ObjectClassObserver objectClassObserver) {
         for (int entityTypeId : allEntityTypeIds) {
-            listenersByEntityTypeId.removeElement(entityTypeId, objectClassListener);
+            listenersByEntityTypeId.removeElement(entityTypeId, objectClassObserver);
         }
     }
 

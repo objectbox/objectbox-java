@@ -10,14 +10,14 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class ObjectClassListenerTest extends AbstractObjectBoxTest {
+public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
     protected BoxStore createBoxStore() {
         return createBoxStoreBuilderWithTwoEntities(false).build();
     }
 
     final List<Class> classesWithChanges = new ArrayList<>();
-    ObjectClassListener objectClassListener = new ObjectClassListener() {
+    ObjectClassObserver objectClassObserver = new ObjectClassObserver() {
         @Override
         public void handleChanges(Class objectClass) {
             classesWithChanges.add(objectClass);
@@ -41,7 +41,7 @@ public class ObjectClassListenerTest extends AbstractObjectBoxTest {
 
     @Test
     public void testTwoObjectClassesChanged_catchAllListener() {
-        store.addObjectClassListener(objectClassListener);
+        store.addObjectClassObserver(objectClassObserver);
         store.runInTx(new Runnable() {
             @Override
             public void run() {
@@ -57,14 +57,14 @@ public class ObjectClassListenerTest extends AbstractObjectBoxTest {
         assertTrue(classesWithChanges.contains(TestEntityMinimal.class));
 
         classesWithChanges.clear();
-        store.removeObjectClassListener(objectClassListener);
+        store.removeObjectClassObserver(objectClassObserver);
         store.runInTx(txRunnable);
         assertEquals(0, classesWithChanges.size());
     }
 
     @Test
     public void testTwoObjectClassesChanged_oneClassListener() {
-        store.addObjectClassListener(objectClassListener, TestEntityMinimal.class);
+        store.addObjectClassObserver(objectClassObserver, TestEntityMinimal.class);
         store.runInTx(txRunnable);
 
         assertEquals(1, classesWithChanges.size());
@@ -75,13 +75,13 @@ public class ObjectClassListenerTest extends AbstractObjectBoxTest {
         assertEquals(0, classesWithChanges.size());
 
         // Adding twice should not trigger notification twice
-        store.addObjectClassListener(objectClassListener, TestEntityMinimal.class);
+        store.addObjectClassObserver(objectClassObserver, TestEntityMinimal.class);
         Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
         boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
         assertEquals(1, classesWithChanges.size());
 
         classesWithChanges.clear();
-        store.removeObjectClassListener(objectClassListener);
+        store.removeObjectClassObserver(objectClassObserver);
         store.runInTx(txRunnable);
         assertEquals(0, classesWithChanges.size());
     }
