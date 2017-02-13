@@ -14,8 +14,9 @@ import io.objectbox.query.QueryTest;
         BoxStoreBuilderTest.class,
         CursorTest.class,
         CursorBytesTest.class,
-        QueryTest.class,
         LazyListTest.class,
+        ObjectClassObserverTest.class,
+        QueryTest.class,
         TransactionTest.class,
 })
 public class FunctionalTestSuite {

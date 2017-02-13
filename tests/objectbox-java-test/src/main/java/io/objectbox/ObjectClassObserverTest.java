@@ -19,7 +19,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     final List<Class> classesWithChanges = new ArrayList<>();
     ObjectClassObserver objectClassObserver = new ObjectClassObserver() {
         @Override
-        public void handleChanges(Class objectClass) {
+        public void onChanges(Class objectClass) {
             classesWithChanges.add(objectClass);
         }
     };
@@ -41,7 +41,20 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
     @Test
     public void testTwoObjectClassesChanged_catchAllListener() {
-        store.addObjectClassObserver(objectClassObserver);
+        testTwoObjectClassesChanged_catchAllListener(false);
+    }
+
+    @Test
+    public void testTwoObjectClassesChanged_catchAllListenerWeak() {
+        testTwoObjectClassesChanged_catchAllListener(true);
+    }
+
+    public void testTwoObjectClassesChanged_catchAllListener(boolean weak) {
+        if (weak) {
+            store.addObjectClassObserverWeak(objectClassObserver);
+        } else {
+            store.addObjectClassObserver(objectClassObserver);
+        }
         store.runInTx(new Runnable() {
             @Override
             public void run() {
@@ -63,8 +76,21 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testTwoObjectClassesChanged_oneClassListener() {
-        store.addObjectClassObserver(objectClassObserver, TestEntityMinimal.class);
+    public void testTwoObjectClassesChanged_oneClassObserver() {
+        testTwoObjectClassesChanged_oneClassObserver(false);
+    }
+
+    @Test
+    public void testTwoObjectClassesChanged_oneClassObserverWeak() {
+        testTwoObjectClassesChanged_oneClassObserver(true);
+    }
+
+    public void testTwoObjectClassesChanged_oneClassObserver(boolean weak) {
+        if (weak) {
+            store.addObjectClassObserverWeak(objectClassObserver, TestEntityMinimal.class);
+        } else {
+            store.addObjectClassObserver(objectClassObserver, TestEntityMinimal.class);
+        }
         store.runInTx(txRunnable);
 
         assertEquals(1, classesWithChanges.size());
@@ -75,7 +101,11 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         assertEquals(0, classesWithChanges.size());
 
         // Adding twice should not trigger notification twice
-        store.addObjectClassObserver(objectClassObserver, TestEntityMinimal.class);
+        if (weak) {
+            store.addObjectClassObserverWeak(objectClassObserver, TestEntityMinimal.class);
+        } else {
+            store.addObjectClassObserver(objectClassObserver, TestEntityMinimal.class);
+        }
         Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
         boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
         assertEquals(1, classesWithChanges.size());

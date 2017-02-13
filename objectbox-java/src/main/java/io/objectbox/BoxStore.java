@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,7 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbSchemaException;
 import io.objectbox.internal.CrashReportLogger;
+import io.objectbox.internal.WeakObjectClassObserver;
 
 @Beta
 public class BoxStore implements Closeable {
@@ -183,8 +185,7 @@ public class BoxStore implements Closeable {
         this.directory = builder.directory;
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
-                throw new RuntimeException("Could not create directory: " +
-                        directory.getAbsolutePath());
+                throw new RuntimeException("Could not create directory: " + directory.getAbsolutePath());
             }
         }
         if (!directory.isDirectory()) {
@@ -359,7 +360,7 @@ public class BoxStore implements Closeable {
                         throw new IllegalStateException("Untracked entity type ID: " + entityTypeId);
                     }
                     for (ObjectClassObserver listener : listeners) {
-                        listener.handleChanges(objectClass);
+                        listener.onChanges(objectClass);
                     }
                 }
             }
@@ -502,26 +503,73 @@ public class BoxStore implements Closeable {
         return handle;
     }
 
-    public void addObjectClassObserver(ObjectClassObserver objectClassObserver) {
+    /**
+     * Adds the given observer to be notified about changes to any object class.
+     * The observer will be called once a transaction is committed.
+     * Failed or aborted transaction do not trigger observers.
+     */
+    public void addObjectClassObserver(ObjectClassObserver observer) {
         for (int entityTypeId : allEntityTypeIds) {
-            listenersByEntityTypeId.putElement(entityTypeId, objectClassObserver);
+            listenersByEntityTypeId.putElement(entityTypeId, observer);
         }
     }
 
-    public void addObjectClassObserver(ObjectClassObserver objectClassObserver, Class objectClass) {
+    /**
+     * Like {@link #addObjectClassObserver(ObjectClassObserver)}, but uses a weak reference to the given observer.
+     * It is still advised to remove observers explicitly if possible: relying on the garbage collection may cause
+     * non-deterministic timing. Until the weak reference is actually cleared by GC, it may still receive notifications.
+     */
+    public void addObjectClassObserverWeak(ObjectClassObserver observer) {
+        addObjectClassObserver(new WeakObjectClassObserver(this, observer));
+    }
+
+
+    /**
+     * Adds the given observer to be notified about changes to the given object class (only).
+     * The observer will be called once a transaction is committed.
+     * Failed or aborted transaction do not trigger observers.
+     */
+    public void addObjectClassObserver(ObjectClassObserver observer, Class objectClass) {
         Integer entityTypeId = entityTypeIdByClass.get(objectClass);
         if (entityTypeId == null) {
             throw new IllegalArgumentException("Not a registered object class: " + objectClass);
         }
-        listenersByEntityTypeId.putElement(entityTypeId, objectClassObserver);
+        listenersByEntityTypeId.putElement(entityTypeId, observer);
     }
 
     /**
-     * Removes the given objectClassObserver from all object classes it added itself to earlier.
+     * Like {@link #addObjectClassObserver(ObjectClassObserver, Class)}, but uses a weak reference to the given observer.
+     * It is still advised to remove observers explicitly if possible: relying on the garbage collection may cause
+     * non-deterministic timing. Until the weak reference is actually cleared by GC, it may still receive notifications.
      */
-    public void removeObjectClassObserver(ObjectClassObserver objectClassObserver) {
+    public void addObjectClassObserverWeak(ObjectClassObserver observer, Class objectClass) {
+        addObjectClassObserver(new WeakObjectClassObserver(this, observer), objectClass);
+    }
+
+    /**
+     * Removes the given observer from all object classes it added itself to earlier.
+     * This also considers weakly added observers.
+     */
+    public void removeObjectClassObserver(ObjectClassObserver observer) {
         for (int entityTypeId : allEntityTypeIds) {
-            listenersByEntityTypeId.removeElement(entityTypeId, objectClassObserver);
+            Set<ObjectClassObserver> observers = listenersByEntityTypeId.get(entityTypeId);
+            if (observers != null) {
+                Iterator<ObjectClassObserver> iterator = observers.iterator();
+                while (iterator.hasNext()) {
+                    ObjectClassObserver candidate = iterator.next();
+                    if (candidate.equals(observer)) {
+                        // Unsupported by CopyOnWriteArraySet: iterator.remove();
+                        observers.remove(candidate);
+                    } else if (candidate instanceof WeakObjectClassObserver) {
+                        ObjectClassObserver delegate = ((WeakObjectClassObserver) candidate).getDelegate();
+                        if (delegate == null || delegate.equals(observer)) {
+                            // Unsupported by CopyOnWriteArraySet: iterator.remove();
+                            observers.remove(candidate);
+                        }
+                    }
+                }
+            }
+            listenersByEntityTypeId.removeElement(entityTypeId, observer);
         }
     }
 
