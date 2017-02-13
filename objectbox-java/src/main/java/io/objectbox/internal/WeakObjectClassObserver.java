@@ -22,7 +22,7 @@ public class WeakObjectClassObserver implements ObjectClassObserver {
         if(delegate != null) {
             delegate.onChanges(objectClass);
         } else {
-            boxStore.removeObjectClassObserver(this);
+            boxStore.unsubscribe(this);
         }
     }
 

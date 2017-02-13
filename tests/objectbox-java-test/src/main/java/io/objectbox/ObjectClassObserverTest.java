@@ -51,9 +51,9 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
     public void testTwoObjectClassesChanged_catchAllListener(boolean weak) {
         if (weak) {
-            store.addObjectClassObserverWeak(objectClassObserver);
+            store.subscribeWeak(objectClassObserver);
         } else {
-            store.addObjectClassObserver(objectClassObserver);
+            store.subscribe(objectClassObserver);
         }
         store.runInTx(new Runnable() {
             @Override
@@ -70,7 +70,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         assertTrue(classesWithChanges.contains(TestEntityMinimal.class));
 
         classesWithChanges.clear();
-        store.removeObjectClassObserver(objectClassObserver);
+        store.unsubscribe(objectClassObserver);
         store.runInTx(txRunnable);
         assertEquals(0, classesWithChanges.size());
     }
@@ -87,9 +87,9 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
     public void testTwoObjectClassesChanged_oneClassObserver(boolean weak) {
         if (weak) {
-            store.addObjectClassObserverWeak(objectClassObserver, TestEntityMinimal.class);
+            store.subscribeWeak(objectClassObserver, TestEntityMinimal.class);
         } else {
-            store.addObjectClassObserver(objectClassObserver, TestEntityMinimal.class);
+            store.subscribe(objectClassObserver, TestEntityMinimal.class);
         }
         store.runInTx(txRunnable);
 
@@ -102,16 +102,16 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
         // Adding twice should not trigger notification twice
         if (weak) {
-            store.addObjectClassObserverWeak(objectClassObserver, TestEntityMinimal.class);
+            store.subscribeWeak(objectClassObserver, TestEntityMinimal.class);
         } else {
-            store.addObjectClassObserver(objectClassObserver, TestEntityMinimal.class);
+            store.subscribe(objectClassObserver, TestEntityMinimal.class);
         }
         Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
         boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
         assertEquals(1, classesWithChanges.size());
 
         classesWithChanges.clear();
-        store.removeObjectClassObserver(objectClassObserver);
+        store.unsubscribe(objectClassObserver);
         store.runInTx(txRunnable);
         assertEquals(0, classesWithChanges.size());
     }

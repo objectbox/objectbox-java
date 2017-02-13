@@ -512,19 +512,19 @@ public class BoxStore implements Closeable {
      * The observer will be called once a transaction is committed.
      * Failed or aborted transaction do not trigger observers.
      */
-    public void addObjectClassObserver(ObjectClassObserver observer) {
+    public void subscribe(ObjectClassObserver observer) {
         for (int entityTypeId : allEntityTypeIds) {
             listenersByEntityTypeId.putElement(entityTypeId, observer);
         }
     }
 
     /**
-     * Like {@link #addObjectClassObserver(ObjectClassObserver)}, but uses a weak reference to the given observer.
+     * Like {@link #subscribe(ObjectClassObserver)}, but uses a weak reference to the given observer.
      * It is still advised to remove observers explicitly if possible: relying on the garbage collection may cause
      * non-deterministic timing. Until the weak reference is actually cleared by GC, it may still receive notifications.
      */
-    public void addObjectClassObserverWeak(ObjectClassObserver observer) {
-        addObjectClassObserver(new WeakObjectClassObserver(this, observer));
+    public void subscribeWeak(ObjectClassObserver observer) {
+        subscribe(new WeakObjectClassObserver(this, observer));
     }
 
 
@@ -533,7 +533,7 @@ public class BoxStore implements Closeable {
      * The observer will be called once a transaction is committed.
      * Failed or aborted transaction do not trigger observers.
      */
-    public void addObjectClassObserver(ObjectClassObserver observer, Class objectClass) {
+    public void subscribe(ObjectClassObserver observer, Class objectClass) {
         Integer entityTypeId = entityTypeIdByClass.get(objectClass);
         if (entityTypeId == null) {
             throw new IllegalArgumentException("Not a registered object class: " + objectClass);
@@ -542,19 +542,19 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * Like {@link #addObjectClassObserver(ObjectClassObserver, Class)}, but uses a weak reference to the given observer.
+     * Like {@link #subscribe(ObjectClassObserver, Class)}, but uses a weak reference to the given observer.
      * It is still advised to remove observers explicitly if possible: relying on the garbage collection may cause
      * non-deterministic timing. Until the weak reference is actually cleared by GC, it may still receive notifications.
      */
-    public void addObjectClassObserverWeak(ObjectClassObserver observer, Class objectClass) {
-        addObjectClassObserver(new WeakObjectClassObserver(this, observer), objectClass);
+    public void subscribeWeak(ObjectClassObserver observer, Class objectClass) {
+        subscribe(new WeakObjectClassObserver(this, observer), objectClass);
     }
 
     /**
      * Removes the given observer from all object classes it added itself to earlier.
      * This also considers weakly added observers.
      */
-    public void removeObjectClassObserver(ObjectClassObserver observer) {
+    public void unsubscribe(ObjectClassObserver observer) {
         for (int entityTypeId : allEntityTypeIds) {
             Set<ObjectClassObserver> observers = listenersByEntityTypeId.get(entityTypeId);
             if (observers != null) {
