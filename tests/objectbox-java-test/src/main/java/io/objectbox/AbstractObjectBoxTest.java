@@ -159,22 +159,23 @@ public abstract class AbstractObjectBoxTest {
     private void addTestEntity(ModelBuilder modelBuilder, boolean withIndex) {
         lastEntityUid = ++lastUid;
         EntityBuilder entityBuilder = modelBuilder.entity("TestEntity").id(++lastEntityId, lastEntityUid);
-        int pId = 0;
-        entityBuilder.property("id", PropertyType.Long).id(++pId, ++lastUid).flags(PropertyFlags.ID);
-        entityBuilder.property("simpleBoolean", PropertyType.Bool).id(++pId, ++lastUid);
-        entityBuilder.property("simpleByte", PropertyType.Byte).id(++pId, ++lastUid);
-        entityBuilder.property("simpleShort", PropertyType.Short).id(++pId, ++lastUid);
-        entityBuilder.property("simpleInt", PropertyType.Int).id(++pId, ++lastUid);
-        entityBuilder.property("simpleLong", PropertyType.Long).id(++pId, ++lastUid);
-        entityBuilder.property("simpleFloat", PropertyType.Float).id(++pId, ++lastUid);
-        entityBuilder.property("simpleDouble", PropertyType.Double).id(++pId, ++lastUid);
-        PropertyBuilder pb = entityBuilder.property("simpleString", PropertyType.String).id(++pId, ++lastUid);
+        entityBuilder.property("id", PropertyType.Long).id(TestEntity_.id.id, ++lastUid).flags(PropertyFlags.ID);
+        entityBuilder.property("simpleBoolean", PropertyType.Bool).id(TestEntity_.simpleBoolean.id, ++lastUid);
+        entityBuilder.property("simpleByte", PropertyType.Byte).id(TestEntity_.simpleByte.id, ++lastUid);
+        entityBuilder.property("simpleShort", PropertyType.Short).id(TestEntity_.simpleShort.id, ++lastUid);
+        entityBuilder.property("simpleInt", PropertyType.Int).id(TestEntity_.simpleInt.id, ++lastUid);
+        entityBuilder.property("simpleLong", PropertyType.Long).id(TestEntity_.simpleLong.id, ++lastUid);
+        entityBuilder.property("simpleFloat", PropertyType.Float).id(TestEntity_.simpleFloat.id,++lastUid);
+        entityBuilder.property("simpleDouble", PropertyType.Double).id(TestEntity_.simpleDouble.id, ++lastUid);
+        PropertyBuilder pb =
+                entityBuilder.property("simpleString", PropertyType.String).id(TestEntity_.simpleString.id, ++lastUid);
         if (withIndex) {
             lastIndexUid =++lastUid;
             pb.flags(PropertyFlags.INDEXED).indexId(++lastIndexId, lastIndexUid);
         }
-        entityBuilder.property("simpleByteArray", PropertyType.ByteVector).id(++pId, ++lastUid);
-        entityBuilder.lastPropertyId(pId, lastUid);
+        entityBuilder.property("simpleByteArray", PropertyType.ByteVector).id(TestEntity_.simpleByteArray.id, ++lastUid);
+        int lastId = TestEntity_.simpleByteArray.id;
+        entityBuilder.lastPropertyId(lastId, lastUid);
         entityBuilder.entityDone();
     }
 
