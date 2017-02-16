@@ -2,6 +2,22 @@ package io.objectbox.reactive;
 
 import java.util.concurrent.ExecutorService;
 
+import io.objectbox.annotation.apihint.Internal;
+
+/**
+ * Builds a {@link DataSubscription} for a {@link DataObserver} passed via {@link #observer(DataObserver)}.
+ * Note that the call to {@link #observer(DataObserver)} is mandatory to create the subscription -
+ * if you forget it, nothing will happen.
+ * <p>
+ * When subscribing to a data source such as {@link io.objectbox.query.Query}, this builder allows to configure:
+ * <ul>
+ * <li>weakly referenced observer via {@link #weak()}</li>
+ * <li>a data transform operation via {@link #transform(Transformer)}</li>
+ * <li>calling the observer using a custom {@link Scheduler} (e.g. Android main thread) via {@link #on(Scheduler)}</li>
+ * </ul>
+ *
+ * @param <T> The data type the {@link DataObserver} subscribes to.
+ */
 public class SubscriptionBuilder<T> {
     private DataPublisher<T> publisher;
     private final Object publisherParam;
@@ -15,6 +31,7 @@ public class SubscriptionBuilder<T> {
 //    private boolean sync;
 
 
+    @Internal
     public SubscriptionBuilder(DataPublisher<T> publisher, Object param, ExecutorService threadPool) {
         this.publisher = publisher;
         publisherParam = param;
@@ -44,6 +61,16 @@ public class SubscriptionBuilder<T> {
 //        return this;
 //    }
 
+    /**
+     * Transforms the original data from the publisher to something that is more helpful to your application.
+     * The transformation is done in an asynchronous thread.
+     * The observer will be called in the same asynchronous thread unless a Scheduler is defined using
+     * {@link #on(Scheduler)}.
+     * <p>
+     * This is roughly equivalent to the map operator as known in Rx and Kotlin.
+     *
+     * @param <TO> The class the data is transformed to
+     */
     public <TO> SubscriptionBuilder<TO> transform(final Transformer<T, TO> transformer) {
         if (this.transformer != null) {
             throw new IllegalStateException("Only one transformer allowed");
@@ -68,7 +95,7 @@ public class SubscriptionBuilder<T> {
         return this;
     }
 
-    public DataSubscription subscribe(final DataObserver<T> observer) {
+    public DataSubscription observer(final DataObserver<T> observer) {
         WeakDataObserver<T> weakObserver = null;
         if (weak) {
             weakObserver = new WeakDataObserver<>(observer);
@@ -77,7 +104,7 @@ public class SubscriptionBuilder<T> {
             this.observer = observer;
         }
         DataSubscriptionImpl subscription = new DataSubscriptionImpl(publisher, publisherParam, observer);
-        if(weakObserver!= null) {
+        if (weakObserver != null) {
             weakObserver.setSubscription(subscription);
         }
 
@@ -93,12 +120,12 @@ public class SubscriptionBuilder<T> {
     class ActionObserver implements DataObserver<T> {
         private final DataSubscriptionImpl subscription;
         private SchedulerRunOnError schedulerRunOnError;
-        private SchedulerRunOnChange schedulerRunOnChange;
+        private SchedulerRunOnChange schedulerRunOnData;
 
         public ActionObserver(DataSubscriptionImpl subscription) {
             this.subscription = subscription;
             if (scheduler != null) {
-                schedulerRunOnChange = new SchedulerRunOnChange();
+                schedulerRunOnData = new SchedulerRunOnChange();
                 if (errorObserver != null) {
                     schedulerRunOnError = new SchedulerRunOnError();
                 }
@@ -110,7 +137,7 @@ public class SubscriptionBuilder<T> {
             if (transformer != null) {
                 transformAndContinue(data);
             } else {
-                callOnChange(data);
+                callOnData(data);
             }
         }
 
@@ -124,7 +151,7 @@ public class SubscriptionBuilder<T> {
                     try {
                         // Type erasure FTW
                         T result = (T) transformer.transform(data);
-                        callOnChange(result);
+                        callOnData(result);
                     } catch (Throwable th) {
                         if (errorObserver != null) {
                             if (!subscription.isCanceled()) {
@@ -142,10 +169,10 @@ public class SubscriptionBuilder<T> {
             });
         }
 
-        void callOnChange(final T result) {
+        void callOnData(final T result) {
             if (!subscription.isCanceled()) {
                 if (scheduler != null) {
-                    scheduler.run(schedulerRunOnChange, result);
+                    scheduler.run(schedulerRunOnData, result);
                 } else {
                     observer.onData(result);
                 }

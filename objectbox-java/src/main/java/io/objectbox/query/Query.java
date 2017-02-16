@@ -289,7 +289,7 @@ public class Query<T> {
             if(objectClassSubscription != null) {
                 throw new IllegalStateException("Existing subscription found");
             }
-            objectClassSubscription = store.subscribe(box.getEntityClass()).weak().subscribe(objectClassObserver);
+            objectClassSubscription = store.subscribe(box.getEntityClass()).weak().observer(objectClassObserver);
         }
         observers.add(observer);
     }

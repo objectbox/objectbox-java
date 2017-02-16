@@ -10,9 +10,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.objectbox.reactive.DataObserver;
+import io.objectbox.reactive.DataSubscription;
+import io.objectbox.reactive.ErrorObserver;
 import io.objectbox.reactive.RunWithParam;
 import io.objectbox.reactive.Scheduler;
-import io.objectbox.reactive.DataSubscription;
 import io.objectbox.reactive.SubscriptionBuilder;
 import io.objectbox.reactive.Transformer;
 
@@ -84,7 +85,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
     private DataSubscription subscribe(boolean weak, Class forClass) {
         SubscriptionBuilder<Class> subscriptionBuilder = store.subscribe(forClass);
-        return (weak ? subscriptionBuilder.weak() : subscriptionBuilder).subscribe(objectClassObserver);
+        return (weak ? subscriptionBuilder.weak() : subscriptionBuilder).observer(objectClassObserver);
     }
 
     @Test
@@ -129,7 +130,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
     private void testTransform(TestScheduler scheduler) throws InterruptedException {
         final List<Long> objectCounts = new CopyOnWriteArrayList<>();
-        final CountDownLatch latch= new CountDownLatch(2);
+        final CountDownLatch latch = new CountDownLatch(2);
         final Thread testThread = Thread.currentThread();
 
         SubscriptionBuilder<Long> subscriptionBuilder = store.subscribe().transform(new Transformer<Class, Long>() {
@@ -139,10 +140,10 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
                 return store.boxFor(source).count();
             }
         });
-        if(scheduler != null) {
+        if (scheduler != null) {
             subscriptionBuilder.on(scheduler);
         }
-        DataSubscription subscription = subscriptionBuilder.subscribe(new DataObserver<Long>() {
+        DataSubscription subscription = subscriptionBuilder.observer(new DataObserver<Long>() {
             @Override
             public void onData(Long data) {
                 objectCounts.add(data);
@@ -175,7 +176,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     @Test
     public void testScheduler() throws InterruptedException {
         TestScheduler scheduler = new TestScheduler();
-        store.subscribe().on(scheduler).subscribe(objectClassObserver);
+        store.subscribe().on(scheduler).observer(objectClassObserver);
 
         store.runInTx(txRunnable);
 
@@ -203,4 +204,54 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
             runnable.run(param);
         }
     }
+
+    @Test
+    public void testTransformError() throws InterruptedException {
+    testTransformError(null);
+    }
+
+    @Test
+    public void testTransformErrorWithScheduler() throws InterruptedException {
+        TestScheduler scheduler = new TestScheduler();
+        testTransformError(scheduler);
+        assertEquals(2, scheduler.counter());
+    }
+
+    public void testTransformError(Scheduler scheduler) throws InterruptedException {
+        final List<Throwable> errors = new CopyOnWriteArrayList<>();
+        final CountDownLatch latch = new CountDownLatch(2);
+        final Thread testThread = Thread.currentThread();
+
+        DataSubscription subscription = store.subscribe().transform(new Transformer<Class, Long>() {
+            @Override
+            public Long transform(Class source) throws Exception {
+                throw new Exception("Boo");
+            }
+        }).onError(new ErrorObserver() {
+            @Override
+            public void onError(Throwable th) {
+                assertNotSame(testThread, Thread.currentThread());
+                errors.add(th);
+                latch.countDown();
+            }
+        }).on(scheduler).observer(new DataObserver<Long>() {
+            @Override
+            public void onData(Long data) {
+                throw new RuntimeException("Should not reach this");
+            }
+        });
+
+        store.runInTx(txRunnable);
+
+        assertLatchCountedDown(latch, 5);
+        assertEquals(2, errors.size());
+        assertEquals("Boo", errors.get(0).getMessage());
+
+        errors.clear();
+        subscription.cancel();
+        store.runInTx(txRunnable);
+        Thread.sleep(20);
+        assertEquals(0, errors.size());
+    }
+
 }
