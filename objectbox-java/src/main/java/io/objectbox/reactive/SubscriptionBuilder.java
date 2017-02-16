@@ -79,6 +79,10 @@ public class SubscriptionBuilder<T> {
         return (SubscriptionBuilder<TO>) this;
     }
 
+    /**
+     * The given {@link ErrorObserver} is notified when the {@link Transformer} ({@link #transform(Transformer)})
+     * threw an exception.
+     */
     public SubscriptionBuilder<T> onError(ErrorObserver errorObserver) {
         if (this.errorObserver != null) {
             throw new IllegalStateException("Only one errorObserver allowed");
@@ -87,6 +91,12 @@ public class SubscriptionBuilder<T> {
         return this;
     }
 
+    /**
+     * Changes the thread in which the {@link DataObserver} (and potentially @{@link ErrorObserver}) is called.
+     * <p>
+     * In the Android package, there is a class AndroidScheduler with a MAIN_THREAD Scheduler implementation.
+     * Using MAIN_THREAD, observers will be called in Android's main thread, which is required for UI updates.
+     */
     public SubscriptionBuilder<T> on(Scheduler scheduler) {
         if (this.scheduler != null) {
             throw new IllegalStateException("Only one scheduler allowed");
@@ -95,6 +105,11 @@ public class SubscriptionBuilder<T> {
         return this;
     }
 
+    /**
+     * The given observer is subscribed to the publisher. This method MUST be called to complete a subscription.
+     *
+     * @return an subscription object used for canceling further notifications to the observer
+     */
     public DataSubscription observer(final DataObserver<T> observer) {
         WeakDataObserver<T> weakObserver = null;
         if (weak) {

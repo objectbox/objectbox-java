@@ -32,10 +32,15 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbSchemaException;
 import io.objectbox.internal.CrashReportLogger;
+import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.SubscriptionBuilder;
 
 @Beta
+/**
+ * Represents an ObjectBox database and gives you @{@link Box}es to get and put Objects of a specific type
+ * (see {@link #boxFor(Class)}).
+ */
 public class BoxStore implements Closeable {
     static {
         String libname = "objectbox";
@@ -275,6 +280,10 @@ public class BoxStore implements Closeable {
         return (Class) entityCursorClassByClass.get(entityClass);
     }
 
+    /**
+     * Internal, low level method: use {@link #runInTx(Runnable)} instead.
+     */
+    @Internal
     public Transaction beginTx() {
         checkOpen();
         // Because write TXs are typically not cached, initialCommitCount is not as relevant than for read TXs.
@@ -288,8 +297,10 @@ public class BoxStore implements Closeable {
     }
 
     /**
+     * Internal, low level method: use {@link #runInReadTx(Runnable)} instead.
      * Begins a transaction for read access only. Note: there may be only one read transaction per thread.
      */
+    @Internal
     public Transaction beginReadTx() {
         checkOpen();
         // initialCommitCount should be acquired before starting the tx. In race conditions, there is a chance the
@@ -347,6 +358,7 @@ public class BoxStore implements Closeable {
         return ok;
     }
 
+    @Internal
     public void unregisterTransaction(Transaction transaction) {
         synchronized (transactions) {
             transactions.remove(transaction);
@@ -374,6 +386,9 @@ public class BoxStore implements Closeable {
         }
     }
 
+    /**
+     * Returns a Box for the given type. Objects are put into (and get from) their individual Box.
+     */
     public <T> Box<T> boxFor(Class<T> entityClass) {
         Box box = boxes.get(entityClass);
         if (box == null) {
@@ -393,6 +408,12 @@ public class BoxStore implements Closeable {
         return box;
     }
 
+    /**
+     * Runs the given runnable inside a transaction.
+     * <p>
+     * Efficiency notes: it is advised to run multiple puts in a transaction because each commit requires an expensive
+     * disk synchronization.
+     */
     public void runInTx(Runnable runnable) {
         Transaction tx = this.activeTx.get();
         // Only if not already set, allowing to call it recursively with first (outer) TX
@@ -414,6 +435,12 @@ public class BoxStore implements Closeable {
         }
     }
 
+    /**
+     * Runs the given runnable inside a read(-only) transaction. Multiple read transactions can occur at the same time.
+     * This allows multiple read operations (gets) using a single consistent state of data.
+     * Also, for a high number of read operations (thousands, e.g. in loops),
+     * it is advised to run them in a single read transaction for efficiency reasons.
+     */
     public void runInReadTx(Runnable runnable) {
         Transaction tx = this.activeTx.get();
         // Only if not already set, allowing to call it recursively with first (outer) TX
@@ -431,6 +458,9 @@ public class BoxStore implements Closeable {
         }
     }
 
+    /**
+     * Like {@link #runInTx(Runnable)}, but allows returning a value and throwing an exception.
+     */
     public <R> R callInTx(Callable<R> callable) throws Exception {
         Transaction tx = this.activeTx.get();
         // Only if not already set, allowing to call it recursively with first (outer) TX
@@ -456,6 +486,8 @@ public class BoxStore implements Closeable {
     /**
      * Runs the given Runnable as a transaction in a separate thread.
      * Once the transaction completes the given callback is called (callback may be null).
+     * <p>
+     * See also {@link #runInTx(Runnable)}.
      */
     public void runInTxAsync(final Runnable runnable, final TxCallback<Void> callback) {
         threadPool.submit(new Runnable() {
@@ -478,6 +510,8 @@ public class BoxStore implements Closeable {
     /**
      * Runs the given Runnable as a transaction in a separate thread.
      * Once the transaction completes the given callback is called (callback may be null).
+     * <p>
+     * * See also {@link #callInTx(Callable)}.
      */
     public <R> void callInTxAsync(final Callable<R> callable, final TxCallback<R> callback) {
         threadPool.submit(new Runnable() {
@@ -511,18 +545,19 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * Adds the given observer to be notified about changes to any object class.
-     * The observer supplied via {@link SubscriptionBuilder} will be called once a transaction is committed.
-     * Failed or aborted transaction do not trigger observers.
+     * A {@link io.objectbox.reactive.DataObserver} can be subscribed to data changes using the returned builder.
+     * The observer is supplied via {@link SubscriptionBuilder#observer(DataObserver)} and will be notified once a
+     * transaction is committed and will receive changes to any object class.
+     * <p>
+     * Note that failed or aborted transaction do not trigger observers.
      */
     public SubscriptionBuilder<Class> subscribe() {
         return new SubscriptionBuilder<>(objectClassPublisher, null, threadPool);
     }
 
     /**
-     * Adds the given observer to be notified about changes to the given object class (only).
-     * The observer supplied via {@link SubscriptionBuilder} will be called once a transaction is committed.
-     * Failed or aborted transaction do not trigger observers.
+     * Like {@link #subscribe()}, but wires the supplied @{@link io.objectbox.reactive.DataObserver} only to the given
+     * object class for notifications.
      */
     public <T> SubscriptionBuilder<Class<T>> subscribe(Class<T> forClass) {
         return new SubscriptionBuilder<>((DataPublisher) objectClassPublisher, forClass, threadPool);

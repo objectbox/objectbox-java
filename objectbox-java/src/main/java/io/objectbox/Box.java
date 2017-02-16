@@ -9,6 +9,7 @@ import java.util.List;
 
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.annotation.apihint.Temporary;
 import io.objectbox.exception.DbException;
 import io.objectbox.internal.CallWithHandle;
 import io.objectbox.internal.ReflectionCache;
@@ -151,7 +152,8 @@ public class Box<T> {
         }
     }
 
-    public int getPropertyId(String propertyName) {
+    /** Used by tests */
+    int getPropertyId(String propertyName) {
         Cursor<T> reader = getReader();
         try {
             return reader.getPropertyId(propertyName);
@@ -160,20 +162,28 @@ public class Box<T> {
         }
     }
 
+    @Internal
     public long getId(T entity) {
         return idGetter.getId(entity);
     }
 
-    public T get(long key) {
+    /**
+     * Get the stored object for the given ID.
+     * @return null if not found
+     */
+    public T get(long id) {
         Cursor<T> reader = getReader();
         try {
-            return reader.get(key);
+            return reader.get(id);
         } finally {
             releaseReader(reader);
         }
 
     }
 
+    /**
+     * Returns the count of all stored objects in this box.
+     */
     public long count() {
         Cursor<T> reader = getReader();
         try {
@@ -183,6 +193,7 @@ public class Box<T> {
         }
     }
 
+    @Temporary
     public List<T> find(String propertyName, String value) {
         Cursor<T> reader = getReader();
         try {
@@ -192,6 +203,7 @@ public class Box<T> {
         }
     }
 
+    @Temporary
     public List<T> find(String propertyName, long value) {
         Cursor<T> reader = getReader();
         try {
@@ -201,6 +213,7 @@ public class Box<T> {
         }
     }
 
+    @Temporary
     public List<T> find(int propertyId, long value) {
         Cursor<T> reader = getReader();
         try {
@@ -210,6 +223,7 @@ public class Box<T> {
         }
     }
 
+    @Temporary
     public List<T> find(int propertyId, String value) {
         Cursor<T> reader = getReader();
         try {
@@ -219,6 +233,7 @@ public class Box<T> {
         }
     }
 
+    @Temporary
     public List<T> find(Property property, String value) {
         Cursor<T> reader = getReader();
         try {
@@ -228,6 +243,7 @@ public class Box<T> {
         }
     }
 
+    @Temporary
     public List<T> find(Property property, long value) {
         Cursor<T> reader = getReader();
         try {
@@ -237,6 +253,9 @@ public class Box<T> {
         }
     }
 
+    /**
+     * Returns all stored Objects in this Box.
+     */
     public List<T> getAll() {
         Cursor<T> cursor = getReader();
         try {
@@ -262,6 +281,7 @@ public class Box<T> {
     }
 
     /** Does not work yet, also probably won't be faster than {@link Box#getAll()}. */
+    @Temporary
     public List<T> getAll2() {
         Cursor<T> reader = getReader();
         try {
@@ -328,24 +348,30 @@ public class Box<T> {
         }
     }
 
-    public void remove(long key) {
+    /**
+     * Removes (deletes) the Object by its ID.
+     */
+    public void remove(long id) {
         Cursor<T> cursor = getWriter();
         try {
-            cursor.deleteEntity(key);
+            cursor.deleteEntity(id);
             commitWriter(cursor);
         } finally {
             releaseWriter(cursor);
         }
     }
 
-    public void remove(long... keys) {
-        if (keys == null || keys.length == 0) {
+    /**
+     * Removes (deletes) Objects by their ID in a single transaction.
+     */
+    public void remove(long... ids) {
+        if (ids == null || ids.length == 0) {
             return;
         }
 
         Cursor<T> cursor = getWriter();
         try {
-            for (long key : keys) {
+            for (long key : ids) {
                 cursor.deleteEntity(key);
             }
             commitWriter(cursor);
@@ -357,13 +383,13 @@ public class Box<T> {
     /**
      * Due to type erasure collision, we cannot simply use "remove" as a method name here.
      */
-    public void removeByKeys(Collection<Long> keys) {
-        if (keys == null || keys.isEmpty()) {
+    public void removeByKeys(Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
             return;
         }
         Cursor<T> cursor = getWriter();
         try {
-            for (long key : keys) {
+            for (long key : ids) {
                 cursor.deleteEntity(key);
             }
             commitWriter(cursor);
@@ -372,10 +398,13 @@ public class Box<T> {
         }
     }
 
-    public void remove(T entity) {
+    /**
+     * Removes (deletes) the given Object.
+     */
+    public void remove(T object) {
         Cursor<T> cursor = getWriter();
         try {
-            long key = cursor.getId(entity);
+            long key = cursor.getId(object);
             cursor.deleteEntity(key);
             commitWriter(cursor);
         } finally {
@@ -383,13 +412,16 @@ public class Box<T> {
         }
     }
 
-    public void remove(T... entities) {
-        if (entities == null || entities.length == 0) {
+    /**
+     * Removes (deletes) the given Objects in a single transaction.
+     */
+    public void remove(T... objects) {
+        if (objects == null || objects.length == 0) {
             return;
         }
         Cursor<T> cursor = getWriter();
         try {
-            for (T entity : entities) {
+            for (T entity : objects) {
                 long key = cursor.getId(entity);
                 cursor.deleteEntity(key);
             }
@@ -399,13 +431,16 @@ public class Box<T> {
         }
     }
 
-    public void remove(Collection<T> entities) {
-        if (entities == null || entities.isEmpty()) {
+    /**
+     * Removes (deletes) the given Objects in a single transaction.
+     */
+    public void remove(Collection<T> objects) {
+        if (objects == null || objects.isEmpty()) {
             return;
         }
         Cursor<T> cursor = getWriter();
         try {
-            for (T entity : entities) {
+            for (T entity : objects) {
                 long key = cursor.getId(entity);
                 cursor.deleteEntity(key);
             }
@@ -415,6 +450,9 @@ public class Box<T> {
         }
     }
 
+    /**
+     * Removes (deletes) ALL Objects in a single transaction.
+     */
     public void removeAll() {
         Cursor<T> cursor = getWriter();
         try {
@@ -425,6 +463,9 @@ public class Box<T> {
         }
     }
 
+    /**
+     * Returns a builder to create queries for Object matching supplied criteria.
+     */
     public QueryBuilder<T> query() {
         return new QueryBuilder<T>(this, store.internalHandle(), store.getEntityName(entityClass));
     }
