@@ -9,10 +9,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.objectbox.reactive.Observer;
+import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.RunWithParam;
 import io.objectbox.reactive.Scheduler;
-import io.objectbox.reactive.Subscription;
+import io.objectbox.reactive.DataSubscription;
 import io.objectbox.reactive.SubscriptionBuilder;
 import io.objectbox.reactive.Transformer;
 
@@ -28,9 +28,9 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     }
 
     final List<Class> classesWithChanges = new ArrayList<>();
-    Observer objectClassObserver = new Observer<Class>() {
+    DataObserver objectClassObserver = new DataObserver<Class>() {
         @Override
-        public void onChange(Class objectClass) {
+        public void onData(Class objectClass) {
             classesWithChanges.add(objectClass);
         }
     };
@@ -61,7 +61,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     }
 
     public void testTwoObjectClassesChanged_catchAllListener(boolean weak) {
-        Subscription subscription = subscribe(weak, null);
+        DataSubscription subscription = subscribe(weak, null);
         store.runInTx(new Runnable() {
             @Override
             public void run() {
@@ -82,7 +82,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         assertEquals(0, classesWithChanges.size());
     }
 
-    private Subscription subscribe(boolean weak, Class forClass) {
+    private DataSubscription subscribe(boolean weak, Class forClass) {
         SubscriptionBuilder<Class> subscriptionBuilder = store.subscribe(forClass);
         return (weak ? subscriptionBuilder.weak() : subscriptionBuilder).subscribe(objectClassObserver);
     }
@@ -98,7 +98,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     }
 
     public void testTwoObjectClassesChanged_oneClassObserver(boolean weak) {
-        Subscription subscription = subscribe(weak, TestEntityMinimal.class);
+        DataSubscription subscription = subscribe(weak, TestEntityMinimal.class);
 
         store.runInTx(txRunnable);
 
@@ -110,7 +110,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         assertEquals(0, classesWithChanges.size());
 
         // Adding twice should not trigger notification twice
-        Subscription subscription2 = subscribe(weak, TestEntityMinimal.class);
+        DataSubscription subscription2 = subscribe(weak, TestEntityMinimal.class);
 
         Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
         boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
@@ -142,9 +142,9 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         if(scheduler != null) {
             subscriptionBuilder.on(scheduler);
         }
-        Subscription subscription = subscriptionBuilder.subscribe(new Observer<Long>() {
+        DataSubscription subscription = subscriptionBuilder.subscribe(new DataObserver<Long>() {
             @Override
-            public void onChange(Long data) {
+            public void onData(Long data) {
                 objectCounts.add(data);
                 latch.countDown();
             }

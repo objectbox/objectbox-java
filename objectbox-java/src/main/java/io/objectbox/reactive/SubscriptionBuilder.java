@@ -3,10 +3,10 @@ package io.objectbox.reactive;
 import java.util.concurrent.ExecutorService;
 
 public class SubscriptionBuilder<T> {
-    private Publisher<T> publisher;
+    private DataPublisher<T> publisher;
     private final Object publisherParam;
     private final ExecutorService threadPool;
-    private Observer<T> observer;
+    private DataObserver<T> observer;
     //    private Runnable firstRunnable;
     private boolean weak;
     private Transformer<T, Object> transformer;
@@ -15,7 +15,7 @@ public class SubscriptionBuilder<T> {
 //    private boolean sync;
 
 
-    public SubscriptionBuilder(Publisher<T> publisher, Object param, ExecutorService threadPool) {
+    public SubscriptionBuilder(DataPublisher<T> publisher, Object param, ExecutorService threadPool) {
         this.publisher = publisher;
         publisherParam = param;
         this.threadPool = threadPool;
@@ -68,15 +68,15 @@ public class SubscriptionBuilder<T> {
         return this;
     }
 
-    public Subscription subscribe(final Observer<T> observer) {
-        WeakObserver<T> weakObserver = null;
+    public DataSubscription subscribe(final DataObserver<T> observer) {
+        WeakDataObserver<T> weakObserver = null;
         if (weak) {
-            weakObserver = new WeakObserver<>(observer);
+            weakObserver = new WeakDataObserver<>(observer);
             this.observer = weakObserver;
         } else {
             this.observer = observer;
         }
-        SubscriptionImpl subscription = new SubscriptionImpl(publisher, publisherParam, observer);
+        DataSubscriptionImpl subscription = new DataSubscriptionImpl(publisher, publisherParam, observer);
         if(weakObserver!= null) {
             weakObserver.setSubscription(subscription);
         }
@@ -90,12 +90,12 @@ public class SubscriptionBuilder<T> {
         return subscription;
     }
 
-    class ActionObserver implements Observer<T> {
-        private final SubscriptionImpl subscription;
+    class ActionObserver implements DataObserver<T> {
+        private final DataSubscriptionImpl subscription;
         private SchedulerRunOnError schedulerRunOnError;
         private SchedulerRunOnChange schedulerRunOnChange;
 
-        public ActionObserver(SubscriptionImpl subscription) {
+        public ActionObserver(DataSubscriptionImpl subscription) {
             this.subscription = subscription;
             if (scheduler != null) {
                 schedulerRunOnChange = new SchedulerRunOnChange();
@@ -106,7 +106,7 @@ public class SubscriptionBuilder<T> {
         }
 
         @Override
-        public void onChange(final T data) {
+        public void onData(final T data) {
             if (transformer != null) {
                 transformAndContinue(data);
             } else {
@@ -147,7 +147,7 @@ public class SubscriptionBuilder<T> {
                 if (scheduler != null) {
                     scheduler.run(schedulerRunOnChange, result);
                 } else {
-                    observer.onChange(result);
+                    observer.onData(result);
                 }
             }
         }
@@ -156,7 +156,7 @@ public class SubscriptionBuilder<T> {
             @Override
             public void run(T data) {
                 if (!subscription.isCanceled()) {
-                    observer.onChange(data);
+                    observer.onData(data);
                 }
             }
         }

@@ -1,6 +1,6 @@
 package io.objectbox.reactive;
 
-public interface Subscription {
+public interface DataSubscription {
     void cancel();
 
     boolean isCanceled();

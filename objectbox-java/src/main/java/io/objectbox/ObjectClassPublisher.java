@@ -7,40 +7,37 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-import io.objectbox.reactive.Observer;
-import io.objectbox.reactive.Publisher;
-import io.objectbox.reactive.WeakObserver;
+import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.reactive.DataObserver;
+import io.objectbox.reactive.DataPublisher;
+import io.objectbox.reactive.WeakDataObserver;
 
-class ObjectClassPublisher implements Publisher<Class> {
+@Internal
+class ObjectClassPublisher implements DataPublisher<Class> {
     final BoxStore boxStore;
-    final MultimapSet<Integer, Observer<Class>> observersByEntityTypeId = MultimapSet.create(SetType.THREAD_SAFE);
+    final MultimapSet<Integer, DataObserver<Class>> observersByEntityTypeId = MultimapSet.create(SetType.THREAD_SAFE);
 
     ObjectClassPublisher(BoxStore boxStore) {
         this.boxStore = boxStore;
     }
 
     @Override
-    public void subscribe(Observer<Class> observer, Object forClass) {
+    public void subscribe(DataObserver<Class> observer, Object forClass) {
         if (forClass == null) {
             for (int entityTypeId : boxStore.getAllEntityTypeIds()) {
-                observersByEntityTypeId.putElement(entityTypeId, (Observer) observer);
+                observersByEntityTypeId.putElement(entityTypeId, (DataObserver) observer);
             }
         } else {
             int entityTypeId = boxStore.getEntityTypeIdOrThrow((Class) forClass);
-            observersByEntityTypeId.putElement(entityTypeId, (Observer) observer);
+            observersByEntityTypeId.putElement(entityTypeId, (DataObserver) observer);
         }
-    }
-
-
-    public void subscribe(ObjectClassObserver observer, Class objectClass) {
-
     }
 
     /**
      * Removes the given observer from all object classes it added itself to earlier (forClass == null).
      * This also considers weakly added observers.
      */
-    public void unsubscribe(Observer<Class> observer, Object forClass) {
+    public void unsubscribe(DataObserver<Class> observer, Object forClass) {
         if (forClass != null) {
             int entityTypeId = boxStore.getEntityTypeIdOrThrow((Class) forClass);
             unsubscribe(observer, entityTypeId);
@@ -51,17 +48,17 @@ class ObjectClassPublisher implements Publisher<Class> {
         }
     }
 
-    private void unsubscribe(Observer<Class> observer, int entityTypeId) {
-        Set<Observer<Class>> observers = observersByEntityTypeId.get(entityTypeId);
+    private void unsubscribe(DataObserver<Class> observer, int entityTypeId) {
+        Set<DataObserver<Class>> observers = observersByEntityTypeId.get(entityTypeId);
         if (observers != null) {
-            Iterator<Observer<Class>> iterator = observers.iterator();
+            Iterator<DataObserver<Class>> iterator = observers.iterator();
             while (iterator.hasNext()) {
-                Observer<Class> candidate = iterator.next();
+                DataObserver<Class> candidate = iterator.next();
                 if (candidate.equals(observer)) {
                     // Unsupported by CopyOnWriteArraySet: iterator.remove();
                     observers.remove(candidate);
-                } else if (candidate instanceof WeakObserver) {
-                    Observer delegate = ((WeakObserver) candidate).getDelegate();
+                } else if (candidate instanceof WeakDataObserver) {
+                    DataObserver delegate = ((WeakDataObserver) candidate).getDelegate();
                     if (delegate == null || delegate.equals(observer)) {
                         // Unsupported by CopyOnWriteArraySet: iterator.remove();
                         observers.remove(candidate);
@@ -73,11 +70,11 @@ class ObjectClassPublisher implements Publisher<Class> {
     }
 
     void publish(int entityTypeId) {
-        Collection<Observer<Class>> observers = observersByEntityTypeId.get(entityTypeId);
+        Collection<DataObserver<Class>> observers = observersByEntityTypeId.get(entityTypeId);
         if (observers != null) {
             Class objectClass = boxStore.getEntityClassOrThrow(entityTypeId);
-            for (Observer<Class> observer : observers) {
-                observer.onChange(objectClass);
+            for (DataObserver<Class> observer : observers) {
+                observer.onData(objectClass);
             }
         }
     }

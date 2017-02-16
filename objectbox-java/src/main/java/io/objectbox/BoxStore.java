@@ -32,7 +32,7 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbSchemaException;
 import io.objectbox.internal.CrashReportLogger;
-import io.objectbox.reactive.Publisher;
+import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.SubscriptionBuilder;
 
 @Beta
@@ -516,7 +516,7 @@ public class BoxStore implements Closeable {
      * Failed or aborted transaction do not trigger observers.
      */
     public SubscriptionBuilder<Class> subscribe() {
-        return new SubscriptionBuilder<Class>(objectClassPublisher, null, threadPool);
+        return new SubscriptionBuilder<>(objectClassPublisher, null, threadPool);
     }
 
     /**
@@ -525,7 +525,7 @@ public class BoxStore implements Closeable {
      * Failed or aborted transaction do not trigger observers.
      */
     public <T> SubscriptionBuilder<Class<T>> subscribe(Class<T> forClass) {
-        return new SubscriptionBuilder<>((Publisher) objectClassPublisher, forClass, threadPool);
+        return new SubscriptionBuilder<>((DataPublisher) objectClassPublisher, forClass, threadPool);
     }
 
     @Internal

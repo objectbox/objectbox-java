@@ -5,33 +5,33 @@ import java.lang.ref.WeakReference;
 import io.objectbox.annotation.apihint.Internal;
 
 @Internal
-public class WeakObserver<T> implements Observer<T> {
-    private final WeakReference<Observer<T>> weakDelegate;
-    private Subscription subscription;
+public class WeakDataObserver<T> implements DataObserver<T> {
+    private final WeakReference<DataObserver<T>> weakDelegate;
+    private DataSubscription subscription;
 
-    WeakObserver(Observer<T> delegate) {
+    WeakDataObserver(DataObserver<T> delegate) {
         this.weakDelegate = new WeakReference<>(delegate);
     }
 
     @Override
-    public void onChange(T data) {
-        Observer<T> delegate = weakDelegate.get();
+    public void onData(T data) {
+        DataObserver<T> delegate = weakDelegate.get();
         if (delegate != null) {
-            delegate.onChange(data);
+            delegate.onData(data);
         } else {
             subscription.cancel();
         }
     }
 
-    public Observer<T> getDelegate() {
+    public DataObserver<T> getDelegate() {
         return weakDelegate.get();
     }
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof WeakObserver) {
-            Observer<T> delegate = weakDelegate.get();
-            if (delegate != null && delegate == ((WeakObserver) other).weakDelegate.get()) {
+        if (other instanceof WeakDataObserver) {
+            DataObserver<T> delegate = weakDelegate.get();
+            if (delegate != null && delegate == ((WeakDataObserver) other).weakDelegate.get()) {
                 return true;
             }
             return super.equals(other);
@@ -42,7 +42,7 @@ public class WeakObserver<T> implements Observer<T> {
 
     @Override
     public int hashCode() {
-        Observer<T> delegate = weakDelegate.get();
+        DataObserver<T> delegate = weakDelegate.get();
         if (delegate != null) {
             return delegate.hashCode();
         } else {
@@ -50,7 +50,7 @@ public class WeakObserver<T> implements Observer<T> {
         }
     }
 
-    public void setSubscription(Subscription subscription) {
+    public void setSubscription(DataSubscription subscription) {
         this.subscription = subscription;
     }
 

@@ -10,8 +10,8 @@ import io.objectbox.BoxStore;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.internal.CallWithHandle;
-import io.objectbox.reactive.Observer;
-import io.objectbox.reactive.Subscription;
+import io.objectbox.reactive.DataObserver;
+import io.objectbox.reactive.DataSubscription;
 
 /**
  * A repeatable query returning entities.
@@ -23,7 +23,7 @@ import io.objectbox.reactive.Subscription;
 @Beta
 public class Query<T> {
 
-    private Subscription objectClassSubscription;
+    private DataSubscription objectClassSubscription;
 
     private static native long nativeDestroy(long handle);
 
@@ -69,7 +69,7 @@ public class Query<T> {
     private final boolean hasOrder;
     private long handle;
     private Set<QueryObserver<T>> observers = new CopyOnWriteArraySet();
-    private Observer<Class<T>> objectClassObserver;
+    private DataObserver<Class<T>> objectClassObserver;
 
     Query(Box<T> box, long queryHandle, boolean hasOrder) {
         this.box = box;
@@ -270,9 +270,9 @@ public class Query<T> {
     public synchronized void subscribe(QueryObserver<T> observer) {
         final BoxStore store = box.getStore();
         if (objectClassObserver == null) {
-            objectClassObserver = new Observer<Class<T>>() {
+            objectClassObserver = new DataObserver<Class<T>>() {
                 @Override
-                public void onChange(Class<T> objectClass) {
+                public void onData(Class<T> objectClass) {
                     store.internalScheduleThread(new Runnable() {
                         @Override
                         public void run() {

@@ -1,12 +1,12 @@
 package io.objectbox.reactive;
 
-class SubscriptionImpl<T> implements Subscription {
+class DataSubscriptionImpl<T> implements DataSubscription {
     private volatile boolean canceled;
-    private Publisher<T> publisher;
+    private DataPublisher<T> publisher;
     private Object publisherParam;
-    private Observer<T> observer;
+    private DataObserver<T> observer;
 
-    SubscriptionImpl(Publisher<T> publisher, Object publisherParam, Observer<T> observer) {
+    DataSubscriptionImpl(DataPublisher<T> publisher, Object publisherParam, DataObserver<T> observer) {
         this.publisher = publisher;
         this.publisherParam = publisherParam;
         this.observer = observer;
