@@ -7,6 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+import io.objectbox.reactive.Observer;
+import io.objectbox.reactive.Subscription;
+import io.objectbox.reactive.SubscriptionBuilder;
+
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -17,9 +22,9 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     }
 
     final List<Class> classesWithChanges = new ArrayList<>();
-    ObjectClassObserver objectClassObserver = new ObjectClassObserver() {
+    Observer objectClassObserver = new Observer<Class>() {
         @Override
-        public void onChanges(Class objectClass) {
+        public void onChange(Class objectClass) {
             classesWithChanges.add(objectClass);
         }
     };
@@ -50,11 +55,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     }
 
     public void testTwoObjectClassesChanged_catchAllListener(boolean weak) {
-        if (weak) {
-            store.subscribeWeak(objectClassObserver);
-        } else {
-            store.subscribe(objectClassObserver);
-        }
+        Subscription subscription = subscribe(weak, null);
         store.runInTx(new Runnable() {
             @Override
             public void run() {
@@ -70,9 +71,14 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         assertTrue(classesWithChanges.contains(TestEntityMinimal.class));
 
         classesWithChanges.clear();
-        store.unsubscribe(objectClassObserver);
+        subscription.cancel();
         store.runInTx(txRunnable);
         assertEquals(0, classesWithChanges.size());
+    }
+
+    private Subscription subscribe(boolean weak, Class forClass) {
+        SubscriptionBuilder<Class> subscriptionBuilder = store.subscribe(forClass);
+        return (weak ? subscriptionBuilder.weak() : subscriptionBuilder).subscribe(objectClassObserver);
     }
 
     @Test
@@ -86,11 +92,8 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     }
 
     public void testTwoObjectClassesChanged_oneClassObserver(boolean weak) {
-        if (weak) {
-            store.subscribeWeak(objectClassObserver, TestEntityMinimal.class);
-        } else {
-            store.subscribe(objectClassObserver, TestEntityMinimal.class);
-        }
+        Subscription subscription = subscribe(weak, TestEntityMinimal.class);
+
         store.runInTx(txRunnable);
 
         assertEquals(1, classesWithChanges.size());
@@ -101,17 +104,14 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         assertEquals(0, classesWithChanges.size());
 
         // Adding twice should not trigger notification twice
-        if (weak) {
-            store.subscribeWeak(objectClassObserver, TestEntityMinimal.class);
-        } else {
-            store.subscribe(objectClassObserver, TestEntityMinimal.class);
-        }
+        Subscription subscription2 = subscribe(weak, TestEntityMinimal.class);
+
         Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
         boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
         assertEquals(1, classesWithChanges.size());
 
         classesWithChanges.clear();
-        store.unsubscribe(objectClassObserver);
+        subscription.cancel();
         store.runInTx(txRunnable);
         assertEquals(0, classesWithChanges.size());
     }

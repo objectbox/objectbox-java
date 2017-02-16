@@ -7,10 +7,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
-import io.objectbox.ObjectClassObserver;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.internal.CallWithHandle;
+import io.objectbox.reactive.Observer;
+import io.objectbox.reactive.Subscription;
 
 /**
  * A repeatable query returning entities.
@@ -22,7 +23,7 @@ import io.objectbox.internal.CallWithHandle;
 @Beta
 public class Query<T> {
 
-    private ObjectClassObserver objectClassObserver;
+    private Subscription objectClassSubscription;
 
     private static native long nativeDestroy(long handle);
 
@@ -68,6 +69,7 @@ public class Query<T> {
     private final boolean hasOrder;
     private long handle;
     private Set<QueryObserver<T>> observers = new CopyOnWriteArraySet();
+    private Observer<Class<T>> objectClassObserver;
 
     Query(Box<T> box, long queryHandle, boolean hasOrder) {
         this.box = box;
@@ -268,9 +270,9 @@ public class Query<T> {
     public synchronized void subscribe(QueryObserver<T> observer) {
         final BoxStore store = box.getStore();
         if (objectClassObserver == null) {
-            objectClassObserver = new ObjectClassObserver() {
+            objectClassObserver = new Observer<Class<T>>() {
                 @Override
-                public void onChanges(Class objectClass) {
+                public void onChange(Class<T> objectClass) {
                     store.internalScheduleThread(new Runnable() {
                         @Override
                         public void run() {
@@ -284,15 +286,19 @@ public class Query<T> {
             };
         }
         if (observers.isEmpty()) {
-            store.subscribeWeak(objectClassObserver, box.getEntityClass());
+            if(objectClassSubscription != null) {
+                throw new IllegalStateException("Existing subscription found");
+            }
+            objectClassSubscription = store.subscribe(box.getEntityClass()).weak().subscribe(objectClassObserver);
         }
         observers.add(observer);
     }
 
     public synchronized void unsubscribe(QueryObserver<T> observer) {
         observers.remove(observer);
-        if (observers.isEmpty() && objectClassObserver != null) {
-            box.getStore().unsubscribe(objectClassObserver);
+        if (observers.isEmpty()) {
+            objectClassSubscription.cancel();
+            objectClassSubscription = null;
         }
     }
 

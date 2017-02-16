@@ -1,8 +1,6 @@
 package io.objectbox;
 
 import org.greenrobot.essentials.collections.LongHashMap;
-import org.greenrobot.essentials.collections.MultimapSet;
-import org.greenrobot.essentials.collections.MultimapSet.SetType;
 import org.greenrobot.essentials.io.IoUtils;
 
 import java.io.BufferedInputStream;
@@ -16,10 +14,8 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +32,8 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbSchemaException;
 import io.objectbox.internal.CrashReportLogger;
-import io.objectbox.internal.WeakObjectClassObserver;
+import io.objectbox.reactive.Publisher;
+import io.objectbox.reactive.SubscriptionBuilder;
 
 @Beta
 public class BoxStore implements Closeable {
@@ -171,10 +168,10 @@ public class BoxStore implements Closeable {
     private final Map<Class, Integer> entityTypeIdByClass;
     private final LongHashMap<Class> classByEntityTypeId;
     private final int[] allEntityTypeIds;
-    private final MultimapSet<Integer, ObjectClassObserver> listenersByEntityTypeId;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
+    private final ObjectClassPublisher objectClassPublisher;
 
     /** Set when running inside TX */
     final ThreadLocal<Transaction> activeTx = new ThreadLocal<>();
@@ -200,7 +197,6 @@ public class BoxStore implements Closeable {
         entityCursorClassByClass = new HashMap<>();
         entityTypeIdByClass = new HashMap<>();
         classByEntityTypeId = new LongHashMap<>();
-        listenersByEntityTypeId = MultimapSet.create(SetType.THREAD_SAFE);
 
         for (EntityClasses entity : builder.entityClasses) {
             try {
@@ -228,6 +224,8 @@ public class BoxStore implements Closeable {
         for (int i = 0; i < size; i++) {
             allEntityTypeIds[i] = (int) entityIdsLong[i];
         }
+
+        objectClassPublisher = new ObjectClassPublisher(this);
     }
 
     @Override
@@ -246,17 +244,31 @@ public class BoxStore implements Closeable {
         return entityNameByClass.get(entityClass);
     }
 
-    Integer getEntityId(Class entityClass) {
+    Integer getEntityTypeId(Class entityClass) {
         return entityTypeIdByClass.get(entityClass);
     }
 
     @Internal
-    public int getEntityIdOrThrow(Class entityClass) {
+    public int getEntityTypeIdOrThrow(Class entityClass) {
         Integer id = entityTypeIdByClass.get(entityClass);
         if (id == null) {
             throw new DbSchemaException("No entity registered for " + entityClass);
         }
         return id;
+    }
+
+    @Internal
+    int[] getAllEntityTypeIds() {
+        return allEntityTypeIds;
+    }
+
+    @Internal
+    Class getEntityClassOrThrow(int entityTypeId) {
+        Class clazz = classByEntityTypeId.get(entityTypeId);
+        if (clazz == null) {
+            throw new DbSchemaException("No entity registered for type ID " + entityTypeId);
+        }
+        return clazz;
     }
 
     <T> Class<Cursor<T>> getEntityCursorClass(Class<T> entityClass) {
@@ -357,16 +369,7 @@ public class BoxStore implements Closeable {
 
         if (entityTypeIdsAffected != null) {
             for (int entityTypeId : entityTypeIdsAffected) {
-                Collection<ObjectClassObserver> listeners = listenersByEntityTypeId.get(entityTypeId);
-                if (listeners != null) {
-                    Class objectClass = classByEntityTypeId.get(entityTypeId);
-                    if (objectClass == null) {
-                        throw new IllegalStateException("Untracked entity type ID: " + entityTypeId);
-                    }
-                    for (ObjectClassObserver listener : listeners) {
-                        listener.onChanges(objectClass);
-                    }
-                }
+                objectClassPublisher.publish(entityTypeId);
             }
         }
     }
@@ -509,72 +512,20 @@ public class BoxStore implements Closeable {
 
     /**
      * Adds the given observer to be notified about changes to any object class.
-     * The observer will be called once a transaction is committed.
+     * The observer supplied via {@link SubscriptionBuilder} will be called once a transaction is committed.
      * Failed or aborted transaction do not trigger observers.
      */
-    public void subscribe(ObjectClassObserver observer) {
-        for (int entityTypeId : allEntityTypeIds) {
-            listenersByEntityTypeId.putElement(entityTypeId, observer);
-        }
+    public SubscriptionBuilder<Class> subscribe() {
+        return new SubscriptionBuilder<Class>(objectClassPublisher, null, threadPool);
     }
-
-    /**
-     * Like {@link #subscribe(ObjectClassObserver)}, but uses a weak reference to the given observer.
-     * It is still advised to remove observers explicitly if possible: relying on the garbage collection may cause
-     * non-deterministic timing. Until the weak reference is actually cleared by GC, it may still receive notifications.
-     */
-    public void subscribeWeak(ObjectClassObserver observer) {
-        subscribe(new WeakObjectClassObserver(this, observer));
-    }
-
 
     /**
      * Adds the given observer to be notified about changes to the given object class (only).
-     * The observer will be called once a transaction is committed.
+     * The observer supplied via {@link SubscriptionBuilder} will be called once a transaction is committed.
      * Failed or aborted transaction do not trigger observers.
      */
-    public void subscribe(ObjectClassObserver observer, Class objectClass) {
-        Integer entityTypeId = entityTypeIdByClass.get(objectClass);
-        if (entityTypeId == null) {
-            throw new IllegalArgumentException("Not a registered object class: " + objectClass);
-        }
-        listenersByEntityTypeId.putElement(entityTypeId, observer);
-    }
-
-    /**
-     * Like {@link #subscribe(ObjectClassObserver, Class)}, but uses a weak reference to the given observer.
-     * It is still advised to remove observers explicitly if possible: relying on the garbage collection may cause
-     * non-deterministic timing. Until the weak reference is actually cleared by GC, it may still receive notifications.
-     */
-    public void subscribeWeak(ObjectClassObserver observer, Class objectClass) {
-        subscribe(new WeakObjectClassObserver(this, observer), objectClass);
-    }
-
-    /**
-     * Removes the given observer from all object classes it added itself to earlier.
-     * This also considers weakly added observers.
-     */
-    public void unsubscribe(ObjectClassObserver observer) {
-        for (int entityTypeId : allEntityTypeIds) {
-            Set<ObjectClassObserver> observers = listenersByEntityTypeId.get(entityTypeId);
-            if (observers != null) {
-                Iterator<ObjectClassObserver> iterator = observers.iterator();
-                while (iterator.hasNext()) {
-                    ObjectClassObserver candidate = iterator.next();
-                    if (candidate.equals(observer)) {
-                        // Unsupported by CopyOnWriteArraySet: iterator.remove();
-                        observers.remove(candidate);
-                    } else if (candidate instanceof WeakObjectClassObserver) {
-                        ObjectClassObserver delegate = ((WeakObjectClassObserver) candidate).getDelegate();
-                        if (delegate == null || delegate.equals(observer)) {
-                            // Unsupported by CopyOnWriteArraySet: iterator.remove();
-                            observers.remove(candidate);
-                        }
-                    }
-                }
-            }
-            listenersByEntityTypeId.removeElement(entityTypeId, observer);
-        }
+    public <T> SubscriptionBuilder<Class<T>> subscribe(Class<T> forClass) {
+        return new SubscriptionBuilder<>((Publisher) objectClassPublisher, forClass, threadPool);
     }
 
     @Internal

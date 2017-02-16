@@ -70,7 +70,7 @@ public class Customer {
                 throw new DbDetachedException();
             }
             Box<Order> box = boxStore.boxFor(Order.class);
-            int targetEntityId = boxStore.getEntityIdOrThrow(Order.class);
+            int targetEntityId = boxStore.getEntityTypeIdOrThrow(Order.class);
             List<Order> ordersNew = box.getBacklinkEntities(targetEntityId, Order_.customerId, id);
             synchronized (this) {
                 if (orders == null) {
