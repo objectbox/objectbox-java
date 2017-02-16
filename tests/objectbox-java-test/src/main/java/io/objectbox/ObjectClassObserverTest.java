@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import io.objectbox.reactive.Observer;
+import io.objectbox.reactive.RunWithParam;
+import io.objectbox.reactive.Scheduler;
 import io.objectbox.reactive.Subscription;
 import io.objectbox.reactive.SubscriptionBuilder;
 import io.objectbox.reactive.Transformer;
@@ -118,7 +120,8 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         assertEquals(0, classesWithChanges.size());
     }
 
-    public void testTransform(boolean weak) throws InterruptedException {
+    @Test
+    public void testTransform() throws InterruptedException {
         final List<Long> objectCounts = new ArrayList<>();
         final CountDownLatch latch= new CountDownLatch(2);
         final Thread testThread = Thread.currentThread();
@@ -156,6 +159,23 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         store.runInTx(txRunnable);
         Thread.sleep(20);
         assertEquals(0, objectCounts.size());
+    }
+
+    @Test
+    public void testScheduler() throws InterruptedException {
+        final int[] schedulerCounter= {0};
+        Subscription subscription = store.subscribe().on(new Scheduler() {
+            @Override
+            public <T> void run(RunWithParam runnable, T param) {
+                schedulerCounter[0]++;
+                runnable.run(param);
+            }
+        }).subscribe(objectClassObserver);
+
+        store.runInTx(txRunnable);
+
+        assertEquals(2, schedulerCounter[0]);
+        assertEquals(2, classesWithChanges.size());
     }
 
 }
