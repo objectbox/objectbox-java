@@ -5,7 +5,9 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.objectbox.reactive.Observer;
 import io.objectbox.reactive.RunWithParam;
@@ -122,16 +124,25 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
     @Test
     public void testTransform() throws InterruptedException {
-        final List<Long> objectCounts = new ArrayList<>();
+        testTransform(null);
+    }
+
+    private void testTransform(TestScheduler scheduler) throws InterruptedException {
+        final List<Long> objectCounts = new CopyOnWriteArrayList<>();
         final CountDownLatch latch= new CountDownLatch(2);
         final Thread testThread = Thread.currentThread();
-        Subscription subscription = store.subscribe().transform(new Transformer<Class, Long>() {
+
+        SubscriptionBuilder<Long> subscriptionBuilder = store.subscribe().transform(new Transformer<Class, Long>() {
             @Override
             public Long transform(Class source) throws Exception {
                 assertNotSame(testThread, Thread.currentThread());
                 return store.boxFor(source).count();
             }
-        }).subscribe(new Observer<Long>() {
+        });
+        if(scheduler != null) {
+            subscriptionBuilder.on(scheduler);
+        }
+        Subscription subscription = subscriptionBuilder.subscribe(new Observer<Long>() {
             @Override
             public void onChange(Long data) {
                 objectCounts.add(data);
@@ -163,19 +174,33 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
     @Test
     public void testScheduler() throws InterruptedException {
-        final int[] schedulerCounter= {0};
-        Subscription subscription = store.subscribe().on(new Scheduler() {
-            @Override
-            public <T> void run(RunWithParam runnable, T param) {
-                schedulerCounter[0]++;
-                runnable.run(param);
-            }
-        }).subscribe(objectClassObserver);
+        TestScheduler scheduler = new TestScheduler();
+        store.subscribe().on(scheduler).subscribe(objectClassObserver);
 
         store.runInTx(txRunnable);
 
-        assertEquals(2, schedulerCounter[0]);
+        assertEquals(2, scheduler.counter());
         assertEquals(2, classesWithChanges.size());
     }
 
+    @Test
+    public void testTransformerWithScheduler() throws InterruptedException {
+        TestScheduler scheduler = new TestScheduler();
+        testTransform(scheduler);
+        assertEquals(2, scheduler.counter());
+    }
+
+    private static class TestScheduler implements Scheduler {
+        AtomicInteger counter = new AtomicInteger();
+
+        int counter() {
+            return counter.intValue();
+        }
+
+        @Override
+        public <T> void run(RunWithParam runnable, T param) {
+            counter.incrementAndGet();
+            runnable.run(param);
+        }
+    }
 }
