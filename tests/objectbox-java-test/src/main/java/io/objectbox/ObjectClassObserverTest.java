@@ -5,14 +5,16 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.concurrent.CountDownLatch;
 
 import io.objectbox.reactive.Observer;
 import io.objectbox.reactive.Subscription;
 import io.objectbox.reactive.SubscriptionBuilder;
+import io.objectbox.reactive.Transformer;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 public class ObjectClassObserverTest extends AbstractObjectBoxTest {
@@ -114,6 +116,46 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         subscription.cancel();
         store.runInTx(txRunnable);
         assertEquals(0, classesWithChanges.size());
+    }
+
+    public void testTransform(boolean weak) throws InterruptedException {
+        final List<Long> objectCounts = new ArrayList<>();
+        final CountDownLatch latch= new CountDownLatch(2);
+        final Thread testThread = Thread.currentThread();
+        Subscription subscription = store.subscribe().transform(new Transformer<Class, Long>() {
+            @Override
+            public Long transform(Class source) throws Exception {
+                assertNotSame(testThread, Thread.currentThread());
+                return store.boxFor(source).count();
+            }
+        }).subscribe(new Observer<Long>() {
+            @Override
+            public void onChange(Long data) {
+                objectCounts.add(data);
+                latch.countDown();
+            }
+        });
+
+        store.runInTx(new Runnable() {
+            @Override
+            public void run() {
+                // Dummy TX, still will be committed, should not add anything to objectCounts
+                getTestEntityBox().count();
+            }
+        });
+
+        store.runInTx(txRunnable);
+
+        assertLatchCountedDown(latch, 5);
+        assertEquals(2, objectCounts.size());
+        assertTrue(objectCounts.contains(2L));
+        assertTrue(objectCounts.contains(3L));
+
+        objectCounts.clear();
+        subscription.cancel();
+        store.runInTx(txRunnable);
+        Thread.sleep(20);
+        assertEquals(0, objectCounts.size());
     }
 
 }
