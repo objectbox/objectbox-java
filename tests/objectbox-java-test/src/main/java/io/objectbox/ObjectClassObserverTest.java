@@ -109,16 +109,16 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testTwoObjectClassesChanged_oneClassObserver() {
+    public void testTwoObjectClassesChanged_oneClassObserver() throws InterruptedException {
         testTwoObjectClassesChanged_oneClassObserver(false);
     }
 
     @Test
-    public void testTwoObjectClassesChanged_oneClassObserverWeak() {
+    public void testTwoObjectClassesChanged_oneClassObserverWeak() throws InterruptedException {
         testTwoObjectClassesChanged_oneClassObserver(true);
     }
 
-    public void testTwoObjectClassesChanged_oneClassObserver(boolean weak) {
+    public void testTwoObjectClassesChanged_oneClassObserver(boolean weak) throws InterruptedException {
         DataSubscription subscription = subscribe(weak, TestEntityMinimal.class);
         runTxAndWaitForObservers(1);
 

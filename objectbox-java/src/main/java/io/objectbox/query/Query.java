@@ -68,7 +68,7 @@ public class Query<T> {
     private final Box<T> box;
     private final boolean hasOrder;
     private long handle;
-    private Set<QueryObserver<T>> observers = new CopyOnWriteArraySet();
+    private Set<DataObserver<List<T>>> observers = new CopyOnWriteArraySet();
     private DataObserver<Class<T>> objectClassObserver;
 
     Query(Box<T> box, long queryHandle, boolean hasOrder) {
@@ -267,7 +267,7 @@ public class Query<T> {
         });
     }
 
-    public synchronized void subscribe(QueryObserver<T> observer) {
+    public synchronized void subscribe(DataObserver<List<T>> observer) {
         final BoxStore store = box.getStore();
         if (objectClassObserver == null) {
             objectClassObserver = new DataObserver<Class<T>>() {
@@ -277,8 +277,8 @@ public class Query<T> {
                         @Override
                         public void run() {
                             List<T> result = find();
-                            for (QueryObserver<T> observer : observers) {
-                                observer.onQueryChanges(result);
+                            for (DataObserver<List<T>> observer : observers) {
+                                observer.onData(result);
                             }
                         }
                     });
@@ -294,7 +294,7 @@ public class Query<T> {
         observers.add(observer);
     }
 
-    public synchronized void unsubscribe(QueryObserver<T> observer) {
+    public synchronized void unsubscribe(DataObserver<List<T>> observer) {
         observers.remove(observer);
         if (observers.isEmpty()) {
             objectClassSubscription.cancel();

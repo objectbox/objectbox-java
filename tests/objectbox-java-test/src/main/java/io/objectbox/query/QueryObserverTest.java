@@ -10,12 +10,13 @@ import java.util.concurrent.CountDownLatch;
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.TestEntity;
+import io.objectbox.reactive.DataObserver;
 
 
 import static io.objectbox.TestEntity_.simpleInt;
 import static org.junit.Assert.assertEquals;
 
-public class QueryObserverTest extends AbstractObjectBoxTest implements QueryObserver<TestEntity> {
+public class QueryObserverTest extends AbstractObjectBoxTest implements DataObserver<List<TestEntity>> {
 
     private Box<TestEntity> box;
     private List<List<TestEntity>> receivedChanges = new CopyOnWriteArrayList<>();
@@ -46,7 +47,7 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements QueryObs
     }
 
     @Override
-    public void onQueryChanges(List<TestEntity> queryResult) {
+    public void onData(List<TestEntity> queryResult) {
         receivedChanges.add(queryResult);
         latch.countDown();
     }
