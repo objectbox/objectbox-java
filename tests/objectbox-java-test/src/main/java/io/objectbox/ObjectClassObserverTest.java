@@ -11,11 +11,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataSubscription;
+import io.objectbox.reactive.DataTransformer;
 import io.objectbox.reactive.ErrorObserver;
 import io.objectbox.reactive.RunWithParam;
 import io.objectbox.reactive.Scheduler;
 import io.objectbox.reactive.SubscriptionBuilder;
-import io.objectbox.reactive.Transformer;
 
 
 import static org.junit.Assert.assertEquals;
@@ -155,7 +155,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         final CountDownLatch latch = new CountDownLatch(2);
         final Thread testThread = Thread.currentThread();
 
-        SubscriptionBuilder<Long> subscriptionBuilder = store.subscribe().transform(new Transformer<Class, Long>() {
+        SubscriptionBuilder<Long> subscriptionBuilder = store.subscribe().transform(new DataTransformer<Class, Long>() {
             @Override
             public Long transform(Class source) throws Exception {
                 assertNotSame(testThread, Thread.currentThread());
@@ -244,7 +244,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         final CountDownLatch latch = new CountDownLatch(2);
         final Thread testThread = Thread.currentThread();
 
-        DataSubscription subscription = store.subscribe().transform(new Transformer<Class, Long>() {
+        DataSubscription subscription = store.subscribe().transform(new DataTransformer<Class, Long>() {
             @Override
             public Long transform(Class source) throws Exception {
                 throw new Exception("Boo");

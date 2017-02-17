@@ -12,7 +12,8 @@ import io.objectbox.annotation.apihint.Internal;
  * When subscribing to a data source such as {@link io.objectbox.query.Query}, this builder allows to configure:
  * <ul>
  * <li>weakly referenced observer via {@link #weak()}</li>
- * <li>a data transform operation via {@link #transform(Transformer)}</li>
+ * <li>a data transform operation via {@link #transform(DataTransformer)}</li>
+ * <li>error handlers via {@link #onError(ErrorObserver)}</li>
  * <li>calling the observer using a custom {@link Scheduler} (e.g. Android main thread) via {@link #on(Scheduler)}</li>
  * </ul>
  *
@@ -25,7 +26,7 @@ public class SubscriptionBuilder<T> {
     private DataObserver<T> observer;
     //    private Runnable firstRunnable;
     private boolean weak;
-    private Transformer<T, Object> transformer;
+    private DataTransformer<T, Object> transformer;
     private Scheduler scheduler;
     private ErrorObserver errorObserver;
 //    private boolean sync;
@@ -71,16 +72,16 @@ public class SubscriptionBuilder<T> {
      *
      * @param <TO> The class the data is transformed to
      */
-    public <TO> SubscriptionBuilder<TO> transform(final Transformer<T, TO> transformer) {
+    public <TO> SubscriptionBuilder<TO> transform(final DataTransformer<T, TO> transformer) {
         if (this.transformer != null) {
             throw new IllegalStateException("Only one transformer allowed");
         }
-        this.transformer = (Transformer<T, Object>) transformer;
+        this.transformer = (DataTransformer<T, Object>) transformer;
         return (SubscriptionBuilder<TO>) this;
     }
 
     /**
-     * The given {@link ErrorObserver} is notified when the {@link Transformer} ({@link #transform(Transformer)}) or
+     * The given {@link ErrorObserver} is notified when the {@link DataTransformer} ({@link #transform(DataTransformer)}) or
      * {@link DataObserver} ({@link #observer(DataObserver)}) threw an exception.
      */
     public SubscriptionBuilder<T> onError(ErrorObserver errorObserver) {
@@ -125,6 +126,7 @@ public class SubscriptionBuilder<T> {
 
         // TODO FIXME when an observer subscribes twice, it currently won't be added, but we return a new subscription
         if (transformer == null && scheduler == null && errorObserver == null) {
+            // Trivial observers do not have to be wrapped
             publisher.subscribe(observer, publisherParam);
         } else {
             publisher.subscribe(new ActionObserver(subscription), publisherParam);
@@ -174,7 +176,6 @@ public class SubscriptionBuilder<T> {
             });
         }
 
-
         private void callOnError(Throwable th, String msgNoErrorObserver) {
             if (errorObserver != null) {
                 if (!subscription.isCanceled()) {
@@ -185,7 +186,10 @@ public class SubscriptionBuilder<T> {
                     }
                 }
             } else {
-                throw new RuntimeException(msgNoErrorObserver, th);
+                RuntimeException exception = new RuntimeException(msgNoErrorObserver, th);
+                // Might by swallowed by thread pool, so print it right away
+                exception.printStackTrace();
+                throw exception;
             }
         }
 

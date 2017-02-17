@@ -12,7 +12,7 @@ import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.TestEntity;
 import io.objectbox.reactive.DataObserver;
-import io.objectbox.reactive.Transformer;
+import io.objectbox.reactive.DataTransformer;
 
 
 import static io.objectbox.TestEntity_.simpleInt;
@@ -50,7 +50,7 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
         assertEquals(0, query.count());
         final List<Integer> receivedSums = new ArrayList<>();
 
-        query.subscribe().transform(new Transformer<List<TestEntity>, Integer>() {
+        query.subscribe().transform(new DataTransformer<List<TestEntity>, Integer>() {
 
             @Override
             public Integer transform(List<TestEntity> source) throws Exception {
