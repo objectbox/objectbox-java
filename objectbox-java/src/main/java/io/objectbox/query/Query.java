@@ -7,6 +7,7 @@ import io.objectbox.Box;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.internal.CallWithHandle;
+import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.SubscriptionBuilder;
 
 /**
@@ -77,6 +78,9 @@ public class Query<T> {
         super.finalize();
     }
 
+    /**
+     * If possible, try to close the query once you are done with it to reclaim resources immediately.
+     */
     public synchronized void close() {
         if (handle != 0) {
             nativeDestroy(handle);
@@ -84,6 +88,9 @@ public class Query<T> {
         }
     }
 
+    /**
+     * Find the first Object matching the query.
+     */
     public T findFirst() {
         return box.internalCallWithReaderHandle(new CallWithHandle<T>() {
             @Override
@@ -93,6 +100,11 @@ public class Query<T> {
         });
     }
 
+    /**
+     * Find the unique Object matching the query.
+     *
+     * @throws io.objectbox.exception.DbException if result was not unique
+     */
     public T findUnique() {
         return box.internalCallWithReaderHandle(new CallWithHandle<T>() {
             @Override
@@ -102,6 +114,9 @@ public class Query<T> {
         });
     }
 
+    /**
+     * Find all Objects matching the query.
+     */
     public List<T> find() {
         return box.internalCallWithReaderHandle(new CallWithHandle<List<T>>() {
             @Override
@@ -111,6 +126,9 @@ public class Query<T> {
         });
     }
 
+    /**
+     * Find all Objects matching the query between the given offset and limit. This helps with pagination.
+     */
     public List<T> find(final long offset, final long limit) {
         return box.internalCallWithReaderHandle(new CallWithHandle<List<T>>() {
             @Override
@@ -144,6 +162,7 @@ public class Query<T> {
         return new LazyList<>(box, findIds(), true);
     }
 
+    /** Returns the count of Objects matching the query. */
     public long count() {
         return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
             @Override
@@ -153,6 +172,7 @@ public class Query<T> {
         });
     }
 
+    /** Sums up all values for the given property over all Objects matching the query. */
     public long sum(final Property property) {
         return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
             @Override
@@ -162,6 +182,7 @@ public class Query<T> {
         });
     }
 
+    /** Sums up all values for the given property over all Objects matching the query. */
     public double sumDouble(final Property property) {
         return box.internalCallWithReaderHandle(new CallWithHandle<Double>() {
             @Override
@@ -171,6 +192,7 @@ public class Query<T> {
         });
     }
 
+    /** Finds the maximum value for the given property over all Objects matching the query. */
     public long max(final Property property) {
         return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
             @Override
@@ -180,6 +202,7 @@ public class Query<T> {
         });
     }
 
+    /** Finds the maximum value for the given property over all Objects matching the query. */
     public double maxDouble(final Property property) {
         return box.internalCallWithReaderHandle(new CallWithHandle<Double>() {
             @Override
@@ -189,6 +212,7 @@ public class Query<T> {
         });
     }
 
+    /** Finds the minimum value for the given property over all Objects matching the query. */
     public long min(final Property property) {
         return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
             @Override
@@ -198,6 +222,7 @@ public class Query<T> {
         });
     }
 
+    /** Finds the minimum value for the given property over all Objects matching the query. */
     public double minDouble(final Property property) {
         return box.internalCallWithReaderHandle(new CallWithHandle<Double>() {
             @Override
@@ -207,6 +232,7 @@ public class Query<T> {
         });
     }
 
+    /** Calculates the average of all values for the given property over all Objects matching the query. */
     public double avg(final Property property) {
         return box.internalCallWithReaderHandle(new CallWithHandle<Double>() {
             @Override
@@ -216,42 +242,67 @@ public class Query<T> {
         });
     }
 
+
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
+     */
     public Query<T> setParameter(Property property, String value) {
         nativeSetParameter(handle, property.getId(), null, value);
         return this;
     }
 
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
+     */
     public Query<T> setParameter(Property property, long value) {
         nativeSetParameter(handle, property.getId(), null, value);
         return this;
     }
 
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
+     */
     public Query<T> setParameter(Property property, double value) {
         nativeSetParameter(handle, property.getId(), null, value);
         return this;
     }
 
     /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
+     *
      * @throws NullPointerException if given date is null
      */
     public Query<T> setParameter(Property property, Date value) {
         return setParameter(property, value.getTime());
     }
 
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
+     */
     public Query<T> setParameter(Property property, boolean value) {
         return setParameter(property, value ? 1 : 0);
     }
 
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     */
     public Query<T> setParameters(Property property, long value1, long value2) {
         nativeSetParameters(handle, property.getId(), null, value1, value2);
         return this;
     }
 
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     */
     public Query<T> setParameters(Property property, double value1, double value2) {
         nativeSetParameters(handle, property.getId(), null, value1, value2);
         return this;
     }
 
+    /**
+     * Removes (deletes) all Objects matching the query
+     * @return count of removed Objects
+     */
     public long remove() {
         return box.internalCallWithWriterHandle(new CallWithHandle<Long>() {
             @Override
@@ -261,6 +312,16 @@ public class Query<T> {
         });
     }
 
+    /**
+     * A {@link io.objectbox.reactive.DataObserver} can be subscribed to data changes using the returned builder.
+     * The observer is supplied via {@link SubscriptionBuilder#observer(DataObserver)} and will be notified once
+     * the query results have (potentially) changed.
+     * <p>
+     * Threading notes:
+     * Query observers are notified from a thread pooled. Observers may be notified in parallel.
+     * The notification order is the same as the subscription order, although this may not always be guaranteed in
+     * the future.
+     */
     public SubscriptionBuilder<List<T>> subscribe() {
         return new SubscriptionBuilder<>(publisher, null, box.getStore().internalThreadPool());
     }
