@@ -6,11 +6,13 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.DataSubscription;
 
-public class QueryPublisher<T> implements DataPublisher<List<T>> {
+@Internal
+class QueryPublisher<T> implements DataPublisher<List<T>> {
 
     private final Query<T> query;
     private final Box<T> box;
@@ -19,7 +21,7 @@ public class QueryPublisher<T> implements DataPublisher<List<T>> {
 
     private Set<DataObserver<List<T>>> observers = new CopyOnWriteArraySet();
 
-    public QueryPublisher(Query<T> query, Box<T> box) {
+    QueryPublisher(Query<T> query, Box<T> box) {
         this.query = query;
         this.box = box;
     }

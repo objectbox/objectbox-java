@@ -276,4 +276,48 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         assertEquals(0, errors.size());
     }
 
+    @Test
+    public void testObserverError() throws InterruptedException {
+        testObserverError(null);
+    }
+
+    @Test
+    public void testObserverErrorWithScheduler() throws InterruptedException {
+        TestScheduler scheduler = new TestScheduler();
+        testObserverError(scheduler);
+        assertEquals(2 + 2, scheduler.counter()); // 2 observer + 2 error observer calls
+    }
+
+    public void testObserverError(Scheduler scheduler) throws InterruptedException {
+        final List<Throwable> errors = new CopyOnWriteArrayList<>();
+        final CountDownLatch latch = new CountDownLatch(2);
+        final Thread testThread = Thread.currentThread();
+
+        DataSubscription subscription = store.subscribe().onError(new ErrorObserver() {
+            @Override
+            public void onError(Throwable th) {
+                assertNotSame(testThread, Thread.currentThread());
+                errors.add(th);
+                latch.countDown();
+            }
+        }).on(scheduler).observer(new DataObserver<Class>() {
+            @Override
+            public void onData(Class data) {
+                throw new RuntimeException("Boo");
+            }
+        });
+
+        store.runInTx(txRunnable);
+
+        assertLatchCountedDown(latch, 5);
+        assertEquals(2, errors.size());
+        assertEquals("Boo", errors.get(0).getMessage());
+
+        errors.clear();
+        subscription.cancel();
+        store.runInTx(txRunnable);
+        Thread.sleep(20);
+        assertEquals(0, errors.size());
+    }
+
 }

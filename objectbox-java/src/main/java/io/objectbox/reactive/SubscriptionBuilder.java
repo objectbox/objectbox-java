@@ -124,7 +124,7 @@ public class SubscriptionBuilder<T> {
         }
 
         // TODO FIXME when an observer subscribes twice, it currently won't be added, but we return a new subscription
-        if (transformer == null && scheduler == null) {
+        if (transformer == null && scheduler == null && errorObserver == null) {
             publisher.subscribe(observer, publisherParam);
         } else {
             publisher.subscribe(new ActionObserver(subscription), publisherParam);
@@ -168,28 +168,37 @@ public class SubscriptionBuilder<T> {
                         T result = (T) transformer.transform(data);
                         callOnData(result);
                     } catch (Throwable th) {
-                        if (errorObserver != null) {
-                            if (!subscription.isCanceled()) {
-                                if (scheduler != null) {
-                                    scheduler.run(schedulerRunOnError, th);
-                                } else {
-                                    errorObserver.onError(th);
-                                }
-                            }
-                        } else {
-                            throw new RuntimeException("Transformer failed without an ErrorObserver set", th);
-                        }
+                        callOnError(th, "Transformer failed without an ErrorObserver set");
                     }
                 }
             });
         }
 
-        void callOnData(final T result) {
+
+        private void callOnError(Throwable th, String msgNoErrorObserver) {
+            if (errorObserver != null) {
+                if (!subscription.isCanceled()) {
+                    if (scheduler != null) {
+                        scheduler.run(schedulerRunOnError, th);
+                    } else {
+                        errorObserver.onError(th);
+                    }
+                }
+            } else {
+                throw new RuntimeException(msgNoErrorObserver, th);
+            }
+        }
+
+        void callOnData(final T data) {
             if (!subscription.isCanceled()) {
                 if (scheduler != null) {
-                    scheduler.run(schedulerRunOnData, result);
+                    scheduler.run(schedulerRunOnData, data);
                 } else {
-                    observer.onData(result);
+                    try {
+                        observer.onData(data);
+                    } catch (RuntimeException | Error e) {
+                        callOnError(e, "Observer failed without an ErrorObserver set");
+                    }
                 }
             }
         }
@@ -198,7 +207,11 @@ public class SubscriptionBuilder<T> {
             @Override
             public void run(T data) {
                 if (!subscription.isCanceled()) {
-                    observer.onData(data);
+                    try {
+                        observer.onData(data);
+                    } catch (RuntimeException | Error e) {
+                        callOnError(e, "Observer failed without an ErrorObserver set");
+                    }
                 }
             }
         }
