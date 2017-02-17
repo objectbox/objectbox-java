@@ -111,14 +111,12 @@ public class SubscriptionBuilder<T> {
      *
      * @return an subscription object used for canceling further notifications to the observer
      */
-    public DataSubscription observer(final DataObserver<T> observer) {
+    public DataSubscription observer(DataObserver<T> observer) {
         WeakDataObserver<T> weakObserver = null;
         if (weak) {
-            weakObserver = new WeakDataObserver<>(observer);
-            this.observer = weakObserver;
-        } else {
-            this.observer = observer;
+            observer = weakObserver = new WeakDataObserver<>(observer);
         }
+        this.observer = observer;
         DataSubscriptionImpl subscription = new DataSubscriptionImpl(publisher, publisherParam, observer);
         if (weakObserver != null) {
             weakObserver.setSubscription(subscription);
@@ -127,7 +125,7 @@ public class SubscriptionBuilder<T> {
         // TODO FIXME when an observer subscribes twice, it currently won't be added, but we return a new subscription
         if (transformer == null && scheduler == null && errorObserver == null) {
             // Trivial observers do not have to be wrapped
-            publisher.subscribe(observer, publisherParam);
+            publisher.subscribe(this.observer, publisherParam);
         } else {
             publisher.subscribe(new ActionObserver(subscription), publisherParam);
         }
