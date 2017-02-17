@@ -2,16 +2,12 @@ package io.objectbox.query;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import io.objectbox.Box;
-import io.objectbox.BoxStore;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.internal.CallWithHandle;
-import io.objectbox.reactive.DataObserver;
-import io.objectbox.reactive.DataSubscription;
+import io.objectbox.reactive.SubscriptionBuilder;
 
 /**
  * A repeatable query returning entities.
@@ -22,8 +18,6 @@ import io.objectbox.reactive.DataSubscription;
  */
 @Beta
 public class Query<T> {
-
-    private DataSubscription objectClassSubscription;
 
     private static native long nativeDestroy(long handle);
 
@@ -68,13 +62,13 @@ public class Query<T> {
     private final Box<T> box;
     private final boolean hasOrder;
     private long handle;
-    private Set<DataObserver<List<T>>> observers = new CopyOnWriteArraySet();
-    private DataObserver<Class<T>> objectClassObserver;
+    private final QueryPublisher<T> publisher;
 
     Query(Box<T> box, long queryHandle, boolean hasOrder) {
         this.box = box;
         handle = queryHandle;
         this.hasOrder = hasOrder;
+        publisher = new QueryPublisher<T>(this, box);
     }
 
     @Override
@@ -267,39 +261,8 @@ public class Query<T> {
         });
     }
 
-    public synchronized void subscribe(DataObserver<List<T>> observer) {
-        final BoxStore store = box.getStore();
-        if (objectClassObserver == null) {
-            objectClassObserver = new DataObserver<Class<T>>() {
-                @Override
-                public void onData(Class<T> objectClass) {
-                    store.internalScheduleThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            List<T> result = find();
-                            for (DataObserver<List<T>> observer : observers) {
-                                observer.onData(result);
-                            }
-                        }
-                    });
-                }
-            };
-        }
-        if (observers.isEmpty()) {
-            if(objectClassSubscription != null) {
-                throw new IllegalStateException("Existing subscription found");
-            }
-            objectClassSubscription = store.subscribe(box.getEntityClass()).weak().observer(objectClassObserver);
-        }
-        observers.add(observer);
-    }
-
-    public synchronized void unsubscribe(DataObserver<List<T>> observer) {
-        observers.remove(observer);
-        if (observers.isEmpty()) {
-            objectClassSubscription.cancel();
-            objectClassSubscription = null;
-        }
+    public SubscriptionBuilder<List<T>> subscribe() {
+        return new SubscriptionBuilder<>(publisher, null, box.getStore().internalThreadPool());
     }
 
 }

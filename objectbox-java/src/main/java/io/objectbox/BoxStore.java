@@ -573,4 +573,9 @@ public class BoxStore implements Closeable {
         return threadPool.submit(runnable);
     }
 
+    @Internal
+    public ExecutorService internalThreadPool() {
+        return threadPool;
+    }
+
 }
