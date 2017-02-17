@@ -34,15 +34,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
             objectClassObserver = new DataObserver<Class<T>>() {
                 @Override
                 public void onData(Class<T> objectClass) {
-                    store.internalScheduleThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            List<T> result = query.find();
-                            for (DataObserver<List<T>> observer : observers) {
-                                observer.onData(result);
-                            }
-                        }
-                    });
+                    publish();
                 }
             };
         }
@@ -53,6 +45,18 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
             objectClassSubscription = store.subscribe(box.getEntityClass()).weak().observer(objectClassObserver);
         }
         observers.add(observer);
+    }
+
+    void publish() {
+        box.getStore().internalScheduleThread(new Runnable() {
+            @Override
+            public void run() {
+                List<T> result = query.find();
+                for (DataObserver<List<T>> observer : observers) {
+                    observer.onData(result);
+                }
+            }
+        });
     }
 
     @Override

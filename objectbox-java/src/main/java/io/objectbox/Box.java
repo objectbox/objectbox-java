@@ -169,6 +169,7 @@ public class Box<T> {
 
     /**
      * Get the stored object for the given ID.
+     *
      * @return null if not found
      */
     public T get(long id) {
@@ -331,6 +332,9 @@ public class Box<T> {
 
     /**
      * Puts the given entities in a box using a single transaction.
+     *
+     * @param entities It is fine to pass null or an empty collection:
+     *                 this case is handled efficiently without overhead.
      */
     public void put(Collection<T> entities) {
         if (entities == null || entities.isEmpty()) {

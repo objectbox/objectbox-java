@@ -332,4 +332,12 @@ public class Query<T> {
         return new SubscriptionBuilder<>(publisher, null, box.getStore().internalThreadPool());
     }
 
+    /**
+     * Publishes the current data to all subscribed @{@link DataObserver}s.
+     * This is useful triggering observers initially and when new parameters have been set.
+     */
+    public void publish() {
+        publisher.publish();
+    }
+
 }
