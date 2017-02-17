@@ -80,8 +80,8 @@ public class SubscriptionBuilder<T> {
     }
 
     /**
-     * The given {@link ErrorObserver} is notified when the {@link Transformer} ({@link #transform(Transformer)})
-     * threw an exception.
+     * The given {@link ErrorObserver} is notified when the {@link Transformer} ({@link #transform(Transformer)}) or
+     * {@link DataObserver} ({@link #observer(DataObserver)}) threw an exception.
      */
     public SubscriptionBuilder<T> onError(ErrorObserver errorObserver) {
         if (this.errorObserver != null) {

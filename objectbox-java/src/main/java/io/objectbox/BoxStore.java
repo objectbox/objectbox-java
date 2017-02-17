@@ -547,8 +547,6 @@ public class BoxStore implements Closeable {
      * The observer is supplied via {@link SubscriptionBuilder#observer(DataObserver)} and will be notified once a
      * transaction is committed and will receive changes to any object class.
      * <p>
-     * Observers may not throw an exception; if they do the results are undefined.
-     * <p>
      * Threading notes:
      * All observers are notified from one separate thread (pooled). Observers are not notified in parallel.
      * The notification order is the same as the subscription order, although this may not always be guaranteed in
