@@ -9,6 +9,7 @@ import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
+import io.objectbox.reactive.DataPublisherUtils;
 import io.objectbox.reactive.DataSubscription;
 
 @Internal
@@ -16,10 +17,10 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
 
     private final Query<T> query;
     private final Box<T> box;
+    private final Set<DataObserver<List<T>>> observers = new CopyOnWriteArraySet();
+
     private DataObserver<Class<T>> objectClassObserver;
     private DataSubscription objectClassSubscription;
-
-    private Set<DataObserver<List<T>>> observers = new CopyOnWriteArraySet();
 
     QueryPublisher(Query<T> query, Box<T> box) {
         this.query = query;
@@ -56,7 +57,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
 
     @Override
     public synchronized void unsubscribe(DataObserver<List<T>> observer, Object param) {
-        observers.remove(observer);
+        DataPublisherUtils.removeObserverFromCopyOnWriteSet(observers, observer);
         if (observers.isEmpty()) {
             objectClassSubscription.cancel();
             objectClassSubscription = null;
