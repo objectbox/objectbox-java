@@ -12,7 +12,6 @@ import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.internal.CallWithHandle;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataSubscription;
-import io.objectbox.reactive.Transformer;
 
 /**
  * A repeatable query returning entities.
@@ -70,7 +69,7 @@ public class Query<T> {
     private final boolean hasOrder;
     private long handle;
     private Set<DataObserver<List<T>>> observers = new CopyOnWriteArraySet();
-    private DataObserver<List<T>> objectClassObserver;
+    private DataObserver<Class<T>> objectClassObserver;
 
     Query(Box<T> box, long queryHandle, boolean hasOrder) {
         this.box = box;
@@ -271,28 +270,26 @@ public class Query<T> {
     public synchronized void subscribe(DataObserver<List<T>> observer) {
         final BoxStore store = box.getStore();
         if (objectClassObserver == null) {
-            objectClassObserver = new DataObserver<List<T>>() {
+            objectClassObserver = new DataObserver<Class<T>>() {
                 @Override
-                public void onData(List<T> result) {
-                    for (DataObserver<List<T>> observer : observers) {
-                        observer.onData(result);
-                    }
+                public void onData(Class<T> objectClass) {
+                    store.internalScheduleThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            List<T> result = find();
+                            for (DataObserver<List<T>> observer : observers) {
+                                observer.onData(result);
+                            }
+                        }
+                    });
                 }
             };
         }
         if (observers.isEmpty()) {
-            if (objectClassSubscription != null) {
+            if(objectClassSubscription != null) {
                 throw new IllegalStateException("Existing subscription found");
             }
-            // Note: transformer is not weakly referenced.
-            objectClassSubscription = store.subscribe(box.getEntityClass()).weak()
-                    .transform(new Transformer<Class<T>, List<T>>() {
-                        @Override
-                        public List<T> transform(Class<T> source) throws Exception {
-                            return find();
-                        }
-                    })
-                    .observer(objectClassObserver);
+            objectClassSubscription = store.subscribe(box.getEntityClass()).weak().observer(objectClassObserver);
         }
         observers.add(observer);
     }
