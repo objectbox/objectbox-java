@@ -380,9 +380,7 @@ public class BoxStore implements Closeable {
         }
 
         if (entityTypeIdsAffected != null) {
-            for (int entityTypeId : entityTypeIdsAffected) {
-                objectClassPublisher.publish(entityTypeId);
-            }
+            objectClassPublisher.publish(entityTypeIdsAffected);
         }
     }
 

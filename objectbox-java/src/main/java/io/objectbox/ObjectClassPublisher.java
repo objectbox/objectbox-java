@@ -3,7 +3,9 @@ package io.objectbox;
 import org.greenrobot.essentials.collections.MultimapSet;
 import org.greenrobot.essentials.collections.MultimapSet.SetType;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -13,9 +15,11 @@ import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.WeakDataObserver;
 
 @Internal
-class ObjectClassPublisher implements DataPublisher<Class> {
+class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
     final BoxStore boxStore;
     final MultimapSet<Integer, DataObserver<Class>> observersByEntityTypeId = MultimapSet.create(SetType.THREAD_SAFE);
+    final Deque<int[]> changesQueue = new ArrayDeque<>();
+    volatile boolean changePublisherRunning;
 
     ObjectClassPublisher(BoxStore boxStore) {
         this.boxStore = boxStore;
@@ -69,13 +73,50 @@ class ObjectClassPublisher implements DataPublisher<Class> {
         observersByEntityTypeId.removeElement(entityTypeId, observer);
     }
 
-    void publish(int entityTypeId) {
-        Collection<DataObserver<Class>> observers = observersByEntityTypeId.get(entityTypeId);
-        if (observers != null) {
-            Class objectClass = boxStore.getEntityClassOrThrow(entityTypeId);
-            for (DataObserver<Class> observer : observers) {
-                observer.onData(objectClass);
+    /**
+     * Non-blocking: will just enqueue the changes for a separate thread.
+     */
+    void publish(int[] entityTypeIdsAffected) {
+        synchronized (changesQueue) {
+            changesQueue.add(entityTypeIdsAffected);
+            // Only one thread at a time
+            if (!changePublisherRunning) {
+                changePublisherRunning = true;
+                boxStore.internalScheduleThread(this);
             }
+        }
+    }
+
+    @Override
+    public void run() {
+        try {
+            while (true) {
+                // We do not join all available array, just in case the app relies on a specific order
+                int[] entityTypeIdsAffected;
+                synchronized (changesQueue) {
+                    entityTypeIdsAffected = changesQueue.pollFirst();
+                    if (entityTypeIdsAffected == null) {
+                        changePublisherRunning = false;
+                        break;
+                    }
+                }
+                for (int entityTypeId : entityTypeIdsAffected) {
+                    Collection<DataObserver<Class>> observers = observersByEntityTypeId.get(entityTypeId);
+                    if (observers != null && !observers.isEmpty()) {
+                        Class objectClass = boxStore.getEntityClassOrThrow(entityTypeId);
+                        try {
+                            for (DataObserver<Class> observer : observers) {
+                                observer.onData(objectClass);
+                            }
+                        } catch (RuntimeException e) {
+                            throw new RuntimeException("Observer failed while processing data for " + objectClass);
+                        }
+                    }
+                }
+            }
+        } finally {
+            // Just in Case of exceptions; it's better done within synchronized for regular cases
+            changePublisherRunning = false;
         }
     }
 }

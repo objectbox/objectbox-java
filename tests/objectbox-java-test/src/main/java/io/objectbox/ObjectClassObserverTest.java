@@ -28,11 +28,15 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         return createBoxStoreBuilderWithTwoEntities(false).build();
     }
 
+    CountDownLatch observerLatch = new CountDownLatch(1);
+
     final List<Class> classesWithChanges = new ArrayList<>();
+
     DataObserver objectClassObserver = new DataObserver<Class>() {
         @Override
         public void onData(Class objectClass) {
             classesWithChanges.add(objectClass);
+            observerLatch.countDown();
         }
     };
 
@@ -72,7 +76,8 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         });
         assertEquals(0, classesWithChanges.size());
 
-        store.runInTx(txRunnable);
+        runTxAndWaitForObservers(2);
+
         assertEquals(2, classesWithChanges.size());
         assertTrue(classesWithChanges.contains(TestEntity.class));
         assertTrue(classesWithChanges.contains(TestEntityMinimal.class));
@@ -80,12 +85,27 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         classesWithChanges.clear();
         subscription.cancel();
         store.runInTx(txRunnable);
-        assertEquals(0, classesWithChanges.size());
+        assertNoStaleObservers();
     }
 
     private DataSubscription subscribe(boolean weak, Class forClass) {
         SubscriptionBuilder<Class> subscriptionBuilder = store.subscribe(forClass);
         return (weak ? subscriptionBuilder.weak() : subscriptionBuilder).observer(objectClassObserver);
+    }
+
+    private void runTxAndWaitForObservers(int latchCount) {
+        observerLatch = new CountDownLatch(latchCount);
+        store.runInTx(txRunnable);
+        assertLatchCountedDown(observerLatch, 5);
+    }
+
+    private void assertNoStaleObservers() {
+        try {
+            Thread.sleep(20);  // Additional time for any stale observers to be notified (not expected)
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(0, classesWithChanges.size());
     }
 
     @Test
@@ -100,8 +120,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
     public void testTwoObjectClassesChanged_oneClassObserver(boolean weak) {
         DataSubscription subscription = subscribe(weak, TestEntityMinimal.class);
-
-        store.runInTx(txRunnable);
+        runTxAndWaitForObservers(1);
 
         assertEquals(1, classesWithChanges.size());
         assertEquals(classesWithChanges.get(0), TestEntityMinimal.class);
@@ -114,13 +133,16 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         DataSubscription subscription2 = subscribe(weak, TestEntityMinimal.class);
 
         Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
+        observerLatch = new CountDownLatch(1);
         boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
+        assertLatchCountedDown(observerLatch, 5);
+        Thread.sleep(20);
         assertEquals(1, classesWithChanges.size());
 
         classesWithChanges.clear();
         subscription.cancel();
         store.runInTx(txRunnable);
-        assertEquals(0, classesWithChanges.size());
+        assertNoStaleObservers();
     }
 
     @Test
@@ -178,7 +200,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         TestScheduler scheduler = new TestScheduler();
         store.subscribe().on(scheduler).observer(objectClassObserver);
 
-        store.runInTx(txRunnable);
+        runTxAndWaitForObservers(2);
 
         assertEquals(2, scheduler.counter());
         assertEquals(2, classesWithChanges.size());
@@ -207,7 +229,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
     @Test
     public void testTransformError() throws InterruptedException {
-    testTransformError(null);
+        testTransformError(null);
     }
 
     @Test
