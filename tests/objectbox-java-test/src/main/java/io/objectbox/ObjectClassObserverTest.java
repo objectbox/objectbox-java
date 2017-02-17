@@ -320,4 +320,52 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         assertEquals(0, errors.size());
     }
 
+    @Test
+    public void testForObserverLeaks() {
+        testForObserverLeaks(false, false);
+    }
+
+    @Test
+    public void testForObserverLeaks_weak() {
+        testForObserverLeaks(false, true);
+    }
+
+    @Test
+    public void testForObserverLeaks_wrapped() {
+        testForObserverLeaks(true, false);
+    }
+
+    @Test
+    public void testForObserverLeaks_wrappedWeak() {
+        testForObserverLeaks(true, true);
+    }
+
+    public void testForObserverLeaks(boolean wrapped, boolean weak) {
+        // Allocation would sum up to 70 GB in total when observer is not unsubscribed
+        long maxMB = Math.min(Runtime.getRuntime().maxMemory() / (1024 * 1024), 70L * 1024);
+        final int chunkSizeMB = 128;
+        int runs = (int) (maxMB / chunkSizeMB + 1);
+        for (int i = 0; i < runs; i++) {
+            // Use a Scheduler to ensure wrapped observer is used
+            SubscriptionBuilder<Class> subscriptionBuilder = store.subscribe();
+            if (weak) {
+                subscriptionBuilder.weak();
+            }
+            if (wrapped) {
+                subscriptionBuilder.on(new TestScheduler());
+            }
+            DataSubscription subscription = subscriptionBuilder.observer(new DataObserver<Class>() {
+                byte[] bigMemory = new byte[chunkSizeMB * 1024 * 1024];
+
+                @Override
+                public void onData(Class data) {
+                    bigMemory[0] ^= 1;
+                }
+            });
+            if (!weak) {
+                subscription.cancel();
+            }
+        }
+    }
+
 }

@@ -5,7 +5,7 @@ import java.lang.ref.WeakReference;
 import io.objectbox.annotation.apihint.Internal;
 
 @Internal
-public class WeakDataObserver<T> implements DataObserver<T> {
+public class WeakDataObserver<T> implements DataObserver<T>, DelegatingObserver {
     private final WeakReference<DataObserver<T>> weakDelegate;
     private DataSubscription subscription;
 
@@ -23,7 +23,7 @@ public class WeakDataObserver<T> implements DataObserver<T> {
         }
     }
 
-    public DataObserver<T> getDelegate() {
+    public DataObserver<T> getObserverDelegate() {
         return weakDelegate.get();
     }
 

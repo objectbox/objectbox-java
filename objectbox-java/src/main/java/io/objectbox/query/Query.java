@@ -154,10 +154,16 @@ public class Query<T> {
         });
     }
 
+    /**
+     * Find all Objects matching the query without actually loading the Objects. See @{@link LazyList} for details.
+     */
     public LazyList<T> findLazy() {
         return new LazyList<>(box, findIds(), false);
     }
 
+    /**
+     * Find all Objects matching the query without actually loading the Objects. See @{@link LazyList} for details.
+     */
     public LazyList<T> findLazyCached() {
         return new LazyList<>(box, findIds(), true);
     }

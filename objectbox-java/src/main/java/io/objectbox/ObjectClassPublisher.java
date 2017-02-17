@@ -6,13 +6,12 @@ import org.greenrobot.essentials.collections.MultimapSet.SetType;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.Set;
 
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
-import io.objectbox.reactive.WeakDataObserver;
+import io.objectbox.reactive.DataPublisherUtils;
 
 @Internal
 class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
@@ -54,23 +53,7 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
 
     private void unsubscribe(DataObserver<Class> observer, int entityTypeId) {
         Set<DataObserver<Class>> observers = observersByEntityTypeId.get(entityTypeId);
-        if (observers != null) {
-            Iterator<DataObserver<Class>> iterator = observers.iterator();
-            while (iterator.hasNext()) {
-                DataObserver<Class> candidate = iterator.next();
-                if (candidate.equals(observer)) {
-                    // Unsupported by CopyOnWriteArraySet: iterator.remove();
-                    observers.remove(candidate);
-                } else if (candidate instanceof WeakDataObserver) {
-                    DataObserver delegate = ((WeakDataObserver) candidate).getDelegate();
-                    if (delegate == null || delegate.equals(observer)) {
-                        // Unsupported by CopyOnWriteArraySet: iterator.remove();
-                        observers.remove(candidate);
-                    }
-                }
-            }
-        }
-        observersByEntityTypeId.removeElement(entityTypeId, observer);
+        DataPublisherUtils.removeObserverFromCopyOnWriteSet(observers, observer);
     }
 
     /**

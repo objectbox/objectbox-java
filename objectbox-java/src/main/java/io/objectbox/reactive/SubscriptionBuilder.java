@@ -134,7 +134,7 @@ public class SubscriptionBuilder<T> {
         return subscription;
     }
 
-    class ActionObserver implements DataObserver<T> {
+    class ActionObserver implements DataObserver<T>, DelegatingObserver<T> {
         private final DataSubscriptionImpl subscription;
         private SchedulerRunOnError schedulerRunOnError;
         private SchedulerRunOnChange schedulerRunOnData;
@@ -205,6 +205,11 @@ public class SubscriptionBuilder<T> {
                     }
                 }
             }
+        }
+
+        @Override
+        public DataObserver<T> getObserverDelegate() {
+            return observer;
         }
 
         class SchedulerRunOnChange implements RunWithParam<T> {
