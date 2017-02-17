@@ -343,7 +343,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     public void testForObserverLeaks(boolean wrapped, boolean weak) {
         // Allocation would sum up to 70 GB in total when observer is not unsubscribed
         long maxMB = Math.min(Runtime.getRuntime().maxMemory() / (1024 * 1024), 70L * 1024);
-        final int chunkSizeMB = 128;
+        final int chunkSizeMB = 16; // 16 is faster than 64 & 128 (~0,3s instead of ~1s) and a bit faster than 8 and 32
         int runs = (int) (maxMB / chunkSizeMB + 1);
         for (int i = 0; i < runs; i++) {
             // Use a Scheduler to ensure wrapped observer is used
