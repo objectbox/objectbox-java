@@ -9,8 +9,6 @@ import java.util.List;
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.TestEntity;
-import io.objectbox.query.Query;
-import io.objectbox.query.QueryBuilder;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
 
@@ -247,6 +245,26 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals(8, keys[0]);
         assertEquals(9, keys[1]);
         assertEquals(10, keys[2]);
+    }
+
+    @Test
+    public void testOr() {
+        putTestEntitiesScalars();
+        Query<TestEntity> query = box.query().equal(simpleInt, 2007).or().equal(simpleLong, 3002).build();
+        List<TestEntity> entities = query.find();
+        assertEquals(2, entities.size());
+        assertEquals(3002, entities.get(0).getSimpleLong());
+        assertEquals(2007, entities.get(1).getSimpleInt());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testOr_bad1() {
+        box.query().or();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testOr_bad2() {
+        box.query().equal(simpleInt, 1).or().build();
     }
 
     @Test
