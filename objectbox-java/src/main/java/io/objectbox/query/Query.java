@@ -307,6 +307,7 @@ public class Query<T> {
 
     /**
      * Removes (deletes) all Objects matching the query
+     *
      * @return count of removed Objects
      */
     public long remove() {
@@ -322,6 +323,9 @@ public class Query<T> {
      * A {@link io.objectbox.reactive.DataObserver} can be subscribed to data changes using the returned builder.
      * The observer is supplied via {@link SubscriptionBuilder#observer(DataObserver)} and will be notified once
      * the query results have (potentially) changed.
+     * <p>
+     * With subscribing, the observer will immediately get current query results.
+     * The query is run for the subscribing observer.
      * <p>
      * Threading notes:
      * Query observers are notified from a thread pooled. Observers may be notified in parallel.

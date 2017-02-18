@@ -45,6 +45,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
             objectClassSubscription = store.subscribe(box.getEntityClass()).weak().observer(objectClassObserver);
         }
         observers.add(observer);
+        publishSingle(observer, param);
     }
 
     @Override

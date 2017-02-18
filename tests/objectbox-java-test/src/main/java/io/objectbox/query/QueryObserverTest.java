@@ -36,6 +36,12 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
         assertEquals(0, query.count());
 
         query.subscribe().observer(this);
+        assertLatchCountedDown(latch, 5);
+        assertEquals(1, receivedChanges.size());
+        assertEquals(0, receivedChanges.get(0).size());
+
+        receivedChanges.clear();
+        latch=new CountDownLatch(1);
         putTestEntitiesScalars();
         assertLatchCountedDown(latch, 5);
 
@@ -44,7 +50,7 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
     }
 
     @Test
-    public void testTranformer() throws InterruptedException {
+    public void testTransformer() throws InterruptedException {
         int[] valuesInt = {2003, 2007, 2002};
         Query<TestEntity> query = box.query().in(simpleInt, valuesInt).build();
         assertEquals(0, query.count());
@@ -67,12 +73,16 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
                 latch.countDown();
             }
         });
+        assertLatchCountedDown(latch, 5);
+
+        latch = new CountDownLatch(1);
         putTestEntitiesScalars();
         assertLatchCountedDown(latch, 5);
         Thread.sleep(20);
 
-        assertEquals(1, receivedSums.size());
-        assertEquals(2003 + 2007 + 2002, (int) receivedSums.get(0));
+        assertEquals(2, receivedSums.size());
+        assertEquals(0, (int) receivedSums.get(0));
+        assertEquals(2003 + 2007 + 2002, (int) receivedSums.get(1));
     }
 
     private List<TestEntity> putTestEntitiesScalars() {
