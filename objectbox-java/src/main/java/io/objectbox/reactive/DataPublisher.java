@@ -6,5 +6,7 @@ import io.objectbox.annotation.apihint.Internal;
 public interface DataPublisher<T> {
     void subscribe(DataObserver<T> observer, Object param);
 
+    void publishSingle(DataObserver<T> observer, Object param);
+
     void unsubscribe(DataObserver<T> observer, Object param);
 }

@@ -5,6 +5,7 @@ import org.greenrobot.essentials.collections.MultimapSet.SetType;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.Set;
 
@@ -56,6 +57,33 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
         DataPublisherUtils.removeObserverFromCopyOnWriteSet(observers, observer);
     }
 
+    @Override
+    public void publishSingle(final DataObserver<Class> observer, final Object forClass) {
+        boxStore.internalScheduleThread(new Runnable() {
+            @Override
+            public void run() {
+                Collection<Class> entityClasses = forClass != null ? Collections.singletonList((Class) forClass) :
+                        boxStore.getAllEntityClasses();
+                for (Class entityClass : entityClasses) {
+                    try {
+                        observer.onData(entityClass);
+                    } catch (RuntimeException e) {
+                        handleObserverException(entityClass);
+                    }
+                }
+            }
+        });
+    }
+
+    private void handleObserverException(Class objectClass) {
+        RuntimeException newEx = new RuntimeException(
+                "Observer failed while processing data for " + objectClass +
+                        ". Consider using an ErrorObserver");
+        // So it won't be swallowed by thread pool
+        newEx.printStackTrace();
+        throw newEx;
+    }
+
     /**
      * Non-blocking: will just enqueue the changes for a separate thread.
      */
@@ -92,7 +120,7 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
                                 observer.onData(objectClass);
                             }
                         } catch (RuntimeException e) {
-                            throw new RuntimeException("Observer failed while processing data for " + objectClass);
+                            handleObserverException(objectClass);
                         }
                     }
                 }

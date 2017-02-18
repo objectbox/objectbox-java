@@ -56,16 +56,16 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testTwoObjectClassesChanged_catchAllListener() {
-        testTwoObjectClassesChanged_catchAllListener(false);
+    public void testTwoObjectClassesChanged_catchAllObserver() {
+        testTwoObjectClassesChanged_catchAllObserver(false);
     }
 
     @Test
-    public void testTwoObjectClassesChanged_catchAllListenerWeak() {
-        testTwoObjectClassesChanged_catchAllListener(true);
+    public void testTwoObjectClassesChanged_catchAllObserverWeak() {
+        testTwoObjectClassesChanged_catchAllObserver(true);
     }
 
-    public void testTwoObjectClassesChanged_catchAllListener(boolean weak) {
+    public void testTwoObjectClassesChanged_catchAllObserver(boolean weak) {
         DataSubscription subscription = subscribe(weak, null);
         store.runInTx(new Runnable() {
             @Override
@@ -366,6 +366,61 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
                 subscription.cancel();
             }
         }
+    }
+
+    @Test
+    public void testSingle() {
+        testSingle(false, false);
+    }
+
+    @Test
+    public void testSingle_wrapped() {
+        testSingle(false, true);
+    }
+
+    @Test
+    public void testSingle_weak() {
+        testSingle(true, false);
+    }
+
+    @Test
+    public void testSingle_weakWrapped() {
+        testSingle(true, true);
+    }
+
+    public void testSingle(boolean weak, boolean wrapped) {
+        SubscriptionBuilder<Class> subscriptionBuilder = store.subscribe().single();
+        if (weak) {
+            subscriptionBuilder.weak();
+        }
+        if (wrapped) {
+            subscriptionBuilder.on(new TestScheduler());
+        }
+        observerLatch = new CountDownLatch(2);
+        subscriptionBuilder.observer(objectClassObserver);
+        assertLatchCountedDown(observerLatch, 5);
+        assertEquals(2, classesWithChanges.size());
+        assertTrue(classesWithChanges.contains(TestEntity.class));
+        assertTrue(classesWithChanges.contains(TestEntityMinimal.class));
+
+        classesWithChanges.clear();
+        store.runInTx(txRunnable);
+        assertNoStaleObservers();
+    }
+
+    @Test
+    public void testSingleCancelSubscription() throws InterruptedException {
+        DataSubscription subscription = store.subscribe().single()
+                .transform(new DataTransformer<Class, Class>() {
+                    @Override
+                    public Class transform(Class source) throws Exception {
+                        Thread.sleep(20);
+                        return source;
+                    }
+                }).observer(objectClassObserver);
+        subscription.cancel();
+        Thread.sleep(40);
+        assertNoStaleObservers();
     }
 
 }

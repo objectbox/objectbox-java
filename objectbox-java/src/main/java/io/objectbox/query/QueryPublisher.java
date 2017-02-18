@@ -47,6 +47,17 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
         observers.add(observer);
     }
 
+    @Override
+    public void publishSingle(final DataObserver<List<T>> observer, Object param) {
+        box.getStore().internalScheduleThread(new Runnable() {
+            @Override
+            public void run() {
+                List<T> result = query.find();
+                observer.onData(result);
+            }
+        });
+    }
+
     void publish() {
         box.getStore().internalScheduleThread(new Runnable() {
             @Override

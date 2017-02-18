@@ -16,6 +16,10 @@ import io.objectbox.annotation.apihint.Internal;
  * <li>error handlers via {@link #onError(ErrorObserver)}</li>
  * <li>calling the observer using a custom {@link Scheduler} (e.g. Android main thread) via {@link #on(Scheduler)}</li>
  * </ul>
+ * <p>
+ * Note: the order of methods called in this do not matter.
+ * Unlike Rx's Observeable, this builder just collects all info.
+ * For example, on(scheduler).transform(transformer) is the same as transform(transformer).on(scheduler).
  *
  * @param <T> The data type the {@link DataObserver} subscribes to.
  */
@@ -26,6 +30,7 @@ public class SubscriptionBuilder<T> {
     private DataObserver<T> observer;
     //    private Runnable firstRunnable;
     private boolean weak;
+    private boolean single;
     private DataTransformer<T, Object> transformer;
     private Scheduler scheduler;
     private ErrorObserver errorObserver;
@@ -54,6 +59,11 @@ public class SubscriptionBuilder<T> {
      */
     public SubscriptionBuilder<T> weak() {
         weak = true;
+        return this;
+    }
+
+    public SubscriptionBuilder<T> single() {
+        single = true;
         return this;
     }
 
@@ -123,11 +133,16 @@ public class SubscriptionBuilder<T> {
         }
 
         // TODO FIXME when an observer subscribes twice, it currently won't be added, but we return a new subscription
-        if (transformer == null && scheduler == null && errorObserver == null) {
-            // Trivial observers do not have to be wrapped
-            publisher.subscribe(this.observer, publisherParam);
+
+        // Trivial observers do not have to be wrapped
+        if (transformer != null || scheduler != null || errorObserver != null) {
+            observer = new ActionObserver(subscription);
+        }
+
+        if(single) {
+            publisher.publishSingle(observer, publisherParam);
         } else {
-            publisher.subscribe(new ActionObserver(subscription), publisherParam);
+            publisher.subscribe(observer, publisherParam);
         }
         return subscription;
     }
