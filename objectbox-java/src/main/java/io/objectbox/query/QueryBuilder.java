@@ -31,6 +31,10 @@ public class QueryBuilder<T> {
         CASE_SENSITIVE
     }
 
+    enum LogicCombination {
+        NONE, AND, OR
+    }
+
     /**
      * Reverts the order from ascending (default) to descending.
      */
@@ -65,7 +69,7 @@ public class QueryBuilder<T> {
     private boolean hasOrder;
 
     private long lastCondition;
-    private boolean combineNextWithOr;
+    private LogicCombination combineNextWith = LogicCombination.NONE;
 
     private static native long nativeCreate(long storeHandle, String entityName);
 
@@ -75,7 +79,7 @@ public class QueryBuilder<T> {
 
     private static native void nativeOrder(long handle, int propertyId, int flags);
 
-    private static native long nativeOr(long handle, long condition1, long condition2);
+    private static native long nativeCombine(long handle, long condition1, long condition2, boolean combineUsingOr);
 
     // ------------------------------ (Not)Null------------------------------
 
@@ -148,8 +152,8 @@ public class QueryBuilder<T> {
         if (handle == 0) {
             throw new IllegalStateException("This QueryBuilder has already been closed. Please use a new instance.");
         }
-        if (combineNextWithOr) {
-            throw new IllegalStateException("Incomplete OR condition. Use or() between two conditions only.");
+        if (combineNextWith != LogicCombination.NONE) {
+            throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
         long queryHandle = nativeBuild(handle);
         Query<T> query = new Query<T>(box, queryHandle, hasOrder);
@@ -207,20 +211,60 @@ public class QueryBuilder<T> {
     /**
      * Combines the previous condition with the following condition with a logical OR.
      * <p>
-     * Example: queryBuilder.equal(color, "blue").or().less(price, 100).build() // color is blue OR price < 100
+     * Example (querying t-shirts):
+     * <pre>{@code
+     * queryBuilder.equal(color, "blue").or().less(price, 30).build() // color is blue OR price < 30
+     * }</pre>
      */
     public QueryBuilder<T> or() {
         if (lastCondition == 0) {
             throw new IllegalStateException("No previous condition. Use or() only between two conditions.");
         }
-        combineNextWithOr = true;
+        combineNextWith = LogicCombination.OR;
+        return this;
+    }
+
+    /**
+     * And AND changes how conditions are combined using a following OR.
+     * By default, all query conditions are already combined using AND.
+     * Do not use this method if all your query conditions must match (AND for all, this is the default).
+     * <p>
+     * However, this method change the precedence with other combinations such as {@link #or()}.
+     * This is best explained by example.
+     * <p>
+     * Example (querying t-shirts):
+     * <pre>{@code
+     * // Case (1): OR has precedence
+     * queryBuilder.equal(color, "blue").equal(size, "XL").or().less(price, 30).build()
+     *
+     * // Case (2): AND has precedence
+     * queryBuilder.equal(color, "blue").and().equal(size, "XL").or().less(price, 30).build()
+     * }</pre>
+     * <p>
+     * Rule: Explicit AND / OR combination have precedence.
+     * <p>
+     * That's why (1) is evaluated like "must be blue and is either of size XL or costs less than 30", or more formally:
+     * blue AND (size XL OR price less than 30).
+     * <p>
+     * Rule: Conditions are applied from left to right (in the order they are called).
+     * <p>
+     * That's why in (2) the AND is evaluated before the OR.
+     * Thus, (2) evaluates to "either must be blue and of size XL, or costs less than 30", or, more formally:
+     * (blue AND size XL) OR price less than 30.
+     */
+    public QueryBuilder<T> and() {
+        if (lastCondition == 0) {
+            throw new IllegalStateException("No previous condition. Use and() only between two conditions.");
+        }
+        combineNextWith = LogicCombination.AND;
         return this;
     }
 
     private void checkCombineCondition(long currentCondition) {
-        if (combineNextWithOr) {
-            lastCondition = nativeOr(handle, lastCondition, currentCondition);
-            combineNextWithOr = false;
+        if (combineNextWith != LogicCombination.NONE) {
+            boolean combineUsingOr = combineNextWith == LogicCombination.OR;
+            lastCondition = nativeCombine(handle, lastCondition, currentCondition, combineUsingOr);
+            combineNextWith = LogicCombination.NONE;
         } else {
             lastCondition = currentCondition;
         }

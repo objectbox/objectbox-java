@@ -268,6 +268,26 @@ public class QueryTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testAnd() {
+        putTestEntitiesScalars();
+        // OR precedence (wrong): {}, AND precedence (expected): 2008
+        Query<TestEntity> query = box.query().equal(simpleInt, 2006).and().equal(simpleInt, 2007).or().equal(simpleInt, 2008).build();
+        List<TestEntity> entities = query.find();
+        assertEquals(1, entities.size());
+        assertEquals(2008, entities.get(0).getSimpleInt());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testAnd_bad1() {
+        box.query().and();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testAnd_bad2() {
+        box.query().equal(simpleInt, 1).and().build();
+    }
+
+    @Test
     public void testSetParameterInt() {
         putTestEntitiesScalars();
         Query<TestEntity> query = box.query().equal(simpleInt, 2007).build();
