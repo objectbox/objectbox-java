@@ -31,7 +31,7 @@ public class QueryBuilder<T> {
         CASE_SENSITIVE
     }
 
-    enum LogicCombination {
+    enum Operator {
         NONE, AND, OR
     }
 
@@ -69,7 +69,7 @@ public class QueryBuilder<T> {
     private boolean hasOrder;
 
     private long lastCondition;
-    private LogicCombination combineNextWith = LogicCombination.NONE;
+    private Operator combineNextWith = Operator.NONE;
 
     private static native long nativeCreate(long storeHandle, String entityName);
 
@@ -152,7 +152,7 @@ public class QueryBuilder<T> {
         if (handle == 0) {
             throw new IllegalStateException("This QueryBuilder has already been closed. Please use a new instance.");
         }
-        if (combineNextWith != LogicCombination.NONE) {
+        if (combineNextWith != Operator.NONE) {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
         long queryHandle = nativeBuild(handle);
@@ -203,6 +203,9 @@ public class QueryBuilder<T> {
      * @see #orderDesc(Property)
      */
     public QueryBuilder<T> order(Property property, int flags) {
+        if(combineNextWith != Operator.NONE) {
+            throw new IllegalStateException("An operator is pending. Use operators like and() and or() only between two conditions.");
+        }
         nativeOrder(handle, property.getId(), flags);
         hasOrder = true;
         return this;
@@ -217,10 +220,7 @@ public class QueryBuilder<T> {
      * }</pre>
      */
     public QueryBuilder<T> or() {
-        if (lastCondition == 0) {
-            throw new IllegalStateException("No previous condition. Use or() only between two conditions.");
-        }
-        combineNextWith = LogicCombination.OR;
+        combineOperator(Operator.OR);
         return this;
     }
 
@@ -253,18 +253,25 @@ public class QueryBuilder<T> {
      * (blue AND size XL) OR price less than 30.
      */
     public QueryBuilder<T> and() {
-        if (lastCondition == 0) {
-            throw new IllegalStateException("No previous condition. Use and() only between two conditions.");
-        }
-        combineNextWith = LogicCombination.AND;
+        combineOperator(Operator.AND);
         return this;
     }
 
+    private void combineOperator(Operator operator) {
+        if (lastCondition == 0) {
+            throw new IllegalStateException("No previous condition. Use operators like and() and or() only between two conditions.");
+        }
+        if(combineNextWith != Operator.NONE) {
+            throw new IllegalStateException("Another operator is pending. Use operators like and() and or() only between two conditions.");
+        }
+        combineNextWith = operator;
+    }
+
     private void checkCombineCondition(long currentCondition) {
-        if (combineNextWith != LogicCombination.NONE) {
-            boolean combineUsingOr = combineNextWith == LogicCombination.OR;
+        if (combineNextWith != Operator.NONE) {
+            boolean combineUsingOr = combineNextWith == Operator.OR;
             lastCondition = nativeCombine(handle, lastCondition, currentCondition, combineUsingOr);
-            combineNextWith = LogicCombination.NONE;
+            combineNextWith = Operator.NONE;
         } else {
             lastCondition = currentCondition;
         }

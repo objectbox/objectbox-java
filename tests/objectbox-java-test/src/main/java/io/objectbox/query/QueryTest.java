@@ -287,6 +287,16 @@ public class QueryTest extends AbstractObjectBoxTest {
         box.query().equal(simpleInt, 1).and().build();
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testOrAfterAnd() {
+        box.query().equal(simpleInt, 1).and().or().equal(simpleInt, 2).build();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testOrderAfterAnd() {
+        box.query().equal(simpleInt, 1).and().order(simpleInt).equal(simpleInt, 2).build();
+    }
+
     @Test
     public void testSetParameterInt() {
         putTestEntitiesScalars();
