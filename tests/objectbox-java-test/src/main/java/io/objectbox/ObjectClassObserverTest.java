@@ -89,7 +89,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     }
 
     private DataSubscription subscribe(boolean weak, Class forClass) {
-        SubscriptionBuilder<Class> subscriptionBuilder = store.subscribe(forClass);
+        SubscriptionBuilder<Class> subscriptionBuilder = store.subscribe(forClass).onlyChanges();
         return (weak ? subscriptionBuilder.weak() : subscriptionBuilder).observer(objectClassObserver);
     }
 
@@ -155,7 +155,8 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         final CountDownLatch latch = new CountDownLatch(2);
         final Thread testThread = Thread.currentThread();
 
-        SubscriptionBuilder<Long> subscriptionBuilder = store.subscribe().transform(new DataTransformer<Class, Long>() {
+        SubscriptionBuilder<Long> subscriptionBuilder = store.subscribe().onlyChanges().
+                transform(new DataTransformer<Class, Long>() {
             @Override
             public Long transform(Class source) throws Exception {
                 assertNotSame(testThread, Thread.currentThread());
@@ -198,7 +199,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     @Test
     public void testScheduler() throws InterruptedException {
         TestScheduler scheduler = new TestScheduler();
-        store.subscribe().on(scheduler).observer(objectClassObserver);
+        store.subscribe().onlyChanges().on(scheduler).observer(objectClassObserver);
 
         runTxAndWaitForObservers(2);
 
@@ -244,7 +245,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         final CountDownLatch latch = new CountDownLatch(2);
         final Thread testThread = Thread.currentThread();
 
-        DataSubscription subscription = store.subscribe().transform(new DataTransformer<Class, Long>() {
+        DataSubscription subscription = store.subscribe().onlyChanges().transform(new DataTransformer<Class, Long>() {
             @Override
             public Long transform(Class source) throws Exception {
                 throw new Exception("Boo");
@@ -293,7 +294,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         final CountDownLatch latch = new CountDownLatch(2);
         final Thread testThread = Thread.currentThread();
 
-        DataSubscription subscription = store.subscribe().onError(new ErrorObserver() {
+        DataSubscription subscription = store.subscribe().onlyChanges().onError(new ErrorObserver() {
             @Override
             public void onError(Throwable th) {
                 assertNotSame(testThread, Thread.currentThread());
@@ -347,7 +348,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         int runs = (int) (maxMB / chunkSizeMB + 1);
         for (int i = 0; i < runs; i++) {
             // Use a Scheduler to ensure wrapped observer is used
-            SubscriptionBuilder<Class> subscriptionBuilder = store.subscribe();
+            SubscriptionBuilder<Class> subscriptionBuilder = store.subscribe().onlyChanges();
             if (weak) {
                 subscriptionBuilder.weak();
             }

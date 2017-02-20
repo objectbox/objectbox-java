@@ -42,10 +42,12 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
             if (objectClassSubscription != null) {
                 throw new IllegalStateException("Existing subscription found");
             }
-            objectClassSubscription = store.subscribe(box.getEntityClass()).weak().observer(objectClassObserver);
+            objectClassSubscription = store.subscribe(box.getEntityClass())
+                    .weak()
+                    .onlyChanges()
+                    .observer(objectClassObserver);
         }
         observers.add(observer);
-        publishSingle(observer, param);
     }
 
     @Override

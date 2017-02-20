@@ -31,6 +31,7 @@ public class SubscriptionBuilder<T> {
     //    private Runnable firstRunnable;
     private boolean weak;
     private boolean single;
+    private boolean onlyChanges;
     private DataTransformer<T, Object> transformer;
     private Scheduler scheduler;
     private ErrorObserver errorObserver;
@@ -64,6 +65,11 @@ public class SubscriptionBuilder<T> {
 
     public SubscriptionBuilder<T> single() {
         single = true;
+        return this;
+    }
+
+    public SubscriptionBuilder<T> onlyChanges() {
+        onlyChanges = true;
         return this;
     }
 
@@ -140,9 +146,15 @@ public class SubscriptionBuilder<T> {
         }
 
         if(single) {
+            if(onlyChanges) {
+                throw new IllegalStateException("Illegal combination of single() and onlyChanges()");
+            }
             publisher.publishSingle(observer, publisherParam);
         } else {
             publisher.subscribe(observer, publisherParam);
+            if(!onlyChanges) {
+                publisher.publishSingle(observer, publisherParam);
+            }
         }
         return subscription;
     }

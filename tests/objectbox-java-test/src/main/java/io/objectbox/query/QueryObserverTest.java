@@ -41,12 +41,28 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
         assertEquals(0, receivedChanges.get(0).size());
 
         receivedChanges.clear();
-        latch=new CountDownLatch(1);
+        latch = new CountDownLatch(1);
         putTestEntitiesScalars();
         assertLatchCountedDown(latch, 5);
 
         assertEquals(1, receivedChanges.size());
         assertEquals(3, receivedChanges.get(0).size());
+    }
+
+    @Test
+    public void testSingle() throws InterruptedException {
+        putTestEntitiesScalars();
+        int[] valuesInt = {2003, 2007, 2002};
+        Query<TestEntity> query = box.query().in(simpleInt, valuesInt).build();
+        query.subscribe().single().observer(this);
+        assertLatchCountedDown(latch, 5);
+        assertEquals(1, receivedChanges.size());
+        assertEquals(3, receivedChanges.get(0).size());
+
+        receivedChanges.clear();
+        putTestEntities(1);
+        Thread.sleep(20);
+        assertEquals(0, receivedChanges.size());
     }
 
     @Test
