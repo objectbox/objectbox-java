@@ -42,6 +42,13 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
             if (objectClassSubscription != null) {
                 throw new IllegalStateException("Existing subscription found");
             }
+
+            // Weak: Query references QueryPublisher, which references objectClassObserver.
+            // Query's DataSubscription references QueryPublisher, which references Query.
+            // --> Query and its DataSubscription keep objectClassSubscription alive.
+            // --> If both are gone, the app could not possibly unsubscribe.
+            // --> OK for objectClassSubscription to be GCed and thus unsubscribed?
+            // --> However, still subscribed observers to the query will NOT be notified anymore.
             objectClassSubscription = store.subscribe(box.getEntityClass())
                     .weak()
                     .onlyChanges()

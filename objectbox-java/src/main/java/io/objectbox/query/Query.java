@@ -331,6 +331,11 @@ public class Query<T> {
      * Query observers are notified from a thread pooled. Observers may be notified in parallel.
      * The notification order is the same as the subscription order, although this may not always be guaranteed in
      * the future.
+     * <p>
+     * Stale observers: you must hold on to the Query or {@link io.objectbox.reactive.DataSubscription} objects to keep
+     * your {@link DataObserver}s active. If this Query is not referenced anymore
+     * (along with its {@link io.objectbox.reactive.DataSubscription}s, which hold a reference to the Query internally),
+     * it may be GCed and observers may become stale (won't receive anymore data).
      */
     public SubscriptionBuilder<List<T>> subscribe() {
         return new SubscriptionBuilder<>(publisher, null, box.getStore().internalThreadPool());
