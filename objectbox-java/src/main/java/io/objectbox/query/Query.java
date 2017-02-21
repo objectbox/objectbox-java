@@ -343,7 +343,8 @@ public class Query<T> {
 
     /**
      * Publishes the current data to all subscribed @{@link DataObserver}s.
-     * This is useful triggering observers initially and when new parameters have been set.
+     * This is useful triggering observers when new parameters have been set.
+     * Note, that setParameter methods will NOT be propagated to observers.
      */
     public void publish() {
         publisher.publish();

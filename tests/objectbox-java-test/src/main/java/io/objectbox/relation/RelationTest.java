@@ -10,6 +10,7 @@ import java.util.List;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
+import io.objectbox.query.Query;
 
 
 import static org.junit.Assert.assertEquals;
@@ -94,6 +95,16 @@ public class RelationTest {
         customerNew.setName("Jake");
         customerNew.put();
         assertEquals("Jake", customerBox.get(customer.getId()).getName());
+    }
+
+    @Test
+    public void testRelationToOneQuery() {
+        Customer customer = putCustomer();
+        Order order = putOrder(customer, "Bananas");
+
+        Query<Order> query = orderBox.query().equal(Order_.customerId, customer.getId()).build();
+        Order orderFound = query.findUnique();
+        assertEquals(order.getId(), orderFound.getId());
     }
 
     private Customer putCustomer() {
