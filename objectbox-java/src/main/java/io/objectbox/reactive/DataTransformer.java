@@ -4,7 +4,7 @@ package io.objectbox.reactive;
  * Transforms or processes data before it is given to subscribed {@link DataObserver}s. A transformer is set via
  * {@link SubscriptionBuilder#transform(DataTransformer)}.
  *
- * Note that a transformer does is not necessarily required to actually "transform" any data.
+ * Note that a transformer is not required to actually "transform" any data.
  * Technically, it's fine to return the same data it received and just do some processing with it.
  *
  * Threading notes: Note that the transformer is always executed asynchronously.
