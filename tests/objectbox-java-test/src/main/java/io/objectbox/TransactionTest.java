@@ -289,6 +289,19 @@ public class TransactionTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testRunInReadTxAndThenPut() {
+        final Box<TestEntity> box = getTestEntityBox();
+        store.runInReadTx(new Runnable() {
+            @Override
+            public void run() {
+                box.count();
+            }
+        });
+        box.put(new TestEntity());
+        assertEquals(1, box.count());
+    }
+
+    @Test
     public void testRunInReadTx_recursiveWriteTxFails() {
         store.runInReadTx(new Runnable() {
             @Override
