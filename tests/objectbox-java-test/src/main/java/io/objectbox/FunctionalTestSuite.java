@@ -7,6 +7,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import io.objectbox.query.LazyListTest;
 import io.objectbox.query.QueryObserverTest;
 import io.objectbox.query.QueryTest;
+import io.objectbox.relation.RelationTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -19,6 +20,7 @@ import io.objectbox.query.QueryTest;
         ObjectClassObserverTest.class,
         QueryObserverTest.class,
         QueryTest.class,
+        RelationTest.class,
         TransactionTest.class,
 })
 public class FunctionalTestSuite {

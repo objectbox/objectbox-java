@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.List;
 
+import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
@@ -17,10 +18,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-public class RelationTest {
+public class RelationTest extends AbstractObjectBoxTest {
 
     private Box<Order> orderBox;
     private Box<Customer> customerBox;
+
+    @Override
+    protected BoxStore createBoxStore() {
+        return MyObjectBox.builder().baseDirectory(boxStoreDir).build();
+    }
 
     @After
     public void deleteDbFiles() {
@@ -30,7 +36,6 @@ public class RelationTest {
     @Before
     public void initBoxes() {
         deleteDbFiles();
-        BoxStore store = MyObjectBox.builder().build();
         customerBox = store.boxFor(Customer.class);
         orderBox = store.boxFor(Order.class);
         customerBox.removeAll();

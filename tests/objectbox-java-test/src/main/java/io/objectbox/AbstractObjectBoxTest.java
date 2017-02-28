@@ -25,6 +25,7 @@ public abstract class AbstractObjectBoxTest {
     protected BoxStore store;
     protected Random random = new Random();
     protected boolean runExtensiveTests;
+
     int lastEntityId;
     int lastIndexId;
     long lastUid;
