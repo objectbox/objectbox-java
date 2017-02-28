@@ -106,11 +106,13 @@ public class MultithreadedRelationTest extends AbstractObjectBoxTest {
                     if (all.size() > 1) {
                         Customer customer2 = all.get(random.nextInt(all.size()));
                         final List<Order> orders = customer2.getOrders();
-                        if (all.size() > 10000 + random.nextInt(500)) {
+                        if (all.size() > 100 + random.nextInt(100)) {
                             System.out.println(">>" + all.size());
                             System.out.println(">>>>" + orders.size());
                             orderBox.remove(orders);
                             customerBox.remove(customer);
+                        } else if (orders.size() > 1) {
+                            orderBox.remove(orders.get(random.nextInt(orders.size())));
                         }
                     }
                 }
