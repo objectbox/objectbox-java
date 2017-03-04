@@ -350,6 +350,20 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertNull(query.setParameter(simpleString, "not here!").findUnique());
     }
 
+    @Test
+    public void testForEach() {
+        putTestEntitiesStrings();
+        final StringBuilder stringBuilder = new StringBuilder();
+        box.query().startsWith(simpleString, "banana").build()
+                .forEach(new QueryConsumer<TestEntity>() {
+                    @Override
+                    public void accept(TestEntity data) {
+                        stringBuilder.append(data.getSimpleString()).append('#');
+                    }
+                });
+        assertEquals("banana#banana milk shake#", stringBuilder.toString());
+    }
+
     private List<TestEntity> putTestEntitiesScalars() {
         return putTestEntities(10, null, 2000);
     }

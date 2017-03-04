@@ -102,8 +102,7 @@ public class LazyListTest extends AbstractObjectBoxTest {
     @Test
     public void testIteratorUncached() {
         List<TestEntity> list = putTestEntities(100);
-        LazyList<TestEntity> listLazy = getTestEntityBox().query().build()
-                .findLazy();
+        LazyList<TestEntity> listLazy = getTestEntityBox().query().build().findLazy();
         testIterator(list, listLazy, true);
     }
 
