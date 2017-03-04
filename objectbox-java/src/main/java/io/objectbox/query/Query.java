@@ -162,6 +162,33 @@ public class Query<T> {
     }
 
     /**
+     * Emits query results one by one to the given consumer.
+     * It "streams" each object from the database to the consumer, which is very memory efficient.
+     * Because this is run in a read transaction, the consumer gets a consistent view on the data.
+     * Like {@link #findLazy()}, this method can be used for a high amount of data.
+     * <p>
+     * Note: because the consumer is called within a read transaction it may not write to the database.
+     */
+    // FIXME make public after runInReadTx is fixed
+    void forEach(final QueryConsumer<T> consumer) {
+        box.getStore().runInReadTx(new Runnable() {
+            @Override
+            public void run() {
+                LazyList<T> lazyList = findLazy();
+                int size = lazyList.size();
+                for (int i = 0; i < size; i++) {
+                    T data = lazyList.get(i);
+                    if (data == null) {
+                        throw new IllegalStateException("Internal error: data object was null");
+                    }
+                    consumer.accept(data);
+                }
+            }
+        });
+    }
+
+
+    /**
      * Find all Objects matching the query without actually loading the Objects. See @{@link LazyList} for details.
      */
     public LazyList<T> findLazyCached() {
