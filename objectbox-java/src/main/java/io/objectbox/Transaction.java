@@ -9,12 +9,14 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 
 public class Transaction implements Closeable {
+    static final boolean WARN_FINALIZER = false;
 
     static Map<Class, Constructor> cursorConstructorCache = new ConcurrentHashMap<>();
 
     private final long transaction;
     private final BoxStore store;
     private final boolean readOnly;
+    private final Throwable creationThrowable;
 
     private int initialCommitCount;
     private boolean closed;
@@ -48,10 +50,18 @@ public class Transaction implements Closeable {
         this.transaction = transaction;
         this.initialCommitCount = initialCommitCount;
         readOnly = nativeIsReadOnly(transaction);
+
+        if(WARN_FINALIZER) {
+            creationThrowable = new Throwable();
+        }
     }
 
     @Override
     protected void finalize() throws Throwable {
+        if(WARN_FINALIZER && !closed && creationThrowable != null) {
+            System.err.println("Transaction was not closed. It was initially created here:");
+            creationThrowable.printStackTrace();
+        }
         close();
         super.finalize();
     }
