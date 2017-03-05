@@ -62,7 +62,7 @@ public class PerformanceTest extends AbstractObjectBoxTest {
                 cursor.find("simpleLong", entity.getSimpleLong()).get(0);
         long time = System.nanoTime() - start;
         cursor.close();
-        transaction.abort();
+        transaction.close();
 
         log("Found entity #" + idx + ": " + (time / 1000000) + " ms " +
                 (time % 1000000) + " ns, " + (idx * 1000000000L / time) + " values/s");
@@ -102,7 +102,7 @@ public class PerformanceTest extends AbstractObjectBoxTest {
             stringsToLookup[i] = entities[random.nextInt(count)].getSimpleString();
         }
 
-        Transaction transaction = store.beginTx();
+        Transaction transaction = store.beginReadTx();
         long start = time();
         Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
         for (int i = 0; i < count; i++) {
@@ -113,6 +113,7 @@ public class PerformanceTest extends AbstractObjectBoxTest {
 
         long time = time() - start;
         log("Looked up " + count + " entities (with index): " + time + " ms, " + valuesPerSec(count, time));
+        transaction.close();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -160,7 +161,7 @@ public class PerformanceTest extends AbstractObjectBoxTest {
         }
 
         cursor.close();
-        transaction.commit();
+        transaction.commitAndClose();
         return time() - start;
     }
 
@@ -174,7 +175,7 @@ public class PerformanceTest extends AbstractObjectBoxTest {
             entitiesRead[key - 1] = key == 1 ? cursor.get(1) : cursor.next();
         }
         cursor.close();
-        transaction.abort();
+        transaction.close();
         time = time() - start;
         log("Read " + count + " entities: " + time + "ms, " + valuesPerSec(count, time));
 
@@ -214,7 +215,7 @@ public class PerformanceTest extends AbstractObjectBoxTest {
             cursor.put(entities[key - 1]);
         }
         cursor.close();
-        transaction.commit();
+        transaction.commitAndClose();
 
         time = time() - start;
         String what = newStringBaseValue != null ? "scalars&strings" : "scalars";
@@ -231,7 +232,7 @@ public class PerformanceTest extends AbstractObjectBoxTest {
             cursor.deleteEntity(key);
         }
         cursor.close();
-        transaction.commit();
+        transaction.commitAndClose();
 
         time = time() - start;
         log("Deleted " + count + " entities " + withOrWithoutIndex + ": " + time + " ms, " + valuesPerSec(count, time));

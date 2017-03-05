@@ -57,7 +57,7 @@ public class PerformanceBytesTest extends AbstractObjectBoxTest {
             cursor.put(key, byteArrays[key - 1]);
         }
         cursor.close();
-        transaction.commit();
+        transaction.commitAndClose();
         long time = time() - start;
         log("Wrote " + count + " values with size " + valueSize + " 1-by-1: " + time + "ms, " + valuesPerSec(count, time) + " values/s");
 
@@ -69,7 +69,7 @@ public class PerformanceBytesTest extends AbstractObjectBoxTest {
             byteArraysRead[key - 1] = cursor.get(key);
         }
         cursor.close();
-        transaction.abort();
+        transaction.close();
         time = time() - start;
         log("Read " + count + " values with size " + valueSize + " 1-by-1: " + time + "ms, " + valuesPerSec(count, time) + " values/s");
 
@@ -100,7 +100,7 @@ public class PerformanceBytesTest extends AbstractObjectBoxTest {
             byteArraysRead[key - 1] = key == 1 ? cursor.get(1) : cursor.getNext();
         }
         cursor.close();
-        transaction.abort();
+        transaction.close();
         long time = time() - start;
         log("Read " + count + " values with size " + valueSize + " with cursor: " + time + "ms, " + valuesPerSec(count, time));
 
@@ -150,7 +150,7 @@ public class PerformanceBytesTest extends AbstractObjectBoxTest {
             cursor.put(key, byteArrays[key - 1]);
         }
         cursor.close();
-        transaction.commit();
+        transaction.commitAndClose();
         long time = time() - start;
         log("Wrote " + count + " new values with cursor: " + time + "ms, " + valuesPerSec(count, time));
         return byteArrays;
@@ -175,7 +175,7 @@ public class PerformanceBytesTest extends AbstractObjectBoxTest {
 
             // TODO use mdb_cursor_renew
             cursor.close();
-            transaction.commit();
+            transaction.commitAndClose();
         }
         long time = time() - start;
         log("Did " + txCount + " put transactions: " + time + "ms, " + valuesPerSec(txCount, time) + " (TX/s)");
@@ -195,7 +195,7 @@ public class PerformanceBytesTest extends AbstractObjectBoxTest {
             cursor.put(key, buffer);
         }
         cursor.close();
-        transaction.commit();
+        transaction.commitAndClose();
 
         long time = time() - start;
         log("Bulk load put " + count + " buffers " + time + " ms, " + valuesPerSec(count, time));
