@@ -169,8 +169,7 @@ public class Query<T> {
      * <p>
      * Note: because the consumer is called within a read transaction it may not write to the database.
      */
-    // FIXME make public after runInReadTx is fixed
-    void forEach(final QueryConsumer<T> consumer) {
+    public void forEach(final QueryConsumer<T> consumer) {
         box.getStore().runInReadTx(new Runnable() {
             @Override
             public void run() {
@@ -186,7 +185,6 @@ public class Query<T> {
             }
         });
     }
-
 
     /**
      * Find all Objects matching the query without actually loading the Objects. See @{@link LazyList} for details.
