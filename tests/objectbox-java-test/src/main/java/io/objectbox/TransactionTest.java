@@ -177,6 +177,10 @@ public class TransactionTest extends AbstractObjectBoxTest {
 
     @Test
     public void testTxGC() throws InterruptedException {
+        // Trigger pending finalizers so we have less finalizers to run later
+        System.gc();
+        System.runFinalization();
+
         // For a real test, use count = 100000 and check console output that TX get freed in between
         int count = runExtensiveTests ? 100000 : 1000;
         Thread[] threads = new Thread[count];
@@ -208,6 +212,13 @@ public class TransactionTest extends AbstractObjectBoxTest {
             thread.join();
         }
         System.out.println("OK vs. MDB_READERS_FULL: " + threadsOK + " vs. " + readersFull);
+
+        // Some effort to clean up the dangling TXs to avoid them surving the store closing, which
+        // may cause issues for later running tests
+        for (int i = 0; i < 10; i++) {
+            System.gc();
+            System.runFinalization();
+        }
 
         assertEquals(count, threadsOK.get());
     }
