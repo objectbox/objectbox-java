@@ -84,6 +84,10 @@ public abstract class AbstractObjectBoxTest {
 
     @After
     public void tearDown() throws Exception {
+        // Collect dangling Cursors and TXs before store closes
+        System.gc();
+        System.runFinalization();
+
         if (store != null) {
             try {
                 store.close();
