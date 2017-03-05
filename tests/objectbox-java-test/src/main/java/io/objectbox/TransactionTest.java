@@ -308,6 +308,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
                 box.count();
             }
         });
+        // Verify that box does not hang on to the read-only TX by doing a put
         box.put(new TestEntity());
         assertEquals(1, box.count());
     }

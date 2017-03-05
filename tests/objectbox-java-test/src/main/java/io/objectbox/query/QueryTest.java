@@ -352,7 +352,7 @@ public class QueryTest extends AbstractObjectBoxTest {
 
     @Test
     public void testForEach() {
-        putTestEntitiesStrings();
+        List<TestEntity> testEntities = putTestEntitiesStrings();
         final StringBuilder stringBuilder = new StringBuilder();
         box.query().startsWith(simpleString, "banana").build()
                 .forEach(new QueryConsumer<TestEntity>() {
@@ -362,6 +362,10 @@ public class QueryTest extends AbstractObjectBoxTest {
                     }
                 });
         assertEquals("banana#banana milk shake#", stringBuilder.toString());
+
+        // Verify that box does not hang on to the read-only TX by doing a put
+        box.put(new TestEntity());
+        assertEquals(testEntities.size() + 1, box.count());
     }
 
     private List<TestEntity> putTestEntitiesScalars() {

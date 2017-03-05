@@ -454,6 +454,13 @@ public class BoxStore implements Closeable {
                 runnable.run();
             } finally {
                 activeTx.remove();
+
+                // TODO That's rather a quick fix, replace with a more general solution
+                // (that could maybe be a TX listener with abort callback?)
+                for(Box box: boxes.values()) {
+                    box.readTxFinished(tx);
+                }
+
                 tx.close();
             }
         } else {

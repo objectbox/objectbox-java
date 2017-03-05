@@ -152,6 +152,14 @@ public class Box<T> {
         }
     }
 
+    void readTxFinished(Transaction tx) {
+        Cursor<T> cursor = activeTxCursor.get();
+        if (cursor != null && cursor.getTx() == tx) {
+            activeTxCursor.remove();
+            cursor.close();
+        }
+    }
+
     /** Used by tests */
     int getPropertyId(String propertyName) {
         Cursor<T> reader = getReader();
