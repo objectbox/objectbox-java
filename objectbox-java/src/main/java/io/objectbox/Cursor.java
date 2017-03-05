@@ -12,6 +12,8 @@ import io.objectbox.annotation.apihint.Temporary;
  */
 @Beta
 public abstract class Cursor<T> implements Closeable {
+    static final boolean WARN_FINALIZER = false;
+
     protected static final int PUT_FLAG_FIRST = 1 << 0;
     protected static final int PUT_FLAG_COMPLETE = 1 << 1;
 
@@ -98,6 +100,8 @@ public abstract class Cursor<T> implements Closeable {
 
     protected boolean closed;
 
+    private final Throwable creationThrowable;
+
     protected Cursor(Transaction tx, long cursor, Properties properties) {
         if (tx == null) {
             throw new IllegalArgumentException("Transaction is null");
@@ -113,6 +117,7 @@ public abstract class Cursor<T> implements Closeable {
                 property.verifyId(id);
             }
         }
+        creationThrowable = WARN_FINALIZER ? new Throwable() : null;
     }
 
     /** "Offline" cursor only useful for Box to retrieve the ID  of an entity. All other operations may fail. */
@@ -120,10 +125,16 @@ public abstract class Cursor<T> implements Closeable {
     protected Cursor() {
         cursor = 0;
         properties = null;
+        // Those are harmless, no native resources to clean...
+        creationThrowable = null;
     }
 
     @Override
     protected void finalize() throws Throwable {
+        if (WARN_FINALIZER && !closed && creationThrowable != null) {
+            System.err.println("Cursor was not closed. It was initially created here:");
+            creationThrowable.printStackTrace();
+        }
         close();
         super.finalize();
     }

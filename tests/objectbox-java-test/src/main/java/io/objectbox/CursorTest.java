@@ -144,6 +144,7 @@ public class CursorTest extends AbstractObjectBoxTest {
         cursor.put(entity);
         assertEquals(key, cursor.lookupKeyUsingIndex(9, value));
         TestEntity read = cursor.get(key);
+        cursor.close();
         assertEquals(1977, read.getSimpleInt());
         assertEquals(value, read.getSimpleString());
     }
@@ -290,6 +291,7 @@ public class CursorTest extends AbstractObjectBoxTest {
         assertEquals(2, cursor.getPropertyId("simpleBoolean"));
         assertEquals(3, cursor.getPropertyId("simpleByte"));
         assertEquals(4, cursor.getPropertyId("simpleShort"));
+        cursor.close();
         transaction.abort();
     }
 

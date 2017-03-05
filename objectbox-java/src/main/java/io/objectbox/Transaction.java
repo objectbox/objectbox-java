@@ -51,14 +51,12 @@ public class Transaction implements Closeable {
         this.initialCommitCount = initialCommitCount;
         readOnly = nativeIsReadOnly(transaction);
 
-        if(WARN_FINALIZER) {
-            creationThrowable = new Throwable();
-        }
+        creationThrowable = WARN_FINALIZER ? new Throwable() : null;
     }
 
     @Override
     protected void finalize() throws Throwable {
-        if(WARN_FINALIZER && !closed && creationThrowable != null) {
+        if (WARN_FINALIZER && !closed && creationThrowable != null) {
             System.err.println("Transaction was not closed. It was initially created here:");
             creationThrowable.printStackTrace();
         }
