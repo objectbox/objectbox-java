@@ -99,7 +99,7 @@ public abstract class Cursor<T> implements Closeable {
     protected boolean closed;
 
     protected Cursor(Transaction tx, long cursor, Properties properties) {
-        if(tx == null) {
+        if (tx == null) {
             throw new IllegalArgumentException("Transaction is null");
         }
         this.tx = tx;
@@ -177,10 +177,9 @@ public abstract class Cursor<T> implements Closeable {
     public synchronized void close() {
         if (!closed) {
             closed = true;
-            // TODO Improve native destroy?
             // tx is null despite check in constructor in some tests (called by finalizer):
             // Null check avoids NPE in finalizer and seems to stabilize Android instrumentation perf tests.
-            if (tx != null && !tx.isClosed() && !tx.getStore().isClosed()) {
+            if (tx != null && !tx.getStore().isClosed()) {
                 nativeDestroy(cursor);
             }
         }
