@@ -62,7 +62,7 @@ public class Query<T> {
 
     private final Box<T> box;
     private final boolean hasOrder;
-    private long handle;
+    long handle;
     private final QueryPublisher<T> publisher;
 
     Query(Box<T> box, long queryHandle, boolean hasOrder) {
