@@ -2,10 +2,10 @@ package io.objectbox.reactive;
 
 /**
  * Observer that can be subscribed to publishers (e.g. @{@link io.objectbox.BoxStore} and
- * @{@link io.objectbox.query.Query}).
+ * {@link io.objectbox.query.Query}).
  *
  * @param <T> type of data that is observed
- * @{@link io.objectbox.query.Query}) to receive data changes.
+ * {@link io.objectbox.query.Query}) to receive data changes.
  */
 public interface DataObserver<T> {
     /**
