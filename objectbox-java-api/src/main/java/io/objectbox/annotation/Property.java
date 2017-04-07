@@ -19,11 +19,4 @@ public @interface Property {
      */
     String nameInDb() default "";
 
-    /**
-     * UIDs identify properties (and entities) uniquely in the meta object model file (objectmodel.json).
-     * With UIDs you can map properties to their meta model representation in a stable way without its name.
-     * Once a UID is set, you can rename the properties as often as you like - ObjectBox keeps track of it automatically.
-     * Thus, it is advisable to lookup the UID in objectmodel.json and use it here before renaming a property.
-     */
-    long uid() default 0;
 }

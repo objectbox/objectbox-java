@@ -55,12 +55,4 @@ public @interface Entity {
 //     */
 //    Class protobuf() default void.class;
 
-    /**
-     * UIDs identify entities (and properties) uniquely in the meta object model file (objectmodel.json).
-     * With UIDs you can map entities to their meta model representation in a stable way without its name.
-     * Once a UID is set, you can rename the entity as often as you like - ObjectBox keeps track of it automatically.
-     * Thus, it is advisable to lookup the UID in objectmodel.json and use it here before renaming a entity.
-     */
-    long uid() default 0;
-
 }

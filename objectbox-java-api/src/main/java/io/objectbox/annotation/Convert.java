@@ -17,7 +17,7 @@ public @interface Convert {
     Class<? extends PropertyConverter> converter();
 
     /**
-     * Class of the column which can be persisted in DB.
+     * Class of the DB type the Java property is converted to/from.
      * This is limited to all java classes which are supported natively by ObjectBox.
      */
     Class dbType();
