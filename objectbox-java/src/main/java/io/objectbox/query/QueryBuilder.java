@@ -125,10 +125,6 @@ public class QueryBuilder<T> {
     @Internal
     public QueryBuilder(Box<T> box, long storeHandle, String entityName) {
         this.box = box;
-
-        // This ensures that all properties have been set
-        box.getProperties();
-
         handle = nativeCreate(storeHandle, entityName);
     }
 

@@ -486,7 +486,6 @@ public class Box<T> {
         return store;
     }
 
-    // Returned Property object will have an ID set
     public synchronized Properties getProperties() {
         if (properties == null) {
             Cursor<T> reader = getReader();
