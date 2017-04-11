@@ -20,44 +20,44 @@ import io.objectbox.reactive.SubscriptionBuilder;
 @Beta
 public class Query<T> {
 
-    private static native long nativeDestroy(long handle);
+    static native long nativeDestroy(long handle);
 
-    private native static Object nativeFindFirst(long handle, long cursorHandle);
+    native static Object nativeFindFirst(long handle, long cursorHandle);
 
-    private native static Object nativeFindUnique(long handle, long cursorHandle);
+    native static Object nativeFindUnique(long handle, long cursorHandle);
 
-    private native static List nativeFind(long handle, long cursorHandle, long offset, long limit);
+    native static List nativeFind(long handle, long cursorHandle, long offset, long limit);
 
-    private native static long[] nativeFindKeysUnordered(long handle, long cursorHandle);
+    native static long[] nativeFindKeysUnordered(long handle, long cursorHandle);
 
-    private native static long nativeCount(long handle, long cursorHandle);
+    native static long nativeCount(long handle, long cursorHandle);
 
-    private native static long nativeSum(long handle, long cursorHandle, int propertyId);
+    native static long nativeSum(long handle, long cursorHandle, int propertyId);
 
-    private native static double nativeSumDouble(long handle, long cursorHandle, int propertyId);
+    native static double nativeSumDouble(long handle, long cursorHandle, int propertyId);
 
-    private native static long nativeMax(long handle, long cursorHandle, int propertyId);
+    native static long nativeMax(long handle, long cursorHandle, int propertyId);
 
-    private native static double nativeMaxDouble(long handle, long cursorHandle, int propertyId);
+    native static double nativeMaxDouble(long handle, long cursorHandle, int propertyId);
 
-    private native static long nativeMin(long handle, long cursorHandle, int propertyId);
+    native static long nativeMin(long handle, long cursorHandle, int propertyId);
 
-    private native static double nativeMinDouble(long handle, long cursorHandle, int propertyId);
+    native static double nativeMinDouble(long handle, long cursorHandle, int propertyId);
 
-    private native static double nativeAvg(long handle, long cursorHandle, int propertyId);
+    native static double nativeAvg(long handle, long cursorHandle, int propertyId);
 
-    private native static long nativeRemove(long handle, long cursorHandle);
+    native static long nativeRemove(long handle, long cursorHandle);
 
-    private native static void nativeSetParameter(long handle, int propertyId, String parameterAlias, String value);
+    native static void nativeSetParameter(long handle, int propertyId, String parameterAlias, String value);
 
-    private native static void nativeSetParameter(long handle, int propertyId, String parameterAlias, long value);
+    native static void nativeSetParameter(long handle, int propertyId, String parameterAlias, long value);
 
-    private native static void nativeSetParameters(long handle, int propertyId, String parameterAlias, long value1,
-                                                   long value2);
+    native static void nativeSetParameters(long handle, int propertyId, String parameterAlias, long value1,
+                                           long value2);
 
-    private native static void nativeSetParameter(long handle, int propertyId, String parameterAlias, double value);
+    native static void nativeSetParameter(long handle, int propertyId, String parameterAlias, double value);
 
-    private native static void nativeSetParameters(long handle, int propertyId, String parameterAlias, double value1,
+    native static void nativeSetParameters(long handle, int propertyId, String parameterAlias, double value1,
                                                    double value2);
 
     private final Box<T> box;
