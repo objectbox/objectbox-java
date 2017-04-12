@@ -45,6 +45,8 @@ public class BoxStoreBuilder {
 
     private boolean android;
 
+    boolean debugTransactions;
+
     List<EntityClasses> entityClasses = new ArrayList<>();
 
     public BoxStoreBuilder(byte[] model) {
@@ -135,6 +137,11 @@ public class BoxStoreBuilder {
 
     public BoxStoreBuilder maxSizeInKByte(long maxSizeInKByte) {
         this.maxSizeInKByte = maxSizeInKByte;
+        return this;
+    }
+
+    public BoxStoreBuilder debugTransactions() {
+        this.debugTransactions = true;
         return this;
     }
 

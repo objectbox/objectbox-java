@@ -178,6 +178,7 @@ public class BoxStore implements Closeable {
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final ObjectClassPublisher objectClassPublisher;
+    final boolean debugTx;
 
     /** Set when running inside TX */
     final ThreadLocal<Transaction> activeTx = new ThreadLocal<>();
@@ -199,6 +200,7 @@ public class BoxStore implements Closeable {
             throw new RuntimeException("Is not a directory: " + directory.getAbsolutePath());
         }
         handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.model);
+        debugTx = builder.debugTransactions;
         entityNameByClass = new HashMap<>();
         entityCursorClassByClass = new HashMap<>();
         entityTypeIdByClass = new HashMap<>();
@@ -293,6 +295,9 @@ public class BoxStore implements Closeable {
         checkOpen();
         // Because write TXs are typically not cached, initialCommitCount is not as relevant than for read TXs.
         int initialCommitCount = commitCount;
+        if(debugTx) {
+            System.out.println("Begin TX with commit count " + initialCommitCount);
+        }
         long nativeTx = nativeBeginTx(handle);
         Transaction tx = new Transaction(this, nativeTx, initialCommitCount);
         synchronized (transactions) {
@@ -314,6 +319,9 @@ public class BoxStore implements Closeable {
         // updated resulting in querying obsolete data until another commit is done.
         // TODO add multithreaded test for this
         int initialCommitCount = commitCount;
+        if(debugTx) {
+            System.out.println("Begin read TX with commit count " + initialCommitCount);
+        }
         long nativeTx = nativeBeginReadTx(handle);
         Transaction tx = new Transaction(this, nativeTx, initialCommitCount);
         synchronized (transactions) {
@@ -378,6 +386,9 @@ public class BoxStore implements Closeable {
         // Only one write TX at a time, but there is a chance two writers race after commit: thus synchronize
         synchronized (txCommitCountLock) {
             commitCount++; // Overflow is OK because we check for equality
+            if(debugTx) {
+                System.out.println("TX committed, new with commit count " + commitCount);
+            }
         }
 
         for (Box box : boxes.values()) {
@@ -457,7 +468,7 @@ public class BoxStore implements Closeable {
 
                 // TODO That's rather a quick fix, replace with a more general solution
                 // (that could maybe be a TX listener with abort callback?)
-                for(Box box: boxes.values()) {
+                for (Box box : boxes.values()) {
                     box.readTxFinished(tx);
                 }
 

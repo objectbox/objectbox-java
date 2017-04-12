@@ -31,6 +31,7 @@ public class Box<T> {
     private final List<WeakReference<Cursor<T>>> readers = new ArrayList<>();
     // TODO Add a new generated class for this (~"EntityOps", also with relation ID helpers?), using Cursor here is work-aroundish
     private final Cursor<T> idGetter;
+    private final boolean debugTx;
 
     private Properties properties;
     private volatile Field boxStoreField;
@@ -44,6 +45,7 @@ public class Box<T> {
         } catch (Exception e) {
             throw new DbException("Box could not create cursor", e);
         }
+        debugTx = store.debugTx;
     }
 
     private Cursor<T> getReader() {
@@ -59,6 +61,9 @@ public class Box<T> {
                 }
                 tx.renew();
                 cursor.renew(tx);
+                if(debugTx) {
+                    System.out.println("Renewed: " + cursor + ", TX: " + tx);
+                }
             } else {
                 cursor = store.beginReadTx().createCursor(entityClass);
                 synchronized (readers) {
@@ -133,19 +138,9 @@ public class Box<T> {
     }
 
     void txCommitted(Transaction tx) {
-        // TODO Unused readers should be disposed when a new write tx is committed
-        // (readers hold on to old data pages and prevent to reuse them)
+        // Thread local readers will be renewed on next get, so we do not need clean them up
 
-        // At least we should be able to clear the reader of the current thread if exists
-        Cursor cursor = threadLocalReader.get();
-        if (cursor != null) {
-            threadLocalReader.remove();
-            Transaction cursorTx = cursor.getTx();
-            cursor.close();
-            cursorTx.close();
-        }
-
-        cursor = activeTxCursor.get();
+        Cursor<T> cursor = activeTxCursor.get();
         if (cursor != null) {
             activeTxCursor.remove();
             cursor.close();
@@ -550,6 +545,15 @@ public class Box<T> {
             releaseWriter(writer);
         }
         return result;
+    }
+
+    public String getReaderDebugInfo() {
+        Cursor<T> reader = getReader();
+        try {
+            return reader + " with " + reader.getTx() + "; store's commit count: " + getStore().commitCount;
+        } finally {
+            releaseReader(reader);
+        }
     }
 
 }
