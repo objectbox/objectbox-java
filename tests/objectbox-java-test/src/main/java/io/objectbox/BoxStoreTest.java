@@ -3,8 +3,12 @@ package io.objectbox;
 import org.junit.Test;
 
 
+import io.objectbox.internal.CallWithHandle;
+
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -47,6 +51,31 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     public void testRegistration() {
         assertEquals("TestEntity", store.getEntityName(TestEntity.class));
         assertEquals(TestEntityCursor.class, store.getEntityCursorClass(TestEntity.class));
+    }
+
+    @Test
+    public void testCloseThreadResources() {
+        Box<TestEntity> box = store.boxFor(TestEntity.class);
+        long internalHandle = getInternalReaderHandle(box);
+        assertTrue(internalHandle != 0);
+        long internalHandle2 = getInternalReaderHandle(box);
+        assertEquals(internalHandle, internalHandle2);
+
+        store.closeThreadResources();
+        long internalHandle3 = getInternalReaderHandle(box);
+        assertNotEquals(internalHandle, internalHandle3);
+    }
+
+    private long getInternalReaderHandle(Box<TestEntity> box) {
+        final long[] handleRef = {0};
+        box.internalCallWithReaderHandle(new CallWithHandle<Void>() {
+            @Override
+            public Void call(long handle) {
+                handleRef[0] = handle;
+                return null;
+            }
+        });
+        return handleRef[0];
     }
 
 }

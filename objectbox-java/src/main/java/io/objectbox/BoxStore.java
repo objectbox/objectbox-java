@@ -295,7 +295,7 @@ public class BoxStore implements Closeable {
         checkOpen();
         // Because write TXs are typically not cached, initialCommitCount is not as relevant than for read TXs.
         int initialCommitCount = commitCount;
-        if(debugTx) {
+        if (debugTx) {
             System.out.println("Begin TX with commit count " + initialCommitCount);
         }
         long nativeTx = nativeBeginTx(handle);
@@ -319,7 +319,7 @@ public class BoxStore implements Closeable {
         // updated resulting in querying obsolete data until another commit is done.
         // TODO add multithreaded test for this
         int initialCommitCount = commitCount;
-        if(debugTx) {
+        if (debugTx) {
             System.out.println("Begin read TX with commit count " + initialCommitCount);
         }
         long nativeTx = nativeBeginReadTx(handle);
@@ -386,7 +386,7 @@ public class BoxStore implements Closeable {
         // Only one write TX at a time, but there is a chance two writers race after commit: thus synchronize
         synchronized (txCommitCountLock) {
             commitCount++; // Overflow is OK because we check for equality
-            if(debugTx) {
+            if (debugTx) {
                 System.out.println("TX committed, new with commit count " + commitCount);
             }
         }
@@ -558,6 +558,18 @@ public class BoxStore implements Closeable {
 
     public int cleanStaleReadTransactions() {
         return nativeCleanStaleReadTransactions(handle);
+    }
+
+    /**
+     * Call this method from a thread that is about to be shutdown or likely not to use ObjectBox anymore:
+     * it frees any cached resources tied to the calling thread (e.g. readers). This method calls
+     * {@link Box#closeThreadResources()} for all initiated boxes ({@link #boxFor(Class)}).
+     */
+    public void closeThreadResources() {
+        for (Box box : boxes.values()) {
+            box.closeThreadResources();
+        }
+        // activeTx is cleaned up in finally blocks, so do not free them here
     }
 
     @Internal

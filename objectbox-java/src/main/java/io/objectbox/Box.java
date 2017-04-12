@@ -28,7 +28,7 @@ public class Box<T> {
     /** Set when running inside TX */
     final ThreadLocal<Cursor<T>> activeTxCursor = new ThreadLocal<>();
     private final ThreadLocal<Cursor<T>> threadLocalReader = new ThreadLocal<>();
-    private final List<WeakReference<Cursor<T>>> readers = new ArrayList<>();
+
     // TODO Add a new generated class for this (~"EntityOps", also with relation ID helpers?), using Cursor here is work-aroundish
     private final Cursor<T> idGetter;
     private final boolean debugTx;
@@ -61,14 +61,11 @@ public class Box<T> {
                 }
                 tx.renew();
                 cursor.renew(tx);
-                if(debugTx) {
+                if (debugTx) {
                     System.out.println("Renewed: " + cursor + ", TX: " + tx);
                 }
             } else {
                 cursor = store.beginReadTx().createCursor(entityClass);
-                synchronized (readers) {
-                    readers.add(new WeakReference<>(cursor));
-                }
                 threadLocalReader.set(cursor);
             }
         }
@@ -134,6 +131,20 @@ public class Box<T> {
                 throw new IllegalStateException("Illegal reader TX state");
             }
             tx.recycle();
+        }
+    }
+
+    /**
+     * Like {@link BoxStore#closeThreadResources()}, but limited to only this Box.
+     * <p>
+     * Rule of thumb: prefer {@link BoxStore#closeThreadResources()} unless you know that your thread only interacted
+     * with this Box.
+     */
+    public void closeThreadResources() {
+        Cursor<T> cursor = threadLocalReader.get();
+        if (cursor != null) {
+            cursor.close();
+            threadLocalReader.remove();
         }
     }
 
