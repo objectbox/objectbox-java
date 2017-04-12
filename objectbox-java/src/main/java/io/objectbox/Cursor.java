@@ -258,4 +258,9 @@ public abstract class Cursor<T> implements Closeable {
         boxStoreForEntities = boxStore;
         nativeSetBoxStoreForEntities(cursor, boxStore);
     }
+
+    @Override
+    public String toString() {
+        return "Cursor " + Long.toString(cursor, 16) + (isClosed() ? "(closed)" : "");
+    }
 }

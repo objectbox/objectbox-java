@@ -183,4 +183,9 @@ public class Transaction implements Closeable {
         return transaction;
     }
 
+    @Override
+    public String toString() {
+        return "TX " + Long.toString(transaction, 16) + " (" + (readOnly ? "read-only" : "write") +
+                ", initialCommitCount=" + initialCommitCount + ")";
+    }
 }
