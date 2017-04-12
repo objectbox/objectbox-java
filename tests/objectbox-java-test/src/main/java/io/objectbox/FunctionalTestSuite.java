@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import io.objectbox.index.IndexReaderRenewTest;
 import io.objectbox.query.LazyListTest;
 import io.objectbox.query.QueryObserverTest;
 import io.objectbox.query.QueryTest;
@@ -17,6 +18,7 @@ import io.objectbox.relation.RelationTest;
         CursorTest.class,
         CursorBytesTest.class,
         LazyListTest.class,
+        IndexReaderRenewTest.class,
         ObjectClassObserverTest.class,
         QueryObserverTest.class,
         QueryTest.class,
