@@ -251,7 +251,12 @@ public abstract class Cursor<T> implements Closeable {
     }
 
     List<T> getBacklinkEntities(int entityId, Property relationIdProperty, long key) {
-        return nativeGetBacklinkEntities(cursor, entityId, relationIdProperty.getId(), key);
+        try {
+            return nativeGetBacklinkEntities(cursor, entityId, relationIdProperty.getId(), key);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Please check if the given property belongs to a valid @Relation: "
+                    + relationIdProperty, e);
+        }
     }
 
     public void setBoxStoreForEntities(BoxStore boxStore) {
