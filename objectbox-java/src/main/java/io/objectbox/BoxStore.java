@@ -165,7 +165,7 @@ public class BoxStore implements Closeable {
     static native int nativeCleanStaleReadTransactions(long store);
 
     public static String getVersion() {
-        return "0.9.9-2017-03-07";
+        return "0.9.10-2017-04-13";
     }
 
     private final File directory;
