@@ -23,14 +23,20 @@ public final class ModelEntity extends Table {
   public int propertiesLength() { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; }
   public IdUid lastPropertyId() { return lastPropertyId(new IdUid()); }
   public IdUid lastPropertyId(IdUid obj) { int o = __offset(10); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
+  public ModelRelation relations(int j) { return relations(new ModelRelation(), j); }
+  public ModelRelation relations(ModelRelation obj, int j) { int o = __offset(12); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int relationsLength() { int o = __offset(12); return o != 0 ? __vector_len(o) : 0; }
 
-  public static void startModelEntity(FlatBufferBuilder builder) { builder.startObject(4); }
+  public static void startModelEntity(FlatBufferBuilder builder) { builder.startObject(5); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addStruct(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addProperties(FlatBufferBuilder builder, int propertiesOffset) { builder.addOffset(2, propertiesOffset, 0); }
   public static int createPropertiesVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
   public static void startPropertiesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
   public static void addLastPropertyId(FlatBufferBuilder builder, int lastPropertyIdOffset) { builder.addStruct(3, lastPropertyIdOffset, 0); }
+  public static void addRelations(FlatBufferBuilder builder, int relationsOffset) { builder.addOffset(4, relationsOffset, 0); }
+  public static int createRelationsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
+  public static void startRelationsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
   public static int endModelEntity(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
