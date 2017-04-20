@@ -53,12 +53,12 @@ public class RelationTest extends AbstractRelationTest {
         Order order2 = putOrder(customer, "Oranges");
 
         assertEquals(2, customer.getOrders().size());
-        order1.remove();
+        orderBox.remove(order1);
         customer.resetOrders();
         assertEquals(1, customer.getOrders().size());
 
         order2.setCustomer(null);
-        order2.put();
+        orderBox.put(order2);
 
         customer.resetOrders();
         assertEquals(0, customer.getOrders().size());
@@ -76,7 +76,7 @@ public class RelationTest extends AbstractRelationTest {
         assertEquals(2, customerNew.getOrders().size());
 
         customerNew.setName("Jake");
-        customerNew.put();
+        customerBox.put(customerNew);
         assertEquals("Jake", customerBox.get(customer.getId()).getName());
     }
 

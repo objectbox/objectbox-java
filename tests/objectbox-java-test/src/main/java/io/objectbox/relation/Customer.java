@@ -87,27 +87,4 @@ public class Customer {
         orders = null;
     }
 
-    /**
-     * Removes entity from its object box. Entity must attached to an entity context.
-     */
-    @Generated(hash = 471132471)
-    public void remove() {
-        if (__boxStore == null) {
-            throw new DbDetachedException();
-        }
-        __boxStore.boxFor(Customer.class).remove(this);
-    }
-
-    /**
-     * Puts the entity in its object box.
-     * Entity must attached to an entity context.
-     */
-    @Generated(hash = 1952089828)
-    public void put() {
-        if (__boxStore == null) {
-            throw new DbDetachedException();
-        }
-        __boxStore.boxFor(Customer.class).put(this);
-    }
-
 }
