@@ -3,6 +3,8 @@ package io.objectbox;
 
 // Copied from generated tests (& removed some unused Properties)
 
+import io.objectbox.internal.IdGetter;
+
 /**
  * Properties for entity "TestEntity". Can be used for QueryBuilder and for referencing DB names.
  */
@@ -49,6 +51,16 @@ public class TestEntity_ implements Properties {
     @Override
     public String getDbName() {
         return __NAME_IN_DB;
+    }
+
+    @Override
+    public IdGetter<TestEntity> getIdGetter() {
+        return new IdGetter<TestEntity>() {
+            @Override
+            public long getId(TestEntity object) {
+                return object.getId();
+            }
+        };
     }
 
 }

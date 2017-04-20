@@ -28,10 +28,6 @@ public final class EntityLongIndexCursor extends Cursor<EntityLongIndex> {
         super(tx, cursor, PROPERTIES);
     }
 
-    @Temporary
-    public EntityLongIndexCursor() {
-    }
-
     @Override
     public final long getId(EntityLongIndex entity) {
         return entity.getId();

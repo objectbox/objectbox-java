@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 
+@Internal
 public class Transaction implements Closeable {
     static final boolean WARN_FINALIZER = false;
 

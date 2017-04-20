@@ -11,6 +11,7 @@ import io.objectbox.annotation.apihint.Temporary;
  * Created by markus.
  */
 @Beta
+@Internal
 public abstract class Cursor<T> implements Closeable {
     static final boolean WARN_FINALIZER = false;
 
@@ -118,15 +119,6 @@ public abstract class Cursor<T> implements Closeable {
             }
         }
         creationThrowable = WARN_FINALIZER ? new Throwable() : null;
-    }
-
-    /** "Offline" cursor only useful for Box to retrieve the ID  of an entity. All other operations may fail. */
-    @Internal
-    protected Cursor() {
-        cursor = 0;
-        properties = null;
-        // Those are harmless, no native resources to clean...
-        creationThrowable = null;
     }
 
     @Override

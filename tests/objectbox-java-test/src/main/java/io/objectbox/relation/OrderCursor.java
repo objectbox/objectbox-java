@@ -28,10 +28,6 @@ public final class OrderCursor extends Cursor<Order> {
         super(tx, cursor, PROPERTIES);
     }
 
-    @Temporary
-    public OrderCursor() {
-    }
-
     @Override
     public final long getId(Order entity) {
         return entity.getId();

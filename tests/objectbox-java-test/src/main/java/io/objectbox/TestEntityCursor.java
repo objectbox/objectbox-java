@@ -6,8 +6,6 @@ public class TestEntityCursor extends Cursor<TestEntity> {
         super(tx, cursor, new TestEntity_());
     }
 
-    public TestEntityCursor() {}
-
     @Override
     protected long getId(TestEntity entity) {
         return entity.getId();

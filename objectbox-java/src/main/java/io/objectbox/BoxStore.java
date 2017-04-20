@@ -165,15 +165,16 @@ public class BoxStore implements Closeable {
     static native int nativeCleanStaleReadTransactions(long store);
 
     public static String getVersion() {
-        return "0.9.10-2017-04-13";
+        return "0.9.11-2017-04-20";
     }
 
     private final File directory;
     private final long handle;
-    private final Map<Class, String> entityNameByClass;
-    private final Map<Class, Class<Cursor>> entityCursorClassByClass;
-    private final Map<Class, Integer> entityTypeIdByClass;
-    private final LongHashMap<Class> classByEntityTypeId;
+    private final Map<Class, String> entityNameByClass = new HashMap<>();
+    private final Map<Class, Class<Cursor>> entityCursorClassByClass = new HashMap<>();
+    private final Map<Class, Integer> entityTypeIdByClass = new HashMap<>();
+    private final Map<Class, Properties> propertiesByClass = new HashMap<>();
+    private final LongHashMap<Class> classByEntityTypeId = new LongHashMap<>();
     private final int[] allEntityTypeIds;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
@@ -187,6 +188,7 @@ public class BoxStore implements Closeable {
     private boolean closed;
 
     Object txCommitCountLock = new Object();
+
     // Not atomic because it is read most of the time
     volatile int commitCount;
 
@@ -202,10 +204,6 @@ public class BoxStore implements Closeable {
         }
         handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.model);
         debugTx = builder.debugTransactions;
-        entityNameByClass = new HashMap<>();
-        entityCursorClassByClass = new HashMap<>();
-        entityTypeIdByClass = new HashMap<>();
-        classByEntityTypeId = new LongHashMap<>();
 
         for (EntityClasses entity : builder.entityClasses) {
             try {
@@ -214,10 +212,11 @@ public class BoxStore implements Closeable {
                 int entityId = nativeRegisterEntityClass(handle, entity.entityName, entity.entityClass);
                 entityTypeIdByClass.put(entity.entityClass, entityId);
                 classByEntityTypeId.put(entityId, entity.entityClass);
+                propertiesByClass.put(entity.entityClass, entity.properties);
                 for (Property property : entity.properties.getAllProperties()) {
                     if (property.customType != null) {
                         if (property.converterClass == null) {
-                            throw new RuntimeException("No converter class for custom type");
+                            throw new RuntimeException("No converter class for custom type of " + property);
                         }
                         nativeRegisterCustomType(handle, entityId, 0, property.dbName, property.converterClass,
                                 property.customType);
@@ -286,6 +285,11 @@ public class BoxStore implements Closeable {
 
     <T> Class<Cursor<T>> getEntityCursorClass(Class<T> entityClass) {
         return (Class) entityCursorClassByClass.get(entityClass);
+    }
+
+    @Internal
+    Properties getProperties(Class entityClass) {
+        return propertiesByClass.get(entityClass);
     }
 
     /**

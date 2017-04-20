@@ -23,10 +23,6 @@ public final class CustomerCursor extends Cursor<Customer> {
         super(tx, cursor, PROPERTIES);
     }
 
-    @Temporary
-    public CustomerCursor() {
-    }
-
     @Override
     public final long getId(Customer entity) {
         return entity.getId();

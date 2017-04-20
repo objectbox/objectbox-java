@@ -3,6 +3,7 @@ package io.objectbox.relation;
 
 import io.objectbox.Properties;
 import io.objectbox.Property;
+import io.objectbox.internal.IdGetter;
 
 // THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project
 
@@ -38,4 +39,13 @@ public class Customer_ implements Properties {
         return __NAME_IN_DB;
     }
 
+    @Override
+    public IdGetter<Customer> getIdGetter() {
+        return new IdGetter<Customer>() {
+            @Override
+            public long getId(Customer object) {
+                return object.getId();
+            }
+        };
+    }
 }

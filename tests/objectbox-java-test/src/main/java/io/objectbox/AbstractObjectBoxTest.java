@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.objectbox.ModelBuilder.EntityBuilder;
 import io.objectbox.ModelBuilder.PropertyBuilder;
+import io.objectbox.internal.IdGetter;
 import io.objectbox.model.PropertyFlags;
 import io.objectbox.model.PropertyType;
 
@@ -67,6 +68,16 @@ public abstract class AbstractObjectBoxTest {
             @Override
             public String getDbName() {
                 return null;
+            }
+
+            @Override
+            public IdGetter getIdGetter() {
+                return new IdGetter<TestEntityMinimal>() {
+                    @Override
+                    public long getId(TestEntityMinimal object) {
+                        return object.getId();
+                    }
+                };
             }
         });
         return builder;

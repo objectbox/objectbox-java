@@ -1,6 +1,5 @@
 package io.objectbox;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,6 +11,7 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.annotation.apihint.Temporary;
 import io.objectbox.exception.DbException;
 import io.objectbox.internal.CallWithHandle;
+import io.objectbox.internal.IdGetter;
 import io.objectbox.internal.ReflectionCache;
 import io.objectbox.query.QueryBuilder;
 
@@ -29,8 +29,7 @@ public class Box<T> {
     final ThreadLocal<Cursor<T>> activeTxCursor = new ThreadLocal<>();
     private final ThreadLocal<Cursor<T>> threadLocalReader = new ThreadLocal<>();
 
-    // TODO Add a new generated class for this (~"EntityOps", also with relation ID helpers?), using Cursor here is work-aroundish
-    private final Cursor<T> idGetter;
+    private final IdGetter<T> idGetter;
     private final boolean debugTx;
 
     private Properties properties;
@@ -39,12 +38,7 @@ public class Box<T> {
     Box(BoxStore store, Class<T> entityClass) {
         this.store = store;
         this.entityClass = entityClass;
-        Class<Cursor<T>> cursorClass = store.getEntityCursorClass(entityClass);
-        try {
-            idGetter = cursorClass.newInstance();
-        } catch (Exception e) {
-            throw new DbException("Box could not create cursor", e);
-        }
+        idGetter = store.getProperties(entityClass).getIdGetter();
         debugTx = store.debugTx;
     }
 

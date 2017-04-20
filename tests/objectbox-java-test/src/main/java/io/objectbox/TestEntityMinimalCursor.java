@@ -1,12 +1,12 @@
 package io.objectbox;
 
+import io.objectbox.internal.IdGetter;
+
 public class TestEntityMinimalCursor extends Cursor<TestEntityMinimal> {
 
     public TestEntityMinimalCursor(Transaction tx, long cursor) {
         super(tx, cursor, new DummyProperties());
     }
-
-    public TestEntityMinimalCursor() {}
 
     @Override
     protected long getId(TestEntityMinimal entity) {
@@ -37,6 +37,16 @@ public class TestEntityMinimalCursor extends Cursor<TestEntityMinimal> {
         @Override
         public String getDbName() {
             return null;
+        }
+
+        @Override
+        public IdGetter<TestEntityMinimal> getIdGetter() {
+            return new IdGetter<TestEntityMinimal>() {
+                @Override
+                public long getId(TestEntityMinimal object) {
+                    return object.getId();
+                }
+            };
         }
     }
 }
