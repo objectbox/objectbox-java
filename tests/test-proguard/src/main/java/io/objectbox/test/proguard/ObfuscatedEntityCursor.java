@@ -24,10 +24,6 @@ public final class ObfuscatedEntityCursor extends Cursor<ObfuscatedEntity> {
         super(tx, cursor, PROPERTIES);
     }
 
-    @Temporary
-    public ObfuscatedEntityCursor() {
-    }
-
     @Override
     public final long getId(ObfuscatedEntity entity) {
         return entity.getId();
