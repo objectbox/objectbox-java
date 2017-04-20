@@ -34,7 +34,7 @@ public class MyObjectBox {
         entityBuilder = modelBuilder.entity("Customer");
         entityBuilder.id(1, 8247662514375611729L).lastPropertyId(2, 7412962174183812632L);
         entityBuilder.property("_id", PropertyType.Long).id(1, 1888039726372206411L)
-                .flags(PropertyFlags.ID | PropertyFlags.NOT_NULL);
+                .flags(PropertyFlags.ID | PropertyFlags.NOT_NULL | PropertyFlags.ID_SELF_ASSIGNABLE);
         entityBuilder.property("name", PropertyType.String).id(2, 7412962174183812632L)
                 .flags(PropertyFlags.INDEXED).indexId(1, 5782921847050580892L);
         entityBuilder.entityDone();

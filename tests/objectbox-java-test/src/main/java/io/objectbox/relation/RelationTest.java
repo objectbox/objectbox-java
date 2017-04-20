@@ -18,29 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-public class RelationTest extends AbstractObjectBoxTest {
-
-    private Box<Order> orderBox;
-    private Box<Customer> customerBox;
-
-    @Override
-    protected BoxStore createBoxStore() {
-        return MyObjectBox.builder().baseDirectory(boxStoreDir).build();
-    }
-
-    @After
-    public void deleteDbFiles() {
-        BoxStore.deleteAllFiles(new File(BoxStoreBuilder.DEFAULT_NAME));
-    }
-
-    @Before
-    public void initBoxes() {
-        deleteDbFiles();
-        customerBox = store.boxFor(Customer.class);
-        orderBox = store.boxFor(Order.class);
-        customerBox.removeAll();
-        orderBox.removeAll();
-    }
+public class RelationTest extends AbstractRelationTest {
 
     @Test
     public void testRelationToOne() {
@@ -110,21 +88,6 @@ public class RelationTest extends AbstractObjectBoxTest {
         Query<Order> query = orderBox.query().equal(Order_.customerId, customer.getId()).build();
         Order orderFound = query.findUnique();
         assertEquals(order.getId(), orderFound.getId());
-    }
-
-    private Customer putCustomer() {
-        Customer customer = new Customer();
-        customer.setName("Joe");
-        customerBox.put(customer);
-        return customer;
-    }
-
-    private Order putOrder(Customer customer, String text) {
-        Order order = new Order();
-        order.setCustomer(customer);
-        order.setText(text);
-        orderBox.put(order);
-        return order;
     }
 
 }

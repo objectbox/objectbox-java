@@ -164,18 +164,19 @@ public abstract class AbstractObjectBoxTest {
     private void addTestEntity(ModelBuilder modelBuilder, boolean withIndex) {
         lastEntityUid = ++lastUid;
         EntityBuilder entityBuilder = modelBuilder.entity("TestEntity").id(++lastEntityId, lastEntityUid);
-        entityBuilder.property("id", PropertyType.Long).id(TestEntity_.id.id, ++lastUid).flags(PropertyFlags.ID);
+        entityBuilder.property("id", PropertyType.Long).id(TestEntity_.id.id, ++lastUid)
+                .flags(PropertyFlags.ID | PropertyFlags.ID_SELF_ASSIGNABLE);
         entityBuilder.property("simpleBoolean", PropertyType.Bool).id(TestEntity_.simpleBoolean.id, ++lastUid);
         entityBuilder.property("simpleByte", PropertyType.Byte).id(TestEntity_.simpleByte.id, ++lastUid);
         entityBuilder.property("simpleShort", PropertyType.Short).id(TestEntity_.simpleShort.id, ++lastUid);
         entityBuilder.property("simpleInt", PropertyType.Int).id(TestEntity_.simpleInt.id, ++lastUid);
         entityBuilder.property("simpleLong", PropertyType.Long).id(TestEntity_.simpleLong.id, ++lastUid);
-        entityBuilder.property("simpleFloat", PropertyType.Float).id(TestEntity_.simpleFloat.id,++lastUid);
+        entityBuilder.property("simpleFloat", PropertyType.Float).id(TestEntity_.simpleFloat.id, ++lastUid);
         entityBuilder.property("simpleDouble", PropertyType.Double).id(TestEntity_.simpleDouble.id, ++lastUid);
         PropertyBuilder pb =
                 entityBuilder.property("simpleString", PropertyType.String).id(TestEntity_.simpleString.id, ++lastUid);
         if (withIndex) {
-            lastIndexUid =++lastUid;
+            lastIndexUid = ++lastUid;
             pb.flags(PropertyFlags.INDEXED).indexId(++lastIndexId, lastIndexUid);
         }
         entityBuilder.property("simpleByteArray", PropertyType.ByteVector).id(TestEntity_.simpleByteArray.id, ++lastUid);
@@ -192,7 +193,7 @@ public abstract class AbstractObjectBoxTest {
         long lastPropertyUid = ++lastUid;
         PropertyBuilder pb = entityBuilder.property("text", PropertyType.String).id(++pId, lastPropertyUid);
         if (withIndex) {
-            lastIndexUid =++lastUid;
+            lastIndexUid = ++lastUid;
             pb.flags(PropertyFlags.INDEXED).indexId(++lastIndexId, lastIndexUid);
         }
         entityBuilder.lastPropertyId(pId, lastPropertyUid);
