@@ -15,14 +15,14 @@ import io.objectbox.internal.ReflectionCache;
  */
 @Beta
 // TODO add tests
-public class ToOne<SOURCE, TARGET> {
-    private final SOURCE entity;
-    private final Class<SOURCE> entityClass;
+public class ToOne<TARGET> {
+    private final Object entity;
+    private final Class entityClass;
     private final Class<TARGET> targetClass;
-    private final Property relationIdProperty;
+    private final Property targetIdProperty;
 
     private BoxStore boxStore;
-    private Box<SOURCE> entityBox;
+    private Box entityBox;
     private volatile Box<TARGET> targetBox;
     private Field targetIdField;
 
@@ -31,13 +31,15 @@ public class ToOne<SOURCE, TARGET> {
      */
     protected TARGET target;
 
+    protected long targetId;
+
     private volatile long resolvedTargetId;
 
-    public ToOne(SOURCE entity, Property relationIdProperty, Class<TARGET> targetClass) {
+    public ToOne(Object entity, Property targetIdProperty, Class<TARGET> targetClass) {
         this.entity = entity;
-        entityClass = (Class<SOURCE>) entity.getClass();
+        entityClass = entity.getClass();
         this.targetClass = targetClass;
-        this.relationIdProperty = relationIdProperty;
+        this.targetIdProperty = targetIdProperty;
     }
 
 
@@ -102,10 +104,14 @@ public class ToOne<SOURCE, TARGET> {
     }
 
     public void setTargetId(long targetId) {
-        try {
-            getTargetIdField().set(entity, targetId);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Could not update to-one ID in entity", e);
+        if(targetIdProperty != null) {
+            try {
+                getTargetIdField().set(entity, targetId);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Could not update to-one ID in entity", e);
+            }
+        } else {
+            this.targetId= targetId;
         }
     }
 
@@ -195,20 +201,24 @@ public class ToOne<SOURCE, TARGET> {
         target = null;
     }
 
-    // Future alternative: Implemented by generated ToOne sub classes
     public long getTargetId() {
-        Field keyField = getTargetIdField();
-        try {
-            Long key = (Long) keyField.get(entity);
-            return key != null ? key : 0;
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Could not access field " + keyField);
+        if(targetIdProperty != null) {
+            // Future alternative: Implemented by generated ToOne sub classes to avoid reflection
+            Field keyField = getTargetIdField();
+            try {
+                Long key = (Long) keyField.get(entity);
+                return key != null ? key : 0;
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Could not access field " + keyField);
+            }
+        } else {
+            return targetId;
         }
     }
 
     private Field getTargetIdField() {
         if (targetIdField == null) {
-            targetIdField = ReflectionCache.getInstance().getField(entity.getClass(), relationIdProperty.name);
+            targetIdField = ReflectionCache.getInstance().getField(entity.getClass(), targetIdProperty.name);
         }
         return targetIdField;
     }
