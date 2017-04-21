@@ -1,7 +1,5 @@
 package io.objectbox;
 
-import io.objectbox.exception.DbException;
-
 import org.junit.Test;
 
 import java.io.IOException;
@@ -16,7 +14,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class CursorTest extends AbstractObjectBoxTest {
 

@@ -8,13 +8,13 @@ import io.objectbox.annotation.apihint.Internal;
 
 @Internal
 public class ReflectionCache {
-    private static ReflectionCache instance = new ReflectionCache();
+    private static final ReflectionCache instance = new ReflectionCache();
 
     public static ReflectionCache getInstance() {
         return instance;
     }
 
-    private Map<Class, Map<String, Field>> fields = new HashMap<>();
+    private final Map<Class, Map<String, Field>> fields = new HashMap<>();
 
     public synchronized Field getField(Class clazz, String name) {
         Map<String, Field> fieldsForClass = fields.get(clazz);

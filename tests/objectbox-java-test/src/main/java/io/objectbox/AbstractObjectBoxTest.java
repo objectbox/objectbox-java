@@ -71,7 +71,7 @@ public abstract class AbstractObjectBoxTest {
             }
 
             @Override
-            public IdGetter getIdGetter() {
+            public IdGetter<TestEntityMinimal> getIdGetter() {
                 return new IdGetter<TestEntityMinimal>() {
                     @Override
                     public long getId(TestEntityMinimal object) {

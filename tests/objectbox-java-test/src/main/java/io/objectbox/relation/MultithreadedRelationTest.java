@@ -31,8 +31,8 @@ public class MultithreadedRelationTest extends AbstractRelationTest {
         running = false;
         assertNull(error);
         assertFalse(hasError);
-        for (int i = 0; i < threads.length; i++) {
-            threads[i].join();
+        for (Thread thread : threads) {
+            thread.join();
         }
     }
 

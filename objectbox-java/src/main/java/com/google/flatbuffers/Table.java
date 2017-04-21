@@ -43,7 +43,7 @@ public class Table {
       return Charset.forName("UTF-8");
     }
   };
-  private final static ThreadLocal<CharBuffer> CHAR_BUFFER = new ThreadLocal<CharBuffer>();
+  private final static ThreadLocal<CharBuffer> CHAR_BUFFER = new ThreadLocal<>();
   /** Used to hold the position of the `bb` buffer. */
   protected int bb_pos;
   /** The underlying ByteBuffer to hold the data of the Table. */

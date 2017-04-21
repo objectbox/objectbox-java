@@ -1,12 +1,8 @@
 package io.objectbox.relation;
 
-import java.util.List;
-import java.util.ArrayList;
-
 import io.objectbox.Cursor;
 import io.objectbox.Properties;
 import io.objectbox.Transaction;
-import io.objectbox.annotation.apihint.Temporary;
 
 // THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project
 

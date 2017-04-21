@@ -53,8 +53,8 @@ public class LazyList<E> implements List<E> {
             throw new UnsupportedOperationException();
         }
 
-        @Override
         /** FIXME: before hasPrevious(), next() must be called. */
+        @Override
         public boolean hasPrevious() {
             return index > 0;
         }
@@ -64,15 +64,14 @@ public class LazyList<E> implements List<E> {
             return index;
         }
 
-        @Override
         /** FIXME: before previous(), next() must be called. */
+        @Override
         public E previous() {
             if (index <= 0) {
                 throw new NoSuchElementException();
             }
             index--;
-            E entity = get(index);
-            return entity;
+            return get(index);
         }
 
         @Override
@@ -121,7 +120,7 @@ public class LazyList<E> implements List<E> {
         this.objectIds = objectIds;
         size = objectIds.length;
         if (cacheEntities) {
-            entities = new ArrayList<E>(size);
+            entities = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 entities.add(null);
             }
@@ -206,11 +205,11 @@ public class LazyList<E> implements List<E> {
         return entities.containsAll(collection);
     }
 
-    @Override
     /**
      * @return An object for the given ID, or null if the object was already removed from its box
      * (and was not cached before).
      */
+    @Override
     public E get(int location) {
         if (location < 0 || location > size) {
             throw new IndexOutOfBoundsException("Illegal cursor location " + location);

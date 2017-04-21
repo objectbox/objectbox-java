@@ -20,7 +20,7 @@ import io.objectbox.reactive.SubscriptionBuilder;
 @Beta
 public class Query<T> {
 
-    static native long nativeDestroy(long handle);
+    static native void nativeDestroy(long handle);
 
     native static Object nativeFindFirst(long handle, long cursorHandle);
 
@@ -69,7 +69,7 @@ public class Query<T> {
         this.box = box;
         handle = queryHandle;
         this.hasOrder = hasOrder;
-        publisher = new QueryPublisher<T>(this, box);
+        publisher = new QueryPublisher<>(this, box);
     }
 
     @Override

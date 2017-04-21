@@ -1,6 +1,5 @@
 package io.objectbox.reactive;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import io.objectbox.annotation.apihint.Internal;
@@ -12,9 +11,7 @@ public class DataPublisherUtils {
      */
     public static <T> void removeObserverFromCopyOnWriteSet(Set<DataObserver<T>> observers, DataObserver<T> observer) {
         if (observers != null) {
-            Iterator<DataObserver<T>> iterator = observers.iterator();
-            while (iterator.hasNext()) {
-                DataObserver<T> candidate = iterator.next();
+            for (DataObserver<T> candidate : observers) {
                 if (candidate.equals(observer)) {
                     // Unsupported by CopyOnWriteArraySet: iterator.remove();
                     observers.remove(candidate);

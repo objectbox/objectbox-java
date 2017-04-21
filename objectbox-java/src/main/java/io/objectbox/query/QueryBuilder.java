@@ -73,7 +73,7 @@ public class QueryBuilder<T> {
 
     private static native long nativeCreate(long storeHandle, String entityName);
 
-    private static native long nativeDestroy(long handle);
+    private static native void nativeDestroy(long handle);
 
     private static native long nativeBuild(long handle);
 
@@ -152,7 +152,7 @@ public class QueryBuilder<T> {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
         long queryHandle = nativeBuild(handle);
-        Query<T> query = new Query<T>(box, queryHandle, hasOrder);
+        Query<T> query = new Query<>(box, queryHandle, hasOrder);
         close();
         return query;
     }

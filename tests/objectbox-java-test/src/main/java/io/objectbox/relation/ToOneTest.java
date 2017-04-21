@@ -1,13 +1,7 @@
 package io.objectbox.relation;
 
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import io.objectbox.AbstractObjectBoxTest;
-import io.objectbox.Box;
-import io.objectbox.TestEntity;
-import io.objectbox.TestEntity_;
 
 
 import static org.junit.Assert.assertEquals;
@@ -94,6 +88,6 @@ public class ToOneTest extends AbstractRelationTest {
         toOne.setTarget(target);
 
         assertTrue(target.getId() != 0);
-        assertEquals("target1", customerBox.get(target.getId()));
+        assertEquals("target1", customerBox.get(target.getId()).getName());
     }
 }

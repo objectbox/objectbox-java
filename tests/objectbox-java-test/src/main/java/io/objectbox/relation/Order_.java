@@ -3,7 +3,6 @@ package io.objectbox.relation;
 
 import io.objectbox.Properties;
 import io.objectbox.Property;
-import io.objectbox.index.model.EntityLongIndex;
 import io.objectbox.internal.IdGetter;
 
 // THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project

@@ -47,7 +47,7 @@ public class BoxStoreBuilder {
 
     boolean debugTransactions;
 
-    List<EntityClasses> entityClasses = new ArrayList<>();
+    final List<EntityClasses> entityClasses = new ArrayList<>();
 
     public BoxStoreBuilder(byte[] model) {
         this.model = model;

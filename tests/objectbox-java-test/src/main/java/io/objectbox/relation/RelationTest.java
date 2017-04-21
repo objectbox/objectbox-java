@@ -1,16 +1,9 @@
 package io.objectbox.relation;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.List;
 
-import io.objectbox.AbstractObjectBoxTest;
-import io.objectbox.Box;
-import io.objectbox.BoxStore;
-import io.objectbox.BoxStoreBuilder;
 import io.objectbox.query.Query;
 
 

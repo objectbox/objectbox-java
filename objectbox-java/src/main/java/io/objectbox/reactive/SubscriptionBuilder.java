@@ -24,7 +24,7 @@ import io.objectbox.annotation.apihint.Internal;
  * @param <T> The data type the {@link DataObserver} subscribes to.
  */
 public class SubscriptionBuilder<T> {
-    private DataPublisher<T> publisher;
+    private final DataPublisher<T> publisher;
     private final Object publisherParam;
     private final ExecutorService threadPool;
     private DataObserver<T> observer;

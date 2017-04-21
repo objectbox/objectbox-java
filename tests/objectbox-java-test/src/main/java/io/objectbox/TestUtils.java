@@ -9,9 +9,6 @@ import java.io.Reader;
 import org.greenrobot.essentials.io.FileUtils;
 import org.greenrobot.essentials.io.IoUtils;
 
-/**
- * Created by markus.
- */
 public class TestUtils {
     public static String loadFile(String filename) {
         String json;
