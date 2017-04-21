@@ -2,6 +2,8 @@ package io.objectbox.reactive;
 
 import java.util.concurrent.ExecutorService;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.annotation.apihint.Internal;
 
 /**
@@ -39,7 +41,7 @@ public class SubscriptionBuilder<T> {
 
 
     @Internal
-    public SubscriptionBuilder(DataPublisher<T> publisher, Object param, ExecutorService threadPool) {
+    public SubscriptionBuilder(DataPublisher<T> publisher, @Nullable Object param, ExecutorService threadPool) {
         this.publisher = publisher;
         publisherParam = param;
         this.threadPool = threadPool;

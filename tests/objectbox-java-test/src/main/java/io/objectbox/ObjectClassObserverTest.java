@@ -158,6 +158,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         SubscriptionBuilder<Long> subscriptionBuilder = store.subscribe().onlyChanges().
                 transform(new DataTransformer<Class, Long>() {
             @Override
+            @SuppressWarnings("NullableProblems")
             public Long transform(Class source) throws Exception {
                 assertNotSame(testThread, Thread.currentThread());
                 return store.boxFor(source).count();
@@ -247,6 +248,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
         DataSubscription subscription = store.subscribe().onlyChanges().transform(new DataTransformer<Class, Long>() {
             @Override
+            @SuppressWarnings("NullableProblems")
             public Long transform(Class source) throws Exception {
                 throw new Exception("Boo");
             }
@@ -414,6 +416,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         DataSubscription subscription = store.subscribe().single()
                 .transform(new DataTransformer<Class, Class>() {
                     @Override
+                    @SuppressWarnings("NullableProblems")
                     public Class transform(Class source) throws Exception {
                         Thread.sleep(20);
                         return source;

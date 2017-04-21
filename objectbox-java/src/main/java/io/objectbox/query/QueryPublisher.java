@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Internal;
@@ -28,7 +30,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
     }
 
     @Override
-    public synchronized void subscribe(DataObserver<List<T>> observer, Object param) {
+    public synchronized void subscribe(DataObserver<List<T>> observer, @Nullable Object param) {
         final BoxStore store = box.getStore();
         if (objectClassObserver == null) {
             objectClassObserver = new DataObserver<Class<T>>() {
@@ -58,7 +60,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
     }
 
     @Override
-    public void publishSingle(final DataObserver<List<T>> observer, Object param) {
+    public void publishSingle(final DataObserver<List<T>> observer, @Nullable Object param) {
         box.getStore().internalScheduleThread(new Runnable() {
             @Override
             public void run() {
@@ -81,7 +83,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
     }
 
     @Override
-    public synchronized void unsubscribe(DataObserver<List<T>> observer, Object param) {
+    public synchronized void unsubscribe(DataObserver<List<T>> observer, @Nullable Object param) {
         DataPublisherUtils.removeObserverFromCopyOnWriteSet(observers, observer);
         if (observers.isEmpty()) {
             objectClassSubscription.cancel();

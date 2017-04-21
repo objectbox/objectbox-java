@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
@@ -26,7 +28,7 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
     }
 
     @Override
-    public void subscribe(DataObserver<Class> observer, Object forClass) {
+    public void subscribe(DataObserver<Class> observer, @Nullable Object forClass) {
         if (forClass == null) {
             for (int entityTypeId : boxStore.getAllEntityTypeIds()) {
                 observersByEntityTypeId.putElement(entityTypeId, (DataObserver) observer);
@@ -41,7 +43,7 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
      * Removes the given observer from all object classes it added itself to earlier (forClass == null).
      * This also considers weakly added observers.
      */
-    public void unsubscribe(DataObserver<Class> observer, Object forClass) {
+    public void unsubscribe(DataObserver<Class> observer, @Nullable Object forClass) {
         if (forClass != null) {
             int entityTypeId = boxStore.getEntityTypeIdOrThrow((Class) forClass);
             unsubscribe(observer, entityTypeId);
@@ -58,7 +60,7 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
     }
 
     @Override
-    public void publishSingle(final DataObserver<Class> observer, final Object forClass) {
+    public void publishSingle(final DataObserver<Class> observer, @Nullable final Object forClass) {
         boxStore.internalScheduleThread(new Runnable() {
             @Override
             public void run() {

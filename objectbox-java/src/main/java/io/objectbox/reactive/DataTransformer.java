@@ -1,5 +1,7 @@
 package io.objectbox.reactive;
 
+import javax.annotation.Nullable;
+
 /**
  * Transforms or processes data before it is given to subscribed {@link DataObserver}s. A transformer is set via
  * {@link SubscriptionBuilder#transform(DataTransformer)}.

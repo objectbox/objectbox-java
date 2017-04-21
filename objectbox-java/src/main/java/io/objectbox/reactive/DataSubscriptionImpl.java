@@ -1,12 +1,14 @@
 package io.objectbox.reactive;
 
+import javax.annotation.Nullable;
+
 class DataSubscriptionImpl<T> implements DataSubscription {
     private volatile boolean canceled;
     private DataPublisher<T> publisher;
     private Object publisherParam;
     private DataObserver<T> observer;
 
-    DataSubscriptionImpl(DataPublisher<T> publisher, Object publisherParam, DataObserver<T> observer) {
+    DataSubscriptionImpl(DataPublisher<T> publisher, @Nullable Object publisherParam, DataObserver<T> observer) {
         this.publisher = publisher;
         this.publisherParam = publisherParam;
         this.observer = observer;

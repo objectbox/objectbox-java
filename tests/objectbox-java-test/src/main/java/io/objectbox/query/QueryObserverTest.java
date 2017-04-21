@@ -75,6 +75,7 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
         query.subscribe().transform(new DataTransformer<List<TestEntity>, Integer>() {
 
             @Override
+            @SuppressWarnings("NullableProblems")
             public Integer transform(List<TestEntity> source) throws Exception {
                 int sum = 0;
                 for (TestEntity entity : source) {

@@ -2,19 +2,19 @@ package io.objectbox.relation;
 
 import java.lang.reflect.Field;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.Property;
-import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbDetachedException;
 import io.objectbox.internal.ReflectionCache;
 
 /**
- * To be used in generated to-one getters etc.
+ * Manages a to-one relation: resolves the target object, keeps the target Id in sync, etc.
  */
-@Beta
-// TODO add tests
+// TODO add more tests
 public class ToOne<TARGET> {
     private final Object entity;
     private final Class entityClass;
@@ -35,20 +35,19 @@ public class ToOne<TARGET> {
 
     private volatile long resolvedTargetId;
 
-    public ToOne(Object entity, Property targetIdProperty, Class<TARGET> targetClass) {
+    public ToOne(Object entity, @Nullable Property targetIdProperty, Class<TARGET> targetClass) {
         this.entity = entity;
         entityClass = entity.getClass();
         this.targetClass = targetClass;
         this.targetIdProperty = targetIdProperty;
     }
 
-
     public TARGET getTarget() {
         return getTarget(getTargetId());
     }
 
-    @Internal
     /** Cursors already have the target ID, so no need for reflection. */
+    @Internal
     public TARGET getTarget(long targetId) {
         synchronized (this) {
             if (resolvedTargetId == targetId) {
@@ -127,7 +126,7 @@ public class ToOne<TARGET> {
      * If the target entity was not put in the DB yet (its ID is 0), it will be put before to get its ID.
      */
     // TODO provide a overload with a ToMany parameter, which also gets updated
-    public void setTarget(final TARGET target) {
+    public void setTarget(@Nullable final TARGET target) {
         if (target != null) {
             ensureBoxes(target);
             long targetId = targetBox.getId(target);
@@ -147,7 +146,7 @@ public class ToOne<TARGET> {
      * If the target entity was not put in the DB yet (its ID is 0), it will be put before to get its ID.
      */
     // TODO provide a overload with a ToMany parameter, which also gets updated
-    public void setAndPutTarget(final TARGET target) {
+    public void setAndPutTarget(@Nullable final TARGET target) {
         ensureBoxes(target);
         if (target != null) {
             long targetId = targetBox.getId(target);
@@ -169,7 +168,7 @@ public class ToOne<TARGET> {
      * Sets the relation ID in the enclosed entity to the ID of the given target entity and puts both entities.
      */
     // TODO provide a overload with a ToMany parameter, which also gets updated
-    public void setAndPutTargetAlways(final TARGET target) {
+    public void setAndPutTargetAlways(@Nullable final TARGET target) {
         ensureBoxes(target);
         if (target != null) {
             boxStore.runInTx(new Runnable() {
@@ -188,7 +187,7 @@ public class ToOne<TARGET> {
     }
 
     /** Both values should be set (and read) "atomically" using synchronized. */
-    private synchronized void setResolvedTarget(TARGET target, long targetId) {
+    private synchronized void setResolvedTarget(@Nullable TARGET target, long targetId) {
         resolvedTargetId = targetId;
         this.target = target;
     }
@@ -221,5 +220,10 @@ public class ToOne<TARGET> {
             targetIdField = ReflectionCache.getInstance().getField(entity.getClass(), targetIdProperty.name);
         }
         return targetIdField;
+    }
+
+    @Internal
+    public void internalPrepareForPut(BoxStore boxStore) {
+
     }
 }

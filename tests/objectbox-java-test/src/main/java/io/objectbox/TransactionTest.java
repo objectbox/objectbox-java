@@ -7,6 +7,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.exception.DbException;
 
 
@@ -369,7 +371,9 @@ public class TransactionTest extends AbstractObjectBoxTest {
         };
         TxCallback<Object> callback = new TxCallback<Object>() {
             @Override
-            public void txFinished(Object result, Throwable error) {
+
+            @SuppressWarnings("NullableProblems")
+            public void txFinished(Object result, @Nullable Throwable error) {
                 threadsDoneLatch.countDown();
                 if (error != null) {
                     errorCount.incrementAndGet();

@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import io.objectbox.annotation.apihint.Internal;
 
 @Internal
@@ -16,6 +18,7 @@ public class ReflectionCache {
 
     private final Map<Class, Map<String, Field>> fields = new HashMap<>();
 
+    @Nonnull
     public synchronized Field getField(Class clazz, String name) {
         Map<String, Field> fieldsForClass = fields.get(clazz);
         if (fieldsForClass == null) {

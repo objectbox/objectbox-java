@@ -3,6 +3,9 @@ package io.objectbox.query;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import io.objectbox.Box;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Beta;
@@ -91,6 +94,7 @@ public class Query<T> {
     /**
      * Find the first Object matching the query.
      */
+    @Nullable
     public T findFirst() {
         return box.internalCallWithReaderHandle(new CallWithHandle<T>() {
             @Override
@@ -105,6 +109,7 @@ public class Query<T> {
      *
      * @throws io.objectbox.exception.DbException if result was not unique
      */
+    @Nullable
     public T findUnique() {
         return box.internalCallWithReaderHandle(new CallWithHandle<T>() {
             @Override
@@ -117,6 +122,7 @@ public class Query<T> {
     /**
      * Find all Objects matching the query.
      */
+    @Nonnull
     public List<T> find() {
         return box.internalCallWithReaderHandle(new CallWithHandle<List<T>>() {
             @Override
@@ -129,6 +135,7 @@ public class Query<T> {
     /**
      * Find all Objects matching the query between the given offset and limit. This helps with pagination.
      */
+    @Nonnull
     public List<T> find(final long offset, final long limit) {
         return box.internalCallWithReaderHandle(new CallWithHandle<List<T>>() {
             @Override
@@ -142,6 +149,7 @@ public class Query<T> {
      * Very efficient way to get just the IDs without creating any objects. IDs can later be used to lookup objects
      * (lookups by ID are also very efficient in ObjectBox).
      */
+    @Nonnull
     public long[] findIds() {
         if (hasOrder) {
             throw new UnsupportedOperationException("This method is currently only available for unordered queries");
@@ -189,6 +197,7 @@ public class Query<T> {
     /**
      * Find all Objects matching the query without actually loading the Objects. See @{@link LazyList} for details.
      */
+    @Nonnull
     public LazyList<T> findLazyCached() {
         return new LazyList<>(box, findIds(), true);
     }
