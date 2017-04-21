@@ -5,14 +5,17 @@ import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 
 @Internal
+@NotThreadSafe
 public class Transaction implements Closeable {
     static final boolean WARN_FINALIZER = false;
 
-    static Map<Class, Constructor> cursorConstructorCache = new ConcurrentHashMap<>();
+    static final Map<Class, Constructor> cursorConstructorCache = new ConcurrentHashMap<>();
 
     private final long transaction;
     private final BoxStore store;

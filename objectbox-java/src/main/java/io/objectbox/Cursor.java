@@ -3,19 +3,19 @@ package io.objectbox;
 import java.io.Closeable;
 import java.util.List;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.annotation.apihint.Temporary;
 
-/**
- * Created by markus.
- */
 @Beta
 @Internal
+@NotThreadSafe
 public abstract class Cursor<T> implements Closeable {
     static final boolean WARN_FINALIZER = false;
 
-    protected static final int PUT_FLAG_FIRST = 1 << 0;
+    protected static final int PUT_FLAG_FIRST = 1;
     protected static final int PUT_FLAG_COMPLETE = 1 << 1;
 
     static native void nativeDestroy(long cursor);

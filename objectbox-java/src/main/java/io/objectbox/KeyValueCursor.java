@@ -2,8 +2,11 @@ package io.objectbox;
 
 import java.io.Closeable;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
+@NotThreadSafe
 public class KeyValueCursor implements Closeable {
-    private static final int PUT_FLAG_FIRST = 1 << 0;
+    private static final int PUT_FLAG_FIRST = 1;
     private static final int PUT_FLAG_COMPLETE = 1 << 1;
     private static final int PUT_FLAG_INSERT_NEW = 1 << 2;
 

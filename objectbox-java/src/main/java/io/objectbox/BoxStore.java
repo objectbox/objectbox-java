@@ -24,8 +24,9 @@ import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import javax.annotation.concurrent.ThreadSafe;
 
 import io.objectbox.BoxStoreBuilder.EntityClasses;
 import io.objectbox.annotation.apihint.Beta;
@@ -38,11 +39,12 @@ import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.SubscriptionBuilder;
 
-@Beta
 /**
- * Represents an ObjectBox database and gives you @{@link Box}es to get and put Objects of a specific type
+ * Represents an ObjectBox database and gives you {@link Box}es to get and put Objects of a specific type
  * (see {@link #boxFor(Class)}).
  */
+@Beta
+@ThreadSafe
 public class BoxStore implements Closeable {
     static {
         String libname = "objectbox";
@@ -90,7 +92,6 @@ public class BoxStore implements Closeable {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                return;
             }
         }
     }
@@ -187,7 +188,7 @@ public class BoxStore implements Closeable {
 
     private boolean closed;
 
-    Object txCommitCountLock = new Object();
+    final Object txCommitCountLock = new Object();
 
     // Not atomic because it is read most of the time
     volatile int commitCount;

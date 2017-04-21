@@ -6,6 +6,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
+
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.annotation.apihint.Temporary;
@@ -21,6 +24,7 @@ import io.objectbox.query.QueryBuilder;
  * Thread-safe.
  */
 @Beta
+@ThreadSafe
 public class Box<T> {
     private final BoxStore store;
     private final Class<T> entityClass;
@@ -72,7 +76,7 @@ public class Box<T> {
             if (activeTx.isClosed()) {
                 throw new IllegalStateException("Active TX is closed");
             }
-            Cursor cursor = activeTxCursor.get();
+            Cursor<T> cursor = activeTxCursor.get();
             if (cursor == null || cursor.getTx().isClosed()) {
                 cursor = activeTx.createCursor(entityClass);
                 activeTxCursor.set(cursor);
@@ -322,7 +326,7 @@ public class Box<T> {
     /**
      * Puts the given entities in a box using a single transaction.
      */
-    public void put(T... entities) {
+    public void put(@Nullable T... entities) {
         if (entities == null || entities.length == 0) {
             return;
         }
@@ -344,7 +348,7 @@ public class Box<T> {
      * @param entities It is fine to pass null or an empty collection:
      *                 this case is handled efficiently without overhead.
      */
-    public void put(Collection<T> entities) {
+    public void put(@Nullable Collection<T> entities) {
         if (entities == null || entities.isEmpty()) {
             return;
         }
@@ -395,7 +399,7 @@ public class Box<T> {
     /**
      * Due to type erasure collision, we cannot simply use "remove" as a method name here.
      */
-    public void removeByKeys(Collection<Long> ids) {
+    public void removeByKeys(@Nullable Collection<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return;
         }
@@ -427,7 +431,7 @@ public class Box<T> {
     /**
      * Removes (deletes) the given Objects in a single transaction.
      */
-    public void remove(T... objects) {
+    public void remove(@Nullable T... objects) {
         if (objects == null || objects.length == 0) {
             return;
         }
@@ -446,7 +450,7 @@ public class Box<T> {
     /**
      * Removes (deletes) the given Objects in a single transaction.
      */
-    public void remove(Collection<T> objects) {
+    public void remove(@Nullable Collection<T> objects) {
         if (objects == null || objects.isEmpty()) {
             return;
         }
@@ -479,7 +483,7 @@ public class Box<T> {
      * Returns a builder to create queries for Object matching supplied criteria.
      */
     public QueryBuilder<T> query() {
-        return new QueryBuilder<T>(this, store.internalHandle(), store.getEntityName(entityClass));
+        return new QueryBuilder<>(this, store.internalHandle(), store.getEntityName(entityClass));
     }
 
     public BoxStore getStore() {
