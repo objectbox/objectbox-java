@@ -176,7 +176,7 @@ public abstract class AbstractObjectBoxTest {
         lastEntityUid = ++lastUid;
         EntityBuilder entityBuilder = modelBuilder.entity("TestEntity").id(++lastEntityId, lastEntityUid);
         entityBuilder.property("id", PropertyType.Long).id(TestEntity_.id.id, ++lastUid)
-                .flags(PropertyFlags.ID | PropertyFlags.ID_SELF_ASSIGNABLE);
+                .flags(PropertyFlags.ID | (areIdsAssignable() ? PropertyFlags.ID_SELF_ASSIGNABLE : 0));
         entityBuilder.property("simpleBoolean", PropertyType.Bool).id(TestEntity_.simpleBoolean.id, ++lastUid);
         entityBuilder.property("simpleByte", PropertyType.Byte).id(TestEntity_.simpleByte.id, ++lastUid);
         entityBuilder.property("simpleShort", PropertyType.Short).id(TestEntity_.simpleShort.id, ++lastUid);
@@ -251,6 +251,10 @@ public abstract class AbstractObjectBoxTest {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected boolean areIdsAssignable() {
+        return false;
     }
 
 }

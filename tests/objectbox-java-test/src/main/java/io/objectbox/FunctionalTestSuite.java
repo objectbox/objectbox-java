@@ -9,6 +9,7 @@ import io.objectbox.query.LazyListTest;
 import io.objectbox.query.QueryObserverTest;
 import io.objectbox.query.QueryTest;
 import io.objectbox.relation.RelationTest;
+import io.objectbox.relation.ToOneTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -23,6 +24,7 @@ import io.objectbox.relation.RelationTest;
         QueryObserverTest.class,
         QueryTest.class,
         RelationTest.class,
+        ToOneTest.class,
         TransactionTest.class,
 })
 public class FunctionalTestSuite {
