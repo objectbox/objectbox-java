@@ -5,8 +5,7 @@ import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
 
 @Internal
-// TODO rename to EntityInfo (?)
-public interface Properties<T> {
+public interface EntityInfo<T> {
     String getEntityName();
     String getDbName();
 

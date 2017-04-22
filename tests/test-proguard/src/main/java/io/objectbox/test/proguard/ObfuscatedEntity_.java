@@ -3,7 +3,7 @@ package io.objectbox.test.proguard;
 
 import io.objectbox.test.proguard.ObfuscatedEntityCursor.Factory;
 
-import io.objectbox.Properties;
+import io.objectbox.EntityInfo;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.CursorFactory;
@@ -15,7 +15,7 @@ import io.objectbox.internal.IdGetter;
 /**
  * Properties for entity "ObfuscatedEntity". Can be used for QueryBuilder and for referencing DB names.
  */
-public final class ObfuscatedEntity_ implements Properties<ObfuscatedEntity> {
+public final class ObfuscatedEntity_ implements EntityInfo<ObfuscatedEntity> {
 
     // Leading underscores for static constants to avoid naming conflicts with property names
 

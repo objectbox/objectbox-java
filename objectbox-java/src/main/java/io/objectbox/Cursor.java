@@ -95,23 +95,23 @@ public abstract class Cursor<T> implements Closeable {
 
     protected Transaction tx;
     protected final long cursor;
-    protected final Properties properties;
+    protected final EntityInfo entityInfo;
     protected final BoxStore boxStoreForEntities;
 
     protected boolean closed;
 
     private final Throwable creationThrowable;
 
-    protected Cursor(Transaction tx, long cursor, Properties properties, BoxStore boxStore) {
+    protected Cursor(Transaction tx, long cursor, EntityInfo entityInfo, BoxStore boxStore) {
         if (tx == null) {
             throw new IllegalArgumentException("Transaction is null");
         }
         this.tx = tx;
         this.cursor = cursor;
-        this.properties = properties;
+        this.entityInfo = entityInfo;
         this.boxStoreForEntities = boxStore;
 
-        Property[] allProperties = properties.getAllProperties();
+        Property[] allProperties = entityInfo.getAllProperties();
         for (Property property : allProperties) {
             if (!property.isIdVerified()) {
                 int id = getPropertyId(property.dbName);
@@ -137,8 +137,8 @@ public abstract class Cursor<T> implements Closeable {
 
     public abstract long put(T entity);
 
-    public Properties getProperties() {
-        return properties;
+    public EntityInfo getEntityInfo() {
+        return entityInfo;
     }
 
     public T get(long key) {

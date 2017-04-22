@@ -5,8 +5,6 @@ package io.objectbox;
 
 import io.objectbox.TestEntityCursor.Factory;
 
-import io.objectbox.Properties;
-import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
@@ -14,7 +12,7 @@ import io.objectbox.internal.IdGetter;
 /**
  * Properties for entity "TestEntity". Can be used for QueryBuilder and for referencing DB names.
  */
-public final class TestEntity_ implements Properties<TestEntity> {
+public final class TestEntity_ implements EntityInfo<TestEntity> {
 
     // Leading underscores for static constants to avoid naming conflicts with property names
 

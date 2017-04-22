@@ -2,7 +2,7 @@ package io.objectbox.relation;
 
 import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
-import io.objectbox.Properties;
+import io.objectbox.EntityInfo;
 import io.objectbox.Transaction;
 
 // THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project
@@ -12,7 +12,7 @@ import io.objectbox.Transaction;
  */
 public final class OrderCursor extends Cursor<Order> {
 
-    private static Properties PROPERTIES = new Order_();
+    private static EntityInfo PROPERTIES = new Order_();
 
     // TODO private Query<Order> customer_OrdersQuery;
 

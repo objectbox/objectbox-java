@@ -172,7 +172,7 @@ public class BoxStore implements Closeable {
     private final long handle;
     private final Map<Class, String> dbNameByClass = new HashMap<>();
     private final Map<Class, Integer> entityTypeIdByClass = new HashMap<>();
-    private final Map<Class, Properties> propertiesByClass = new HashMap<>();
+    private final Map<Class, EntityInfo> propertiesByClass = new HashMap<>();
     private final LongHashMap<Class> classByEntityTypeId = new LongHashMap<>();
     private final int[] allEntityTypeIds;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
@@ -204,7 +204,7 @@ public class BoxStore implements Closeable {
         handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.model);
         debugTx = builder.debugTransactions;
 
-        for (Properties entityInfo : builder.entityInfoList) {
+        for (EntityInfo entityInfo : builder.entityInfoList) {
             try {
                 dbNameByClass.put(entityInfo.getEntityClass(), entityInfo.getDbName());
                 int entityId = nativeRegisterEntityClass(handle, entityInfo.getDbName(), entityInfo.getEntityClass());
@@ -282,7 +282,7 @@ public class BoxStore implements Closeable {
     }
 
     @Internal
-    Properties getEntityInfo(Class entityClass) {
+    EntityInfo getEntityInfo(Class entityClass) {
         return propertiesByClass.get(entityClass);
     }
 

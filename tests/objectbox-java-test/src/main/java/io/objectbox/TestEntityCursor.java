@@ -1,12 +1,7 @@
 package io.objectbox;
 
 
-import io.objectbox.BoxStore;
-import io.objectbox.Cursor;
-import io.objectbox.Properties;
-import io.objectbox.Transaction;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.annotation.apihint.Temporary;
 import io.objectbox.internal.CursorFactory;
 
 // THIS CODE IS based on GENERATED code BY ObjectBox

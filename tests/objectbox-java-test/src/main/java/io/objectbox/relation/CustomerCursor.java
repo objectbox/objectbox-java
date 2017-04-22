@@ -3,7 +3,7 @@ package io.objectbox.relation;
 
 import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
-import io.objectbox.Properties;
+import io.objectbox.EntityInfo;
 import io.objectbox.Transaction;
 
 // THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project
@@ -13,7 +13,7 @@ import io.objectbox.Transaction;
  */
 public final class CustomerCursor extends Cursor<Customer> {
 
-    private static Properties PROPERTIES = new Customer_();
+    private static EntityInfo PROPERTIES = new Customer_();
 
 
     // Property IDs get verified in Cursor base class

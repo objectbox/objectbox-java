@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
-import io.objectbox.Properties;
+import io.objectbox.EntityInfo;
 import io.objectbox.Property;
 import io.objectbox.Transaction;
 import io.objectbox.internal.CursorFactory;
@@ -16,7 +16,7 @@ import io.objectbox.internal.IdGetter;
 /**
  * Properties for entity "ORDERS". Can be used for QueryBuilder and for referencing DB names.
  */
-public class Order_ implements Properties<Order> {
+public class Order_ implements EntityInfo<Order> {
 
     public static final String __NAME_IN_DB = "ORDERS";
 //    public static final String __NAME_IN_DB = "Order";

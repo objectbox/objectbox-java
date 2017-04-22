@@ -11,7 +11,7 @@ import io.objectbox.internal.IdGetter;
 /**
  * Properties for entity "TestEntity". Can be used for QueryBuilder and for referencing DB names.
  */
-public final class TestEntityMinimal_ implements Properties<TestEntityMinimal> {
+public final class TestEntityMinimal_ implements EntityInfo<TestEntityMinimal> {
 
     // Leading underscores for static constants to avoid naming conflicts with property names
 

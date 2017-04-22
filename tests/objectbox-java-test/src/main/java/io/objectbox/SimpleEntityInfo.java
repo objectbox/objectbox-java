@@ -3,7 +3,7 @@ package io.objectbox;
 import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
 
-public class SimpleEntityInfo<T> implements Properties<T> {
+public class SimpleEntityInfo<T> implements EntityInfo<T> {
 
     String entityName;
     String dbName;

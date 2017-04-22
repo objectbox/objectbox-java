@@ -36,7 +36,7 @@ public class Box<T> {
     private final IdGetter<T> idGetter;
     private final boolean debugTx;
 
-    private Properties properties;
+    private EntityInfo entityInfo;
     private volatile Field boxStoreField;
 
     Box(BoxStore store, Class<T> entityClass) {
@@ -490,16 +490,16 @@ public class Box<T> {
         return store;
     }
 
-    public synchronized Properties getProperties() {
-        if (properties == null) {
+    public synchronized EntityInfo getEntityInfo() {
+        if (entityInfo == null) {
             Cursor<T> reader = getReader();
             try {
-                properties = reader.getProperties();
+                entityInfo = reader.getEntityInfo();
             } finally {
                 releaseReader(reader);
             }
         }
-        return properties;
+        return entityInfo;
     }
 
     @Beta

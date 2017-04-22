@@ -32,7 +32,7 @@ public class BoxStoreBuilder {
 
     boolean debugTransactions;
 
-    final List<Properties> entityInfoList = new ArrayList<>();
+    final List<EntityInfo> entityInfoList = new ArrayList<>();
 
     public BoxStoreBuilder(byte[] model) {
         this.model = model;
@@ -107,8 +107,8 @@ public class BoxStoreBuilder {
     }
 
     @Internal
-    public <T> void entity(Properties properties) {
-        entityInfoList.add(properties);
+    public <T> void entity(EntityInfo entityInfo) {
+        entityInfoList.add(entityInfo);
     }
 
     // Not sure this will ever be implements
