@@ -1,14 +1,20 @@
 package io.objectbox;
 
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
 
 @Internal
-public interface Properties {
-    Property[] getAllProperties();
-    Property getIdProperty();
+// TODO rename to EntityInfo (?)
+public interface Properties<T> {
+    String getEntityName();
     String getDbName();
 
-    @Internal
-    <T> IdGetter<T> getIdGetter();
+    Class<T> getEntityClass();
+
+    Property[] getAllProperties();
+    Property getIdProperty();
+
+    IdGetter<T> getIdGetter();
+    CursorFactory<T> getCursorFactory();
 }

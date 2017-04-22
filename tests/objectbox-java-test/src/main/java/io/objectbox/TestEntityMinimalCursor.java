@@ -1,11 +1,21 @@
 package io.objectbox;
 
+import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
 
 public class TestEntityMinimalCursor extends Cursor<TestEntityMinimal> {
+    private static final TestEntityMinimal_ PROPERTIES = new TestEntityMinimal_();
 
-    public TestEntityMinimalCursor(Transaction tx, long cursor) {
-        super(tx, cursor, new DummyProperties());
+    @Internal
+    static final class Factory implements CursorFactory<TestEntityMinimal> {
+        public Cursor<TestEntityMinimal> createCursor(Transaction tx, long cursorHandle, BoxStore boxStoreForEntities) {
+            return new TestEntityMinimalCursor(tx, cursorHandle, boxStoreForEntities);
+        }
+    }
+
+    public TestEntityMinimalCursor(Transaction tx, long cursor, BoxStore boxStore) {
+        super(tx, cursor, PROPERTIES, boxStore);
     }
 
     @Override
@@ -23,30 +33,4 @@ public class TestEntityMinimalCursor extends Cursor<TestEntityMinimal> {
         return key;
     }
 
-    private static class DummyProperties implements Properties {
-        @Override
-        public Property[] getAllProperties() {
-            return new Property[0];
-        }
-
-        @Override
-        public Property getIdProperty() {
-            return null;
-        }
-
-        @Override
-        public String getDbName() {
-            return null;
-        }
-
-        @Override
-        public IdGetter<TestEntityMinimal> getIdGetter() {
-            return new IdGetter<TestEntityMinimal>() {
-                @Override
-                public long getId(TestEntityMinimal object) {
-                    return object.getId();
-                }
-            };
-        }
-    }
 }

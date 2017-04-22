@@ -20,7 +20,7 @@ public class MyObjectBox {
 
     public static BoxStoreBuilder builder() {
         BoxStoreBuilder builder = new BoxStoreBuilder(getModel());
-        builder.entity("EntityLongIndex", EntityLongIndex.class, EntityLongIndexCursor.class, new EntityLongIndex_());
+        builder.entity(new EntityLongIndex_());
         return builder;
     }
 

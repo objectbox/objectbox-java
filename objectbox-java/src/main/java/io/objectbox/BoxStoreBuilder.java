@@ -12,21 +12,6 @@ public class BoxStoreBuilder {
 
     public static final String DEFAULT_NAME = "objectbox";
 
-    static class EntityClasses<T> {
-        final String entityName;
-        final Class<T> entityClass;
-        final Class<? extends Cursor<T>> cursorClass;
-        final Properties properties;
-
-        EntityClasses(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass,
-                      Properties properties) {
-            this.entityName = entityName;
-            this.entityClass = entityClass;
-            this.cursorClass = cursorClass;
-            this.properties = properties;
-        }
-    }
-
     final byte[] model;
 
     /** BoxStore uses this */
@@ -47,7 +32,7 @@ public class BoxStoreBuilder {
 
     boolean debugTransactions;
 
-    final List<EntityClasses> entityClasses = new ArrayList<>();
+    final List<Properties> entityInfoList = new ArrayList<>();
 
     public BoxStoreBuilder(byte[] model) {
         this.model = model;
@@ -122,17 +107,15 @@ public class BoxStoreBuilder {
     }
 
     @Internal
-    public <T> void entity(String entityName, Class<T> entityClass, Class<? extends Cursor<T>> cursorClass,
-                           Properties properties) {
-        EntityClasses<T> info = new EntityClasses<>(entityName, entityClass, cursorClass, properties);
-        entityClasses.add(info);
+    public <T> void entity(Properties properties) {
+        entityInfoList.add(properties);
     }
 
     // Not sure this will ever be implements
     BoxStoreBuilder modelUpdate(ModelUpdate modelUpdate) {
         throw new UnsupportedOperationException("Not yet implemented");
-//        this.modelUpdate = modelUpdate;
-//        return this;
+        //        this.modelUpdate = modelUpdate;
+        //        return this;
     }
 
     public BoxStoreBuilder maxSizeInKByte(long maxSizeInKByte) {

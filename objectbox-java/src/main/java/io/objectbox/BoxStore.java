@@ -28,7 +28,6 @@ import java.util.concurrent.Future;
 
 import javax.annotation.concurrent.ThreadSafe;
 
-import io.objectbox.BoxStoreBuilder.EntityClasses;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
@@ -171,8 +170,7 @@ public class BoxStore implements Closeable {
 
     private final File directory;
     private final long handle;
-    private final Map<Class, String> entityNameByClass = new HashMap<>();
-    private final Map<Class, Class<Cursor>> entityCursorClassByClass = new HashMap<>();
+    private final Map<Class, String> dbNameByClass = new HashMap<>();
     private final Map<Class, Integer> entityTypeIdByClass = new HashMap<>();
     private final Map<Class, Properties> propertiesByClass = new HashMap<>();
     private final LongHashMap<Class> classByEntityTypeId = new LongHashMap<>();
@@ -206,15 +204,14 @@ public class BoxStore implements Closeable {
         handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.model);
         debugTx = builder.debugTransactions;
 
-        for (EntityClasses entity : builder.entityClasses) {
+        for (Properties entityInfo : builder.entityInfoList) {
             try {
-                entityNameByClass.put(entity.entityClass, entity.entityName);
-                entityCursorClassByClass.put(entity.entityClass, entity.cursorClass);
-                int entityId = nativeRegisterEntityClass(handle, entity.entityName, entity.entityClass);
-                entityTypeIdByClass.put(entity.entityClass, entityId);
-                classByEntityTypeId.put(entityId, entity.entityClass);
-                propertiesByClass.put(entity.entityClass, entity.properties);
-                for (Property property : entity.properties.getAllProperties()) {
+                dbNameByClass.put(entityInfo.getEntityClass(), entityInfo.getDbName());
+                int entityId = nativeRegisterEntityClass(handle, entityInfo.getDbName(), entityInfo.getEntityClass());
+                entityTypeIdByClass.put(entityInfo.getEntityClass(), entityId);
+                classByEntityTypeId.put(entityId, entityInfo.getEntityClass());
+                propertiesByClass.put(entityInfo.getEntityClass(), entityInfo);
+                for (Property property : entityInfo.getAllProperties()) {
                     if (property.customType != null) {
                         if (property.converterClass == null) {
                             throw new RuntimeException("No converter class for custom type of " + property);
@@ -224,7 +221,7 @@ public class BoxStore implements Closeable {
                     }
                 }
             } catch (RuntimeException e) {
-                throw new RuntimeException("Could not setup up entity " + entity.entityClass, e);
+                throw new RuntimeException("Could not setup up entity " + entityInfo.getEntityClass(), e);
             }
         }
         int size = classByEntityTypeId.size();
@@ -249,8 +246,8 @@ public class BoxStore implements Closeable {
         }
     }
 
-    String getEntityName(Class entityClass) {
-        return entityNameByClass.get(entityClass);
+    String getDbName(Class entityClass) {
+        return dbNameByClass.get(entityClass);
     }
 
     Integer getEntityTypeId(Class entityClass) {
@@ -267,7 +264,7 @@ public class BoxStore implements Closeable {
     }
 
     public Collection<Class> getAllEntityClasses() {
-        return entityNameByClass.keySet();
+        return dbNameByClass.keySet();
     }
 
     @Internal
@@ -284,12 +281,8 @@ public class BoxStore implements Closeable {
         return clazz;
     }
 
-    <T> Class<Cursor<T>> getEntityCursorClass(Class<T> entityClass) {
-        return (Class) entityCursorClassByClass.get(entityClass);
-    }
-
     @Internal
-    Properties getProperties(Class entityClass) {
+    Properties getEntityInfo(Class entityClass) {
         return propertiesByClass.get(entityClass);
     }
 
@@ -412,7 +405,7 @@ public class BoxStore implements Closeable {
     public <T> Box<T> boxFor(Class<T> entityClass) {
         Box box = boxes.get(entityClass);
         if (box == null) {
-            if (!entityNameByClass.containsKey(entityClass)) {
+            if (!dbNameByClass.containsKey(entityClass)) {
                 throw new IllegalArgumentException(entityClass +
                         " is not a known entity. Please add it and trigger generation again.");
             }

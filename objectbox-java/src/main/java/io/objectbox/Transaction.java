@@ -1,21 +1,16 @@
 package io.objectbox;
 
 import java.io.Closeable;
-import java.lang.reflect.Constructor;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.exception.DbException;
+import io.objectbox.internal.CursorFactory;
 
 @Internal
 @NotThreadSafe
 public class Transaction implements Closeable {
     static final boolean WARN_FINALIZER = false;
-
-    static final Map<Class, Constructor> cursorConstructorCache = new ConcurrentHashMap<>();
 
     private final long transaction;
     private final BoxStore store;
@@ -132,27 +127,10 @@ public class Transaction implements Closeable {
 
     public <T> Cursor<T> createCursor(Class<T> entityClass) {
         checkOpen();
-        Class<Cursor<T>> cursorClass = store.getEntityCursorClass(entityClass);
-        String entityName = store.getEntityName(entityClass);
-        if (entityClass == null || cursorClass == null) {
-            throw new DbException("No entity info registered in store for " + entityClass);
-        }
-        try {
-            // TODO use CursorFactory instead
-            Constructor<Cursor<T>> cursorConstructor = cursorConstructorCache.get(cursorClass);
-            if (cursorConstructor == null) {
-                cursorConstructor = cursorClass.getConstructor(Transaction.class, long.class);
-                cursorConstructorCache.put(cursorClass, cursorConstructor);
-            }
-            long cursorHandle = nativeCreateCursor(transaction, entityName, entityClass);
-            Cursor<T> cursor = cursorConstructor.newInstance(this, cursorHandle);
-
-            // TODO make this part of constructor too?
-            cursor.setBoxStoreForEntities(store);
-            return cursor;
-        } catch (Exception e) {
-            throw new RuntimeException("Could not create cursor", e);
-        }
+        Properties entityInfo = store.getEntityInfo(entityClass);
+        CursorFactory<T> factory = entityInfo.getCursorFactory();
+        long cursorHandle = nativeCreateCursor(transaction, entityInfo.getDbName(), entityClass);
+        return factory.createCursor(this, cursorHandle, store);
     }
 
     public BoxStore getStore() {

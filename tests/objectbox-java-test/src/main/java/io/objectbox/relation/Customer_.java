@@ -1,8 +1,14 @@
 
 package io.objectbox.relation;
 
+import javax.annotation.Nullable;
+
+import io.objectbox.BoxStore;
+import io.objectbox.Cursor;
 import io.objectbox.Properties;
 import io.objectbox.Property;
+import io.objectbox.Transaction;
+import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
 
 // THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project
@@ -10,7 +16,7 @@ import io.objectbox.internal.IdGetter;
 /**
  * Properties for entity "Customer". Can be used for QueryBuilder and for referencing DB names.
  */
-public class Customer_ implements Properties {
+public class Customer_ implements Properties<Customer> {
 
     public static final String __NAME_IN_DB = "Customer";
 
@@ -35,8 +41,18 @@ public class Customer_ implements Properties {
     }
 
     @Override
+    public String getEntityName() {
+        return "Customer";
+    }
+
+    @Override
     public String getDbName() {
         return __NAME_IN_DB;
+    }
+
+    @Override
+    public Class<Customer> getEntityClass() {
+        return Customer.class;
     }
 
     @Override
@@ -45,6 +61,16 @@ public class Customer_ implements Properties {
             @Override
             public long getId(Customer object) {
                 return object.getId();
+            }
+        };
+    }
+
+    @Override
+    public CursorFactory<Customer> getCursorFactory() {
+        return new CursorFactory<Customer>() {
+            @Override
+            public Cursor<Customer> createCursor(Transaction tx, long cursorHandle, @Nullable BoxStore boxStoreForEntities) {
+                return new CustomerCursor(tx, cursorHandle, boxStoreForEntities);
             }
         };
     }

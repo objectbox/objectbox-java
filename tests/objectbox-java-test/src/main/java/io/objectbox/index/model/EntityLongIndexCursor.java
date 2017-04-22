@@ -1,6 +1,7 @@
 package io.objectbox.index.model;
 
 
+import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
 import io.objectbox.Properties;
 import io.objectbox.Transaction;
@@ -23,8 +24,8 @@ public final class EntityLongIndexCursor extends Cursor<EntityLongIndex> {
     private final static int __ID_float4 = EntityLongIndex_.float4.id;
     private final static int __ID_float5 = EntityLongIndex_.float5.id;
 
-    public EntityLongIndexCursor(Transaction tx, long cursor) {
-        super(tx, cursor, PROPERTIES);
+    public EntityLongIndexCursor(Transaction tx, long cursor, BoxStore boxStore) {
+        super(tx, cursor, PROPERTIES, boxStore);
     }
 
     @Override

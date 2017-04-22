@@ -19,8 +19,8 @@ public class MyObjectBox {
 
     public static BoxStoreBuilder builder() {
         BoxStoreBuilder builder = new BoxStoreBuilder(getModel());
-        builder.entity("Customer", Customer.class, CustomerCursor.class, new Customer_());
-        builder.entity("ORDERS", Order.class, OrderCursor.class, new Order_());
+        builder.entity(new Customer_());
+        builder.entity(new Order_());
         return builder;
     }
 
@@ -41,6 +41,7 @@ public class MyObjectBox {
 
 
         entityBuilder = modelBuilder.entity("ORDERS");
+//        entityBuilder = modelBuilder.entity("Order");
         entityBuilder.id(3, 6367118380491771428L).lastPropertyId(4, 1061627027714085430L);
         entityBuilder.property("_id", PropertyType.Long).id(1, 7221142423462017794L)
                 .flags(PropertyFlags.ID | PropertyFlags.ID_SELF_ASSIGNABLE | PropertyFlags.NOT_NULL);

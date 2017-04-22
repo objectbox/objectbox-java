@@ -49,11 +49,12 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void testRegistration() {
-        assertEquals("TestEntity", store.getEntityName(TestEntity.class));
-        assertEquals(TestEntityCursor.class, store.getEntityCursorClass(TestEntity.class));
+        assertEquals("TestEntity", store.getDbName(TestEntity.class));
+        assertEquals(TestEntity.class, store.getEntityInfo(TestEntity.class).getEntityClass());
     }
 
     @Test
+    // FIXME test is flaky
     public void testCloseThreadResources() {
         Box<TestEntity> box = store.boxFor(TestEntity.class);
         long internalHandle = getInternalReaderHandle(box);

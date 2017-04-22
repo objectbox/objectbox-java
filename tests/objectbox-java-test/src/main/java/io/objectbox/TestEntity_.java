@@ -3,14 +3,31 @@ package io.objectbox;
 
 // Copied from generated tests (& removed some unused Properties)
 
+import io.objectbox.TestEntityCursor.Factory;
+
+import io.objectbox.Properties;
+import io.objectbox.Property;
+import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
 
 /**
  * Properties for entity "TestEntity". Can be used for QueryBuilder and for referencing DB names.
  */
-public class TestEntity_ implements Properties {
+public final class TestEntity_ implements Properties<TestEntity> {
 
-    public static final String __NAME_IN_DB = "TestEntity";
+    // Leading underscores for static constants to avoid naming conflicts with property names
+
+    public static final String __ENTITY_NAME = "TestEntity";
+
+    public static final Class<TestEntity> __ENTITY_CLASS = TestEntity.class;
+
+    public static final String __DB_NAME = "TestEntity";
+
+    public static final CursorFactory<TestEntity> __CURSOR_FACTORY = new Factory();
+
+    @Internal
+    static final TestEntityIdGetter __ID_GETTER = new TestEntityIdGetter();
 
     private static int ID;
 
@@ -39,6 +56,21 @@ public class TestEntity_ implements Properties {
     public final static Property __ID_PROPERTY = id;
 
     @Override
+    public String getEntityName() {
+        return __ENTITY_NAME;
+    }
+
+    @Override
+    public Class<TestEntity> getEntityClass() {
+        return __ENTITY_CLASS;
+    }
+
+    @Override
+    public String getDbName() {
+        return __DB_NAME;
+    }
+
+    @Override
     public Property[] getAllProperties() {
         return __ALL_PROPERTIES;
     }
@@ -49,18 +81,20 @@ public class TestEntity_ implements Properties {
     }
 
     @Override
-    public String getDbName() {
-        return __NAME_IN_DB;
+    public IdGetter<TestEntity> getIdGetter() {
+        return __ID_GETTER;
     }
 
     @Override
-    public IdGetter<TestEntity> getIdGetter() {
-        return new IdGetter<TestEntity>() {
-            @Override
-            public long getId(TestEntity object) {
-                return object.getId();
-            }
-        };
+    public CursorFactory<TestEntity> getCursorFactory() {
+        return __CURSOR_FACTORY;
+    }
+
+    @Internal
+    static final class TestEntityIdGetter implements IdGetter<TestEntity> {
+        public long getId(TestEntity object) {
+            return object.getId();
+        }
     }
 
 }

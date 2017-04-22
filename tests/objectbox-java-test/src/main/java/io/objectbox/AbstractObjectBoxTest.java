@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.objectbox.ModelBuilder.EntityBuilder;
 import io.objectbox.ModelBuilder.PropertyBuilder;
+import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
 import io.objectbox.model.PropertyFlags;
 import io.objectbox.model.PropertyType;
@@ -53,39 +54,14 @@ public abstract class AbstractObjectBoxTest {
 
     protected BoxStoreBuilder createBoxStoreBuilderWithTwoEntities(boolean withIndex) {
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModelWithTwoEntities(withIndex)).directory(boxStoreDir);
-        builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class, new TestEntity_());
-        builder.entity("TestEntityMinimal", TestEntityMinimal.class, TestEntityMinimalCursor.class, new Properties() {
-            @Override
-            public Property[] getAllProperties() {
-                return new Property[0];
-            }
-
-            @Override
-            public Property getIdProperty() {
-                return null;
-            }
-
-            @Override
-            public String getDbName() {
-                return null;
-            }
-
-            @Override
-            public IdGetter<TestEntityMinimal> getIdGetter() {
-                return new IdGetter<TestEntityMinimal>() {
-                    @Override
-                    public long getId(TestEntityMinimal object) {
-                        return object.getId();
-                    }
-                };
-            }
-        });
+        builder.entity(new TestEntity_());
+        builder.entity(new TestEntityMinimal_());
         return builder;
     }
 
     protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(withIndex)).directory(boxStoreDir);
-        builder.entity("TestEntity", TestEntity.class, TestEntityCursor.class, new TestEntity_());
+        builder.entity(new TestEntity_());
         return builder;
     }
 

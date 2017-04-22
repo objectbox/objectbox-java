@@ -96,20 +96,20 @@ public abstract class Cursor<T> implements Closeable {
     protected Transaction tx;
     protected final long cursor;
     protected final Properties properties;
-
-    protected BoxStore boxStoreForEntities;
+    protected final BoxStore boxStoreForEntities;
 
     protected boolean closed;
 
     private final Throwable creationThrowable;
 
-    protected Cursor(Transaction tx, long cursor, Properties properties) {
+    protected Cursor(Transaction tx, long cursor, Properties properties, BoxStore boxStore) {
         if (tx == null) {
             throw new IllegalArgumentException("Transaction is null");
         }
         this.tx = tx;
         this.cursor = cursor;
         this.properties = properties;
+        this.boxStoreForEntities = boxStore;
 
         Property[] allProperties = properties.getAllProperties();
         for (Property property : allProperties) {
@@ -119,6 +119,8 @@ public abstract class Cursor<T> implements Closeable {
             }
         }
         creationThrowable = WARN_FINALIZER ? new Throwable() : null;
+
+        nativeSetBoxStoreForEntities(cursor, boxStore);
     }
 
     @Override
@@ -249,11 +251,6 @@ public abstract class Cursor<T> implements Closeable {
             throw new IllegalArgumentException("Please check if the given property belongs to a valid @Relation: "
                     + relationIdProperty, e);
         }
-    }
-
-    public void setBoxStoreForEntities(BoxStore boxStore) {
-        boxStoreForEntities = boxStore;
-        nativeSetBoxStoreForEntities(cursor, boxStore);
     }
 
     @Override

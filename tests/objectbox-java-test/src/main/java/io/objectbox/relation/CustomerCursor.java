@@ -1,6 +1,7 @@
 package io.objectbox.relation;
 
 
+import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
 import io.objectbox.Properties;
 import io.objectbox.Transaction;
@@ -18,8 +19,8 @@ public final class CustomerCursor extends Cursor<Customer> {
     // Property IDs get verified in Cursor base class
     private final static int __ID_name = Customer_.name.id;
 
-    public CustomerCursor(Transaction tx, long cursor) {
-        super(tx, cursor, PROPERTIES);
+    public CustomerCursor(Transaction tx, long cursor, BoxStore boxStore) {
+        super(tx, cursor, PROPERTIES, boxStore);
     }
 
     @Override

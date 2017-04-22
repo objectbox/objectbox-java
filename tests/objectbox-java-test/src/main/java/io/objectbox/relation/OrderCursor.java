@@ -1,5 +1,6 @@
 package io.objectbox.relation;
 
+import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
 import io.objectbox.Properties;
 import io.objectbox.Transaction;
@@ -20,8 +21,8 @@ public final class OrderCursor extends Cursor<Order> {
     private final static int __ID_customerId = Order_.customerId.id;
     private final static int __ID_text = Order_.text.id;
 
-    public OrderCursor(Transaction tx, long cursor) {
-        super(tx, cursor, PROPERTIES);
+    public OrderCursor(Transaction tx, long cursor, BoxStore boxStore) {
+        super(tx, cursor, PROPERTIES, boxStore);
     }
 
     @Override

@@ -43,6 +43,8 @@ public class Property {
     /** Type, which is converted to a type supported by the DB. */
     public final Class customType;
 
+    // TODO verified state should be per DB -> move to BoxStore/Box.
+    // Also, this should make the Property class truly @Immutable.
     private boolean idVerified;
 
     public Property(int ordinal, int id, Class<?> type, String name, boolean primaryKey, String dbName) {

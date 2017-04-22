@@ -42,7 +42,7 @@ public class Box<T> {
     Box(BoxStore store, Class<T> entityClass) {
         this.store = store;
         this.entityClass = entityClass;
-        idGetter = store.getProperties(entityClass).getIdGetter();
+        idGetter = store.getEntityInfo(entityClass).getIdGetter();
         debugTx = store.debugTx;
     }
 
@@ -483,7 +483,7 @@ public class Box<T> {
      * Returns a builder to create queries for Object matching supplied criteria.
      */
     public QueryBuilder<T> query() {
-        return new QueryBuilder<>(this, store.internalHandle(), store.getEntityName(entityClass));
+        return new QueryBuilder<>(this, store.internalHandle(), store.getDbName(entityClass));
     }
 
     public BoxStore getStore() {

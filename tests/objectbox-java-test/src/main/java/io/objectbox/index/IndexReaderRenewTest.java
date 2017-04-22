@@ -36,7 +36,7 @@ public class IndexReaderRenewTest extends AbstractObjectBoxTest {
         final Query<EntityLongIndex> query = box.query().equal(EntityLongIndex_.indexedLong, 0).build();
         store.subscribe(EntityLongIndex.class).transform(new DataTransformer<Class<EntityLongIndex>, EntityLongIndex>() {
             @Override
-            public EntityLongIndex transform(Class<EntityLongIndex> bodyStatClass) throws Exception {
+            public EntityLongIndex transform(Class<EntityLongIndex> clazz) throws Exception {
                 int callCount = transformerCallCount.incrementAndGet();
                 if (callCount == 1) {
                     query.setParameter(EntityLongIndex_.indexedLong, 1);
