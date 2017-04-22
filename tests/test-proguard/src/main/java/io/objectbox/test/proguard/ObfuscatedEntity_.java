@@ -42,6 +42,8 @@ public final class ObfuscatedEntity_ implements EntityInfo<ObfuscatedEntity> {
 
     public final static Property __ID_PROPERTY = id;
 
+    public final static ObfuscatedEntity_ __INSTANCE = new ObfuscatedEntity_();
+
     @Override
     public String getEntityName() {
         return __ENTITY_NAME;

@@ -19,7 +19,7 @@ public class MyObjectBox {
 
     public static BoxStoreBuilder builder() {
         BoxStoreBuilder builder = new BoxStoreBuilder(getModel());
-        builder.entity(new ObfuscatedEntity_());
+        builder.entity(ObfuscatedEntity_.__INSTANCE);
         return builder;
     }
 

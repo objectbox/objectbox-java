@@ -20,9 +20,7 @@ public final class ObfuscatedEntityCursor extends Cursor<ObfuscatedEntity> {
         }
     }
 
-    private static final ObfuscatedEntity_ PROPERTIES = new ObfuscatedEntity_();
-
-    private static final ObfuscatedEntity_.ObfuscatedEntityIdGetter ID_GETTER = PROPERTIES.__ID_GETTER;
+    private static final ObfuscatedEntity_.ObfuscatedEntityIdGetter ID_GETTER = ObfuscatedEntity_.__ID_GETTER;
 
 
     // Property IDs get verified in Cursor base class
@@ -30,7 +28,7 @@ public final class ObfuscatedEntityCursor extends Cursor<ObfuscatedEntity> {
     private final static int __ID_myString = ObfuscatedEntity_.myString.id;
 
     public ObfuscatedEntityCursor(Transaction tx, long cursor, BoxStore boxStore) {
-        super(tx, cursor, PROPERTIES, boxStore);
+        super(tx, cursor, ObfuscatedEntity_.__INSTANCE, boxStore);
     }
 
     @Override
