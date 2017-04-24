@@ -17,9 +17,7 @@ import io.objectbox.internal.ReflectionCache;
 // TODO add more tests
 public class ToOne<TARGET> {
     private final Object entity;
-    private final Class entityClass;
-    private final Class<TARGET> targetClass;
-    private final Property targetIdProperty;
+    private final RelationInfo relationInfo;
 
     private BoxStore boxStore;
     private Box entityBox;
@@ -35,11 +33,9 @@ public class ToOne<TARGET> {
 
     private volatile long resolvedTargetId;
 
-    public ToOne(Object entity, @Nullable Property targetIdProperty, Class<TARGET> targetClass) {
+    public ToOne(Object entity, RelationInfo relationInfo) {
         this.entity = entity;
-        entityClass = entity.getClass();
-        this.targetClass = targetClass;
-        this.targetIdProperty = targetIdProperty;
+        this.relationInfo = relationInfo;
     }
 
     public TARGET getTarget() {
@@ -81,8 +77,8 @@ public class ToOne<TARGET> {
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
-            entityBox = boxStore.boxFor(entityClass);
-            targetBox = boxStore.boxFor(targetClass);
+            entityBox = boxStore.boxFor(relationInfo.sourceInfo.getEntityClass());
+            targetBox = boxStore.boxFor(relationInfo.targetInfo.getEntityClass());
         }
     }
 
@@ -103,7 +99,7 @@ public class ToOne<TARGET> {
     }
 
     public void setTargetId(long targetId) {
-        if(targetIdProperty != null) {
+        if(relationInfo.targetIdProperty != null) {
             try {
                 getTargetIdField().set(entity, targetId);
             } catch (IllegalAccessException e) {
@@ -201,7 +197,7 @@ public class ToOne<TARGET> {
     }
 
     public long getTargetId() {
-        if(targetIdProperty != null) {
+        if(relationInfo.targetIdProperty != null) {
             // Future alternative: Implemented by generated ToOne sub classes to avoid reflection
             Field keyField = getTargetIdField();
             try {
@@ -217,7 +213,7 @@ public class ToOne<TARGET> {
 
     private Field getTargetIdField() {
         if (targetIdField == null) {
-            targetIdField = ReflectionCache.getInstance().getField(entity.getClass(), targetIdProperty.name);
+            targetIdField = ReflectionCache.getInstance().getField(entity.getClass(), relationInfo.targetIdProperty.name);
         }
         return targetIdField;
     }

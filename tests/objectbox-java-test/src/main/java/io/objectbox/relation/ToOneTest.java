@@ -4,6 +4,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 
+import io.objectbox.Property;
+
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -12,7 +15,7 @@ public class ToOneTest extends AbstractRelationTest {
     @Test
     public void testTargetId_withTargetIdProperty() {
         Order entity = putOrder(null, null);
-        ToOne<Customer> toOne = new ToOne<>(entity, Order_.customerId, Customer.class);
+        ToOne<Customer> toOne = new ToOne<>(entity, getRelationInfo(Order_.customerId));
         entity.setCustomerId(1042);
         assertEquals(1042, toOne.getTargetId());
 
@@ -20,10 +23,14 @@ public class ToOneTest extends AbstractRelationTest {
         assertEquals(1977, entity.getCustomerId());
     }
 
+    private RelationInfo<Customer> getRelationInfo(Property targetIdProperty) {
+        return new RelationInfo<>(new Order_(), new Customer_(), targetIdProperty);
+    }
+
     @Test
     public void testTargetId_noTargetIdProperty() {
         Order entity = putOrder(null, null);
-        ToOne<Customer> toOne = new ToOne<>(entity, null, Customer.class);
+        ToOne<Customer> toOne = new ToOne<>(entity, getRelationInfo(null));
         entity.setCustomerId(1042);
         assertEquals(0, toOne.getTargetId());
         toOne.setTargetId(1977);
@@ -43,7 +50,7 @@ public class ToOneTest extends AbstractRelationTest {
         Order source = putOrder(null, null);
 
         // Without customerId
-        ToOne<Customer> toOne = new ToOne<>(source, null, Customer.class);
+        ToOne<Customer> toOne = new ToOne<>(source, getRelationInfo(null));
         toOne.setTargetId(1977);
         assertEquals("target1", toOne.getTarget().getName());
 
@@ -51,7 +58,7 @@ public class ToOneTest extends AbstractRelationTest {
         assertEquals(target2.getId(), toOne.getTargetId());
 
         // With customerId
-        toOne = new ToOne<>(source, Order_.customerId, Customer.class);
+        toOne = new ToOne<>(source, getRelationInfo(Order_.customerId));
         source.setCustomerId(1977);
         assertEquals("target1", toOne.getTarget().getName());
 
@@ -67,7 +74,7 @@ public class ToOneTest extends AbstractRelationTest {
         Customer target = new Customer();
         target.setName("target1");
 
-        ToOne<Customer> toOne = new ToOne<>(source, Order_.customerId, Customer.class);
+        ToOne<Customer> toOne = new ToOne<>(source, getRelationInfo(Order_.customerId));
         toOne.setTarget(target);
         orderBox.put(source);
 
@@ -84,7 +91,7 @@ public class ToOneTest extends AbstractRelationTest {
         Customer target = new Customer();
         target.setName("target1");
 
-        ToOne<Customer> toOne = new ToOne<>(source, Order_.customerId, Customer.class);
+        ToOne<Customer> toOne = new ToOne<>(source, getRelationInfo(Order_.customerId));
         toOne.setTarget(target);
 
         assertTrue(target.getId() != 0);

@@ -1,24 +1,29 @@
 package io.objectbox.relation;
 
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
+import io.objectbox.EntityInfo;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.internal.IdGetter;
 
 @Internal
+@Immutable
 public class RelationInfo<TARGET> {
-    public final Class sourceClass;
-    public final @Nullable Property targetIdProperty;
-    public final Class<TARGET> targetClass;
-    public final IdGetter<TARGET> targetIdGetter;
+    public final EntityInfo sourceInfo;
+    public final EntityInfo<TARGET> targetInfo;
 
-    public RelationInfo(Class sourceClass, @Nullable Property targetIdProperty, Class<TARGET> targetClass,
-                        IdGetter<TARGET> targetIdGetter) {
-        this.sourceClass = sourceClass;
+    @Nullable
+    public final Property targetIdProperty;
+
+    public RelationInfo(EntityInfo sourceInfo, EntityInfo<TARGET> targetInfo) {
+        this(sourceInfo, targetInfo, null);
+    }
+
+    public RelationInfo(EntityInfo sourceInfo, EntityInfo<TARGET> targetInfo, @Nullable Property targetIdProperty) {
+        this.sourceInfo = sourceInfo;
+        this.targetInfo = targetInfo;
         this.targetIdProperty = targetIdProperty;
-        this.targetClass = targetClass;
-        this.targetIdGetter = targetIdGetter;
     }
 }
 
