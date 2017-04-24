@@ -8,7 +8,10 @@ import io.objectbox.Property;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class ToOneTest extends AbstractRelationTest {
@@ -74,13 +77,25 @@ public class ToOneTest extends AbstractRelationTest {
         Customer target = new Customer();
         target.setName("target1");
 
-        source.customer__toOne.setTarget(target);
-        orderBox.put(source);
+        ToOne<Customer> toOne = source.customer__toOne;
+        assertTrue(toOne.isResolved());
+        assertTrue(toOne.isNull());
+        assertNull(toOne.getCachedTarget());
 
+        toOne.setTarget(target);
+        assertSame(target, toOne.getTarget());
+
+        orderBox.put(source);
         long targetId = target.getId();
         assertTrue(targetId != 0);
         assertEquals(targetId, source.getCustomerId());
+        assertSame(target, toOne.getCachedTarget());
+        assertSame(target, toOne.getTarget());
+        assertSame(targetId, toOne.getTargetId());
+        assertTrue(toOne.isResolved());
+        assertFalse(toOne.isNull());
 
+        // Check reload
         Order reloaded = orderBox.get(source.getId());
         assertNotSame(source, reloaded);
         assertEquals(targetId, reloaded.getCustomerId());

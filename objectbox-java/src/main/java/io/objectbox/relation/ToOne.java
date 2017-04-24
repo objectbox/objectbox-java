@@ -87,15 +87,15 @@ public class ToOne<TARGET> {
     }
 
     public boolean isResolved() {
-        return resolvedTargetId != getTargetId();
+        return resolvedTargetId == getTargetId();
     }
 
     public boolean isResolvedAndNotNull() {
-        return resolvedTargetId != 0 && resolvedTargetId != getTargetId();
+        return resolvedTargetId != 0 && resolvedTargetId == getTargetId();
     }
 
     public boolean isNull() {
-        return getTargetId() == 0;
+        return getTargetId() == 0 && target == null;
     }
 
     public void setTargetId(long targetId) {
@@ -222,6 +222,8 @@ public class ToOne<TARGET> {
 
     @Internal
     public void internalPutTarget(Cursor<TARGET> targetCursor) {
-        setTargetId(targetCursor.put(target));
+        long id = targetCursor.put(target);
+        setTargetId(id);
+        setResolvedTarget(target, id);
     }
 }
