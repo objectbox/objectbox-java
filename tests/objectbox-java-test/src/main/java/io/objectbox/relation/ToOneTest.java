@@ -8,6 +8,7 @@ import io.objectbox.Property;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 public class ToOneTest extends AbstractRelationTest {
@@ -67,18 +68,22 @@ public class ToOneTest extends AbstractRelationTest {
     }
 
     @Test
-    @Ignore("not yet supported")
     public void testPutNewSourceAndTarget() {
         Order source = new Order();
         source.setText("source");
         Customer target = new Customer();
         target.setName("target1");
 
-        ToOne<Customer> toOne = new ToOne<>(source, getRelationInfo(Order_.customerId));
-        toOne.setTarget(target);
+        source.customer__toOne.setTarget(target);
         orderBox.put(source);
 
-        assertTrue(target.getId() != 0);
+        long targetId = target.getId();
+        assertTrue(targetId != 0);
+        assertEquals(targetId, source.getCustomerId());
+
+        Order reloaded = orderBox.get(source.getId());
+        assertNotSame(source, reloaded);
+        assertEquals(targetId, reloaded.getCustomerId());
     }
 
     @Test

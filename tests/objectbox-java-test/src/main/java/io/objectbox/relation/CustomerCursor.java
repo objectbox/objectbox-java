@@ -5,6 +5,7 @@ import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
 import io.objectbox.EntityInfo;
 import io.objectbox.Transaction;
+import io.objectbox.internal.CursorFactory;
 
 // THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project
 
@@ -12,6 +13,12 @@ import io.objectbox.Transaction;
  * Cursor for DB entity "Customer".
  */
 public final class CustomerCursor extends Cursor<Customer> {
+
+    static final class Factory implements CursorFactory<Customer> {
+        public Cursor<Customer> createCursor(Transaction tx, long cursorHandle, BoxStore boxStoreForEntities) {
+            return new CustomerCursor(tx, cursorHandle, boxStoreForEntities);
+        }
+    }
 
     private static EntityInfo PROPERTIES = new Customer_();
 

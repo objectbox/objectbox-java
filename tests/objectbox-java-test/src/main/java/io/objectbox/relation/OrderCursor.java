@@ -4,6 +4,7 @@ import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
 import io.objectbox.EntityInfo;
 import io.objectbox.Transaction;
+import io.objectbox.internal.CursorFactory;
 
 // THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project
 
@@ -11,8 +12,13 @@ import io.objectbox.Transaction;
  * Cursor for DB entity "ORDERS".
  */
 public final class OrderCursor extends Cursor<Order> {
+    static final class Factory implements CursorFactory<Order> {
+        public Cursor<Order> createCursor(Transaction tx, long cursorHandle, BoxStore boxStoreForEntities) {
+            return new OrderCursor(tx, cursorHandle, boxStoreForEntities);
+        }
+    }
 
-    private static EntityInfo PROPERTIES = new Order_();
+    private static final Order_.OrderIdGetter ID_GETTER = Order_.__ID_GETTER;
 
     // TODO private Query<Order> customer_OrdersQuery;
 
@@ -22,12 +28,12 @@ public final class OrderCursor extends Cursor<Order> {
     private final static int __ID_text = Order_.text.id;
 
     public OrderCursor(Transaction tx, long cursor, BoxStore boxStore) {
-        super(tx, cursor, PROPERTIES, boxStore);
+        super(tx, cursor, Order_.__INSTANCE, boxStore);
     }
 
     @Override
     public final long getId(Order entity) {
-        return entity.getId();
+        return ID_GETTER.getId(entity);
     }
 
     /**
@@ -37,15 +43,23 @@ public final class OrderCursor extends Cursor<Order> {
      */
     @Override
     public final long put(Order entity) {
+        if(entity.customer__toOne.internalRequiresPutTarget()) {
+            Cursor<Customer> targetCursor = getRelationTargetCursor(Customer.class);
+            try {
+                entity.customer__toOne.internalPutTarget(targetCursor);
+            } finally {
+                targetCursor.close();
+            }
+        }
         String text = entity.getText();
         int __id3 = text != null ? __ID_text : 0;
-        java.util.Date date = entity.getDate();
+        java.util.Date date = entity.date;
         int __id1 = date != null ? __ID_date : 0;
 
-        long __assignedId = collect313311(cursor, entity.getId(), PUT_FLAG_FIRST | PUT_FLAG_COMPLETE,
+        long __assignedId = collect313311(cursor, entity.id, PUT_FLAG_FIRST | PUT_FLAG_COMPLETE,
                 __id3, text, 0, null,
                 0, null, 0, null,
-                __ID_customerId, entity.getCustomerId(), __id1, __id1 != 0 ? date.getTime() : 0,
+                __ID_customerId, entity.customerId, __id1, __id1 != 0 ? date.getTime() : 0,
                 0, 0, 0, 0,
                 0, 0, 0, 0,
                 0, 0, 0, 0);
@@ -58,7 +72,7 @@ public final class OrderCursor extends Cursor<Order> {
     // TODO @Override
     protected final void attachEntity(Order entity) {
         // TODO super.attachEntity(entity);
-        entity.__boxStore = boxStoreForEntities;
+        //entity.__boxStore = boxStoreForEntities;
     }
 
     // TODO do we need this? @Override

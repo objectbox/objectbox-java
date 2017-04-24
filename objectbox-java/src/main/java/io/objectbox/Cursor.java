@@ -234,6 +234,13 @@ public abstract class Cursor<T> implements Closeable {
         return closed;
     }
 
+    protected <TARGET> Cursor<TARGET> getRelationTargetCursor(Class<TARGET> targetClass) {
+        // minor to do: optimize by using existing native cursor handle?
+        // (Note: Cursor should not destroy the native cursor then.)
+
+        return tx.createCursor(targetClass);
+    }
+
     public void renew(Transaction tx) {
         nativeRenew(cursor, tx.internalHandle());
         this.tx = tx;

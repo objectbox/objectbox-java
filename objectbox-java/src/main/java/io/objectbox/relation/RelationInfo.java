@@ -9,6 +9,9 @@ import io.objectbox.annotation.apihint.Internal;
 
 @Internal
 @Immutable
+/**
+ * Meta info describing a relation including source and target entity.
+ */
 public class RelationInfo<TARGET> {
     public final EntityInfo sourceInfo;
     public final EntityInfo<TARGET> targetInfo;

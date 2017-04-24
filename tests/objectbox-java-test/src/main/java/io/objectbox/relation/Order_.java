@@ -8,8 +8,10 @@ import io.objectbox.Cursor;
 import io.objectbox.EntityInfo;
 import io.objectbox.Property;
 import io.objectbox.Transaction;
+import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
+import io.objectbox.relation.OrderCursor.Factory;
 
 // THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project
 
@@ -18,8 +20,19 @@ import io.objectbox.internal.IdGetter;
  */
 public class Order_ implements EntityInfo<Order> {
 
-    public static final String __NAME_IN_DB = "ORDERS";
-//    public static final String __NAME_IN_DB = "Order";
+
+    // Leading underscores for static constants to avoid naming conflicts with property names
+
+    public static final String __ENTITY_NAME = "Order";
+
+    public static final Class<Order> __ENTITY_CLASS = Order.class;
+
+    public static final String __DB_NAME = "ORDERS";
+
+    public static final CursorFactory<Order> __CURSOR_FACTORY = new Factory();
+
+    @Internal
+    static final OrderIdGetter __ID_GETTER = new OrderIdGetter();
 
     public final static Property id = new Property(0, 1, long.class, "id", true, "_id");
     public final static Property date = new Property(1, 2, java.util.Date.class, "date");
@@ -27,13 +40,30 @@ public class Order_ implements EntityInfo<Order> {
     public final static Property text = new Property(3, 4, String.class, "text");
 
     public final static Property[] __ALL_PROPERTIES = {
-        id,
-        date,
-        customerId,
-        text
+            id,
+            date,
+            customerId,
+            text
     };
 
     public final static Property __ID_PROPERTY = id;
+
+    public final static Order_ __INSTANCE = new Order_();
+
+    @Override
+    public String getEntityName() {
+        return __ENTITY_NAME;
+    }
+
+    @Override
+    public Class<Order> getEntityClass() {
+        return __ENTITY_CLASS;
+    }
+
+    @Override
+    public String getDbName() {
+        return __DB_NAME;
+    }
 
     @Override
     public Property[] getAllProperties() {
@@ -46,37 +76,22 @@ public class Order_ implements EntityInfo<Order> {
     }
 
     @Override
-    public String getEntityName() {
-        return "Order";
-    }
-
-    @Override
-    public String getDbName() {
-        return __NAME_IN_DB;
-    }
-
-    @Override
-    public Class<Order> getEntityClass() {
-        return Order.class;
-    }
-
-    @Override
-    public  IdGetter<Order> getIdGetter() {
-        return new IdGetter<Order>() {
-            @Override
-            public long getId(Order object) {
-                return object.getId();
-            }
-        };
+    public IdGetter<Order> getIdGetter() {
+        return __ID_GETTER;
     }
 
     @Override
     public CursorFactory<Order> getCursorFactory() {
-        return new CursorFactory<Order>() {
-            @Override
-            public Cursor<Order> createCursor(Transaction tx, long cursorHandle, @Nullable BoxStore boxStoreForEntities) {
-                return new OrderCursor(tx, cursorHandle, boxStoreForEntities);
-            }
-        };
+        return __CURSOR_FACTORY;
     }
+
+    @Internal
+    static final class OrderIdGetter implements IdGetter<Order> {
+        public long getId(Order object) {
+            return object.getId();
+        }
+    }
+
+    static final RelationInfo<Customer> customer = new RelationInfo<>(Order_.__INSTANCE, Customer_.__INSTANCE, customerId);
+
 }

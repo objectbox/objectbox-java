@@ -16,23 +16,21 @@ import io.objectbox.exception.DbDetachedException;
 public class Order {
 
     @Id(assignable = true)
-    private long id;
-    private java.util.Date date;
-    private long customerId;
-    private String text;
+    long id;
+    java.util.Date date;
+    long customerId;
+    String text;
 
     @Relation
     private Customer customer;
 
-
+    /** @Depreacted Used to resolve relations */
     @Internal
-    @Generated(hash = 1698848862)
-    private transient Long customer__resolvedKey;
-
-    /** Used to resolve relations */
-    @Internal
-    @Generated(hash = 1307364262)
+    @Generated(hash = 975972993)
     transient BoxStore __boxStore;
+    @Internal
+    @Generated(hash = 1031210392)
+    transient ToOne<Customer> customer__toOne = new ToOne<>(this, Order_.customer);
 
     @Generated(hash = 1105174599)
     public Order() {
@@ -89,30 +87,15 @@ public class Order {
     /** To-one relationship, resolved on first access. */
     @Generated(hash = 910495430)
     public Customer getCustomer() {
-        long __key = this.customerId;
-        if (customer__resolvedKey == null || customer__resolvedKey != __key) {
-            final BoxStore boxStore = this.__boxStore;
-            if (boxStore == null) {
-                throw new DbDetachedException();
-            }
-            Box<Customer> box = boxStore.boxFor(Customer.class);
-            Customer customerNew = box.get(__key);
-            synchronized (this) {
-                customer = customerNew;
-                customer__resolvedKey = __key;
-            }
-        }
+        customer = customer__toOne.getTarget(this.customerId);
         return customer;
     }
 
     /** Set the to-one relation including its ID property. */
     @Generated(hash = 1322376583)
     public void setCustomer(Customer customer) {
-        synchronized (this) {
-            this.customer = customer;
-            customerId = customer == null ? 0 : customer.getId();
-            customer__resolvedKey = customerId;
-        }
+        customer__toOne.setTarget(customer);
+        this.customer = customer;
     }
 
 }

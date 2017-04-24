@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
-import io.objectbox.Property;
+import io.objectbox.Cursor;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbDetachedException;
 import io.objectbox.internal.ReflectionCache;
@@ -99,14 +99,14 @@ public class ToOne<TARGET> {
     }
 
     public void setTargetId(long targetId) {
-        if(relationInfo.targetIdProperty != null) {
+        if (relationInfo.targetIdProperty != null) {
             try {
                 getTargetIdField().set(entity, targetId);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("Could not update to-one ID in entity", e);
             }
         } else {
-            this.targetId= targetId;
+            this.targetId = targetId;
         }
     }
 
@@ -124,11 +124,7 @@ public class ToOne<TARGET> {
     // TODO provide a overload with a ToMany parameter, which also gets updated
     public void setTarget(@Nullable final TARGET target) {
         if (target != null) {
-            ensureBoxes(target);
-            long targetId = targetBox.getId(target);
-            if (targetId == 0) {
-                targetId = targetBox.put(target);
-            }
+            long targetId = relationInfo.targetInfo.getIdGetter().getId(target);
             setTargetId(targetId);
             setResolvedTarget(target, targetId);
         } else {
@@ -197,7 +193,7 @@ public class ToOne<TARGET> {
     }
 
     public long getTargetId() {
-        if(relationInfo.targetIdProperty != null) {
+        if (relationInfo.targetIdProperty != null) {
             // Future alternative: Implemented by generated ToOne sub classes to avoid reflection
             Field keyField = getTargetIdField();
             try {
@@ -218,8 +214,14 @@ public class ToOne<TARGET> {
         return targetIdField;
     }
 
-    @Internal
-    public void internalPrepareForPut(BoxStore boxStore) {
 
+    @Internal
+    public boolean internalRequiresPutTarget() {
+        return target != null && getTargetId() == 0;
+    }
+
+    @Internal
+    public void internalPutTarget(Cursor<TARGET> targetCursor) {
+        setTargetId(targetCursor.put(target));
     }
 }
