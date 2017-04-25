@@ -24,7 +24,6 @@ public final class ObfuscatedEntityCursor extends Cursor<ObfuscatedEntity> {
     private static final ObfuscatedEntity_.ObfuscatedEntityIdGetter ID_GETTER = ObfuscatedEntity_.__ID_GETTER;
 
 
-    // Property IDs get verified in Cursor base class
     private final static int __ID_myInt = ObfuscatedEntity_.myInt.id;
     private final static int __ID_myString = ObfuscatedEntity_.myString.id;
 
