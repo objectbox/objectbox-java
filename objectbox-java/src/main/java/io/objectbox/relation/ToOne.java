@@ -15,6 +15,7 @@ import io.objectbox.internal.ReflectionCache;
  * Manages a to-one relation: resolves the target object, keeps the target Id in sync, etc.
  */
 // TODO add more tests
+// TODO not exactly thread safe
 public class ToOne<TARGET> {
     private final Object entity;
     private final RelationInfo relationInfo;
@@ -33,6 +34,9 @@ public class ToOne<TARGET> {
 
     private volatile long resolvedTargetId;
 
+    /** To avoid calls to {@link #getTargetId()}, which may involve expensive reflection. */
+    private boolean checkIdOfTargetForPut;
+
     public ToOne(Object entity, RelationInfo relationInfo) {
         this.entity = entity;
         this.relationInfo = relationInfo;
@@ -42,7 +46,7 @@ public class ToOne<TARGET> {
         return getTarget(getTargetId());
     }
 
-    /** Cursors already have the target ID, so no need for reflection. */
+    /** If property backed, entities can pass the target ID to avoid reflection. */
     @Internal
     public TARGET getTarget(long targetId) {
         synchronized (this) {
@@ -108,6 +112,9 @@ public class ToOne<TARGET> {
         } else {
             this.targetId = targetId;
         }
+        if (targetId != 0) {
+            checkIdOfTargetForPut = false;
+        }
     }
 
     void setAndUpdateTargetId(long targetId) {
@@ -125,6 +132,7 @@ public class ToOne<TARGET> {
     public void setTarget(@Nullable final TARGET target) {
         if (target != null) {
             long targetId = relationInfo.targetInfo.getIdGetter().getId(target);
+            checkIdOfTargetForPut = true;
             setTargetId(targetId);
             setResolvedTarget(target, targetId);
         } else {
@@ -217,11 +225,12 @@ public class ToOne<TARGET> {
 
     @Internal
     public boolean internalRequiresPutTarget() {
-        return target != null && getTargetId() == 0;
+        return checkIdOfTargetForPut && target != null && getTargetId() == 0;
     }
 
     @Internal
     public void internalPutTarget(Cursor<TARGET> targetCursor) {
+        checkIdOfTargetForPut = false;
         long id = targetCursor.put(target);
         setTargetId(id);
         setResolvedTarget(target, id);
