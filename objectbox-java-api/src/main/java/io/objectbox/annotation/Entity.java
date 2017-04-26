@@ -13,14 +13,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Entity {
 
-    /**
-     * Specifies the name on the DB side (e.g. table name) this entity maps to.
-     * By default, the name is based on the entities class name.
-     * <p>
-     * Note: if you intent to rename an entity, consider using uid instead.
-     */
-    String nameInDb() default "";
-
+// Maybe better than "createInDb":
+// Class partialFor" to create a partial class referencing the class to the full entity
 //    /**
 //     * Advanced flag to disable table creation in the database (when set to false). This can be used to create partial
 //     * entities, which may use only a sub set of properties. Be aware however that ObjectBox does not sync multiple
@@ -33,22 +27,12 @@ public @interface Entity {
 //     * Entities which belong to different schemas should <strong>not</strong> have relations.
 //     */
 //    String schema() default "default";
-//
-//    /**
-//     * Whether update/delete/refresh methods should be generated.
-//     * If entity has defined {@link Relation}, then it is active independently from this value
-//     */
-//    boolean active() default false;
-//
-    /**
-     * Whether an all properties constructor should be generated. A no-args constructor is always required.
-     */
-    boolean generateConstructors() default true;
 
-    /**
-     * Whether getters and setters for properties should be generated if missing.
-     */
-    boolean generateGettersSetters() default false;
+//    /**
+//     * Whether an all properties constructor should be generated.
+//     */
+//    boolean generateConstructors() default true;
+
 //
 //    /**
 //     * Define a protobuf class of this entity to create an additional, special DAO for.
