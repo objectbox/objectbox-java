@@ -19,11 +19,11 @@ public class EntityLongIndex {
     Float float4;
     Float float5;
 
-    @Generated(hash = 37687253)
+    @Generated(37687253)
     public EntityLongIndex() {
     }
 
-    @Generated(hash = 2116856237)
+    @Generated(2116856237)
     public EntityLongIndex(long id, long indexedLong, Float float1, Float float2, Float float3, Float float4, Float float5) {
         this.id = id;
         this.indexedLong = indexedLong;

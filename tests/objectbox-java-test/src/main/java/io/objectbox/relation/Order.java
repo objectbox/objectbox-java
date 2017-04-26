@@ -26,13 +26,13 @@ public class Order {
 
     /** @Depreacted Used to resolve relations */
     @Internal
-    @Generated(hash = 975972993)
+    @Generated(975972993)
     transient BoxStore __boxStore;
     @Internal
-    @Generated(hash = 1031210392)
+    @Generated(1031210392)
     transient ToOne<Customer> customer__toOne = new ToOne<>(this, Order_.customer);
 
-    @Generated(hash = 1105174599)
+    @Generated(1105174599)
     public Order() {
     }
 
@@ -40,7 +40,7 @@ public class Order {
         this.id = id;
     }
 
-    @Generated(hash = 10986505)
+    @Generated(10986505)
     public Order(long id, java.util.Date date, long customerId, String text) {
         this.id = id;
         this.date = date;
@@ -85,14 +85,14 @@ public class Order {
     }
 
     /** To-one relationship, resolved on first access. */
-    @Generated(hash = 910495430)
+    @Generated(910495430)
     public Customer getCustomer() {
         customer = customer__toOne.getTarget(this.customerId);
         return customer;
     }
 
     /** Set the to-one relation including its ID property. */
-    @Generated(hash = 1322376583)
+    @Generated(1322376583)
     public void setCustomer(Customer customer) {
         customer__toOne.setTarget(customer);
         this.customer = customer;

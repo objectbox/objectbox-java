@@ -29,14 +29,14 @@ public class Customer {
 
     /** Used to resolve relations */
     @Internal
-    @Generated(hash = 1307364262)
+    @Generated(1307364262)
     transient BoxStore __boxStore;
 
-    @Generated(hash = 60841032)
+    @Generated(60841032)
     public Customer() {
     }
 
-    @Generated(hash = 1039711609)
+    @Generated(1039711609)
     public Customer(long id, String name) {
         this.id = id;
         this.name = name;
@@ -62,7 +62,7 @@ public class Customer {
      * To-many relationship, resolved on first access (and after reset).
      * Changes to to-many relations are not persisted, make changes to the target entity.
      */
-    @Generated(hash = 954185799)
+    @Generated(954185799)
     public List<Order> getOrders() {
         if (orders == null) {
             final BoxStore boxStore = this.__boxStore;
@@ -82,7 +82,7 @@ public class Customer {
     }
 
     /** Resets a to-many relationship, making the next get call to query for a fresh result. */
-    @Generated(hash = 1446109810)
+    @Generated(1446109810)
     public synchronized void resetOrders() {
         orders = null;
     }

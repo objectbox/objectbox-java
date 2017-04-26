@@ -15,5 +15,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target({ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD})
 public @interface Generated {
-    int hash() default -1;
+    /** A hash to identify the generated code */
+    int value() default -1;
 }
