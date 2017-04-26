@@ -15,5 +15,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target({ElementType.FIELD, ElementType.TYPE})
 public @interface Uid {
+    /**
+     * The UID associated with an entity/property.
+     * <p>
+     * Special values:
+     * <ul>
+     * <li>empty (or zero): and the ObjectBox Gradle plugin will set it automatically to the current value.</li>
+     * <li>-1: will assign a new ID and UID forcing the property/entity to be treated as new
+     * (for entities: all property IDs and UIDs will be renewed too)</li>
+     * </ul>
+     */
     long value() default 0;
 }
