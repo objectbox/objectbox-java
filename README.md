@@ -9,6 +9,8 @@ This GitHub repo is a placeholder and will be extended in the future. Right now 
 
 Beta Notice
 -----------
+Let us know how we are doing: [2 minute questionaire](https://docs.google.com/forms/d/e/1FAIpQLSe_fq-FlBThK_96bkHv1oEDizoHwEu_b6M4FJkMv9V5q_Or9g/viewform?usp=sf_link).
+
 ObjectBox is beta. That also means that, until we reach 1.0, there may be breaking changes. This applies to the API and also (but less likely) to the file format. The latter we will only change if we see really relevant changes that significantly improve ObjectBox. Please always check that you are using the latest version.
 
 Links
