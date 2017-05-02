@@ -170,7 +170,8 @@ public class Query<T> {
     }
 
     /**
-     * Emits query results one by one to the given consumer.
+     * Emits query results one by one to the given consumer (synchronously).
+     * Once this method returns, the consumer will have received all result object).
      * It "streams" each object from the database to the consumer, which is very memory efficient.
      * Because this is run in a read transaction, the consumer gets a consistent view on the data.
      * Like {@link #findLazy()}, this method can be used for a high amount of data.

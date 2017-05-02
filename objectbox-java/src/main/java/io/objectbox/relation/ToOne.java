@@ -16,6 +16,7 @@ import io.objectbox.internal.ReflectionCache;
  */
 // TODO add more tests
 // TODO not exactly thread safe
+// TODO enforce not-null (not zero) checks on the target setters once we use some not-null annotation
 public class ToOne<TARGET> {
     private final Object entity;
     private final RelationInfo relationInfo;
