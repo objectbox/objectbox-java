@@ -46,7 +46,7 @@ public class Box<T> {
         debugTx = store.debugTx;
     }
 
-    private Cursor<T> getReader() {
+    Cursor<T> getReader() {
         Cursor<T> cursor = getActiveTxCursor();
         if (cursor != null) {
             return cursor;
@@ -121,7 +121,7 @@ public class Box<T> {
         }
     }
 
-    private void releaseReader(Cursor<T> cursor) {
+    void releaseReader(Cursor<T> cursor) {
         // NOP if TX is ongoing
         if (activeTxCursor.get() == null) {
             Transaction tx = cursor.getTx();
