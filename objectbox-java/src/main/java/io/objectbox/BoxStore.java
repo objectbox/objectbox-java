@@ -1,18 +1,9 @@
 package io.objectbox;
 
 import org.greenrobot.essentials.collections.LongHashMap;
-import org.greenrobot.essentials.io.IoUtils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +24,7 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbSchemaException;
 import io.objectbox.internal.CrashReportLogger;
+import io.objectbox.internal.NativeLibraryLoader;
 import io.objectbox.internal.ObjectBoxThreadPool;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
@@ -45,55 +37,6 @@ import io.objectbox.reactive.SubscriptionBuilder;
 @Beta
 @ThreadSafe
 public class BoxStore implements Closeable {
-    static {
-        String libname = "objectbox";
-        // For Android, os.name is also "Linux", so we need an extra check
-        if (!System.getProperty("java.vendor").contains("Android")) {
-            String osName = System.getProperty("os.name");
-            String sunArch = System.getProperty("sun.arch.data.model");
-            if (osName.contains("Windows")) {
-                libname += "-windows" + ("32".equals(sunArch) ? "-x86" : "-x64");
-                checkUnpackLib(libname + ".dll");
-            } else if (osName.contains("Linux")) {
-                libname += "-linux" + ("32".equals(sunArch) ? "-x86" : "-x64");
-                checkUnpackLib("lib" + libname + ".so");
-            }
-        }
-        System.loadLibrary(libname);
-    }
-
-    private static void checkUnpackLib(String filename) {
-        String path = "/native/" + filename;
-        URL resource = BoxStore.class.getResource(path);
-        if (resource == null) {
-            System.err.println("Not available in classpath: " + path);
-        } else {
-            File file = new File(filename);
-            try {
-                URLConnection urlConnection = resource.openConnection();
-                int length = urlConnection.getContentLength();
-                long lastModified = urlConnection.getLastModified();
-                if (!file.exists() || file.length() != length || file.lastModified() != lastModified) {
-                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                    try {
-                        OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
-                        try {
-                            IoUtils.copyAllBytes(in, out);
-                        } finally {
-                            IoUtils.safeClose(out);
-                        }
-                    } finally {
-                        IoUtils.safeClose(in);
-                    }
-                    if (lastModified > 0) {
-                        file.setLastModified(lastModified);
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     private static BoxStore defaultStore;
 
@@ -165,7 +108,7 @@ public class BoxStore implements Closeable {
     static native int nativeCleanStaleReadTransactions(long store);
 
     public static String getVersion() {
-        return "0.9.11-2017-04-20";
+        return "0.9.12-2017-05-03";
     }
 
     private final File directory;
@@ -192,6 +135,8 @@ public class BoxStore implements Closeable {
     volatile int commitCount;
 
     BoxStore(BoxStoreBuilder builder) {
+        NativeLibraryLoader.ensureLoaded();
+
         this.directory = builder.directory;
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
