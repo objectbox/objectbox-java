@@ -108,7 +108,9 @@ public class LazyList<E> implements List<E> {
     private final Box<E> box;
     private final long[] objectIds;
     private final List<E> entities;
-    private final int size;
+
+    // Accessed by iterator: avoid private
+    final int size;
 
     private volatile int loadedCount;
 
