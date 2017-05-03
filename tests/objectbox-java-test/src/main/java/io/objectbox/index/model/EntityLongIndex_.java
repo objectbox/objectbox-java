@@ -66,6 +66,11 @@ public class EntityLongIndex_ implements EntityInfo<EntityLongIndex> {
     }
 
     @Override
+    public int getEntityId() {
+        return 7;
+    }
+
+    @Override
     public IdGetter<EntityLongIndex> getIdGetter() {
         return new IdGetter<EntityLongIndex>() {
             @Override

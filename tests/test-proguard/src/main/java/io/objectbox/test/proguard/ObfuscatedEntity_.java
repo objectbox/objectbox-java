@@ -21,6 +21,8 @@ public final class ObfuscatedEntity_ implements EntityInfo<ObfuscatedEntity> {
 
     public static final String __ENTITY_NAME = "ObfuscatedEntity";
 
+    public static final int __ENTITY_ID = 1;
+
     public static final Class<ObfuscatedEntity> __ENTITY_CLASS = ObfuscatedEntity.class;
 
     public static final String __DB_NAME = "ObfuscatedEntity";
@@ -47,6 +49,11 @@ public final class ObfuscatedEntity_ implements EntityInfo<ObfuscatedEntity> {
     @Override
     public String getEntityName() {
         return __ENTITY_NAME;
+    }
+
+    @Override
+    public int getEntityId() {
+        return __ENTITY_ID;
     }
 
     @Override

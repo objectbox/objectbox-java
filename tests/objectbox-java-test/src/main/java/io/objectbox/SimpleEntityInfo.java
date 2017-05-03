@@ -37,6 +37,11 @@ public class SimpleEntityInfo<T> implements EntityInfo<T> {
         return entityClass;
     }
 
+    @Override
+    public int getEntityId() {
+        return 2;
+    }
+
     public SimpleEntityInfo<T> setEntityClass(Class<T> entityClass) {
         this.entityClass = entityClass;
         return this;

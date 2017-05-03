@@ -56,6 +56,11 @@ public class Customer_ implements EntityInfo<Customer> {
     }
 
     @Override
+    public int getEntityId() {
+        return 1;
+    }
+
+    @Override
     public String getDbName() {
         return __DB_NAME;
     }

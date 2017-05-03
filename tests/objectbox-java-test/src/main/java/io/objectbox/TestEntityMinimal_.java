@@ -54,6 +54,11 @@ public final class TestEntityMinimal_ implements EntityInfo<TestEntityMinimal> {
     }
 
     @Override
+    public int getEntityId() {
+        return 3;
+    }
+
+    @Override
     public String getDbName() {
         return __DB_NAME;
     }

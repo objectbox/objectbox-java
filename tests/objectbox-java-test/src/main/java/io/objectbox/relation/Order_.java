@@ -61,6 +61,11 @@ public class Order_ implements EntityInfo<Order> {
     }
 
     @Override
+    public int getEntityId() {
+        return 3;
+    }
+
+    @Override
     public String getDbName() {
         return __DB_NAME;
     }

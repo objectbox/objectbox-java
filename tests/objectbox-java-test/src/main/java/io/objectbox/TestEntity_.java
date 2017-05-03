@@ -64,6 +64,11 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
     }
 
     @Override
+    public int getEntityId() {
+        return 1;
+    }
+
+    @Override
     public String getDbName() {
         return __DB_NAME;
     }
