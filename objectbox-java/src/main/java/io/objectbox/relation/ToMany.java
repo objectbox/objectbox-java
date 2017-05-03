@@ -16,6 +16,7 @@
 package io.objectbox.relation;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -31,7 +32,7 @@ import io.objectbox.internal.ReflectionCache;
  */
 public class ToMany<TARGET> implements List<TARGET> {
 
-    private final TARGET entity;
+    private final Object entity;
     private final RelationInfo<TARGET> relationInfo;
 
     private List<TARGET> entities;
@@ -41,25 +42,19 @@ public class ToMany<TARGET> implements List<TARGET> {
     private Box entityBox;
     private volatile Box<TARGET> targetBox;
 
-    ToMany(TARGET entity, RelationInfo<TARGET> relationInfo) {
-        this.entity = entity;
+    public ToMany(Object sourceEntity, RelationInfo<TARGET> relationInfo) {
+        this.entity = sourceEntity;
         this.relationInfo = relationInfo;
     }
 
 
-    private void ensureBoxes(TARGET target) {
+    private void ensureBoxes() {
         if (targetBox == null) {
             Field boxStoreField = ReflectionCache.getInstance().getField(entity.getClass(), "__boxStore");
             try {
                 boxStore = (BoxStore) boxStoreField.get(entity);
                 if (boxStore == null) {
-                    if (target != null) {
-                        boxStoreField = ReflectionCache.getInstance().getField(target.getClass(), "__boxStore");
-                        boxStore = (BoxStore) boxStoreField.get(target);
-                    }
-                    if (boxStore == null) {
-                        throw new DbDetachedException("Cannot resolve relation for detached entities");
-                    }
+                    throw new DbDetachedException("Cannot resolve relation for detached entities");
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -68,6 +63,30 @@ public class ToMany<TARGET> implements List<TARGET> {
             targetBox = boxStore.boxFor(relationInfo.targetInfo.getEntityClass());
         }
     }
+
+    private void checkGetEntities() {
+        if (entities == null) {
+            long id = relationInfo.sourceInfo.getIdGetter().getId(this);
+            if (id == 0) {
+                // Not yet persisted entity
+                synchronized (this) {
+                    if (entities == null) {
+                        entities = new ArrayList<>();
+                    }
+                }
+            } else {
+                ensureBoxes();
+                List<TARGET> newEntities = targetBox.getBacklinkEntities(relationInfo.targetInfo.getEntityId(),
+                        relationInfo.targetIdProperty, id);
+                synchronized (this) {
+                    if (entities == null) {
+                        entities = newEntities;
+                    }
+                }
+            }
+        }
+    }
+
 
     @Override
     public boolean add(TARGET object) {
@@ -104,14 +123,6 @@ public class ToMany<TARGET> implements List<TARGET> {
     public boolean containsAll(Collection<?> collection) {
         checkGetEntities();
         return entities.containsAll(collection);
-    }
-
-    private void checkGetEntities() {
-        if (entities == null) {
-            long id = relationInfo.sourceInfo.getIdGetter().getId(this);
-            ensureBoxes(null);
-            targetBox.getBacklinkEntities(relationInfo.targetInfo.getEntityId(), relationInfo.targetIdProperty, id);
-        }
     }
 
     /**
