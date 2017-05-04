@@ -144,7 +144,7 @@ public class ToOne<TARGET> {
     public void setTarget(@Nullable final TARGET target) {
         if (target != null) {
             long targetId = relationInfo.targetInfo.getIdGetter().getId(target);
-            checkIdOfTargetForPut = true;
+            checkIdOfTargetForPut = targetId == 0;
             setTargetId(targetId);
             setResolvedTarget(target, targetId);
         } else {

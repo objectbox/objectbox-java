@@ -16,10 +16,19 @@ public class RelationInfo<TARGET> {
     public final EntityInfo<TARGET> targetInfo;
     public final Property targetIdProperty;
 
+    /** For ToMany relations based on backlinks (null otherwise). */
+    public final ToOneGetter toOneGetter;
+
     public RelationInfo(EntityInfo sourceInfo, EntityInfo<TARGET> targetInfo, Property targetIdProperty) {
+        this(sourceInfo, targetInfo, targetIdProperty, null);
+    }
+
+    public RelationInfo(EntityInfo sourceInfo, EntityInfo<TARGET> targetInfo, Property targetIdProperty,
+                        ToOneGetter toOneGetter) {
         this.sourceInfo = sourceInfo;
         this.targetInfo = targetInfo;
         this.targetIdProperty = targetIdProperty;
+        this.toOneGetter = toOneGetter;
     }
 }
 

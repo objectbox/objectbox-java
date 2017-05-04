@@ -2,7 +2,6 @@ package io.objectbox.relation;
 
 import java.util.List;
 
-import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Generated;
@@ -10,7 +9,6 @@ import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Index;
 import io.objectbox.annotation.Relation;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.exception.DbDetachedException;
 
 /**
  * Entity mapped to table "CUSTOMER".

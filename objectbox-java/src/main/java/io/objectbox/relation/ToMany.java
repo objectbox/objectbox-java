@@ -17,14 +17,20 @@ package io.objectbox.relation;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.Cursor;
 import io.objectbox.annotation.apihint.Experimental;
+import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbDetachedException;
+import io.objectbox.internal.IdGetter;
 import io.objectbox.internal.ReflectionCache;
 import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 
@@ -43,7 +49,9 @@ public class ToMany<TARGET> implements List<TARGET> {
 
     private ListFactory listFactory;
     private List<TARGET> entities;
-    private List<TARGET> entitiesAdded;
+
+    /** Used as a set (value is always Boolean.TRUE). */
+    private Map<TARGET, Boolean> entitiesAdded;
 
     private BoxStore boxStore;
     private Box entityBox;
@@ -95,7 +103,7 @@ public class ToMany<TARGET> implements List<TARGET> {
         if (entitiesAdded == null) {
             synchronized (this) {
                 if (entitiesAdded == null) {
-                    entitiesAdded = getListFactory().createList();
+                    entitiesAdded = new ConcurrentHashMap<>();
                 }
             }
         }
@@ -127,29 +135,34 @@ public class ToMany<TARGET> implements List<TARGET> {
     @Override
     public boolean add(TARGET object) {
         ensureEntitiesWithModifications();
-        entitiesAdded.add(object);
+        entitiesAdded.put(object, Boolean.TRUE);
         return entities.add(object);
     }
 
     @Override
     public void add(int location, TARGET object) {
         ensureEntitiesWithModifications();
-        entitiesAdded.add(object);
+        entitiesAdded.put(object, Boolean.TRUE);
         entities.add(location, object);
     }
 
     @Override
     public boolean addAll(Collection<? extends TARGET> objects) {
-        ensureEntitiesWithModifications();
-        entitiesAdded.addAll(objects);
+        putAllToAdded(objects);
         return entities.addAll(objects);
+    }
+
+    private void putAllToAdded(Collection<? extends TARGET> objects) {
+        ensureEntitiesWithModifications();
+        for (TARGET object : objects) {
+            entitiesAdded.put(object, Boolean.TRUE);
+        }
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends TARGET> objects) {
-        ensureEntitiesWithModifications();
-        entitiesAdded.addAll(objects);
-        return entities.addAll(objects);
+        putAllToAdded(objects);
+        return entities.addAll(index, objects);
     }
 
     @Override
@@ -159,9 +172,9 @@ public class ToMany<TARGET> implements List<TARGET> {
             entitiesToClear.clear();
         }
 
-        entitiesToClear = entitiesAdded;
-        if (entitiesToClear != null) {
-            entitiesToClear.clear();
+        Map setToClear = entitiesAdded;
+        if (setToClear != null) {
+            setToClear.clear();
         }
     }
 
@@ -278,6 +291,42 @@ public class ToMany<TARGET> implements List<TARGET> {
     public synchronized void reset() {
         entities = null;
         entitiesAdded = null;
+    }
+
+    public boolean isResolved() {
+        return entities != null;
+    }
+
+    public int getAddCount() {
+        Map<TARGET, Boolean> set = this.entitiesAdded;
+        return set != null ? set.size() : 0;
+    }
+
+    @Internal
+    public boolean internalRequiresPutTarget() {
+        Map<TARGET, Boolean> set = this.entitiesAdded;
+        return set != null && !set.isEmpty();
+    }
+
+    @Internal
+    public void internalPutTarget(Cursor<TARGET> targetCursor) {
+        Iterator<TARGET> iterator = entitiesAdded.keySet().iterator();
+        ToOneGetter toOneGetter = relationInfo.toOneGetter;
+        long entityId = relationInfo.sourceInfo.getIdGetter().getId(entity);
+        IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
+
+        while (iterator.hasNext()) {
+            TARGET target = iterator.next();
+            ToOne<Object> toOne = toOneGetter.getToOne(target);
+            long toOneTargetId = toOne.getTargetId();
+            if (toOneTargetId != entityId) {
+                toOne.setTargetId(entityId);
+                targetCursor.put(target);
+            } else if (idGetter.getId(target) == 0) {
+                targetCursor.put(target);
+            }
+            iterator.remove();
+        }
     }
 
 }

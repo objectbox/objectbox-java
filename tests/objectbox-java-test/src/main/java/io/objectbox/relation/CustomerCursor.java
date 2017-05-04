@@ -55,6 +55,13 @@ public final class CustomerCursor extends Cursor<Customer> {
 
         entity.setId(__assignedId);
         entity.__boxStore = boxStoreForEntities;
+
+        if (entity.orders instanceof ToMany) {
+            ToMany<Order> toMany = (ToMany<Order>) entity.orders;
+            if (toMany.internalRequiresPutTarget()) {
+                toMany.internalPutTarget(getRelationTargetCursor(Order.class));
+            }
+        }
         return __assignedId;
     }
 
