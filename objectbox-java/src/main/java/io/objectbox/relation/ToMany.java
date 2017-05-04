@@ -41,7 +41,7 @@ public class ToMany<TARGET> implements List<TARGET> {
     private final Object entity;
     private final RelationInfo<TARGET> relationInfo;
 
-    private ListFactory listFactory = new CopyOnWriteArrayListFactory();
+    private ListFactory listFactory;
     private List<TARGET> entities;
     private List<TARGET> entitiesAdded;
 
@@ -61,6 +61,17 @@ public class ToMany<TARGET> implements List<TARGET> {
             throw new IllegalArgumentException("ListFactory is null");
         }
         this.listFactory = listFactory;
+    }
+
+    public ListFactory getListFactory() {
+        if (listFactory == null) {
+            synchronized (this) {
+                if (listFactory == null) {
+                    listFactory = new CopyOnWriteArrayListFactory();
+                }
+            }
+        }
+        return listFactory;
     }
 
     private void ensureBoxes() {
@@ -84,7 +95,7 @@ public class ToMany<TARGET> implements List<TARGET> {
         if (entitiesAdded == null) {
             synchronized (this) {
                 if (entitiesAdded == null) {
-                    entitiesAdded = listFactory.createList();
+                    entitiesAdded = getListFactory().createList();
                 }
             }
         }
@@ -97,7 +108,7 @@ public class ToMany<TARGET> implements List<TARGET> {
                 // Not yet persisted entity
                 synchronized (this) {
                     if (entities == null) {
-                        entities = listFactory.createList();
+                        entities = getListFactory().createList();
                     }
                 }
             } else {
@@ -144,12 +155,12 @@ public class ToMany<TARGET> implements List<TARGET> {
     @Override
     public void clear() {
         List<TARGET> entitiesToClear = entities;
-        if(entitiesToClear != null) {
+        if (entitiesToClear != null) {
             entitiesToClear.clear();
         }
 
         entitiesToClear = entitiesAdded;
-        if(entitiesToClear != null) {
+        if (entitiesToClear != null) {
             entitiesToClear.clear();
         }
     }
