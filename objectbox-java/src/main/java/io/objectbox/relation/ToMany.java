@@ -66,7 +66,7 @@ public class ToMany<TARGET> implements List<TARGET> {
 
     private void checkGetEntities() {
         if (entities == null) {
-            long id = relationInfo.sourceInfo.getIdGetter().getId(this);
+            long id = relationInfo.sourceInfo.getIdGetter().getId(entity);
             if (id == 0) {
                 // Not yet persisted entity
                 synchronized (this) {
@@ -221,6 +221,11 @@ public class ToMany<TARGET> implements List<TARGET> {
     public <T> T[] toArray(T[] array) {
         checkGetEntities();
         return entities.toArray(array);
+    }
+
+    public synchronized void reset() {
+        entities = null;
+        entitiesAdded = null;
     }
 
 }

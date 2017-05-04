@@ -93,6 +93,6 @@ public class Customer_ implements EntityInfo<Customer> {
     }
 
     static final RelationInfo<Order> orders =
-            new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE);
+            new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, Order_.customerId);
 
 }
