@@ -16,7 +16,6 @@
 package io.objectbox.relation;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -24,17 +23,25 @@ import java.util.ListIterator;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.exception.DbDetachedException;
 import io.objectbox.internal.ReflectionCache;
+import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 
 /**
+ * A List representing a to-many relation.
+ * Not thread-safe (unless strictly read-only); for multithreaded use consider wrapping this list with
+ * {@link java.util.Collections#synchronizedList(List)}.
+ *
  * @param <TARGET> Object type (entity).
  */
+// TODO investigate if we can make it thread-safe if required (using ListFactory etc.)
 public class ToMany<TARGET> implements List<TARGET> {
 
     private final Object entity;
     private final RelationInfo<TARGET> relationInfo;
 
+    private ListFactory listFactory = new CopyOnWriteArrayListFactory();
     private List<TARGET> entities;
     private List<TARGET> entitiesAdded;
 
@@ -47,6 +54,14 @@ public class ToMany<TARGET> implements List<TARGET> {
         this.relationInfo = relationInfo;
     }
 
+    /** Currently only used for non-persisted entities (id == 0). */
+    @Experimental
+    public void setListFactory(ListFactory listFactory) {
+        if (listFactory == null) {
+            throw new IllegalArgumentException("ListFactory is null");
+        }
+        this.listFactory = listFactory;
+    }
 
     private void ensureBoxes() {
         if (targetBox == null) {
@@ -64,14 +79,25 @@ public class ToMany<TARGET> implements List<TARGET> {
         }
     }
 
-    private void checkGetEntities() {
+    private void ensureEntitiesWithModifications() {
+        ensureEntities();
+        if (entitiesAdded == null) {
+            synchronized (this) {
+                if (entitiesAdded == null) {
+                    entitiesAdded = listFactory.createList();
+                }
+            }
+        }
+    }
+
+    private void ensureEntities() {
         if (entities == null) {
             long id = relationInfo.sourceInfo.getIdGetter().getId(entity);
             if (id == 0) {
                 // Not yet persisted entity
                 synchronized (this) {
                     if (entities == null) {
-                        entities = new ArrayList<>();
+                        entities = listFactory.createList();
                     }
                 }
             } else {
@@ -87,41 +113,56 @@ public class ToMany<TARGET> implements List<TARGET> {
         }
     }
 
-
     @Override
     public boolean add(TARGET object) {
-        throw new UnsupportedOperationException();
+        ensureEntitiesWithModifications();
+        entitiesAdded.add(object);
+        return entities.add(object);
     }
 
     @Override
     public void add(int location, TARGET object) {
-        throw new UnsupportedOperationException();
+        ensureEntitiesWithModifications();
+        entitiesAdded.add(object);
+        entities.add(location, object);
     }
 
     @Override
-    public boolean addAll(Collection<? extends TARGET> arg0) {
-        throw new UnsupportedOperationException();
+    public boolean addAll(Collection<? extends TARGET> objects) {
+        ensureEntitiesWithModifications();
+        entitiesAdded.addAll(objects);
+        return entities.addAll(objects);
     }
 
     @Override
-    public boolean addAll(int arg0, Collection<? extends TARGET> arg1) {
-        throw new UnsupportedOperationException();
+    public boolean addAll(int index, Collection<? extends TARGET> objects) {
+        ensureEntitiesWithModifications();
+        entitiesAdded.addAll(objects);
+        return entities.addAll(objects);
     }
 
     @Override
     public void clear() {
-        throw new UnsupportedOperationException();
+        List<TARGET> entitiesToClear = entities;
+        if(entitiesToClear != null) {
+            entitiesToClear.clear();
+        }
+
+        entitiesToClear = entitiesAdded;
+        if(entitiesToClear != null) {
+            entitiesToClear.clear();
+        }
     }
 
     @Override
     public boolean contains(Object object) {
-        checkGetEntities();
+        ensureEntities();
         return entities.contains(object);
     }
 
     @Override
     public boolean containsAll(Collection<?> collection) {
-        checkGetEntities();
+        ensureEntities();
         return entities.containsAll(collection);
     }
 
@@ -131,43 +172,43 @@ public class ToMany<TARGET> implements List<TARGET> {
      */
     @Override
     public TARGET get(int location) {
-        checkGetEntities();
+        ensureEntities();
         return entities.get(location);
     }
 
     @Override
     public int indexOf(Object object) {
-        checkGetEntities();
+        ensureEntities();
         return entities.indexOf(object);
     }
 
     @Override
     public boolean isEmpty() {
-        checkGetEntities();
+        ensureEntities();
         return entities.isEmpty();
     }
 
     @Override
     public Iterator<TARGET> iterator() {
-        checkGetEntities();
+        ensureEntities();
         return entities.iterator();
     }
 
     @Override
     public int lastIndexOf(Object object) {
-        checkGetEntities();
+        ensureEntities();
         return entities.lastIndexOf(object);
     }
 
     @Override
     public ListIterator<TARGET> listIterator() {
-        checkGetEntities();
+        ensureEntities();
         return entities.listIterator();
     }
 
     @Override
     public ListIterator<TARGET> listIterator(int location) {
-        checkGetEntities();
+        ensureEntities();
         return entities.listIterator(location);
     }
 
@@ -198,13 +239,13 @@ public class ToMany<TARGET> implements List<TARGET> {
 
     @Override
     public int size() {
-        checkGetEntities();
+        ensureEntities();
         return entities.size();
     }
 
     @Override
     public List<TARGET> subList(int start, int end) {
-        checkGetEntities();
+        ensureEntities();
         for (int i = start; i < end; i++) {
             get(i);
         }
@@ -213,13 +254,13 @@ public class ToMany<TARGET> implements List<TARGET> {
 
     @Override
     public Object[] toArray() {
-        checkGetEntities();
+        ensureEntities();
         return entities.toArray();
     }
 
     @Override
     public <T> T[] toArray(T[] array) {
-        checkGetEntities();
+        ensureEntities();
         return entities.toArray(array);
     }
 
