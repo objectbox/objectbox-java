@@ -48,8 +48,10 @@ public class ToMany<TARGET> implements List<TARGET> {
     private ListFactory listFactory;
     private List<TARGET> entities;
 
-    /** Used as a set (value is always Boolean.TRUE). */
+    /** Entities added since last put/sync. Map is used as a set (value is always Boolean.TRUE). */
     private Map<TARGET, Boolean> entitiesAdded;
+
+    List<TARGET> entitiesToPut;
 
     private BoxStore boxStore;
     private Box entityBox;
@@ -300,32 +302,45 @@ public class ToMany<TARGET> implements List<TARGET> {
         return set != null ? set.size() : 0;
     }
 
+    /** Called after main entity is put (so we have its ID). */
     @Internal
     public boolean internalRequiresPutTarget() {
-        Map<TARGET, Boolean> set = this.entitiesAdded;
-        return set != null && !set.isEmpty();
-    }
-
-    @Internal
-    public void internalPutTarget(Cursor<TARGET> targetCursor) {
-        List<TARGET> putCandidates;
-        synchronized (this) {
-            putCandidates = new ArrayList<>(entitiesAdded.keySet());
-            entitiesAdded.clear();
+        Map<TARGET, Boolean> setAdded = this.entitiesAdded;
+        if (setAdded == null || setAdded.isEmpty()) {
+            return false;
         }
         ToOneGetter toOneGetter = relationInfo.toOneGetter;
         long entityId = relationInfo.sourceInfo.getIdGetter().getId(entity);
         IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
-
-        for (TARGET target : putCandidates) {
-            ToOne<Object> toOne = toOneGetter.getToOne(target);
-            long toOneTargetId = toOne.getTargetId();
-            if (toOneTargetId != entityId) {
-                toOne.setTargetId(entityId);
-                targetCursor.put(target);
-            } else if (idGetter.getId(target) == 0) {
-                targetCursor.put(target);
+        synchronized (this) {
+            if (entitiesToPut == null) {
+                entitiesToPut = new ArrayList<>();
             }
+            for (TARGET target : setAdded.keySet()) {
+                ToOne<Object> toOne = toOneGetter.getToOne(target);
+                long toOneTargetId = toOne.getTargetId();
+                if (toOneTargetId != entityId) {
+                    toOne.setTarget(entity);
+                    entitiesToPut.add(target);
+                } else if (idGetter.getId(target) == 0) {
+                    entitiesToPut.add(target);
+                }
+            }
+            setAdded.clear();
+            return !entitiesToPut.isEmpty();
+        }
+    }
+
+    @Internal
+    public void internalPutTarget(Cursor<TARGET> targetCursor) {
+        TARGET[] toPut;
+        synchronized (this) {
+            toPut = (TARGET[]) entitiesToPut.toArray();
+            entitiesToPut.clear();
+        }
+
+        for (TARGET target : toPut) {
+            targetCursor.put(target);
         }
     }
 
