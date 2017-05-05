@@ -16,13 +16,13 @@
 package io.objectbox.relation;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
@@ -36,12 +36,10 @@ import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 
 /**
  * A List representing a to-many relation.
- * Not thread-safe (unless strictly read-only); for multithreaded use consider wrapping this list with
- * {@link java.util.Collections#synchronizedList(List)}.
+ * Is thread-safe by default (using the default {@link java.util.concurrent.CopyOnWriteArrayList}).
  *
  * @param <TARGET> Object type (entity).
  */
-// TODO investigate if we can make it thread-safe if required (using ListFactory etc.)
 public class ToMany<TARGET> implements List<TARGET> {
 
     private final Object entity;
@@ -103,7 +101,7 @@ public class ToMany<TARGET> implements List<TARGET> {
         if (entitiesAdded == null) {
             synchronized (this) {
                 if (entitiesAdded == null) {
-                    entitiesAdded = new ConcurrentHashMap<>();
+                    entitiesAdded = new LinkedHashMap<>(); // Keep order of added items
                 }
             }
         }
@@ -133,26 +131,26 @@ public class ToMany<TARGET> implements List<TARGET> {
     }
 
     @Override
-    public boolean add(TARGET object) {
+    public synchronized boolean add(TARGET object) {
         ensureEntitiesWithModifications();
         entitiesAdded.put(object, Boolean.TRUE);
         return entities.add(object);
     }
 
     @Override
-    public void add(int location, TARGET object) {
+    public synchronized void add(int location, TARGET object) {
         ensureEntitiesWithModifications();
         entitiesAdded.put(object, Boolean.TRUE);
         entities.add(location, object);
     }
 
     @Override
-    public boolean addAll(Collection<? extends TARGET> objects) {
+    public synchronized boolean addAll(Collection<? extends TARGET> objects) {
         putAllToAdded(objects);
         return entities.addAll(objects);
     }
 
-    private void putAllToAdded(Collection<? extends TARGET> objects) {
+    private synchronized void putAllToAdded(Collection<? extends TARGET> objects) {
         ensureEntitiesWithModifications();
         for (TARGET object : objects) {
             entitiesAdded.put(object, Boolean.TRUE);
@@ -160,13 +158,13 @@ public class ToMany<TARGET> implements List<TARGET> {
     }
 
     @Override
-    public boolean addAll(int index, Collection<? extends TARGET> objects) {
+    public synchronized boolean addAll(int index, Collection<? extends TARGET> objects) {
         putAllToAdded(objects);
         return entities.addAll(index, objects);
     }
 
     @Override
-    public void clear() {
+    public synchronized void clear() {
         List<TARGET> entitiesToClear = entities;
         if (entitiesToClear != null) {
             entitiesToClear.clear();
@@ -310,13 +308,16 @@ public class ToMany<TARGET> implements List<TARGET> {
 
     @Internal
     public void internalPutTarget(Cursor<TARGET> targetCursor) {
-        Iterator<TARGET> iterator = entitiesAdded.keySet().iterator();
+        List<TARGET> putCandidates;
+        synchronized (this) {
+            putCandidates = new ArrayList<>(entitiesAdded.keySet());
+            entitiesAdded.clear();
+        }
         ToOneGetter toOneGetter = relationInfo.toOneGetter;
         long entityId = relationInfo.sourceInfo.getIdGetter().getId(entity);
         IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
 
-        while (iterator.hasNext()) {
-            TARGET target = iterator.next();
+        for (TARGET target : putCandidates) {
             ToOne<Object> toOne = toOneGetter.getToOne(target);
             long toOneTargetId = toOne.getTargetId();
             if (toOneTargetId != entityId) {
@@ -325,7 +326,6 @@ public class ToMany<TARGET> implements List<TARGET> {
             } else if (idGetter.getId(target) == 0) {
                 targetCursor.put(target);
             }
-            iterator.remove();
         }
     }
 

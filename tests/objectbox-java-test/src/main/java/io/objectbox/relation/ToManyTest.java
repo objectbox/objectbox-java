@@ -39,28 +39,54 @@ public class ToManyTest extends AbstractRelationTest {
     @Test
     public void testPutNewCustomerWithNewOrders() {
         Customer customer = new Customer();
-        Order order1 = new Order();
-        order1.setText("foo");
-        Order order2 = new Order();
-        order2.setText("bar");
-        customer.orders.add(order1);
-        customer.orders.add(order2);
+        testPutCustomerWithOrders(customer, 5, 0);
+    }
+
+    @Test
+    public void testPutCustomerWithNewOrders() {
+        Customer customer = putCustomer();
+        testPutCustomerWithOrders(customer, 5, 0);
+    }
+
+    @Test
+    public void testPutNewCustomerWithNewAndExistingOrders() {
+        Customer customer = new Customer();
+        testPutCustomerWithOrders(customer, 5, 5);
+    }
+
+    @Test
+    public void testPutCustomerWithNewAndExistingOrders() {
+        Customer customer = putCustomer();
+        testPutCustomerWithOrders(customer, 5, 5);
+    }
+
+    private void testPutCustomerWithOrders(Customer customer, int countNewOrders, int countExistingOrders) {
+        for (int i = 1; i <= countNewOrders; i++) {
+            Order order = new Order();
+            order.setText("new" + i);
+            customer.orders.add(order);
+        }
+        for (int i = 1; i <= countExistingOrders; i++) {
+            customer.orders.add(putOrder(null, "existing" + i));
+        }
 
         ToMany<Order> toMany = (ToMany<Order>) customer.orders;
-        assertEquals(2, toMany.getAddCount());
+        assertEquals(countNewOrders + countExistingOrders, toMany.getAddCount());
         customerBox.put(customer);
         assertEquals(1, customer.getId());
-        assertEquals(1, order1.getId());
-        assertEquals(2, order2.getId());
         assertEquals(0, toMany.getAddCount());
 
-        assertEquals(1, customerBox.count());
-        assertEquals(2, orderBox.count());
+        for (int i = 1; i <= countNewOrders; i++) {
+            assertEquals(countExistingOrders + i, customer.orders.get(i - 1).getId());
+        }
 
-        assertEquals(customer.getId(), order1.getCustomerId());
-        assertEquals(customer.getId(), order2.getCustomerId());
-        assertEquals(customer.getId(), orderBox.get(order1.getId()).getCustomerId());
-        assertEquals(customer.getId(), orderBox.get(order2.getId()).getCustomerId());
+        assertEquals(1, customerBox.count());
+        assertEquals(countNewOrders + countExistingOrders, orderBox.count());
+
+        for (Order order : customer.orders) {
+            assertEquals(customer.getId(), order.getCustomerId());
+            assertEquals(customer.getId(), orderBox.get(order.getId()).getCustomerId());
+        }
     }
 
     private Customer putCustomerWithOrders() {
