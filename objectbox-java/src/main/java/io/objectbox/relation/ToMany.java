@@ -40,9 +40,13 @@ import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 /**
  * A List representing a to-many relation.
  * It tracks changes (adds and removes) that are synced (persisted) to the target box.
- * That sync happens either on {@link Box#put(Object)} of the source entity of this relation
+ * That DB sync happens either on {@link Box#put(Object)} of the source entity of this relation
  * or using {@link #syncToTargetBox()}.
- * Is thread-safe by default (using the default {@link java.util.concurrent.CopyOnWriteArrayList}).
+ * <p>
+ * If this relation is a backlink from a {@link ToOne} relation, a DB sync will also update ToOne objects
+ * (but not vice versa).
+ * <p>
+ * ToMany is thread-safe by default (only if the default {@link java.util.concurrent.CopyOnWriteArrayList} is used).
  *
  * @param <TARGET> Object type (entity).
  */

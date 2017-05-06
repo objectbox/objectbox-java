@@ -15,6 +15,9 @@ import io.objectbox.internal.ReflectionCache;
  * Manages a to-one relation: resolves the target object, keeps the target Id in sync, etc.
  * A to-relation is unidirectional: it points from the source entity to the target entity.
  * The target is referenced by its ID, which is persisted in the source entity.
+ *
+ * If their is a backlink {@link ToMany} relation based on this to-one relation,
+ * the ToMany object will not be notified/updated about changes done here (use {@link ToMany#reset()} if required).
  */
 // TODO add more tests
 // TODO not exactly thread safe
@@ -129,6 +132,7 @@ public class ToOne<TARGET> {
         }
     }
 
+    // To do a more efficient put with only one property changed.
     void setAndUpdateTargetId(long targetId) {
         setTargetId(targetId);
         ensureBoxes(null);
