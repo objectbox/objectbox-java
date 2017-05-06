@@ -151,6 +151,7 @@ public class ToMany<TARGET> implements List<TARGET> {
     public synchronized boolean add(TARGET object) {
         ensureEntitiesWithModifications();
         entitiesAdded.put(object, Boolean.TRUE);
+        entitiesRemoved.remove(object);
         return entities.add(object);
     }
 
@@ -158,6 +159,7 @@ public class ToMany<TARGET> implements List<TARGET> {
     public synchronized void add(int location, TARGET object) {
         ensureEntitiesWithModifications();
         entitiesAdded.put(object, Boolean.TRUE);
+        entitiesRemoved.remove(object);
         entities.add(location, object);
     }
 
@@ -171,6 +173,7 @@ public class ToMany<TARGET> implements List<TARGET> {
         ensureEntitiesWithModifications();
         for (TARGET object : objects) {
             entitiesAdded.put(object, Boolean.TRUE);
+            entitiesRemoved.remove(object);
         }
     }
 
@@ -249,6 +252,10 @@ public class ToMany<TARGET> implements List<TARGET> {
         return entities.listIterator();
     }
 
+    /**
+     * The returned iterator does not track any potential calls to {@link Iterator#remove()}.
+     * Thus these removes will NOT be synced to the target Box.
+     */
     @Override
     public ListIterator<TARGET> listIterator(int location) {
         ensureEntities();
@@ -318,6 +325,10 @@ public class ToMany<TARGET> implements List<TARGET> {
         return entities.size();
     }
 
+    /**
+     * The returned sub list does not do any change tracking.
+     * Thus any modifications to the sublist won't be synced to the target Box.
+     */
     @Override
     public List<TARGET> subList(int start, int end) {
         ensureEntities();
@@ -350,6 +361,11 @@ public class ToMany<TARGET> implements List<TARGET> {
 
     public int getAddCount() {
         Map<TARGET, Boolean> set = this.entitiesAdded;
+        return set != null ? set.size() : 0;
+    }
+
+    public int getRemoveCount() {
+        Map<TARGET, Boolean> set = this.entitiesRemoved;
         return set != null ? set.size() : 0;
     }
 

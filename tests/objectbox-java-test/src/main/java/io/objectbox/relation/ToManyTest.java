@@ -3,8 +3,13 @@ package io.objectbox.relation;
 import org.junit.Test;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class ToManyTest extends AbstractRelationTest {
@@ -90,7 +95,7 @@ public class ToManyTest extends AbstractRelationTest {
     }
 
     @Test
-    public void testClearOrders() {
+    public void testClear() {
         int count = 5;
         Customer customer = putCustomerWithOrders(count);
         ToMany<Order> toMany = (ToMany<Order>) customer.orders;
@@ -105,13 +110,104 @@ public class ToManyTest extends AbstractRelationTest {
     }
 
     @Test
-    public void testClearOrders_removeFromTargetBox() {
+    public void testClear_removeFromTargetBox() {
         Customer customer = putCustomerWithOrders(5);
         ToMany<Order> toMany = (ToMany<Order>) customer.orders;
         toMany.setRemoveFromTargetBox(true);
         toMany.clear();
         customerBox.put(customer);
         assertEquals(0, orderBox.count());
+    }
+
+    @Test
+    public void testRemove() {
+        int count = 5;
+        Customer customer = putCustomerWithOrders(count);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        Order removed1 = toMany.remove(3);
+        assertEquals("order4", removed1.getText());
+        Order removed2 = toMany.get(1);
+        assertTrue(toMany.remove(removed2));
+        customerBox.put(customer);
+        assertOrder2And4Removed(count, customer, toMany);
+    }
+
+    @Test
+    public void testRemoveAll() {
+        int count = 5;
+        Customer customer = putCustomerWithOrders(count);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        List<Order> toRemove = new ArrayList<>();
+        toRemove.add(toMany.get(1));
+        toRemove.add(toMany.get(3));
+        assertTrue(toMany.removeAll(toRemove));
+        customerBox.put(customer);
+        assertOrder2And4Removed(count, customer, toMany);
+    }
+
+    @Test
+    public void testRetainAll() {
+        int count = 5;
+        Customer customer = putCustomerWithOrders(count);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        List<Order> toRetain = new ArrayList<>();
+        toRetain.add(toMany.get(0));
+        toRetain.add(toMany.get(2));
+        toRetain.add(toMany.get(4));
+        assertTrue(toMany.retainAll(toRetain));
+        customerBox.put(customer);
+        assertOrder2And4Removed(count, customer, toMany);
+    }
+
+    @Test
+    public void testSet() {
+        int count = 5;
+        Customer customer = putCustomerWithOrders(count);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        Order order1 = new Order();
+        order1.setText("new1");
+        assertEquals("order2", toMany.set(1, order1).getText());
+        Order order2 = putOrder(null, "new2");
+        assertEquals("order4", toMany.set(3, order2).getText());
+        assertEquals(count + 1, orderBox.count());
+        customerBox.put(customer);
+        assertEquals(count + 2, orderBox.count());
+
+        toMany.reset();
+        assertEquals(5, toMany.size());
+        assertEquals("order1", toMany.get(0).getText());
+        assertEquals("order3", toMany.get(1).getText());
+        assertEquals("order5", toMany.get(2).getText());
+        assertEquals("new2", toMany.get(3).getText());
+        assertEquals("new1", toMany.get(4).getText());
+    }
+
+    private void assertOrder2And4Removed(int count, Customer customer, ToMany<Order> toMany) {
+        assertEquals(count - 2, countOrdersWithCustomerId(customer.getId()));
+        assertEquals(count, orderBox.count());
+        assertEquals(2, countOrdersWithCustomerId(0));
+
+        toMany.reset();
+        assertEquals(3, toMany.size());
+        assertEquals("order1", toMany.get(0).getText());
+        assertEquals("order3", toMany.get(1).getText());
+        assertEquals("order5", toMany.get(2).getText());
+    }
+
+    @Test
+    public void testAddRemoved() {
+        int count = 5;
+        Customer customer = putCustomerWithOrders(count);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        Order order = toMany.get(2);
+        assertTrue(toMany.remove(order));
+        assertTrue(toMany.add(order));
+        assertTrue(toMany.remove(order));
+        assertTrue(toMany.add(order));
+        assertEquals(0, toMany.getRemoveCount());
+        assertEquals(1, toMany.getAddCount());
+        customerBox.put(customer);
+        assertEquals(count, orderBox.count());
     }
 
     private long countOrdersWithCustomerId(long customerId) {
