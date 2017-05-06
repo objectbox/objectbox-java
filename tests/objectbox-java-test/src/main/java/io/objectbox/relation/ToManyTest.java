@@ -2,14 +2,13 @@ package io.objectbox.relation;
 
 import org.junit.Test;
 
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class ToManyTest extends AbstractRelationTest {
@@ -92,6 +91,32 @@ public class ToManyTest extends AbstractRelationTest {
             assertEquals(customer.getId(), order.getCustomerId());
             assertEquals(customer.getId(), orderBox.get(order.getId()).getCustomerId());
         }
+    }
+
+    @Test
+    public void testAddAll() {
+        Customer customer = putCustomer();
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+
+        List<Order> orders = new ArrayList<>();
+        Order order1 = new Order();
+        order1.setText("order1");
+        Order order2 = new Order();
+        order2.setText("order2");
+        orders.add(order1);
+        orders.add(order2);
+        toMany.addAll(orders);
+        customerBox.put(customer);
+
+        List<Order> all = orderBox.getAll();
+        assertEquals(2, all.size());
+        assertEquals("order1", all.get(0).getText());
+        assertEquals(customer.getId(), all.get(0).getCustomerId());
+        assertEquals("order2", all.get(1).getText());
+        assertEquals(customer.getId(), all.get(1).getCustomerId());
+
+        toMany.reset();
+        assertEquals(2, toMany.size());
     }
 
     @Test
@@ -208,6 +233,44 @@ public class ToManyTest extends AbstractRelationTest {
         assertEquals(1, toMany.getAddCount());
         customerBox.put(customer);
         assertEquals(count, orderBox.count());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testSyncToTargetBox_detached() {
+        Customer customer = new Customer();
+        customer.setId(42);
+        ((ToMany) customer.orders).syncToTargetBox();
+    }
+
+    @Test
+    public void testSyncToTargetBox() {
+        int count = 5;
+        Customer customer = putCustomerWithOrders(count);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        Order order = toMany.get(2);
+        assertTrue(toMany.retainAll(Collections.singletonList(order)));
+
+        toMany.add(putOrder(null, "new1"));
+        Order order2 = new Order();
+        order2.setText("new2");
+        toMany.add(order2);
+
+        assertEquals(4, toMany.getRemoveCount());
+        assertEquals(2, toMany.getAddCount());
+        toMany.syncToTargetBox();
+        assertEquals(0, toMany.getRemoveCount());
+        assertEquals(0, toMany.getAddCount());
+
+        assertEquals(count + 2, orderBox.count());
+        toMany.reset();
+        assertEquals(3, toMany.size());
+        assertEquals("order3", toMany.get(0).getText());
+        assertEquals("new1", toMany.get(1).getText());
+        assertEquals("new2", toMany.get(2).getText());
+
+        assertFalse(toMany.internalRequiresPutTarget());
+        customerBox.put(customer);
+        assertEquals(3, customerBox.get(customer.getId()).orders.size());
     }
 
     private long countOrdersWithCustomerId(long customerId) {

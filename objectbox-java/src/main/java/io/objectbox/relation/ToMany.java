@@ -27,6 +27,7 @@ import java.util.Map;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
+import io.objectbox.InternalAccess;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbDetachedException;
@@ -369,7 +370,36 @@ public class ToMany<TARGET> implements List<TARGET> {
         return set != null ? set.size() : 0;
     }
 
-    /** Called after main entity is put (so we have its ID). */
+    /**
+     * Syncs (persists) tracked changes (added and removed entities) to the target box.
+     * Note that this is done automatically when you put the source entity of this to-many relation.
+     * However, if only this to-many relation has changed, it is more efficient to call this method.
+     *
+     * @throws IllegalStateException If the source entity of this to-many relation was not previously persisted
+     */
+    public void syncToTargetBox() {
+        long id = relationInfo.sourceInfo.getIdGetter().getId(entity);
+        if (id == 0) {
+            throw new IllegalStateException(
+                    "The source entity was not yet persisted (no ID), use box.put() on it instead");
+        }
+        try {
+            ensureBoxes();
+        } catch (DbDetachedException e) {
+            throw new IllegalStateException("The source entity was not yet persisted, use box.put() on it instead");
+        }
+        if (internalRequiresPutTarget()) {
+            Cursor<TARGET> writer = InternalAccess.getWriter(targetBox);
+            try {
+                internalPutTarget(writer);
+                InternalAccess.commitWriter(targetBox, writer);
+            } finally {
+                InternalAccess.releaseWriter(targetBox, writer);
+            }
+        }
+    }
+
+    /** Called after relation source entity is put (so we have its ID). */
     @Internal
     public boolean internalRequiresPutTarget() {
         Map<TARGET, Boolean> setAdded = this.entitiesAdded;
@@ -379,6 +409,9 @@ public class ToMany<TARGET> implements List<TARGET> {
         }
         ToOneGetter toOneGetter = relationInfo.toOneGetter;
         long entityId = relationInfo.sourceInfo.getIdGetter().getId(entity);
+        if (entityId == 0) {
+            throw new IllegalStateException("Source entity has no ID (potential internal error)");
+        }
         IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
         synchronized (this) {
             if (entitiesToPut == null) {

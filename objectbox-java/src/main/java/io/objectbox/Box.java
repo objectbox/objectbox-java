@@ -86,7 +86,7 @@ public class Box<T> {
         return null;
     }
 
-    private Cursor<T> getWriter() {
+    Cursor<T> getWriter() {
         Cursor<T> cursor = getActiveTxCursor();
         if (cursor != null) {
             return cursor;
@@ -101,7 +101,7 @@ public class Box<T> {
         }
     }
 
-    private void commitWriter(Cursor<T> cursor) {
+    void commitWriter(Cursor<T> cursor) {
         // NOP if TX is ongoing
         if (activeTxCursor.get() == null) {
             cursor.close();
@@ -109,7 +109,7 @@ public class Box<T> {
         }
     }
 
-    private void releaseWriter(Cursor<T> cursor) {
+    void releaseWriter(Cursor<T> cursor) {
         // NOP if TX is ongoing
         if (activeTxCursor.get() == null) {
             Transaction tx = cursor.getTx();
