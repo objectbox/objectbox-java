@@ -11,7 +11,7 @@ public class ToManyTest extends AbstractRelationTest {
 
     @Test
     public void testGet() {
-        Customer customer = putCustomerWithOrders();
+        Customer customer = putCustomerWithOrders(2);
         customer = customerBox.get(customer.getId());
         ToMany<Order> toMany = (ToMany<Order>) customer.getOrders();
         assertFalse(toMany.isResolved());
@@ -24,7 +24,7 @@ public class ToManyTest extends AbstractRelationTest {
 
     @Test
     public void testReset() {
-        Customer customer = putCustomerWithOrders();
+        Customer customer = putCustomerWithOrders(2);
         customer = customerBox.get(customer.getId());
         ToMany<Order> toMany = (ToMany<Order>) customer.getOrders();
         assertEquals(2, toMany.size());
@@ -89,10 +89,48 @@ public class ToManyTest extends AbstractRelationTest {
         }
     }
 
-    private Customer putCustomerWithOrders() {
+    @Test
+    public void testRemoveOrders() {
+        int count = 5;
+        Customer customer = putCustomerWithOrders(count);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        assertFalse(toMany.isResolved());
+
+        toMany.clear();
+        assertEquals(count, countOrdersWithCustomerId(customer.getId()));
+        customerBox.put(customer);
+        assertEquals(0, countOrdersWithCustomerId(customer.getId()));
+        assertEquals(count, orderBox.count());
+
+        // assertEquals(count, countOrdersWithCustomerId(0));
+        // assertEquals(5, orderBox.query().notNull(Order_.customerId).build().count());
+        // assertEquals(5, orderBox.query().isNull(Order_.customerId).build().count());
+    }
+
+    @Test
+    public void testRemoveOrders_removeInDb() {
+        int count = 5;
+        Customer customer = putCustomerWithOrders(count);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        assertFalse(toMany.isResolved());
+
+        toMany.clear();
+        assertEquals(count, countOrdersWithCustomerId(customer.getId()));
+        customerBox.put(customer);
+        assertEquals(0, orderBox.count());
+
+    }
+
+    private long countOrdersWithCustomerId(long customerId) {
+        return orderBox.query().equal(Order_.customerId, customerId).build().count();
+    }
+
+
+    private Customer putCustomerWithOrders(int orderCount) {
         Customer customer = putCustomer();
-        putOrder(customer, "order1");
-        putOrder(customer, "order2");
+        for (int i = 1; i <= orderCount; i++) {
+            putOrder(customer, "order" + i);
+        }
         return customer;
     }
 }

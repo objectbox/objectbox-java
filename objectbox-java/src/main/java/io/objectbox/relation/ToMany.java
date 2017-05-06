@@ -51,7 +51,11 @@ public class ToMany<TARGET> implements List<TARGET> {
     /** Entities added since last put/sync. Map is used as a set (value is always Boolean.TRUE). */
     private Map<TARGET, Boolean> entitiesAdded;
 
+    /** Entities removed since last put/sync. Map is used as a set (value is always Boolean.TRUE). */
+    private Map<TARGET, Boolean> entitiesRemoved;
+
     List<TARGET> entitiesToPut;
+    List<TARGET> entitiesToRemove;
 
     private BoxStore boxStore;
     private Box entityBox;
@@ -104,6 +108,7 @@ public class ToMany<TARGET> implements List<TARGET> {
             synchronized (this) {
                 if (entitiesAdded == null) {
                     entitiesAdded = new LinkedHashMap<>(); // Keep order of added items
+                    entitiesRemoved = new LinkedHashMap<>(); // Keep order of added items
                 }
             }
         }
@@ -167,8 +172,12 @@ public class ToMany<TARGET> implements List<TARGET> {
 
     @Override
     public synchronized void clear() {
+        ensureEntitiesWithModifications();
         List<TARGET> entitiesToClear = entities;
         if (entitiesToClear != null) {
+            for (TARGET target : entitiesToClear) {
+                entitiesRemoved.put(target, Boolean.TRUE);
+            }
             entitiesToClear.clear();
         }
 
@@ -237,28 +246,60 @@ public class ToMany<TARGET> implements List<TARGET> {
     }
 
     @Override
-    public TARGET remove(int location) {
-        throw new UnsupportedOperationException();
+    public synchronized TARGET remove(int location) {
+        ensureEntitiesWithModifications();
+        TARGET removed = entities.remove(location);
+        entitiesAdded.remove(removed);
+        entitiesRemoved.put(removed, Boolean.TRUE);
+        return removed;
     }
 
     @Override
-    public boolean remove(Object object) {
-        throw new UnsupportedOperationException();
+    public synchronized boolean remove(Object object) {
+        ensureEntitiesWithModifications();
+        boolean removed = entities.remove(object);
+        if (removed) {
+            entitiesAdded.remove(object);
+            entitiesRemoved.put((TARGET) object, Boolean.TRUE);
+        }
+        return removed;
     }
 
     @Override
-    public boolean removeAll(Collection<?> arg0) {
-        throw new UnsupportedOperationException();
+    public synchronized boolean removeAll(Collection<?> objects) {
+        boolean changes = false;
+        for (Object object : objects) {
+            changes |= remove(object);
+        }
+        return changes;
     }
 
     @Override
-    public boolean retainAll(Collection<?> arg0) {
-        throw new UnsupportedOperationException();
+    public synchronized boolean retainAll(Collection<?> objects) {
+        ensureEntitiesWithModifications();
+        boolean changes = false;
+        Iterator<TARGET> iterator = entities.iterator();
+        while (iterator.hasNext()) {
+            TARGET target = iterator.next();
+            if (!objects.contains(target)) {
+                iterator.remove();
+                entitiesAdded.remove(target);
+                entitiesRemoved.put((TARGET) target, Boolean.TRUE);
+                changes = true;
+            }
+        }
+        return changes;
     }
 
     @Override
-    public TARGET set(int location, TARGET object) {
-        throw new UnsupportedOperationException();
+    public synchronized TARGET set(int location, TARGET object) {
+        ensureEntitiesWithModifications();
+        TARGET old = entities.set(location, object);
+        entitiesAdded.remove(old);
+        entitiesAdded.put(object, Boolean.TRUE);
+        entitiesRemoved.remove(object);
+        entitiesRemoved.put(old, Boolean.TRUE);
+        return old;
     }
 
     @Override
@@ -306,7 +347,8 @@ public class ToMany<TARGET> implements List<TARGET> {
     @Internal
     public boolean internalRequiresPutTarget() {
         Map<TARGET, Boolean> setAdded = this.entitiesAdded;
-        if (setAdded == null || setAdded.isEmpty()) {
+        Map<TARGET, Boolean> setRemoved = this.entitiesRemoved;
+        if ((setAdded == null || setAdded.isEmpty()) && (setRemoved == null || setRemoved.isEmpty())) {
             return false;
         }
         ToOneGetter toOneGetter = relationInfo.toOneGetter;
@@ -315,6 +357,7 @@ public class ToMany<TARGET> implements List<TARGET> {
         synchronized (this) {
             if (entitiesToPut == null) {
                 entitiesToPut = new ArrayList<>();
+                entitiesToRemove = new ArrayList<>();
             }
             for (TARGET target : setAdded.keySet()) {
                 ToOne<Object> toOne = toOneGetter.getToOne(target);
@@ -327,20 +370,43 @@ public class ToMany<TARGET> implements List<TARGET> {
                 }
             }
             setAdded.clear();
-            return !entitiesToPut.isEmpty();
+
+            for (TARGET target : setRemoved.keySet()) {
+                ToOne<Object> toOne = toOneGetter.getToOne(target);
+                long toOneTargetId = toOne.getTargetId();
+                if (toOneTargetId == entityId) {
+                    toOne.setTarget(null);
+                    entitiesToRemove.add(target);
+                }
+            }
+            setRemoved.clear();
+
+            return !entitiesToPut.isEmpty() || !entitiesToRemove.isEmpty();
         }
     }
 
     @Internal
     public void internalPutTarget(Cursor<TARGET> targetCursor) {
+        TARGET[] toRemove;
         TARGET[] toPut;
         synchronized (this) {
-            toPut = (TARGET[]) entitiesToPut.toArray();
+            toRemove = entitiesToRemove.isEmpty() ? null : (TARGET[]) entitiesToRemove.toArray();
+            entitiesToRemove.clear();
+            toPut = entitiesToPut.isEmpty() ? null : (TARGET[]) entitiesToPut.toArray();
             entitiesToPut.clear();
         }
 
-        for (TARGET target : toPut) {
-            targetCursor.put(target);
+        if (toRemove != null) {
+            IdGetter<TARGET> targetIdGetter = relationInfo.targetInfo.getIdGetter();
+            for (TARGET target : toRemove) {
+                long id = targetIdGetter.getId(target);
+                targetCursor.deleteEntity(id);
+            }
+        }
+        if (toPut != null) {
+            for (TARGET target : toPut) {
+                targetCursor.put(target);
+            }
         }
     }
 
