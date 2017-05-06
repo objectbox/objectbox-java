@@ -18,6 +18,8 @@ package io.objectbox.relation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -351,6 +353,10 @@ public class ToMany<TARGET> implements List<TARGET> {
         return entities.toArray(array);
     }
 
+    /**
+     * Resets the already loaded entities so they will be re-loaded on their next access.
+     * This allows to sync with non-tracked changes (outside of this ToMany object).
+     */
     public synchronized void reset() {
         entities = null;
         entitiesAdded = null;
@@ -368,6 +374,32 @@ public class ToMany<TARGET> implements List<TARGET> {
     public int getRemoveCount() {
         Map<TARGET, Boolean> set = this.entitiesRemoved;
         return set != null ? set.size() : 0;
+    }
+
+    /**
+     * Sorts the list by the "natural" ObjectBox order for to-many list (by entity ID).
+     * This will be the order when you get the entities fresh (e.g. initially or after calling {@link #reset()}).
+     * Note that non persisted entities (ID is zero) will be put to the end as they are still to get an ID.
+     */
+    public void sortById() {
+        ensureEntities();
+        Collections.sort(entities, new Comparator<TARGET>() {
+
+            IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
+
+            @Override
+            public int compare(TARGET o1, TARGET o2) {
+                long id1 = idGetter.getId(o1);
+                long id2 = idGetter.getId(o2);
+                if (id1 == 0) id1 = Long.MAX_VALUE;
+                if (id2 == 0) id2 = Long.MAX_VALUE;
+                long delta = id1 - id2;
+                // because of long we cannot simply return delta
+                if (delta < 0) return -1;
+                else if (delta > 0) return 1;
+                else return 0;
+            }
+        });
     }
 
     /**

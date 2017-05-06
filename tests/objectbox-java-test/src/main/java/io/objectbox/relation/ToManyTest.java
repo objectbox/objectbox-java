@@ -273,6 +273,29 @@ public class ToManyTest extends AbstractRelationTest {
         assertEquals(3, customerBox.get(customer.getId()).orders.size());
     }
 
+    @Test
+    public void testSortById() {
+        Customer customer = putCustomerWithOrders(1);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        Order orderNew1 = new Order();
+        orderNew1.setText("new1");
+        toMany.add(orderNew1);
+        Order order2 = putOrder(null, "order2");
+        Order order3 = putOrder(null, "order3");
+        toMany.add(order3);
+        Order orderNew2 = new Order();
+        orderNew2.setText("new2");
+        toMany.add(orderNew2);
+        toMany.add(order2);
+        toMany.sortById();
+
+        assertEquals("order1", toMany.get(0).getText());
+        assertEquals("order2", toMany.get(1).getText());
+        assertEquals("order3", toMany.get(2).getText());
+        assertEquals("new1", toMany.get(3).getText());
+        assertEquals("new2", toMany.get(4).getText());
+    }
+
     private long countOrdersWithCustomerId(long customerId) {
         return orderBox.query().equal(Order_.customerId, customerId).build().count();
     }
