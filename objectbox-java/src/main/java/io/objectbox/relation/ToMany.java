@@ -39,6 +39,9 @@ import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 
 /**
  * A List representing a to-many relation.
+ * It tracks changes (adds and removes) that are synced (persisted) to the target box.
+ * That sync happens either on {@link Box#put(Object)} of the source entity of this relation
+ * or using {@link #syncToTargetBox()}.
  * Is thread-safe by default (using the default {@link java.util.concurrent.CopyOnWriteArrayList}).
  *
  * @param <TARGET> Object type (entity).
@@ -360,6 +363,9 @@ public class ToMany<TARGET> implements List<TARGET> {
     public synchronized void reset() {
         entities = null;
         entitiesAdded = null;
+        entitiesRemoved = null;
+        entitiesToRemove = null;
+        entitiesToPut = null;
     }
 
     public boolean isResolved() {
