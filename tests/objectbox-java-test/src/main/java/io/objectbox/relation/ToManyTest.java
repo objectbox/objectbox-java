@@ -90,7 +90,7 @@ public class ToManyTest extends AbstractRelationTest {
     }
 
     @Test
-    public void testRemoveOrders() {
+    public void testClearOrders() {
         int count = 5;
         Customer customer = putCustomerWithOrders(count);
         ToMany<Order> toMany = (ToMany<Order>) customer.orders;
@@ -101,30 +101,22 @@ public class ToManyTest extends AbstractRelationTest {
         customerBox.put(customer);
         assertEquals(0, countOrdersWithCustomerId(customer.getId()));
         assertEquals(count, orderBox.count());
-
-        // assertEquals(count, countOrdersWithCustomerId(0));
-        // assertEquals(5, orderBox.query().notNull(Order_.customerId).build().count());
-        // assertEquals(5, orderBox.query().isNull(Order_.customerId).build().count());
+        assertEquals(count, countOrdersWithCustomerId(0));
     }
 
     @Test
-    public void testRemoveOrders_removeInDb() {
-        int count = 5;
-        Customer customer = putCustomerWithOrders(count);
+    public void testClearOrders_removeFromTargetBox() {
+        Customer customer = putCustomerWithOrders(5);
         ToMany<Order> toMany = (ToMany<Order>) customer.orders;
-        assertFalse(toMany.isResolved());
-
+        toMany.setRemoveFromTargetBox(true);
         toMany.clear();
-        assertEquals(count, countOrdersWithCustomerId(customer.getId()));
         customerBox.put(customer);
         assertEquals(0, orderBox.count());
-
     }
 
     private long countOrdersWithCustomerId(long customerId) {
         return orderBox.query().equal(Order_.customerId, customerId).build().count();
     }
-
 
     private Customer putCustomerWithOrders(int orderCount) {
         Customer customer = putCustomer();

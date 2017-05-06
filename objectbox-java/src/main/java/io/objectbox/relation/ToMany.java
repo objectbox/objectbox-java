@@ -60,6 +60,7 @@ public class ToMany<TARGET> implements List<TARGET> {
     private BoxStore boxStore;
     private Box entityBox;
     private volatile Box<TARGET> targetBox;
+    private boolean removeFromTargetBox;
 
     public ToMany(Object sourceEntity, RelationInfo<TARGET> relationInfo) {
         this.entity = sourceEntity;
@@ -73,6 +74,15 @@ public class ToMany<TARGET> implements List<TARGET> {
             throw new IllegalArgumentException("ListFactory is null");
         }
         this.listFactory = listFactory;
+    }
+
+    /**
+     * On put, this also deletes removed entities from the target Box.
+     * Note: removed target entities won't cascade the delete.
+     */
+    @Experimental
+    public synchronized void setRemoveFromTargetBox(boolean removeFromTargetBox) {
+        this.removeFromTargetBox = removeFromTargetBox;
     }
 
     public ListFactory getListFactory() {
@@ -376,7 +386,11 @@ public class ToMany<TARGET> implements List<TARGET> {
                 long toOneTargetId = toOne.getTargetId();
                 if (toOneTargetId == entityId) {
                     toOne.setTarget(null);
-                    entitiesToRemove.add(target);
+                    if (removeFromTargetBox) {
+                        entitiesToRemove.add(target);
+                    } else {
+                        entitiesToPut.add(target);
+                    }
                 }
             }
             setRemoved.clear();
