@@ -6,22 +6,19 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import io.objectbox.annotation.apihint.Beta;
+import io.objectbox.annotation.apihint.Temporary;
 
 /**
- * Marks the property (type must be an entity or a List of entities) as a relation (optional?).
+ * Optional annotation for ToOnes to specify a property serving as an ID to the target.
+ * Note: this annotation will likely be renamed/changed in the next version.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 @Beta
+@Temporary
 public @interface Relation {
     /**
-     * Name of the property holding the id (key) as a base for this relation.
-     * <p>
-     * For to-one relations, the id property must reside in the same entity.
-     * <p>
-     * For to-many relations, the id must reside in the target entity as part of a to-one @Relation. This implies that
-     * to-many relations require a to-one relation in the target entity pointing to this entity.
-     * <p>
+     * Name of the property (in the source entity) holding the id (key) as a base for this to-one relation.
      */
     String idProperty() default "";
 }
