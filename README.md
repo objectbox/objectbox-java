@@ -3,7 +3,7 @@ ObjectBox is a new superfast mobile database for objects.
 
 [ObjectBox – The new Mobile Database (Beta)](http://greenrobot.org/objectbox/)
 
-**Latest version: [0.9.12 (2017/05/08)](http://greenrobot.org/objectbox/changelog)**
+**Latest version: [0.9.12(.1) (2017/05/09)](http://greenrobot.org/objectbox/changelog)**
 
 This GitHub repo is a placeholder and will be extended in the future. Right now it serves to [track issues](https://github.com/greenrobot/ObjectBox/issues) with ObjectBox beta.
 
