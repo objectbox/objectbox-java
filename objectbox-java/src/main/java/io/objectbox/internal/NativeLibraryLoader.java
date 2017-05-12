@@ -38,10 +38,11 @@ public class NativeLibraryLoader {
         if (file.exists()) {
             System.load(file.getAbsolutePath());
         } else {
-            if (!android) {
-                System.err.println("File not available: " + file.getAbsolutePath());
-            }
-            System.loadLibrary(libname);
+                throw new RuntimeException("File not available: " + file.getAbsolutePath());
+//            if (!android) {
+//                System.err.println("File not available: " + file.getAbsolutePath());
+//            }
+//            System.loadLibrary(libname);
         }
     }
 
