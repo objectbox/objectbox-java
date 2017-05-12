@@ -27,14 +27,15 @@ public class NativeLibraryLoader {
             if (osName.contains("Windows")) {
                 libname += "-windows" + ("32".equals(sunArch) ? "-x86" : "-x64");
                 filename = libname + ".dll";
-                checkUnpackLib(filename);
+                //checkUnpackLib(filename);
             } else if (osName.contains("Linux")) {
                 libname += "-linux" + ("32".equals(sunArch) ? "-x86" : "-x64");
                 filename = "lib" + libname + ".so";
-                checkUnpackLib(filename);
+                //checkUnpackLib(filename);
             }
         }
         File file = new File(filename);
+        System.err.println("Checking file: " + file.getAbsolutePath());
         if (file.exists()) {
             System.load(file.getAbsolutePath());
         } else {
