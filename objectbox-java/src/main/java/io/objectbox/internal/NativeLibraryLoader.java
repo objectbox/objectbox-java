@@ -18,19 +18,31 @@ import java.net.URLConnection;
 public class NativeLibraryLoader {
     static {
         String libname = "objectbox";
+        String filename = "objectbox.so";
         // For Android, os.name is also "Linux", so we need an extra check
-        if (!System.getProperty("java.vendor").contains("Android")) {
+        boolean android = System.getProperty("java.vendor").contains("Android");
+        if (!android) {
             String osName = System.getProperty("os.name");
             String sunArch = System.getProperty("sun.arch.data.model");
             if (osName.contains("Windows")) {
                 libname += "-windows" + ("32".equals(sunArch) ? "-x86" : "-x64");
-                checkUnpackLib(libname + ".dll");
+                filename = libname + ".dll";
+                checkUnpackLib(filename);
             } else if (osName.contains("Linux")) {
                 libname += "-linux" + ("32".equals(sunArch) ? "-x86" : "-x64");
-                checkUnpackLib("lib" + libname + ".so");
+                filename = "lib" + libname + ".so";
+                checkUnpackLib(filename);
             }
         }
-        System.loadLibrary(libname);
+        File file = new File(filename);
+        if (file.exists()) {
+            System.load(file.getAbsolutePath());
+        } else {
+            if (!android) {
+                System.err.println("File not available: " + file.getAbsolutePath());
+            }
+            System.loadLibrary(libname);
+        }
     }
 
     private static void checkUnpackLib(String filename) {
