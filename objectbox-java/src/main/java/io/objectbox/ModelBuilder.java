@@ -83,6 +83,7 @@ public class ModelBuilder {
 
         Integer id;
         Long uid;
+        Integer flags;
         Integer lastPropertyId;
         Long lastPropertyUid;
         PropertyBuilder propertyBuilder;
@@ -103,6 +104,11 @@ public class ModelBuilder {
             checkNotFinished();
             this.lastPropertyId = lastPropertyId;
             this.lastPropertyUid = lastPropertyUid;
+            return this;
+        }
+
+        public EntityBuilder flags(int flags) {
+            this.flags = flags;
             return this;
         }
 
@@ -146,6 +152,9 @@ public class ModelBuilder {
             if (lastPropertyId != null) {
                 int idOffset = IdUid.createIdUid(fbb, lastPropertyId, lastPropertyUid);
                 ModelEntity.addLastPropertyId(fbb, idOffset);
+            }
+            if(flags != null) {
+                ModelEntity.addFlags(fbb, flags);
             }
             entityOffsets.add(ModelEntity.endModelEntity(fbb));
             return ModelBuilder.this;

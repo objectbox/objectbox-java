@@ -169,7 +169,11 @@ public abstract class AbstractObjectBoxTest {
         entityBuilder.property("simpleByteArray", PropertyType.ByteVector).id(TestEntity_.simpleByteArray.id, ++lastUid);
         int lastId = TestEntity_.simpleByteArray.id;
         entityBuilder.lastPropertyId(lastId, lastUid);
+        addOptionalFlagsToTestEntity(entityBuilder);
         entityBuilder.entityDone();
+    }
+
+    protected void addOptionalFlagsToTestEntity(EntityBuilder entityBuilder) {
     }
 
     private void addTestEntityMinimal(ModelBuilder modelBuilder, boolean withIndex) {

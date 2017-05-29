@@ -15,7 +15,10 @@ public class TestEntity {
     /** Not-null value. */
     private byte[] simpleByteArray;
 
+    transient boolean noArgsConstructorCalled;
+
     public TestEntity() {
+        noArgsConstructorCalled = true;
     }
 
     public TestEntity(long id) {
