@@ -28,10 +28,10 @@ public @interface Entity {
 //     */
 //    String schema() default "default";
 
-//    /**
-//     * Whether an all properties constructor should be generated.
-//     */
-//    boolean generateConstructors() default true;
+    /**
+     * Use a no-arg constructor instead of an all properties constructor (generated).
+     */
+    boolean useNoArgConstructor() default false;
 
 //
 //    /**
