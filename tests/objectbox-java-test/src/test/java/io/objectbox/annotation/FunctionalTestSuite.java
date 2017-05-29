@@ -9,6 +9,7 @@ import io.objectbox.BoxStoreTest;
 import io.objectbox.BoxTest;
 import io.objectbox.CursorBytesTest;
 import io.objectbox.CursorTest;
+import io.objectbox.NonArgConstructorTest;
 import io.objectbox.ObjectClassObserverTest;
 import io.objectbox.TransactionTest;
 import io.objectbox.index.IndexReaderRenewTest;
@@ -27,6 +28,7 @@ import io.objectbox.relation.ToOneTest;
         CursorTest.class,
         CursorBytesTest.class,
         LazyListTest.class,
+        NonArgConstructorTest.class,
         IndexReaderRenewTest.class,
         ObjectClassObserverTest.class,
         QueryObserverTest.class,

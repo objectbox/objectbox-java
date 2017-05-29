@@ -13,6 +13,7 @@ import io.objectbox.relation.ToOneTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+//NOTE: there is a duplicate class (used by Gradle) where any change must be applied too: see src/test/...
         BoxTest.class,
         BoxStoreTest.class,
         BoxStoreBuilderTest.class,
