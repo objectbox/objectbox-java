@@ -19,6 +19,7 @@ import io.objectbox.relation.ToOneTest;
         CursorTest.class,
         CursorBytesTest.class,
         LazyListTest.class,
+        NonArgConstructorTest.class,
         IndexReaderRenewTest.class,
         ObjectClassObserverTest.class,
         QueryObserverTest.class,
