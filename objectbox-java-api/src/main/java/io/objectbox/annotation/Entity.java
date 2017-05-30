@@ -30,6 +30,7 @@ public @interface Entity {
 
     /**
      * Use a no-arg constructor instead of an all properties constructor (generated).
+     * Note that is generally not recommended when using the ObjectBox Gradle plugin for Java classes.
      */
     boolean useNoArgConstructor() default false;
 
