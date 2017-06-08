@@ -2,9 +2,12 @@ package io.objectbox.relation;
 
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import io.objectbox.TestUtils;
 
 
 import static org.junit.Assert.assertEquals;
@@ -294,6 +297,33 @@ public class ToManyTest extends AbstractRelationTest {
         assertEquals("order3", toMany.get(2).getText());
         assertEquals("new1", toMany.get(3).getText());
         assertEquals("new2", toMany.get(4).getText());
+    }
+
+
+    @Test
+    public void testSerializable() throws IOException, ClassNotFoundException {
+        Customer customer = new Customer();
+        customer.setName("source");
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+
+        Customer entityDeserialized = (Customer) TestUtils.serializeDeserialize(toMany).getEntity();
+        assertEquals("source", entityDeserialized.getName());
+
+        Order target = new Order();
+        target.setText("target");
+        toMany.add(target);
+
+        ToMany<Order> toManyDeserialized = TestUtils.serializeDeserialize(toMany);
+        assertEquals(1, toManyDeserialized.size());
+        Order order = toManyDeserialized.get(0);
+        assertEquals("target", order.getText());
+
+        try {
+            customerBox.put((Customer) toManyDeserialized.getEntity());
+        } catch (IllegalStateException e) {
+            // TODO "The ToOne property for Order.customerId is null" -> ToOne is transient; investigate more?
+            e.printStackTrace();
+        }
     }
 
     private long countOrdersWithCustomerId(long customerId) {

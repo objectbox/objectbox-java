@@ -15,6 +15,7 @@
  */
 package io.objectbox.relation;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,7 +51,8 @@ import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
  *
  * @param <TARGET> Object type (entity).
  */
-public class ToMany<TARGET> implements List<TARGET> {
+public class ToMany<TARGET> implements List<TARGET>, Serializable {
+    private static final long serialVersionUID = 2367317778240689006L;
 
     private final Object entity;
     private final RelationInfo<TARGET> relationInfo;
@@ -67,10 +69,10 @@ public class ToMany<TARGET> implements List<TARGET> {
     List<TARGET> entitiesToPut;
     List<TARGET> entitiesToRemove;
 
-    private BoxStore boxStore;
-    private Box entityBox;
-    private volatile Box<TARGET> targetBox;
-    private boolean removeFromTargetBox;
+    transient private BoxStore boxStore;
+    transient private Box entityBox;
+    transient private volatile Box<TARGET> targetBox;
+    transient private boolean removeFromTargetBox;
 
     public ToMany(Object sourceEntity, RelationInfo<TARGET> relationInfo) {
         this.entity = sourceEntity;
@@ -462,6 +464,10 @@ public class ToMany<TARGET> implements List<TARGET> {
             }
             for (TARGET target : setAdded.keySet()) {
                 ToOne<Object> toOne = toOneGetter.getToOne(target);
+                if (toOne == null) {
+                    throw new IllegalStateException("The ToOne property for " + relationInfo.targetInfo.getEntityName()
+                            + "." + relationInfo.targetIdProperty.name + " is null");
+                }
                 long toOneTargetId = toOne.getTargetId();
                 if (toOneTargetId != entityId) {
                     toOne.setTarget(entity);
@@ -515,4 +521,8 @@ public class ToMany<TARGET> implements List<TARGET> {
         }
     }
 
+    /** For tests */
+    Object getEntity() {
+        return entity;
+    }
 }

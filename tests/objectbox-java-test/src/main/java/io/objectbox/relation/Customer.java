@@ -1,5 +1,6 @@
 package io.objectbox.relation;
 
+import java.io.Serializable;
 import java.util.List;
 
 import io.objectbox.BoxStore;
@@ -14,7 +15,7 @@ import io.objectbox.annotation.apihint.Internal;
  * Entity mapped to table "CUSTOMER".
  */
 @Entity
-public class Customer {
+public class Customer implements Serializable {
 
     @Id
     private long id;

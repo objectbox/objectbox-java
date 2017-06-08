@@ -1,11 +1,13 @@
 package io.objectbox;
 
+import java.io.Serializable;
+
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
 
 @Internal
-public interface EntityInfo<T> {
+public interface EntityInfo<T> extends Serializable {
     String getEntityName();
 
     String getDbName();

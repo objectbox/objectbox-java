@@ -1,5 +1,7 @@
 package io.objectbox.relation;
 
+import java.io.Serializable;
+
 import javax.annotation.concurrent.Immutable;
 
 import io.objectbox.EntityInfo;
@@ -11,7 +13,9 @@ import io.objectbox.annotation.apihint.Internal;
 /**
  * Meta info describing a relation including source and target entity.
  */
-public class RelationInfo<TARGET> {
+public class RelationInfo<TARGET> implements Serializable {
+    private static final long serialVersionUID = 7412962174183812632L;
+
     public final EntityInfo sourceInfo;
     public final EntityInfo<TARGET> targetInfo;
     public final Property targetIdProperty;

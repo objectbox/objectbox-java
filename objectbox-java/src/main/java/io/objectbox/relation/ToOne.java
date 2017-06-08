@@ -1,5 +1,6 @@
 package io.objectbox.relation;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 
 import javax.annotation.Nullable;
@@ -15,21 +16,23 @@ import io.objectbox.internal.ReflectionCache;
  * Manages a to-one relation: resolves the target object, keeps the target Id in sync, etc.
  * A to-relation is unidirectional: it points from the source entity to the target entity.
  * The target is referenced by its ID, which is persisted in the source entity.
- *
+ * <p>
  * If their is a backlink {@link ToMany} relation based on this to-one relation,
  * the ToMany object will not be notified/updated about changes done here (use {@link ToMany#reset()} if required).
  */
 // TODO add more tests
 // TODO not exactly thread safe
 // TODO enforce not-null (not zero) checks on the target setters once we use some not-null annotation
-public class ToOne<TARGET> {
+public class ToOne<TARGET> implements Serializable {
+    private static final long serialVersionUID = 5092547044335989281L;
+
     private final Object entity;
     private final RelationInfo relationInfo;
 
-    private BoxStore boxStore;
-    private Box entityBox;
-    private volatile Box<TARGET> targetBox;
-    private Field targetIdField;
+    transient private BoxStore boxStore;
+    transient private Box entityBox;
+    transient private volatile Box<TARGET> targetBox;
+    transient private Field targetIdField;
 
     /**
      * Resolved target entity is cached
@@ -250,5 +253,10 @@ public class ToOne<TARGET> {
         long id = targetCursor.put(target);
         setTargetId(id);
         setResolvedTarget(target, id);
+    }
+
+    /** For tests */
+    Object getEntity() {
+        return entity;
     }
 }

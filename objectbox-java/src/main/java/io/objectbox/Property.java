@@ -16,6 +16,7 @@
 
 package io.objectbox;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import io.objectbox.annotation.apihint.Internal;
@@ -28,7 +29,9 @@ import io.objectbox.query.QueryCondition.PropertyCondition.Operation;
 /**
  * Meta data describing a property
  */
-public class Property {
+public class Property implements Serializable {
+    private static final long serialVersionUID = 8613291105982758093L;
+
     public final int ordinal;
     public final int id;
 

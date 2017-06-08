@@ -3,8 +3,10 @@ package io.objectbox.relation;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
 
 import io.objectbox.Property;
+import io.objectbox.TestUtils;
 
 
 import static org.junit.Assert.assertEquals;
@@ -117,4 +119,21 @@ public class ToOneTest extends AbstractRelationTest {
         assertTrue(target.getId() != 0);
         assertEquals("target1", customerBox.get(target.getId()).getName());
     }
+
+    @Test
+    public void testSerializable() throws IOException, ClassNotFoundException {
+        Order source = new Order();
+        source.setText("source");
+        ToOne<Customer> toOne = new ToOne<>(source, getRelationInfo(Order_.customerId));
+        Order entityDeserialized = (Order) TestUtils.serializeDeserialize(toOne).getEntity();
+        assertEquals("source", entityDeserialized.getText());
+
+        Customer target = new Customer();
+        target.setName("target");
+        toOne.setTarget(target);
+
+        Customer targetDeserialized = TestUtils.serializeDeserialize(toOne).getTarget();
+        assertEquals("target", targetDeserialized.getName());
+    }
+
 }

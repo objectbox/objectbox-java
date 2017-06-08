@@ -1,6 +1,7 @@
 package io.objectbox.relation;
 
-import io.objectbox.Box;
+import java.io.Serializable;
+
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Generated;
@@ -15,7 +16,7 @@ import io.objectbox.exception.DbDetachedException;
  */
 @Entity
 @NameInDb("ORDERS")
-public class Order {
+public class Order implements Serializable {
 
     @Id(assignable = true)
     long id;
@@ -30,6 +31,7 @@ public class Order {
     @Internal
     @Generated(975972993)
     transient BoxStore __boxStore;
+
     @Internal
     @Generated(1031210392)
     transient ToOne<Customer> customer__toOne = new ToOne<>(this, Order_.customer);
