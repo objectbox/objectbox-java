@@ -289,6 +289,9 @@ public class BoxStore implements Closeable {
                 t.close();
             }
             nativeDelete(handle);
+
+            // When running the full unit test suite, we had 100+ threads before, hope this helps:
+            threadPool.shutdown();
         }
     }
 
