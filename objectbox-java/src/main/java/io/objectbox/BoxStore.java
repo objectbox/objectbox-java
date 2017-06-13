@@ -16,6 +16,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -292,6 +293,25 @@ public class BoxStore implements Closeable {
 
             // When running the full unit test suite, we had 100+ threads before, hope this helps:
             threadPool.shutdown();
+            checkThreadTermination();
+        }
+    }
+
+    /** dump thread stacks if pool does not terminate promptly. */
+    private void checkThreadTermination() {
+        try {
+            if (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) {
+                int activeCount = Thread.activeCount();
+                System.err.println("Thread pool not terminated in time; printing stack traces...");
+                Thread[] threads = new Thread[activeCount + 2];
+                int count = Thread.enumerate(threads);
+                for (int i = 0; i < count; i++) {
+                    System.err.println("Thread: " + threads[i].getName());
+                    threads[i].dumpStack();
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
