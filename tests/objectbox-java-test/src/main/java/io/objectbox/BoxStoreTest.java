@@ -27,25 +27,6 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testCloseBulk() {
-        store.close();
-        for (int i = 0; i < 1000; i++) {
-            store = createBoxStore();
-            assertFalse(store.isClosed());
-            store.runInTx(new Runnable() {
-                @Override
-                public void run() {
-                    TestEntity entity = putTestEntity("dummy", 1);
-                    getTestEntityBox().remove(entity);
-                }
-            });
-            assertEquals(0, getTestEntityBox().count());
-            store.close();
-            assertTrue(store.isClosed());
-        }
-    }
-
-    @Test
     public void testEmptyTransaction() {
         Transaction transaction = store.beginTx();
         transaction.commit();
