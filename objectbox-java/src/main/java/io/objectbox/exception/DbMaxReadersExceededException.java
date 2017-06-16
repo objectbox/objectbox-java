@@ -11,4 +11,7 @@ public class DbMaxReadersExceededException extends DbException {
         super(message);
     }
 
+    public DbMaxReadersExceededException(String message, int errorCode) {
+        super(message, errorCode);
+    }
 }

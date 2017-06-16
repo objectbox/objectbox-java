@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 
 import io.objectbox.exception.DbException;
+import io.objectbox.exception.DbMaxReadersExceededException;
 
 
 import static org.junit.Assert.assertArrayEquals;
@@ -194,13 +195,8 @@ public class TransactionTest extends AbstractObjectBoxTest {
                 public void run() {
                     try {
                         Transaction tx = store.beginReadTx();
-                        //tx.createKeyValueCursor();
-                    } catch (DbException e) {
-                        if (e.getErrorCode() == -30790) { // "MDB_READERS_FULL"
-                            readersFull.incrementAndGet();
-                        } else {
-                            throw e;
-                        }
+                    } catch (DbMaxReadersExceededException e) {
+                        readersFull.incrementAndGet();
                     }
                     threadsOK.incrementAndGet();
                 }
