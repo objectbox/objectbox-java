@@ -64,7 +64,7 @@ public class BoxStore implements Closeable {
     /**
      * Clears the convenience instance.
      * <p>
-     * Note: This is usually not required (for testability, please see the comment of     * {@link #getDefault()}).
+     * Note: This is usually not required (for testability, please see the comment of {@link #getDefault()}).
      *
      * @return true if a default store was available before
      */
@@ -109,7 +109,7 @@ public class BoxStore implements Closeable {
     static native int nativeCleanStaleReadTransactions(long store);
 
     public static String getVersion() {
-        return "0.9.12-2017-05-03";
+        return "0.9.13-2017-06-16";
     }
 
     private final File directory;
@@ -146,7 +146,7 @@ public class BoxStore implements Closeable {
         } else if (!directory.mkdirs()) {
             throw new RuntimeException("Could not create directory: " + directory.getAbsolutePath());
         }
-        handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, 0, builder.model);
+        handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.maxReaders, builder.model);
         debugTx = builder.debugTransactions;
 
         for (EntityInfo entityInfo : builder.entityInfoList) {

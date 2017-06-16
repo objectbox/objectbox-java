@@ -20,7 +20,7 @@ import io.objectbox.ideasonly.ModelUpdate;
  * <li>Name/location of DB: use {@link #name(String)}/{@link #baseDirectory}/{@link #androidContext(Object)}
  * OR {@link #directory(File)}(default: name "objectbox)</li>
  * <li>Max DB size: see {@link #maxSizeInKByte} (default: 512 MB)</li>
- * <li>Max readers: see {@link #maxReaders} (default: 126)</li>
+ * <li>Max readers: see {@link #maxReaders(int)} (default: 126)</li>
  * </ol>
  */
 public class BoxStoreBuilder {
@@ -154,6 +154,21 @@ public class BoxStoreBuilder {
         return this;
     }
 
+    /**
+     * Sets the maximum number of concurrent readers. For most applications, the default is fine (> 100 readers).
+     * <p>
+     * A "reader" is short for a thread involved in a read transaction.
+     * <p>
+     * If you hit {@link io.objectbox.exception.DbMaxReadersExceededException}, you should first worry about the
+     * amount of threads you are using.
+     * For highly concurrent setups (e.g. you are using ObjectBox on the server side) it may make sense to increase the
+     * number.
+     */
+    public BoxStoreBuilder maxReaders(int maxReaders) {
+        this.maxReaders = maxReaders;
+        return this;
+    }
+
     @Internal
     public <T> void entity(EntityInfo entityInfo) {
         entityInfoList.add(entityInfo);
@@ -205,6 +220,7 @@ public class BoxStoreBuilder {
 
     /**
      * Builds the default {@link BoxStore} instance, which can be acquired using {@link BoxStore#getDefault()}.
+     * For testability, please see the comment of {@link BoxStore#getDefault()}.
      * <p>
      * May be called once only (throws otherwise).
      */
