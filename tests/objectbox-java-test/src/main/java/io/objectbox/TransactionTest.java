@@ -196,8 +196,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
                         Transaction tx = store.beginReadTx();
                         //tx.createKeyValueCursor();
                     } catch (DbException e) {
-                        if (e.getErrorCode() == -30790 || // "MDB_READERS_FULL"
-                                "Maximum of threads/transactions reached".equals(e.getMessage())) {
+                        if (e.getErrorCode() == -30790) { // "MDB_READERS_FULL"
                             readersFull.incrementAndGet();
                         } else {
                             throw e;
