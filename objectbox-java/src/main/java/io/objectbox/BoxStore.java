@@ -83,7 +83,7 @@ public class BoxStore implements Closeable {
 
     public static native void setCrashReportLogger(CrashReportLogger crashReportLogger);
 
-    static native long nativeCreate(String directory, long maxDbSizeInKByte, byte[] model);
+    static native long nativeCreate(String directory, long maxDbSizeInKByte, int maxReaders, byte[] model);
 
     static native void nativeDelete(long store);
 
@@ -147,7 +147,7 @@ public class BoxStore implements Closeable {
         if (!directory.isDirectory()) {
             throw new RuntimeException("Is not a directory: " + directory.getAbsolutePath());
         }
-        handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.model);
+        handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, 0, builder.model);
         debugTx = builder.debugTransactions;
 
         for (EntityInfo entityInfo : builder.entityInfoList) {
