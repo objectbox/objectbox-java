@@ -139,13 +139,12 @@ public class BoxStore implements Closeable {
         NativeLibraryLoader.ensureLoaded();
 
         this.directory = builder.directory;
-        if (!directory.exists()) {
-            if (!directory.mkdirs()) {
-                throw new RuntimeException("Could not create directory: " + directory.getAbsolutePath());
+        if (directory.exists()) {
+            if (!directory.isDirectory()) {
+                throw new RuntimeException("Is not a directory: " + directory.getAbsolutePath());
             }
-        }
-        if (!directory.isDirectory()) {
-            throw new RuntimeException("Is not a directory: " + directory.getAbsolutePath());
+        } else if (!directory.mkdirs()) {
+            throw new RuntimeException("Could not create directory: " + directory.getAbsolutePath());
         }
         handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, 0, builder.model);
         debugTx = builder.debugTransactions;
