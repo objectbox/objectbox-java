@@ -41,7 +41,7 @@ public abstract class AbstractObjectBoxTest {
         tempFile.delete();
         boxStoreDir = tempFile;
         store = createBoxStore();
-        runExtensiveTests = System.getProperty("extensive") != null;
+        runExtensiveTests = System.getProperty("extensive-tests") != null;
     }
 
     protected BoxStore createBoxStore() {
