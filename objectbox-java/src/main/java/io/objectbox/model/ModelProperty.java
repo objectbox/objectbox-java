@@ -30,14 +30,20 @@ public final class ModelProperty extends Table {
    */
   public String targetEntity() { int o = __offset(14); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer targetEntityAsByteBuffer() { return __vector_as_bytebuffer(14, 1); }
+  /**
+   * E.g. for virtual to-one target ID properties, this references the ToOne object
+   */
+  public String virtualTarget() { int o = __offset(16); return o != 0 ? __string(o + bb_pos) : null; }
+  public ByteBuffer virtualTargetAsByteBuffer() { return __vector_as_bytebuffer(16, 1); }
 
-  public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(6); }
+  public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(7); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addStruct(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(2, (short)type, (short)0); }
   public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(3, (int)flags, (int)0L); }
   public static void addIndexId(FlatBufferBuilder builder, int indexIdOffset) { builder.addStruct(4, indexIdOffset, 0); }
   public static void addTargetEntity(FlatBufferBuilder builder, int targetEntityOffset) { builder.addOffset(5, targetEntityOffset, 0); }
+  public static void addVirtualTarget(FlatBufferBuilder builder, int virtualTargetOffset) { builder.addOffset(6, virtualTargetOffset, 0); }
   public static int endModelProperty(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

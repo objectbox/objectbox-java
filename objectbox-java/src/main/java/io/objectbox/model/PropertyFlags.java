@@ -44,5 +44,9 @@ public final class PropertyFlags {
    * Unused yet, used by References for 1) back-references and 2) to clear references to deleted objects (required for ID reuse)
    */
   public static final int INDEX_PARTIAL_SKIP_ZERO = 512;
+  /**
+   * Virtual properties may not have a dedicated field in their entity class, e.g. target IDs of to-one relations
+   */
+  public static final int VIRTUAL = 1024;
 }
 
