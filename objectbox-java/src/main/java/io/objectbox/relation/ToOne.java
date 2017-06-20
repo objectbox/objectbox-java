@@ -28,6 +28,7 @@ public class ToOne<TARGET> implements Serializable {
 
     private final Object entity;
     private final RelationInfo relationInfo;
+    private final boolean virtualProperty;
 
     transient private BoxStore boxStore;
     transient private Box entityBox;
@@ -37,9 +38,9 @@ public class ToOne<TARGET> implements Serializable {
     /**
      * Resolved target entity is cached
      */
-    protected TARGET target;
+    private TARGET target;
 
-    protected long targetId;
+    private long targetId;
 
     private volatile long resolvedTargetId;
 
@@ -55,6 +56,7 @@ public class ToOne<TARGET> implements Serializable {
     public ToOne(Object sourceEntity, RelationInfo relationInfo) {
         this.entity = sourceEntity;
         this.relationInfo = relationInfo;
+        virtualProperty = relationInfo.targetIdProperty == null;
     }
 
     /**
@@ -100,6 +102,7 @@ public class ToOne<TARGET> implements Serializable {
                 throw new RuntimeException(e);
             }
             entityBox = boxStore.boxFor(relationInfo.sourceInfo.getEntityClass());
+            //noinspection unchecked
             targetBox = boxStore.boxFor(relationInfo.targetInfo.getEntityClass());
         }
     }
@@ -121,14 +124,14 @@ public class ToOne<TARGET> implements Serializable {
     }
 
     public void setTargetId(long targetId) {
-        if (relationInfo.targetIdProperty != null) {
+        if (virtualProperty) {
+            this.targetId = targetId;
+        } else {
             try {
                 getTargetIdField().set(entity, targetId);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("Could not update to-one ID in entity", e);
             }
-        } else {
-            this.targetId = targetId;
         }
         if (targetId != 0) {
             checkIdOfTargetForPut = false;
@@ -220,7 +223,9 @@ public class ToOne<TARGET> implements Serializable {
     }
 
     public long getTargetId() {
-        if (relationInfo.targetIdProperty != null) {
+        if (virtualProperty) {
+            return targetId;
+        } else {
             // Future alternative: Implemented by generated ToOne sub classes to avoid reflection
             Field keyField = getTargetIdField();
             try {
@@ -229,8 +234,6 @@ public class ToOne<TARGET> implements Serializable {
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("Could not access field " + keyField);
             }
-        } else {
-            return targetId;
         }
     }
 
