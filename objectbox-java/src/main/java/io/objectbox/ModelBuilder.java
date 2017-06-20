@@ -34,12 +34,19 @@ public class ModelBuilder {
         }
 
         public PropertyBuilder(String name, String targetEntityName, int type) {
+            this(name, targetEntityName, null, type);
+        }
+        public PropertyBuilder(String name, String targetEntityName, String virtualTarget, int type) {
             int propertyNameOffset = fbb.createString(name);
             int targetEntityOffset = targetEntityName != null ? fbb.createString(targetEntityName) : 0;
+            int virtualTargetOffset = virtualTarget != null ? fbb.createString(virtualTarget) : 0;
             ModelProperty.startModelProperty(fbb);
             ModelProperty.addName(fbb, propertyNameOffset);
             if (targetEntityOffset != 0) {
                 ModelProperty.addTargetEntity(fbb, targetEntityOffset);
+            }
+            if (virtualTargetOffset != 0) {
+                ModelProperty.addVirtualTarget(fbb, virtualTargetOffset);
             }
             ModelProperty.addType(fbb, type);
         }
