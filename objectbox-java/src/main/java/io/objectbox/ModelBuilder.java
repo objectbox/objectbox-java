@@ -29,14 +29,7 @@ public class ModelBuilder {
     public class PropertyBuilder {
         boolean finished;
 
-        public PropertyBuilder(String name, int type) {
-            this(name, null, type);
-        }
-
-        public PropertyBuilder(String name, String targetEntityName, int type) {
-            this(name, targetEntityName, null, type);
-        }
-        public PropertyBuilder(String name, String targetEntityName, String virtualTarget, int type) {
+        PropertyBuilder(String name, String targetEntityName, String virtualTarget, int type) {
             int propertyNameOffset = fbb.createString(name);
             int targetEntityOffset = targetEntityName != null ? fbb.createString(targetEntityName) : 0;
             int virtualTargetOffset = virtualTarget != null ? fbb.createString(virtualTarget) : 0;
@@ -130,9 +123,13 @@ public class ModelBuilder {
         }
 
         public PropertyBuilder property(String name, String targetEntityName, int type) {
+            return property(name, targetEntityName, null, type);
+        }
+
+        public PropertyBuilder property(String name, String targetEntityName, String virtualTarget, int type) {
             checkNotFinished();
             checkFinishProperty();
-            propertyBuilder = new PropertyBuilder(name, targetEntityName, type);
+            propertyBuilder = new PropertyBuilder(name, targetEntityName, virtualTarget, type);
             return propertyBuilder;
         }
 
