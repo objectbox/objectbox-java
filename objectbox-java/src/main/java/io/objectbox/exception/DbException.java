@@ -1,5 +1,9 @@
 package io.objectbox.exception;
 
+/**
+ * General exception for things that may go wrong with the database.
+ * Also base class for more concrete exceptions.
+ */
 public class DbException extends RuntimeException {
     private final int errorCode;
 

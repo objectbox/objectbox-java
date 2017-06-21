@@ -4,10 +4,12 @@ import org.greenrobot.essentials.collections.LongHashMap;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +25,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
+import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbSchemaException;
 import io.objectbox.internal.CrashReportLogger;
 import io.objectbox.internal.NativeLibraryLoader;
@@ -40,6 +43,8 @@ import io.objectbox.reactive.SubscriptionBuilder;
 public class BoxStore implements Closeable {
 
     private static BoxStore defaultStore;
+
+    private static Set<String> openFiles = new HashSet<>();
 
     /**
      * Convenience singleton instance which gets set up using {@link BoxStoreBuilder#buildDefault()}.
@@ -113,6 +118,7 @@ public class BoxStore implements Closeable {
     }
 
     private final File directory;
+    private final String canonicalPath;
     private final long handle;
     private final Map<Class, String> dbNameByClass = new HashMap<>();
     private final Map<Class, Integer> entityTypeIdByClass = new HashMap<>();
@@ -139,14 +145,21 @@ public class BoxStore implements Closeable {
     BoxStore(BoxStoreBuilder builder) {
         NativeLibraryLoader.ensureLoaded();
 
-        this.directory = builder.directory;
+        directory = builder.directory;
         if (directory.exists()) {
             if (!directory.isDirectory()) {
-                throw new RuntimeException("Is not a directory: " + directory.getAbsolutePath());
+                throw new DbException("Is not a directory: " + directory.getAbsolutePath());
             }
         } else if (!directory.mkdirs()) {
-            throw new RuntimeException("Could not create directory: " + directory.getAbsolutePath());
+            throw new DbException("Could not create directory: " + directory.getAbsolutePath());
         }
+        try {
+            canonicalPath = directory.getCanonicalPath();
+        } catch (IOException e) {
+            throw new DbException("Could not verify dir", e);
+        }
+        verifyNotAlreadyOpen(canonicalPath);
+
         handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.maxReaders, builder.model);
         debugTx = builder.debugTransactions;
         debugRelations = builder.debugRelations;
@@ -179,6 +192,28 @@ public class BoxStore implements Closeable {
         }
 
         objectClassPublisher = new ObjectClassPublisher(this);
+    }
+
+    private static void verifyNotAlreadyOpen(String canonicalPath) {
+        synchronized (openFiles) {
+            int tries = 0;
+            while (tries < 5 && openFiles.contains(canonicalPath)) {
+                tries++;
+                System.gc();
+                System.runFinalization();
+                System.gc();
+                System.runFinalization();
+                try {
+                    openFiles.wait(100);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
+            }
+            if (!openFiles.add(canonicalPath)) {
+                throw new DbException("Another BoxStore is still open for this directory: " + canonicalPath+
+                        ". Hint: for most apps it's recommended to keep a BoxStore for the app's life time.");
+            }
+        }
     }
 
     @Override
@@ -280,21 +315,31 @@ public class BoxStore implements Closeable {
         return closed;
     }
 
-    public synchronized void close() {
-        if (!closed) {
-            closed = true;
-            List<Transaction> transactionsToClose;
-            synchronized (transactions) {
-                transactionsToClose = new ArrayList<>(this.transactions);
-            }
-            for (Transaction t : transactionsToClose) {
-                t.close();
-            }
-            nativeDelete(handle);
+    public void close() {
+        boolean oldClosedState;
+        synchronized (this) {
+            oldClosedState = closed;
+            if (!closed) {
+                closed = true;
+                List<Transaction> transactionsToClose;
+                synchronized (transactions) {
+                    transactionsToClose = new ArrayList<>(this.transactions);
+                }
+                for (Transaction t : transactionsToClose) {
+                    t.close();
+                }
+                nativeDelete(handle);
 
-            // When running the full unit test suite, we had 100+ threads before, hope this helps:
-            threadPool.shutdown();
-            checkThreadTermination();
+                // When running the full unit test suite, we had 100+ threads before, hope this helps:
+                threadPool.shutdown();
+                checkThreadTermination();
+            }
+        }
+        if (!oldClosedState) {
+            synchronized (openFiles) {
+                openFiles.remove(canonicalPath);
+                openFiles.notifyAll();
+            }
         }
     }
 

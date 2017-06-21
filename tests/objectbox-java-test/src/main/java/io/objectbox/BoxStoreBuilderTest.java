@@ -32,6 +32,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         BoxStore boxStore = builder.buildDefault();
         assertSame(boxStore, BoxStore.getDefault());
         assertSame(boxStore, BoxStore.getDefault());
+        boxStore.close(); // to prevent "Another BoxStore was opened" error
         try {
             builder.buildDefault();
             fail("Should have thrown");

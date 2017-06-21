@@ -2,6 +2,10 @@ package io.objectbox;
 
 import org.junit.Test;
 
+import java.io.File;
+
+import io.objectbox.exception.DbException;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -64,6 +68,24 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         Cursor<TestEntity> reader3 = box.getReader();
         box.releaseReader(reader3);
         assertNotSame(reader, reader3);
+    }
+
+    @Test(expected = DbException.class)
+    public void testPreventTwoBoxStoresWithSameFileOpenend() {
+        createBoxStore();
+    }
+
+    @Test
+    public void testOpenSameBoxStoreAfterClose() {
+        store.close();
+        createBoxStore();
+    }
+
+    @Test
+    public void testOpenTwoBoxStoreTwoFiles() {
+        File boxStoreDir2 = new File(boxStoreDir.getAbsolutePath() + "-2");
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir2);
+        builder.entity(new TestEntity_());
     }
 
 }
