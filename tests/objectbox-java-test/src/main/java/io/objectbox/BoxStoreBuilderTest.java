@@ -43,7 +43,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
 
     @Test
     public void testClearDefaultStore() {
-        builder.buildDefault();
+        BoxStore boxStore1 = builder.buildDefault();
         BoxStore.clearDefaultStore();
         try {
             BoxStore.getDefault();
@@ -51,6 +51,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         } catch (IllegalStateException expected) {
             // OK
         }
+        boxStore1.close();
         BoxStore boxStore = builder.buildDefault();
         assertSame(boxStore, BoxStore.getDefault());
     }
