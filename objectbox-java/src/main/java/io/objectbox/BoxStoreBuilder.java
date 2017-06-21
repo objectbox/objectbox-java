@@ -51,6 +51,8 @@ public class BoxStoreBuilder {
 
     boolean debugTransactions;
 
+    boolean debugRelations;
+
     int maxReaders;
 
     final List<EntityInfo> entityInfoList = new ArrayList<>();
@@ -196,8 +198,15 @@ public class BoxStoreBuilder {
         return this;
     }
 
+    /** Enables some debug logging for transactions. */
     public BoxStoreBuilder debugTransactions() {
         this.debugTransactions = true;
+        return this;
+    }
+
+    /** Enables some debug logging for relations. */
+    public BoxStoreBuilder debugRelations() {
+        this.debugRelations = true;
         return this;
     }
 

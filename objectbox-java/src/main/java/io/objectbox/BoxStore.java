@@ -124,6 +124,7 @@ public class BoxStore implements Closeable {
     private final ExecutorService threadPool = new ObjectBoxThreadPool(this);
     private final ObjectClassPublisher objectClassPublisher;
     final boolean debugTx;
+    final boolean debugRelations;
 
     /** Set when running inside TX */
     final ThreadLocal<Transaction> activeTx = new ThreadLocal<>();
@@ -148,6 +149,7 @@ public class BoxStore implements Closeable {
         }
         handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.maxReaders, builder.model);
         debugTx = builder.debugTransactions;
+        debugRelations = builder.debugRelations;
 
         for (EntityInfo entityInfo : builder.entityInfoList) {
             try {
@@ -353,7 +355,7 @@ public class BoxStore implements Closeable {
         synchronized (txCommitCountLock) {
             commitCount++; // Overflow is OK because we check for equality
             if (debugTx) {
-                System.out.println("TX committed, new with commit count " + commitCount);
+                System.out.println("TX committed. New commit count: " + commitCount);
             }
         }
 
@@ -577,4 +579,8 @@ public class BoxStore implements Closeable {
         return threadPool;
     }
 
+    @Internal
+    public boolean isDebugRelations() {
+        return debugRelations;
+    }
 }
