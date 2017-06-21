@@ -210,6 +210,8 @@ public class ToOne<TARGET> implements Serializable {
 
     /** Both values should be set (and read) "atomically" using synchronized. */
     private synchronized void setResolvedTarget(@Nullable TARGET target, long targetId) {
+        // FIXME temp debug log
+        System.out.println("Setting resolved ToOne target to " + (target == null ? "null" : "non-null") + " for ID " + targetId);
         resolvedTargetId = targetId;
         this.target = target;
     }
