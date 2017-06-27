@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 
 import static org.junit.Assert.assertEquals;
@@ -157,6 +158,24 @@ public class BoxTest extends AbstractObjectBoxTest {
         long key2 = box2.put(entity2);
         TestEntityMinimal entity2Read = box2.get(key2);
         assertEquals("foo", entity2Read.getText());
+    }
+
+    @Test
+    public void testGetIds() {
+        List<TestEntity> entities = putTestEntities(5);
+
+        List<Long> ids = new ArrayList<>();
+        ids.add(entities.get(1).getId());
+        ids.add(entities.get(3).getId());
+        List<TestEntity> readEntities = box.get(ids);
+        assertEquals(2, readEntities.size());
+        assertEquals((long) ids.get(0), readEntities.get(0).getId());
+        assertEquals((long) ids.get(1), readEntities.get(1).getId());
+
+        Map<Long, TestEntity> map = box.getMap(ids);
+        assertEquals(2, map.size());
+        assertEquals((long) ids.get(0), map.get(ids.get(0)).getId());
+        assertEquals((long) ids.get(1), map.get(ids.get(1)).getId());
     }
 
     @Test

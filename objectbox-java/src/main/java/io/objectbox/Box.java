@@ -4,7 +4,9 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
@@ -191,7 +193,46 @@ public class Box<T> {
         } finally {
             releaseReader(reader);
         }
+    }
 
+    /**
+     * Get the stored objects for the given IDs.
+     *
+     * @return null if not found
+     */
+    public List<T> get(Iterable<Long> ids) {
+        ArrayList<T> list = new ArrayList<>();
+        Cursor<T> reader = getReader();
+        try {
+            for (Long id : ids) {
+                T entity = reader.get(id);
+                if (entity != null) {
+                    list.add(entity);
+                }
+            }
+        } finally {
+            releaseReader(reader);
+        }
+        return list;
+    }
+
+    /**
+     * Get the stored objects for the given IDs as a Map with IDs as keys, and entities as values.
+     * IDs for none entity is found will be put in the map with null values.
+     *
+     * @return null if not found
+     */
+    public Map<Long, T> getMap(Iterable<Long> ids) {
+        HashMap<Long, T> map = new HashMap<>();
+        Cursor<T> reader = getReader();
+        try {
+            for (Long id : ids) {
+                map.put(id, reader.get(id));
+            }
+        } finally {
+            releaseReader(reader);
+        }
+        return map;
     }
 
     /**
