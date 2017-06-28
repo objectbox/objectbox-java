@@ -218,7 +218,7 @@ public class Box<T> {
 
     /**
      * Get the stored objects for the given IDs as a Map with IDs as keys, and entities as values.
-     * IDs for none entity is found will be put in the map with null values.
+     * IDs for which no entity is found will be put in the map with null values.
      *
      * @return null if not found
      */
