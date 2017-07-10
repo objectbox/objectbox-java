@@ -217,6 +217,27 @@ public class Box<T> {
     }
 
     /**
+     * Get the stored objects for the given IDs.
+     *
+     * @return null if not found
+     */
+    public List<T> get(long[] ids) {
+        ArrayList<T> list = new ArrayList<>(ids.length);
+        Cursor<T> reader = getReader();
+        try {
+            for (Long id : ids) {
+                T entity = reader.get(id);
+                if (entity != null) {
+                    list.add(entity);
+                }
+            }
+        } finally {
+            releaseReader(reader);
+        }
+        return list;
+    }
+
+    /**
      * Get the stored objects for the given IDs as a Map with IDs as keys, and entities as values.
      * IDs for which no entity is found will be put in the map with null values.
      *
@@ -558,6 +579,21 @@ public class Box<T> {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    // Sketching future API extension
+    private boolean isEmpty() {
+        return false;
+    }
+
+    // Sketching future API extension
+    private boolean isChanged(T entity) {
+        return false;
+    }
+
+    // Sketching future API extension
+    private boolean putIfChanged(T entity) {
+        return false;
     }
 
     public Class<T> getEntityClass() {
