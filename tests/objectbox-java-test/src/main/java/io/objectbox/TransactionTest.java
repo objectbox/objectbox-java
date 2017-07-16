@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,6 +17,7 @@ import io.objectbox.exception.DbMaxReadersExceededException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -369,11 +371,11 @@ public class TransactionTest extends AbstractObjectBoxTest {
 
             @SuppressWarnings("NullableProblems")
             public void txFinished(Object result, @Nullable Throwable error) {
-                threadsDoneLatch.countDown();
                 if (error != null) {
                     errorCount.incrementAndGet();
                     error.printStackTrace();
                 }
+                threadsDoneLatch.countDown();
             }
         };
         for (int i = 0; i < countThreads; i++) {
@@ -383,6 +385,32 @@ public class TransactionTest extends AbstractObjectBoxTest {
         assertEquals(countThreads * countEntities, number.get());
         assertEquals(countThreads * countEntities, box.count());
         assertEquals(0, errorCount.get());
+    }
+
+    @Test
+    public void testCallInTxAsync_Error() throws InterruptedException {
+        Callable<Object> callable = new Callable<Object>() {
+            @Override
+            public Long call() throws Exception {
+                TestEntity entity = new TestEntity();
+                entity.setId(-1);
+                getTestEntityBox().put(entity);
+                return null;
+            }
+        };
+        final LinkedBlockingQueue<Throwable> queue = new LinkedBlockingQueue<>();
+        TxCallback<Object> callback = new TxCallback<Object>() {
+            @Override
+
+            @SuppressWarnings("NullableProblems")
+            public void txFinished(Object result, @Nullable Throwable error) {
+                queue.add(error);
+            }
+        };
+        store.callInTxAsync(callable, callback);
+
+        Throwable result = queue.poll(5, TimeUnit.SECONDS);
+        assertNotNull(result);
     }
 
 
