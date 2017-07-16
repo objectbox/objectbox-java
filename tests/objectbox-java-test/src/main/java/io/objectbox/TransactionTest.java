@@ -342,6 +342,23 @@ public class TransactionTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testRunInTx_PutAfterRemoveAll() {
+        final Box<TestEntity> box = getTestEntityBox();
+        final long[] counts = {0};
+        box.put(new TestEntity());
+        store.runInTx(new Runnable() {
+            @Override
+            public void run() {
+                putTestEntities(2);
+                box.removeAll();
+                putTestEntity("hello", 3);
+                counts[0] = box.count();
+            }
+        });
+        assertEquals(1, counts[0]);
+    }
+
+    @Test
     public void testCallInTxAsync_multiThreaded() throws InterruptedException {
         final Box<TestEntity> box = getTestEntityBox();
         final Thread mainTestThread = Thread.currentThread();
