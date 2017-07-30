@@ -242,7 +242,7 @@ public class ToManyTest extends AbstractRelationTest {
     public void testSyncToTargetBox_detached() {
         Customer customer = new Customer();
         customer.setId(42);
-        ((ToMany) customer.orders).syncToTargetBox();
+        ((ToMany) customer.orders).applyChangesToDb();
     }
 
     @Test
@@ -260,7 +260,7 @@ public class ToManyTest extends AbstractRelationTest {
 
         assertEquals(4, toMany.getRemoveCount());
         assertEquals(2, toMany.getAddCount());
-        toMany.syncToTargetBox();
+        toMany.applyChangesToDb();
         assertEquals(0, toMany.getRemoveCount());
         assertEquals(0, toMany.getAddCount());
 
@@ -271,7 +271,7 @@ public class ToManyTest extends AbstractRelationTest {
         assertEquals("new1", toMany.get(1).getText());
         assertEquals("new2", toMany.get(2).getText());
 
-        assertFalse(toMany.internalRequiresPutTarget());
+        assertFalse(toMany.internalCheckApplyToDbRequired());
         customerBox.put(customer);
         assertEquals(3, customerBox.get(customer.getId()).orders.size());
     }

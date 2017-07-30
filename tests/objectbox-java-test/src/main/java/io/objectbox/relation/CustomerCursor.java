@@ -58,8 +58,8 @@ public final class CustomerCursor extends Cursor<Customer> {
 
         if (entity.orders instanceof ToMany) {
             ToMany<Order> toMany = (ToMany<Order>) entity.orders;
-            if (toMany.internalRequiresPutTarget()) {
-                toMany.internalPutTarget(getRelationTargetCursor(Order.class));
+            if (toMany.internalCheckApplyToDbRequired()) {
+                toMany.internalApplyToDb(this, getRelationTargetCursor(Order.class));
             }
         }
         return __assignedId;

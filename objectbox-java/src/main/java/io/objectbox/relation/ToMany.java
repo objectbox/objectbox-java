@@ -40,9 +40,9 @@ import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 
 /**
  * A List representing a to-many relation.
- * It tracks changes (adds and removes) that are synced (persisted) to the target box.
- * That DB sync happens either on {@link Box#put(Object)} of the source entity of this relation
- * or using {@link #syncToTargetBox()}.
+ * It tracks changes (adds and removes) that can be later applied (persisted) to the database.
+ * This happens either on {@link Box#put(Object)} of the source entity of this relation or using
+ * {@link #applyChangesToDb()}.
  * <p>
  * If this relation is a backlink from a {@link ToOne} relation, a DB sync will also update ToOne objects
  * (but not vice versa).
@@ -160,6 +160,11 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     @Override
+    /**
+     * Adds the given entity to the list and tracks the addition so it can be later applied to the database
+     * (e.g. via {@link Box#put(Object)} of the entity owning the ToMany, or via {@link #applyChangesToDb()}).
+     * Note that the given entity will remain unchanged at this point (e.g. to-ones are not updated).
+     */
     public synchronized boolean add(TARGET object) {
         ensureEntitiesWithModifications();
         entitiesAdded.put(object, Boolean.TRUE);
@@ -168,6 +173,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     @Override
+    /** See {@link #add(Object)} for general comments. */
     public synchronized void add(int location, TARGET object) {
         ensureEntitiesWithModifications();
         entitiesAdded.put(object, Boolean.TRUE);
@@ -176,6 +182,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     @Override
+    /** See {@link #add(Object)} for general comments. */
     public synchronized boolean addAll(Collection<? extends TARGET> objects) {
         putAllToAdded(objects);
         return entities.addAll(objects);
@@ -190,6 +197,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     @Override
+    /** See {@link #add(Object)} for general comments. */
     public synchronized boolean addAll(int index, Collection<? extends TARGET> objects) {
         putAllToAdded(objects);
         return entities.addAll(index, objects);
@@ -415,13 +423,14 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     /**
-     * Syncs (persists) tracked changes (added and removed entities) to the target box.
+     * Applies (persists) tracked changes (added and removed entities) to the target box
+     * and/or updates standalone relations.
      * Note that this is done automatically when you put the source entity of this to-many relation.
      * However, if only this to-many relation has changed, it is more efficient to call this method.
      *
      * @throws IllegalStateException If the source entity of this to-many relation was not previously persisted
      */
-    public void syncToTargetBox() {
+    public void applyChangesToDb() {
         long id = relationInfo.sourceInfo.getIdGetter().getId(entity);
         if (id == 0) {
             throw new IllegalStateException(
@@ -432,20 +441,35 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         } catch (DbDetachedException e) {
             throw new IllegalStateException("The source entity was not yet persisted, use box.put() on it instead");
         }
-        if (internalRequiresPutTarget()) {
-            Cursor<TARGET> writer = InternalAccess.getWriter(targetBox);
-            try {
-                internalPutTarget(writer);
-                InternalAccess.commitWriter(targetBox, writer);
-            } finally {
-                InternalAccess.releaseWriter(targetBox, writer);
-            }
+        if (internalCheckApplyToDbRequired()) {
+            // We need a TX because we use two writers and both must use same TX (without: unchecked, SIGSEGV)
+            boxStore.runInTx(new Runnable() {
+                @Override
+                public void run() {
+                    Cursor sourceWriter = InternalAccess.getWriter(entityBox);
+                    try {
+                        Cursor<TARGET> targetWriter = InternalAccess.getWriter(targetBox);
+                        try {
+                            internalApplyToDb(sourceWriter, targetWriter);
+                            InternalAccess.commitWriter(targetBox, targetWriter);
+                        } finally {
+                            InternalAccess.releaseWriter(targetBox, targetWriter);
+                        }
+                    } finally {
+                        InternalAccess.releaseWriter(entityBox, sourceWriter);
+                    }
+                }
+            });
         }
     }
 
-    /** Called after relation source entity is put (so we have its ID). */
+    /**
+     * For internal use only; do not use in your app.
+     * Called after relation source entity is put (so we have its ID).
+     * Prepares data for {@link #internalApplyToDb(Cursor, Cursor)}
+     */
     @Internal
-    public boolean internalRequiresPutTarget() {
+    public boolean internalCheckApplyToDbRequired() {
         Map<TARGET, Boolean> setAdded = this.entitiesAdded;
         Map<TARGET, Boolean> setRemoved = this.entitiesRemoved;
         if ((setAdded == null || setAdded.isEmpty()) && (setRemoved == null || setRemoved.isEmpty())) {
@@ -457,47 +481,64 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             throw new IllegalStateException("Source entity has no ID (potential internal error)");
         }
         IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
+        boolean isStandaloneRelation = relationInfo.relationId != 0;
         synchronized (this) {
             if (entitiesToPut == null) {
                 entitiesToPut = new ArrayList<>();
                 entitiesToRemove = new ArrayList<>();
             }
-            for (TARGET target : setAdded.keySet()) {
-                ToOne<Object> toOne = toOneGetter.getToOne(target);
-                if (toOne == null) {
-                    throw new IllegalStateException("The ToOne property for " + relationInfo.targetInfo.getEntityName()
-                            + "." + relationInfo.targetIdProperty.name + " is null");
-                }
-                long toOneTargetId = toOne.getTargetId();
-                if (toOneTargetId != entityId) {
-                    toOne.setTarget(entity);
-                    entitiesToPut.add(target);
-                } else if (idGetter.getId(target) == 0) {
-                    entitiesToPut.add(target);
-                }
-            }
-            setAdded.clear();
-
-            for (TARGET target : setRemoved.keySet()) {
-                ToOne<Object> toOne = toOneGetter.getToOne(target);
-                long toOneTargetId = toOne.getTargetId();
-                if (toOneTargetId == entityId) {
-                    toOne.setTarget(null);
-                    if (removeFromTargetBox) {
-                        entitiesToRemove.add(target);
-                    } else {
+            if (isStandaloneRelation) {
+                for (TARGET target : setAdded.keySet()) {
+                    if (idGetter.getId(target) == 0) {
                         entitiesToPut.add(target);
                     }
                 }
+                if (removeFromTargetBox) {
+                    entitiesToRemove.addAll(setRemoved.keySet());
+                }
+            } else {
+                for (TARGET target : setAdded.keySet()) {
+                    ToOne<Object> toOne = toOneGetter.getToOne(target);
+                    if (toOne == null) {
+                        throw new IllegalStateException("The ToOne property for " +
+                                relationInfo.targetInfo.getEntityName() + "." + relationInfo.targetIdProperty.name +
+                                " is null");
+                    }
+                    long toOneTargetId = toOne.getTargetId();
+                    if (toOneTargetId != entityId) {
+                        toOne.setTarget(entity);
+                        entitiesToPut.add(target);
+                    } else if (idGetter.getId(target) == 0) {
+                        entitiesToPut.add(target);
+                    }
+                }
+                setAdded.clear();
+
+                for (TARGET target : setRemoved.keySet()) {
+                    ToOne<Object> toOne = toOneGetter.getToOne(target);
+                    long toOneTargetId = toOne.getTargetId();
+                    if (toOneTargetId == entityId) {
+                        toOne.setTarget(null);
+                        if (removeFromTargetBox) {
+                            entitiesToRemove.add(target);
+                        } else {
+                            entitiesToPut.add(target);
+                        }
+                    }
+                }
+                setRemoved.clear();
             }
-            setRemoved.clear();
 
             return !entitiesToPut.isEmpty() || !entitiesToRemove.isEmpty();
         }
     }
 
+    /**
+     * For internal use only; do not use in your app.
+     * Convention: {@link #internalCheckApplyToDbRequired()} must be called before this call as it prepares .
+     */
     @Internal
-    public void internalPutTarget(Cursor<TARGET> targetCursor) {
+    public void internalApplyToDb(Cursor sourceCursor, Cursor<TARGET> targetCursor) {
         TARGET[] toRemove;
         TARGET[] toPut;
         synchronized (this) {
