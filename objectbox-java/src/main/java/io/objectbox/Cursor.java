@@ -91,6 +91,12 @@ public abstract class Cursor<T> implements Closeable {
 
     static native List nativeGetBacklinkEntities(long cursor, int entityId, int propertyId, long key);
 
+    static native List nativeGetRelationEntities(long cursor, int relationId, long key);
+
+    static native void nativeModifyRelations(long cursor, int relationId, long key, long[] targetKeys, boolean remove);
+
+    static native void nativeModifyRelationsSingle(long cursor, int relationId, long key, long targetKey, boolean remove);
+
     static native void nativeSetBoxStoreForEntities(long cursor, Object boxStore);
 
     protected Transaction tx;
@@ -251,6 +257,7 @@ public abstract class Cursor<T> implements Closeable {
         return cursor;
     }
 
+    @Internal
     List<T> getBacklinkEntities(int entityId, Property relationIdProperty, long key) {
         try {
             return nativeGetBacklinkEntities(cursor, entityId, relationIdProperty.getId(), key);
@@ -258,6 +265,21 @@ public abstract class Cursor<T> implements Closeable {
             throw new IllegalArgumentException("Please check if the given property belongs to a valid @Relation: "
                     + relationIdProperty, e);
         }
+    }
+
+    @Internal
+    public List<T> getRelationEntities(int relationId, long key) {
+        return nativeGetRelationEntities(cursor, relationId, key);
+    }
+
+    @Internal
+    public void modifyRelations(int relationId, long key, long[] targetKeys, boolean remove) {
+        nativeModifyRelations(cursor, relationId, key, targetKeys, remove);
+    }
+
+    @Internal
+    public void modifyRelationsSingle(int relationId, long key, long targetKey, boolean remove) {
+        nativeModifyRelationsSingle(cursor, relationId, key, targetKey, remove);
     }
 
     @Override

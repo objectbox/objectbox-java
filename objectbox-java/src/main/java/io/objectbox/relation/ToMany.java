@@ -583,29 +583,26 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 throw new IllegalStateException("Source entity has no ID (should have been put before)");
             }
 
-            if (removedStandalone != null) {
-                for (TARGET target : removedStandalone) {
-                    long id = targetIdGetter.getId(target);
-                    if (id == 0) {
-                        // Paranoia
-                        throw new IllegalStateException("Target entity has no ID (should have been put before)");
-                    }
-// TODO
-                }
-            }
-            if (addedStandalone != null) {
-                for (TARGET target : addedStandalone) {
-                    long id = targetIdGetter.getId(target);
-                    if (id == 0) {
-                        // Paranoia
-                        throw new IllegalStateException("Target entity has no ID (should have been put before)");
-                    }
-
-// TODO
-                }
-            }
+            checkModifyStandaloneRelation(sourceCursor, entityId, removedStandalone, targetIdGetter, true);
+            checkModifyStandaloneRelation(sourceCursor, entityId, addedStandalone, targetIdGetter, false);
         }
+    }
 
+    private void checkModifyStandaloneRelation(Cursor cursor, long sourceEntityId, TARGET[] targets,
+                                               IdGetter<TARGET> targetIdGetter, boolean remove) {
+        if (targets != null) {
+            int length = targets.length;
+            long[] targetIds = new long[length];
+            for (int i = 0; i < length; i++) {
+                long targetId = targetIdGetter.getId(targets[i]);
+                if (targetId == 0) {
+                    // Paranoia
+                    throw new IllegalStateException("Target entity has no ID (should have been put before)");
+                }
+                targetIds[i] = targetId;
+            }
+            cursor.modifyRelations(relationInfo.relationId, sourceEntityId, targetIds, remove);
+        }
     }
 
     /** For tests */
