@@ -10,7 +10,9 @@ import io.objectbox.model.IdUid;
 import io.objectbox.model.Model;
 import io.objectbox.model.ModelEntity;
 import io.objectbox.model.ModelProperty;
+import io.objectbox.model.ModelRelation;
 
+// Remember: IdUid is a struct, not a table, and thus must be inlined
 @Internal
 public class ModelBuilder {
     private static final int MODEL_VERSION = 2;
@@ -25,6 +27,9 @@ public class ModelBuilder {
 
     Integer lastIndexId;
     Long lastIndexUid;
+
+    Integer lastRelationId;
+    Long lastRelationUid;
 
     public class PropertyBuilder {
         boolean finished;
@@ -80,6 +85,7 @@ public class ModelBuilder {
     public class EntityBuilder {
         final String name;
         final List<Integer> propertyOffsets = new ArrayList<>();
+        final List<Integer> relationOffsets = new ArrayList<>();
 
         Integer id;
         Long uid;
@@ -140,15 +146,36 @@ public class ModelBuilder {
             }
         }
 
+        public EntityBuilder relation(String name, int relationId, long relationUid, int targetEntityId,
+                                      long targetEntityUid) {
+            checkNotFinished();
+            checkFinishProperty();
+
+            int propertyNameOffset = fbb.createString(name);
+            int relationIdOffset = IdUid.createIdUid(fbb, relationId, relationUid);
+            int targetEntityIdOffset = IdUid.createIdUid(fbb, targetEntityId, targetEntityUid);
+
+            ModelRelation.startModelRelation(fbb);
+            ModelRelation.addName(fbb, propertyNameOffset);
+            ModelRelation.addId(fbb, relationIdOffset);
+            ModelRelation.addTargetEntityId(fbb, targetEntityIdOffset);
+            relationOffsets.add(ModelRelation.endModelRelation(fbb));
+
+            return this;
+        }
+
         public ModelBuilder entityDone() {
             checkNotFinished();
             checkFinishProperty();
             finished = true;
             int testEntityNameOffset = fbb.createString(name);
             int propertiesOffset = createVector(propertyOffsets);
+            int relationsOffset = relationOffsets.isEmpty() ? 0 : createVector(relationOffsets);
+
             ModelEntity.startModelEntity(fbb);
             ModelEntity.addName(fbb, testEntityNameOffset);
             ModelEntity.addProperties(fbb, propertiesOffset);
+            if (relationsOffset != 0) ModelEntity.addRelations(fbb, relationsOffset);
             if (id != null || uid != null) {
                 int idOffset = IdUid.createIdUid(fbb, id, uid);
                 ModelEntity.addId(fbb, idOffset);
@@ -157,7 +184,7 @@ public class ModelBuilder {
                 int idOffset = IdUid.createIdUid(fbb, lastPropertyId, lastPropertyUid);
                 ModelEntity.addLastPropertyId(fbb, idOffset);
             }
-            if(flags != null) {
+            if (flags != null) {
                 ModelEntity.addFlags(fbb, flags);
             }
             entityOffsets.add(ModelEntity.endModelEntity(fbb));
@@ -194,6 +221,12 @@ public class ModelBuilder {
         return this;
     }
 
+    public ModelBuilder lastRelationId(int lastRelationId, long lastRelationUid) {
+        this.lastRelationId = lastRelationId;
+        this.lastRelationUid = lastRelationUid;
+        return this;
+    }
+
     public byte[] build() {
         int nameOffset = fbb.createString("default");
         int entityVectorOffset = createVector(entityOffsets);
@@ -209,6 +242,10 @@ public class ModelBuilder {
         if (lastIndexId != null) {
             int idOffset = IdUid.createIdUid(fbb, lastIndexId, lastIndexUid);
             Model.addLastIndexId(fbb, idOffset);
+        }
+        if (lastRelationId != null) {
+            int idOffset = IdUid.createIdUid(fbb, lastRelationId, lastRelationUid);
+            Model.addLastRelationId(fbb, idOffset);
         }
         int offset = Model.endModel(fbb);
 
