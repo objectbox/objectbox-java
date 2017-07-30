@@ -124,7 +124,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         }
     }
 
-    private void ensureEntitiesWithModifications() {
+    private void ensureEntitiesWithTrackingLists() {
         ensureEntities();
         if (entitiesAdded == null) {
             synchronized (this) {
@@ -148,8 +148,14 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 }
             } else {
                 ensureBoxes();
-                List<TARGET> newEntities = targetBox.getBacklinkEntities(relationInfo.targetInfo.getEntityId(),
-                        relationInfo.targetIdProperty, id);
+                List<TARGET> newEntities;
+                int relationId = relationInfo.relationId;
+                if (relationId != 0) {
+                    newEntities = targetBox.internalGetRelationEntities(relationId, id);
+                } else {
+                    newEntities = targetBox.internalGetBacklinkEntities(relationInfo.targetInfo.getEntityId(),
+                            relationInfo.targetIdProperty, id);
+                }
                 synchronized (this) {
                     if (entities == null) {
                         entities = newEntities;
@@ -166,7 +172,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
      * Note that the given entity will remain unchanged at this point (e.g. to-ones are not updated).
      */
     public synchronized boolean add(TARGET object) {
-        ensureEntitiesWithModifications();
+        ensureEntitiesWithTrackingLists();
         entitiesAdded.put(object, Boolean.TRUE);
         entitiesRemoved.remove(object);
         return entities.add(object);
@@ -175,7 +181,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     @Override
     /** See {@link #add(Object)} for general comments. */
     public synchronized void add(int location, TARGET object) {
-        ensureEntitiesWithModifications();
+        ensureEntitiesWithTrackingLists();
         entitiesAdded.put(object, Boolean.TRUE);
         entitiesRemoved.remove(object);
         entities.add(location, object);
@@ -189,7 +195,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     private synchronized void putAllToAdded(Collection<? extends TARGET> objects) {
-        ensureEntitiesWithModifications();
+        ensureEntitiesWithTrackingLists();
         for (TARGET object : objects) {
             entitiesAdded.put(object, Boolean.TRUE);
             entitiesRemoved.remove(object);
@@ -205,7 +211,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     @Override
     public synchronized void clear() {
-        ensureEntitiesWithModifications();
+        ensureEntitiesWithTrackingLists();
         List<TARGET> entitiesToClear = entities;
         if (entitiesToClear != null) {
             for (TARGET target : entitiesToClear) {
@@ -284,7 +290,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     @Override
     public synchronized TARGET remove(int location) {
-        ensureEntitiesWithModifications();
+        ensureEntitiesWithTrackingLists();
         TARGET removed = entities.remove(location);
         entitiesAdded.remove(removed);
         entitiesRemoved.put(removed, Boolean.TRUE);
@@ -293,7 +299,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     @Override
     public synchronized boolean remove(Object object) {
-        ensureEntitiesWithModifications();
+        ensureEntitiesWithTrackingLists();
         boolean removed = entities.remove(object);
         if (removed) {
             entitiesAdded.remove(object);
@@ -313,7 +319,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     @Override
     public synchronized boolean retainAll(Collection<?> objects) {
-        ensureEntitiesWithModifications();
+        ensureEntitiesWithTrackingLists();
         boolean changes = false;
         Iterator<TARGET> iterator = entities.iterator();
         while (iterator.hasNext()) {
@@ -330,7 +336,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     @Override
     public synchronized TARGET set(int location, TARGET object) {
-        ensureEntitiesWithModifications();
+        ensureEntitiesWithTrackingLists();
         TARGET old = entities.set(location, object);
         entitiesAdded.remove(old);
         entitiesAdded.put(object, Boolean.TRUE);

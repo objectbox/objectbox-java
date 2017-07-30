@@ -601,10 +601,20 @@ public class Box<T> {
     }
 
     @Internal
-    public List<T> getBacklinkEntities(int entityId, Property relationIdProperty, long key) {
+    public List<T> internalGetBacklinkEntities(int entityId, Property relationIdProperty, long key) {
         Cursor<T> reader = getReader();
         try {
             return reader.getBacklinkEntities(entityId, relationIdProperty, key);
+        } finally {
+            releaseReader(reader);
+        }
+    }
+
+    @Internal
+    public List<T> internalGetRelationEntities(int relationId, long key) {
+        Cursor<T> reader = getReader();
+        try {
+            return reader.getRelationEntities(relationId, key);
         } finally {
             releaseReader(reader);
         }
