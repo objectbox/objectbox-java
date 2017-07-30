@@ -478,7 +478,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         ToOneGetter toOneGetter = relationInfo.toOneGetter;
         long entityId = relationInfo.sourceInfo.getIdGetter().getId(entity);
         if (entityId == 0) {
-            throw new IllegalStateException("Source entity has no ID (potential internal error)");
+            throw new IllegalStateException("Source entity has no ID (should have been put before)");
         }
         IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
         boolean isStandaloneRelation = relationInfo.relationId != 0;
@@ -488,14 +488,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 entitiesToRemove = new ArrayList<>();
             }
             if (isStandaloneRelation) {
-                for (TARGET target : setAdded.keySet()) {
-                    if (idGetter.getId(target) == 0) {
-                        entitiesToPut.add(target);
-                    }
-                }
-                if (removeFromTargetBox) {
-                    entitiesToRemove.addAll(setRemoved.keySet());
-                }
+                // No prep here, all is done inside a single synchronized block in internalApplyToDb
+                return !setAdded.isEmpty() || !setRemoved.isEmpty();
             } else {
                 for (TARGET target : setAdded.keySet()) {
                     ToOne<Object> toOne = toOneGetter.getToOne(target);
@@ -527,9 +521,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                     }
                 }
                 setRemoved.clear();
+                return !entitiesToPut.isEmpty() || !entitiesToRemove.isEmpty();
             }
-
-            return !entitiesToPut.isEmpty() || !entitiesToRemove.isEmpty();
         }
     }
 
@@ -541,7 +534,31 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     public void internalApplyToDb(Cursor sourceCursor, Cursor<TARGET> targetCursor) {
         TARGET[] toRemove;
         TARGET[] toPut;
+        TARGET[] addedStandalone = null;
+        TARGET[] removedStandalone = null;
+
+        boolean isStandaloneRelation = relationInfo.relationId != 0;
+        IdGetter<TARGET> targetIdGetter = relationInfo.targetInfo.getIdGetter();
         synchronized (this) {
+            if (isStandaloneRelation) {
+                for (TARGET target : entitiesAdded.keySet()) {
+                    if (targetIdGetter.getId(target) == 0) {
+                        entitiesToPut.add(target);
+                    }
+                }
+                if (removeFromTargetBox) {
+                    entitiesToRemove.addAll(entitiesRemoved.keySet());
+                }
+                if (!entitiesAdded.isEmpty()) {
+                    addedStandalone = (TARGET[]) entitiesAdded.keySet().toArray();
+                    entitiesAdded.clear();
+                }
+                if (!entitiesRemoved.isEmpty()) {
+                    removedStandalone = (TARGET[]) entitiesRemoved.keySet().toArray();
+                    entitiesRemoved.clear();
+                }
+            }
+
             toRemove = entitiesToRemove.isEmpty() ? null : (TARGET[]) entitiesToRemove.toArray();
             entitiesToRemove.clear();
             toPut = entitiesToPut.isEmpty() ? null : (TARGET[]) entitiesToPut.toArray();
@@ -549,7 +566,6 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         }
 
         if (toRemove != null) {
-            IdGetter<TARGET> targetIdGetter = relationInfo.targetInfo.getIdGetter();
             for (TARGET target : toRemove) {
                 long id = targetIdGetter.getId(target);
                 targetCursor.deleteEntity(id);
@@ -560,6 +576,36 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 targetCursor.put(target);
             }
         }
+
+        if (isStandaloneRelation) {
+            long entityId = relationInfo.sourceInfo.getIdGetter().getId(entity);
+            if (entityId == 0) {
+                throw new IllegalStateException("Source entity has no ID (should have been put before)");
+            }
+
+            if (removedStandalone != null) {
+                for (TARGET target : removedStandalone) {
+                    long id = targetIdGetter.getId(target);
+                    if (id == 0) {
+                        // Paranoia
+                        throw new IllegalStateException("Target entity has no ID (should have been put before)");
+                    }
+// TODO
+                }
+            }
+            if (addedStandalone != null) {
+                for (TARGET target : addedStandalone) {
+                    long id = targetIdGetter.getId(target);
+                    if (id == 0) {
+                        // Paranoia
+                        throw new IllegalStateException("Target entity has no ID (should have been put before)");
+                    }
+
+// TODO
+                }
+            }
+        }
+
     }
 
     /** For tests */
