@@ -1,6 +1,8 @@
 package io.objectbox.relation;
 
 
+import java.util.List;
+
 import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
 import io.objectbox.EntityInfo;
@@ -59,9 +61,28 @@ public final class CustomerCursor extends Cursor<Customer> {
         if (entity.orders instanceof ToMany) {
             ToMany<Order> toMany = (ToMany<Order>) entity.orders;
             if (toMany.internalCheckApplyToDbRequired()) {
-                toMany.internalApplyToDb(this, getRelationTargetCursor(Order.class));
+                Cursor<Order> targetCursor = getRelationTargetCursor(Order.class);
+                try {
+                    toMany.internalApplyToDb(this, targetCursor);
+                } finally {
+                    targetCursor.close();
+                }
             }
         }
+
+        List<Order> ordersStandalone = entity.getOrdersStandalone();
+        if (ordersStandalone instanceof ToMany) {
+            ToMany<Order> toMany = (ToMany<Order>) ordersStandalone;
+            if (toMany.internalCheckApplyToDbRequired()) {
+                Cursor<Order> targetCursor = getRelationTargetCursor(Order.class);
+                try {
+                    toMany.internalApplyToDb(this, targetCursor);
+                } finally {
+                    targetCursor.close();
+                }
+            }
+        }
+
         return __assignedId;
     }
 

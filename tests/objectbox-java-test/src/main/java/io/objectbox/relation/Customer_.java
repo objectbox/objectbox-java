@@ -100,4 +100,7 @@ public class Customer_ implements EntityInfo<Customer> {
                 }
             });
 
+    static final RelationInfo<Order> ordersStandalone =
+            new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, 1);
+
 }

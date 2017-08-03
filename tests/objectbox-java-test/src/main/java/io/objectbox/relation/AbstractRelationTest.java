@@ -17,7 +17,7 @@ public abstract class AbstractRelationTest extends AbstractObjectBoxTest {
 
     @Override
     protected BoxStore createBoxStore() {
-        return MyObjectBox.builder().baseDirectory(boxStoreDir).build();
+        return MyObjectBox.builder().baseDirectory(boxStoreDir).debugTransactions().build();
     }
 
     @After

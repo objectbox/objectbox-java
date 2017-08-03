@@ -26,6 +26,8 @@ public class Customer implements Serializable {
     @Relation(idProperty = "customerId")
     List<Order> orders = new ToMany<>(this, Customer_.orders);
 
+    ToMany<Order> ordersStandalone = new ToMany<>(this, Customer_.ordersStandalone);
+
     /** Used to resolve relations */
     @Internal
     @Generated(1307364262)
@@ -61,4 +63,7 @@ public class Customer implements Serializable {
         return orders;
     }
 
+    public ToMany<Order> getOrdersStandalone() {
+        return ordersStandalone;
+    }
 }

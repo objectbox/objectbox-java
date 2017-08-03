@@ -28,6 +28,7 @@ public class MyObjectBox {
         ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.lastEntityId(4, 5318696586219463633L);
         modelBuilder.lastIndexId(2, 8919874872236271392L);
+        modelBuilder.lastRelationId(1, 8943758920347589435L);
 
         EntityBuilder entityBuilder;
 
@@ -37,6 +38,7 @@ public class MyObjectBox {
                 .flags(PropertyFlags.ID | PropertyFlags.NOT_NULL | PropertyFlags.ID_SELF_ASSIGNABLE);
         entityBuilder.property("name", PropertyType.String).id(2, 7412962174183812632L)
                 .flags(PropertyFlags.INDEXED).indexId(1, 5782921847050580892L);
+        entityBuilder.relation("ordersStandalone", 1, 8943758920347589435L, 3, 6367118380491771428L);
         entityBuilder.entityDone();
 
 
