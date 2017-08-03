@@ -322,15 +322,21 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     public synchronized boolean retainAll(Collection<?> objects) {
         ensureEntitiesWithTrackingLists();
         boolean changes = false;
-        Iterator<TARGET> iterator = entities.iterator();
-        while (iterator.hasNext()) {
-            TARGET target = iterator.next();
+        List<TARGET> toRemove = null;
+        // Do not use Iterator with remove because not all List Types support it (e.g. CopyOnWriteArrayList)
+        for (TARGET target : entities) {
             if (!objects.contains(target)) {
-                iterator.remove();
+                if (toRemove == null) {
+                    toRemove = new ArrayList<>();
+                }
+                toRemove.add(target);
                 entitiesAdded.remove(target);
                 entitiesRemoved.put((TARGET) target, Boolean.TRUE);
                 changes = true;
             }
+        }
+        if(toRemove != null) {
+            entities.removeAll(toRemove);
         }
         return changes;
     }
