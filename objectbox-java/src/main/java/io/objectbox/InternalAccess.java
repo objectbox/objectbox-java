@@ -16,6 +16,10 @@ public class InternalAccess {
         return box.getWriter();
     }
 
+    public static <T> Cursor<T> getActiveTxCursor(Box<T> box) {
+        return box.getActiveTxCursor();
+    }
+
     public static <T> void releaseWriter(Box<T> box, Cursor<T> writer) {
         box.releaseWriter(writer);
     }

@@ -151,7 +151,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 List<TARGET> newEntities;
                 int relationId = relationInfo.relationId;
                 if (relationId != 0) {
-                    newEntities = entityBox.internalGetRelationEntities(relationId, id);
+                    int sourceEntityId = relationInfo.sourceInfo.getEntityId();
+                    newEntities = targetBox.internalGetRelationEntities(sourceEntityId, relationId, id);
                 } else {
                     newEntities = targetBox.internalGetBacklinkEntities(relationInfo.targetInfo.getEntityId(),
                             relationInfo.targetIdProperty, id);
@@ -452,18 +453,9 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             boxStore.runInTx(new Runnable() {
                 @Override
                 public void run() {
-                    Cursor sourceWriter = InternalAccess.getWriter(entityBox);
-                    try {
-                        Cursor<TARGET> targetWriter = InternalAccess.getWriter(targetBox);
-                        try {
-                            internalApplyToDb(sourceWriter, targetWriter);
-                            InternalAccess.commitWriter(targetBox, targetWriter);
-                        } finally {
-                            InternalAccess.releaseWriter(targetBox, targetWriter);
-                        }
-                    } finally {
-                        InternalAccess.releaseWriter(entityBox, sourceWriter);
-                    }
+                    Cursor sourceCursor = InternalAccess.getActiveTxCursor(entityBox);
+                    Cursor<TARGET> targetCursor = InternalAccess.getActiveTxCursor(targetBox);
+                    internalApplyToDb(sourceCursor, targetCursor);
                 }
             });
         }

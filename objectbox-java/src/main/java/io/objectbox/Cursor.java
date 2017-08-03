@@ -91,7 +91,7 @@ public abstract class Cursor<T> implements Closeable {
 
     static native List nativeGetBacklinkEntities(long cursor, int entityId, int propertyId, long key);
 
-    static native List nativeGetRelationEntities(long cursor, int relationId, long key);
+    static native List nativeGetRelationEntities(long cursor, int sourceEntityId, int relationId, long key);
 
     static native void nativeModifyRelations(long cursor, int relationId, long key, long[] targetKeys, boolean remove);
 
@@ -268,8 +268,8 @@ public abstract class Cursor<T> implements Closeable {
     }
 
     @Internal
-    public List<T> getRelationEntities(int relationId, long key) {
-        return nativeGetRelationEntities(cursor, relationId, key);
+    public List<T> getRelationEntities(int sourceEntityId, int relationId, long key) {
+        return nativeGetRelationEntities(cursor, sourceEntityId, relationId, key);
     }
 
     @Internal

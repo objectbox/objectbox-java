@@ -72,7 +72,7 @@ public class Box<T> {
         return cursor;
     }
 
-    private Cursor<T> getActiveTxCursor() {
+    Cursor<T> getActiveTxCursor() {
         Transaction activeTx = store.activeTx.get();
         if (activeTx != null) {
             if (activeTx.isClosed()) {
@@ -611,10 +611,10 @@ public class Box<T> {
     }
 
     @Internal
-    public List<T> internalGetRelationEntities(int relationId, long key) {
+    public List<T> internalGetRelationEntities(int sourceEntityId, int relationId, long key) {
         Cursor<T> reader = getReader();
         try {
-            return reader.getRelationEntities(relationId, key);
+            return reader.getRelationEntities(sourceEntityId, relationId, key);
         } finally {
             releaseReader(reader);
         }
