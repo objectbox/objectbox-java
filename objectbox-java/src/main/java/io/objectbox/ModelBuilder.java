@@ -152,12 +152,12 @@ public class ModelBuilder {
             checkFinishProperty();
 
             int propertyNameOffset = fbb.createString(name);
-            int relationIdOffset = IdUid.createIdUid(fbb, relationId, relationUid);
-            int targetEntityIdOffset = IdUid.createIdUid(fbb, targetEntityId, targetEntityUid);
 
             ModelRelation.startModelRelation(fbb);
             ModelRelation.addName(fbb, propertyNameOffset);
+            int relationIdOffset = IdUid.createIdUid(fbb, relationId, relationUid);
             ModelRelation.addId(fbb, relationIdOffset);
+            int targetEntityIdOffset = IdUid.createIdUid(fbb, targetEntityId, targetEntityUid);
             ModelRelation.addTargetEntityId(fbb, targetEntityIdOffset);
             relationOffsets.add(ModelRelation.endModelRelation(fbb));
 
