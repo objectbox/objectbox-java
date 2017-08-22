@@ -12,6 +12,8 @@ import io.objectbox.annotation.apihint.Beta;
  * <p>
  * Example: one "Order" references one "Customer" (to-one relation).
  * The backlink to this is a to-many in the reverse direction: one "Customer" has a number of "Order"s.
+ *
+ * Note: backlinks to to-many relations will be supported in the future.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)

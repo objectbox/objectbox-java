@@ -20,5 +20,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.CLASS)
 @Target({ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.TYPE})
+@Deprecated
 public @interface Keep {
 }

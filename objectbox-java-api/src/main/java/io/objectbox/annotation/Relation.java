@@ -16,6 +16,7 @@ import io.objectbox.annotation.apihint.Temporary;
 @Target(ElementType.FIELD)
 @Beta
 @Temporary
+@Deprecated
 public @interface Relation {
     /**
      * Name of the property (in the source entity) holding the id (key) as a base for this to-one relation.
