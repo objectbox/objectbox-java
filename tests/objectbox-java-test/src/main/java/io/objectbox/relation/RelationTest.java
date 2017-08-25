@@ -84,4 +84,43 @@ public class RelationTest extends AbstractRelationTest {
         assertEquals(order.getId(), orderFound.getId());
     }
 
+    @Test
+    public void testToOneBulk() {
+        // JNI local refs are limited on Android (for example, 512 on Android 7)
+        final int count = runExtensiveTests ? 10000 : 1000;
+        store.runInTx(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < count; i++) {
+                    Customer customer = new Customer(0, "Customer" + i);
+                    customerBox.put(customer);
+                    putOrder(customer, "order" + 1);
+                }
+            }
+        });
+        assertEquals(count, customerBox.getAll().size());
+        assertEquals(count, orderBox.getAll().size());
+    }
+
+    @Test
+    public void testToManyBulk() {
+        // JNI local refs are limited on Android (for example, 512 on Android 7)
+        final int count = runExtensiveTests ? 10000 : 1000;
+        Customer customer = new Customer();
+        List<Order> orders = customer.getOrders();
+        List<Order> ordersStandalone = customer.getOrdersStandalone();
+        for (int i = 0; i < count; i++) {
+            Order order = new Order();
+            order.setText("order" + i);
+            orders.add(order);
+            Order orderStandalone = new Order();
+            orderStandalone.setText("orderStandalone" + i);
+            ordersStandalone.add(orderStandalone);
+        }
+        long customerId = customerBox.put(customer);
+
+        assertEquals(count, customerBox.get(customerId).getOrders().size());
+        assertEquals(count, customerBox.get(customerId).getOrdersStandalone().size());
+    }
+
 }
