@@ -479,7 +479,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         if ((setAdded == null || setAdded.isEmpty()) && (setRemoved == null || setRemoved.isEmpty())) {
             return false;
         }
-        ToOneGetter toOneGetter = relationInfo.toOneGetter;
+        ToOneGetter backlinkToOneGetter = relationInfo.backlinkToOneGetter;
         long entityId = relationInfo.sourceInfo.getIdGetter().getId(entity);
         if (entityId == 0) {
             throw new IllegalStateException("Source entity has no ID (should have been put before)");
@@ -496,7 +496,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 return !setAdded.isEmpty() || !setRemoved.isEmpty();
             } else {
                 for (TARGET target : setAdded.keySet()) {
-                    ToOne<Object> toOne = toOneGetter.getToOne(target);
+                    ToOne<Object> toOne = backlinkToOneGetter.getToOne(target);
                     if (toOne == null) {
                         throw new IllegalStateException("The ToOne property for " +
                                 relationInfo.targetInfo.getEntityName() + "." + relationInfo.targetIdProperty.name +
@@ -513,7 +513,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 setAdded.clear();
 
                 for (TARGET target : setRemoved.keySet()) {
-                    ToOne<Object> toOne = toOneGetter.getToOne(target);
+                    ToOne<Object> toOne = backlinkToOneGetter.getToOne(target);
                     long toOneTargetId = toOne.getTargetId();
                     if (toOneTargetId == entityId) {
                         toOne.setTarget(null);
