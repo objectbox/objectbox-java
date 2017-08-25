@@ -1,11 +1,11 @@
 package io.objectbox.internal;
 
 import java.io.Serializable;
+import java.util.List;
 
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.relation.ToMany;
 
 @Internal
 public interface ToManyGetter<SOURCE> extends Serializable {
-    <TARGET> ToMany<TARGET> getToMany(SOURCE object);
+    <TARGET> List<TARGET> getToMany(SOURCE object);
 }
