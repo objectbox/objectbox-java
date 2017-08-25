@@ -1,16 +1,13 @@
 
 package io.objectbox.relation;
 
-import javax.annotation.Nullable;
-
-import io.objectbox.BoxStore;
-import io.objectbox.Cursor;
 import io.objectbox.EntityInfo;
 import io.objectbox.Property;
-import io.objectbox.Transaction;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
+import io.objectbox.internal.ToManyGetter;
+import io.objectbox.internal.ToOneGetter;
 import io.objectbox.relation.CustomerCursor.Factory;
 
 // THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project
@@ -93,7 +90,12 @@ public class Customer_ implements EntityInfo<Customer> {
     }
 
     static final RelationInfo<Order> orders =
-            new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, Order_.customerId, new ToOneGetter<Order>() {
+            new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, Order_.customerId, new ToManyGetter<Customer>() {
+                @Override
+                public ToMany<Order> getToMany(Customer customer) {
+                    return (ToMany<Order>) customer.getOrders();
+                }
+            }, new ToOneGetter<Order>() {
                 @Override
                 public ToOne<Customer> getToOne(Order order) {
                     return order.customer__toOne;
@@ -101,6 +103,11 @@ public class Customer_ implements EntityInfo<Customer> {
             });
 
     static final RelationInfo<Order> ordersStandalone =
-            new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, 1);
+            new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, 1, new ToManyGetter<Customer>() {
+                @Override
+                public ToMany<Order> getToMany(Customer customer) {
+                    return (ToMany<Order>) customer.getOrders();
+                }
+            });
 
 }

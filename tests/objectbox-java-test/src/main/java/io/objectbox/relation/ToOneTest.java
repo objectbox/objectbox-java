@@ -30,7 +30,7 @@ public class ToOneTest extends AbstractRelationTest {
     }
 
     private RelationInfo<Customer> getRelationInfo(Property targetIdProperty) {
-        return new RelationInfo<>(new Order_(), new Customer_(), targetIdProperty);
+        return new RelationInfo<>(new Order_(), new Customer_(), targetIdProperty, null);
     }
 
     @Test

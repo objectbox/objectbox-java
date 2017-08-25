@@ -34,8 +34,7 @@ import io.objectbox.InternalAccess;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbDetachedException;
-import io.objectbox.internal.IdGetter;
-import io.objectbox.internal.ReflectionCache;
+import io.objectbox.internal.*;
 import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 
 /**
@@ -479,7 +478,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         if ((setAdded == null || setAdded.isEmpty()) && (setRemoved == null || setRemoved.isEmpty())) {
             return false;
         }
-        ToOneGetter backlinkToOneGetter = relationInfo.backlinkToOneGetter;
+        io.objectbox.internal.ToOneGetter backlinkToOneGetter = relationInfo.backlinkToOneGetter;
         long entityId = relationInfo.sourceInfo.getIdGetter().getId(entity);
         if (entityId == 0) {
             throw new IllegalStateException("Source entity has no ID (should have been put before)");

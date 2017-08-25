@@ -11,6 +11,7 @@ import io.objectbox.Transaction;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
+import io.objectbox.internal.ToOneGetter;
 import io.objectbox.relation.OrderCursor.Factory;
 
 // THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project
@@ -97,6 +98,11 @@ public class Order_ implements EntityInfo<Order> {
         }
     }
 
-    static final RelationInfo<Customer> customer = new RelationInfo<>(Order_.__INSTANCE, Customer_.__INSTANCE, customerId);
+    static final RelationInfo<Customer> customer = new RelationInfo<>(Order_.__INSTANCE, Customer_.__INSTANCE, customerId, new ToOneGetter<Order>() {
+        @Override
+        public ToOne getToOne(Order object) {
+            return object.customer__toOne;
+        }
+    });
 
 }

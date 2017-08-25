@@ -7,6 +7,7 @@ import javax.annotation.concurrent.Immutable;
 import io.objectbox.EntityInfo;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.internal.ToOneGetter;
 
 @Internal
 @Immutable
@@ -22,8 +23,12 @@ public class RelationInfo<TARGET> implements Serializable {
     /** For relations based on a target ID property (null for stand-alone relations). */
     public final Property targetIdProperty;
 
+    /** Only set for ToOne relations */
+    public final io.objectbox.internal.ToOneGetter toOneGetter;
+
+    private final io.objectbox.internal.ToManyGetter toManyGetter;
     /** For ToMany relations based on backlinks (null otherwise). */
-    public final ToOneGetter backlinkToOneGetter;
+    public final io.objectbox.internal.ToOneGetter backlinkToOneGetter;
 
     /** For stand-alone to-many relations (0 otherwise). */
     public final int relationId;
@@ -31,27 +36,42 @@ public class RelationInfo<TARGET> implements Serializable {
     /**
      * ToOne
      */
-    public RelationInfo(EntityInfo sourceInfo, EntityInfo<TARGET> targetInfo, Property targetIdProperty) {
-        this(sourceInfo, targetInfo, targetIdProperty, null);
-    }
-
     public RelationInfo(EntityInfo sourceInfo, EntityInfo<TARGET> targetInfo, Property targetIdProperty,
-                        ToOneGetter backlinkToOneGetter) {
+                        io.objectbox.internal.ToOneGetter toOneGetter) {
         this.sourceInfo = sourceInfo;
         this.targetInfo = targetInfo;
         this.targetIdProperty = targetIdProperty;
-        this.backlinkToOneGetter = backlinkToOneGetter;
-        relationId = 0;
+        this.toOneGetter = toOneGetter;
+        this.backlinkToOneGetter = null;
+        this.toManyGetter = null;
+        this.relationId = 0;
     }
 
     /**
-     * Stand-alone to-many.
+     * ToMany as a ToOne backlink
      */
-    public RelationInfo(EntityInfo sourceInfo, EntityInfo<TARGET> targetInfo, int relationId) {
+    public RelationInfo(EntityInfo sourceInfo, EntityInfo<TARGET> targetInfo, Property targetIdProperty,
+                        io.objectbox.internal.ToManyGetter toManyGetter, ToOneGetter backlinkToOneGetter) {
+        this.sourceInfo = sourceInfo;
+        this.targetInfo = targetInfo;
+        this.targetIdProperty = targetIdProperty;
+        this.toManyGetter = toManyGetter;
+        this.backlinkToOneGetter = backlinkToOneGetter;
+        this.toOneGetter = null;
+        this.relationId = 0;
+    }
+
+    /**
+     * Stand-alone ToMany.
+     */
+    public RelationInfo(EntityInfo sourceInfo, EntityInfo<TARGET> targetInfo, int relationId,
+                        io.objectbox.internal.ToManyGetter toManyGetter) {
         this.sourceInfo = sourceInfo;
         this.targetInfo = targetInfo;
         this.relationId = relationId;
+        this.toManyGetter = toManyGetter;
         this.targetIdProperty = null;
+        this.toOneGetter = null;
         this.backlinkToOneGetter = null;
     }
 }
