@@ -299,6 +299,26 @@ public class TransactionTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testCallInReadTx() {
+        final Box<TestEntity> box = getTestEntityBox();
+        box.put(new TestEntity());
+        long[] counts = store.callInReadTx(new Callable<long[]>() {
+            @Override
+            public long[] call() throws Exception {
+                long count1 = store.callInReadTx(new Callable<Long>() {
+                    @Override
+                    public Long call() throws Exception {
+                        return box.count();
+                    }
+                });
+                return new long[]{box.count(), count1};
+            }
+        });
+        assertEquals(1, counts[0]);
+        assertEquals(1, counts[1]);
+    }
+
+    @Test
     public void testRunInReadTxAndThenPut() {
         final Box<TestEntity> box = getTestEntityBox();
         store.runInReadTx(new Runnable() {

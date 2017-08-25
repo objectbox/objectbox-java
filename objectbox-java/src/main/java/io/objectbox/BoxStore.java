@@ -210,7 +210,7 @@ public class BoxStore implements Closeable {
                 }
             }
             if (!openFiles.add(canonicalPath)) {
-                throw new DbException("Another BoxStore is still open for this directory: " + canonicalPath+
+                throw new DbException("Another BoxStore is still open for this directory: " + canonicalPath +
                         ". Hint: for most apps it's recommended to keep a BoxStore for the app's life time.");
             }
         }
@@ -489,6 +489,43 @@ public class BoxStore implements Closeable {
             }
         } else {
             runnable.run();
+        }
+    }
+
+    /**
+     * Calls the given callable inside a read(-only) transaction. Multiple read transactions can occur at the same time.
+     * This allows multiple read operations (gets) using a single consistent state of data.
+     * Also, for a high number of read operations (thousands, e.g. in loops),
+     * it is advised to run them in a single read transaction for efficiency reasons.
+     * Note that any exception thrown by the given Callable will be wrapped in a RuntimeException.
+     */
+    public <T> T callInReadTx(Callable<T> callable) {
+        Transaction tx = this.activeTx.get();
+        // Only if not already set, allowing to call it recursively with first (outer) TX
+        if (tx == null) {
+            tx = beginReadTx();
+            activeTx.set(tx);
+            try {
+                return callable.call();
+            } catch (Exception e) {
+                throw new RuntimeException("Callable threw exception", e);
+            } finally {
+                activeTx.remove();
+
+                // TODO That's rather a quick fix, replace with a more general solution
+                // (that could maybe be a TX listener with abort callback?)
+                for (Box box : boxes.values()) {
+                    box.readTxFinished(tx);
+                }
+
+                tx.close();
+            }
+        } else {
+            try {
+                return callable.call();
+            } catch (Exception e) {
+                throw new RuntimeException("Callable threw exception", e);
+            }
         }
     }
 
