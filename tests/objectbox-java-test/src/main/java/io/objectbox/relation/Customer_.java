@@ -90,12 +90,12 @@ public class Customer_ implements EntityInfo<Customer> {
     }
 
     static final RelationInfo<Order> orders =
-            new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, Order_.customerId, new ToManyGetter<Customer>() {
+            new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, new ToManyGetter<Customer>() {
                 @Override
                 public ToMany<Order> getToMany(Customer customer) {
                     return (ToMany<Order>) customer.getOrders();
                 }
-            }, new ToOneGetter<Order>() {
+            }, Order_.customerId, new ToOneGetter<Order>() {
                 @Override
                 public ToOne<Customer> getToOne(Order order) {
                     return order.customer__toOne;
@@ -103,11 +103,11 @@ public class Customer_ implements EntityInfo<Customer> {
             });
 
     static final RelationInfo<Order> ordersStandalone =
-            new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, 1, new ToManyGetter<Customer>() {
+            new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, new ToManyGetter<Customer>() {
                 @Override
                 public ToMany<Order> getToMany(Customer customer) {
                     return (ToMany<Order>) customer.getOrders();
                 }
-            });
+            }, 1);
 
 }
