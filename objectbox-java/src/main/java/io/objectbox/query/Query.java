@@ -2,16 +2,21 @@ package io.objectbox.query;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import io.objectbox.Box;
+import io.objectbox.BoxStore;
+import io.objectbox.InternalAccess;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.internal.CallWithHandle;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.SubscriptionBuilder;
+import io.objectbox.relation.RelationInfo;
+import io.objectbox.relation.ToOne;
 
 /**
  * A repeatable query returning entities.
@@ -61,18 +66,22 @@ public class Query<T> {
     native static void nativeSetParameter(long handle, int propertyId, String parameterAlias, double value);
 
     native static void nativeSetParameters(long handle, int propertyId, String parameterAlias, double value1,
-                                                   double value2);
+                                           double value2);
 
     private final Box<T> box;
+    private final BoxStore store;
     private final boolean hasOrder;
-    long handle;
     private final QueryPublisher<T> publisher;
+    private final List<EagerRelation> eagerRelations;
+    long handle;
 
-    Query(Box<T> box, long queryHandle, boolean hasOrder) {
+    Query(Box<T> box, long queryHandle, boolean hasOrder, List<EagerRelation> eagerRelations) {
         this.box = box;
+        store = box.getStore();
         handle = queryHandle;
         this.hasOrder = hasOrder;
         publisher = new QueryPublisher<>(this, box);
+        this.eagerRelations = eagerRelations;
     }
 
     @Override
@@ -96,10 +105,13 @@ public class Query<T> {
      */
     @Nullable
     public T findFirst() {
-        return box.internalCallWithReaderHandle(new CallWithHandle<T>() {
+        return store.callInReadTx(new Callable<T>() {
             @Override
-            public T call(long cursorHandle) {
-                return (T) nativeFindFirst(handle, cursorHandle);
+            public T call() {
+                @SuppressWarnings("unchecked")
+                T entity = (T) nativeFindFirst(handle, InternalAccess.getActiveTxCursorHandle(box));
+                resolveEagerRelation(entity);
+                return entity;
             }
         });
     }
@@ -111,10 +123,13 @@ public class Query<T> {
      */
     @Nullable
     public T findUnique() {
-        return box.internalCallWithReaderHandle(new CallWithHandle<T>() {
+        return store.callInReadTx(new Callable<T>() {
             @Override
-            public T call(long cursorHandle) {
-                return (T) nativeFindUnique(handle, cursorHandle);
+            public T call() {
+                @SuppressWarnings("unchecked")
+                T entity = (T) nativeFindUnique(handle, InternalAccess.getActiveTxCursorHandle(box));
+                resolveEagerRelation(entity);
+                return entity;
             }
         });
     }
@@ -124,10 +139,13 @@ public class Query<T> {
      */
     @Nonnull
     public List<T> find() {
-        return box.internalCallWithReaderHandle(new CallWithHandle<List<T>>() {
+        return store.callInReadTx(new Callable<List<T>>() {
             @Override
-            public List<T> call(long cursorHandle) {
-                return nativeFind(handle, cursorHandle, 0, 0);
+            public List<T> call() throws Exception {
+                long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
+                List entities = nativeFind(Query.this.handle, cursorHandle, 0, 0);
+                resolveEagerRelations(entities);
+                return entities;
             }
         });
     }
@@ -137,10 +155,13 @@ public class Query<T> {
      */
     @Nonnull
     public List<T> find(final long offset, final long limit) {
-        return box.internalCallWithReaderHandle(new CallWithHandle<List<T>>() {
+        return store.callInReadTx(new Callable<List<T>>() {
             @Override
-            public List<T> call(long cursorHandle) {
-                return nativeFind(handle, cursorHandle, offset, limit);
+            public List<T> call() {
+                long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
+                List entities = nativeFind(handle, cursorHandle, offset, limit);
+                resolveEagerRelations(entities);
+                return entities;
             }
         });
     }
@@ -185,11 +206,14 @@ public class Query<T> {
                 LazyList<T> lazyList = findLazy();
                 int size = lazyList.size();
                 for (int i = 0; i < size; i++) {
-                    T data = lazyList.get(i);
-                    if (data == null) {
+                    T entity = lazyList.get(i);
+                    if (entity == null) {
                         throw new IllegalStateException("Internal error: data object was null");
                     }
-                    consumer.accept(data);
+                    if(eagerRelations != null) {
+                        resolveEagerRelationForNonNullEagerRelations(entity, i);
+                    }
+                    consumer.accept(entity);
                 }
             }
         });
@@ -201,6 +225,53 @@ public class Query<T> {
     @Nonnull
     public LazyList<T> findLazyCached() {
         return new LazyList<>(box, findIds(), true);
+    }
+
+    void resolveEagerRelations(List entities) {
+        if (eagerRelations != null) {
+            int entityIndex = 0;
+            for (Object entity : entities) {
+                resolveEagerRelationForNonNullEagerRelations(entity, entityIndex);
+                entityIndex++;
+            }
+        }
+    }
+
+    /** Note: no null check on eagerRelations! */
+    void resolveEagerRelationForNonNullEagerRelations(Object entity, int entityIndex) {
+        for (EagerRelation eagerRelation : eagerRelations) {
+            if (eagerRelation.limit == 0 || entityIndex < eagerRelation.limit) {
+                resolveEagerRelation(entity, eagerRelation);
+            }
+        }
+    }
+
+    void resolveEagerRelation(Object entity) {
+        if (eagerRelations != null) {
+            for (EagerRelation eagerRelation : eagerRelations) {
+                resolveEagerRelation(entity, eagerRelation);
+            }
+        }
+    }
+
+    void resolveEagerRelation(Object entity, EagerRelation eagerRelation) {
+        if (eagerRelations != null) {
+            RelationInfo relationInfo = eagerRelation.relationInfo;
+            if (relationInfo.toOneGetter != null) {
+                ToOne toOne = relationInfo.toOneGetter.getToOne(entity);
+                if (toOne != null) {
+                    toOne.getTarget();
+                }
+            } else {
+                if (relationInfo.toManyGetter == null) {
+                    throw new IllegalStateException("Relation info without relation getter: " + relationInfo);
+                }
+                List toMany = relationInfo.toManyGetter.getToMany(entity);
+                if (toMany != null) {
+                    toMany.size();
+                }
+            }
+        }
     }
 
     /** Returns the count of Objects matching the query. */

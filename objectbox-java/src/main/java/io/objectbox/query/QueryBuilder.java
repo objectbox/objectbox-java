@@ -1,12 +1,15 @@
 package io.objectbox.query;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import io.objectbox.Box;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.model.OrderFlags;
+import io.objectbox.relation.RelationInfo;
 
 /**
  * With QueryBuilder you define custom queries returning matching entities. Using the methods of this class you can
@@ -70,6 +73,8 @@ public class QueryBuilder<T> {
 
     private long lastCondition;
     private Operator combineNextWith = Operator.NONE;
+
+    private List<EagerRelation> eagerRelations;
 
     private static native long nativeCreate(long storeHandle, String entityName);
 
@@ -152,7 +157,7 @@ public class QueryBuilder<T> {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
         long queryHandle = nativeBuild(handle);
-        Query<T> query = new Query<>(box, queryHandle, hasOrder);
+        Query<T> query = new Query<>(box, queryHandle, hasOrder, eagerRelations);
         close();
         return query;
     }
@@ -199,11 +204,28 @@ public class QueryBuilder<T> {
      * @see #orderDesc(Property)
      */
     public QueryBuilder<T> order(Property property, int flags) {
-        if(combineNextWith != Operator.NONE) {
+        if (combineNextWith != Operator.NONE) {
             throw new IllegalStateException("An operator is pending. Use operators like and() and or() only between two conditions.");
         }
         nativeOrder(handle, property.getId(), flags);
         hasOrder = true;
+        return this;
+    }
+
+    public QueryBuilder<T> eager(RelationInfo relationInfo, RelationInfo... more) {
+        return eager(0, relationInfo, more);
+    }
+
+    public QueryBuilder<T> eager(int limit, RelationInfo relationInfo, RelationInfo... more) {
+        if (eagerRelations == null) {
+            eagerRelations = new ArrayList<>();
+        }
+        eagerRelations.add(new EagerRelation(limit, relationInfo));
+        if (more != null) {
+            for (RelationInfo info : more) {
+                eagerRelations.add(new EagerRelation(limit, info));
+            }
+        }
         return this;
     }
 
@@ -257,7 +279,7 @@ public class QueryBuilder<T> {
         if (lastCondition == 0) {
             throw new IllegalStateException("No previous condition. Use operators like and() and or() only between two conditions.");
         }
-        if(combineNextWith != Operator.NONE) {
+        if (combineNextWith != Operator.NONE) {
             throw new IllegalStateException("Another operator is pending. Use operators like and() and or() only between two conditions.");
         }
         combineNextWith = operator;

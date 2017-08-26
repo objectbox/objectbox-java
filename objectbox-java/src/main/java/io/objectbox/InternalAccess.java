@@ -8,6 +8,10 @@ public class InternalAccess {
         return box.getReader();
     }
 
+    public static long getHandle(Cursor reader) {
+        return reader.internalHandle();
+    }
+
     public static <T> void releaseReader(Box<T> box, Cursor<T> reader) {
         box.releaseReader(reader);
     }
@@ -20,9 +24,14 @@ public class InternalAccess {
         return box.getActiveTxCursor();
     }
 
+    public static <T> long getActiveTxCursorHandle(Box<T> box) {
+        return box.getActiveTxCursor().internalHandle();
+    }
+
     public static <T> void releaseWriter(Box<T> box, Cursor<T> writer) {
         box.releaseWriter(writer);
     }
+
     public static <T> void commitWriter(Box<T> box, Cursor<T> writer) {
         box.commitWriter(writer);
     }
