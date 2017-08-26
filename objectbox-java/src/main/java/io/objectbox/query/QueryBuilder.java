@@ -212,10 +212,25 @@ public class QueryBuilder<T> {
         return this;
     }
 
+    /**
+     * Specifies relations that should be resolved eagerly.
+     * This prepares the given relation objects to be preloaded (cached) avoiding further get operations from the db.
+     * A common use case is prealoading all
+     *
+     * @param relationInfo The relation as found in the generated meta info class ("EntityName_") of class T.
+     * @param more         Supply further relations to be eagerly loaded.
+     */
     public QueryBuilder<T> eager(RelationInfo relationInfo, RelationInfo... more) {
         return eager(0, relationInfo, more);
     }
 
+    /**
+     * Like {@link #eager(RelationInfo, RelationInfo[])}, but limits eager loading to the given count.
+     *
+     * @param limit        Count of entities to be eager loaded.
+     * @param relationInfo The relation as found in the generated meta info class ("EntityName_") of class T.
+     * @param more         Supply further relations to be eagerly loaded.
+     */
     public QueryBuilder<T> eager(int limit, RelationInfo relationInfo, RelationInfo... more) {
         if (eagerRelations == null) {
             eagerRelations = new ArrayList<>();
