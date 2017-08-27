@@ -210,10 +210,14 @@ public class Query<T> {
                     if (entity == null) {
                         throw new IllegalStateException("Internal error: data object was null");
                     }
-                    if(eagerRelations != null) {
+                    if (eagerRelations != null) {
                         resolveEagerRelationForNonNullEagerRelations(entity, i);
                     }
-                    consumer.accept(entity);
+                    try {
+                        consumer.accept(entity);
+                    } catch (BreakForEach breakForEach) {
+                        break;
+                    }
                 }
             }
         });

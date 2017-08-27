@@ -368,6 +368,21 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals(testEntities.size() + 1, box.count());
     }
 
+    @Test
+    public void testForEachBreak() {
+        putTestEntitiesStrings();
+        final StringBuilder stringBuilder = new StringBuilder();
+        box.query().startsWith(simpleString, "banana").build()
+                .forEach(new QueryConsumer<TestEntity>() {
+                    @Override
+                    public void accept(TestEntity data) {
+                        stringBuilder.append(data.getSimpleString());
+                        throw new BreakForEach();
+                    }
+                });
+        assertEquals("banana", stringBuilder.toString());
+    }
+
     private List<TestEntity> putTestEntitiesScalars() {
         return putTestEntities(10, null, 2000);
     }
