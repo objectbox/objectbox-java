@@ -76,6 +76,8 @@ public class QueryBuilder<T> {
 
     private List<EagerRelation> eagerRelations;
 
+    private QueryFilter<T> filter;
+
     private static native long nativeCreate(long storeHandle, String entityName);
 
     private static native void nativeDestroy(long handle);
@@ -157,7 +159,7 @@ public class QueryBuilder<T> {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
         long queryHandle = nativeBuild(handle);
-        Query<T> query = new Query<>(box, queryHandle, hasOrder, eagerRelations);
+        Query<T> query = new Query<>(box, queryHandle, hasOrder, eagerRelations, filter);
         close();
         return query;
     }
@@ -205,7 +207,8 @@ public class QueryBuilder<T> {
      */
     public QueryBuilder<T> order(Property property, int flags) {
         if (combineNextWith != Operator.NONE) {
-            throw new IllegalStateException("An operator is pending. Use operators like and() and or() only between two conditions.");
+            throw new IllegalStateException(
+                    "An operator is pending. Use operators like and() and or() only between two conditions.");
         }
         nativeOrder(handle, property.getId(), flags);
         hasOrder = true;
@@ -241,6 +244,28 @@ public class QueryBuilder<T> {
                 eagerRelations.add(new EagerRelation(limit, info));
             }
         }
+        return this;
+    }
+
+    /**
+     * Sets a filter that executes on primary query results (returned from the db core) on a Java level.
+     * For efficiency reasons, you should always prefer primary criteria like {@link #equal(Property, String)} if
+     * possible.
+     * A filter requires to instantiate full Java objects beforehand, which is less efficient.
+     * <p>
+     * The upside of filters is that they allow any complex operation including traversing object graphs,
+     * and that filtering is executed along with the query (preferably in a background thread).
+     * Use filtering wisely ;-).
+     * <p>
+     * Also note, that a filter may only be used along with {@link Query#find()} and
+     * {@link Query#forEach(QueryConsumer)} at this point.
+     * Other find methods will throw a exception and aggregate functions will silently ignore the filter.
+     */
+    public QueryBuilder<T> filter(QueryFilter<T> filter) {
+        if (this.filter != null) {
+            throw new IllegalStateException("A filter was already defined, you can only assign one filter");
+        }
+        this.filter = filter;
         return this;
     }
 

@@ -383,6 +383,38 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals("banana", stringBuilder.toString());
     }
 
+    @Test
+    public void testForEachWithFilter() {
+        putTestEntitiesStrings();
+        final StringBuilder stringBuilder = new StringBuilder();
+        box.query().filter(createTestFilter()).build()
+                .forEach(new QueryConsumer<TestEntity>() {
+                    @Override
+                    public void accept(TestEntity data) {
+                        stringBuilder.append(data.getSimpleString()).append('#');
+                    }
+                });
+        assertEquals("apple#banana milk shake#", stringBuilder.toString());
+    }
+
+    @Test
+    public void testFindWithFilter() {
+        putTestEntitiesStrings();
+        List<TestEntity> entities = box.query().filter(createTestFilter()).build().find();
+        assertEquals(2, entities.size());
+        assertEquals("apple", entities.get(0).getSimpleString());
+        assertEquals("banana milk shake", entities.get(1).getSimpleString());
+    }
+
+    private QueryFilter<TestEntity> createTestFilter() {
+        return new QueryFilter<TestEntity>() {
+            @Override
+            public boolean keep(TestEntity entity) {
+                return entity.getSimpleString().contains("e");
+            }
+        };
+    }
+
     private List<TestEntity> putTestEntitiesScalars() {
         return putTestEntities(10, null, 2000);
     }

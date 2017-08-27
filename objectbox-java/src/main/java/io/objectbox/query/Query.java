@@ -1,6 +1,7 @@
 package io.objectbox.query;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -73,15 +74,17 @@ public class Query<T> {
     private final boolean hasOrder;
     private final QueryPublisher<T> publisher;
     private final List<EagerRelation> eagerRelations;
+    private final QueryFilter<T> filter;
     long handle;
 
-    Query(Box<T> box, long queryHandle, boolean hasOrder, List<EagerRelation> eagerRelations) {
+    Query(Box<T> box, long queryHandle, boolean hasOrder, List<EagerRelation> eagerRelations, QueryFilter<T> filter) {
         this.box = box;
         store = box.getStore();
         handle = queryHandle;
         this.hasOrder = hasOrder;
         publisher = new QueryPublisher<>(this, box);
         this.eagerRelations = eagerRelations;
+        this.filter = filter;
     }
 
     @Override
@@ -105,6 +108,7 @@ public class Query<T> {
      */
     @Nullable
     public T findFirst() {
+        ensureNoFilter();
         return store.callInReadTx(new Callable<T>() {
             @Override
             public T call() {
@@ -116,6 +120,13 @@ public class Query<T> {
         });
     }
 
+    private void ensureNoFilter() {
+        if (filter != null) {
+            throw new UnsupportedOperationException("Does not yet work with a filter yet. " +
+                    "At this point, only find() and forEach() are supported with filters.");
+        }
+    }
+
     /**
      * Find the unique Object matching the query.
      *
@@ -123,6 +134,7 @@ public class Query<T> {
      */
     @Nullable
     public T findUnique() {
+        ensureNoFilter();
         return store.callInReadTx(new Callable<T>() {
             @Override
             public T call() {
@@ -143,7 +155,16 @@ public class Query<T> {
             @Override
             public List<T> call() throws Exception {
                 long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
-                List entities = nativeFind(Query.this.handle, cursorHandle, 0, 0);
+                List<T> entities = nativeFind(Query.this.handle, cursorHandle, 0, 0);
+                if (filter != null) {
+                    Iterator<T> iterator = entities.iterator();
+                    while (iterator.hasNext()) {
+                        T entity = iterator.next();
+                        if (!filter.keep(entity)) {
+                            iterator.remove();
+                        }
+                    }
+                }
                 resolveEagerRelations(entities);
                 return entities;
             }
@@ -155,6 +176,7 @@ public class Query<T> {
      */
     @Nonnull
     public List<T> find(final long offset, final long limit) {
+        ensureNoFilter();
         return store.callInReadTx(new Callable<List<T>>() {
             @Override
             public List<T> call() {
@@ -169,6 +191,8 @@ public class Query<T> {
     /**
      * Very efficient way to get just the IDs without creating any objects. IDs can later be used to lookup objects
      * (lookups by ID are also very efficient in ObjectBox).
+     *
+     * Note: a filter set with {@link QueryBuilder#filter} will be silently ignored!
      */
     @Nonnull
     public long[] findIds() {
@@ -187,6 +211,7 @@ public class Query<T> {
      * Find all Objects matching the query without actually loading the Objects. See @{@link LazyList} for details.
      */
     public LazyList<T> findLazy() {
+        ensureNoFilter();
         return new LazyList<>(box, findIds(), false);
     }
 
@@ -203,12 +228,17 @@ public class Query<T> {
         box.getStore().runInReadTx(new Runnable() {
             @Override
             public void run() {
-                LazyList<T> lazyList = findLazy();
+                LazyList<T> lazyList = new LazyList<>(box, findIds(), false);
                 int size = lazyList.size();
                 for (int i = 0; i < size; i++) {
                     T entity = lazyList.get(i);
                     if (entity == null) {
                         throw new IllegalStateException("Internal error: data object was null");
+                    }
+                    if (filter != null) {
+                        if (!filter.keep(entity)) {
+                            continue;
+                        }
                     }
                     if (eagerRelations != null) {
                         resolveEagerRelationForNonNullEagerRelations(entity, i);
@@ -228,6 +258,7 @@ public class Query<T> {
      */
     @Nonnull
     public LazyList<T> findLazyCached() {
+        ensureNoFilter();
         return new LazyList<>(box, findIds(), true);
     }
 
