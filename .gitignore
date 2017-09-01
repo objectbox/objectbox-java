@@ -1,0 +1,60 @@
+.DS_Store
+
+# IntelliJ Idea
+.idea/
+*.iml
+
+# Gradle & Java build
+.gradle
+build/
+bin/
+gen/
+target/
+out/
+classes/
+gradle.properties
+
+# Local build properties
+build.properties
+local.properties
+
+### CMake build files
+CMakeFiles/
+CMakeCache.txt
+Makefile
+*.cmake
+.externalNativeBuild
+cmake-build-debug/
+# used by build.sh script
+cbuild/
+
+# Native libs
+objectbox*.dll
+libobjectbox*.so
+
+### Build script
+/Release/
+/Debug/
+
+### Test DB files
+data.mdb
+lock.mdb
+test-db/
+jni-unit-test-db/
+test-db64/
+perf-test-db/
+perf-test-db64/
+tests/test-entity-annotations/objectbox/
+
+## Backups
+.gitignore~
+*.txt~
+default.json.bak
+
+# Java crash reports
+hs_err_pid*.log
+
+# Misc
+callgrind.out.*
+/captures/
+valgrind.log
