@@ -10,7 +10,7 @@ pipeline {
 
                 sh 'chmod +x gradlew'
 
-                sh './gradlew --stacktrace --debug ' +
+                sh './gradlew --stacktrace ' +
                         '-Dextensive-tests=true ' +
                         'clean build uploadArchives -PpreferedRepo=local'
             }

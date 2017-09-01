@@ -8,5 +8,10 @@ targetCompatibility = 1.7
 dependencies {
     compile project(':objectbox-java')
     compile project(':objectbox-java-api')
+
+    if(isLinux64) {
+        compile "io.objectbox:objectbox-linux:${rootProject.version}"
+    }
+
     testCompile 'junit:junit:4.12'
 }
