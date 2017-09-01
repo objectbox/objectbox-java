@@ -1,0 +1,128 @@
+// Just too many sub projects, so each can reference rootProject.version
+version = '0.9.16-RC3-SNAPSHOT'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.3'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        mavenCentral()
+        mavenLocal()
+    }
+}
+
+if (JavaVersion.current().isJava8Compatible()) {
+    allprojects {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
+}
+
+def projectNamesToPublish =
+        ['objectbox',
+         'objectbox-java-api',
+         'objectbox-java',
+         'objectbox-kotlin',
+         'objectbox-generator',
+         'objectbox-daocompat',
+         'linux',
+         'msbuild',
+        ]
+
+configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+
+    configurations {
+        deployerJars
+    }
+
+    dependencies {
+        deployerJars 'org.apache.maven.wagon:wagon-webdav:1.0-beta-2'
+        deployerJars 'org.apache.maven.wagon:wagon-ftp:2.2'
+    }
+
+    signing {
+        if (project.hasProperty('signing.keyId') && project.hasProperty('signing.password') &&
+                project.hasProperty('signing.secretKeyRingFile')) {
+            sign configurations.archives
+        } else {
+            println "Signing information missing/incomplete for ${project.name}"
+        }
+    }
+
+    // Use afterEvaluate or all dependencies will be lost in the generated POM
+    afterEvaluate {
+        uploadArchives {
+            repositories {
+                mavenDeployer {
+                    if (project.hasProperty('preferedRepo') && preferedRepo == 'local') {
+                        repository url: repositories.mavenLocal().url
+                    } else if (project.hasProperty('preferedRepo') && project.hasProperty('preferedUsername')
+                            && project.hasProperty('preferedPassword')) {
+                        configuration = configurations.deployerJars
+                        // Replace for bintray's dynamic URL
+                        preferedRepo = preferedRepo.replace('__groupId__', project.group)
+                        preferedRepo = preferedRepo.replace('__artifactId__', project.archivesBaseName)
+                        // println preferedRepo
+                        repository(url: preferedRepo) {
+                            authentication(userName: preferedUsername, password: preferedPassword)
+                        }
+                    } else if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+                        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+                        def isSnapshot = version.endsWith('-SNAPSHOT')
+                        def sonatypeRepositoryUrl = isSnapshot ?
+                                "https://oss.sonatype.org/content/repositories/snapshots/"
+                                : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                        repository(url: sonatypeRepositoryUrl) {
+                            authentication(userName: sonatypeUsername, password: sonatypePassword)
+                        }
+                    } else {
+                        println "Settings sonatypeUsername/sonatypePassword missing/incomplete for ${project.name}"
+                    }
+
+                    pom.project {
+                        packaging 'jar'
+                        url 'http://objectbox.io'
+
+                        scm {
+                            url 'https://github.com/objectbox/objectbox-java'
+                            connection 'scm:git@github.com:objectbox/objectbox-java.git'
+                            developerConnection 'scm:git@github.com:objectbox/objectbox-java.git'
+                        }
+
+                        developers {
+                            developer {
+                                id 'ObjectBox'
+                                name 'ObjectBox'
+                            }
+                        }
+
+                        issueManagement {
+                            system 'GitHub Issues'
+                            url 'https://github.com/objectbox/objectbox-java/issues'
+                        }
+
+                        organization {
+                            name 'ObjectBox Ltd.'
+                            url 'http://objectbox.io'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.1'
+    distributionType = org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
+}

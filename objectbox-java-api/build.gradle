@@ -1,0 +1,55 @@
+apply plugin: 'java'
+
+group = 'io.objectbox'
+version= rootProject.version
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+javadoc {
+    failOnError = false
+    title = " ObjectBox API ${version} API"
+    options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
+    doLast {
+        copy {
+            from '../javadoc-style'
+            into "build/docs/javadoc/"
+        }
+    }
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    // Not yet: archives sourcesJar
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            // Basic definitions are defined in root project
+            pom.project {
+                name 'ObjectBox API'
+                description 'ObjectBox is a fast NoSQL database for Objects'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+            }
+        }
+    }
+}
