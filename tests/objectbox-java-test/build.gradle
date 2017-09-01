@@ -10,7 +10,7 @@ dependencies {
     compile 'org.greenrobot:essentials:3.0.0-RC1'
 
     if(isLinux64) {
-        compile "io.objectbox:objectbox-linux:$versionUnderTest"
+        compile "io.objectbox:objectbox-linux:${rootProject.version}"
     }
 
     // Right now, test sources are in src/main not src/test
