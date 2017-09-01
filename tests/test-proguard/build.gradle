@@ -1,0 +1,12 @@
+apply plugin: 'java'
+
+uploadArchives.enabled = false
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+dependencies {
+    compile project(':objectbox-java')
+    compile project(':objectbox-java-api')
+    testCompile 'junit:junit:4.12'
+}

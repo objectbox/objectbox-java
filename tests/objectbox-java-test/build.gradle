@@ -1,0 +1,20 @@
+apply plugin: 'java'
+
+uploadArchives.enabled = false
+
+targetCompatibility = '1.7'
+sourceCompatibility = '1.7'
+
+dependencies {
+    compile project(':objectbox-java')
+    compile 'org.greenrobot:essentials:3.0.0-RC1'
+
+    // Right now, test sources are in src/main not src/test
+    compile 'junit:junit:4.12'
+}
+
+test {
+    // This is pretty useless now because it floods console with warnings about internal Java classes
+    // However we might check from time to time, also with Java 9.
+    // jvmArgs '-Xcheck:jni'
+}
