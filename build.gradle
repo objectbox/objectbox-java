@@ -2,6 +2,12 @@
 version = '0.9.16-RC3-SNAPSHOT'
 
 buildscript {
+    ext {
+        isLinux = System.getProperty("os.name").contains("Linux")
+        is64 = System.getProperty("sun.arch.data.model") == "64"
+        isLinux64 = isLinux && is64
+    }
+
     repositories {
         jcenter()
     }

@@ -9,6 +9,10 @@ dependencies {
     compile project(':objectbox-java')
     compile 'org.greenrobot:essentials:3.0.0-RC1'
 
+    if(isLinux64) {
+        compile "io.objectbox:objectbox-linux:$versionUnderTest"
+    }
+
     // Right now, test sources are in src/main not src/test
     compile 'junit:junit:4.12'
 }
