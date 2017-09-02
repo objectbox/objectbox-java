@@ -53,10 +53,15 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from 'build/docs/javadoc'
 }
 
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
 artifacts {
     archives jar
     archives javadocJar
-    // Not yet: archives sourcesJar
+    archives sourcesJar
 }
 
 uploadArchives {
