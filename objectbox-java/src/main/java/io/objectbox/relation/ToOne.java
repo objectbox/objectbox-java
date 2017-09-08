@@ -55,6 +55,12 @@ public class ToOne<TARGET> implements Serializable {
      * @param relationInfo Meta info as generated in the Entity_ (entity name plus underscore) classes.
      */
     public ToOne(Object sourceEntity, RelationInfo relationInfo) {
+        if(sourceEntity == null ) {
+            throw new IllegalArgumentException("No source entity given (null)");
+        }
+        if(relationInfo == null) {
+            throw new IllegalArgumentException("No relation info given (null)");
+        }
         this.entity = sourceEntity;
         this.relationInfo = relationInfo;
         virtualProperty = relationInfo.targetIdProperty == null;

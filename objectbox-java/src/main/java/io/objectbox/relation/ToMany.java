@@ -74,6 +74,12 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     transient private boolean removeFromTargetBox;
 
     public ToMany(Object sourceEntity, RelationInfo<TARGET> relationInfo) {
+        if(sourceEntity == null ) {
+            throw new IllegalArgumentException("No source entity given (null)");
+        }
+        if(relationInfo == null) {
+            throw new IllegalArgumentException("No relation info given (null)");
+        }
         this.entity = sourceEntity;
         this.relationInfo = relationInfo;
     }
