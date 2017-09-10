@@ -1,13 +1,13 @@
 # ObjectBox Java (Kotlin, Android)
 ObjectBox is a superfast object-oriented database with strong relation support.
 
-**Latest version: [1.0.0 (2017/09/04)](http://objectbox.io/changelog)**
+**Latest version: [1.0.1 (2017/09/10)](http://objectbox.io/changelog)**
 
 Demo code using ObjectBox:
 
     Playlist playlist = new Playlist("My Favorties");
-    playlist.songs.add(new Song("Lalala");
-    playlist.songs.add(new Song("Lololo");
+    playlist.songs.add(new Song("Lalala"));
+    playlist.songs.add(new Song("Lololo"));
     box.put(playlist);
 
 Gradle setup
@@ -15,7 +15,7 @@ Gradle setup
 Add this to your root build.gradle (project level): 
 
     buildscript {
-        ext.objectboxVersion = '1.0.0'
+        ext.objectboxVersion = '1.0.1'
         repositories {
             maven { url "http://objectbox.net/beta-repo/" }
         }
