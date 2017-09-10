@@ -407,7 +407,8 @@ public class BoxStore implements Closeable {
         }
     }
 
-    public void dropAllData() {
+    // TODO not implemented on native side; rename to "nukeData" (?)
+    void dropAllData() {
         nativeDropAllData(handle);
     }
 
