@@ -18,6 +18,7 @@ package io.objectbox.relation;
 
 import org.junit.Test;
 
+import java.util.Comparator;
 import java.util.List;
 
 import io.objectbox.query.Query;
@@ -53,6 +54,28 @@ public class RelationTest extends AbstractRelationTest {
         assertEquals("Bananas", orders.get(0).getText());
         assertEquals(order2.getId(), orders.get(1).getId());
         assertEquals("Oranges", orders.get(1).getText());
+    }
+
+    @Test
+    public void testRelationToMany_comparator() {
+        Customer customer = putCustomer();
+        putOrder(customer, "Bananas");
+        putOrder(customer, "Oranges");
+        putOrder(customer, "Apples");
+
+        ToMany<Order> orders = (ToMany<Order>) customer.getOrders();
+        orders.setComparator(new Comparator<Order>() {
+            @Override
+            public int compare(Order o1, Order o2) {
+                return o1.text.compareTo(o2.text);
+            }
+        });
+        orders.reset();
+
+        assertEquals(3, orders.size());
+        assertEquals("Apples", orders.get(0).getText());
+        assertEquals("Bananas", orders.get(1).getText());
+        assertEquals("Oranges", orders.get(2).getText());
     }
 
     @Test

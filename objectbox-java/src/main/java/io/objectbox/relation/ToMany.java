@@ -72,6 +72,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     transient private Box entityBox;
     transient private volatile Box<TARGET> targetBox;
     transient private boolean removeFromTargetBox;
+    transient private Comparator<TARGET> comparator;
 
     public ToMany(Object sourceEntity, RelationInfo<TARGET> relationInfo) {
         if(sourceEntity == null ) {
@@ -91,6 +92,12 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             throw new IllegalArgumentException("ListFactory is null");
         }
         this.listFactory = listFactory;
+    }
+
+    /** Set an comparator to define the order of entities. */
+    @Experimental
+    public void setComparator(Comparator<TARGET> comparator) {
+        this.comparator = comparator;
     }
 
     /**
@@ -161,6 +168,9 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 } else {
                     newEntities = targetBox.internalGetBacklinkEntities(relationInfo.targetInfo.getEntityId(),
                             relationInfo.targetIdProperty, id);
+                }
+                if(comparator != null) {
+                    Collections.sort(newEntities, comparator);
                 }
                 synchronized (this) {
                     if (entities == null) {
