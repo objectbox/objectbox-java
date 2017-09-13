@@ -1,3 +1,5 @@
+<img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png">
+
 # ObjectBox Java (Kotlin, Android)
 ObjectBox is a superfast object-oriented database with strong relation support.
 
