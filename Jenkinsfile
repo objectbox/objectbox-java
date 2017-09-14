@@ -3,8 +3,8 @@ pipeline {
     agent any
 
     triggers {
-        def branch = env.BRANCH_NAME.replaceAll("/", "%2F")
-        upstream(upstreamProjects: "ObjectStore/$branch", threshold: hudson.model.Result.FAILURE)
+        upstream(upstreamProjects: "ObjectStore/${env.BRANCH_NAME.replaceAll("/", "%2F")}",
+                threshold: hudson.model.Result.FAILURE)
     }
 
     stages {
