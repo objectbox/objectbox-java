@@ -4,7 +4,7 @@ pipeline {
 
     triggers {
         def branch = env.BRANCH_NAME.replaceAll("/", "%2F")
-        upstream(upstreamProjects: "ObjectStore/$branch")
+        upstream(upstreamProjects: "ObjectStore/$branch", threshold: hudson.model.Result.FAILURE)
     }
 
     stages {
