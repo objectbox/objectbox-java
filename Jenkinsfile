@@ -2,6 +2,11 @@
 pipeline {
     agent any
 
+    triggers {
+        def branch = env.BRANCH_NAME.replaceAll("/", "%2F")
+        upstream(upstreamProjects: "ObjectStore/$branch")
+    }
+
     stages {
         stage('build-java') {
             steps {
