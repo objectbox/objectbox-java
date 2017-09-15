@@ -1,6 +1,7 @@
 package io.objectbox.query;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -77,6 +78,8 @@ public class QueryBuilder<T> {
     private List<EagerRelation> eagerRelations;
 
     private QueryFilter<T> filter;
+
+    private Comparator<T> comparator;
 
     private static native long nativeCreate(long storeHandle, String entityName);
 
@@ -159,7 +162,7 @@ public class QueryBuilder<T> {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
         long queryHandle = nativeBuild(handle);
-        Query<T> query = new Query<>(box, queryHandle, hasOrder, eagerRelations, filter);
+        Query<T> query = new Query<>(box, queryHandle, hasOrder, eagerRelations, filter, comparator);
         close();
         return query;
     }
@@ -212,6 +215,11 @@ public class QueryBuilder<T> {
         }
         nativeOrder(handle, property.getId(), flags);
         hasOrder = true;
+        return this;
+    }
+
+    public QueryBuilder<T> sort(Comparator<T> comparator) {
+        this.comparator = comparator;
         return this;
     }
 

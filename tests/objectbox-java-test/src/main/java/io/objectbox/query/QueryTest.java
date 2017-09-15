@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import io.objectbox.AbstractObjectBoxTest;
@@ -27,16 +28,8 @@ import io.objectbox.Box;
 import io.objectbox.TestEntity;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
-
-import static io.objectbox.TestEntity_.simpleBoolean;
-import static io.objectbox.TestEntity_.simpleFloat;
-import static io.objectbox.TestEntity_.simpleInt;
-import static io.objectbox.TestEntity_.simpleLong;
-import static io.objectbox.TestEntity_.simpleShort;
-import static io.objectbox.TestEntity_.simpleString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static io.objectbox.TestEntity_.*;
+import static org.junit.Assert.*;
 
 public class QueryTest extends AbstractObjectBoxTest {
 
@@ -420,6 +413,23 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals(2, entities.size());
         assertEquals("apple", entities.get(0).getSimpleString());
         assertEquals("banana milk shake", entities.get(1).getSimpleString());
+    }
+
+    @Test
+    public void testFindWithComparator() {
+        putTestEntitiesStrings();
+        List<TestEntity> entities = box.query().sort(new Comparator<TestEntity>() {
+            @Override
+            public int compare(TestEntity o1, TestEntity o2) {
+                return o1.getSimpleString().substring(1).compareTo(o2.getSimpleString().substring(1));
+            }
+        }).build().find();
+        assertEquals(5, entities.size());
+        assertEquals("banana", entities.get(0).getSimpleString());
+        assertEquals("banana milk shake", entities.get(1).getSimpleString());
+        assertEquals("bar", entities.get(2).getSimpleString());
+        assertEquals("foo bar", entities.get(3).getSimpleString());
+        assertEquals("apple", entities.get(4).getSimpleString());
     }
 
     private QueryFilter<TestEntity> createTestFilter() {

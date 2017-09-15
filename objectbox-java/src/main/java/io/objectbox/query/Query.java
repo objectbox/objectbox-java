@@ -1,5 +1,7 @@
 package io.objectbox.query;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -75,9 +77,11 @@ public class Query<T> {
     private final QueryPublisher<T> publisher;
     private final List<EagerRelation> eagerRelations;
     private final QueryFilter<T> filter;
+    private final Comparator<T> comparator;
     long handle;
 
-    Query(Box<T> box, long queryHandle, boolean hasOrder, List<EagerRelation> eagerRelations, QueryFilter<T> filter) {
+    Query(Box<T> box, long queryHandle, boolean hasOrder, List<EagerRelation> eagerRelations, QueryFilter<T> filter,
+          Comparator<T> comparator) {
         this.box = box;
         store = box.getStore();
         handle = queryHandle;
@@ -85,6 +89,7 @@ public class Query<T> {
         publisher = new QueryPublisher<>(this, box);
         this.eagerRelations = eagerRelations;
         this.filter = filter;
+        this.comparator = comparator;
     }
 
     @Override
@@ -108,7 +113,7 @@ public class Query<T> {
      */
     @Nullable
     public T findFirst() {
-        ensureNoFilter();
+        ensureNoFilterNoComparator();
         return store.callInReadTx(new Callable<T>() {
             @Override
             public T call() {
@@ -120,10 +125,18 @@ public class Query<T> {
         });
     }
 
-    private void ensureNoFilter() {
+    private void ensureNoFilterNoComparator() {
         if (filter != null) {
             throw new UnsupportedOperationException("Does not yet work with a filter yet. " +
                     "At this point, only find() and forEach() are supported with filters.");
+        }
+        ensureNoComparator();
+    }
+
+    private void ensureNoComparator() {
+        if (comparator != null) {
+            throw new UnsupportedOperationException("Does not yet work with a sorting comparator yet. " +
+                    "At this point, only find() is supported with sorting comparators.");
         }
     }
 
@@ -134,7 +147,7 @@ public class Query<T> {
      */
     @Nullable
     public T findUnique() {
-        ensureNoFilter();
+        ensureNoFilterNoComparator();
         return store.callInReadTx(new Callable<T>() {
             @Override
             public T call() {
@@ -166,6 +179,9 @@ public class Query<T> {
                     }
                 }
                 resolveEagerRelations(entities);
+                if (comparator != null) {
+                    Collections.sort(entities, comparator);
+                }
                 return entities;
             }
         });
@@ -176,7 +192,7 @@ public class Query<T> {
      */
     @Nonnull
     public List<T> find(final long offset, final long limit) {
-        ensureNoFilter();
+        ensureNoFilterNoComparator();
         return store.callInReadTx(new Callable<List<T>>() {
             @Override
             public List<T> call() {
@@ -191,7 +207,7 @@ public class Query<T> {
     /**
      * Very efficient way to get just the IDs without creating any objects. IDs can later be used to lookup objects
      * (lookups by ID are also very efficient in ObjectBox).
-     *
+     * <p>
      * Note: a filter set with {@link QueryBuilder#filter} will be silently ignored!
      */
     @Nonnull
@@ -211,7 +227,7 @@ public class Query<T> {
      * Find all Objects matching the query without actually loading the Objects. See @{@link LazyList} for details.
      */
     public LazyList<T> findLazy() {
-        ensureNoFilter();
+        ensureNoFilterNoComparator();
         return new LazyList<>(box, findIds(), false);
     }
 
@@ -225,6 +241,7 @@ public class Query<T> {
      * Note: because the consumer is called within a read transaction it may not write to the database.
      */
     public void forEach(final QueryConsumer<T> consumer) {
+        ensureNoComparator();
         box.getStore().runInReadTx(new Runnable() {
             @Override
             public void run() {
@@ -258,7 +275,7 @@ public class Query<T> {
      */
     @Nonnull
     public LazyList<T> findLazyCached() {
-        ensureNoFilter();
+        ensureNoFilterNoComparator();
         return new LazyList<>(box, findIds(), true);
     }
 
