@@ -129,8 +129,12 @@ public class BoxStore implements Closeable {
 
     static native int nativeCleanStaleReadTransactions(long store);
 
+    static native String startDataBrowser(long store, String urlPath, int port);
+
+    public static native boolean isDataBrowserAvailable();
+
     public static String getVersion() {
-        return "1.0.1-2017-09-10";
+        return "1.0.2-2017-09-26";
     }
 
     private final File directory;
@@ -658,6 +662,10 @@ public class BoxStore implements Closeable {
      */
     public SubscriptionBuilder<Class> subscribe() {
         return new SubscriptionBuilder<>(objectClassPublisher, null, threadPool);
+    }
+
+    public String startDataBrowser(int port) {
+        return startDataBrowser(handle, null, port);
     }
 
     /**
