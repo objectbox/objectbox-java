@@ -31,10 +31,13 @@ import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
 import io.objectbox.InternalAccess;
+import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbDetachedException;
-import io.objectbox.internal.*;
+import io.objectbox.internal.IdGetter;
+import io.objectbox.internal.ReflectionCache;
+import io.objectbox.query.QueryFilter;
 import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 
 /**
@@ -75,10 +78,10 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     transient private Comparator<TARGET> comparator;
 
     public ToMany(Object sourceEntity, RelationInfo<TARGET> relationInfo) {
-        if(sourceEntity == null ) {
+        if (sourceEntity == null) {
             throw new IllegalArgumentException("No source entity given (null)");
         }
-        if(relationInfo == null) {
+        if (relationInfo == null) {
             throw new IllegalArgumentException("No relation info given (null)");
         }
         this.entity = sourceEntity;
@@ -169,7 +172,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                     newEntities = targetBox.internalGetBacklinkEntities(relationInfo.targetInfo.getEntityId(),
                             relationInfo.targetIdProperty, id);
                 }
-                if(comparator != null) {
+                if (comparator != null) {
                     Collections.sort(newEntities, comparator);
                 }
                 synchronized (this) {
@@ -350,7 +353,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 changes = true;
             }
         }
-        if(toRemove != null) {
+        if (toRemove != null) {
             entities.removeAll(toRemove);
         }
         return changes;
@@ -439,13 +442,18 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             public int compare(TARGET o1, TARGET o2) {
                 long id1 = idGetter.getId(o1);
                 long id2 = idGetter.getId(o2);
-                if (id1 == 0) id1 = Long.MAX_VALUE;
-                if (id2 == 0) id2 = Long.MAX_VALUE;
+                if (id1 == 0)
+                    id1 = Long.MAX_VALUE;
+                if (id2 == 0)
+                    id2 = Long.MAX_VALUE;
                 long delta = id1 - id2;
                 // because of long we cannot simply return delta
-                if (delta < 0) return -1;
-                else if (delta > 0) return 1;
-                else return 0;
+                if (delta < 0)
+                    return -1;
+                else if (delta > 0)
+                    return 1;
+                else
+                    return 0;
             }
         });
     }
@@ -480,6 +488,45 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 }
             });
         }
+    }
+
+    /**
+     * Returns true if at least one of the entities matches the given filter.
+     * <p>
+     * For use with {@link io.objectbox.query.QueryBuilder#filter(QueryFilter)} inside a {@link QueryFilter} to check
+     * to-many relation entities.
+     */
+    @Beta
+    public boolean hasA(QueryFilter<TARGET> filter) {
+        ensureEntities();
+        Object[] objects = entities.toArray();
+        for (Object target : objects) {
+            if (filter.keep((TARGET) target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if all of the entities match the given filter. Returns false if the list is empty.
+     * <p>
+     * For use with {@link io.objectbox.query.QueryBuilder#filter(QueryFilter)} inside a {@link QueryFilter} to check
+     * to-many relation entities.
+     */
+    @Beta
+    public boolean hasAll(QueryFilter<TARGET> filter) {
+        ensureEntities();
+        Object[] objects = entities.toArray();
+        if(objects.length == 0) {
+            return false;
+        }
+        for (Object target : objects) {
+            if (!filter.keep((TARGET) target)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import io.objectbox.TestUtils;
+import io.objectbox.query.QueryFilter;
 
 
 import static org.junit.Assert.assertEquals;
@@ -314,7 +315,37 @@ public class ToManyTest extends AbstractRelationTest {
         assertEquals("new1", toMany.get(3).getText());
         assertEquals("new2", toMany.get(4).getText());
     }
+    @Test
+    public void testHasA() {
+        Customer customer = putCustomerWithOrders(3);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        QueryFilter<Order> filter = new QueryFilter<Order>() {
+            @Override
+            public boolean keep(Order entity) {
+                return "order2".equals(entity.text);
+            }
+        };
+        assertTrue(toMany.hasA(filter));
+        toMany.remove(1);
+        assertFalse(toMany.hasA(filter));
+    }
 
+    @Test
+    public void testHasAll() {
+        Customer customer = putCustomerWithOrders(3);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        QueryFilter<Order> filter = new QueryFilter<Order>() {
+            @Override
+            public boolean keep(Order entity) {
+                return entity.text.startsWith("order");
+            }
+        };
+        assertTrue(toMany.hasAll(filter));
+        toMany.get(0).text="nope";
+        assertFalse(toMany.hasAll(filter));
+        toMany.clear();
+        assertFalse(toMany.hasAll(filter));
+    }
 
     @Test
     public void testSerializable() throws IOException, ClassNotFoundException {
