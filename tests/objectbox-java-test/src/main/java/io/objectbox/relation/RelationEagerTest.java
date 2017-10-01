@@ -20,6 +20,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import io.objectbox.query.Query;
 import io.objectbox.query.QueryConsumer;
 
 
@@ -78,6 +79,19 @@ public class RelationEagerTest extends AbstractRelationTest {
     }
 
     @Test
+    public void testEagerToMany_NoResult() {
+        Query<Customer> query = customerBox.query().eager(Customer_.orders).build();
+        query.find();
+        query.findFirst();
+        query.forEach(new QueryConsumer<Customer>() {
+            @Override
+            public void accept(Customer data) {
+
+            }
+        });
+    }
+
+    @Test
     public void testEagerToSingle() {
         Customer customer = putCustomer();
         putOrder(customer, "Bananas");
@@ -121,5 +135,19 @@ public class RelationEagerTest extends AbstractRelationTest {
         order = orderBox.query().eager(Order_.customer).build().findUnique();
         assertTrue(order.customer__toOne.isResolved());
     }
+
+    @Test
+    public void testEagerToSingle_NoResult() {
+        Query<Order> query = orderBox.query().eager(Order_.customer).build();
+        query.find();
+        query.findFirst();
+        query.forEach(new QueryConsumer<Order>() {
+            @Override
+            public void accept(Order data) {
+
+            }
+        });
+    }
+
 
 }

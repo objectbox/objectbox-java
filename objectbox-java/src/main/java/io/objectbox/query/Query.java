@@ -290,7 +290,7 @@ public class Query<T> {
     }
 
     /** Note: no null check on eagerRelations! */
-    void resolveEagerRelationForNonNullEagerRelations(Object entity, int entityIndex) {
+    void resolveEagerRelationForNonNullEagerRelations(@Nonnull Object entity, int entityIndex) {
         for (EagerRelation eagerRelation : eagerRelations) {
             if (eagerRelation.limit == 0 || entityIndex < eagerRelation.limit) {
                 resolveEagerRelation(entity, eagerRelation);
@@ -298,15 +298,15 @@ public class Query<T> {
         }
     }
 
-    void resolveEagerRelation(Object entity) {
-        if (eagerRelations != null) {
+    void resolveEagerRelation(@Nullable Object entity) {
+        if (eagerRelations != null && entity != null) {
             for (EagerRelation eagerRelation : eagerRelations) {
                 resolveEagerRelation(entity, eagerRelation);
             }
         }
     }
 
-    void resolveEagerRelation(Object entity, EagerRelation eagerRelation) {
+    void resolveEagerRelation(@Nonnull Object entity, EagerRelation eagerRelation) {
         if (eagerRelations != null) {
             RelationInfo relationInfo = eagerRelation.relationInfo;
             if (relationInfo.toOneGetter != null) {
