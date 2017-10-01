@@ -36,9 +36,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
 import io.objectbox.annotation.apihint.Beta;
+import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbException;
@@ -129,12 +131,12 @@ public class BoxStore implements Closeable {
 
     static native int nativeCleanStaleReadTransactions(long store);
 
-    static native String startDataBrowser(long store, String urlPath, int port);
+    static native String startObjectBrowser(long store, String urlPath, int port);
 
-    public static native boolean isDataBrowserAvailable();
+    public static native boolean isObjectBrowserAvailable();
 
     public static String getVersion() {
-        return "1.0.2-2017-09-26";
+        return "1.1.0-2017-10-01";
     }
 
     private final File directory;
@@ -161,6 +163,8 @@ public class BoxStore implements Closeable {
 
     // Not atomic because it is read most of the time
     volatile int commitCount;
+
+    private int objectBrowserPort;
 
     BoxStore(BoxStoreBuilder builder) {
         NativeLibraryLoader.ensureLoaded();
@@ -664,8 +668,46 @@ public class BoxStore implements Closeable {
         return new SubscriptionBuilder<>(objectClassPublisher, null, threadPool);
     }
 
-    public String startDataBrowser(int port) {
-        return startDataBrowser(handle, null, port);
+    @Experimental
+    @Nullable
+    public String startObjectBrowser() {
+        verifyObjectBrowserNotRunning();
+        final int basePort = 8090;
+        for (int port = basePort; port < basePort + 10; port++) {
+            try {
+                String url = startObjectBrowser(port);
+                if (url != null) {
+                    return url;
+                }
+            } catch (DbException e) {
+                if (e.getMessage() == null || !e.getMessage().contains("port")) {
+                    throw e;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Experimental
+    @Nullable
+    public String startObjectBrowser(int port) {
+        verifyObjectBrowserNotRunning();
+        String url = startObjectBrowser(handle, null, port);
+        if (url != null) {
+            objectBrowserPort = port;
+        }
+        return url;
+    }
+
+    @Experimental
+    public int getObjectBrowserPort() {
+        return objectBrowserPort;
+    }
+
+    private void verifyObjectBrowserNotRunning() {
+        if (objectBrowserPort != 0) {
+            throw new DbException("ObjectBrowser is already running at port " + objectBrowserPort);
+        }
     }
 
     /**
