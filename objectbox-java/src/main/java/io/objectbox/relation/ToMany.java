@@ -327,6 +327,26 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         return removed;
     }
 
+    @Beta
+    /** Removes an object by its entity ID. */
+    public synchronized TARGET removeById(long id) {
+        ensureEntities();
+        int size = entities.size();
+        IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
+        for (int i = 0; i < size; i++) {
+            TARGET candidate = entities.get(i);
+            if (idGetter.getId(candidate) == id) {
+                TARGET removed = remove(i);
+                if (removed != candidate) {
+                    throw new IllegalStateException("Mismatch: " + removed + " vs. " + candidate);
+                }
+                return candidate;
+            }
+
+        }
+        return null;
+    }
+
     @Override
     public synchronized boolean removeAll(Collection<?> objects) {
         boolean changes = false;
@@ -518,7 +538,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     public boolean hasAll(QueryFilter<TARGET> filter) {
         ensureEntities();
         Object[] objects = entities.toArray();
-        if(objects.length == 0) {
+        if (objects.length == 0) {
             return false;
         }
         for (Object target : objects) {

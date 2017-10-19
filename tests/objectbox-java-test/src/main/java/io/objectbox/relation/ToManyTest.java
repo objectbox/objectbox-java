@@ -188,6 +188,20 @@ public class ToManyTest extends AbstractRelationTest {
     }
 
     @Test
+    public void testRemoveById() {
+        int count = 5;
+        Customer customer = putCustomerWithOrders(count);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        Order removed1 = toMany.removeById(toMany.get(3).getId());
+        assertEquals("order4", removed1.getText());
+        Order removed2 = toMany.removeById(toMany.get(1).getId());
+        assertEquals("order2", removed2.getText());
+        assertNull(toMany.removeById(42));
+        customerBox.put(customer);
+        assertOrder2And4Removed(count, customer, toMany);
+    }
+
+    @Test
     public void testRetainAll() {
         int count = 5;
         Customer customer = putCustomerWithOrders(count);
