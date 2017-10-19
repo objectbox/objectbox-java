@@ -26,10 +26,7 @@ import java.util.List;
 import io.objectbox.TestUtils;
 import io.objectbox.query.QueryFilter;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ToManyTest extends AbstractRelationTest {
 
@@ -315,6 +312,7 @@ public class ToManyTest extends AbstractRelationTest {
         assertEquals("new1", toMany.get(3).getText());
         assertEquals("new2", toMany.get(4).getText());
     }
+
     @Test
     public void testHasA() {
         Customer customer = putCustomerWithOrders(3);
@@ -341,10 +339,30 @@ public class ToManyTest extends AbstractRelationTest {
             }
         };
         assertTrue(toMany.hasAll(filter));
-        toMany.get(0).text="nope";
+        toMany.get(0).text = "nope";
         assertFalse(toMany.hasAll(filter));
         toMany.clear();
         assertFalse(toMany.hasAll(filter));
+    }
+
+    @Test
+    public void testIndexOfId() {
+        Customer customer = putCustomerWithOrders(3);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        assertEquals(1, toMany.indexOfId(toMany.get(1).getId()));
+        assertEquals(2, toMany.indexOfId(toMany.get(2).getId()));
+        assertEquals(0, toMany.indexOfId(toMany.get(0).getId()));
+        assertEquals(-1, toMany.indexOfId(42));
+    }
+
+    @Test
+    public void testGetById() {
+        Customer customer = putCustomerWithOrders(3);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        assertEquals(toMany.get(1), toMany.getById(toMany.get(1).getId()));
+        assertEquals(toMany.get(2), toMany.getById(toMany.get(2).getId()));
+        assertEquals(toMany.get(0), toMany.getById(toMany.get(0).getId()));
+        assertNull(toMany.getById(42));
     }
 
     @Test

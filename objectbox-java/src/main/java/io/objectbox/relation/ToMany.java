@@ -529,6 +529,38 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         return true;
     }
 
+    @Beta
+    /** Gets an object by its entity ID. */
+    public TARGET getById(long id) {
+        ensureEntities();
+        Object[] objects = entities.toArray();
+        IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
+        for (Object target : objects) {
+            TARGET candidate = (TARGET) target;
+            if (idGetter.getId(candidate) == id) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    @Beta
+    /** Gets the index of the object with the given entity ID. */
+    public int indexOfId(long id) {
+        ensureEntities();
+        Object[] objects = entities.toArray();
+        IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
+        int index = 0;
+        for (Object target : objects) {
+            TARGET candidate = (TARGET) target;
+            if (idGetter.getId(candidate) == id) {
+                return index;
+            }
+            index++;
+        }
+        return -1;
+    }
+
     /**
      * For internal use only; do not use in your app.
      * Called after relation source entity is put (so we have its ID).
