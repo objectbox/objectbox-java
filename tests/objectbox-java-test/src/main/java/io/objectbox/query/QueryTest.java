@@ -46,6 +46,13 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertNotNull(query);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testBuildTwice() {
+        QueryBuilder<TestEntity> queryBuilder = box.query();
+        queryBuilder.build().find();
+        queryBuilder.build().find();
+    }
+
     @Test
     public void testNullNotNull() {
         List<TestEntity> scalars = putTestEntitiesScalars();
