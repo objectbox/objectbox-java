@@ -148,7 +148,8 @@ public class BoxStoreBuilder {
         if (context == null) {
             throw new NullPointerException("Context may not be null");
         }
-        File baseDir = new File(getAndroidFilesDir(context), "objectbox");
+        File filesDir = getAndroidFilesDir(context);
+        File baseDir = new File(filesDir, "objectbox");
         if (!baseDir.exists()) {
             boolean ok = baseDir.mkdirs();
             if (!ok) {
@@ -169,12 +170,16 @@ public class BoxStoreBuilder {
         try {
             Method getFilesDir = context.getClass().getMethod("getFilesDir");
             filesDir = (File) getFilesDir.invoke(context);
+            if (filesDir == null) {
+                // Race condition in Android before 4.4: https://issuetracker.google.com/issues/36918154 ?
+                System.err.println("getFilesDir() returned null - retrying once...");
+                filesDir = (File) getFilesDir.invoke(context);
+            }
         } catch (Exception e) {
             throw new RuntimeException(
                     "Could not init with given Android context (must be sub class of android.content.Context)", e);
         }
         if (filesDir == null) {
-            // TODO should we consider https://issuetracker.google.com/issues/36918154 ?
             throw new IllegalStateException("Android files dir is null");
         }
         return filesDir;
@@ -190,6 +195,7 @@ public class BoxStoreBuilder {
      * For highly concurrent setups (e.g. you are using ObjectBox on the server side) it may make sense to increase the
      * number.
      */
+
     public BoxStoreBuilder maxReaders(int maxReaders) {
         this.maxReaders = maxReaders;
         return this;
