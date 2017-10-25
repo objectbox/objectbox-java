@@ -151,13 +151,13 @@ public class BoxStoreBuilder {
         File filesDir = getAndroidFilesDir(context);
         File baseDir = new File(filesDir, "objectbox");
         if (!baseDir.exists()) {
-            boolean ok = baseDir.mkdirs();
-            if (!ok) {
-                System.err.print("Could not create base dir");
+            baseDir.mkdir();
+            if (!baseDir.exists()) { // check baseDir.exists() because of potential concurrent processes
+                throw new RuntimeException("Could not init Android base dir at " + baseDir.getAbsolutePath());
             }
         }
-        if (!baseDir.exists() || !baseDir.isDirectory()) {
-            throw new RuntimeException("Could not init Android base dir at " + baseDir.getAbsolutePath());
+        if (!baseDir.isDirectory()) {
+            throw new RuntimeException("Android base dir is not a dir: " + baseDir.getAbsolutePath());
         }
         baseDirectory = baseDir;
         android = true;
@@ -181,6 +181,9 @@ public class BoxStoreBuilder {
         }
         if (filesDir == null) {
             throw new IllegalStateException("Android files dir is null");
+        }
+        if (!filesDir.exists()) {
+            throw new IllegalStateException("Android files dir does not exist");
         }
         return filesDir;
     }
