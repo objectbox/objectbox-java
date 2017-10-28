@@ -48,5 +48,15 @@ public final class PropertyFlags {
    * Virtual properties may not have a dedicated field in their entity class, e.g. target IDs of to-one relations
    */
   public static final int VIRTUAL = 1024;
+  /**
+   * Index uses a 32 bit hash instead of the value
+   * (32 bits is shorter on disk, runs well on 32 bit systems, and should be OK even with a few collisions)
+   */
+  public static final int INDEX_HASH = 2048;
+  /**
+   * Index uses a 64 bit hash instead of the value
+   * (recommended mostly for 64 bit machines with values longer >200 bytes; small values are faster with a 32 bit hash)
+   */
+  public static final int INDEX_HASH64 = 4096;
 }
 
