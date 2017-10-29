@@ -15,9 +15,11 @@ import io.objectbox.relation.RelationInfo;
 /**
  * With QueryBuilder you define custom queries returning matching entities. Using the methods of this class you can
  * select (filter) results for specific data (for example #{@link #equal(Property, String)} and
- * {@link #isNull(Property)}) and select an sort order for the resulting list (see {@link #order(Property)} and its overloads).
+ * {@link #isNull(Property)}) and select an sort order for the resulting list (see {@link #order(Property)} and its
+ * overloads).
  * <p>
- * Use {@link #build()} to conclude your query definitions and to get a {@link Query} object, which is used to actually get results.
+ * Use {@link #build()} to conclude your query definitions and to get a {@link Query} object, which is used to actually
+ * get results.
  * <p>
  * Note: Currently you can only query for complete entities. Returning individual property values or aggregates are
  * currently not available. Keep in mind that ObjectBox is very fast and the overhead to create an entity is very low.
@@ -441,6 +443,17 @@ public class QueryBuilder<T> {
     public QueryBuilder<T> equal(Property property, String value) {
         checkCombineCondition(nativeEqual(handle, property.getId(), value, false));
         return this;
+    }
+
+    // Help people with floating point equality...
+    /**
+     * Floating point equality is non-trivial; this is just a convenience for
+     * {@link #between(Property, double, double)} with parameters(property, value - tolerance, value + tolerance).
+     * When using {@link Query#setParameters(Property, double, double)},
+     * consider that the params are the lower and upper bounds.
+     */
+    public QueryBuilder<T> equal(Property property, double value, double tolerance) {
+        return between(property, value - tolerance, value + tolerance);
     }
 
     public QueryBuilder<T> notEqual(Property property, String value) {
