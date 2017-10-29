@@ -285,50 +285,10 @@ public class Box<T> {
     }
 
     @Temporary
-    public List<T> find(String propertyName, String value) {
-        Cursor<T> reader = getReader();
-        try {
-            return reader.find(propertyName, value);
-        } finally {
-            releaseReader(reader);
-        }
-    }
-
-    @Temporary
-    public List<T> find(String propertyName, long value) {
-        Cursor<T> reader = getReader();
-        try {
-            return reader.find(propertyName, value);
-        } finally {
-            releaseReader(reader);
-        }
-    }
-
-    @Temporary
-    public List<T> find(int propertyId, long value) {
-        Cursor<T> reader = getReader();
-        try {
-            return reader.find(propertyId, value);
-        } finally {
-            releaseReader(reader);
-        }
-    }
-
-    @Temporary
-    public List<T> find(int propertyId, String value) {
-        Cursor<T> reader = getReader();
-        try {
-            return reader.find(propertyId, value);
-        } finally {
-            releaseReader(reader);
-        }
-    }
-
-    @Temporary
     public List<T> find(Property property, String value) {
         Cursor<T> reader = getReader();
         try {
-            return reader.find(property.dbName, value);
+            return reader.find(property, value);
         } finally {
             releaseReader(reader);
         }
@@ -338,7 +298,7 @@ public class Box<T> {
     public List<T> find(Property property, long value) {
         Cursor<T> reader = getReader();
         try {
-            return reader.find(property.dbName, value);
+            return reader.find(property, value);
         } finally {
             releaseReader(reader);
         }

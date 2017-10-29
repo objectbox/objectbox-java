@@ -74,8 +74,8 @@ public class PerformanceTest extends AbstractObjectBoxTest {
         cursor.seek(1);
         long start = System.nanoTime();
         TestEntity foundEntity = findString ?
-                cursor.find("simpleString", entity.getSimpleString()).get(0) :
-                cursor.find("simpleLong", entity.getSimpleLong()).get(0);
+                cursor.find(TestEntity_.simpleString, entity.getSimpleString()).get(0) :
+                cursor.find(TestEntity_.simpleLong, entity.getSimpleLong()).get(0);
         long time = System.nanoTime() - start;
         cursor.close();
         transaction.close();
@@ -122,7 +122,7 @@ public class PerformanceTest extends AbstractObjectBoxTest {
         long start = time();
         Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
         for (int i = 0; i < count; i++) {
-            List<TestEntity> found = cursor.find("simpleString", stringsToLookup[i]);
+            List<TestEntity> found = cursor.find(TestEntity_.simpleString, stringsToLookup[i]);
             //assertEquals(stringsToLookup[i], found.get(0).getSimpleString());
         }
         cursor.close();

@@ -24,11 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class BoxTest extends AbstractObjectBoxTest {
 
@@ -222,19 +218,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         putTestEntity("apple", 0);
         putTestEntity("banana", 0);
 
-        List<TestEntity> list = box.find(new Property(2, 0, String.class, "wrongname", false, "simpleString"), "banana");
-        assertEquals(2, list.size());
-        assertEquals(1, list.get(0).getId());
-        assertEquals(3, list.get(1).getId());
-    }
-
-    @Test
-    public void testFindString_preparedPropertyId() {
-        putTestEntity("banana", 0);
-        putTestEntity("apple", 0);
-        putTestEntity("banana", 0);
-        int propertyId = box.getPropertyId("simpleString");
-        List<TestEntity> list = box.find(propertyId, "banana");
+        List<TestEntity> list = box.find(TestEntity_.simpleString, "banana");
         assertEquals(2, list.size());
         assertEquals(1, list.get(0).getId());
         assertEquals(3, list.get(1).getId());
@@ -246,7 +230,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         putTestEntity(null, 23);
         putTestEntity(null, 42);
 
-        List<TestEntity> list = box.find(new Property(2, 0, int.class, "wrongname", false, "simpleInt"), 42);
+        List<TestEntity> list = box.find(TestEntity_.simpleInt, 42);
         assertEquals(2, list.size());
         assertEquals(1, list.get(0).getId());
         assertEquals(3, list.get(1).getId());
@@ -257,19 +241,6 @@ public class BoxTest extends AbstractObjectBoxTest {
         TestEntity entity = putTestEntity(null, 42);
         assertTrue(entity.getId() > 0);
         assertEquals(entity.getId(), box.getId(entity));
-    }
-
-    @Test
-    public void testFindInt_preparedPropertyId() {
-        putTestEntity(null, 42);
-        putTestEntity(null, 23);
-        putTestEntity(null, 42);
-
-        int propertyId = box.getPropertyId("simpleInt");
-        List<TestEntity> list = box.find(propertyId, 42);
-        assertEquals(2, list.size());
-        assertEquals(1, list.get(0).getId());
-        assertEquals(3, list.get(1).getId());
     }
 
 }
