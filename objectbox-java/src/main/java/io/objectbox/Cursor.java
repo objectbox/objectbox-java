@@ -52,10 +52,6 @@ public abstract class Cursor<T> implements Closeable {
 
     static native long nativeCount(long cursor);
 
-    static native List nativeFindScalar(long cursor, String propertyName, long value);
-
-    static native List nativeFindString(long cursor, String propertyName, String value);
-
     static native List nativeFindScalarPropertyId(long cursor, int propertyId, long value);
 
     static native List nativeFindStringPropertyId(long cursor, int propertyId, String value);
@@ -217,23 +213,13 @@ public abstract class Cursor<T> implements Closeable {
     }
 
     @Temporary
-    public List<T> find(String propertyName, long value) {
-        return nativeFindScalar(cursor, propertyName, value);
+    public List<T> find(Property property, long value) {
+        return nativeFindScalarPropertyId(cursor, property.id, value);
     }
 
     @Temporary
-    public List<T> find(String propertyName, String value) {
-        return nativeFindString(cursor, propertyName, value);
-    }
-
-    @Temporary
-    public List<T> find(int propertyId, long value) {
-        return nativeFindScalarPropertyId(cursor, propertyId, value);
-    }
-
-    @Temporary
-    public List<T> find(int propertyId, String value) {
-        return nativeFindStringPropertyId(cursor, propertyId, value);
+    public List<T> find(Property property, String value) {
+        return nativeFindStringPropertyId(cursor, property.id, value);
     }
 
     /**
