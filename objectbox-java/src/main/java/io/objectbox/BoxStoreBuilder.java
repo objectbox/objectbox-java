@@ -224,7 +224,6 @@ public class BoxStoreBuilder {
      * (for example you insert data in an infinite look).
      *
      * @param maxSizeInKByte
-     * @return
      */
     public BoxStoreBuilder maxSizeInKByte(long maxSizeInKByte) {
         this.maxSizeInKByte = maxSizeInKByte;
