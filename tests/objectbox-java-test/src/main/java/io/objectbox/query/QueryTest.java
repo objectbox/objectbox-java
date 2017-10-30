@@ -26,6 +26,7 @@ import java.util.List;
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.TestEntity;
+import io.objectbox.TestEntity_;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
 import static io.objectbox.TestEntity_.*;
@@ -49,8 +50,25 @@ public class QueryTest extends AbstractObjectBoxTest {
     @Test(expected = IllegalStateException.class)
     public void testBuildTwice() {
         QueryBuilder<TestEntity> queryBuilder = box.query();
-        queryBuilder.build().find();
-        queryBuilder.build().find();
+        for (int i = 0; i < 2; i++) {
+            // calling any builder method after build should fail
+            // note: not calling all variants for different types
+            queryBuilder.isNull(TestEntity_.simpleString);
+            queryBuilder.and();
+            queryBuilder.notNull(TestEntity_.simpleString);
+            queryBuilder.or();
+            queryBuilder.equal(TestEntity_.simpleBoolean, true);
+            queryBuilder.notEqual(TestEntity_.simpleBoolean, true);
+            queryBuilder.less(TestEntity_.simpleInt, 42);
+            queryBuilder.greater(TestEntity_.simpleInt, 42);
+            queryBuilder.between(TestEntity_.simpleInt, 42, 43);
+            queryBuilder.in(TestEntity_.simpleInt, new int[]{42});
+            queryBuilder.notIn(TestEntity_.simpleInt, new int[]{42});
+            queryBuilder.contains(TestEntity_.simpleString, "42");
+            queryBuilder.startsWith(TestEntity_.simpleString, "42");
+            queryBuilder.order(TestEntity_.simpleInt);
+            queryBuilder.build().find();
+        }
     }
 
     @Test
