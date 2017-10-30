@@ -157,9 +157,7 @@ public class QueryBuilder<T> {
      * Builds the query and closes this QueryBuilder.
      */
     public Query<T> build() {
-        if (handle == 0) {
-            throw new IllegalStateException("This QueryBuilder has already been closed. Please use a new instance.");
-        }
+        verifyHandle();
         if (combineNextWith != Operator.NONE) {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
@@ -167,6 +165,12 @@ public class QueryBuilder<T> {
         Query<T> query = new Query<>(box, queryHandle, hasOrder, eagerRelations, filter, comparator);
         close();
         return query;
+    }
+
+    private void verifyHandle() {
+        if (handle == 0) {
+            throw new IllegalStateException("This QueryBuilder has already been closed. Please use a new instance.");
+        }
     }
 
     /**
@@ -211,6 +215,7 @@ public class QueryBuilder<T> {
      * @see #orderDesc(Property)
      */
     public QueryBuilder<T> order(Property property, int flags) {
+        verifyHandle();
         if (combineNextWith != Operator.NONE) {
             throw new IllegalStateException(
                     "An operator is pending. Use operators like and() and or() only between two conditions.");
@@ -346,106 +351,126 @@ public class QueryBuilder<T> {
     }
 
     public QueryBuilder<T> isNull(Property property) {
+        verifyHandle();
         checkCombineCondition(nativeNull(handle, property.getId()));
         return this;
     }
 
     public QueryBuilder<T> notNull(Property property) {
+        verifyHandle();
         checkCombineCondition(nativeNotNull(handle, property.getId()));
         return this;
     }
 
     public QueryBuilder<T> equal(Property property, long value) {
+        verifyHandle();
         checkCombineCondition(nativeEqual(handle, property.getId(), value));
         return this;
     }
 
     public QueryBuilder<T> equal(Property property, boolean value) {
+        verifyHandle();
         checkCombineCondition(nativeEqual(handle, property.getId(), value ? 1 : 0));
         return this;
     }
 
     /** @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead. */
     public QueryBuilder<T> equal(Property property, Date value) {
+        verifyHandle();
         checkCombineCondition(nativeEqual(handle, property.getId(), value.getTime()));
         return this;
     }
 
     public QueryBuilder<T> notEqual(Property property, long value) {
+        verifyHandle();
         checkCombineCondition(nativeNotEqual(handle, property.getId(), value));
         return this;
     }
 
     public QueryBuilder<T> notEqual(Property property, boolean value) {
+        verifyHandle();
         checkCombineCondition(nativeNotEqual(handle, property.getId(), value ? 1 : 0));
         return this;
     }
 
     /** @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead. */
     public QueryBuilder<T> notEqual(Property property, Date value) {
+        verifyHandle();
         checkCombineCondition(nativeNotEqual(handle, property.getId(), value.getTime()));
         return this;
     }
 
     public QueryBuilder<T> less(Property property, long value) {
+        verifyHandle();
         checkCombineCondition(nativeLess(handle, property.getId(), value));
         return this;
     }
 
     public QueryBuilder<T> greater(Property property, long value) {
+        verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value));
         return this;
     }
 
     public QueryBuilder<T> less(Property property, Date value) {
+        verifyHandle();
         checkCombineCondition(nativeLess(handle, property.getId(), value.getTime()));
         return this;
     }
 
     /** @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead. */
     public QueryBuilder<T> greater(Property property, Date value) {
+        verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value.getTime()));
         return this;
     }
 
     public QueryBuilder<T> between(Property property, long value1, long value2) {
+        verifyHandle();
         checkCombineCondition(nativeBetween(handle, property.getId(), value1, value2));
         return this;
     }
 
     /** @throws NullPointerException if one of the given values is null. */
     public QueryBuilder<T> between(Property property, Date value1, Date value2) {
+        verifyHandle();
         checkCombineCondition(nativeBetween(handle, property.getId(), value1.getTime(), value2.getTime()));
         return this;
     }
 
     // FIXME DbException: invalid unordered_map<K, T> key
     public QueryBuilder<T> in(Property property, long[] values) {
+        verifyHandle();
         checkCombineCondition(nativeIn(handle, property.getId(), values, false));
         return this;
     }
 
     public QueryBuilder<T> in(Property property, int[] values) {
+        verifyHandle();
         checkCombineCondition(nativeIn(handle, property.getId(), values, false));
         return this;
     }
 
     public QueryBuilder<T> notIn(Property property, long[] values) {
+        verifyHandle();
         checkCombineCondition(nativeIn(handle, property.getId(), values, true));
         return this;
     }
 
     public QueryBuilder<T> notIn(Property property, int[] values) {
+        verifyHandle();
         checkCombineCondition(nativeIn(handle, property.getId(), values, true));
         return this;
     }
 
     public QueryBuilder<T> equal(Property property, String value) {
+        verifyHandle();
         checkCombineCondition(nativeEqual(handle, property.getId(), value, false));
         return this;
     }
 
     // Help people with floating point equality...
+
     /**
      * Floating point equality is non-trivial; this is just a convenience for
      * {@link #between(Property, double, double)} with parameters(property, value - tolerance, value + tolerance).
@@ -457,61 +482,73 @@ public class QueryBuilder<T> {
     }
 
     public QueryBuilder<T> notEqual(Property property, String value) {
+        verifyHandle();
         checkCombineCondition(nativeNotEqual(handle, property.getId(), value, false));
         return this;
     }
 
     public QueryBuilder<T> contains(Property property, String value) {
+        verifyHandle();
         checkCombineCondition(nativeContains(handle, property.getId(), value, false));
         return this;
     }
 
     public QueryBuilder<T> startsWith(Property property, String value) {
+        verifyHandle();
         checkCombineCondition(nativeStartsWith(handle, property.getId(), value, false));
         return this;
     }
 
     public QueryBuilder<T> endsWith(Property property, String value) {
+        verifyHandle();
         checkCombineCondition(nativeEndsWith(handle, property.getId(), value, false));
         return this;
     }
 
     public QueryBuilder<T> equal(Property property, String value, StringOrder order) {
+        verifyHandle();
         checkCombineCondition(nativeEqual(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
         return this;
     }
 
     public QueryBuilder<T> notEqual(Property property, String value, StringOrder order) {
+        verifyHandle();
         checkCombineCondition(nativeNotEqual(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
         return this;
     }
 
     public QueryBuilder<T> contains(Property property, String value, StringOrder order) {
+        verifyHandle();
         checkCombineCondition(nativeContains(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
         return this;
     }
 
     public QueryBuilder<T> startsWith(Property property, String value, StringOrder order) {
+        verifyHandle();
         checkCombineCondition(nativeStartsWith(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
         return this;
     }
 
     public QueryBuilder<T> endsWith(Property property, String value, StringOrder order) {
+        verifyHandle();
         checkCombineCondition(nativeEndsWith(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
         return this;
     }
 
     public QueryBuilder<T> less(Property property, double value) {
+        verifyHandle();
         checkCombineCondition(nativeLess(handle, property.getId(), value));
         return this;
     }
 
     public QueryBuilder<T> greater(Property property, double value) {
+        verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value));
         return this;
     }
 
     public QueryBuilder<T> between(Property property, double value1, double value2) {
+        verifyHandle();
         checkCombineCondition(nativeBetween(handle, property.getId(), value1, value2));
         return this;
     }
