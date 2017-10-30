@@ -1,5 +1,5 @@
 // Just too many sub projects, so each can reference rootProject.version
-version = '1.2.0-RC'
+version = '1.2.0'
 
 buildscript {
     ext {
@@ -126,6 +126,6 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.1'
+    gradleVersion = '4.3'
     distributionType = org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
 }
