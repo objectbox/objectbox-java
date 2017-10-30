@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
 
+import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 
 /**
@@ -37,7 +38,7 @@ public class SubscriptionBuilder<T> {
     private DataTransformer<T, Object> transformer;
     private Scheduler scheduler;
     private ErrorObserver errorObserver;
-//    private boolean sync;
+    //    private boolean sync;
 
 
     @Internal
@@ -47,13 +48,13 @@ public class SubscriptionBuilder<T> {
         this.threadPool = threadPool;
     }
 
-//    public Observable<T> runFirst(Runnable firstRunnable) {
-//        if (firstRunnable != null) {
-//            throw new IllegalStateException("Only one asyncRunnable allowed");
-//        }
-//        this.firstRunnable = firstRunnable;
-//        return this;
-//    }
+    //    public Observable<T> runFirst(Runnable firstRunnable) {
+    //        if (firstRunnable != null) {
+    //            throw new IllegalStateException("Only one asyncRunnable allowed");
+    //        }
+    //        this.firstRunnable = firstRunnable;
+    //        return this;
+    //    }
 
     /**
      * Uses a weak reference for the observer.
@@ -75,10 +76,10 @@ public class SubscriptionBuilder<T> {
         return this;
     }
 
-//    public Observable<T> sync() {
-//        sync = true;
-//        return this;
-//    }
+    //    public Observable<T> sync() {
+    //        sync = true;
+    //        return this;
+    //    }
 
     /**
      * Transforms the original data from the publisher to something that is more helpful to your application.
@@ -99,8 +100,9 @@ public class SubscriptionBuilder<T> {
     }
 
     /**
-     * The given {@link ErrorObserver} is notified when the {@link DataTransformer} ({@link #transform(DataTransformer)}) or
-     * {@link DataObserver} ({@link #observer(DataObserver)}) threw an exception.
+     * The given {@link ErrorObserver} is notified when the {@link DataTransformer}
+     * ({@link #transform(DataTransformer)}) or {@link DataObserver} ({@link #observer(DataObserver)})
+     * threw an exception.
      */
     public SubscriptionBuilder<T> onError(ErrorObserver errorObserver) {
         if (this.errorObserver != null) {
@@ -126,6 +128,8 @@ public class SubscriptionBuilder<T> {
 
     /**
      * The given observer is subscribed to the publisher. This method MUST be called to complete a subscription.
+     * <p>
+     * Note: you must keep the returned {@link DataSubscription} to cancel it.
      *
      * @return an subscription object used for canceling further notifications to the observer
      */
@@ -147,18 +151,29 @@ public class SubscriptionBuilder<T> {
             observer = new ActionObserver(subscription);
         }
 
-        if(single) {
-            if(onlyChanges) {
+        if (single) {
+            if (onlyChanges) {
                 throw new IllegalStateException("Illegal combination of single() and onlyChanges()");
             }
             publisher.publishSingle(observer, publisherParam);
         } else {
             publisher.subscribe(observer, publisherParam);
-            if(!onlyChanges) {
+            if (!onlyChanges) {
                 publisher.publishSingle(observer, publisherParam);
             }
         }
         return subscription;
+    }
+
+    /**
+     * Convenience for calling {@link #observer(DataObserver)} with adding the resulting {@link DataSubscription} to the
+     * given {@link DataSubscriptionList}.
+     */
+    @Beta
+    public DataSubscription observer(DataObserver<T> observer, DataSubscriptionList dataSubscriptionList) {
+        DataSubscription dataSubscription = observer(observer);
+        dataSubscriptionList.add(dataSubscription);
+        return dataSubscription;
     }
 
     class ActionObserver implements DataObserver<T>, DelegatingObserver<T> {
