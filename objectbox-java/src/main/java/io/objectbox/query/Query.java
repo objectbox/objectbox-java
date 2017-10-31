@@ -17,6 +17,7 @@ import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.internal.CallWithHandle;
 import io.objectbox.reactive.DataObserver;
+import io.objectbox.reactive.DataSubscriptionList;
 import io.objectbox.reactive.SubscriptionBuilder;
 import io.objectbox.relation.RelationInfo;
 import io.objectbox.relation.ToOne;
@@ -497,6 +498,18 @@ public class Query<T> {
      */
     public SubscriptionBuilder<List<T>> subscribe() {
         return new SubscriptionBuilder<>(publisher, null, box.getStore().internalThreadPool());
+    }
+
+    /**
+     * Convenience for {@link #subscribe()} with a subsequent call to
+     * {@link SubscriptionBuilder#dataSubscriptionList(DataSubscriptionList)}.
+     *
+     * @param dataSubscriptionList the resulting {@link io.objectbox.reactive.DataSubscription} will be added to it
+     */
+    public SubscriptionBuilder<List<T>> subscribe(DataSubscriptionList dataSubscriptionList) {
+        SubscriptionBuilder<List<T>> subscriptionBuilder = subscribe();
+        subscriptionBuilder.dataSubscriptionList(dataSubscriptionList);
+        return subscriptionBuilder;
     }
 
     /**

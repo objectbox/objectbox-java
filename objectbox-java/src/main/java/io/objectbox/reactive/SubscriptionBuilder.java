@@ -38,6 +38,7 @@ public class SubscriptionBuilder<T> {
     private DataTransformer<T, Object> transformer;
     private Scheduler scheduler;
     private ErrorObserver errorObserver;
+    private DataSubscriptionList dataSubscriptionList;
     //    private boolean sync;
 
 
@@ -144,6 +145,10 @@ public class SubscriptionBuilder<T> {
             weakObserver.setSubscription(subscription);
         }
 
+        if(dataSubscriptionList != null) {
+            dataSubscriptionList.add(subscription);
+        }
+
         // TODO FIXME when an observer subscribes twice, it currently won't be added, but we return a new subscription
 
         // Trivial observers do not have to be wrapped
@@ -165,15 +170,9 @@ public class SubscriptionBuilder<T> {
         return subscription;
     }
 
-    /**
-     * Convenience for calling {@link #observer(DataObserver)} with adding the resulting {@link DataSubscription} to the
-     * given {@link DataSubscriptionList}.
-     */
-    @Beta
-    public DataSubscription observer(DataObserver<T> observer, DataSubscriptionList dataSubscriptionList) {
-        DataSubscription dataSubscription = observer(observer);
-        dataSubscriptionList.add(dataSubscription);
-        return dataSubscription;
+    public SubscriptionBuilder<T> dataSubscriptionList(DataSubscriptionList dataSubscriptionList) {
+        this.dataSubscriptionList = dataSubscriptionList;
+        return this;
     }
 
     class ActionObserver implements DataObserver<T>, DelegatingObserver<T> {
