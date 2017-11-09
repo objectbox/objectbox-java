@@ -133,7 +133,7 @@ public class BoxStore implements Closeable {
 
     static native String nativeStartObjectBrowser(long store, String urlPath, int port);
 
-    static native String nativeSetDebugFlags(long store, int debugFlags);
+    static native void nativeSetDebugFlags(long store, int debugFlags);
 
     public static native boolean isObjectBrowserAvailable();
 
