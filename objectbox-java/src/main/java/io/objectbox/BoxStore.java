@@ -188,9 +188,12 @@ public class BoxStore implements Closeable {
         verifyNotAlreadyOpen(canonicalPath);
 
         handle = nativeCreate(canonicalPath, builder.maxSizeInKByte, builder.maxReaders, builder.model);
-        nativeSetDebugFlags(handle, builder.debugFlags);
-        debugTxRead = (builder.debugFlags & DebugFlags.LOG_TRANSACTIONS_READ) != 0;
-        debugTxWrite = (builder.debugFlags & DebugFlags.LOG_TRANSACTIONS_WRITE) != 0;
+        int debugFlags = builder.debugFlags;
+        if (debugFlags != 0) {
+            nativeSetDebugFlags(handle, debugFlags);
+            debugTxRead = (debugFlags & DebugFlags.LOG_TRANSACTIONS_READ) != 0;
+            debugTxWrite = (debugFlags & DebugFlags.LOG_TRANSACTIONS_WRITE) != 0;
+        }
         debugRelations = builder.debugRelations;
 
         for (EntityInfo entityInfo : builder.entityInfoList) {
