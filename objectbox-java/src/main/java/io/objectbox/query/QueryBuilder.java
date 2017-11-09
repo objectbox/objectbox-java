@@ -9,7 +9,6 @@ import io.objectbox.Box;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.model.OrderFlags;
 import io.objectbox.relation.RelationInfo;
 
 /**
