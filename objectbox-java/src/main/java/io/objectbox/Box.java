@@ -52,7 +52,6 @@ public class Box<T> {
     private final ThreadLocal<Cursor<T>> threadLocalReader = new ThreadLocal<>();
 
     private final IdGetter<T> idGetter;
-    private final boolean debugTx;
 
     private EntityInfo entityInfo;
     private volatile Field boxStoreField;
@@ -61,7 +60,6 @@ public class Box<T> {
         this.store = store;
         this.entityClass = entityClass;
         idGetter = store.getEntityInfo(entityClass).getIdGetter();
-        debugTx = store.debugTx;
     }
 
     Cursor<T> getReader() {
@@ -77,9 +75,6 @@ public class Box<T> {
                 }
                 tx.renew();
                 cursor.renew(tx);
-                if (debugTx) {
-                    System.out.println("Renewed: " + cursor + ", TX: " + tx);
-                }
             } else {
                 cursor = store.beginReadTx().createCursor(entityClass);
                 threadLocalReader.set(cursor);

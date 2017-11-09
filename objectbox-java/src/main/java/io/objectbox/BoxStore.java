@@ -131,7 +131,9 @@ public class BoxStore implements Closeable {
 
     static native int nativeCleanStaleReadTransactions(long store);
 
-    static native String startObjectBrowser(long store, String urlPath, int port);
+    static native String nativeStartObjectBrowser(long store, String urlPath, int port);
+
+    static native String nativeSetDebugFlags(long store, int debugFlags);
 
     public static native boolean isObjectBrowserAvailable();
 
@@ -151,7 +153,8 @@ public class BoxStore implements Closeable {
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
     private final ExecutorService threadPool = new ObjectBoxThreadPool(this);
     private final ObjectClassPublisher objectClassPublisher;
-    final boolean debugTx;
+    final boolean debugTxRead;
+    final boolean debugTxWrite;
     final boolean debugRelations;
 
     /** Set when running inside TX */
@@ -185,7 +188,9 @@ public class BoxStore implements Closeable {
         verifyNotAlreadyOpen(canonicalPath);
 
         handle = nativeCreate(canonicalPath, builder.maxSizeInKByte, builder.maxReaders, builder.model);
-        debugTx = builder.debugTransactions;
+        nativeSetDebugFlags(handle, builder.debugFlags);
+        debugTxRead = (builder.debugFlags & DebugFlags.LOG_TRANSACTIONS_READ) != 0;
+        debugTxWrite = (builder.debugFlags & DebugFlags.LOG_TRANSACTIONS_WRITE) != 0;
         debugRelations = builder.debugRelations;
 
         for (EntityInfo entityInfo : builder.entityInfoList) {
@@ -300,7 +305,7 @@ public class BoxStore implements Closeable {
         checkOpen();
         // Because write TXs are typically not cached, initialCommitCount is not as relevant than for read TXs.
         int initialCommitCount = commitCount;
-        if (debugTx) {
+        if (debugTxWrite) {
             System.out.println("Begin TX with commit count " + initialCommitCount);
         }
         long nativeTx = nativeBeginTx(handle);
@@ -324,7 +329,7 @@ public class BoxStore implements Closeable {
         // updated resulting in querying obsolete data until another commit is done.
         // TODO add multithreaded test for this
         int initialCommitCount = commitCount;
-        if (debugTx) {
+        if (debugTxRead) {
             System.out.println("Begin read TX with commit count " + initialCommitCount);
         }
         long nativeTx = nativeBeginReadTx(handle);
@@ -424,8 +429,9 @@ public class BoxStore implements Closeable {
         // Only one write TX at a time, but there is a chance two writers race after commit: thus synchronize
         synchronized (txCommitCountLock) {
             commitCount++; // Overflow is OK because we check for equality
-            if (debugTx) {
-                System.out.println("TX committed. New commit count: " + commitCount);
+            if (debugTxWrite) {
+                System.out.println("TX committed. New commit count: " + commitCount + ", entity types affected: " +
+                        (entityTypeIdsAffected != null ? entityTypeIdsAffected.length : 0));
             }
         }
 
@@ -692,7 +698,7 @@ public class BoxStore implements Closeable {
     @Nullable
     public String startObjectBrowser(int port) {
         verifyObjectBrowserNotRunning();
-        String url = startObjectBrowser(handle, null, port);
+        String url = nativeStartObjectBrowser(handle, null, port);
         if (url != null) {
             objectBrowserPort = port;
         }
@@ -731,5 +737,9 @@ public class BoxStore implements Closeable {
     @Internal
     public boolean isDebugRelations() {
         return debugRelations;
+    }
+
+    void setDebugFlags(int debugFlags) {
+        nativeSetDebugFlags(handle, debugFlags);
     }
 }

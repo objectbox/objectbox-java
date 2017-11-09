@@ -65,9 +65,9 @@ public class BoxStoreBuilder {
 
     ModelUpdate modelUpdate;
 
-    private boolean android;
+    int debugFlags;
 
-    boolean debugTransactions;
+    private boolean android;
 
     boolean debugRelations;
 
@@ -230,9 +230,20 @@ public class BoxStoreBuilder {
         return this;
     }
 
-    /** Enables some debug logging for transactions. */
+    @Deprecated
+    /** @deprecated Use {@link #debugFlags} instead. */
     public BoxStoreBuilder debugTransactions() {
-        this.debugTransactions = true;
+        this.debugFlags |= DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE;
+        return this;
+    }
+
+    /**
+     * Debug flags typically enable additional logging, see {@link DebugFlags} for valid values.
+     * <p>
+     * Example: debugFlags({@link DebugFlags#LOG_TRANSACTIONS_READ} | {@link DebugFlags#LOG_TRANSACTIONS_WRITE});
+     */
+    public BoxStoreBuilder debugFlags(int debugFlags) {
+        this.debugFlags = debugFlags;
         return this;
     }
 
