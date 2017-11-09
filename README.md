@@ -3,7 +3,7 @@
 # ObjectBox Java (Kotlin, Android)
 ObjectBox is a superfast object-oriented database with strong relation support.
 
-**Latest version: [1.2.0 (2017/10/31)](http://objectbox.io/changelog)**
+**Latest version: [1.2.1 (2017/11/10)](http://objectbox.io/changelog)**
 
 Demo code using ObjectBox:
 
@@ -17,7 +17,7 @@ Gradle setup
 Add this to your root build.gradle (project level): 
 
     buildscript {
-        ext.objectboxVersion = '1.2.0'
+        ext.objectboxVersion = '1.2.1'
         repositories {
             maven { url "http://objectbox.net/beta-repo/" }
         }
