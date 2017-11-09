@@ -193,6 +193,8 @@ public class BoxStore implements Closeable {
             nativeSetDebugFlags(handle, debugFlags);
             debugTxRead = (debugFlags & DebugFlags.LOG_TRANSACTIONS_READ) != 0;
             debugTxWrite = (debugFlags & DebugFlags.LOG_TRANSACTIONS_WRITE) != 0;
+        } else {
+            debugTxRead = debugTxWrite = false;
         }
         debugRelations = builder.debugRelations;
 
