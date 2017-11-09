@@ -184,7 +184,7 @@ public class BoxStore implements Closeable {
         }
         verifyNotAlreadyOpen(canonicalPath);
 
-        handle = nativeCreate(directory.getAbsolutePath(), builder.maxSizeInKByte, builder.maxReaders, builder.model);
+        handle = nativeCreate(canonicalPath, builder.maxSizeInKByte, builder.maxReaders, builder.model);
         debugTx = builder.debugTransactions;
         debugRelations = builder.debugRelations;
 
