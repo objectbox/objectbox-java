@@ -5,6 +5,7 @@ pipeline {
     triggers {
         upstream(upstreamProjects: "ObjectStore/${env.BRANCH_NAME.replaceAll("/", "%2F")}",
                 threshold: hudson.model.Result.FAILURE)
+        cron ("*/20 0-6 * * *") // every 20 minutes at night (0:00 - 6:00)
     }
 
     stages {
