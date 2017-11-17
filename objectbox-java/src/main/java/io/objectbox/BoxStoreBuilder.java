@@ -37,7 +37,7 @@ import io.objectbox.ideasonly.ModelUpdate;
  * <ol>
  * <li>Name/location of DB: use {@link #name(String)}/{@link #baseDirectory}/{@link #androidContext(Object)}
  * OR {@link #directory(File)}(default: name "objectbox)</li>
- * <li>Max DB size: see {@link #maxSizeInKByte} (default: 512 MB)</li>
+ * <li>Max DB size: see {@link #maxSizeInKByte} (default: 1 GB)</li>
  * <li>Max readers: see {@link #maxReaders(int)} (default: 126)</li>
  * </ol>
  */
@@ -47,7 +47,7 @@ public class BoxStoreBuilder {
     public static final String DEFAULT_NAME = "objectbox";
 
     /** The default maximum size the DB can grow to, which can be overwritten using {@link #maxSizeInKByte}. */
-    public static final int DEFAULT_MAX_DB_SIZE_KBYTE = 512 * 1024;
+    public static final int DEFAULT_MAX_DB_SIZE_KBYTE = 1024 * 1024;
 
     final byte[] model;
 
@@ -60,7 +60,7 @@ public class BoxStoreBuilder {
     /** Ignored by BoxStore */
     private String name;
 
-    // 512 MB
+    /** Defaults to {@link #DEFAULT_MAX_DB_SIZE_KBYTE}. */
     long maxSizeInKByte = DEFAULT_MAX_DB_SIZE_KBYTE;
 
     ModelUpdate modelUpdate;
@@ -218,10 +218,10 @@ public class BoxStoreBuilder {
 
     /**
      * Sets the maximum size the database file can grow to.
-     * By default this is 512 MB, which should be sufficient for most applications.
+     * By default this is 1 GB, which should be sufficient for most applications.
      * <p>
      * In general, a maximum size prevents the DB from growing indefinitely when something goes wrong
-     * (for example you insert data in an infinite look).
+     * (for example you insert data in an infinite loop).
      *
      * @param maxSizeInKByte
      */
