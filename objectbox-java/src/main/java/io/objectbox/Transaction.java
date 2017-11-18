@@ -34,7 +34,9 @@ public class Transaction implements Closeable {
     private final Throwable creationThrowable;
 
     private int initialCommitCount;
-    private boolean closed;
+
+    /** volatile because finalizer thread may interfere with "one thread, one TX" rule */
+    private volatile boolean closed;
 
     static native void nativeDestroy(long transaction);
 
