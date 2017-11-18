@@ -21,10 +21,13 @@ pipeline {
         }
 
         stage('build-java') {
+            environment {
+                ASAN_OPTIONS = 'detect_leaks=0'
+            }
+
             steps {
-                sh './gradlew --stacktrace ' +
-                        '-Dextensive-tests=true ' +
-                        '-PpreferedRepo=local ' +
+                sh 'LD_PRELOAD=$ASAN_LIB_SO ./gradlew --stacktrace ' +
+                        '-Dorg.gradle.daemon=false -Dextensive-tests=true -PpreferedRepo=local ' +
                         'clean build uploadArchives'
             }
         }
