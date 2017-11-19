@@ -21,4 +21,11 @@ test {
     // This is pretty useless now because it floods console with warnings about internal Java classes
     // However we might check from time to time, also with Java 9.
     // jvmArgs '-Xcheck:jni'
+
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+        displayGranularity=2
+        events 'started', 'passed'
+    }
 }
