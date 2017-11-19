@@ -19,4 +19,11 @@ echo "ASAN_OPTIONS: $ASAN_OPTIONS"
 ls -l $ASAN_LIB_SO
 ls -l $ASAN_SYMBOLIZER_PATH
 
-LD_PRELOAD=${ASAN_LIB_SO} ./gradlew -Dorg.gradle.daemon=false --stacktrace test
+if [[ $# -eq 0 ]] ; then
+    args=test
+else
+    args=$@
+fi
+echo "Starting Gradle for target(s) \"$args\"..."
+
+LD_PRELOAD=${ASAN_LIB_SO} ./gradlew -Dorg.gradle.daemon=false --stacktrace ${args}
