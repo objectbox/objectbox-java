@@ -36,7 +36,7 @@ pipeline {
     // For global vars see /jenkins/pipeline-syntax/globals
     post {
         always {
-            junit '**/build/test-results/**/TEST-*.xml'
+            //junit '**/build/test-results/**/TEST-*.xml'
             archive 'tests/*/hs_err_pid*.log'
         }
 
