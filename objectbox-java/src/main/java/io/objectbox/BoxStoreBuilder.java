@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.ideasonly.ModelUpdate;
@@ -148,8 +149,7 @@ public class BoxStoreBuilder {
         if (context == null) {
             throw new NullPointerException("Context may not be null");
         }
-        File filesDir = getAndroidFilesDir(context);
-        File baseDir = new File(filesDir, "objectbox");
+        File baseDir = getAndroidBaseDir(context);
         if (!baseDir.exists()) {
             baseDir.mkdir();
             if (!baseDir.exists()) { // check baseDir.exists() because of potential concurrent processes
@@ -164,8 +164,21 @@ public class BoxStoreBuilder {
         return this;
     }
 
+    static File getAndroidDbDir(Object context, String dbName) {
+        File baseDir = getAndroidBaseDir(context);
+        return new File(baseDir, dbName(dbName));
+    }
+
+    private static String dbName(@Nullable String dbNameOrNull) {
+        return dbNameOrNull != null ? dbNameOrNull : DEFAULT_NAME;
+    }
+
+    static File getAndroidBaseDir(Object context) {
+        return new File(getAndroidFilesDir(context), "objectbox");
+    }
+
     @Nonnull
-    private File getAndroidFilesDir(Object context) {
+    private static File getAndroidFilesDir(Object context) {
         File filesDir;
         try {
             Method getFilesDir = context.getClass().getMethod("getFilesDir");
@@ -205,7 +218,7 @@ public class BoxStoreBuilder {
     }
 
     @Internal
-    public <T> void entity(EntityInfo entityInfo) {
+    public void entity(EntityInfo entityInfo) {
         entityInfoList.add(entityInfo);
     }
 
@@ -223,7 +236,6 @@ public class BoxStoreBuilder {
      * In general, a maximum size prevents the DB from growing indefinitely when something goes wrong
      * (for example you insert data in an infinite loop).
      *
-     * @param maxSizeInKByte
      */
     public BoxStoreBuilder maxSizeInKByte(long maxSizeInKByte) {
         this.maxSizeInKByte = maxSizeInKByte;
@@ -258,16 +270,19 @@ public class BoxStoreBuilder {
      */
     public BoxStore build() {
         if (directory == null) {
-            if (name == null) {
-                name = DEFAULT_NAME;
-            }
-            if (baseDirectory != null) {
-                directory = new File(baseDirectory, name);
-            } else {
-                directory = new File(name);
-            }
+            name = dbName(name);
+            directory = getDbDir(baseDirectory, name);
         }
         return new BoxStore(this);
+    }
+
+    static File getDbDir(@Nullable File baseDirectoryOrNull, @Nullable String nameOrNull) {
+        String name = dbName(nameOrNull);
+        if (baseDirectoryOrNull != null) {
+            return new File(baseDirectoryOrNull, name);
+        } else {
+            return new File(name);
+        }
     }
 
     /**

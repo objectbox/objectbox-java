@@ -426,7 +426,8 @@ public class BoxStore implements Closeable {
      * If you did not use a custom name with BoxStoreBuilder, you can pass "new File({@link
      * BoxStoreBuilder#DEFAULT_NAME})".
      *
-     * @param objectStoreDirectory directory to be deleted
+     * @param objectStoreDirectory directory to be deleted; this is the value you previously provided to {@link
+     *                             BoxStoreBuilder#directory(File)}
      * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
      * Note: If false is returned, any number of files may have been deleted before the failure happened.
      */
@@ -448,6 +449,41 @@ public class BoxStore implements Closeable {
             }
         }
         return objectStoreDirectory.delete();
+    }
+
+    /**
+     * Danger zone! This will delete all files in the given directory!
+     * <p>
+     * If you did not use a custom name with BoxStoreBuilder, you can pass "new File({@link
+     * BoxStoreBuilder#DEFAULT_NAME})".
+     *
+     * @param androidContext     provide an Android Context like Application or Service
+     * @param customDbNameOrNull use null for default name, or the name you previously provided to {@link
+     *                           BoxStoreBuilder#name(String)}.
+     * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
+     * Note: If false is returned, any number of files may have been deleted before the failure happened.
+     */
+    public static boolean deleteAllFiles(Object androidContext, @Nullable String customDbNameOrNull) {
+        File dbDir = BoxStoreBuilder.getAndroidDbDir(androidContext, customDbNameOrNull);
+        return deleteAllFiles(dbDir);
+    }
+
+    /**
+     * Danger zone! This will delete all files in the given directory!
+     * <p>
+     * If you did not use a custom name with BoxStoreBuilder, you can pass "new File({@link
+     * BoxStoreBuilder#DEFAULT_NAME})".
+     *
+     * @param baseDirectoryOrNull use null for no base dir, or the value you previously provided to {@link
+     *                            BoxStoreBuilder#baseDirectory(File)}
+     * @param customDbNameOrNull  use null for default name, or the name you previously provided to {@link
+     *                            BoxStoreBuilder#name(String)}.
+     * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
+     * Note: If false is returned, any number of files may have been deleted before the failure happened.
+     */
+    public static boolean deleteAllFiles(@Nullable File baseDirectoryOrNull, @Nullable String customDbNameOrNull) {
+        File dbDir = BoxStoreBuilder.getDbDir(baseDirectoryOrNull, customDbNameOrNull);
+        return deleteAllFiles(dbDir);
     }
 
     @Internal
