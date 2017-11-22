@@ -138,7 +138,7 @@ public class BoxStore implements Closeable {
     public static native boolean isObjectBrowserAvailable();
 
     public static String getVersion() {
-        return "1.2.2-2017-11-21";
+        return "1.2.2-2017-11-22";
     }
 
     private final File directory;
@@ -349,6 +349,15 @@ public class BoxStore implements Closeable {
         return closed;
     }
 
+    /**
+     * Closes the BoxStore and frees associated resources.
+     * This method is useful for unit tests;
+     * most real applications should open a BoxStore once and keep it open until the app dies.
+     * <p>
+     * WARNING:
+     * This is a somewhat delicate thing to do if you have threads running that may potentially still use the BoxStore.
+     * This results in undefined behavior, including the possibility of crashing.
+     */
     public void close() {
         boolean oldClosedState;
         synchronized (this) {
@@ -395,6 +404,15 @@ public class BoxStore implements Closeable {
         }
     }
 
+    /**
+     * Danger zone! This will delete all data (files) of this BoxStore!
+     * You must call {@link #close()} before and read the docs of that method carefully!
+     * <p>
+     * A safer alternative: use the static {@link #deleteAllFiles(File)} method before opening the BoxStore.
+     *
+     * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
+     * Note: If false is returned, any number of files may have been deleted before the failure happened.
+     */
     public boolean deleteAllFiles() {
         if (!closed) {
             throw new IllegalStateException("Store must be closed");
@@ -402,20 +420,34 @@ public class BoxStore implements Closeable {
         return deleteAllFiles(directory);
     }
 
+    /**
+     * Danger zone! This will delete all files in the given directory!
+     * <p>
+     * If you did not use a custom name with BoxStoreBuilder, you can pass "new File({@link
+     * BoxStoreBuilder#DEFAULT_NAME})".
+     *
+     * @param objectStoreDirectory directory to be deleted
+     * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
+     * Note: If false is returned, any number of files may have been deleted before the failure happened.
+     */
     public static boolean deleteAllFiles(File objectStoreDirectory) {
-        boolean ok = true;
-        if (objectStoreDirectory != null && objectStoreDirectory.exists()) {
-            File[] files = objectStoreDirectory.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    ok &= file.delete();
-                }
-            } else {
-                ok = false;
-            }
-            ok &= objectStoreDirectory.delete();
+        if (!objectStoreDirectory.exists()) {
+            return true;
         }
-        return ok;
+
+        File[] files = objectStoreDirectory.listFiles();
+        if (files == null) {
+            return false;
+        }
+        for (File file : files) {
+            if (!file.delete()) {
+                // OK if concurrently deleted. Fail fast otherwise.
+                if (file.exists()) {
+                    return false;
+                }
+            }
+        }
+        return objectStoreDirectory.delete();
     }
 
     @Internal
@@ -638,6 +670,11 @@ public class BoxStore implements Closeable {
         });
     }
 
+    /**
+     * Gives info that can be useful for debugging.
+     *
+     * @return String that is typically logged by the application.
+     */
     public String diagnose() {
         return nativeDiagnose(handle);
     }
