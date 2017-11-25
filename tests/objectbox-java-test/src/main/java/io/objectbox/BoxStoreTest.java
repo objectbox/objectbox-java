@@ -22,12 +22,7 @@ import java.io.File;
 
 import io.objectbox.exception.DbException;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class BoxStoreTest extends AbstractObjectBoxTest {
 
@@ -102,6 +97,51 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         File boxStoreDir2 = new File(boxStoreDir.getAbsolutePath() + "-2");
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir2);
         builder.entity(new TestEntity_());
+    }
+
+    @Test
+    public void testDeleteAllFiles() {
+        closeStoreForTest();
+    }
+
+    @Test
+    public void testDeleteAllFiles_staticDir() {
+        closeStoreForTest();
+        File boxStoreDir2 = new File(boxStoreDir.getAbsolutePath() + "-2");
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir2);
+        BoxStore store2 = builder.build();
+        store2.close();
+
+        assertTrue(boxStoreDir2.exists());
+        assertTrue(BoxStore.deleteAllFiles(boxStoreDir2));
+        assertFalse(boxStoreDir2.exists());
+    }
+
+    @Test
+    public void testDeleteAllFiles_baseDirName() {
+        closeStoreForTest();
+        File basedir = new File("test-base-dir");
+        String name = "mydb";
+        basedir.mkdir();
+        assertTrue(basedir.isDirectory());
+        File dbDir = new File(basedir, name);
+        assertFalse(dbDir.exists());
+
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).baseDirectory(basedir).name(name);
+        BoxStore store2 = builder.build();
+        store2.close();
+
+        assertTrue(dbDir.exists());
+        assertTrue(BoxStore.deleteAllFiles(basedir, name));
+        assertFalse(dbDir.exists());
+        assertTrue(basedir.delete());
+    }
+
+    private void closeStoreForTest() {
+        assertTrue(boxStoreDir.exists());
+        store.close();
+        assertTrue(store.deleteAllFiles());
+        assertFalse(boxStoreDir.exists());
     }
 
 }
