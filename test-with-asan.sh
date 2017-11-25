@@ -26,4 +26,10 @@ else
 fi
 echo "Starting Gradle for target(s) \"$args\"..."
 
-LD_PRELOAD=${ASAN_LIB_SO} ./gradlew -Dorg.gradle.daemon=false --stacktrace ${args}
+user=$(whoami)
+if [[ ${user} == "jenkins" ]]; then
+    echo "WARNING!! USING DAEMON ON JENKINS (VS. ASAN)"
+    LD_PRELOAD=${ASAN_LIB_SO} ./gradlew --stacktrace ${args}
+else
+    LD_PRELOAD=${ASAN_LIB_SO} ./gradlew -Dorg.gradle.daemon=false --stacktrace ${args}
+fi
