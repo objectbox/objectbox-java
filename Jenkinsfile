@@ -22,12 +22,7 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh './gradlew --stacktrace ' +
-                        '-Dorg.gradle.daemon=false -PpreferedRepo=local -x test ' +
-                        'clean build uploadArchives'
-
-                // TODO enable again, once it works:
-                // sh './test-with-asan.sh -Dextensive-tests=true -PpreferedRepo=local clean build uploadArchives'
+                sh './test-with-asan.sh -Dextensive-tests=true -PpreferedRepo=local clean build uploadArchives'
             }
         }
 
@@ -36,7 +31,7 @@ pipeline {
     // For global vars see /jenkins/pipeline-syntax/globals
     post {
         always {
-            //junit '**/build/test-results/**/TEST-*.xml'
+            junit '**/build/test-results/**/TEST-*.xml'
             archive 'tests/*/hs_err_pid*.log'
         }
 
