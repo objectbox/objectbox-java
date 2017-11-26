@@ -75,8 +75,9 @@ public class Transaction implements Closeable {
 
     @Override
     protected void finalize() throws Throwable {
-        if (!closed) {
-            System.err.println("Transaction was not closed (initial commit count: " + initialCommitCount + ").");
+        // Committed & aborted transactions are fine: remaining native resources are not expensive
+        if (!closed && nativeIsActive(transaction)) { // TODO what about recycled state?
+            System.err.println("Transaction was not finished (initial commit count: " + initialCommitCount + ").");
             if (creationThrowable != null) {
                 System.err.println("Transaction was initially created here:");
                 creationThrowable.printStackTrace();
