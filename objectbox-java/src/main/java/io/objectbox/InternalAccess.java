@@ -51,4 +51,10 @@ public class InternalAccess {
     public static <T> void commitWriter(Box<T> box, Cursor<T> writer) {
         box.commitWriter(writer);
     }
+
+    /** Makes creation more expensive, but lets Finalizers show the creation stack for dangling resources. */
+    public static void enableCreationStackTracking() {
+        Transaction.TRACK_CREATION_STACK = true;
+        Cursor.TRACK_CREATION_STACK = true;
+    }
 }
