@@ -23,13 +23,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class CursorTest extends AbstractObjectBoxTest {
 
@@ -64,7 +58,7 @@ public class CursorTest extends AbstractObjectBoxTest {
             cursor.put(entity);
         } finally {
             cursor.close();
-            transaction.abort();
+            transaction.close();
         }
     }
 
@@ -149,15 +143,19 @@ public class CursorTest extends AbstractObjectBoxTest {
         String value = "lulu321";
         entity.setSimpleString(value);
         Transaction transaction = store.beginTx();
-
-        Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
-        long key = cursor.put(entity);
-        // And again
-        entity.setSimpleInt(1977);
-        cursor.put(entity);
-        assertEquals(key, cursor.lookupKeyUsingIndex(9, value));
-        TestEntity read = cursor.get(key);
-        cursor.close();
+        TestEntity read;
+        try {
+            Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
+            long key = cursor.put(entity);
+            // And again
+            entity.setSimpleInt(1977);
+            cursor.put(entity);
+            assertEquals(key, cursor.lookupKeyUsingIndex(9, value));
+            read = cursor.get(key);
+            cursor.close();
+        } finally {
+            transaction.close();
+        }
         assertEquals(1977, read.getSimpleInt());
         assertEquals(value, read.getSimpleString());
     }
@@ -264,13 +262,17 @@ public class CursorTest extends AbstractObjectBoxTest {
     @Test
     public void testClose() {
         Transaction tx = store.beginReadTx();
-        Cursor<TestEntity> cursor = tx.createCursor(TestEntity.class);
-        assertFalse(cursor.isClosed());
-        cursor.close();
-        assertTrue(cursor.isClosed());
+        try {
+            Cursor<TestEntity> cursor = tx.createCursor(TestEntity.class);
+            assertFalse(cursor.isClosed());
+            cursor.close();
+            assertTrue(cursor.isClosed());
 
-        // Double close should be fine
-        cursor.close();
+            // Double close should be fine
+            cursor.close();
+        } finally {
+            tx.close();
+        }
     }
 
     @Test

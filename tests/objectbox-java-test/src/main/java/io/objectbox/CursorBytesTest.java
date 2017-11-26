@@ -21,10 +21,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Random;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 // NOTE: Sizes must be multiple of 4 (currently not enforced)
 public class CursorBytesTest extends AbstractObjectBoxTest {
@@ -55,8 +52,8 @@ public class CursorBytesTest extends AbstractObjectBoxTest {
         assertTrue(Arrays.equals(new byte[]{4, 5, 6, 7}, cursor.getNext()));
         assertTrue(Arrays.equals(new byte[]{2, 3, 4, 5}, cursor.getPrev()));
         // getLast is currently unsupported
-//        assertTrue(Arrays.equals(new byte[]{8, 9, 10, 11, 12, 13}, cursor.getLast()));
-//        assertTrue(Arrays.equals(new byte[]{4, 5, 6, 7, 8}, cursor.getPrev()));
+        //        assertTrue(Arrays.equals(new byte[]{8, 9, 10, 11, 12, 13}, cursor.getLast()));
+        //        assertTrue(Arrays.equals(new byte[]{4, 5, 6, 7, 8}, cursor.getPrev()));
 
         cursor.close();
         transaction.abort();
@@ -65,19 +62,23 @@ public class CursorBytesTest extends AbstractObjectBoxTest {
     @Test
     public void testRemove() {
         Transaction transaction = store.beginTx();
-        KeyValueCursor cursor = transaction.createKeyValueCursor();
+        try {
+            KeyValueCursor cursor = transaction.createKeyValueCursor();
 
-        cursor.put(1, new byte[]{1, 1, 0, 0});
-        cursor.put(2, new byte[]{2, 1, 0, 0});
-        cursor.put(4, new byte[]{4, 1, 0, 0});
+            cursor.put(1, new byte[]{1, 1, 0, 0});
+            cursor.put(2, new byte[]{2, 1, 0, 0});
+            cursor.put(4, new byte[]{4, 1, 0, 0});
 
-        assertTrue(cursor.removeAt(2));
+            assertTrue(cursor.removeAt(2));
 
-        // now 4 should be next to 1
-        assertTrue(cursor.seek(1));
-        byte[] next = cursor.getNext();
-        assertNotNull(next);
-        assertTrue(Arrays.equals(new byte[]{4, 1, 0, 0}, next));
+            // now 4 should be next to 1
+            assertTrue(cursor.seek(1));
+            byte[] next = cursor.getNext();
+            assertNotNull(next);
+            assertTrue(Arrays.equals(new byte[]{4, 1, 0, 0}, next));
+        } finally {
+            transaction.close();
+        }
     }
 
     @Test
