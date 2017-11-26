@@ -29,11 +29,8 @@ import java.util.concurrent.TimeUnit;
 
 import io.objectbox.ModelBuilder.EntityBuilder;
 import io.objectbox.ModelBuilder.PropertyBuilder;
-import io.objectbox.internal.CursorFactory;
-import io.objectbox.internal.IdGetter;
 import io.objectbox.model.PropertyFlags;
 import io.objectbox.model.PropertyType;
-
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -52,6 +49,9 @@ public abstract class AbstractObjectBoxTest {
 
     @Before
     public void setUp() throws IOException {
+        Cursor.TRACK_CREATION_STACK = true;
+        Transaction.TRACK_CREATION_STACK = true;
+
         // This works with Android without needing any context
         File tempFile = File.createTempFile("object-store-test", "");
         tempFile.delete();

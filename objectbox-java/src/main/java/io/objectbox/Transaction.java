@@ -26,7 +26,9 @@ import io.objectbox.internal.CursorFactory;
 @Internal
 @NotThreadSafe
 public class Transaction implements Closeable {
-    static final boolean WARN_FINALIZER = false;
+    /** May be set by tests */
+    @Internal
+    static boolean TRACK_CREATION_STACK;
 
     private final long transaction;
     private final BoxStore store;
@@ -68,14 +70,18 @@ public class Transaction implements Closeable {
         this.initialCommitCount = initialCommitCount;
         readOnly = nativeIsReadOnly(transaction);
 
-        creationThrowable = WARN_FINALIZER ? new Throwable() : null;
+        creationThrowable = TRACK_CREATION_STACK ? new Throwable() : null;
     }
 
     @Override
     protected void finalize() throws Throwable {
-        if (WARN_FINALIZER && !closed && creationThrowable != null) {
-            System.err.println("Transaction was not closed. It was initially created here:");
-            creationThrowable.printStackTrace();
+        if (!closed) {
+            System.err.println("Transaction was not closed (initial commit count: " + initialCommitCount + ").");
+            if (creationThrowable != null) {
+                System.err.println("Transaction was initially created here:");
+                creationThrowable.printStackTrace();
+            }
+            System.err.flush();
         }
         close();
         super.finalize();

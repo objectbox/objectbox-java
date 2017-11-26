@@ -29,7 +29,9 @@ import io.objectbox.annotation.apihint.Temporary;
 @Internal
 @NotThreadSafe
 public abstract class Cursor<T> implements Closeable {
-    static final boolean WARN_FINALIZER = false;
+    /** May be set by tests */
+    @Internal
+    static boolean TRACK_CREATION_STACK;
 
     protected static final int PUT_FLAG_FIRST = 1;
     protected static final int PUT_FLAG_COMPLETE = 1 << 1;
@@ -136,19 +138,23 @@ public abstract class Cursor<T> implements Closeable {
                 property.verifyId(id);
             }
         }
-        creationThrowable = WARN_FINALIZER ? new Throwable() : null;
+        creationThrowable = TRACK_CREATION_STACK ? new Throwable() : null;
 
         nativeSetBoxStoreForEntities(cursor, boxStore);
     }
 
     @Override
     protected void finalize() throws Throwable {
-        if (WARN_FINALIZER && !closed && creationThrowable != null) {
-            System.err.println("Cursor was not closed. It was initially created here:");
-            creationThrowable.printStackTrace();
+        if (!closed) {
+            System.err.println("Cursor was not closed.");
+            if (creationThrowable != null) {
+                System.err.println("Cursor was initially created here:");
+                creationThrowable.printStackTrace();
+            }
+            System.err.flush();
+            close();
+            super.finalize();
         }
-        close();
-        super.finalize();
     }
 
     protected abstract long getId(T entity);
@@ -223,8 +229,8 @@ public abstract class Cursor<T> implements Closeable {
     }
 
     /**
-     * @deprecated TODO only used in tests, remove in the future
      * @return key or 0 if not found
+     * @deprecated TODO only used in tests, remove in the future
      */
     long lookupKeyUsingIndex(int propertyId, String value) {
         return nativeLookupKeyUsingIndex(cursor, propertyId, value);
