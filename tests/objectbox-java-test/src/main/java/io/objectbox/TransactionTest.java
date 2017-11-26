@@ -16,6 +16,7 @@
 
 package io.objectbox;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.Callable;
@@ -197,10 +198,15 @@ public class TransactionTest extends AbstractObjectBoxTest {
     }*/
 
     @Test
+    @Ignore("Tests robustness in invalid usage scenarios with lots of errors raised and resources leaked." +
+            "Only run this test manually from time to time, but spare regular test runs from those errors.")
     public void testTxGC() throws InterruptedException {
         // Trigger pending finalizers so we have less finalizers to run later
         System.gc();
         System.runFinalization();
+
+        // Dangling TXs is exactly what we are testing here
+        Transaction.TRACK_CREATION_STACK = false;
 
         // For a real test, use count = 100000 and check console output that TX get freed in between
         int count = runExtensiveTests ? 100000 : 1000;
@@ -212,7 +218,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
                 @Override
                 public void run() {
                     try {
-                        Transaction tx = store.beginReadTx();
+                        store.beginReadTx();
                     } catch (DbMaxReadersExceededException e) {
                         readersFull.incrementAndGet();
                     }
