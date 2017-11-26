@@ -33,6 +33,9 @@ public abstract class Cursor<T> implements Closeable {
     @Internal
     static boolean TRACK_CREATION_STACK;
 
+    @Internal
+    static boolean LOG_READ_NOT_CLOSED;
+
     protected static final int PUT_FLAG_FIRST = 1;
     protected static final int PUT_FLAG_COMPLETE = 1 << 1;
 
@@ -118,6 +121,7 @@ public abstract class Cursor<T> implements Closeable {
     protected final EntityInfo entityInfo;
     protected final BoxStore boxStoreForEntities;
 
+    protected final boolean readOnly;
     protected boolean closed;
 
     private final Throwable creationThrowable;
@@ -127,6 +131,7 @@ public abstract class Cursor<T> implements Closeable {
             throw new IllegalArgumentException("Transaction is null");
         }
         this.tx = tx;
+        readOnly = tx.isReadOnly();
         this.cursor = cursor;
         this.entityInfo = entityInfo;
         this.boxStoreForEntities = boxStore;
@@ -146,12 +151,15 @@ public abstract class Cursor<T> implements Closeable {
     @Override
     protected void finalize() throws Throwable {
         if (!closed) {
-            System.err.println("Cursor was not closed.");
-            if (creationThrowable != null) {
-                System.err.println("Cursor was initially created here:");
-                creationThrowable.printStackTrace();
+            // By default only complain about write cursors
+            if (!readOnly || LOG_READ_NOT_CLOSED) {
+                System.err.println("Cursor was not closed.");
+                if (creationThrowable != null) {
+                    System.err.println("Cursor was initially created here:");
+                    creationThrowable.printStackTrace();
+                }
+                System.err.flush();
             }
-            System.err.flush();
             close();
             super.finalize();
         }
