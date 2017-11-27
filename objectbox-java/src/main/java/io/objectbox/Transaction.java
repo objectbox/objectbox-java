@@ -20,6 +20,7 @@ import java.io.Closeable;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.CursorFactory;
 
@@ -124,7 +125,11 @@ public class Transaction implements Closeable {
         nativeAbort(transaction);
     }
 
-    /** Efficient for read transactions. */
+    /**
+     * Will throw if Cursors are still active for this TX.
+     * Efficient for read transactions.
+     */
+    @Experimental
     public void reset() {
         checkOpen();
         initialCommitCount = store.commitCount;
