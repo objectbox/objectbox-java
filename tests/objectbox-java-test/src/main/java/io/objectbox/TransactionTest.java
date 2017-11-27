@@ -176,7 +176,11 @@ public class TransactionTest extends AbstractObjectBoxTest {
     @Test(expected = IllegalStateException.class)
     public void testCommitReadTxException() {
         Transaction tx = store.beginReadTx();
-        tx.commit();
+        try {
+            tx.commit();
+        } finally {
+            tx.abort();
+        }
     }
 
     /*
