@@ -74,7 +74,7 @@ public class Box<T> {
                     throw new IllegalStateException("Illegal reader TX state");
                 }
                 tx.renew();
-                cursor.renew(tx);
+                cursor.renew();
             } else {
                 cursor = store.beginReadTx().createCursor(entityClass);
                 threadLocalReader.set(cursor);

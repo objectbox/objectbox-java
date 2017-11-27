@@ -131,13 +131,16 @@ public class Transaction implements Closeable {
         nativeReset(transaction);
     }
 
-    /** For read transactions. */
+    /**
+     * For read transactions, this releases important native resources that hold on versions of potential old data.
+     * To continue, use {@link #renew()}.
+     */
     public void recycle() {
         checkOpen();
         nativeRecycle(transaction);
     }
 
-    /** Efficient for read transactions. */
+    /** Renews a previously recycled transaction (see {@link #recycle()}). Efficient for read transactions. */
     public void renew() {
         checkOpen();
         initialCommitCount = store.commitCount;

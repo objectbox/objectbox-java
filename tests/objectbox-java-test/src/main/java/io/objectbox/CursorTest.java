@@ -316,10 +316,9 @@ public class CursorTest extends AbstractObjectBoxTest {
 
         Transaction transaction = store.beginReadTx();
         Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
-        transaction.close();
-        transaction = store.beginReadTx();
-        cursor.renew(transaction);
-        assertSame(transaction, cursor.getTx());
+        transaction.recycle();
+        transaction.renew();
+        cursor.renew();
         assertEquals("orange", cursor.get(1).getSimpleString());
 
         cursor.close();

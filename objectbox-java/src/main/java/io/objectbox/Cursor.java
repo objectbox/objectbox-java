@@ -116,7 +116,7 @@ public abstract class Cursor<T> implements Closeable {
 
     static native void nativeSetBoxStoreForEntities(long cursor, Object boxStore);
 
-    protected Transaction tx;
+    protected final Transaction tx;
     protected final long cursor;
     protected final EntityInfo entityInfo;
     protected final BoxStore boxStoreForEntities;
@@ -264,9 +264,11 @@ public abstract class Cursor<T> implements Closeable {
         return tx.createCursor(targetClass);
     }
 
-    public void renew(Transaction tx) {
+    /**
+     * To be used in combination with {@link Transaction#renew()}.
+     * */
+    public void renew() {
         nativeRenew(cursor, tx.internalHandle());
-        this.tx = tx;
     }
 
     @Internal
