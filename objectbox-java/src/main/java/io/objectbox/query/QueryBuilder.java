@@ -82,56 +82,56 @@ public class QueryBuilder<T> {
 
     private Comparator<T> comparator;
 
-    private static native long nativeCreate(long storeHandle, String entityName);
+    private native long nativeCreate(long storeHandle, String entityName);
 
-    private static native void nativeDestroy(long handle);
+    private native void nativeDestroy(long handle);
 
-    private static native long nativeBuild(long handle);
+    private native long nativeBuild(long handle);
 
-    private static native void nativeOrder(long handle, int propertyId, int flags);
+    private native void nativeOrder(long handle, int propertyId, int flags);
 
-    private static native long nativeCombine(long handle, long condition1, long condition2, boolean combineUsingOr);
+    private native long nativeCombine(long handle, long condition1, long condition2, boolean combineUsingOr);
 
     // ------------------------------ (Not)Null------------------------------
 
-    private static native long nativeNull(long handle, int propertyId);
+    private native long nativeNull(long handle, int propertyId);
 
-    private static native long nativeNotNull(long handle, int propertyId);
+    private native long nativeNotNull(long handle, int propertyId);
 
     // ------------------------------ Integers ------------------------------
 
-    private static native long nativeEqual(long handle, int propertyId, long value);
+    private native long nativeEqual(long handle, int propertyId, long value);
 
-    private static native long nativeNotEqual(long handle, int propertyId, long value);
+    private native long nativeNotEqual(long handle, int propertyId, long value);
 
-    private static native long nativeLess(long handle, int propertyId, long value);
+    private native long nativeLess(long handle, int propertyId, long value);
 
-    private static native long nativeGreater(long handle, int propertyId, long value);
+    private native long nativeGreater(long handle, int propertyId, long value);
 
-    private static native long nativeBetween(long handle, int propertyId, long value1, long value2);
+    private native long nativeBetween(long handle, int propertyId, long value1, long value2);
 
-    private static native long nativeIn(long handle, int propertyId, int[] values, boolean negate);
+    private native long nativeIn(long handle, int propertyId, int[] values, boolean negate);
 
-    private static native long nativeIn(long handle, int propertyId, long[] values, boolean negate);
+    private native long nativeIn(long handle, int propertyId, long[] values, boolean negate);
 
     // ------------------------------ Strings ------------------------------
 
-    private static native long nativeEqual(long handle, int propertyId, String value, boolean caseSensitive);
+    private native long nativeEqual(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private static native long nativeNotEqual(long handle, int propertyId, String value, boolean caseSensitive);
+    private native long nativeNotEqual(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private static native long nativeContains(long handle, int propertyId, String value, boolean caseSensitive);
+    private native long nativeContains(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private static native long nativeStartsWith(long handle, int propertyId, String value, boolean caseSensitive);
+    private native long nativeStartsWith(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private static native long nativeEndsWith(long handle, int propertyId, String value, boolean caseSensitive);
+    private native long nativeEndsWith(long handle, int propertyId, String value, boolean caseSensitive);
 
     // ------------------------------ FPs ------------------------------
-    private static native long nativeLess(long handle, int propertyId, double value);
+    private native long nativeLess(long handle, int propertyId, double value);
 
-    private static native long nativeGreater(long handle, int propertyId, double value);
+    private native long nativeGreater(long handle, int propertyId, double value);
 
-    private static native long nativeBetween(long handle, int propertyId, double value1, double value2);
+    private native long nativeBetween(long handle, int propertyId, double value1, double value2);
 
     @Internal
     public QueryBuilder(Box<T> box, long storeHandle, String entityName) {
