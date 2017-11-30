@@ -596,6 +596,40 @@ public class BoxStore implements Closeable {
         }
     }
 
+    @Experimental
+    public <T> T callInReadTxWithRetry(Callable<T> callable, int attempts, int initialBackOffInMs, boolean logAndHeal) {
+        if (attempts == 1) {
+            return callInReadTx(callable);
+        }
+        long backoffInMs = initialBackOffInMs;
+        DbException lastException = null;
+        for (int attempt = 1; attempt <= attempts; attempt++) {
+            try {
+                return callInReadTx(callable);
+            } catch (DbException e) {
+                lastException = e;
+                if (logAndHeal) {
+                    System.err.println(attempt + ". of " + attempts + " attempts of calling a read TX failed:");
+                    e.printStackTrace();
+                    System.err.println(diagnose());
+                    System.err.flush();
+
+                    System.gc();
+                    System.runFinalization();
+                    cleanStaleReadTransactions();
+                }
+                try {
+                    Thread.sleep(backoffInMs);
+                } catch (InterruptedException ie) {
+                    ie.printStackTrace();
+                    throw lastException;
+                }
+                backoffInMs *= 2;
+            }
+        }
+        throw lastException;
+    }
+
     /**
      * Calls the given callable inside a read(-only) transaction. Multiple read transactions can occur at the same time.
      * This allows multiple read operations (gets) using a single consistent state of data.
@@ -603,6 +637,7 @@ public class BoxStore implements Closeable {
      * it is advised to run them in a single read transaction for efficiency reasons.
      * Note that any exception thrown by the given Callable will be wrapped in a RuntimeException.
      */
+
     public <T> T callInReadTx(Callable<T> callable) {
         Transaction tx = this.activeTx.get();
         // Only if not already set, allowing to call it recursively with first (outer) TX
@@ -611,6 +646,8 @@ public class BoxStore implements Closeable {
             activeTx.set(tx);
             try {
                 return callable.call();
+            } catch (DbException e) {
+                throw e;
             } catch (Exception e) {
                 throw new RuntimeException("Callable threw exception", e);
             } finally {

@@ -19,6 +19,7 @@ package io.objectbox;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.concurrent.Callable;
 
 import io.objectbox.exception.DbException;
 
@@ -142,6 +143,33 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         store.close();
         assertTrue(store.deleteAllFiles());
         assertFalse(boxStoreDir.exists());
+    }
+
+    @Test
+    public void testCallInReadTxWithRetry() {
+        final int[] countHolder = {0};
+        String value = store.callInReadTxWithRetry(createTestCallable(countHolder), 5, 0, true);
+        assertEquals("42", value);
+        assertEquals(5, countHolder[0]);
+    }
+
+    @Test(expected = DbException.class)
+    public void testCallInReadTxWithRetry_fail() {
+        final int[] countHolder = {0};
+        store.callInReadTxWithRetry(createTestCallable(countHolder), 4, 0, true);
+    }
+
+    private Callable<String> createTestCallable(final int[] countHolder) {
+        return new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                int count = ++countHolder[0];
+                if (count < 5) {
+                    throw new DbException("Count: " + count);
+                }
+                return "42";
+            }
+        };
     }
 
 }
