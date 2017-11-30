@@ -138,7 +138,7 @@ public class BoxStore implements Closeable {
     public static native boolean isObjectBrowserAvailable();
 
     public static String getVersion() {
-        return "1.3.1-2017-11-29";
+        return "1.3.2-2017-11-30";
     }
 
     private final File directory;
