@@ -21,6 +21,8 @@ import org.junit.Test;
 import java.io.File;
 import java.util.concurrent.Callable;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.exception.DbException;
 
 import static org.junit.Assert.*;
@@ -157,6 +159,27 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     public void testCallInReadTxWithRetry_fail() {
         final int[] countHolder = {0};
         store.callInReadTxWithRetry(createTestCallable(countHolder), 4, 0, true);
+    }
+
+    @Test
+    public void testCallInReadTxWithRetry_callback() {
+        closeStoreForTest();
+        final int[] countHolder = {0};
+        final int[] countHolderCallback = {0};
+
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir)
+                .defaultFailedReadTxAttemptCallback(new TxCallback() {
+                    @Override
+                    public void txFinished(@Nullable Object result, @Nullable Throwable error) {
+                        assertNotNull(error);
+                        countHolderCallback[0]++;
+                    }
+                });
+        store = builder.build();
+        String value = store.callInReadTxWithRetry(createTestCallable(countHolder), 5, 0, true);
+        assertEquals("42", value);
+        assertEquals(5, countHolder[0]);
+        assertEquals(4, countHolderCallback[0]);
     }
 
     private Callable<String> createTestCallable(final int[] countHolder) {

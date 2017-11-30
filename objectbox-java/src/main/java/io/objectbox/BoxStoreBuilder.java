@@ -24,6 +24,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.ideasonly.ModelUpdate;
 
@@ -73,6 +74,10 @@ public class BoxStoreBuilder {
     boolean debugRelations;
 
     int maxReaders;
+
+    int defaultQueryAttempts;
+
+    TxCallback defaultFailedReadTxAttemptCallback;
 
     final List<EntityInfo> entityInfoList = new ArrayList<>();
 
@@ -235,7 +240,6 @@ public class BoxStoreBuilder {
      * <p>
      * In general, a maximum size prevents the DB from growing indefinitely when something goes wrong
      * (for example you insert data in an infinite loop).
-     *
      */
     public BoxStoreBuilder maxSizeInKByte(long maxSizeInKByte) {
         this.maxSizeInKByte = maxSizeInKByte;
@@ -262,6 +266,18 @@ public class BoxStoreBuilder {
     /** Enables some debug logging for relations. */
     public BoxStoreBuilder debugRelations() {
         this.debugRelations = true;
+        return this;
+    }
+
+    @Experimental
+    public BoxStoreBuilder defaultQueryAttempts(int defaultQueryAttempts) {
+        this.defaultQueryAttempts = defaultQueryAttempts;
+        return this;
+    }
+
+    @Experimental
+    public BoxStoreBuilder defaultFailedReadTxAttemptCallback(TxCallback defaultFailedReadTxAttemptCallback) {
+        this.defaultFailedReadTxAttemptCallback = defaultFailedReadTxAttemptCallback;
         return this;
     }
 

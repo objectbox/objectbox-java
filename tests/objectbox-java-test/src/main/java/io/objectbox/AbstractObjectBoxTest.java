@@ -147,7 +147,7 @@ public abstract class AbstractObjectBoxTest {
         return System.currentTimeMillis();
     }
 
-    byte[] createTestModel(boolean withIndex) {
+    protected byte[] createTestModel(boolean withIndex) {
         ModelBuilder modelBuilder = new ModelBuilder();
         addTestEntity(modelBuilder, withIndex);
         modelBuilder.lastEntityId(lastEntityId, lastEntityUid);

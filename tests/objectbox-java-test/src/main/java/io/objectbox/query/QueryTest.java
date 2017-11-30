@@ -23,10 +23,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
+import io.objectbox.BoxStoreBuilder;
 import io.objectbox.TestEntity;
 import io.objectbox.TestEntity_;
+import io.objectbox.TxCallback;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
 import static io.objectbox.TestEntity_.*;
@@ -455,6 +459,27 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals("bar", entities.get(2).getSimpleString());
         assertEquals("foo bar", entities.get(3).getSimpleString());
         assertEquals("apple", entities.get(4).getSimpleString());
+    }
+
+    @Test
+    // TODO can we improve? More than just "still works"?
+    public void testQueryAttempts() {
+        store.close();
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir)
+                .defaultQueryAttempts(5)
+                .defaultFailedReadTxAttemptCallback(new TxCallback() {
+                    @Override
+                    public void txFinished(@Nullable Object result, @Nullable Throwable error) {
+                        error.printStackTrace();
+                    }
+                });
+        builder.entity(new TestEntity_());
+
+        store = builder.build();
+        putTestEntitiesScalars();
+
+        Query<TestEntity> query = store.boxFor(TestEntity.class).query().equal(simpleInt, 2007).build();
+        assertEquals(2007, query.findFirst().getSimpleInt());
     }
 
     private QueryFilter<TestEntity> createTestFilter() {

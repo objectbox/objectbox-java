@@ -65,12 +65,12 @@ public class Query<T> {
     native void nativeSetParameter(long handle, int propertyId, String parameterAlias, long value);
 
     native void nativeSetParameters(long handle, int propertyId, String parameterAlias, long value1,
-                                           long value2);
+                                    long value2);
 
     native void nativeSetParameter(long handle, int propertyId, String parameterAlias, double value);
 
     native void nativeSetParameters(long handle, int propertyId, String parameterAlias, double value1,
-                                           double value2);
+                                    double value2);
 
     private final Box<T> box;
     private final BoxStore store;
@@ -79,12 +79,16 @@ public class Query<T> {
     private final List<EagerRelation> eagerRelations;
     private final QueryFilter<T> filter;
     private final Comparator<T> comparator;
+    private final int queryAttempts;
+    private final int initialRetryBackOffInMs = 10;
+
     long handle;
 
     Query(Box<T> box, long queryHandle, boolean hasOrder, List<EagerRelation> eagerRelations, QueryFilter<T> filter,
           Comparator<T> comparator) {
         this.box = box;
         store = box.getStore();
+        queryAttempts = store.internalDefaultQueryAttempts();
         handle = queryHandle;
         this.hasOrder = hasOrder;
         publisher = new QueryPublisher<>(this, box);
@@ -115,7 +119,7 @@ public class Query<T> {
     @Nullable
     public T findFirst() {
         ensureNoFilterNoComparator();
-        return store.callInReadTx(new Callable<T>() {
+        return store.callInReadTxWithRetry(new Callable<T>() {
             @Override
             public T call() {
                 @SuppressWarnings("unchecked")
@@ -123,7 +127,7 @@ public class Query<T> {
                 resolveEagerRelation(entity);
                 return entity;
             }
-        });
+        }, queryAttempts, initialRetryBackOffInMs, true);
     }
 
     private void ensureNoFilterNoComparator() {
@@ -149,7 +153,7 @@ public class Query<T> {
     @Nullable
     public T findUnique() {
         ensureNoFilterNoComparator();
-        return store.callInReadTx(new Callable<T>() {
+        return store.callInReadTxWithRetry(new Callable<T>() {
             @Override
             public T call() {
                 @SuppressWarnings("unchecked")
@@ -157,7 +161,7 @@ public class Query<T> {
                 resolveEagerRelation(entity);
                 return entity;
             }
-        });
+        }, queryAttempts, initialRetryBackOffInMs, true);
     }
 
     /**
@@ -165,7 +169,7 @@ public class Query<T> {
      */
     @Nonnull
     public List<T> find() {
-        return store.callInReadTx(new Callable<List<T>>() {
+        return store.callInReadTxWithRetry(new Callable<List<T>>() {
             @Override
             public List<T> call() throws Exception {
                 long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
@@ -185,7 +189,7 @@ public class Query<T> {
                 }
                 return entities;
             }
-        });
+        }, queryAttempts, initialRetryBackOffInMs, true);
     }
 
     /**
@@ -194,7 +198,7 @@ public class Query<T> {
     @Nonnull
     public List<T> find(final long offset, final long limit) {
         ensureNoFilterNoComparator();
-        return store.callInReadTx(new Callable<List<T>>() {
+        return store.callInReadTxWithRetry(new Callable<List<T>>() {
             @Override
             public List<T> call() {
                 long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
@@ -202,7 +206,7 @@ public class Query<T> {
                 resolveEagerRelations(entities);
                 return entities;
             }
-        });
+        }, queryAttempts, initialRetryBackOffInMs, true);
     }
 
     /**
