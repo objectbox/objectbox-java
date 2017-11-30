@@ -192,6 +192,17 @@ public class QueryTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testSumDoubleOfFloats() {
+        TestEntity entity = new TestEntity();
+        entity.setSimpleFloat(0);
+        TestEntity entity2 = new TestEntity();
+        entity2.setSimpleFloat(-2.05f);
+        box.put(entity, entity2);
+        double sum = box.query().build().sumDouble(simpleFloat);
+        assertEquals(-2.05, sum, 0.0001);
+    }
+
+    @Test
     public void testString() {
         List<TestEntity> entities = putTestEntitiesStrings();
         int count = entities.size();
