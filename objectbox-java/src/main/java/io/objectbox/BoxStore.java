@@ -624,7 +624,7 @@ public class BoxStore implements Closeable {
                 lastException = e;
 
                 String diagnose = diagnose();
-                String message = attempt + ". of " + attempts + " attempts of calling a read TX failed:";
+                String message = attempt + " of " + attempts + " attempts of calling a read TX failed:";
                 if (logAndHeal) {
                     System.err.println(message);
                     e.printStackTrace();
