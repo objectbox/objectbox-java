@@ -603,10 +603,17 @@ public class BoxStore implements Closeable {
         }
     }
 
+    /**
+     * Calls {@link #callInReadTx(Callable)} and retries in case a DbException is thrown.
+     * If the given amount of attempts is reached, the last DbException will be thrown.
+     * Experimental: API might change.
+     */
     @Experimental
     public <T> T callInReadTxWithRetry(Callable<T> callable, int attempts, int initialBackOffInMs, boolean logAndHeal) {
         if (attempts == 1) {
             return callInReadTx(callable);
+        } else if (attempts < 1) {
+            throw new IllegalArgumentException("Illegal value of attempts: " + attempts);
         }
         long backoffInMs = initialBackOffInMs;
         DbException lastException = null;
@@ -648,9 +655,9 @@ public class BoxStore implements Closeable {
      * This allows multiple read operations (gets) using a single consistent state of data.
      * Also, for a high number of read operations (thousands, e.g. in loops),
      * it is advised to run them in a single read transaction for efficiency reasons.
-     * Note that any exception thrown by the given Callable will be wrapped in a RuntimeException.
+     * Note that an exception thrown by the given Callable will be wrapped in a RuntimeException, if the exception is
+     * not a RuntimeException itself.
      */
-
     public <T> T callInReadTx(Callable<T> callable) {
         Transaction tx = this.activeTx.get();
         // Only if not already set, allowing to call it recursively with first (outer) TX
@@ -659,7 +666,7 @@ public class BoxStore implements Closeable {
             activeTx.set(tx);
             try {
                 return callable.call();
-            } catch (DbException e) {
+            } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {
                 throw new RuntimeException("Callable threw exception", e);

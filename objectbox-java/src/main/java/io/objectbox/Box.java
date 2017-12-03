@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
@@ -169,6 +170,9 @@ public class Box<T> {
         }
     }
 
+    /**
+     * Called by {@link BoxStore#callInReadTx(Callable)} - does not throw so caller does not need try/finally.
+     */
     void readTxFinished(Transaction tx) {
         Cursor<T> cursor = activeTxCursor.get();
         if (cursor != null && cursor.getTx() == tx) {
