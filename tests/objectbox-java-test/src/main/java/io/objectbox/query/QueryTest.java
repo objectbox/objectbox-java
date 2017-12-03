@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.BoxStoreBuilder;
+import io.objectbox.DebugFlags;
 import io.objectbox.TestEntity;
 import io.objectbox.TestEntity_;
 import io.objectbox.TxCallback;
@@ -39,6 +40,11 @@ import static org.junit.Assert.*;
 public class QueryTest extends AbstractObjectBoxTest {
 
     private Box<TestEntity> box;
+
+    @Override
+    protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
+        return super.createBoxStoreBuilder(withIndex).debugFlags(DebugFlags.LOG_QUERY_PARAMETERS);
+    }
 
     @Before
     public void setUpBox() {
