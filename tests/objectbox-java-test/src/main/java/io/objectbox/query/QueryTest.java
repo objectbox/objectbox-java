@@ -477,8 +477,8 @@ public class QueryTest extends AbstractObjectBoxTest {
     public void testQueryAttempts() {
         store.close();
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir)
-                .defaultQueryAttempts(5)
-                .defaultFailedReadTxAttemptCallback(new TxCallback() {
+                .queryAttempts(5)
+                .failedReadTxAttemptCallback(new TxCallback() {
                     @Override
                     public void txFinished(@Nullable Object result, @Nullable Throwable error) {
                         error.printStackTrace();

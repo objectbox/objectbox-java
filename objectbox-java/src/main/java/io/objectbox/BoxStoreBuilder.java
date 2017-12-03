@@ -75,9 +75,9 @@ public class BoxStoreBuilder {
 
     int maxReaders;
 
-    int defaultQueryAttempts;
+    int queryAttempts;
 
-    TxCallback defaultFailedReadTxAttemptCallback;
+    TxCallback failedReadTxAttemptCallback;
 
     final List<EntityInfo> entityInfoList = new ArrayList<>();
 
@@ -269,15 +269,31 @@ public class BoxStoreBuilder {
         return this;
     }
 
+    /**
+     * For massive concurrent setups (app is using a lot of threads), you can enable automatic retries for queries.
+     * This can resolve situations in which resources are getting sparse (e.g.
+     * {@link io.objectbox.exception.DbMaxReadersExceededException} or other variations of
+     * {@link io.objectbox.exception.DbException} are thrown during query execution).
+     *
+     * @param queryAttempts number of attempts a query find operation will be executed before failing.
+     *                      Recommended values are in the range of 2 to 5, e.g. a value of 3 as a starting point.
+     */
     @Experimental
-    public BoxStoreBuilder defaultQueryAttempts(int defaultQueryAttempts) {
-        this.defaultQueryAttempts = defaultQueryAttempts;
+    public BoxStoreBuilder queryAttempts(int queryAttempts) {
+        if (queryAttempts < 1) {
+            throw new IllegalArgumentException("Query attempts must >= 1");
+        }
+        this.queryAttempts = queryAttempts;
         return this;
     }
 
+    /**
+     * Define a callback for failed read transactions during retires (see also {@link #queryAttempts(int)}).
+     * Useful for e.g. logging.
+     */
     @Experimental
-    public BoxStoreBuilder defaultFailedReadTxAttemptCallback(TxCallback defaultFailedReadTxAttemptCallback) {
-        this.defaultFailedReadTxAttemptCallback = defaultFailedReadTxAttemptCallback;
+    public BoxStoreBuilder failedReadTxAttemptCallback(TxCallback failedReadTxAttemptCallback) {
+        this.failedReadTxAttemptCallback = failedReadTxAttemptCallback;
         return this;
     }
 

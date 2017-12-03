@@ -138,7 +138,7 @@ public class BoxStore implements Closeable {
     public static native boolean isObjectBrowserAvailable();
 
     public static String getVersion() {
-        return "1.3.2-2017-11-30";
+        return "1.3.3-2017-12-03";
     }
 
     private final File directory;
@@ -169,9 +169,9 @@ public class BoxStore implements Closeable {
 
     private int objectBrowserPort;
 
-    private final int defaultQueryAttempts;
+    private final int queryAttempts;
 
-    private final TxCallback defaultFailedReadTxAttemptCallback;
+    private final TxCallback failedReadTxAttemptCallback;
 
     BoxStore(BoxStoreBuilder builder) {
         NativeLibraryLoader.ensureLoaded();
@@ -231,8 +231,8 @@ public class BoxStore implements Closeable {
 
         objectClassPublisher = new ObjectClassPublisher(this);
 
-        defaultFailedReadTxAttemptCallback = builder.defaultFailedReadTxAttemptCallback;
-        defaultQueryAttempts = builder.defaultQueryAttempts < 1 ? 1 : builder.defaultQueryAttempts;
+        failedReadTxAttemptCallback = builder.failedReadTxAttemptCallback;
+        queryAttempts = builder.queryAttempts < 1 ? 1 : builder.queryAttempts;
     }
 
     private static void verifyNotAlreadyOpen(String canonicalPath) {
@@ -635,8 +635,8 @@ public class BoxStore implements Closeable {
                     System.runFinalization();
                     cleanStaleReadTransactions();
                 }
-                if (defaultFailedReadTxAttemptCallback != null) {
-                    defaultFailedReadTxAttemptCallback.txFinished(null, new DbException(message + " \n" + diagnose, e));
+                if (failedReadTxAttemptCallback != null) {
+                    failedReadTxAttemptCallback.txFinished(null, new DbException(message + " \n" + diagnose, e));
                 }
                 try {
                     Thread.sleep(backoffInMs);
@@ -875,13 +875,13 @@ public class BoxStore implements Closeable {
     }
 
     @Internal
-    public int internalDefaultQueryAttempts() {
-        return defaultQueryAttempts;
+    public int internalQueryAttempts() {
+        return queryAttempts;
     }
 
     @Internal
-    public TxCallback internalDefaultFailedReadTxAttemptCallback() {
-        return defaultFailedReadTxAttemptCallback;
+    public TxCallback internalFailedReadTxAttemptCallback() {
+        return failedReadTxAttemptCallback;
     }
 
     void setDebugFlags(int debugFlags) {

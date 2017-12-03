@@ -168,7 +168,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         final int[] countHolderCallback = {0};
 
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir)
-                .defaultFailedReadTxAttemptCallback(new TxCallback() {
+                .failedReadTxAttemptCallback(new TxCallback() {
                     @Override
                     public void txFinished(@Nullable Object result, @Nullable Throwable error) {
                         assertNotNull(error);

@@ -88,7 +88,7 @@ public class Query<T> {
           Comparator<T> comparator) {
         this.box = box;
         store = box.getStore();
-        queryAttempts = store.internalDefaultQueryAttempts();
+        queryAttempts = store.internalQueryAttempts();
         handle = queryHandle;
         this.hasOrder = hasOrder;
         publisher = new QueryPublisher<>(this, box);
