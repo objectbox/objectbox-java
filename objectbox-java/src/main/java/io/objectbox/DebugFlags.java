@@ -10,8 +10,9 @@ public final class DebugFlags {
   public static final int LOG_TRANSACTIONS_READ = 1;
   public static final int LOG_TRANSACTIONS_WRITE = 2;
   public static final int LOG_QUERIES = 4;
+  public static final int LOG_QUERY_PARAMETERS = 8;
 
-  public static final String[] names = { "LOG_TRANSACTIONS_READ", "LOG_TRANSACTIONS_WRITE", "", "LOG_QUERIES", };
+  public static final String[] names = { "LOG_TRANSACTIONS_READ", "LOG_TRANSACTIONS_WRITE", "", "LOG_QUERIES", "", "", "", "LOG_QUERY_PARAMETERS", };
 
   public static String name(int e) { return names[e - LOG_TRANSACTIONS_READ]; }
 }
