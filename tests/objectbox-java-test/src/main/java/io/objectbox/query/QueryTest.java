@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -33,6 +34,9 @@ import io.objectbox.TestEntity;
 import io.objectbox.TestEntity_;
 import io.objectbox.TxCallback;
 import io.objectbox.query.QueryBuilder.StringOrder;
+import io.objectbox.relation.MyObjectBox;
+import io.objectbox.relation.Order;
+import io.objectbox.relation.Order_;
 
 import static io.objectbox.TestEntity_.*;
 import static org.junit.Assert.*;
@@ -497,6 +501,24 @@ public class QueryTest extends AbstractObjectBoxTest {
 
         Query<TestEntity> query = store.boxFor(TestEntity.class).query().equal(simpleInt, 2007).build();
         assertEquals(2007, query.findFirst().getSimpleInt());
+    }
+
+    @Test
+    public void testDateParam() {
+        store.close();
+        assertTrue(store.deleteAllFiles());
+        store = MyObjectBox.builder().baseDirectory(boxStoreDir).debugFlags(DebugFlags.LOG_QUERY_PARAMETERS).build();
+
+        Date now = new Date();
+        Order order = new Order();
+        order.setDate(now);
+        Box<Order> box = store.boxFor(Order.class);
+        box.put(order);
+
+        Query<Order> query = box.query().equal(Order_.date, 0).build();
+        assertEquals(0, query.count());
+
+        query.setParameter(Order_.date, now);
     }
 
     private QueryFilter<TestEntity> createTestFilter() {
