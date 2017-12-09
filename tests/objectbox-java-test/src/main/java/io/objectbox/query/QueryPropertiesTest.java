@@ -21,26 +21,19 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.BoxStoreBuilder;
 import io.objectbox.DebugFlags;
 import io.objectbox.TestEntity;
-import io.objectbox.TestEntity_;
-import io.objectbox.TxCallback;
 import io.objectbox.query.QueryBuilder.StringOrder;
-import io.objectbox.relation.MyObjectBox;
-import io.objectbox.relation.Order;
-import io.objectbox.relation.Order_;
 
-import static io.objectbox.TestEntity_.*;
-import static org.junit.Assert.*;
+import static io.objectbox.TestEntity_.simpleInt;
+import static io.objectbox.TestEntity_.simpleString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class QueryPropertiesTest extends AbstractObjectBoxTest {
 
@@ -86,6 +79,12 @@ public class QueryPropertiesTest extends AbstractObjectBoxTest {
         assertTrue(list.contains("banana"));
         assertTrue(list.contains("bar"));
         assertTrue(list.contains("banana milk shake"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testFindStrings_wrongPropertyType() {
+        putTestEntitiesStrings();
+        box.query().build().findStrings(simpleInt);
     }
 
     private List<TestEntity> putTestEntitiesScalars() {
