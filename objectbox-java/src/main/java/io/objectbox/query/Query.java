@@ -42,6 +42,9 @@ public class Query<T> {
 
     native long[] nativeFindKeysUnordered(long handle, long cursorHandle);
 
+    native String[] nativeFindStrings(long handle, long cursorHandle, int propertyId, boolean unique,
+                                      boolean uniqueNoCase);
+
     native long nativeCount(long handle, long cursorHandle);
 
     native long nativeSum(long handle, long cursorHandle, int propertyId);
@@ -119,7 +122,7 @@ public class Query<T> {
     @Nullable
     public T findFirst() {
         ensureNoFilterNoComparator();
-        return store.callInReadTxWithRetry(new Callable<T>() {
+        return callInReadTx(new Callable<T>() {
             @Override
             public T call() {
                 @SuppressWarnings("unchecked")
@@ -127,7 +130,7 @@ public class Query<T> {
                 resolveEagerRelation(entity);
                 return entity;
             }
-        }, queryAttempts, initialRetryBackOffInMs, true);
+        });
     }
 
     private void ensureNoFilterNoComparator() {
@@ -153,7 +156,7 @@ public class Query<T> {
     @Nullable
     public T findUnique() {
         ensureNoFilterNoComparator();
-        return store.callInReadTxWithRetry(new Callable<T>() {
+        return callInReadTx(new Callable<T>() {
             @Override
             public T call() {
                 @SuppressWarnings("unchecked")
@@ -161,7 +164,7 @@ public class Query<T> {
                 resolveEagerRelation(entity);
                 return entity;
             }
-        }, queryAttempts, initialRetryBackOffInMs, true);
+        });
     }
 
     /**
@@ -169,7 +172,7 @@ public class Query<T> {
      */
     @Nonnull
     public List<T> find() {
-        return store.callInReadTxWithRetry(new Callable<List<T>>() {
+        return callInReadTx(new Callable<List<T>>() {
             @Override
             public List<T> call() throws Exception {
                 long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
@@ -189,7 +192,7 @@ public class Query<T> {
                 }
                 return entities;
             }
-        }, queryAttempts, initialRetryBackOffInMs, true);
+        });
     }
 
     /**
@@ -198,7 +201,7 @@ public class Query<T> {
     @Nonnull
     public List<T> find(final long offset, final long limit) {
         ensureNoFilterNoComparator();
-        return store.callInReadTxWithRetry(new Callable<List<T>>() {
+        return callInReadTx(new Callable<List<T>>() {
             @Override
             public List<T> call() {
                 long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
@@ -206,7 +209,7 @@ public class Query<T> {
                 resolveEagerRelations(entities);
                 return entities;
             }
-        }, queryAttempts, initialRetryBackOffInMs, true);
+        });
     }
 
     /**
@@ -234,6 +237,35 @@ public class Query<T> {
     public LazyList<T> findLazy() {
         ensureNoFilterNoComparator();
         return new LazyList<>(box, findIds(), false);
+    }
+
+    public String[] findStrings(final Property property) {
+        return callInReadTx(new Callable<String[]>() {
+            @Override
+            public String[] call() {
+                long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
+                return nativeFindStrings(handle, cursorHandle, property.id, false, false);
+            }
+        });
+    }
+
+    public String[] findStringsUnique(final Property property) {
+        return findStringsUnique(property, QueryBuilder.StringOrder.CASE_INSENSITIVE);
+    }
+
+    public String[] findStringsUnique(final Property property, final QueryBuilder.StringOrder stringOrder) {
+        return callInReadTx(new Callable<String[]>() {
+            @Override
+            public String[] call() {
+                long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
+                boolean noCase = stringOrder == QueryBuilder.StringOrder.CASE_INSENSITIVE;
+                return nativeFindStrings(handle, cursorHandle, property.id, true, noCase);
+            }
+        });
+    }
+
+    <T> T callInReadTx(Callable<T> callable) {
+        return store.callInReadTxWithRetry(callable, queryAttempts, initialRetryBackOffInMs, true);
     }
 
     /**
