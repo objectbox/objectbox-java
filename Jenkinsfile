@@ -46,6 +46,7 @@ pipeline {
         always {
             junit '**/build/test-results/**/TEST-*.xml'
             archive 'tests/*/hs_err_pid*.log'
+            archive '**/build/reports/findbugs/*'
         }
 
         changed {
