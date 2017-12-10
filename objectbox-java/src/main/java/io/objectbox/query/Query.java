@@ -239,6 +239,17 @@ public class Query<T> {
         return new LazyList<>(box, findIds(), false);
     }
 
+    // TODO we might move all those property find methods in a "PropertyQuery" class for divide & conquer.
+
+    /**
+     * Find the values for the given string property for objects matching the query.
+     * <p>
+     * Note: this will list all strings (except null values), which may contain duplicates.
+     * Check {@link #findStringsUnique(Property, QueryBuilder.StringOrder)} to avoid duplicates.
+     *
+     * @param property the property (must be of type String) for which to return values
+     * @return Found strings
+     */
     public String[] findStrings(final Property property) {
         return callInReadTx(new Callable<String[]>() {
             @Override
@@ -249,10 +260,20 @@ public class Query<T> {
         });
     }
 
+    /** Case-insensitive short-hand for {@link #findStringsUnique(Property, QueryBuilder.StringOrder)}. */
     public String[] findStringsUnique(final Property property) {
         return findStringsUnique(property, QueryBuilder.StringOrder.CASE_INSENSITIVE);
     }
 
+    /**
+     * Find the unique values for the given string property for objects matching the query.
+     * <p>
+     * Note: the order of returned strings may be completely random.
+     *
+     * @param property    the property (must be of type String) for which to return values
+     * @param stringOrder e.g. case sensitive/insensitive
+     * @return Found strings
+     */
     public String[] findStringsUnique(final Property property, final QueryBuilder.StringOrder stringOrder) {
         return callInReadTx(new Callable<String[]>() {
             @Override
