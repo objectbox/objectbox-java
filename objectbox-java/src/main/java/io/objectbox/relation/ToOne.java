@@ -55,10 +55,10 @@ public class ToOne<TARGET> implements Serializable {
      * @param relationInfo Meta info as generated in the Entity_ (entity name plus underscore) classes.
      */
     public ToOne(Object sourceEntity, RelationInfo relationInfo) {
-        if(sourceEntity == null ) {
+        if (sourceEntity == null) {
             throw new IllegalArgumentException("No source entity given (null)");
         }
-        if(relationInfo == null) {
+        if (relationInfo == null) {
             throw new IllegalArgumentException("No relation info given (null)");
         }
         this.entity = sourceEntity;
@@ -273,5 +273,18 @@ public class ToOne<TARGET> implements Serializable {
     /** For tests */
     Object getEntity() {
         return entity;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof ToOne)) return false;
+        ToOne other = (ToOne) obj;
+        return relationInfo == other.relationInfo && getTargetId() == other.getTargetId();
+    }
+
+    @Override
+    public int hashCode() {
+        long targetId = getTargetId();
+        return (int) (targetId ^ targetId >>> 32);
     }
 }
