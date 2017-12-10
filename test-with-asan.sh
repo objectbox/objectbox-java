@@ -27,7 +27,7 @@ fi
 echo "Starting Gradle for target(s) \"$args\"..."
 
 user=$(whoami)
-if [[ ${user} == "jenkins" ]]; then
+if [[ ${user} == "jenkinsXXX-DISABLED-TO-TEST" ]]; then
     echo "WARNING!! USING GRADLE DAEMON ON JENKINS (VS. ASAN)"
     LD_PRELOAD=${ASAN_LIB_SO} ./gradlew --stacktrace ${args}
 else
