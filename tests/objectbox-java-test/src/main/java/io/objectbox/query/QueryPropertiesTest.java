@@ -65,14 +65,14 @@ public class QueryPropertiesTest extends AbstractObjectBoxTest {
         assertEquals("banana milk shake", result[3]);
         assertEquals("banana", result[4]);
 
-        result = query.property(simpleString).findStringsUnique();
+        result = query.property(simpleString).distinct().findStrings();
         assertEquals(3, result.length);
         List<String> list = Arrays.asList(result);
         assertTrue(list.contains("BAR"));
         assertTrue(list.contains("banana"));
         assertTrue(list.contains("banana milk shake"));
 
-        result = query.property(simpleString).findStringsUnique(StringOrder.CASE_SENSITIVE);
+        result = query.property(simpleString).distinct(StringOrder.CASE_SENSITIVE).findStrings();
         assertEquals(4, result.length);
         list = Arrays.asList(result);
         assertTrue(list.contains("BAR"));

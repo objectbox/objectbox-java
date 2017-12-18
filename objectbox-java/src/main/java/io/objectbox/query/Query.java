@@ -29,6 +29,7 @@ import io.objectbox.relation.ToOne;
  * @author Markus
  * @see QueryBuilder
  */
+@SuppressWarnings({"SameParameterValue", "UnusedReturnValue", "WeakerAccess"})
 @Beta
 public class Query<T> {
 
@@ -42,8 +43,8 @@ public class Query<T> {
 
     native long[] nativeFindKeysUnordered(long handle, long cursorHandle);
 
-    native String[] nativeFindStrings(long handle, long cursorHandle, int propertyId, boolean unique,
-                                      boolean uniqueNoCase);
+    native String[] nativeFindStrings(long handle, long cursorHandle, int propertyId, boolean distinct,
+                                      boolean distinctNoCase);
 
     native long nativeCount(long handle, long cursorHandle);
 
@@ -63,16 +64,16 @@ public class Query<T> {
 
     native long nativeRemove(long handle, long cursorHandle);
 
-    native void nativeSetParameter(long handle, int propertyId, String parameterAlias, String value);
+    native void nativeSetParameter(long handle, int propertyId, @Nullable String parameterAlias, String value);
 
-    native void nativeSetParameter(long handle, int propertyId, String parameterAlias, long value);
+    native void nativeSetParameter(long handle, int propertyId, @Nullable String parameterAlias, long value);
 
-    native void nativeSetParameters(long handle, int propertyId, String parameterAlias, long value1,
+    native void nativeSetParameters(long handle, int propertyId, @Nullable String parameterAlias, long value1,
                                     long value2);
 
-    native void nativeSetParameter(long handle, int propertyId, String parameterAlias, double value);
+    native void nativeSetParameter(long handle, int propertyId, @Nullable String parameterAlias, double value);
 
-    native void nativeSetParameters(long handle, int propertyId, String parameterAlias, double value1,
+    native void nativeSetParameters(long handle, int propertyId, @Nullable String parameterAlias, double value1,
                                     double value2);
 
     final Box<T> box;
