@@ -30,9 +30,7 @@ import io.objectbox.DebugFlags;
 import io.objectbox.TestEntity;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
-import static io.objectbox.TestEntity_.simpleInt;
-import static io.objectbox.TestEntity_.simpleLong;
-import static io.objectbox.TestEntity_.simpleString;
+import static io.objectbox.TestEntity_.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -103,6 +101,40 @@ public class QueryPropertiesTest extends AbstractObjectBoxTest {
         query = box.query().greater(simpleLong, 1004).build();
         assertEquals(2, query.property(simpleLong).findLongs().length);
         assertEquals(1, query.property(simpleLong).distinct().findLongs().length);
+    }
+
+    @Test
+    public void testFindInts() {
+        putTestEntities(5);
+        Query<TestEntity> query = box.query().greater(simpleInt, 2).build();
+        int[] result = query.property(simpleInt).findInts() ;
+        assertEquals(3, result.length);
+        assertEquals(3, result[0]);
+        assertEquals(4, result[1]);
+        assertEquals(5, result[2]);
+
+        putTestEntity(null, 5);
+
+        query = box.query().greater(simpleInt, 4).build();
+        assertEquals(2, query.property(simpleInt).findInts().length);
+        assertEquals(1, query.property(simpleInt).distinct().findInts().length);
+    }
+
+    @Test
+    public void testFindBytes() {
+        putTestEntities(5);
+        Query<TestEntity> query = box.query().greater(simpleByte, 12).build();
+        byte[] result = query.property(simpleByte).findBytes() ;
+        assertEquals(3, result.length);
+        assertEquals(13, result[0]);
+        assertEquals(14, result[1]);
+        assertEquals(15, result[2]);
+
+        putTestEntity(null, 5);
+
+        query = box.query().greater(simpleByte, 14).build();
+        assertEquals(2, query.property(simpleByte).findBytes().length);
+        assertEquals(1, query.property(simpleByte).distinct().findBytes().length);
     }
 
     @Test(expected = IllegalArgumentException.class)

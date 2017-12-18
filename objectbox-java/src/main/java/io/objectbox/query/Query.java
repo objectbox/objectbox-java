@@ -64,6 +64,10 @@ public class Query<T> {
 
     native long[] nativeFindLongs(long handle, long cursorHandle, int propertyId, boolean distinct);
 
+    native int[] nativeFindInts(long handle, long cursorHandle, int propertyId, boolean distinct);
+
+    native byte[] nativeFindBytes(long handle, long cursorHandle, int propertyId, boolean distinct);
+
     native long nativeCount(long handle, long cursorHandle);
 
     native long nativeSum(long handle, long cursorHandle, int propertyId);
