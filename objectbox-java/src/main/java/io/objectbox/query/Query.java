@@ -75,7 +75,7 @@ public class Query<T> {
     native void nativeSetParameters(long handle, int propertyId, String parameterAlias, double value1,
                                     double value2);
 
-    private final Box<T> box;
+    final Box<T> box;
     private final BoxStore store;
     private final boolean hasOrder;
     private final QueryPublisher<T> publisher;
@@ -242,50 +242,15 @@ public class Query<T> {
     // TODO we might move all those property find methods in a "PropertyQuery" class for divide & conquer.
 
     /**
-     * Find the values for the given string property for objects matching the query.
-     * <p>
-     * Note: this will list all strings (except null values), which may contain duplicates.
-     * Check {@link #findStringsUnique(Property, QueryBuilder.StringOrder)} to avoid duplicates.
      *
-     * @param property the property (must be of type String) for which to return values
-     * @return Found strings
+     * @param property the property for which to return values
+     * @return
      */
-    public String[] findStrings(final Property property) {
-        return callInReadTx(new Callable<String[]>() {
-            @Override
-            public String[] call() {
-                long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
-                return nativeFindStrings(handle, cursorHandle, property.id, false, false);
-            }
-        });
+    public PropertyQuery property(Property property) {
+        return new PropertyQuery(this, property);
     }
 
-    /** Case-insensitive short-hand for {@link #findStringsUnique(Property, QueryBuilder.StringOrder)}. */
-    public String[] findStringsUnique(final Property property) {
-        return findStringsUnique(property, QueryBuilder.StringOrder.CASE_INSENSITIVE);
-    }
-
-    /**
-     * Find the unique values for the given string property for objects matching the query.
-     * <p>
-     * Note: the order of returned strings may be completely random.
-     *
-     * @param property    the property (must be of type String) for which to return values
-     * @param stringOrder e.g. case sensitive/insensitive
-     * @return Found strings
-     */
-    public String[] findStringsUnique(final Property property, final QueryBuilder.StringOrder stringOrder) {
-        return callInReadTx(new Callable<String[]>() {
-            @Override
-            public String[] call() {
-                long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
-                boolean noCase = stringOrder == QueryBuilder.StringOrder.CASE_INSENSITIVE;
-                return nativeFindStrings(handle, cursorHandle, property.id, true, noCase);
-            }
-        });
-    }
-
-    <T> T callInReadTx(Callable<T> callable) {
+    <R> R callInReadTx(Callable<R> callable) {
         return store.callInReadTxWithRetry(callable, queryAttempts, initialRetryBackOffInMs, true);
     }
 
