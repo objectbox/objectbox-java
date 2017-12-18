@@ -31,7 +31,6 @@ public class ObfuscatedEntity {
     private int myInt;
     private String myString;
 
-    @Generated
     public ObfuscatedEntity() {
     }
 
@@ -39,7 +38,6 @@ public class ObfuscatedEntity {
         this.id = id;
     }
 
-    @Generated
     public ObfuscatedEntity(long id, int myInt, String myString) {
         this.id = id;
         this.myInt = myInt;
