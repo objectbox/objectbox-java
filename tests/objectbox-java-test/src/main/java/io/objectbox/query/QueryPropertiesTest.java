@@ -31,6 +31,7 @@ import io.objectbox.TestEntity;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
 import static io.objectbox.TestEntity_.simpleInt;
+import static io.objectbox.TestEntity_.simpleLong;
 import static io.objectbox.TestEntity_.simpleString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -85,6 +86,29 @@ public class QueryPropertiesTest extends AbstractObjectBoxTest {
     public void testFindStrings_wrongPropertyType() {
         putTestEntitiesStrings();
         box.query().build().property(simpleInt).findStrings();
+    }
+
+    @Test
+    public void testFindLongs() {
+        putTestEntities(5);
+        Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
+        long[] result = query.property(simpleLong).findLongs();
+        assertEquals(3, result.length);
+        assertEquals(1003, result[0]);
+        assertEquals(1004, result[1]);
+        assertEquals(1005, result[2]);
+
+        putTestEntity(null, 5);
+
+        query = box.query().greater(simpleLong, 1004).build();
+        assertEquals(2, query.property(simpleLong).findLongs().length);
+        assertEquals(1, query.property(simpleLong).distinct().findLongs().length);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testFindLongs_wrongPropertyType() {
+        putTestEntitiesStrings();
+        box.query().build().property(simpleInt).findLongs();
     }
 
     private List<TestEntity> putTestEntitiesScalars() {

@@ -62,6 +62,8 @@ public class Query<T> {
     native String[] nativeFindStrings(long handle, long cursorHandle, int propertyId, boolean distinct,
                                       boolean distinctNoCase);
 
+    native long[] nativeFindLongs(long handle, long cursorHandle, int propertyId, boolean distinct);
+
     native long nativeCount(long handle, long cursorHandle);
 
     native long nativeSum(long handle, long cursorHandle, int propertyId);
@@ -259,7 +261,6 @@ public class Query<T> {
     // TODO we might move all those property find methods in a "PropertyQuery" class for divide & conquer.
 
     /**
-     *
      * @param property the property for which to return values
      * @return
      */

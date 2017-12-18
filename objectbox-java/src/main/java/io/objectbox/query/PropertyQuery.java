@@ -85,4 +85,25 @@ public class PropertyQuery {
         });
     }
 
+    /**
+     * Find the values for the given long property for objects matching the query.
+     * <p>
+     * Note: null values are excluded from results.
+     * <p>
+     * Note: results are not guaranteed to be in any particular order.
+     * <p>
+     * See also: {@link #distinct}
+     *
+     * @return Found longs
+     */
+    public long[] findLongs() {
+        return (long[]) query.callInReadTx(new Callable<long[]>() {
+            @Override
+            public long[] call() {
+                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
+                return query.nativeFindLongs(query.handle, cursorHandle, property.id, distinct);
+            }
+        });
+    }
+
 }
