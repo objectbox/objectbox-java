@@ -84,7 +84,7 @@ public class QueryPropertiesTest extends AbstractObjectBoxTest {
     @Test(expected = IllegalArgumentException.class)
     public void testFindStrings_wrongPropertyType() {
         putTestEntitiesStrings();
-        box.query().build().findStrings(simpleInt);
+        box.query().build().property(simpleInt).findStrings();
     }
 
     private List<TestEntity> putTestEntitiesScalars() {
