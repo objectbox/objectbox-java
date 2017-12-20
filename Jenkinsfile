@@ -1,5 +1,5 @@
-// dev branch only: every 30 minutes at night (0:00 - 6:00)
-String cronSchedule = BRANCH_NAME == 'dev' ? '*/30 0-6 * * *' : ''
+// dev branch only: every 30 minutes at night (1:00 - 5:00)
+String cronSchedule = BRANCH_NAME == 'dev' ? '*/30 1-5 * * *' : ''
 
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
