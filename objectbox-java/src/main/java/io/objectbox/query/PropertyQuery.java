@@ -126,6 +126,44 @@ public class PropertyQuery {
     }
 
     /**
+     * Find the values for the given int property for objects matching the query.
+     * <p>
+     * Note: null values are excluded from results.
+     * <p>
+     * Note: results are not guaranteed to be in any particular order.
+     * <p>
+     * See also: {@link #distinct}
+     */
+    public short[] findShorts() {
+        return (short[]) query.callInReadTx(new Callable<short[]>() {
+            @Override
+            public short[] call() {
+                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
+                return query.nativeFindShorts(query.handle, cursorHandle, property.id, distinct);
+            }
+        });
+    }
+
+    /**
+     * Find the values for the given int property for objects matching the query.
+     * <p>
+     * Note: null values are excluded from results.
+     * <p>
+     * Note: results are not guaranteed to be in any particular order.
+     * <p>
+     * See also: {@link #distinct}
+     */
+    public char[] findChars() {
+        return (char[]) query.callInReadTx(new Callable<char[]>() {
+            @Override
+            public char[] call() {
+                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
+                return query.nativeFindChars(query.handle, cursorHandle, property.id, distinct);
+            }
+        });
+    }
+
+    /**
      * Find the values for the given byte property for objects matching the query.
      * <p>
      * Note: null values are excluded from results.
@@ -138,6 +176,44 @@ public class PropertyQuery {
             public byte[] call() {
                 long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
                 return query.nativeFindBytes(query.handle, cursorHandle, property.id, distinct);
+            }
+        });
+    }
+
+    /**
+     * Find the values for the given int property for objects matching the query.
+     * <p>
+     * Note: null values are excluded from results.
+     * <p>
+     * Note: results are not guaranteed to be in any particular order.
+     * <p>
+     * See also: {@link #distinct}
+     */
+    public float[] findFloats() {
+        return (float[]) query.callInReadTx(new Callable<float[]>() {
+            @Override
+            public float[] call() {
+                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
+                return query.nativeFindFloats(query.handle, cursorHandle, property.id, distinct);
+            }
+        });
+    }
+
+    /**
+     * Find the values for the given int property for objects matching the query.
+     * <p>
+     * Note: null values are excluded from results.
+     * <p>
+     * Note: results are not guaranteed to be in any particular order.
+     * <p>
+     * See also: {@link #distinct}
+     */
+    public double[] findDoubles() {
+        return (double[]) query.callInReadTx(new Callable<double[]>() {
+            @Override
+            public double[] call() {
+                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
+                return query.nativeFindDoubles(query.handle, cursorHandle, property.id, distinct);
             }
         });
     }

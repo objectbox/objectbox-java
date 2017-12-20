@@ -121,6 +121,59 @@ public class QueryPropertiesTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testFindShorts() {
+        putTestEntities(5);
+        Query<TestEntity> query = box.query().greater(simpleInt, 2).build();
+        short[] result = query.property(simpleShort).findShorts() ;
+        assertEquals(3, result.length);
+        assertEquals(103, result[0]);
+        assertEquals(104, result[1]);
+        assertEquals(105, result[2]);
+
+        putTestEntity(null, 5);
+
+        query = box.query().greater(simpleInt, 4).build();
+        assertEquals(2, query.property(simpleShort).findShorts().length);
+        assertEquals(1, query.property(simpleShort).distinct().findShorts().length);
+    }
+
+    // TODO @Test for findChars (no char property in entity)
+
+    @Test
+    public void testFindFloats() {
+        putTestEntities(5);
+        Query<TestEntity> query = box.query().greater(simpleInt, 2).build();
+        float[] result = query.property(simpleFloat).findFloats() ;
+        assertEquals(3, result.length);
+        assertEquals(200.3f, result[0], 0.0001f);
+        assertEquals(200.4f, result[1], 0.0001f);
+        assertEquals(200.5f, result[2], 0.0001f);
+
+        putTestEntity(null, 5);
+
+        query = box.query().greater(simpleInt, 4).build();
+        assertEquals(2, query.property(simpleFloat).findFloats().length);
+        assertEquals(1, query.property(simpleFloat).distinct().findFloats().length);
+    }
+
+    @Test
+    public void testFindDoubles() {
+        putTestEntities(5);
+        Query<TestEntity> query = box.query().greater(simpleInt, 2).build();
+        double[] result = query.property(simpleDouble).findDoubles() ;
+        assertEquals(3, result.length);
+        assertEquals(2000.03, result[0], 0.0001);
+        assertEquals(2000.04, result[1], 0.0001);
+        assertEquals(2000.05, result[2], 0.0001);
+
+        putTestEntity(null, 5);
+
+        query = box.query().greater(simpleInt, 4).build();
+        assertEquals(2, query.property(simpleDouble).findDoubles().length);
+        assertEquals(1, query.property(simpleDouble).distinct().findDoubles().length);
+    }
+
+    @Test
     public void testFindBytes() {
         putTestEntities(5);
         Query<TestEntity> query = box.query().greater(simpleByte, 12).build();
@@ -141,6 +194,18 @@ public class QueryPropertiesTest extends AbstractObjectBoxTest {
     public void testFindLongs_wrongPropertyType() {
         putTestEntitiesStrings();
         box.query().build().property(simpleInt).findLongs();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testFindInts_wrongPropertyType() {
+        putTestEntitiesStrings();
+        box.query().build().property(simpleLong).findInts();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testFindShorts_wrongPropertyType() {
+        putTestEntitiesStrings();
+        box.query().build().property(simpleInt).findShorts();
     }
 
     private List<TestEntity> putTestEntitiesScalars() {

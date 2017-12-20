@@ -66,7 +66,15 @@ public class Query<T> {
 
     native int[] nativeFindInts(long handle, long cursorHandle, int propertyId, boolean distinct);
 
+    native short[] nativeFindShorts(long handle, long cursorHandle, int propertyId, boolean distinct);
+
+    native char[] nativeFindChars(long handle, long cursorHandle, int propertyId, boolean distinct);
+
     native byte[] nativeFindBytes(long handle, long cursorHandle, int propertyId, boolean distinct);
+
+    native float[] nativeFindFloats(long handle, long cursorHandle, int propertyId, boolean distinct);
+
+    native double[] nativeFindDoubles(long handle, long cursorHandle, int propertyId, boolean distinct);
 
     native long nativeCount(long handle, long cursorHandle);
 
