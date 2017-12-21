@@ -60,21 +60,28 @@ public class Query<T> {
     native long[] nativeFindKeysUnordered(long handle, long cursorHandle);
 
     native String[] nativeFindStrings(long handle, long cursorHandle, int propertyId, boolean distinct,
-                                      boolean distinctNoCase);
+                                      boolean distinctNoCase, boolean enableNull, String nullValue);
 
-    native long[] nativeFindLongs(long handle, long cursorHandle, int propertyId, boolean distinct);
+    native long[] nativeFindLongs(long handle, long cursorHandle, int propertyId, boolean distinct, boolean enableNull,
+                                  long nullValue);
 
-    native int[] nativeFindInts(long handle, long cursorHandle, int propertyId, boolean distinct);
+    native int[] nativeFindInts(long handle, long cursorHandle, int propertyId, boolean distinct, boolean enableNull,
+                                int nullValue);
 
-    native short[] nativeFindShorts(long handle, long cursorHandle, int propertyId, boolean distinct);
+    native short[] nativeFindShorts(long handle, long cursorHandle, int propertyId, boolean distinct,
+                                    boolean enableNull, short nullValue);
 
-    native char[] nativeFindChars(long handle, long cursorHandle, int propertyId, boolean distinct);
+    native char[] nativeFindChars(long handle, long cursorHandle, int propertyId, boolean distinct, boolean enableNull,
+                                  char nullValue);
 
-    native byte[] nativeFindBytes(long handle, long cursorHandle, int propertyId, boolean distinct);
+    native byte[] nativeFindBytes(long handle, long cursorHandle, int propertyId, boolean distinct, boolean enableNull,
+                                  byte nullValue);
 
-    native float[] nativeFindFloats(long handle, long cursorHandle, int propertyId, boolean distinct);
+    native float[] nativeFindFloats(long handle, long cursorHandle, int propertyId, boolean distinct,
+                                    boolean enableNull, float nullValue);
 
-    native double[] nativeFindDoubles(long handle, long cursorHandle, int propertyId, boolean distinct);
+    native double[] nativeFindDoubles(long handle, long cursorHandle, int propertyId, boolean distinct,
+                                      boolean enableNull, double nullValue);
 
     native long nativeCount(long handle, long cursorHandle);
 
