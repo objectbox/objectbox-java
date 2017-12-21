@@ -86,6 +86,9 @@ public class Query<T> {
     native Object nativeFindNumber(long handle, long cursorHandle, int propertyId, boolean unique, boolean enableNull,
                                    long nullValue, float nullValueFloat, double nullValueDouble);
 
+    native String nativeFindString(long handle, long cursorHandle, int propertyId, boolean unique, boolean enableNull,
+                                   String nullValue);
+
     native long nativeCount(long handle, long cursorHandle);
 
     native long nativeSum(long handle, long cursorHandle, int propertyId);

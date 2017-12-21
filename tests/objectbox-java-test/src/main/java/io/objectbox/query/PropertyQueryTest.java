@@ -132,6 +132,32 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testFindString() {
+        Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
+        PropertyQuery propertyQuery = query.property(simpleString);
+        assertNull(propertyQuery.findFirstString());
+        assertNull(propertyQuery.reset().findUniqueString());
+        putTestEntities(5);
+        assertEquals("foo3", propertyQuery.reset().findFirstString());
+
+        query = box.query().greater(simpleLong, 1004).build();
+        propertyQuery = query.property(simpleString);
+        assertEquals("foo5", propertyQuery.reset().findUniqueString());
+
+        putTestEntity(null, 6);
+        // TODO XXX enable me after fixing combination of unique and distinct: putTestEntity(null, 7);
+        query.setParameter(simpleLong, 1005);
+        assertEquals("nope", propertyQuery.reset().distinct().nullValue("nope").findUniqueString());
+    }
+
+    @Test(expected = DbException.class)
+    public void testFindString_uniqueFails() {
+        putTestEntity("foo", 1);
+        putTestEntity("foo", 2);
+        box.query().build().property(simpleString).findUniqueString();
+    }
+
+    @Test
     public void testFindLongs() {
         putTestEntities(5);
         Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();

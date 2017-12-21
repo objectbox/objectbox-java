@@ -44,6 +44,18 @@ public class PropertyQuery {
         this.property = property;
     }
 
+    /** Clears all values (e.g. distinct and null value). */
+    public PropertyQuery reset() {
+        distinct = false;
+        noCaseIfDistinct = true;
+        enableNull = false;
+        nullValueDouble = 0;
+        nullValueFloat = 0;
+        nullValueString = null;
+        nullValueLong = 0;
+        return this;
+    }
+
     /**
      * Only distinct values should be returned (e.g. 1,2,3 instead of 1,1,2,3,3,3).
      * <p>
@@ -251,6 +263,24 @@ public class PropertyQuery {
         });
     }
 
+    private String findString(final boolean unique) {
+        return (String) query.callInReadTx(new Callable<String>() {
+            @Override
+            public String call() {
+                return query.nativeFindString(query.handle, query.cursorHandle(), property.id, unique,
+                        enableNull, nullValueString);
+            }
+        });
+    }
+
+    public String findFirstString() {
+        return findString(false);
+    }
+
+    public String findUniqueString() {
+        return findString(true);
+    }
+
     private Object findNumber(final boolean unique) {
         return query.callInReadTx(new Callable<Object>() {
             @Override
@@ -268,7 +298,6 @@ public class PropertyQuery {
     public Long findUniqueLong() {
         return (Long) findNumber(true);
     }
-
 
     public Integer findFirstInt() {
         return (Integer) findNumber(false);
