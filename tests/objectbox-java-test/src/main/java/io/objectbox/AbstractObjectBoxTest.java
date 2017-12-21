@@ -27,6 +27,8 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.ModelBuilder.EntityBuilder;
 import io.objectbox.ModelBuilder.PropertyBuilder;
 import io.objectbox.model.PropertyFlags;
@@ -136,7 +138,7 @@ public abstract class AbstractObjectBoxTest {
         System.err.println(text);
     }
 
-    protected void logError(String text, Exception ex) {
+    protected void logError(@Nullable String text, Exception ex) {
         if (text != null) {
             System.err.println(text);
         }
@@ -207,7 +209,7 @@ public abstract class AbstractObjectBoxTest {
         entityBuilder.entityDone();
     }
 
-    protected TestEntity createTestEntity(String simpleString, int nr) {
+    protected TestEntity createTestEntity(@Nullable String simpleString, int nr) {
         TestEntity entity = new TestEntity();
         entity.setSimpleString(simpleString);
         entity.setSimpleInt(nr);
@@ -220,7 +222,7 @@ public abstract class AbstractObjectBoxTest {
         return entity;
     }
 
-    protected TestEntity putTestEntity(String simpleString, int nr) {
+    protected TestEntity putTestEntity(@Nullable String simpleString, int nr) {
         TestEntity entity = createTestEntity(simpleString, nr);
         long key = getTestEntityBox().put(entity);
         assertTrue(key != 0);
@@ -228,7 +230,7 @@ public abstract class AbstractObjectBoxTest {
         return entity;
     }
 
-    protected List<TestEntity> putTestEntities(int count, String baseString, int baseNr) {
+    protected List<TestEntity> putTestEntities(int count, @Nullable String baseString, int baseNr) {
         List<TestEntity> entities = new ArrayList<>();
         for (int i = baseNr; i < baseNr + count; i++) {
             entities.add(createTestEntity(baseString != null ? baseString + i : null, i));

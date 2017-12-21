@@ -26,6 +26,8 @@ import io.objectbox.internal.CursorFactory;
  * Cursor for DB entity "TestEntity".
  */
 public final class TestEntityCursor extends Cursor<TestEntity> {
+    public static boolean INT_NULL_HACK;
+
     @Internal
     static final class Factory implements CursorFactory<TestEntity> {
         public Cursor<TestEntity> createCursor(Transaction tx, long cursorHandle, BoxStore boxStoreForEntities) {
@@ -68,7 +70,7 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
         long __assignedId = collect313311(cursor, entity.getId(), PUT_FLAG_FIRST | PUT_FLAG_COMPLETE,
                 9, entity.getSimpleString(), 0, null, 0, null,
                 10, entity.getSimpleByteArray(),
-                0, 0, 6, entity.getSimpleLong(), 5, entity.getSimpleInt(),
+                0, 0, 6, entity.getSimpleLong(), INT_NULL_HACK ? 0 : 5, entity.getSimpleInt(),
                 4, entity.getSimpleShort(), 3, entity.getSimpleByte(),
                 2, entity.getSimpleBoolean() ? 1 : 0,
                 7, entity.getSimpleFloat(), 8, entity.getSimpleDouble()
