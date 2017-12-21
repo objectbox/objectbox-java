@@ -33,8 +33,7 @@ import io.objectbox.exception.DbException;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
 import static io.objectbox.TestEntity_.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class PropertyQueryTest extends AbstractObjectBoxTest {
 
@@ -151,8 +150,10 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
 
     @Test
     public void testFindLong() {
-        putTestEntities(5);
         Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
+        assertNull(query.property(simpleLong).findFirstLong());
+        assertNull(query.property(simpleLong).findUniqueLong());
+        putTestEntities(5);
         long result = query.property(simpleLong).findFirstLong();
         assertEquals(1003, result);
 
@@ -169,13 +170,24 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
 
     @Test
     public void testFindInt() {
-        putTestEntities(5);
         Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
-        long result = query.property(simpleInt).findFirstInt();
+        assertNull(query.property(simpleInt).findFirstInt());
+        assertNull(query.property(simpleInt).findUniqueInt());
+        putTestEntities(5);
+        int result = query.property(simpleInt).findFirstInt();
         assertEquals(3, result);
 
         query = box.query().greater(simpleLong, 1004).build();
-        assertEquals(5, (long) query.property(simpleInt).distinct().findUniqueInt());
+        assertEquals(5, (int) query.property(simpleInt).distinct().findUniqueInt());
+
+        TestEntityCursor.INT_NULL_HACK = true;
+        try {
+            putTestEntity(null, 6);
+        } finally {
+            TestEntityCursor.INT_NULL_HACK = false;
+        }
+        query.setParameter(simpleLong, 1005);
+        assertEquals(-99, (int) query.property(simpleInt).nullValue(-99).findUniqueInt());
     }
 
     @Test(expected = DbException.class)
@@ -184,6 +196,8 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
         putTestEntity(null, 1);
         box.query().build().property(simpleInt).findUniqueInt();
     }
+
+    // TODO add test for other types of single object find methods
 
     @Test
     public void testFindInts() {
