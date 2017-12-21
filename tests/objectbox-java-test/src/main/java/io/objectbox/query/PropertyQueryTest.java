@@ -154,8 +154,7 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
         assertNull(query.property(simpleLong).findFirstLong());
         assertNull(query.property(simpleLong).findUniqueLong());
         putTestEntities(5);
-        long result = query.property(simpleLong).findFirstLong();
-        assertEquals(1003, result);
+        assertEquals(1003, (long) query.property(simpleLong).findFirstLong());
 
         query = box.query().greater(simpleLong, 1004).build();
         assertEquals(1005, (long) query.property(simpleLong).distinct().findUniqueLong());
@@ -174,8 +173,7 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
         assertNull(query.property(simpleInt).findFirstInt());
         assertNull(query.property(simpleInt).findUniqueInt());
         putTestEntities(5);
-        int result = query.property(simpleInt).findFirstInt();
-        assertEquals(3, result);
+        assertEquals(3, (int) query.property(simpleInt).findFirstInt());
 
         query = box.query().greater(simpleLong, 1004).build();
         assertEquals(5, (int) query.property(simpleInt).distinct().findUniqueInt());
@@ -195,6 +193,18 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
         putTestEntity(null, 1);
         putTestEntity(null, 1);
         box.query().build().property(simpleInt).findUniqueInt();
+    }
+
+    @Test
+    public void testFindDouble() {
+        Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
+        assertNull(query.property(simpleDouble).findFirstDouble());
+        assertNull(query.property(simpleDouble).findUniqueDouble());
+        putTestEntities(5);
+        assertEquals(2000.03, query.property(simpleDouble).findFirstDouble(), 0.001);
+
+        query = box.query().greater(simpleLong, 1004).build();
+        assertEquals(2000.05, query.property(simpleDouble).distinct().findUniqueDouble(), 0.001);
     }
 
     // TODO add test for other types of single object find methods

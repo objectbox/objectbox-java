@@ -278,4 +278,52 @@ public class PropertyQuery {
         return (Integer) findNumber(true);
     }
 
+    public Short findFirstShort() {
+        return (Short) findNumber(false);
+    }
+
+    public Short findUniqueShort() {
+        return (Short) findNumber(true);
+    }
+
+    public Character findFirstChar() {
+        return (Character) findNumber(false);
+    }
+
+    public Character findUniqueChar() {
+        return (Character) findNumber(true);
+    }
+
+    public Byte findFirstByte() {
+        return (Byte) findNumber(false);
+    }
+
+    public Byte findUniqueByte() {
+        return (Byte) findNumber(true);
+    }
+
+    public Boolean findFirstBoolean() {
+        return (Boolean) findNumber(false);
+    }
+
+    public Boolean findUniqueBoolean() {
+        return (Boolean) findNumber(true);
+    }
+
+    public Float findFirstFloat() {
+        return (Float) findNumber(false);
+    }
+
+    public Float findUniqueFloat() {
+        return (Float) findNumber(true);
+    }
+
+    public Double findFirstDouble() {
+        return (Double) findNumber(false);
+    }
+
+    public Double findUniqueDouble() {
+        return (Double) findNumber(true);
+    }
+
 }
