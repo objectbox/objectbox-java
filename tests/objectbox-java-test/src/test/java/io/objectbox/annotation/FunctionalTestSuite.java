@@ -15,7 +15,7 @@ import io.objectbox.TransactionTest;
 import io.objectbox.index.IndexReaderRenewTest;
 import io.objectbox.query.LazyListTest;
 import io.objectbox.query.QueryObserverTest;
-import io.objectbox.query.QueryPropertiesTest;
+import io.objectbox.query.PropertyQueryTest;
 import io.objectbox.query.QueryTest;
 import io.objectbox.relation.RelationEagerTest;
 import io.objectbox.relation.RelationTest;
@@ -35,7 +35,7 @@ import io.objectbox.relation.ToOneTest;
         ObjectClassObserverTest.class,
         QueryObserverTest.class,
         QueryTest.class,
-        QueryPropertiesTest.class,
+        PropertyQueryTest.class,
         RelationTest.class,
         RelationEagerTest.class,
         ToOneTest.class,

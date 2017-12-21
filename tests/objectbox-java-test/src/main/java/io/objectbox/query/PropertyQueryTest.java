@@ -34,7 +34,7 @@ import static io.objectbox.TestEntity_.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class QueryPropertiesTest extends AbstractObjectBoxTest {
+public class PropertyQueryTest extends AbstractObjectBoxTest {
 
     private Box<TestEntity> box;
 
