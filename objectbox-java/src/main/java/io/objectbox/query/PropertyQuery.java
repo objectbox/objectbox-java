@@ -153,7 +153,7 @@ public class PropertyQuery {
             @Override
             public int[] call() {
                 return query.nativeFindInts(query.handle, query.cursorHandle(), property.id, distinct,
-                        enableNull, (int)nullValueLong);
+                        enableNull, (int) nullValueLong);
             }
         });
     }
@@ -249,6 +249,33 @@ public class PropertyQuery {
                         enableNull, nullValueDouble);
             }
         });
+    }
+
+    private Object findNumber(final boolean unique) {
+        return query.callInReadTx(new Callable<Object>() {
+            @Override
+            public Object call() {
+                return query.nativeFindNumber(query.handle, query.cursorHandle(), property.id, unique,
+                        enableNull, nullValueLong, nullValueFloat, nullValueDouble);
+            }
+        });
+    }
+
+    public Long findFirstLong() {
+        return (Long) findNumber(false);
+    }
+
+    public Long findUniqueLong() {
+        return (Long) findNumber(true);
+    }
+
+
+    public Integer findFirstInt() {
+        return (Integer) findNumber(false);
+    }
+
+    public Integer findUniqueInt() {
+        return (Integer) findNumber(true);
     }
 
 }

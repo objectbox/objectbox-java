@@ -149,6 +149,42 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testFindLong() {
+        putTestEntities(5);
+        Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
+        long result = query.property(simpleLong).findFirstLong();
+        assertEquals(1003, result);
+
+        query = box.query().greater(simpleLong, 1004).build();
+        assertEquals(1005, (long) query.property(simpleLong).distinct().findUniqueLong());
+    }
+
+    @Test()
+    public void testFindLong_uniqueFails() {
+        putTestEntity(null, 1);
+        putTestEntity(null, 1);
+        box.query().build().property(simpleLong).findUniqueLong();
+    }
+
+    @Test
+    public void testFindInt() {
+        putTestEntities(5);
+        Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
+        long result = query.property(simpleInt).findFirstInt();
+        assertEquals(3, result);
+
+        query = box.query().greater(simpleLong, 1004).build();
+        assertEquals(5, (long) query.property(simpleInt).distinct().findUniqueInt());
+    }
+
+    @Test()
+    public void testFindInt_uniqueFails() {
+        putTestEntity(null, 1);
+        putTestEntity(null, 1);
+        box.query().build().property(simpleInt).findUniqueInt();
+    }
+
+    @Test
     public void testFindInts() {
         putTestEntities(5);
         Query<TestEntity> query = box.query().greater(simpleInt, 2).build();

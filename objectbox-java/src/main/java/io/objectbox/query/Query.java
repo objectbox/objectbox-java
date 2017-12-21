@@ -83,6 +83,9 @@ public class Query<T> {
     native double[] nativeFindDoubles(long handle, long cursorHandle, int propertyId, boolean distinct,
                                       boolean enableNull, double nullValue);
 
+    native Object nativeFindNumber(long handle, long cursorHandle, int propertyId, boolean unique, boolean enableNull,
+                                   long nullValue, float nullValueFloat, double nullValueDouble);
+
     native long nativeCount(long handle, long cursorHandle);
 
     native long nativeSum(long handle, long cursorHandle, int propertyId);
