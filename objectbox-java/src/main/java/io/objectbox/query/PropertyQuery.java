@@ -78,9 +78,9 @@ public class PropertyQuery {
         return (String[]) query.callInReadTx(new Callable<String[]>() {
             @Override
             public String[] call() {
-                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
                 boolean distinctNoCase = distinct && noCaseIfDistinct;
-                return query.nativeFindStrings(query.handle, cursorHandle, property.id, distinct, distinctNoCase);
+                long cursorHandle = query.cursorHandle();
+                return query.nativeFindStrings(query.handle, cursorHandle, property.id, distinct,distinctNoCase);
             }
         });
     }
@@ -100,8 +100,7 @@ public class PropertyQuery {
         return (long[]) query.callInReadTx(new Callable<long[]>() {
             @Override
             public long[] call() {
-                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
-                return query.nativeFindLongs(query.handle, cursorHandle, property.id, distinct);
+                return query.nativeFindLongs(query.handle, query.cursorHandle(), property.id, distinct);
             }
         });
     }
@@ -119,8 +118,7 @@ public class PropertyQuery {
         return (int[]) query.callInReadTx(new Callable<int[]>() {
             @Override
             public int[] call() {
-                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
-                return query.nativeFindInts(query.handle, cursorHandle, property.id, distinct);
+                return query.nativeFindInts(query.handle, query.cursorHandle(), property.id, distinct);
             }
         });
     }
@@ -138,8 +136,7 @@ public class PropertyQuery {
         return (short[]) query.callInReadTx(new Callable<short[]>() {
             @Override
             public short[] call() {
-                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
-                return query.nativeFindShorts(query.handle, cursorHandle, property.id, distinct);
+                return query.nativeFindShorts(query.handle, query.cursorHandle(), property.id, distinct);
             }
         });
     }
@@ -157,8 +154,7 @@ public class PropertyQuery {
         return (char[]) query.callInReadTx(new Callable<char[]>() {
             @Override
             public char[] call() {
-                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
-                return query.nativeFindChars(query.handle, cursorHandle, property.id, distinct);
+                return query.nativeFindChars(query.handle, query.cursorHandle(), property.id, distinct);
             }
         });
     }
@@ -174,8 +170,7 @@ public class PropertyQuery {
         return (byte[]) query.callInReadTx(new Callable<byte[]>() {
             @Override
             public byte[] call() {
-                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
-                return query.nativeFindBytes(query.handle, cursorHandle, property.id, distinct);
+                return query.nativeFindBytes(query.handle, query.cursorHandle(), property.id, distinct);
             }
         });
     }
@@ -193,8 +188,7 @@ public class PropertyQuery {
         return (float[]) query.callInReadTx(new Callable<float[]>() {
             @Override
             public float[] call() {
-                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
-                return query.nativeFindFloats(query.handle, cursorHandle, property.id, distinct);
+                return query.nativeFindFloats(query.handle, query.cursorHandle(), property.id, distinct);
             }
         });
     }
@@ -212,8 +206,7 @@ public class PropertyQuery {
         return (double[]) query.callInReadTx(new Callable<double[]>() {
             @Override
             public double[] call() {
-                long cursorHandle = InternalAccess.getActiveTxCursorHandle(query.box);
-                return query.nativeFindDoubles(query.handle, cursorHandle, property.id, distinct);
+                return query.nativeFindDoubles(query.handle, query.cursorHandle(), property.id, distinct);
             }
         });
     }

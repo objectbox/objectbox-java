@@ -147,6 +147,11 @@ public class Query<T> {
         }
     }
 
+    /** To be called inside a read TX */
+    long cursorHandle() {
+        return InternalAccess.getActiveTxCursorHandle(box);
+    }
+
     /**
      * Find the first Object matching the query.
      */
@@ -157,7 +162,7 @@ public class Query<T> {
             @Override
             public T call() {
                 @SuppressWarnings("unchecked")
-                T entity = (T) nativeFindFirst(handle, InternalAccess.getActiveTxCursorHandle(box));
+                T entity = (T) nativeFindFirst(handle, cursorHandle());
                 resolveEagerRelation(entity);
                 return entity;
             }
@@ -191,7 +196,7 @@ public class Query<T> {
             @Override
             public T call() {
                 @SuppressWarnings("unchecked")
-                T entity = (T) nativeFindUnique(handle, InternalAccess.getActiveTxCursorHandle(box));
+                T entity = (T) nativeFindUnique(handle, cursorHandle());
                 resolveEagerRelation(entity);
                 return entity;
             }
@@ -206,8 +211,7 @@ public class Query<T> {
         return callInReadTx(new Callable<List<T>>() {
             @Override
             public List<T> call() throws Exception {
-                long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
-                List<T> entities = nativeFind(Query.this.handle, cursorHandle, 0, 0);
+                List<T> entities = nativeFind(Query.this.handle, cursorHandle(), 0, 0);
                 if (filter != null) {
                     Iterator<T> iterator = entities.iterator();
                     while (iterator.hasNext()) {
@@ -235,8 +239,7 @@ public class Query<T> {
         return callInReadTx(new Callable<List<T>>() {
             @Override
             public List<T> call() {
-                long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
-                List entities = nativeFind(handle, cursorHandle, offset, limit);
+                List entities = nativeFind(handle, cursorHandle(), offset, limit);
                 resolveEagerRelations(entities);
                 return entities;
             }
