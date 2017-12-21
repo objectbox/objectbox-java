@@ -29,6 +29,7 @@ import io.objectbox.BoxStoreBuilder;
 import io.objectbox.DebugFlags;
 import io.objectbox.TestEntity;
 import io.objectbox.TestEntityCursor;
+import io.objectbox.exception.DbException;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
 import static io.objectbox.TestEntity_.*;
@@ -159,7 +160,7 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
         assertEquals(1005, (long) query.property(simpleLong).distinct().findUniqueLong());
     }
 
-    @Test()
+    @Test(expected = DbException.class)
     public void testFindLong_uniqueFails() {
         putTestEntity(null, 1);
         putTestEntity(null, 1);
@@ -177,7 +178,7 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
         assertEquals(5, (long) query.property(simpleInt).distinct().findUniqueInt());
     }
 
-    @Test()
+    @Test(expected = DbException.class)
     public void testFindInt_uniqueFails() {
         putTestEntity(null, 1);
         putTestEntity(null, 1);
