@@ -7,7 +7,7 @@ pipeline {
 
     triggers {
         upstream(upstreamProjects: "ObjectStore/${env.BRANCH_NAME.replaceAll("/", "%2F")}",
-                threshold: hudson.model.Result.FAILURE)
+                threshold: hudson.model.Result.SUCCESS)
         cron (cronSchedule)
     }
 
