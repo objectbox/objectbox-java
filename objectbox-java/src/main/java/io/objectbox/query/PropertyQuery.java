@@ -267,8 +267,9 @@ public class PropertyQuery {
         return (String) query.callInReadTx(new Callable<String>() {
             @Override
             public String call() {
-                return query.nativeFindString(query.handle, query.cursorHandle(), property.id, unique,
-                        enableNull, nullValueString);
+                boolean distinctCase = distinct && !noCaseIfDistinct;
+                return query.nativeFindString(query.handle, query.cursorHandle(), property.id, unique, distinct,
+                        distinctCase, enableNull, nullValueString);
             }
         });
     }
@@ -285,7 +286,7 @@ public class PropertyQuery {
         return query.callInReadTx(new Callable<Object>() {
             @Override
             public Object call() {
-                return query.nativeFindNumber(query.handle, query.cursorHandle(), property.id, unique,
+                return query.nativeFindNumber(query.handle, query.cursorHandle(), property.id, unique, distinct,
                         enableNull, nullValueLong, nullValueFloat, nullValueDouble);
             }
         });
