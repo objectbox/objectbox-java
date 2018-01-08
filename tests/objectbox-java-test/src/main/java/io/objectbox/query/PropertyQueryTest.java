@@ -222,6 +222,88 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testFindShort() {
+        Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
+        assertNull(query.property(simpleShort).findShort());
+        assertNull(query.property(simpleShort).unique().findShort());
+
+        putTestEntities(5);
+        assertEquals(103, (short) query.property(simpleShort).findShort());
+
+        query = box.query().greater(simpleLong, 1004).build();
+        assertEquals(105, (short) query.property(simpleShort).distinct().unique().findShort());
+    }
+
+    @Test(expected = DbException.class)
+    public void testFindShort_uniqueFails() {
+        putTestEntity(null, 1);
+        putTestEntity(null, 1);
+        box.query().build().property(simpleShort).unique().findShort();
+    }
+
+    // TODO add test for findChar
+
+    @Test
+    public void testFindByte() {
+        Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
+        assertNull(query.property(simpleByte).findByte());
+        assertNull(query.property(simpleByte).unique().findByte());
+
+        putTestEntities(5);
+        assertEquals((byte) 13, (byte) query.property(simpleByte).findByte());
+
+        query = box.query().greater(simpleLong, 1004).build();
+        assertEquals((byte) 15, (byte) query.property(simpleByte).distinct().unique().findByte());
+    }
+
+    @Test(expected = DbException.class)
+    public void testFindByte_uniqueFails() {
+        putTestEntity(null, 1);
+        putTestEntity(null, 1);
+        box.query().build().property(simpleByte).unique().findByte();
+    }
+
+    @Test
+    public void testFindBoolean() {
+        Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
+        assertNull(query.property(simpleBoolean).findBoolean());
+        assertNull(query.property(simpleBoolean).unique().findBoolean());
+
+        putTestEntities(5);
+        assertFalse(query.property(simpleBoolean).findBoolean());
+
+        query = box.query().greater(simpleLong, 1004).build();
+        assertFalse(query.property(simpleBoolean).distinct().unique().findBoolean());
+    }
+
+    @Test(expected = DbException.class)
+    public void testFindBoolean_uniqueFails() {
+        putTestEntity(null, 1);
+        putTestEntity(null, 1);
+        box.query().build().property(simpleBoolean).unique().findBoolean();
+    }
+
+    @Test
+    public void testFindFloat() {
+        Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
+        assertNull(query.property(simpleFloat).findFloat());
+        assertNull(query.property(simpleFloat).unique().findFloat());
+
+        putTestEntities(5);
+        assertEquals(200.3f, query.property(simpleFloat).findFloat(), 0.001f);
+
+        query = box.query().greater(simpleLong, 1004).build();
+        assertEquals(200.5f, query.property(simpleFloat).distinct().unique().findFloat(), 0.001f);
+    }
+
+    @Test(expected = DbException.class)
+    public void testFindFloat_uniqueFails() {
+        putTestEntity(null, 1);
+        putTestEntity(null, 1);
+        box.query().build().property(simpleFloat).unique().findFloat();
+    }
+
+    @Test
     public void testFindDouble() {
         Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
         assertNull(query.property(simpleDouble).findDouble());
@@ -233,7 +315,12 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
         assertEquals(2000.05, query.property(simpleDouble).distinct().unique().findDouble(), 0.001);
     }
 
-    // TODO add test for other types of single object find methods
+    @Test(expected = DbException.class)
+    public void testFindDouble_uniqueFails() {
+        putTestEntity(null, 1);
+        putTestEntity(null, 1);
+        box.query().build().property(simpleDouble).unique().findDouble();
+    }
 
     @Test
     public void testFindInts() {
