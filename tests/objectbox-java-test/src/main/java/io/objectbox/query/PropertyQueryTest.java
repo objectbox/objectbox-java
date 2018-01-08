@@ -145,7 +145,7 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
         assertEquals("foo5", propertyQuery.reset().unique().findString());
 
         putTestEntity(null, 6);
-        // TODO XXX enable me after fixing combination of unique and distinct: putTestEntity(null, 7);
+        putTestEntity(null, 7);
         query.setParameter(simpleLong, 1005);
         assertEquals("nope", propertyQuery.reset().distinct().nullValue("nope").unique().findString());
     }
