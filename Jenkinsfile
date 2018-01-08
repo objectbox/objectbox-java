@@ -6,7 +6,7 @@ pipeline {
     agent any
 
     triggers {
-        upstream(upstreamProjects: "ObjectStore/${env.BRANCH_NAME.replaceAll("/", "%2F")}",
+        upstream(upstreamProjects: "ObjectStore-Linux/${env.BRANCH_NAME.replaceAll("/", "%2F")}",
                 threshold: hudson.model.Result.SUCCESS)
         cron (cronSchedule)
     }
