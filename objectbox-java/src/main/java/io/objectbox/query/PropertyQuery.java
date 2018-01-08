@@ -33,6 +33,7 @@ public class PropertyQuery {
     boolean distinct;
     boolean noCaseIfDistinct = true;
     boolean enableNull;
+    boolean unique;
 
     double nullValueDouble;
     float nullValueFloat;
@@ -48,6 +49,7 @@ public class PropertyQuery {
     public PropertyQuery reset() {
         distinct = false;
         noCaseIfDistinct = true;
+        unique = false;
         enableNull = false;
         nullValueDouble = 0;
         nullValueFloat = 0;
@@ -77,6 +79,20 @@ public class PropertyQuery {
         }
         distinct = true;
         noCaseIfDistinct = stringOrder == QueryBuilder.StringOrder.CASE_INSENSITIVE;
+        return this;
+    }
+
+    /**
+     * For find methods returning single values, e.g. {@link #findInt()}, this will additional verify that the
+     * resulting value is unique.
+     * If there is any other resulting value resulting from this query, an exception will be thrown.
+     * <p>
+     * Can be combined with {@link #distinct()}.
+     * <p>
+     * Will be ignored for find methods returning multiple values, e.g. {@link #findInts()}.
+     */
+    public PropertyQuery unique() {
+        unique = true;
         return this;
     }
 
@@ -263,7 +279,7 @@ public class PropertyQuery {
         });
     }
 
-    private String findString(final boolean unique) {
+    public String findString() {
         return (String) query.callInReadTx(new Callable<String>() {
             @Override
             public String call() {
@@ -274,15 +290,7 @@ public class PropertyQuery {
         });
     }
 
-    public String findFirstString() {
-        return findString(false);
-    }
-
-    public String findUniqueString() {
-        return findString(true);
-    }
-
-    private Object findNumber(final boolean unique) {
+    private Object findNumber() {
         return query.callInReadTx(new Callable<Object>() {
             @Override
             public Object call() {
@@ -292,68 +300,36 @@ public class PropertyQuery {
         });
     }
 
-    public Long findFirstLong() {
-        return (Long) findNumber(false);
+    public Long findLong() {
+        return (Long) findNumber();
     }
 
-    public Long findUniqueLong() {
-        return (Long) findNumber(true);
+    public Integer findInt() {
+        return (Integer) findNumber();
     }
 
-    public Integer findFirstInt() {
-        return (Integer) findNumber(false);
+    public Short findShort() {
+        return (Short) findNumber();
     }
 
-    public Integer findUniqueInt() {
-        return (Integer) findNumber(true);
+    public Character findChar() {
+        return (Character) findNumber();
     }
 
-    public Short findFirstShort() {
-        return (Short) findNumber(false);
+    public Byte findByte() {
+        return (Byte) findNumber();
     }
 
-    public Short findUniqueShort() {
-        return (Short) findNumber(true);
+    public Boolean findBoolean() {
+        return (Boolean) findNumber();
     }
 
-    public Character findFirstChar() {
-        return (Character) findNumber(false);
+    public Float findFloat() {
+        return (Float) findNumber();
     }
 
-    public Character findUniqueChar() {
-        return (Character) findNumber(true);
-    }
-
-    public Byte findFirstByte() {
-        return (Byte) findNumber(false);
-    }
-
-    public Byte findUniqueByte() {
-        return (Byte) findNumber(true);
-    }
-
-    public Boolean findFirstBoolean() {
-        return (Boolean) findNumber(false);
-    }
-
-    public Boolean findUniqueBoolean() {
-        return (Boolean) findNumber(true);
-    }
-
-    public Float findFirstFloat() {
-        return (Float) findNumber(false);
-    }
-
-    public Float findUniqueFloat() {
-        return (Float) findNumber(true);
-    }
-
-    public Double findFirstDouble() {
-        return (Double) findNumber(false);
-    }
-
-    public Double findUniqueDouble() {
-        return (Double) findNumber(true);
+    public Double findDouble() {
+        return (Double) findNumber();
     }
 
 }

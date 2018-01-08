@@ -135,26 +135,26 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
     public void testFindString() {
         Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
         PropertyQuery propertyQuery = query.property(simpleString);
-        assertNull(propertyQuery.findFirstString());
-        assertNull(propertyQuery.reset().findUniqueString());
+        assertNull(propertyQuery.findString());
+        assertNull(propertyQuery.reset().unique().findString());
         putTestEntities(5);
-        assertEquals("foo3", propertyQuery.reset().findFirstString());
+        assertEquals("foo3", propertyQuery.reset().findString());
 
         query = box.query().greater(simpleLong, 1004).build();
         propertyQuery = query.property(simpleString);
-        assertEquals("foo5", propertyQuery.reset().findUniqueString());
+        assertEquals("foo5", propertyQuery.reset().unique().findString());
 
         putTestEntity(null, 6);
         // TODO XXX enable me after fixing combination of unique and distinct: putTestEntity(null, 7);
         query.setParameter(simpleLong, 1005);
-        assertEquals("nope", propertyQuery.reset().distinct().nullValue("nope").findUniqueString());
+        assertEquals("nope", propertyQuery.reset().distinct().nullValue("nope").unique().findString());
     }
 
     @Test(expected = DbException.class)
     public void testFindString_uniqueFails() {
         putTestEntity("foo", 1);
         putTestEntity("foo", 2);
-        box.query().build().property(simpleString).findUniqueString();
+        box.query().build().property(simpleString).unique().findString();
     }
 
     @Test
@@ -177,32 +177,32 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
     @Test
     public void testFindLong() {
         Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
-        assertNull(query.property(simpleLong).findFirstLong());
-        assertNull(query.property(simpleLong).findUniqueLong());
+        assertNull(query.property(simpleLong).findLong());
+        assertNull(query.property(simpleLong).findLong());
         putTestEntities(5);
-        assertEquals(1003, (long) query.property(simpleLong).findFirstLong());
+        assertEquals(1003, (long) query.property(simpleLong).findLong());
 
         query = box.query().greater(simpleLong, 1004).build();
-        assertEquals(1005, (long) query.property(simpleLong).distinct().findUniqueLong());
+        assertEquals(1005, (long) query.property(simpleLong).distinct().findLong());
     }
 
     @Test(expected = DbException.class)
     public void testFindLong_uniqueFails() {
         putTestEntity(null, 1);
         putTestEntity(null, 1);
-        box.query().build().property(simpleLong).findUniqueLong();
+        box.query().build().property(simpleLong).unique().findLong();
     }
 
     @Test
     public void testFindInt() {
         Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
-        assertNull(query.property(simpleInt).findFirstInt());
-        assertNull(query.property(simpleInt).findUniqueInt());
+        assertNull(query.property(simpleInt).findInt());
+        assertNull(query.property(simpleInt).unique().findInt());
         putTestEntities(5);
-        assertEquals(3, (int) query.property(simpleInt).findFirstInt());
+        assertEquals(3, (int) query.property(simpleInt).findInt());
 
         query = box.query().greater(simpleLong, 1004).build();
-        assertEquals(5, (int) query.property(simpleInt).distinct().findUniqueInt());
+        assertEquals(5, (int) query.property(simpleInt).distinct().unique().findInt());
 
         TestEntityCursor.INT_NULL_HACK = true;
         try {
@@ -211,26 +211,26 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
             TestEntityCursor.INT_NULL_HACK = false;
         }
         query.setParameter(simpleLong, 1005);
-        assertEquals(-99, (int) query.property(simpleInt).nullValue(-99).findUniqueInt());
+        assertEquals(-99, (int) query.property(simpleInt).nullValue(-99).unique().findInt());
     }
 
     @Test(expected = DbException.class)
     public void testFindInt_uniqueFails() {
         putTestEntity(null, 1);
         putTestEntity(null, 1);
-        box.query().build().property(simpleInt).findUniqueInt();
+        box.query().build().property(simpleInt).unique().findInt();
     }
 
     @Test
     public void testFindDouble() {
         Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
-        assertNull(query.property(simpleDouble).findFirstDouble());
-        assertNull(query.property(simpleDouble).findUniqueDouble());
+        assertNull(query.property(simpleDouble).findDouble());
+        assertNull(query.property(simpleDouble).unique().findDouble());
         putTestEntities(5);
-        assertEquals(2000.03, query.property(simpleDouble).findFirstDouble(), 0.001);
+        assertEquals(2000.03, query.property(simpleDouble).findDouble(), 0.001);
 
         query = box.query().greater(simpleLong, 1004).build();
-        assertEquals(2000.05, query.property(simpleDouble).distinct().findUniqueDouble(), 0.001);
+        assertEquals(2000.05, query.property(simpleDouble).distinct().unique().findDouble(), 0.001);
     }
 
     // TODO add test for other types of single object find methods
