@@ -289,8 +289,12 @@ public class Query<T> {
     // TODO we might move all those property find methods in a "PropertyQuery" class for divide & conquer.
 
     /**
+     * Creates a {@link PropertyQuery} for the given property.
+     *
+     * A {@link PropertyQuery} uses the same conditions as this Query object,
+     * but returns only the value(s) of a single property (not an entity objects).
+     *
      * @param property the property for which to return values
-     * @return
      */
     public PropertyQuery property(Property property) {
         return new PropertyQuery(this, property);
