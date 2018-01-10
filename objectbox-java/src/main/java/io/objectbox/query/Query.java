@@ -290,7 +290,7 @@ public class Query<T> {
 
     /**
      * Creates a {@link PropertyQuery} for the given property.
-     *
+     * <p>
      * A {@link PropertyQuery} uses the same conditions as this Query object,
      * but returns only the value(s) of a single property (not an entity objects).
      *
@@ -409,76 +409,47 @@ public class Query<T> {
         });
     }
 
-    /** Sums up all values for the given property over all Objects matching the query. */
+    /** @deprecated Use {@link #property(Property)} to get a {@link PropertyQuery} for aggregate functions. */
+    @Deprecated
     public long sum(final Property property) {
-        return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
-            @Override
-            public Long call(long cursorHandle) {
-                return nativeSum(handle, cursorHandle, property.getId());
-            }
-        });
+        return property(property).sum();
     }
 
-    /** Sums up all values for the given property over all Objects matching the query. */
+    /** @deprecated Use {@link #property(Property)} to get a {@link PropertyQuery} for aggregate functions. */
+    @Deprecated
     public double sumDouble(final Property property) {
-        return box.internalCallWithReaderHandle(new CallWithHandle<Double>() {
-            @Override
-            public Double call(long cursorHandle) {
-                return nativeSumDouble(handle, cursorHandle, property.getId());
-            }
-        });
+        return property(property).sumDouble();
     }
 
-    /** Finds the maximum value for the given property over all Objects matching the query. */
+    /** @deprecated Use {@link #property(Property)} to get a {@link PropertyQuery} for aggregate functions. */
+    @Deprecated
     public long max(final Property property) {
-        return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
-            @Override
-            public Long call(long cursorHandle) {
-                return nativeMax(handle, cursorHandle, property.getId());
-            }
-        });
+        return property(property).max();
     }
 
-    /** Finds the maximum value for the given property over all Objects matching the query. */
+    /** @deprecated Use {@link #property(Property)} to get a {@link PropertyQuery} for aggregate functions. */
+    @Deprecated
     public double maxDouble(final Property property) {
-        return box.internalCallWithReaderHandle(new CallWithHandle<Double>() {
-            @Override
-            public Double call(long cursorHandle) {
-                return nativeMaxDouble(handle, cursorHandle, property.getId());
-            }
-        });
+        return property(property).maxDouble();
     }
 
-    /** Finds the minimum value for the given property over all Objects matching the query. */
+    /** @deprecated Use {@link #property(Property)} to get a {@link PropertyQuery} for aggregate functions. */
+    @Deprecated
     public long min(final Property property) {
-        return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
-            @Override
-            public Long call(long cursorHandle) {
-                return nativeMin(handle, cursorHandle, property.getId());
-            }
-        });
+        return property(property).min();
     }
 
-    /** Finds the minimum value for the given property over all Objects matching the query. */
+    /** @deprecated Use {@link #property(Property)} to get a {@link PropertyQuery} for aggregate functions. */
+    @Deprecated
     public double minDouble(final Property property) {
-        return box.internalCallWithReaderHandle(new CallWithHandle<Double>() {
-            @Override
-            public Double call(long cursorHandle) {
-                return nativeMinDouble(handle, cursorHandle, property.getId());
-            }
-        });
+        return property(property).minDouble();
     }
 
-    /** Calculates the average of all values for the given property over all Objects matching the query. */
+    /** @deprecated Use {@link #property(Property)} to get a {@link PropertyQuery} for aggregate functions. */
+    @Deprecated
     public double avg(final Property property) {
-        return box.internalCallWithReaderHandle(new CallWithHandle<Double>() {
-            @Override
-            public Double call(long cursorHandle) {
-                return nativeAvg(handle, cursorHandle, property.getId());
-            }
-        });
+        return property(property).avg();
     }
-
 
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
