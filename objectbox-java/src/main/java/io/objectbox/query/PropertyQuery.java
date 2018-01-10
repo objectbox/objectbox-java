@@ -101,30 +101,28 @@ public class PropertyQuery {
         return this;
     }
 
-    public PropertyQuery nullValue(long nullValue) {
-        enableNull = true;
-        this.nullValueLong = nullValue;
-        return this;
-    }
-
-    public PropertyQuery nullValue(float nullValue) {
-        enableNull = true;
-        this.nullValueFloat = nullValue;
-        return this;
-    }
-
-    public PropertyQuery nullValue(double nullValue) {
-        enableNull = true;
-        this.nullValueDouble = nullValue;
-        return this;
-    }
-
-    public PropertyQuery nullValue(String nullValue) {
+    /**
+     * By default, null values are not returned by find methods (primitive arrays cannot contains nulls).
+     * However, using this function, you can define an alternative value that will be returned for null values.
+     * E.g. -1 for ins/longs or "NULL" for strings.
+     */
+    public PropertyQuery nullValue(Object nullValue) {
         if (nullValue == null) {
-            throw new IllegalArgumentException("Null strings are not allowed (yet)");
+            throw new IllegalArgumentException("Null values are not allowed");
         }
+        boolean isString = nullValue instanceof String;
+        boolean isNumber = nullValue instanceof Number;
+        if (!isString && !isNumber) {
+            throw new IllegalArgumentException("Unsupported value class: " + nullValue.getClass());
+        }
+
         enableNull = true;
-        this.nullValueString = nullValue;
+        nullValueString = isString ? (String) nullValue : null;
+        boolean isFloat = nullValue instanceof Float;
+        nullValueFloat = isFloat ? (Float) nullValue : 0;
+        boolean isDouble = nullValue instanceof Double;
+        nullValueDouble = isDouble ? (Double) nullValue : 0;
+        nullValueLong = isNumber && !isFloat && !isDouble ? ((Number) nullValue).longValue() : 0;
         return this;
     }
 
