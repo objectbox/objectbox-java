@@ -61,6 +61,7 @@ import io.objectbox.reactive.SubscriptionBuilder;
 @ThreadSafe
 public class BoxStore implements Closeable {
 
+    private static final String VERSION = "1.4.2-2018-01-26";
     private static BoxStore defaultStore;
 
     private static Set<String> openFiles = new HashSet<>();
@@ -141,7 +142,7 @@ public class BoxStore implements Closeable {
     public static native boolean isObjectBrowserAvailable();
 
     public static String getVersion() {
-        return "1.4.2-2018-01-26";
+        return VERSION;
     }
 
     private final File directory;

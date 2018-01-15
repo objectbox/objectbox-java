@@ -2,6 +2,7 @@
 version = '1.4.2-SNAPSHOT'
 
 buildscript {
+    ext.ob_expected_version = project.hasProperty('expectedVersion') ? project.property('expectedVersion') : 'UNDEFINED'
     ext {
         isLinux = System.getProperty("os.name").contains("Linux")
         is64 = System.getProperty("sun.arch.data.model") == "64"
@@ -122,6 +123,34 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                 }
             }
         }
+    }
+}
+
+// this task is also used by the composite build ('objectbox-deploy'), check before making changes
+task installAll {
+    group 'deploy'
+    dependsOn ':objectbox-java-api:install'
+    dependsOn ':objectbox-java:install'
+    dependsOn ':objectbox-kotlin:install'
+    doLast {
+        println("Installed version $version")
+    }
+}
+
+// this task is also used by the composite build ('objectbox-deploy'), check before making changes
+task deployAll {
+    group 'deploy'
+    dependsOn ':objectbox-java-api:uploadArchives'
+    dependsOn ':objectbox-java:uploadArchives'
+    dependsOn ':objectbox-kotlin:uploadArchives'
+}
+
+// this task is also used by the composite build ('objectbox-deploy'), check before making changes
+task verifyVersion {
+    group 'verify'
+    dependsOn ':objectbox-java:verifyVersion'
+    doLast {
+        assert ob_expected_version == version
     }
 }
 
