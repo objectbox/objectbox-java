@@ -1,5 +1,5 @@
 // Just too many sub projects, so each can reference rootProject.version
-version = '1.4.0'
+version = '1.4.1-SNAPSHOT'
 
 buildscript {
     ext {
