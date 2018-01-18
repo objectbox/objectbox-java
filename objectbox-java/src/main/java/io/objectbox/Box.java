@@ -402,6 +402,34 @@ public class Box<T> {
     }
 
     /**
+     * Puts the given entities in a box using a single transaction.
+     *
+     * @param entities It is fine to pass null or an empty collection:
+     *                 this case is handled efficiently without overhead.
+     *
+     * @return list of saved entities ids
+     */
+    public Collection<Long> putAndGetIds(@Nullable Collection<T> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Collection<Long> ids = new ArrayList<>();
+        Cursor<T> cursor = getWriter();
+        try {
+            for (T entity : entities) {
+                ids.add(cursor.put(entity));
+            }
+            commitWriter(cursor);
+        } catch (Exception e) {
+            ids = Collections.emptyList();
+        } finally {
+            releaseWriter(cursor);
+        }
+        return ids;
+    }
+
+    /**
      * Removes (deletes) the Object by its ID.
      */
     public void remove(long id) {
