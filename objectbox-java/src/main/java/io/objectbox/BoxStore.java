@@ -44,6 +44,7 @@ import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbException;
+import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.DbSchemaException;
 import io.objectbox.internal.CrashReportLogger;
 import io.objectbox.internal.NativeLibraryLoader;
@@ -131,14 +132,16 @@ public class BoxStore implements Closeable {
 
     static native int nativeCleanStaleReadTransactions(long store);
 
-    static native String nativeStartObjectBrowser(long store, String urlPath, int port);
+    static native void nativeSetDbExceptionListener(long store, DbExceptionListener dbExceptionListener);
 
     static native void nativeSetDebugFlags(long store, int debugFlags);
+
+    static native String nativeStartObjectBrowser(long store, String urlPath, int port);
 
     public static native boolean isObjectBrowserAvailable();
 
     public static String getVersion() {
-        return "1.4.0-2018-01-08";
+        return "1.4.1-2018-01-18";
     }
 
     private final File directory;
@@ -852,6 +855,14 @@ public class BoxStore implements Closeable {
     }
 
     /**
+     * The given listener will be called when an exception is thrown.
+     * This for example allows a central error handling, e.g. a special logging for DB related exceptions.
+     */
+    public void setDbExceptionListener(DbExceptionListener dbExceptionListener) {
+        nativeSetDbExceptionListener(handle, dbExceptionListener);
+    }
+
+    /**
      * Like {@link #subscribe()}, but wires the supplied @{@link io.objectbox.reactive.DataObserver} only to the given
      * object class for notifications.
      */
@@ -887,4 +898,5 @@ public class BoxStore implements Closeable {
     void setDebugFlags(int debugFlags) {
         nativeSetDebugFlags(handle, debugFlags);
     }
+
 }
