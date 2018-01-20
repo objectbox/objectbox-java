@@ -23,7 +23,7 @@ package io.objectbox.exception;
 public interface DbExceptionListener {
     /**
      * Called when an exception is thrown during a database operation.
-     * Do NOT throw exceptions in this method: behavior is undefined, e.g. all thrown exceptions may be ignored.
+     * Do NOT throw exceptions in this method: throw exceptions are ignored (but logged to stderr).
      *
      * @param e the exception occurred during a database operation
      */

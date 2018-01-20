@@ -33,6 +33,8 @@ import io.objectbox.DebugFlags;
 import io.objectbox.TestEntity;
 import io.objectbox.TestEntity_;
 import io.objectbox.TxCallback;
+import io.objectbox.exception.DbException;
+import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.query.QueryBuilder.StringOrder;
 import io.objectbox.relation.MyObjectBox;
 import io.objectbox.relation.Order;
@@ -519,6 +521,26 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals(0, query.count());
 
         query.setParameter(Order_.date, now);
+    }
+
+    @Test
+    public void testFailedUnique_exceptionListener() {
+        final Exception[] exs = {null};
+        DbExceptionListener exceptionListener = new DbExceptionListener() {
+            @Override
+            public void onDbException(Exception e) {
+                exs[0] = e;
+            }
+        };
+        putTestEntitiesStrings();
+        Query<TestEntity> query = box.query().build();
+        store.setDbExceptionListener(exceptionListener);
+        try {
+            query.findUnique();
+            fail("Should have thrown");
+        } catch (DbException e) {
+            assertSame(e, exs[0]);
+        }
     }
 
     private QueryFilter<TestEntity> createTestFilter() {

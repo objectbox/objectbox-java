@@ -28,16 +28,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 
 import io.objectbox.exception.DbException;
+import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.DbMaxReadersExceededException;
 
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class TransactionTest extends AbstractObjectBoxTest {
 
@@ -180,6 +174,26 @@ public class TransactionTest extends AbstractObjectBoxTest {
             tx.commit();
         } finally {
             tx.abort();
+        }
+    }
+
+    @Test
+    public void testCommitReadTxException_exceptionListener() {
+        final Exception[] exs = {null};
+        DbExceptionListener exceptionListener = new DbExceptionListener() {
+            @Override
+            public void onDbException(Exception e) {
+                exs[0] = e;
+            }
+        };
+        Transaction tx = store.beginReadTx();
+        store.setDbExceptionListener(exceptionListener);
+        try {
+            tx.commit();
+            fail("Should have thrown");
+        } catch (IllegalStateException e) {
+            tx.abort();
+            assertSame(e, exs[0]);
         }
     }
 
