@@ -278,12 +278,11 @@ public class ToManyTest extends AbstractRelationTest {
         toMany.add(order);
         toMany.remove(order);
         assertTrue(toMany.hasPendingDbChanges());
-        // TODO:
-        // assertEquals(1, toMany.getAddCount());
-        // assertEquals(0, toMany.getRemoveCount());
+        assertEquals(1, toMany.getAddCount());
+        assertEquals(0, toMany.getRemoveCount());
 
         toMany.applyChangesToDb();
-        // TODO assertEquals(1, orderBox.count());
+        assertEquals(1, orderBox.count());
     }
 
     @Test
@@ -296,7 +295,7 @@ public class ToManyTest extends AbstractRelationTest {
         toMany.applyChangesToDb();
         assertEquals(count, toMany.size());
         toMany.reset();
-        //TODO assertEquals(count, toMany.size());
+        assertEquals(count, toMany.size());
     }
 
     @Test
@@ -313,12 +312,11 @@ public class ToManyTest extends AbstractRelationTest {
         toMany.set(0, toMany.get(2));
         toMany.set(2, order0);
 
-        // TODO:
-        // assertEquals(3, toMany.getAddCount());
-        // assertEquals(0, toMany.getRemoveCount());
+        assertEquals(3, toMany.getAddCount());
+        assertEquals(0, toMany.getRemoveCount());
 
         toMany.applyChangesToDb();
-        // TODO assertEquals(3, orderBox.count());
+        assertEquals(3, orderBox.count());
     }
 
     @Test(expected = IllegalStateException.class)

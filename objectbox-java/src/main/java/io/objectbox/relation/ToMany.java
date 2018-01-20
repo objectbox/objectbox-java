@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,6 +45,8 @@ import io.objectbox.internal.ToOneGetter;
 import io.objectbox.query.QueryFilter;
 import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 
+import static java.lang.Boolean.TRUE;
+
 /**
  * A List representing a to-many relation.
  * It tracks changes (adds and removes) that can be later applied (persisted) to the database.
@@ -60,12 +63,16 @@ import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 @SuppressWarnings("unchecked")
 public class ToMany<TARGET> implements List<TARGET>, Serializable {
     private static final long serialVersionUID = 2367317778240689006L;
+    private final static Integer ONE = Integer.valueOf(1);
 
     private final Object entity;
     private final RelationInfo<TARGET> relationInfo;
 
     private ListFactory listFactory;
     private List<TARGET> entities;
+
+    /** Counts of all entities in the list ({@link #entities}). */
+    private Map<TARGET, Integer> entityCounts;
 
     /** Entities added since last put/sync. Map is used as a set (value is always Boolean.TRUE). */
     private Map<TARGET, Boolean> entitiesAdded;
@@ -151,6 +158,13 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 if (entitiesAdded == null) {
                     entitiesAdded = new LinkedHashMap<>(); // Keep order of added items
                     entitiesRemoved = new LinkedHashMap<>(); // Keep order of added items
+                    entityCounts = new HashMap<>();
+                    for (TARGET object : entities) {
+                        Integer old = entityCounts.put(object, ONE);
+                        if (old != null) {
+                            entityCounts.put(object, old + 1);
+                        }
+                    }
                 }
             }
         }
@@ -196,40 +210,64 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
      */
     @Override
     public synchronized boolean add(TARGET object) {
-        ensureEntitiesWithTrackingLists();
-        entitiesAdded.put(object, Boolean.TRUE);
-        entitiesRemoved.remove(object);
+        trackAdd(object);
         return entities.add(object);
+    }
+
+    /** Must be called from a synchronized method */
+    private void trackAdd(TARGET object) {
+        ensureEntitiesWithTrackingLists();
+        Integer old = entityCounts.put(object, ONE);
+        if (old != null) {
+            entityCounts.put(object, old + 1);
+        }
+        entitiesAdded.put(object, TRUE);
+        entitiesRemoved.remove(object);
+    }
+
+    /** Must be called from a synchronized method */
+    private void trackAdd(Collection<? extends TARGET> objects) {
+        ensureEntitiesWithTrackingLists();
+        for (TARGET object : objects) {
+            trackAdd(object);
+        }
+    }
+
+    /** Must be called from a synchronized method */
+    private void trackRemove(TARGET object) {
+        ensureEntitiesWithTrackingLists();
+        Integer count = entityCounts.remove(object);
+        if (count != null) {
+            if (count == 1) {
+                entityCounts.remove(object);
+                entitiesAdded.remove(object);
+                entitiesRemoved.put(object, TRUE);
+            } else if (count > 1) {
+                entityCounts.put(object, count - 1);
+            } else {
+                throw new IllegalStateException("Illegal count: " + count);
+            }
+        }
     }
 
     /** See {@link #add(Object)} for general comments. */
     @Override
     public synchronized void add(int location, TARGET object) {
-        ensureEntitiesWithTrackingLists();
-        entitiesAdded.put(object, Boolean.TRUE);
-        entitiesRemoved.remove(object);
+        trackAdd(object);
         entities.add(location, object);
     }
 
     /** See {@link #add(Object)} for general comments. */
     @Override
     public synchronized boolean addAll(Collection<? extends TARGET> objects) {
-        putAllToAdded(objects);
+        trackAdd(objects);
         return entities.addAll(objects);
-    }
-
-    private synchronized void putAllToAdded(Collection<? extends TARGET> objects) {
-        ensureEntitiesWithTrackingLists();
-        for (TARGET object : objects) {
-            entitiesAdded.put(object, Boolean.TRUE);
-            entitiesRemoved.remove(object);
-        }
     }
 
     /** See {@link #add(Object)} for general comments. */
     @Override
     public synchronized boolean addAll(int index, Collection<? extends TARGET> objects) {
-        putAllToAdded(objects);
+        trackAdd(objects);
         return entities.addAll(index, objects);
     }
 
@@ -239,7 +277,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         List<TARGET> entitiesToClear = entities;
         if (entitiesToClear != null) {
             for (TARGET target : entitiesToClear) {
-                entitiesRemoved.put(target, Boolean.TRUE);
+                entitiesRemoved.put(target, TRUE);
             }
             entitiesToClear.clear();
         }
@@ -247,6 +285,11 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         Map setToClear = entitiesAdded;
         if (setToClear != null) {
             setToClear.clear();
+        }
+
+        Map entityCountsToClear = this.entityCounts;
+        if(entityCountsToClear != null) {
+            entityCountsToClear.clear();
         }
     }
 
@@ -319,8 +362,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     public synchronized TARGET remove(int location) {
         ensureEntitiesWithTrackingLists();
         TARGET removed = entities.remove(location);
-        entitiesAdded.remove(removed);
-        entitiesRemoved.put(removed, Boolean.TRUE);
+        trackRemove(removed);
         return removed;
     }
 
@@ -329,14 +371,12 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         ensureEntitiesWithTrackingLists();
         boolean removed = entities.remove(object);
         if (removed) {
-            entitiesAdded.remove(object);
-            entitiesRemoved.put((TARGET) object, Boolean.TRUE);
+            trackRemove((TARGET) object);
         }
         return removed;
     }
 
     /** Removes an object by its entity ID. */
-    @Beta
     public synchronized TARGET removeById(long id) {
         ensureEntities();
         int size = entities.size();
@@ -350,7 +390,6 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 }
                 return candidate;
             }
-
         }
         return null;
     }
@@ -376,13 +415,11 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                     toRemove = new ArrayList<>();
                 }
                 toRemove.add(target);
-                entitiesAdded.remove(target);
-                entitiesRemoved.put(target, Boolean.TRUE);
                 changes = true;
             }
         }
         if (toRemove != null) {
-            entities.removeAll(toRemove);
+            removeAll(toRemove);
         }
         return changes;
     }
@@ -391,10 +428,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     public synchronized TARGET set(int location, TARGET object) {
         ensureEntitiesWithTrackingLists();
         TARGET old = entities.set(location, object);
-        entitiesAdded.remove(old);
-        entitiesAdded.put(object, Boolean.TRUE);
-        entitiesRemoved.remove(object);
-        entitiesRemoved.put(old, Boolean.TRUE);
+        trackRemove(old);
+        trackAdd(object);
         return old;
     }
 
@@ -412,9 +447,6 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     @Override
     public List<TARGET> subList(int start, int end) {
         ensureEntities();
-        for (int i = start; i < end; i++) {
-            get(i);
-        }
         return entities.subList(start, end);
     }
 
@@ -442,6 +474,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         entitiesRemoved = null;
         entitiesToRemove = null;
         entitiesToPut = null;
+        entityCounts = null;
     }
 
     public boolean isResolved() {
@@ -529,8 +562,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
      */
     @Beta
     public boolean hasA(QueryFilter<TARGET> filter) {
-        ensureEntities();
-        Object[] objects = entities.toArray();
+        Object[] objects = toArray();
         for (Object target : objects) {
             if (filter.keep((TARGET) target)) {
                 return true;
@@ -547,8 +579,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
      */
     @Beta
     public boolean hasAll(QueryFilter<TARGET> filter) {
-        ensureEntities();
-        Object[] objects = entities.toArray();
+        Object[] objects = toArray();
         if (objects.length == 0) {
             return false;
         }
