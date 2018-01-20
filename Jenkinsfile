@@ -1,9 +1,14 @@
 // dev branch only: every 30 minutes at night (1:00 - 5:00)
 String cronSchedule = BRANCH_NAME == 'dev' ? '*/30 1-5 * * *' : ''
+String buildsToKeep = '500'
 
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
     agent any
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: buildsToKeep, artifactNumToKeepStr: buildsToKeep))
+    }
 
     triggers {
         upstream(upstreamProjects: "ObjectStore-Linux/${env.BRANCH_NAME.replaceAll("/", "%2F")}",
