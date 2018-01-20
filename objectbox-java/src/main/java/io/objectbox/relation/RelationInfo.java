@@ -46,7 +46,7 @@ public class RelationInfo<TARGET> implements Serializable {
     /** Only set for ToMany relations */
     public final ToManyGetter toManyGetter;
 
-    /** For ToMany relations based on backlinks (null otherwise). */
+    /** For ToMany relations based on backlinks (null for stand-alone relations). */
     public final ToOneGetter backlinkToOneGetter;
 
     /** For stand-alone to-many relations (0 otherwise). */
