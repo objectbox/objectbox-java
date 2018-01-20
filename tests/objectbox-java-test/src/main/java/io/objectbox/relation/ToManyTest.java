@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import io.objectbox.TestUtils;
 import io.objectbox.query.QueryFilter;
@@ -266,6 +267,60 @@ public class ToManyTest extends AbstractRelationTest {
         assertEquals(count, orderBox.count());
     }
 
+    @Test
+    public void testAddAddRemove() {
+        Customer customer = putCustomer();
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        assertFalse(toMany.hasPendingDbChanges());
+        Order order = new Order();
+        toMany.add(order);
+        assertTrue(toMany.hasPendingDbChanges());
+        toMany.add(order);
+        toMany.remove(order);
+        assertTrue(toMany.hasPendingDbChanges());
+        // TODO:
+        // assertEquals(1, toMany.getAddCount());
+        // assertEquals(0, toMany.getRemoveCount());
+
+        toMany.applyChangesToDb();
+        // TODO assertEquals(1, orderBox.count());
+    }
+
+    @Test
+    public void testReverse() {
+        int count = 5;
+        Customer customer = putCustomerWithOrders(count);
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        Collections.reverse(toMany);
+
+        toMany.applyChangesToDb();
+        assertEquals(count, toMany.size());
+        toMany.reset();
+        //TODO assertEquals(count, toMany.size());
+    }
+
+    @Test
+    public void testSet_Swap() {
+        Customer customer = putCustomer();
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        assertFalse(toMany.hasPendingDbChanges());
+        toMany.add(new Order());
+        toMany.add(new Order());
+        toMany.add(new Order());
+
+        // Swap 0 and 2 using get and set - this causes 2 to be in the list twice temporarily
+        Order order0 = toMany.get(0);
+        toMany.set(0, toMany.get(2));
+        toMany.set(2, order0);
+
+        // TODO:
+        // assertEquals(3, toMany.getAddCount());
+        // assertEquals(0, toMany.getRemoveCount());
+
+        toMany.applyChangesToDb();
+        // TODO assertEquals(3, orderBox.count());
+    }
+
     @Test(expected = IllegalStateException.class)
     public void testSyncToTargetBox_detached() {
         Customer customer = new Customer();
@@ -409,11 +464,16 @@ public class ToManyTest extends AbstractRelationTest {
         return orderBox.query().equal(Order_.customerId, customerId).build().count();
     }
 
-    private Customer putCustomerWithOrders(int orderCount) {
-        Customer customer = putCustomer();
-        for (int i = 1; i <= orderCount; i++) {
-            putOrder(customer, "order" + i);
-        }
-        return customer;
+    private Customer putCustomerWithOrders(final int orderCount) {
+        return store.callInTxNoException(new Callable<Customer>() {
+            @Override
+            public Customer call() {
+                Customer customer = putCustomer();
+                for (int i = 1; i <= orderCount; i++) {
+                    putOrder(customer, "order" + i);
+                }
+                return customer;
+            }
+        });
     }
 }
