@@ -74,30 +74,8 @@ public final class CustomerCursor extends Cursor<Customer> {
         entity.setId(__assignedId);
         entity.__boxStore = boxStoreForEntities;
 
-        if (entity.orders instanceof ToMany) {
-            ToMany<Order> toMany = (ToMany<Order>) entity.orders;
-            if (toMany.internalCheckApplyToDbRequired()) {
-                Cursor<Order> targetCursor = getRelationTargetCursor(Order.class);
-                try {
-                    toMany.internalApplyToDb(this, targetCursor);
-                } finally {
-                    targetCursor.close();
-                }
-            }
-        }
-
-        List<Order> ordersStandalone = entity.getOrdersStandalone();
-        if (ordersStandalone instanceof ToMany) {
-            ToMany<Order> toMany = (ToMany<Order>) ordersStandalone;
-            if (toMany.internalCheckApplyToDbRequired()) {
-                Cursor<Order> targetCursor = getRelationTargetCursor(Order.class);
-                try {
-                    toMany.internalApplyToDb(this, targetCursor);
-                } finally {
-                    targetCursor.close();
-                }
-            }
-        }
+        checkApplyToManyToDb(entity.orders, Order.class);
+        checkApplyToManyToDb(entity.getOrdersStandalone(), Order.class);
 
         return __assignedId;
     }

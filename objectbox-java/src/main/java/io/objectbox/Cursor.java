@@ -25,6 +25,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.annotation.apihint.Temporary;
+import io.objectbox.relation.ToMany;
 
 @SuppressWarnings({"unchecked", "SameParameterValue", "unused"})
 @Beta
@@ -307,6 +308,20 @@ public abstract class Cursor<T> implements Closeable {
     @Internal
     public void modifyRelationsSingle(int relationId, long key, long targetKey, boolean remove) {
         nativeModifyRelationsSingle(cursor, relationId, key, targetKey, remove);
+    }
+
+    protected <TARGET> void checkApplyToManyToDb(List<TARGET> orders, Class<TARGET> targetClass) {
+        if (orders instanceof ToMany) {
+            ToMany<TARGET> toMany = (ToMany<TARGET>) orders;
+            if (toMany.internalCheckApplyToDbRequired()) {
+                Cursor<TARGET> targetCursor = getRelationTargetCursor(targetClass);
+                try {
+                    toMany.internalApplyToDb(this, targetCursor);
+                } finally {
+                    targetCursor.close();
+                }
+            }
+        }
     }
 
     @Override
