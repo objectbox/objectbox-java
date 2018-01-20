@@ -37,6 +37,7 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbDetachedException;
 import io.objectbox.internal.IdGetter;
 import io.objectbox.internal.ReflectionCache;
+import io.objectbox.internal.ToOneGetter;
 import io.objectbox.query.QueryFilter;
 import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 
@@ -53,6 +54,7 @@ import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
  *
  * @param <TARGET> Object type (entity).
  */
+@SuppressWarnings("unchecked")
 public class ToMany<TARGET> implements List<TARGET>, Serializable {
     private static final long serialVersionUID = 2367317778240689006L;
 
@@ -184,12 +186,12 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         }
     }
 
-    @Override
     /**
      * Adds the given entity to the list and tracks the addition so it can be later applied to the database
      * (e.g. via {@link Box#put(Object)} of the entity owning the ToMany, or via {@link #applyChangesToDb()}).
      * Note that the given entity will remain unchanged at this point (e.g. to-ones are not updated).
      */
+    @Override
     public synchronized boolean add(TARGET object) {
         ensureEntitiesWithTrackingLists();
         entitiesAdded.put(object, Boolean.TRUE);
@@ -197,8 +199,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         return entities.add(object);
     }
 
-    @Override
     /** See {@link #add(Object)} for general comments. */
+    @Override
     public synchronized void add(int location, TARGET object) {
         ensureEntitiesWithTrackingLists();
         entitiesAdded.put(object, Boolean.TRUE);
@@ -206,8 +208,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         entities.add(location, object);
     }
 
-    @Override
     /** See {@link #add(Object)} for general comments. */
+    @Override
     public synchronized boolean addAll(Collection<? extends TARGET> objects) {
         putAllToAdded(objects);
         return entities.addAll(objects);
@@ -221,8 +223,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         }
     }
 
-    @Override
     /** See {@link #add(Object)} for general comments. */
+    @Override
     public synchronized boolean addAll(int index, Collection<? extends TARGET> objects) {
         putAllToAdded(objects);
         return entities.addAll(index, objects);
@@ -327,8 +329,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         return removed;
     }
 
-    @Beta
     /** Removes an object by its entity ID. */
+    @Beta
     public synchronized TARGET removeById(long id) {
         ensureEntities();
         int size = entities.size();
@@ -549,8 +551,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         return true;
     }
 
-    @Beta
     /** Gets an object by its entity ID. */
+    @Beta
     public TARGET getById(long id) {
         ensureEntities();
         Object[] objects = entities.toArray();
@@ -564,8 +566,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         return null;
     }
 
-    @Beta
     /** Gets the index of the object with the given entity ID. */
+    @Beta
     public int indexOfId(long id) {
         ensureEntities();
         Object[] objects = entities.toArray();
@@ -590,10 +592,13 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     public boolean internalCheckApplyToDbRequired() {
         Map<TARGET, Boolean> setAdded = this.entitiesAdded;
         Map<TARGET, Boolean> setRemoved = this.entitiesRemoved;
-        if ((setAdded == null || setAdded.isEmpty()) && (setRemoved == null || setRemoved.isEmpty())) {
+        boolean nonAdded = setAdded == null || setAdded.isEmpty();
+        boolean nonRemoved = setRemoved == null || setRemoved.isEmpty();
+        if (nonAdded && nonRemoved) {
             return false;
         }
-        io.objectbox.internal.ToOneGetter backlinkToOneGetter = relationInfo.backlinkToOneGetter;
+
+        ToOneGetter backlinkToOneGetter = relationInfo.backlinkToOneGetter;
         long entityId = relationInfo.sourceInfo.getIdGetter().getId(entity);
         if (entityId == 0) {
             throw new IllegalStateException("Source entity has no ID (should have been put before)");
@@ -607,38 +612,42 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             }
             if (isStandaloneRelation) {
                 // No prep here, all is done inside a single synchronized block in internalApplyToDb
-                return !setAdded.isEmpty() || !setRemoved.isEmpty();
+                return true;
             } else {
-                for (TARGET target : setAdded.keySet()) {
-                    ToOne<Object> toOne = backlinkToOneGetter.getToOne(target);
-                    if (toOne == null) {
-                        throw new IllegalStateException("The ToOne property for " +
-                                relationInfo.targetInfo.getEntityName() + "." + relationInfo.targetIdProperty.name +
-                                " is null");
-                    }
-                    long toOneTargetId = toOne.getTargetId();
-                    if (toOneTargetId != entityId) {
-                        toOne.setTarget(entity);
-                        entitiesToPut.add(target);
-                    } else if (idGetter.getId(target) == 0) {
-                        entitiesToPut.add(target);
-                    }
-                }
-                setAdded.clear();
-
-                for (TARGET target : setRemoved.keySet()) {
-                    ToOne<Object> toOne = backlinkToOneGetter.getToOne(target);
-                    long toOneTargetId = toOne.getTargetId();
-                    if (toOneTargetId == entityId) {
-                        toOne.setTarget(null);
-                        if (removeFromTargetBox) {
-                            entitiesToRemove.add(target);
-                        } else {
+                if (!nonAdded) {
+                    for (TARGET target : setAdded.keySet()) {
+                        ToOne<Object> toOne = backlinkToOneGetter.getToOne(target);
+                        if (toOne == null) {
+                            throw new IllegalStateException("The ToOne property for " +
+                                    relationInfo.targetInfo.getEntityName() + "." + relationInfo.targetIdProperty.name +
+                                    " is null");
+                        }
+                        long toOneTargetId = toOne.getTargetId();
+                        if (toOneTargetId != entityId) {
+                            toOne.setTarget(entity);
+                            entitiesToPut.add(target);
+                        } else if (idGetter.getId(target) == 0) {
                             entitiesToPut.add(target);
                         }
                     }
+                    setAdded.clear();
                 }
-                setRemoved.clear();
+
+                if (!nonRemoved) {
+                    for (TARGET target : setRemoved.keySet()) {
+                        ToOne<Object> toOne = backlinkToOneGetter.getToOne(target);
+                        long toOneTargetId = toOne.getTargetId();
+                        if (toOneTargetId == entityId) {
+                            toOne.setTarget(null);
+                            if (removeFromTargetBox) {
+                                entitiesToRemove.add(target);
+                            } else {
+                                entitiesToPut.add(target);
+                            }
+                        }
+                    }
+                    setRemoved.clear();
+                }
                 return !entitiesToPut.isEmpty() || !entitiesToRemove.isEmpty();
             }
         }
