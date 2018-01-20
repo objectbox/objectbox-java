@@ -16,6 +16,16 @@
 
 package io.objectbox.exception;
 
+/**
+ * Listener for exceptions occurring during database operations.
+ * Set via {@link io.objectbox.BoxStore#setDbExceptionListener(DbExceptionListener)}.
+ */
 public interface DbExceptionListener {
+    /**
+     * Called when an exception is thrown during a database operation.
+     * Do NOT throw exceptions in this method: behavior is undefined, e.g. all thrown exceptions may be ignored.
+     *
+     * @param e the exception occurred during a database operation
+     */
     void onDbException(Exception e);
 }
