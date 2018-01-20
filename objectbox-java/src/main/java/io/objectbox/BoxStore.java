@@ -719,6 +719,18 @@ public class BoxStore implements Closeable {
     }
 
     /**
+     * Like {@link #callInTx(Callable)}, but throws no Exception.
+     * Any Exception thrown in the Callable is wrapped in a RuntimeException.
+     */
+    public <R> R callInTxNoException(Callable<R> callable) {
+        try {
+            return callInTx(callable);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Runs the given Runnable as a transaction in a separate thread.
      * Once the transaction completes the given callback is called (callback may be null).
      * <p>
