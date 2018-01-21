@@ -268,6 +268,18 @@ public class ToManyTest extends AbstractRelationTest {
     }
 
     @Test
+    public void testAddRemove() {
+        Customer customer = putCustomer();
+        ToMany<Order> toMany = (ToMany<Order>) customer.orders;
+        Order order = new Order();
+        toMany.add(order);
+        toMany.remove(order);
+
+        toMany.applyChangesToDb();
+        assertEquals(0, orderBox.count());
+    }
+
+    @Test
     public void testAddAddRemove() {
         Customer customer = putCustomer();
         ToMany<Order> toMany = (ToMany<Order>) customer.orders;

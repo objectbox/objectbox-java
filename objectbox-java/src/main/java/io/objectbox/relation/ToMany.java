@@ -81,7 +81,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     private Map<TARGET, Boolean> entitiesRemoved;
 
     List<TARGET> entitiesToPut;
-    List<TARGET> entitiesToRemove;
+    List<TARGET> entitiesToRemoveFromDb;
 
     transient private BoxStore boxStore;
     transient private Box entityBox;
@@ -241,6 +241,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             if (count == 1) {
                 entityCounts.remove(object);
                 entitiesAdded.remove(object);
+
                 entitiesRemoved.put(object, TRUE);
             } else if (count > 1) {
                 entityCounts.put(object, count - 1);
@@ -288,7 +289,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         }
 
         Map entityCountsToClear = this.entityCounts;
-        if(entityCountsToClear != null) {
+        if (entityCountsToClear != null) {
             entityCountsToClear.clear();
         }
     }
@@ -472,7 +473,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         entities = null;
         entitiesAdded = null;
         entitiesRemoved = null;
-        entitiesToRemove = null;
+        entitiesToRemoveFromDb = null;
         entitiesToPut = null;
         entityCounts = null;
     }
@@ -652,7 +653,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         synchronized (this) {
             if (entitiesToPut == null) {
                 entitiesToPut = new ArrayList<>();
-                entitiesToRemove = new ArrayList<>();
+                entitiesToRemoveFromDb = new ArrayList<>();
             }
         }
 
@@ -701,17 +702,19 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                     ToOne<Object> toOne = backlinkToOneGetter.getToOne(target);
                     long toOneTargetId = toOne.getTargetId();
                     if (toOneTargetId == entityId) {
-                        toOne.setTarget(null);
-                        if (removeFromTargetBox) {
-                            entitiesToRemove.add(target);
-                        } else {
-                            entitiesToPut.add(target);
+                        toOne.setTarget(null); // This is also done for non-persisted entities (if used elsewhere)
+                        if (idGetter.getId(target) != 0) { // No further action for non-persisted entities required
+                            if (removeFromTargetBox) {
+                                entitiesToRemoveFromDb.add(target);
+                            } else {
+                                entitiesToPut.add(target);
+                            }
                         }
                     }
                 }
                 setRemoved.clear();
             }
-            return !entitiesToPut.isEmpty() || !entitiesToRemove.isEmpty();
+            return !entitiesToPut.isEmpty() || !entitiesToRemoveFromDb.isEmpty();
         }
     }
 
@@ -721,7 +724,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
      */
     @Internal
     public void internalApplyToDb(Cursor sourceCursor, Cursor<TARGET> targetCursor) {
-        TARGET[] toRemove;
+        TARGET[] toRemoveFromDb;
         TARGET[] toPut;
         TARGET[] addedStandalone = null;
         TARGET[] removedStandalone = null;
@@ -736,7 +739,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                     }
                 }
                 if (removeFromTargetBox) {
-                    entitiesToRemove.addAll(entitiesRemoved.keySet());
+                    entitiesToRemoveFromDb.addAll(entitiesRemoved.keySet());
                 }
                 if (!entitiesAdded.isEmpty()) {
                     addedStandalone = (TARGET[]) entitiesAdded.keySet().toArray();
@@ -748,16 +751,18 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 }
             }
 
-            toRemove = entitiesToRemove.isEmpty() ? null : (TARGET[]) entitiesToRemove.toArray();
-            entitiesToRemove.clear();
+            toRemoveFromDb = entitiesToRemoveFromDb.isEmpty() ? null : (TARGET[]) entitiesToRemoveFromDb.toArray();
+            entitiesToRemoveFromDb.clear();
             toPut = entitiesToPut.isEmpty() ? null : (TARGET[]) entitiesToPut.toArray();
             entitiesToPut.clear();
         }
 
-        if (toRemove != null) {
-            for (TARGET target : toRemove) {
+        if (toRemoveFromDb != null) {
+            for (TARGET target : toRemoveFromDb) {
                 long id = targetIdGetter.getId(target);
-                targetCursor.deleteEntity(id);
+                if (id != 0) {
+                    targetCursor.deleteEntity(id);
+                }
             }
         }
         if (toPut != null) {
