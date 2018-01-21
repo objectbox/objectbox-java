@@ -21,10 +21,8 @@ import java.util.List;
 
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.Entity;
-import io.objectbox.annotation.Generated;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Index;
-import io.objectbox.annotation.Relation;
 import io.objectbox.annotation.apihint.Internal;
 
 /**
@@ -39,21 +37,17 @@ public class Customer implements Serializable {
     @Index
     private String name;
 
-    @Relation(idProperty = "customerId")
     List<Order> orders = new ToMany<>(this, Customer_.orders);
 
     ToMany<Order> ordersStandalone = new ToMany<>(this, Customer_.ordersStandalone);
 
     /** Used to resolve relations */
     @Internal
-    @Generated(1307364262)
     transient BoxStore __boxStore;
 
-    @Generated(60841032)
     public Customer() {
     }
 
-    @Generated(1039711609)
     public Customer(long id, String name) {
         this.id = id;
         this.name = name;

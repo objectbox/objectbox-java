@@ -18,14 +18,13 @@ package io.objectbox.relation;
 
 import java.io.Serializable;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.Entity;
-import io.objectbox.annotation.Generated;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.NameInDb;
-import io.objectbox.annotation.Relation;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.exception.DbDetachedException;
 
 /**
  * Entity mapped to table "ORDERS".
@@ -40,19 +39,15 @@ public class Order implements Serializable {
     long customerId;
     String text;
 
-    @Relation
     private Customer customer;
 
     /** @Depreacted Used to resolve relations */
     @Internal
-    @Generated(975972993)
     transient BoxStore __boxStore;
 
     @Internal
-    @Generated(1031210392)
     transient ToOne<Customer> customer__toOne = new ToOne<>(this, Order_.customer);
 
-    @Generated(1105174599)
     public Order() {
     }
 
@@ -60,7 +55,6 @@ public class Order implements Serializable {
         this.id = id;
     }
 
-    @Generated(10986505)
     public Order(long id, java.util.Date date, long customerId, String text) {
         this.id = id;
         this.date = date;
@@ -105,15 +99,13 @@ public class Order implements Serializable {
     }
 
     /** To-one relationship, resolved on first access. */
-    @Generated(910495430)
     public Customer getCustomer() {
         customer = customer__toOne.getTarget(this.customerId);
         return customer;
     }
 
     /** Set the to-one relation including its ID property. */
-    @Generated(1322376583)
-    public void setCustomer(Customer customer) {
+    public void setCustomer(@Nullable Customer customer) {
         customer__toOne.setTarget(customer);
         this.customer = customer;
     }
