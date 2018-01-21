@@ -220,6 +220,17 @@ public class ToManyStandaloneTest extends AbstractRelationTest {
     }
 
     @Test
+    public void testAddRemove_notPersisted() {
+        Customer customer = putCustomer();
+        ToMany<Order> toMany = customer.ordersStandalone;
+        Order order = new Order();
+        toMany.add(order);
+        toMany.remove(order);
+        customerBox.put(customer);
+        assertEquals(0, orderBox.count());
+    }
+
+    @Test
     public void testRemoveAll() {
         int count = 5;
         Customer customer = putCustomerWithOrders(count);

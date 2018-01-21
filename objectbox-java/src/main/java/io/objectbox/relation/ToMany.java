@@ -727,7 +727,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         TARGET[] toRemoveFromDb;
         TARGET[] toPut;
         TARGET[] addedStandalone = null;
-        TARGET[] removedStandalone = null;
+        List<TARGET> removedStandalone = null;
 
         boolean isStandaloneRelation = relationInfo.relationId != 0;
         IdGetter<TARGET> targetIdGetter = relationInfo.targetInfo.getIdGetter();
@@ -746,7 +746,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                     entitiesAdded.clear();
                 }
                 if (!entitiesRemoved.isEmpty()) {
-                    removedStandalone = (TARGET[]) entitiesRemoved.keySet().toArray();
+                    removedStandalone = new ArrayList<>(entitiesRemoved.keySet());
                     entitiesRemoved.clear();
                 }
             }
@@ -777,26 +777,51 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 throw new IllegalStateException("Source entity has no ID (should have been put before)");
             }
 
-            checkModifyStandaloneRelation(sourceCursor, entityId, removedStandalone, targetIdGetter, true);
-            checkModifyStandaloneRelation(sourceCursor, entityId, addedStandalone, targetIdGetter, false);
+            if (removedStandalone != null) {
+                removeStandaloneRelations(sourceCursor, entityId, removedStandalone, targetIdGetter);
+            }
+            if (addedStandalone != null) {
+                addStandaloneRelations(sourceCursor, entityId, addedStandalone, targetIdGetter, false);
+            }
         }
     }
 
-    private void checkModifyStandaloneRelation(Cursor cursor, long sourceEntityId, @Nullable TARGET[] targets,
-                                               IdGetter<TARGET> targetIdGetter, boolean remove) {
-        if (targets != null) {
-            int length = targets.length;
-            long[] targetIds = new long[length];
-            for (int i = 0; i < length; i++) {
-                long targetId = targetIdGetter.getId(targets[i]);
-                if (targetId == 0) {
-                    // Paranoia
-                    throw new IllegalStateException("Target entity has no ID (should have been put before)");
-                }
-                targetIds[i] = targetId;
+    /**
+     * The list of removed entities may contain non-persisted entities, which will be ignored (removed from the list).
+     */
+    private void removeStandaloneRelations(Cursor cursor, long sourceEntityId, List<TARGET> removed,
+                                           IdGetter<TARGET> targetIdGetter) {
+        Iterator<TARGET> iterator = removed.iterator();
+        while (iterator.hasNext()) {
+            if (targetIdGetter.getId(iterator.next()) == 0) {
+                iterator.remove();
             }
-            cursor.modifyRelations(relationInfo.relationId, sourceEntityId, targetIds, remove);
         }
+
+        int size = removed.size();
+        if (size > 0) {
+            long[] targetIds = new long[size];
+            for (int i = 0; i < size; i++) {
+                targetIds[i] = targetIdGetter.getId(removed.get(i));
+            }
+            cursor.modifyRelations(relationInfo.relationId, sourceEntityId, targetIds, true);
+        }
+    }
+
+    /** The target array may not contain non-persisted entities. */
+    private void addStandaloneRelations(Cursor cursor, long sourceEntityId, @Nullable TARGET[] added,
+                                        IdGetter<TARGET> targetIdGetter, boolean remove) {
+        int length = added.length;
+        long[] targetIds = new long[length];
+        for (int i = 0; i < length; i++) {
+            long targetId = targetIdGetter.getId(added[i]);
+            if (targetId == 0) {
+                // Paranoia
+                throw new IllegalStateException("Target entity has no ID (should have been put before)");
+            }
+            targetIds[i] = targetId;
+        }
+        cursor.modifyRelations(relationInfo.relationId, sourceEntityId, targetIds, remove);
     }
 
     /** For tests */
