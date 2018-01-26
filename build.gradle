@@ -127,6 +127,6 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
 
 task wrapper(type: Wrapper) {
     group 'build setup'
-    gradleVersion = '4.5'
+    gradleVersion = '4.4.1'
     distributionType = Wrapper.DistributionType.ALL
 }
