@@ -28,6 +28,10 @@ public class InternalAccess {
         return reader.internalHandle();
     }
 
+    public static long getHandle(Transaction tx) {
+        return tx.internalHandle();
+    }
+
     public static <T> void releaseReader(Box<T> box, Cursor<T> reader) {
         box.releaseReader(reader);
     }
