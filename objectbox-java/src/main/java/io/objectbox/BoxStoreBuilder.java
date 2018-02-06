@@ -81,6 +81,15 @@ public class BoxStoreBuilder {
 
     final List<EntityInfo> entityInfoList = new ArrayList<>();
 
+    /** Not for application use. */
+    public static BoxStoreBuilder createDebugWithoutModel() {
+        return new BoxStoreBuilder();
+    }
+
+    private BoxStoreBuilder() {
+        model = null;
+    }
+
     @Internal
     /** Called internally from the generated class "MyObjectBox". Check MyObjectBox.builder() to get an instance. */
     public BoxStoreBuilder(byte[] model) {

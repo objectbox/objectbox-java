@@ -33,6 +33,21 @@ public class DebugCursorTest extends AbstractObjectBoxTest {
         TestEntity entity1 = putTestEntity("foo", 23);
         TestEntity entity2 = putTestEntity("bar", 42);
 
+        runTest(entity1, entity2);
+    }
+
+    @Test
+    public void testDebugCursor_seekOrNext_get_withoutModel() {
+        TestEntity entity1 = putTestEntity("foo", 23);
+        TestEntity entity2 = putTestEntity("bar", 42);
+
+        store.close();
+        store = BoxStoreBuilder.createDebugWithoutModel().directory(boxStoreDir).build();
+
+        runTest(entity1, entity2);
+    }
+
+    private void runTest(TestEntity entity1, TestEntity entity2) {
         Transaction transaction = store.beginReadTx();
         DebugCursor debugCursor = DebugCursor.create(transaction);
 
