@@ -39,14 +39,12 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
-import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.DbSchemaException;
-import io.objectbox.internal.CrashReportLogger;
 import io.objectbox.internal.NativeLibraryLoader;
 import io.objectbox.internal.ObjectBoxThreadPool;
 import io.objectbox.reactive.DataObserver;
@@ -57,14 +55,14 @@ import io.objectbox.reactive.SubscriptionBuilder;
  * Represents an ObjectBox database and gives you {@link Box}es to get and put Objects of a specific type
  * (see {@link #boxFor(Class)}).
  */
-@Beta
+@SuppressWarnings({"unused", "UnusedReturnValue", "SameParameterValue", "WeakerAccess"})
 @ThreadSafe
 public class BoxStore implements Closeable {
 
-    private static final String VERSION = "1.4.2-2018-01-26";
+    private static final String VERSION = "1.4.2-2018-02-12";
     private static BoxStore defaultStore;
 
-    private static Set<String> openFiles = new HashSet<>();
+    private static final Set<String> openFiles = new HashSet<>();
 
     /**
      * Convenience singleton instance which gets set up using {@link BoxStoreBuilder#buildDefault()}.
@@ -106,8 +104,6 @@ public class BoxStore implements Closeable {
      */
     public static native void testUnalignedMemoryAccess();
 
-    public static native void setCrashReportLogger(CrashReportLogger crashReportLogger);
-
     static native long nativeCreate(String directory, long maxDbSizeInKByte, int maxReaders, byte[] model);
 
     static native void nativeDelete(long store);
@@ -117,9 +113,6 @@ public class BoxStore implements Closeable {
     static native long nativeBeginTx(long store);
 
     static native long nativeBeginReadTx(long store);
-
-    static native long nativeCreateIndex(long store, String name, int entityId, int propertyId);
-
 
     /** @return entity ID */
     // TODO only use ids once we have them in Java
@@ -137,7 +130,7 @@ public class BoxStore implements Closeable {
 
     static native void nativeSetDebugFlags(long store, int debugFlags);
 
-    static native String nativeStartObjectBrowser(long store, String urlPath, int port);
+    static native String nativeStartObjectBrowser(long store, @Nullable String urlPath, int port);
 
     public static native boolean isObjectBrowserAvailable();
 
@@ -407,7 +400,7 @@ public class BoxStore implements Closeable {
                 int count = Thread.enumerate(threads);
                 for (int i = 0; i < count; i++) {
                     System.err.println("Thread: " + threads[i].getName());
-                    threads[i].dumpStack();
+                    Thread.dumpStack();
                 }
             }
         } catch (InterruptedException e) {
@@ -509,7 +502,7 @@ public class BoxStore implements Closeable {
         nativeDropAllData(handle);
     }
 
-    void txCommitted(Transaction tx, int[] entityTypeIdsAffected) {
+    void txCommitted(Transaction tx, @Nullable int[] entityTypeIdsAffected) {
         // Only one write TX at a time, but there is a chance two writers race after commit: thus synchronize
         synchronized (txCommitCountLock) {
             commitCount++; // Overflow is OK because we check for equality
@@ -531,6 +524,7 @@ public class BoxStore implements Closeable {
     /**
      * Returns a Box for the given type. Objects are put into (and get from) their individual Box.
      */
+    @SuppressWarnings("unchecked")
     public <T> Box<T> boxFor(Class<T> entityClass) {
         Box box = boxes.get(entityClass);
         if (box == null) {
@@ -640,6 +634,7 @@ public class BoxStore implements Closeable {
                     cleanStaleReadTransactions();
                 }
                 if (failedReadTxAttemptCallback != null) {
+                    //noinspection unchecked
                     failedReadTxAttemptCallback.txFinished(null, new DbException(message + " \n" + diagnose, e));
                 }
                 try {
@@ -737,7 +732,7 @@ public class BoxStore implements Closeable {
      * <p>
      * See also {@link #runInTx(Runnable)}.
      */
-    public void runInTxAsync(final Runnable runnable, final TxCallback<Void> callback) {
+    public void runInTxAsync(final Runnable runnable, @Nullable final TxCallback<Void> callback) {
         threadPool.submit(new Runnable() {
             @Override
             public void run() {
@@ -761,7 +756,7 @@ public class BoxStore implements Closeable {
      * <p>
      * * See also {@link #callInTx(Callable)}.
      */
-    public <R> void callInTxAsync(final Callable<R> callable, final TxCallback<R> callback) {
+    public <R> void callInTxAsync(final Callable<R> callable, @Nullable final TxCallback<R> callback) {
         threadPool.submit(new Runnable() {
             @Override
             public void run() {
@@ -879,6 +874,7 @@ public class BoxStore implements Closeable {
      * Like {@link #subscribe()}, but wires the supplied @{@link io.objectbox.reactive.DataObserver} only to the given
      * object class for notifications.
      */
+    @SuppressWarnings("unchecked")
     public <T> SubscriptionBuilder<Class<T>> subscribe(Class<T> forClass) {
         return new SubscriptionBuilder<>((DataPublisher) objectClassPublisher, forClass, threadPool);
     }

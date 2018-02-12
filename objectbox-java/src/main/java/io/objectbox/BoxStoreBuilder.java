@@ -178,7 +178,7 @@ public class BoxStoreBuilder {
         return this;
     }
 
-    static File getAndroidDbDir(Object context, String dbName) {
+    static File getAndroidDbDir(Object context, @Nullable String dbName) {
         File baseDir = getAndroidBaseDir(context);
         return new File(baseDir, dbName(dbName));
     }
