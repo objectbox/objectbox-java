@@ -375,7 +375,9 @@ public class BoxStore implements Closeable {
                 for (Transaction t : transactionsToClose) {
                     t.close();
                 }
-                nativeDelete(handle);
+                if (handle != 0) { // failed before native handle was created?
+                    nativeDelete(handle);
+                }
 
                 // When running the full unit test suite, we had 100+ threads before, hope this helps:
                 threadPool.shutdown();
