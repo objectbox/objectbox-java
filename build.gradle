@@ -5,8 +5,10 @@ buildscript {
     ext.ob_expected_version = project.hasProperty('expectedVersion') ? project.property('expectedVersion') : 'UNDEFINED'
     ext {
         isLinux = System.getProperty("os.name").contains("Linux")
+        isMac = !isLinux && System.getProperty("os.name").toLowerCase().contains("mac")
         is64 = System.getProperty("sun.arch.data.model") == "64"
         isLinux64 = isLinux && is64
+        isMac64 = isMac && is64
     }
 
     repositories {
@@ -156,6 +158,6 @@ task verifyVersion {
 
 task wrapper(type: Wrapper) {
     group 'build setup'
-    gradleVersion = '4.4.1'
+    gradleVersion = '4.5.1'
     distributionType = Wrapper.DistributionType.ALL
 }

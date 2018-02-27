@@ -21,6 +21,7 @@ local.properties
 # Native libs
 objectbox*.dll
 libobjectbox*.so
+libobjectbox*.dylib
 
 ### Test DB files
 data.mdb

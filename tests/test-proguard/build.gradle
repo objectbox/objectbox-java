@@ -11,6 +11,8 @@ dependencies {
 
     if(isLinux64) {
         compile "io.objectbox:objectbox-linux:${rootProject.version}"
+    } else if(isMac64) {
+        compile "io.objectbox:objectbox-macos:${rootProject.version}"
     }
 
     testCompile 'junit:junit:4.12'
