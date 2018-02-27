@@ -38,15 +38,20 @@ public class NativeLibraryLoader {
         // For Android, os.name is also "Linux", so we need an extra check
         boolean android = System.getProperty("java.vendor").contains("Android");
         if (!android) {
-            String osName = System.getProperty("os.name");
+            String osName = System.getProperty("os.name").toLowerCase();
             String sunArch = System.getProperty("sun.arch.data.model");
-            if (osName.contains("Windows")) {
-                libname += "-windows" + ("32".equals(sunArch) ? "-x86" : "-x64");
+            String cpuArchPostfix = "32".equals(sunArch) ? "-x86" : "-x64";
+            if (osName.contains("windows")) {
+                libname += "-windows" + cpuArchPostfix;
                 filename = libname + ".dll";
                 checkUnpackLib(filename);
-            } else if (osName.contains("Linux")) {
-                libname += "-linux" + ("32".equals(sunArch) ? "-x86" : "-x64");
+            } else if (osName.contains("linux")) {
+                libname += "-linux" + cpuArchPostfix;
                 filename = "lib" + libname + ".so";
+                checkUnpackLib(filename);
+            } else if (osName.contains("mac")) {
+                libname += "-macos" + cpuArchPostfix;
+                filename = "lib" + libname + ".dylib";
                 checkUnpackLib(filename);
             }
         }
