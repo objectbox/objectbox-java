@@ -44,6 +44,17 @@ pipeline {
             }
         }
 
+        stage('upload-to-bintray') {
+            when { expression { return BRANCH_NAME == 'publish' } }
+            environment {
+                BINTRAY_URL = credentials('bintray_url')
+                BINTRAY_LOGIN = credentials('bintray_login')
+            }
+            steps {
+                sh './gradlew --stacktrace -PpreferedRepo=${BINTRAY_URL} -PpreferedUsername=${BINTRAY_LOGIN_UST} -PpreferedPassword=${BINTRAY_LOGIN_PSW} uploadArchives'
+            }
+        }
+
     }
 
     // For global vars see /jenkins/pipeline-syntax/globals
