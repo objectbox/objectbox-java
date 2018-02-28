@@ -51,7 +51,8 @@ pipeline {
                 BINTRAY_LOGIN = credentials('bintray_login')
             }
             steps {
-                sh './gradlew --stacktrace -PpreferedRepo=${BINTRAY_URL} -PpreferedUsername=${BINTRAY_LOGIN_UST} -PpreferedPassword=${BINTRAY_LOGIN_PSW} uploadArchives'
+                sh 'echo "Uploading to ${BINTRAY_URL} using user ${BINTRAY_LOGIN_USR}..."'
+                sh './gradlew --stacktrace -PpreferedRepo=${BINTRAY_URL} -PpreferedUsername=${BINTRAY_LOGIN_USR} -PpreferedPassword=${BINTRAY_LOGIN_PSW} uploadArchives'
             }
         }
 
