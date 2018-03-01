@@ -1,7 +1,7 @@
 <img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png">
 
 # ObjectBox Java (Kotlin, Android)
-ObjectBox is a superfast object-oriented database with strong relation support.
+ObjectBox is a superfast object-oriented database with strong relation support. ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
 **Latest version: [1.4.3 (2018/03/01)](http://objectbox.io/changelog)**
 
@@ -36,14 +36,19 @@ apply plugin: 'io.objectbox' // after applying Android plugin
 
 First steps
 -----------
+Create data object class `@Entity`, for example "Playlist".
+```java
+@Entity public class Playlist { ... }
+```
+Now build the project to let ObjectBox generate the class `MyObjectBox` for you.
+
 Prepare the BoxStore object once for your app, e.g. in `onCreate` in your Application class:
 
 ```java
 boxStore = MyObjectBox.builder().androidContext(this).build();
 ```
 
-Create data object class `@Entity`, for example "Playlist".
-Then get a `Box` class for this entity class:
+Then get a `Box` class for the Playlist entity class:
 
 ```java
 Box<Playlist> box = boxStore.boxFor(Playlist.class);
@@ -71,7 +76,7 @@ Thanks!
 
 License
 -------
-    Copyright 2017 ObjectBox Ltd. All rights reserved.
+    Copyright 2017-2018 ObjectBox Ltd. All rights reserved.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
