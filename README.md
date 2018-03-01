@@ -24,7 +24,6 @@ buildscript {
     dependencies {
         classpath "io.objectbox:objectbox-gradle-plugin:$objectboxVersion"
     }
-    
 }
 ```
 
