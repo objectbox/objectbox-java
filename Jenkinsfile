@@ -13,7 +13,7 @@ pipeline {
     triggers {
         upstream(upstreamProjects: "ObjectStore-Linux/${env.BRANCH_NAME.replaceAll("/", "%2F")}",
                 threshold: hudson.model.Result.SUCCESS)
-        cron (cronSchedule)
+        cron(cronSchedule)
     }
 
     stages {
@@ -51,7 +51,15 @@ pipeline {
                 BINTRAY_LOGIN = credentials('bintray_login')
             }
             steps {
+                script {
+                    slackSend color: "#42ebf4",
+                            message: "Publishing ${currentBuild.fullDisplayName} to ${BINTRAY_URL}\n${env.BUILD_URL}"
+                }
                 sh './gradlew --stacktrace -PpreferedRepo=${BINTRAY_URL} -PpreferedUsername=${BINTRAY_LOGIN_USR} -PpreferedPassword=${BINTRAY_LOGIN_PSW} uploadArchives'
+                script {
+                    slackSend color: "##41f4cd",
+                            message: "Published ${currentBuild.fullDisplayName} successfully to Bintray - check https://bintray.com/objectbox/objectbox\n${env.BUILD_URL}"
+                }
             }
         }
 
