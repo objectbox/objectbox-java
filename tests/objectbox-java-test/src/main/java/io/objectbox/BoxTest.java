@@ -137,6 +137,14 @@ public class BoxTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testPanicModeRemoveAllObjects() {
+        assertEquals(0, box.panicModeRemoveAll());
+        putTestEntities(7);
+        assertEquals(7, box.panicModeRemoveAll());
+        assertEquals(0, box.count());
+    }
+
+    @Test
     public void testRunInTx() {
         final long[] counts = {0, 0};
         store.runInTx(new Runnable() {

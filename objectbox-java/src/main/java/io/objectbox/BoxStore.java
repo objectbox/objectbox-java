@@ -135,8 +135,11 @@ public class BoxStore implements Closeable {
     public static native boolean isObjectBrowserAvailable();
 
     public static String getVersion() {
+
         return VERSION;
     }
+
+    native long nativePanicModeRemoveAllObjects(long store, int entityId);
 
     private final File directory;
     private final String canonicalPath;
@@ -908,6 +911,10 @@ public class BoxStore implements Closeable {
 
     void setDebugFlags(int debugFlags) {
         nativeSetDebugFlags(handle, debugFlags);
+    }
+
+    long panicModeRemoveAllObjects(int entityId) {
+        return nativePanicModeRemoveAllObjects(handle, entityId);
     }
 
 }
