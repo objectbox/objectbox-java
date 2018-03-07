@@ -34,6 +34,7 @@ public final class ModelProperty extends Table {
   public IdUid id(IdUid obj) { int o = __offset(4); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
   public String name() { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
+  public ByteBuffer nameInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 6, 1); }
   public int type() { int o = __offset(8); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
   /**
    * bit flags: e.g. indexed, not-nullable
@@ -46,13 +47,21 @@ public final class ModelProperty extends Table {
    */
   public String targetEntity() { int o = __offset(14); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer targetEntityAsByteBuffer() { return __vector_as_bytebuffer(14, 1); }
+  public ByteBuffer targetEntityInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 14, 1); }
   /**
    * E.g. for virtual to-one target ID properties, this references the ToOne object
    */
   public String virtualTarget() { int o = __offset(16); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer virtualTargetAsByteBuffer() { return __vector_as_bytebuffer(16, 1); }
+  public ByteBuffer virtualTargetInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 16, 1); }
+  /**
+   * Secondary name ignored by core; e.g. may reference a binding specific name (e.g. Java property)
+   */
+  public String nameSecondary() { int o = __offset(18); return o != 0 ? __string(o + bb_pos) : null; }
+  public ByteBuffer nameSecondaryAsByteBuffer() { return __vector_as_bytebuffer(18, 1); }
+  public ByteBuffer nameSecondaryInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 18, 1); }
 
-  public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(7); }
+  public static void startModelProperty(FlatBufferBuilder builder) { builder.startObject(8); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addStruct(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(2, (short)type, (short)0); }
@@ -60,6 +69,7 @@ public final class ModelProperty extends Table {
   public static void addIndexId(FlatBufferBuilder builder, int indexIdOffset) { builder.addStruct(4, indexIdOffset, 0); }
   public static void addTargetEntity(FlatBufferBuilder builder, int targetEntityOffset) { builder.addOffset(5, targetEntityOffset, 0); }
   public static void addVirtualTarget(FlatBufferBuilder builder, int virtualTargetOffset) { builder.addOffset(6, virtualTargetOffset, 0); }
+  public static void addNameSecondary(FlatBufferBuilder builder, int nameSecondaryOffset) { builder.addOffset(7, nameSecondaryOffset, 0); }
   public static int endModelProperty(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
