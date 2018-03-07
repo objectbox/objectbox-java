@@ -48,9 +48,12 @@ public class ModelBuilder {
     Long lastRelationUid;
 
     public class PropertyBuilder {
+        /** Deferred, so we can still add strings after constructor. */
+        private final int type;
         boolean finished;
 
         PropertyBuilder(String name, String targetEntityName, String virtualTarget, int type) {
+            this.type = type;
             int propertyNameOffset = fbb.createString(name);
             int targetEntityOffset = targetEntityName != null ? fbb.createString(targetEntityName) : 0;
             int virtualTargetOffset = virtualTarget != null ? fbb.createString(virtualTarget) : 0;
@@ -62,7 +65,6 @@ public class ModelBuilder {
             if (virtualTargetOffset != 0) {
                 ModelProperty.addVirtualTarget(fbb, virtualTargetOffset);
             }
-            ModelProperty.addType(fbb, type);
         }
 
         public PropertyBuilder id(int id, long uid) {
@@ -85,6 +87,15 @@ public class ModelBuilder {
             return this;
         }
 
+        public PropertyBuilder secondaryName(String secondaryName) {
+            checkNotFinished();
+            if (secondaryName != null) {
+                int offset = fbb.createString(secondaryName);
+                ModelProperty.addNameSecondary(fbb, offset);
+            }
+            return this;
+        }
+
         private void checkNotFinished() {
             if (finished) {
                 throw new IllegalStateException("Already finished");
@@ -94,6 +105,7 @@ public class ModelBuilder {
         public int finish() {
             checkNotFinished();
             finished = true;
+            ModelProperty.addType(fbb, type);
             return ModelProperty.endModelProperty(fbb);
         }
     }
