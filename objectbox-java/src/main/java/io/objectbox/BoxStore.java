@@ -176,18 +176,7 @@ public class BoxStore implements Closeable {
         NativeLibraryLoader.ensureLoaded();
 
         directory = builder.directory;
-        if (directory.exists()) {
-            if (!directory.isDirectory()) {
-                throw new DbException("Is not a directory: " + directory.getAbsolutePath());
-            }
-        } else if (!directory.mkdirs()) {
-            throw new DbException("Could not create directory: " + directory.getAbsolutePath());
-        }
-        try {
-            canonicalPath = directory.getCanonicalPath();
-        } catch (IOException e) {
-            throw new DbException("Could not verify dir", e);
-        }
+        canonicalPath = getCanonicalPath(directory);
         verifyNotAlreadyOpen(canonicalPath);
 
         handle = nativeCreate(canonicalPath, builder.maxSizeInKByte, builder.maxReaders, builder.model);
@@ -232,6 +221,21 @@ public class BoxStore implements Closeable {
 
         failedReadTxAttemptCallback = builder.failedReadTxAttemptCallback;
         queryAttempts = builder.queryAttempts < 1 ? 1 : builder.queryAttempts;
+    }
+
+    static String getCanonicalPath(File directory) {
+        if (directory.exists()) {
+            if (!directory.isDirectory()) {
+                throw new DbException("Is not a directory: " + directory.getAbsolutePath());
+            }
+        } else if (!directory.mkdirs()) {
+            throw new DbException("Could not create directory: " + directory.getAbsolutePath());
+        }
+        try {
+            return directory.getCanonicalPath();
+        } catch (IOException e) {
+            throw new DbException("Could not verify dir", e);
+        }
     }
 
     private static void verifyNotAlreadyOpen(String canonicalPath) {
