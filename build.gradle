@@ -1,5 +1,5 @@
 // Just too many sub projects, so each can reference rootProject.version
-version = '1.4.4-SNAPSHOT'
+version = '1.4.4'
 
 buildscript {
     ext.ob_expected_version = project.hasProperty('expectedVersion') ? project.property('expectedVersion') : 'UNDEFINED'
