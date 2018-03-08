@@ -16,9 +16,13 @@
 
 package io.objectbox;
 
+import org.greenrobot.essentials.io.IoUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,31 +31,29 @@ import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.io.Serializable;
 
-import org.greenrobot.essentials.io.FileUtils;
-import org.greenrobot.essentials.io.IoUtils;
-
 public class TestUtils {
 
     public static String loadFile(String filename) {
-        String json;
-        InputStream in = TestUtils.class.getResourceAsStream("/" + filename);
         try {
-            if (in != null) {
-                Reader reader = new InputStreamReader(in, "UTF-8");
-                json = IoUtils.readAllCharsAndClose(reader);
-
-            } else {
-                String pathname = "src/main/resources/" + filename;
-                File file = new File(pathname);
-                if (!file.exists()) {
-                    file = new File("lib-test-java/" + pathname);
-                }
-                json = FileUtils.readUtf8(file);
-            }
+            InputStream in = openInputStream("/" + filename);
+            Reader reader = new InputStreamReader(in, "UTF-8");
+            return IoUtils.readAllCharsAndClose(reader);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return json;
+    }
+
+    public static InputStream openInputStream(String filename) throws FileNotFoundException {
+        InputStream in = TestUtils.class.getResourceAsStream("/" + filename);
+        if (in == null) {
+            String pathname = "src/main/resources/" + filename;
+            File file = new File(pathname);
+            if (!file.exists()) {
+                file = new File("lib-test-java/" + pathname);
+            }
+            in = new FileInputStream(file);
+        }
+        return in;
     }
 
     public static <T extends Serializable> T serializeDeserialize(T entity) throws IOException, ClassNotFoundException {
