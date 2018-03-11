@@ -59,7 +59,7 @@ import io.objectbox.reactive.SubscriptionBuilder;
 @ThreadSafe
 public class BoxStore implements Closeable {
 
-    private static final String VERSION = "1.4.4-2018-03-08";
+    private static final String VERSION = "1.4.5-2018-03-11";
     private static BoxStore defaultStore;
 
     private static final Set<String> openFiles = new HashSet<>();
@@ -97,7 +97,12 @@ public class BoxStore implements Closeable {
         return existedBefore;
     }
 
-    public static native String getVersionNative();
+    static native String nativeGetVersion();
+
+    public static String getVersionNative() {
+        NativeLibraryLoader.ensureLoaded();
+        return nativeGetVersion();
+    }
 
     /**
      * Diagnostics: If this method crashes on a device, please send us the logcat output.
@@ -132,7 +137,12 @@ public class BoxStore implements Closeable {
 
     static native String nativeStartObjectBrowser(long store, @Nullable String urlPath, int port);
 
-    public static native boolean isObjectBrowserAvailable();
+    static native boolean nativeIsObjectBrowserAvailable();
+
+    public static boolean isObjectBrowserAvailable() {
+        NativeLibraryLoader.ensureLoaded();
+        return nativeIsObjectBrowserAvailable();
+    }
 
     public static String getVersion() {
         return VERSION;
