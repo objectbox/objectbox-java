@@ -317,6 +317,9 @@ public class BoxStoreBuilder {
         return this;
     }
 
+    /**
+     * Let's you specify an DB file to be used during initial start of the app (no DB file exists yet).
+     */
     @Experimental
     public BoxStoreBuilder initialDbFile(final File initialDbFile) {
         return initialDbFile(new Factory<InputStream>() {
@@ -327,6 +330,10 @@ public class BoxStoreBuilder {
         });
     }
 
+    /**
+     * Let's you specify a provider for a DB file to be used during initial start of the app (no DB file exists yet).
+     * The provider will only be called if no DB file exists yet.
+     */
     @Experimental
     public BoxStoreBuilder initialDbFile(Factory<InputStream> initialDbFileFactory) {
         this.initialDbFileFactory = initialDbFileFactory;
