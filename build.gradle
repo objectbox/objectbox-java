@@ -6,9 +6,11 @@ buildscript {
     ext {
         isLinux = System.getProperty("os.name").contains("Linux")
         isMac = !isLinux && System.getProperty("os.name").toLowerCase().contains("mac")
+        isWin = System.getProperty("os.name").toLowerCase().contains("windows")
         is64 = System.getProperty("sun.arch.data.model") == "64"
         isLinux64 = isLinux && is64
         isMac64 = isMac && is64
+        isWin64 = isWin && is64
     }
 
     repositories {

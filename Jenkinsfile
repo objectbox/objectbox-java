@@ -31,7 +31,7 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh './test-with-asan.sh -Dextensive-tests=true clean build'
+                sh './test-with-asan.sh -Dextensive-tests=true clean test --tests io.objectbox.FunctionalTestSuite --tests io.objectbox.test.proguard.ObfuscatedEntityTest assemble'
             }
         }
 
