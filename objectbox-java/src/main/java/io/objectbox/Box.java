@@ -276,9 +276,18 @@ public class Box<T> {
      * Returns the count of all stored objects in this box.
      */
     public long count() {
+        return count(0);
+    }
+
+    /**
+     * Returns the count of all stored objects in this box or the given maxCount, whichever is lower.
+     *
+     * @param maxCount maximum value to count or 0 (zero) to have no maximum limit
+     */
+    public long count(long maxCount) {
         Cursor<T> reader = getReader();
         try {
-            return reader.count();
+            return reader.count(maxCount);
         } finally {
             releaseReader(reader);
         }

@@ -58,7 +58,7 @@ public abstract class Cursor<T> implements Closeable {
 
     static native Object nativeFirstEntity(long cursor);
 
-    static native long nativeCount(long cursor);
+    static native long nativeCount(long cursor, long maxCountOrZero);
 
     static native List nativeFindScalarPropertyId(long cursor, int propertyId, long value);
 
@@ -215,8 +215,8 @@ public abstract class Cursor<T> implements Closeable {
         return nativeSeek(cursor, key);
     }
 
-    public long count() {
-        return nativeCount(cursor);
+    public long count(long maxCountOrZero) {
+        return nativeCount(cursor, maxCountOrZero);
     }
 
     @Override
