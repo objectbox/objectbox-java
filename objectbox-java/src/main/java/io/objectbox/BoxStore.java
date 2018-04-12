@@ -59,7 +59,7 @@ import io.objectbox.reactive.SubscriptionBuilder;
 @ThreadSafe
 public class BoxStore implements Closeable {
 
-    private static final String VERSION = "1.4.6-2018-03-15";
+    private static final String VERSION = "1.5.0-2018-04-12";
     private static BoxStore defaultStore;
 
     private static final Set<String> openFiles = new HashSet<>();
