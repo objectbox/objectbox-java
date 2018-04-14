@@ -11,7 +11,7 @@ pipeline {
     }
 
     triggers {
-        upstream(upstreamProjects: "ObjectStore-Linux/${env.BRANCH_NAME.replaceAll("/", "%2F")}",
+        upstream(upstreamProjects: "ObjectBox-Linux/${env.BRANCH_NAME.replaceAll("/", "%2F")}",
                 threshold: hudson.model.Result.SUCCESS)
         cron(cronSchedule)
     }
