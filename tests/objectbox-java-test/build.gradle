@@ -9,12 +9,14 @@ dependencies {
     compile project(':objectbox-java')
     compile 'org.greenrobot:essentials:3.0.0-RC1'
 
-    if(isLinux64) {
-        compile "io.objectbox:objectbox-linux:${rootProject.version}"
-    } else if(isMac64) {
-        compile "io.objectbox:objectbox-macos:${rootProject.version}"
-    } else if(isWin64) {
-        compile "io.objectbox:objectbox-windows:${rootProject.version}"
+    if (!noObjectBoxTestDepencies) { // Switch to use locally compiled version to avoid dependency cycles
+        if (isLinux64) {
+            compile "io.objectbox:objectbox-linux:${rootProject.version}"
+        } else if (isMac64) {
+            compile "io.objectbox:objectbox-macos:${rootProject.version}"
+        } else if (isWin64) {
+            compile "io.objectbox:objectbox-windows:${rootProject.version}"
+        }
     }
 
     testCompile 'junit:junit:4.12'
@@ -28,7 +30,7 @@ test {
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
-        displayGranularity=2
+        displayGranularity = 2
         events 'started', 'passed'
     }
 }

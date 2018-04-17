@@ -9,12 +9,14 @@ dependencies {
     compile project(':objectbox-java')
     compile project(':objectbox-java-api')
 
-    if(isLinux64) {
-        compile "io.objectbox:objectbox-linux:${rootProject.version}"
-    } else if(isMac64) {
-        compile "io.objectbox:objectbox-macos:${rootProject.version}"
-    } else if(isWin64) {
-        compile "io.objectbox:objectbox-windows:${rootProject.version}"
+    if (!noObjectBoxTestDepencies) { // Switch to use locally compiled version to avoid dependency cycles
+        if (isLinux64) {
+            compile "io.objectbox:objectbox-linux:${rootProject.version}"
+        } else if (isMac64) {
+            compile "io.objectbox:objectbox-macos:${rootProject.version}"
+        } else if (isWin64) {
+            compile "io.objectbox:objectbox-windows:${rootProject.version}"
+        }
     }
 
     testCompile 'junit:junit:4.12'
