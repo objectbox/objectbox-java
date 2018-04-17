@@ -10,7 +10,7 @@ dependencies {
     compile 'org.greenrobot:essentials:3.0.0-RC1'
 
     // Check flag to use locally compiled version to avoid dependency cycles
-    if (project.hasProperty('noObjectBoxTestDepencies') && !noObjectBoxTestDepencies) {
+    if (!project.hasProperty('noObjectBoxTestDepencies') || !noObjectBoxTestDepencies) {
         if (isLinux64) {
             compile "io.objectbox:objectbox-linux:${rootProject.version}"
         } else if (isMac64) {
