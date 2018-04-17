@@ -9,7 +9,8 @@ dependencies {
     compile project(':objectbox-java')
     compile project(':objectbox-java-api')
 
-    if (!noObjectBoxTestDepencies) { // Switch to use locally compiled version to avoid dependency cycles
+    // Check flag to use locally compiled version to avoid dependency cycles
+    if (project.hasProperty('noObjectBoxTestDepencies') && !noObjectBoxTestDepencies) {
         if (isLinux64) {
             compile "io.objectbox:objectbox-linux:${rootProject.version}"
         } else if (isMac64) {
