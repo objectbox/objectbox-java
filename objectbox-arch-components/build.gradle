@@ -1,0 +1,33 @@
+apply plugin: 'java'
+
+targetCompatibility = '1.7'
+sourceCompatibility = '1.7'
+
+group = 'io.objectbox'
+version= rootProject.version
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+    ignoreFailures = true
+}
+
+
+repositories {
+    google()
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile project(':objectbox-java')
+
+    compile "android.arch.paging:runtime:1.0.0-alpha6"
+}
+
+javadoc {
+    failOnError = false
+    title = "Architecture Components for ObjectBox"
+    options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
+}
