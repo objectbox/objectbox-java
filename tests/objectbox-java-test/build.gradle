@@ -12,11 +12,11 @@ dependencies {
     // Check flag to use locally compiled version to avoid dependency cycles
     if (!project.hasProperty('noObjectBoxTestDepencies') || !noObjectBoxTestDepencies) {
         if (isLinux64) {
-            compile "io.objectbox:objectbox-linux:${rootProject.version}"
+            compile "io.objectbox:objectbox-linux:$ob_native_version"
         } else if (isMac64) {
-            compile "io.objectbox:objectbox-macos:${rootProject.version}"
+            compile "io.objectbox:objectbox-macos:$ob_native_version"
         } else if (isWin64) {
-            compile "io.objectbox:objectbox-windows:${rootProject.version}"
+            compile "io.objectbox:objectbox-windows:$ob_native_version"
         }
     }
 
