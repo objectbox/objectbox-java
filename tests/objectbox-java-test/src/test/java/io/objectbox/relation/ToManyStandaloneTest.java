@@ -37,21 +37,23 @@ public class ToManyStandaloneTest extends AbstractRelationTest {
         Order order1 = putOrder(null, "order1");
         Order order2 = putOrder(null, "order2");
         Customer customer = putCustomer();
+        long customerId = customer.getId();
 
         Cursor<Customer> cursorSource = InternalAccess.getWriter(customerBox);
         long[] orderIds = {order1.getId(), order2.getId()};
-        cursorSource.modifyRelations(1, customer.getId(), orderIds, false);
+        cursorSource.modifyRelations(1, customerId, orderIds, false);
         RelationInfo<Order> info = Customer_.ordersStandalone;
         int sourceEntityId = info.sourceInfo.getEntityId();
         Cursor<Order> targetCursor = cursorSource.getTx().createCursor(Order.class);
-        List<Order> related = targetCursor.getRelationEntities(sourceEntityId, info.relationId, customer.getId());
+        List<Order> related = targetCursor.getRelationEntities(sourceEntityId, info.relationId, customerId, false);
         assertEquals(2, related.size());
         assertEquals(order1.getId(), related.get(0).getId());
         assertEquals(order2.getId(), related.get(1).getId());
 
         // Also
         InternalAccess.commitWriter(customerBox, cursorSource);
-        assertEquals(2, orderBox.internalGetRelationEntities(sourceEntityId, info.relationId, customer.getId()).size());
+        assertEquals(2,
+                orderBox.internalGetRelationEntities(sourceEntityId, info.relationId, customerId, false).size());
     }
 
     @Test

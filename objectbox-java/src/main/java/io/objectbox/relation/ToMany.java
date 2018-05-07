@@ -186,7 +186,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 int relationId = relationInfo.relationId;
                 if (relationId != 0) {
                     int sourceEntityId = relationInfo.sourceInfo.getEntityId();
-                    newEntities = targetBox.internalGetRelationEntities(sourceEntityId, relationId, id);
+                    newEntities = targetBox.internalGetRelationEntities(sourceEntityId, relationId, id, false);
                 } else {
                     newEntities = targetBox.internalGetBacklinkEntities(relationInfo.targetInfo.getEntityId(),
                             relationInfo.targetIdProperty, id);

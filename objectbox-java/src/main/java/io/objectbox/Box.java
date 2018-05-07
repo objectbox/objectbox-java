@@ -609,10 +609,10 @@ public class Box<T> {
     }
 
     @Internal
-    public List<T> internalGetRelationEntities(int sourceEntityId, int relationId, long key) {
+    public List<T> internalGetRelationEntities(int sourceEntityId, int relationId, long key, boolean backlink) {
         Cursor<T> reader = getReader();
         try {
-            return reader.getRelationEntities(sourceEntityId, relationId, key);
+            return reader.getRelationEntities(sourceEntityId, relationId, key, backlink);
         } finally {
             releaseReader(reader);
         }
