@@ -1,5 +1,5 @@
 // Just too many sub projects, so each can reference rootProject.version
-version = '1.5.1-to-many-backlink-update-SNAPSHOT'
+version = '1.5.1-SNAPSHOT'
 
 buildscript {
     ext.ob_native_version = '1.5.0' // used by tests
