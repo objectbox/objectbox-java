@@ -141,7 +141,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             try {
                 boxStore = (BoxStore) boxStoreField.get(entity);
                 if (boxStore == null) {
-                    throw new DbDetachedException("Cannot resolve relation for detached entities");
+                    throw new DbDetachedException("Cannot resolve relation for detached entities, " +
+                            "call box.attach(entity) beforehand.");
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
