@@ -26,17 +26,20 @@ import io.objectbox.annotation.apihint.Beta;
 /**
  * Defines a backlink relation, which is based on another relation reversing the direction.
  * <p>
- * Example: one "Order" references one "Customer" (to-one relation).
+ * Example (to-one relation): one "Order" references one "Customer".
  * The backlink to this is a to-many in the reverse direction: one "Customer" has a number of "Order"s.
- *
- * Note: backlinks to to-many relations will be supported in the future.
+ * <p>
+ * Example (to-many relation): one "Teacher" references multiple "Student"s.
+ * The backlink to this: one "Student" has a number of "Teacher"s.
+ * <p>
+ * Note: changes made to a backlink relation based on a to-many relation are ignored.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 @Beta
 public @interface Backlink {
     /**
-     * Name of the relation the backlink should be based on (e.g. name of a ToOne property in the target entity).
+     * Name of the relation the backlink should be based on (e.g. name of a ToOne or ToMany property in the target entity).
      * Can be left empty if there is just a single relation from the target to the source entity.
      */
     String to() default "";
