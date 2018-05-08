@@ -189,8 +189,15 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                     int sourceEntityId = relationInfo.sourceInfo.getEntityId();
                     newEntities = targetBox.internalGetRelationEntities(sourceEntityId, relationId, id, false);
                 } else {
-                    newEntities = targetBox.internalGetBacklinkEntities(relationInfo.targetInfo.getEntityId(),
-                            relationInfo.targetIdProperty, id);
+                    if (relationInfo.targetIdProperty != null) {
+                        // Backlink from ToOne
+                        newEntities = targetBox.internalGetBacklinkEntities(relationInfo.targetInfo.getEntityId(),
+                                relationInfo.targetIdProperty, id);
+                    } else {
+                        // Backlink from ToMany
+                        newEntities = targetBox.internalGetRelationEntities(relationInfo.targetInfo.getEntityId(),
+                                relationInfo.targetRelationId, id, true);
+                    }
                 }
                 if (comparator != null) {
                     Collections.sort(newEntities, comparator);
@@ -670,6 +677,11 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     private boolean prepareBacklinkEntitiesForDb() {
         ToOneGetter backlinkToOneGetter = relationInfo.backlinkToOneGetter;
+        if (backlinkToOneGetter == null) {
+            // backlink from ToMany, do not apply changes to db
+            return false;
+        }
+
         long entityId = relationInfo.sourceInfo.getIdGetter().getId(entity);
         if (entityId == 0) {
             throw new IllegalStateException("Source entity has no ID (should have been put before)");
