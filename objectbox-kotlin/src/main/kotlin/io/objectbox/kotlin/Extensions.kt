@@ -19,6 +19,7 @@ package io.objectbox.kotlin
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import io.objectbox.Property
+import io.objectbox.query.Query
 import io.objectbox.query.QueryBuilder
 import kotlin.reflect.KClass
 
@@ -34,3 +35,17 @@ inline fun <reified T> QueryBuilder<T>.inValues(property: Property, values: Long
 /** An alias for the "in" method, which is a reserved keyword in Kotlin. */
 inline fun <reified T> QueryBuilder<T>.inValues(property: Property, values: IntArray): QueryBuilder<T>?
         = `in`(property, values)
+
+/**
+ * Allows building a query for this Box instance with a call to [build][QueryBuilder.build] to return a [Query] instance.
+ * ```
+ * val query = box.query {
+ *     equal(Entity_.property, value)
+ * }
+ * ```
+ */
+inline fun <T> Box<T>.query(block: QueryBuilder<T>.() -> Unit) : Query<T> {
+    val builder = query()
+    block(builder)
+    return builder.build()
+}
