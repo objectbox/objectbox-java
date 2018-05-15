@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("unused") // tested in integration test project
+
 package io.objectbox.kotlin
 
 import io.objectbox.Box
@@ -21,6 +23,7 @@ import io.objectbox.BoxStore
 import io.objectbox.Property
 import io.objectbox.query.Query
 import io.objectbox.query.QueryBuilder
+import io.objectbox.relation.ToMany
 import kotlin.reflect.KClass
 
 inline fun <reified T> BoxStore.boxFor(): Box<T> = boxFor(T::class.java)
@@ -48,4 +51,20 @@ inline fun <T> Box<T>.query(block: QueryBuilder<T>.() -> Unit) : Query<T> {
     val builder = query()
     block(builder)
     return builder.build()
+}
+
+/**
+ * Allows making changes (adding and removing entities) to this ToMany with a call to
+ * [apply][ToMany.applyChangesToDb] the changes to the database.
+ * Can [reset][ToMany.reset] the ToMany before making changes.
+ * ```
+ * toMany.applyChangesToDb {
+ *     add(entity)
+ * }
+ * ```
+ */
+inline fun <T> ToMany<T>.applyChangesToDb(resetFirst: Boolean = false, body: ToMany<T>.() -> Unit) {
+    if (resetFirst) reset()
+    body()
+    applyChangesToDb()
 }
