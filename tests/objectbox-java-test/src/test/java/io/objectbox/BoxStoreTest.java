@@ -140,6 +140,11 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         assertTrue(basedir.delete());
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testDeleteAllFiles_openStore() {
+        BoxStore.deleteAllFiles(boxStoreDir);
+    }
+
     private void closeStoreForTest() {
         assertTrue(boxStoreDir.exists());
         store.close();

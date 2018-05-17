@@ -59,9 +59,10 @@ import io.objectbox.reactive.SubscriptionBuilder;
 @ThreadSafe
 public class BoxStore implements Closeable {
 
-    private static final String VERSION = "1.5.0-2018-04-12";
+    private static final String VERSION = "1.5.1-2018-05-17";
     private static BoxStore defaultStore;
 
+    /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
     private static final Set<String> openFiles = new HashSet<>();
 
     /**
@@ -250,6 +251,17 @@ public class BoxStore implements Closeable {
 
     private static void verifyNotAlreadyOpen(String canonicalPath) {
         synchronized (openFiles) {
+            isFileOpen(canonicalPath); // for retries
+            if (!openFiles.add(canonicalPath)) {
+                throw new DbException("Another BoxStore is still open for this directory: " + canonicalPath +
+                        ". Hint: for most apps it's recommended to keep a BoxStore for the app's life time.");
+            }
+        }
+    }
+
+    /** Also retries up to 500ms to improve GC race condition situation. */
+    private static boolean isFileOpen(String canonicalPath) {
+        synchronized (openFiles) {
             int tries = 0;
             while (tries < 5 && openFiles.contains(canonicalPath)) {
                 tries++;
@@ -263,10 +275,7 @@ public class BoxStore implements Closeable {
                     // Ignore
                 }
             }
-            if (!openFiles.add(canonicalPath)) {
-                throw new DbException("Another BoxStore is still open for this directory: " + canonicalPath +
-                        ". Hint: for most apps it's recommended to keep a BoxStore for the app's life time.");
-            }
+            return openFiles.contains(canonicalPath);
         }
     }
 
@@ -445,6 +454,8 @@ public class BoxStore implements Closeable {
     /**
      * Danger zone! This will delete all files in the given directory!
      * <p>
+     * No {@link BoxStore} may be alive using the given directory.
+     * <p>
      * If you did not use a custom name with BoxStoreBuilder, you can pass "new File({@link
      * BoxStoreBuilder#DEFAULT_NAME})".
      *
@@ -452,10 +463,14 @@ public class BoxStore implements Closeable {
      *                             BoxStoreBuilder#directory(File)}
      * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
      * Note: If false is returned, any number of files may have been deleted before the failure happened.
+     * @throws IllegalStateException if the given directory is still used by a open {@link BoxStore}.
      */
     public static boolean deleteAllFiles(File objectStoreDirectory) {
         if (!objectStoreDirectory.exists()) {
             return true;
+        }
+        if (isFileOpen(getCanonicalPath(objectStoreDirectory))) {
+            throw new IllegalStateException("Cannot delete files: store is still open");
         }
 
         File[] files = objectStoreDirectory.listFiles();
@@ -476,6 +491,8 @@ public class BoxStore implements Closeable {
     /**
      * Danger zone! This will delete all files in the given directory!
      * <p>
+     * No {@link BoxStore} may be alive using the given name.
+     * <p>
      * If you did not use a custom name with BoxStoreBuilder, you can pass "new File({@link
      * BoxStoreBuilder#DEFAULT_NAME})".
      *
@@ -484,6 +501,8 @@ public class BoxStore implements Closeable {
      *                           BoxStoreBuilder#name(String)}.
      * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
      * Note: If false is returned, any number of files may have been deleted before the failure happened.
+     * @throws IllegalStateException if the given name is still used by a open {@link BoxStore}.
+     *
      */
     public static boolean deleteAllFiles(Object androidContext, @Nullable String customDbNameOrNull) {
         File dbDir = BoxStoreBuilder.getAndroidDbDir(androidContext, customDbNameOrNull);
@@ -492,6 +511,8 @@ public class BoxStore implements Closeable {
 
     /**
      * Danger zone! This will delete all files in the given directory!
+     * <p>
+     * No {@link BoxStore} may be alive using the given directory.
      * <p>
      * If you did not use a custom name with BoxStoreBuilder, you can pass "new File({@link
      * BoxStoreBuilder#DEFAULT_NAME})".
@@ -502,6 +523,7 @@ public class BoxStore implements Closeable {
      *                            BoxStoreBuilder#name(String)}.
      * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
      * Note: If false is returned, any number of files may have been deleted before the failure happened.
+     * @throws IllegalStateException if the given directory (+name) is still used by a open {@link BoxStore}.
      */
     public static boolean deleteAllFiles(@Nullable File baseDirectoryOrNull, @Nullable String customDbNameOrNull) {
         File dbDir = BoxStoreBuilder.getDbDir(baseDirectoryOrNull, customDbNameOrNull);
@@ -569,7 +591,7 @@ public class BoxStore implements Closeable {
      * disk synchronization.
      */
     public void runInTx(Runnable runnable) {
-        Transaction tx = this.activeTx.get();
+        Transaction tx = activeTx.get();
         // Only if not already set, allowing to call it recursively with first (outer) TX
         if (tx == null) {
             tx = beginTx();
@@ -596,7 +618,7 @@ public class BoxStore implements Closeable {
      * it is advised to run them in a single read transaction for efficiency reasons.
      */
     public void runInReadTx(Runnable runnable) {
-        Transaction tx = this.activeTx.get();
+        Transaction tx = activeTx.get();
         // Only if not already set, allowing to call it recursively with first (outer) TX
         if (tx == null) {
             tx = beginReadTx();
@@ -676,7 +698,7 @@ public class BoxStore implements Closeable {
      * not a RuntimeException itself.
      */
     public <T> T callInReadTx(Callable<T> callable) {
-        Transaction tx = this.activeTx.get();
+        Transaction tx = activeTx.get();
         // Only if not already set, allowing to call it recursively with first (outer) TX
         if (tx == null) {
             tx = beginReadTx();
@@ -711,7 +733,7 @@ public class BoxStore implements Closeable {
      * Like {@link #runInTx(Runnable)}, but allows returning a value and throwing an exception.
      */
     public <R> R callInTx(Callable<R> callable) throws Exception {
-        Transaction tx = this.activeTx.get();
+        Transaction tx = activeTx.get();
         // Only if not already set, allowing to call it recursively with first (outer) TX
         if (tx == null) {
             tx = beginTx();
