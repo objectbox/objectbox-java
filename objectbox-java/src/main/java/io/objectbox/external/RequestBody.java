@@ -3,8 +3,9 @@ package io.objectbox.external;
 import org.json.JSONObject;
 
 /**
- * TODO DOC
- * @author juan_
+ * Class that wraps the parameter key and the object data that after is parsed to a {@link JSONObject} and 
+ * 	sent to a HTTP endpoint
+ * @author Juan Ramos - ptjuanramos
  *
  */
 public class RequestBody {

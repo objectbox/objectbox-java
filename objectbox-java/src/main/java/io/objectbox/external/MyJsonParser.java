@@ -19,10 +19,10 @@ import io.objectbox.exception.MyJsonParserException;
 public class MyJsonParser {
 	
 	/**
-	 * TODO DOC
-	 * @param parsableObject
-	 * @return
-	 * @throws JSONException
+	 * Parse a bean Class(class with getters and setters) to a {@link JSONObject}
+	 * @param parsableObject serializable bean object
+	 * @return {@link JSONObject}
+	 * @throws JSONException if something went wrong when parsing to a {@link JSONObject}
 	 */
 	public static JSONObject parseToJson(Object parsableObject) throws JSONException{
 		String className = parsableObject.getClass().getSimpleName();
@@ -33,9 +33,11 @@ public class MyJsonParser {
 	}
 	
 	/**
-	 * 
-	 * @param jsonObject
-	 * @return
+	 * The invert process of {@link MyJsonParser#parseToJson(Object)}
+	 * @param jsonObject data that is used to parse to Object
+	 * @param classType this parameter is used for a successful object parse
+	 * @return parsed object
+	 * @throws MyJsonParserException if something when wrong in this method life cycle 
 	 */
 	public static Object getClassFromJson(JSONObject jsonObject, Class classType) throws MyJsonParserException{
 		JSONObject bodyJson;

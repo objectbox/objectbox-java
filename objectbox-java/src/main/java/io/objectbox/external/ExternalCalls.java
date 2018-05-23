@@ -15,9 +15,9 @@ import io.objectbox.Box;
 import io.objectbox.exception.ExEndpointException;;
 
 /**
- * 
+ * The holly grail of the External Calls integration
  * @author Juan Ramos - ptjuanramos
- * @param <T>
+ * @param <T> To handle abstract object in the future
  */
 public class ExternalCalls<T> {
 	private EndPoints endPoints;
@@ -29,10 +29,14 @@ public class ExternalCalls<T> {
 	}
 	
 	/**
-	 * 
-	 * @param query
-	 * @param box
-	 * @return
+	 * After instancing {@link ExternalCalls} by a giving {@link EndPoints}, parses a instance of a serializable bean instance to a JSON object
+	 * that is used as body in a HTTP POST request, then, makes an HTTP requests for a giving operation type, which is represented 
+	 * by {@link QueryType} enumerator.
+	 * @param query {@link QueryType} operation type
+	 * @param paramKey String that represents the HTTP parameter that is used to handle the incoming data on back-end services
+	 * @param parsableObject Bean object(object with getters and setters) that is parsed to {@link JSONObject}
+	 * @param method {@link Method} HTTP verbs
+	 * @return {@link JSONObject} that represents the HTTP response 
 	 * @throws IOException 
 	 * @throws ExEndpointNotFoundException 
 	 */

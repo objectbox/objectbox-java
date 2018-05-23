@@ -24,11 +24,6 @@ public enum QueryType {
 		this.type = type;
 	}
 	
-	/**
-	 * 
-	 * @param type
-	 * @return
-	 */
 	public Optional<QueryType> getType(String type) {
 		for (QueryType e : QueryType.values()) {
 			if(e.type.equals(type)) {

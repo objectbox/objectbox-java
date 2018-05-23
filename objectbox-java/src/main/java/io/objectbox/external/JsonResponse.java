@@ -3,6 +3,12 @@ package io.objectbox.external;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Bean class that is parsed to {@link JSONObject}.
+ * <br>Template that is used to produce a response.
+ * <br>This is instantiate by using the inner {@link JsonResponseBuilder} class
+ * @author Juan Ramos - ptjuanramos
+ */
 public class JsonResponse {
 	private boolean ok;
 	private Object message;
@@ -23,6 +29,10 @@ public class JsonResponse {
 		return this.message;
 	}
 	
+	/**
+	 * Parses this object to {@link JSONObject} that is used to persist 
+	 * @return {@link JSONObject}
+	 */
 	public JSONObject toJson() {
 		JSONObject response;
 		
@@ -35,15 +45,27 @@ public class JsonResponse {
 		return response;
 	}
 	
+	/**
+	 * Following the Builder design pattern this {@link JsonResponse} inner class builds
+	 * 	a {@link JsonResponse} instance with all properties values
+	 */
 	public static class JsonResponseBuilder {
 		private boolean ok;
 		private Object message;
 		
+		/**
+		 * Message that shows to the user if something went wrong with the HTTP request or not
+		 * @return {@link JsonResponseBuilder} instance
+		 */
 		public JsonResponseBuilder isOk(boolean ok) {
 			this.ok = ok;
 			return this;
 		}
 		
+		/**
+		 * Sets a response message
+		 * @return {@link JsonResponseBuilder} instance
+		 */
 		public JsonResponseBuilder setMessage(Object message) {
 			this.message = message;
 			return this;
