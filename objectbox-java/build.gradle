@@ -21,6 +21,23 @@ dependencies {
     compile 'org.greenrobot:essentials:3.0.0-RC1'
     compile 'com.google.flatbuffers:flatbuffers-java:1.8.0'
     compile 'com.google.code.findbugs:jsr305:3.0.2'
+    //ptjuanramos dependencies
+    compile 'org.json:json:20160212'
+	compile 'com.sendgrid:java-http-client:4.2.0'
+	
+	// https://mvnrepository.com/artifact/com.google.code.gson/gson
+	compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
+	
+	
+	testCompile(
+            'org.junit.jupiter:junit-jupiter-api:5.1.0'
+    )
+    testRuntime(
+            'org.junit.jupiter:junit-jupiter-engine:5.1.0',
+            'org.junit.vintage:junit-vintage-engine:5.1.0',
+            'org.junit.platform:junit-platform-launcher:1.1.0',
+            'org.junit.platform:junit-platform-runner:1.1.0'
+    ) 
 }
 
 javadoc {
