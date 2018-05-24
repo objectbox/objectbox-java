@@ -72,6 +72,10 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 task sourcesJar(type: Jar) {
+	classifier = 'all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+	
     from sourceSets.main.allSource
     classifier = 'sources'
 }

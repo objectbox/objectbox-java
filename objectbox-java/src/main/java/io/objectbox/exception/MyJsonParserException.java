@@ -2,7 +2,7 @@ package io.objectbox.exception;
 
 import java.util.Map;
 
-import io.objectbox.external.MyJsonParser;
+import io.objectbox.external.api.MyJsonParser;
 
 /**
  * Exception class that is throw when some error occur in {@link MyJsonParser} class
