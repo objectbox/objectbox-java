@@ -19,7 +19,7 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':objectbox-java-api')
     compile 'org.greenrobot:essentials:3.0.0-RC1'
-    compile 'com.google.flatbuffers:flatbuffers-java:1.8.0'
+    compile 'com.google.flatbuffers:flatbuffers-java:1.9.0'
     compile 'com.google.code.findbugs:jsr305:3.0.2'
 }
 
