@@ -34,6 +34,7 @@ public final class ModelEntity extends Table {
   public IdUid id(IdUid obj) { int o = __offset(4); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
   public String name() { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
+  public ByteBuffer nameInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 6, 1); }
   public ModelProperty properties(int j) { return properties(new ModelProperty(), j); }
   public ModelProperty properties(ModelProperty obj, int j) { int o = __offset(8); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
   public int propertiesLength() { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; }
@@ -51,6 +52,7 @@ public final class ModelEntity extends Table {
    */
   public String nameSecondary() { int o = __offset(16); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameSecondaryAsByteBuffer() { return __vector_as_bytebuffer(16, 1); }
+  public ByteBuffer nameSecondaryInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 16, 1); }
 
   public static void startModelEntity(FlatBufferBuilder builder) { builder.startObject(7); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addStruct(0, idOffset, 0); }
