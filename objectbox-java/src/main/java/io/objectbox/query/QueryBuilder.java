@@ -41,6 +41,7 @@ import io.objectbox.relation.RelationInfo;
  *
  * @param <T> Entity class associated with this query builder.
  */
+@SuppressWarnings("WeakerAccess")
 @Experimental
 public class QueryBuilder<T> {
 
@@ -85,6 +86,8 @@ public class QueryBuilder<T> {
 
     private final Box<T> box;
 
+    private final long storeHandle;
+
     private long handle;
 
     private boolean hasOrder;
@@ -98,11 +101,16 @@ public class QueryBuilder<T> {
 
     private Comparator<T> comparator;
 
+    private final boolean isSubQuery;
+
     private native long nativeCreate(long storeHandle, String entityName);
 
     private native void nativeDestroy(long handle);
 
     private native long nativeBuild(long handle);
+
+    private native long nativeLink(long handle, long storeHandle, int targetEntityId, int propertyId, int relationId,
+                                   boolean backlink);
 
     private native void nativeOrder(long handle, int propertyId, int flags);
 
@@ -152,7 +160,16 @@ public class QueryBuilder<T> {
     @Internal
     public QueryBuilder(Box<T> box, long storeHandle, String entityName) {
         this.box = box;
+        this.storeHandle = storeHandle;
         handle = nativeCreate(storeHandle, entityName);
+        isSubQuery = false;
+    }
+
+    public QueryBuilder(long storeHandle, long subQueryBuilderHandle) {
+        this.box = null;
+        this.storeHandle = storeHandle;
+        handle = subQueryBuilderHandle;
+        isSubQuery = true;
     }
 
     @Override
@@ -163,7 +180,9 @@ public class QueryBuilder<T> {
 
     public synchronized void close() {
         if (handle != 0) {
-            nativeDestroy(handle);
+            if (!isSubQuery) {
+                nativeDestroy(handle);
+            }
             handle = 0;
         }
     }
@@ -173,6 +192,9 @@ public class QueryBuilder<T> {
      */
     public Query<T> build() {
         verifyHandle();
+        if (isSubQuery) {
+            throw new IllegalStateException("Do not call build on a sub query builder (link)");
+        }
         if (combineNextWith != Operator.NONE) {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
@@ -243,6 +265,22 @@ public class QueryBuilder<T> {
     public QueryBuilder<T> sort(Comparator<T> comparator) {
         this.comparator = comparator;
         return this;
+    }
+
+    /**
+     * Creates a link to another entity, for which you also can describe conditions using the returned builder.
+     * <p>
+     * Note: in relational databases you would use a "join" for this.
+     *
+     * @param relationInfo Relation meta info (generated)
+     * @param <TARGET>     The target entity. For parent/tree like relations, it can be the same type.
+     * @return A builder to define query conditions at the target entity side.
+     */
+    public <TARGET> QueryBuilder<TARGET> link(RelationInfo<TARGET> relationInfo) {
+        int targetEntityId = relationInfo.targetInfo.getEntityId();
+        int propertyId = relationInfo.targetIdProperty != null ? relationInfo.targetIdProperty.id : 0;
+        long linkQBHandle = nativeLink(handle, storeHandle, targetEntityId, propertyId, relationInfo.relationId, false);
+        return new QueryBuilder<>(storeHandle, linkQBHandle);
     }
 
     /**
