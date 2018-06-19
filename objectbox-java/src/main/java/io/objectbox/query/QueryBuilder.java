@@ -109,8 +109,8 @@ public class QueryBuilder<T> {
 
     private native long nativeBuild(long handle);
 
-    private native long nativeLink(long handle, long storeHandle, int targetEntityId, int propertyId, int relationId,
-                                   boolean backlink);
+    private native long nativeLink(long handle, long storeHandle, int sourceEntityId, int targetEntityId,
+                                   int propertyId, int relationId, boolean backlink);
 
     private native void nativeOrder(long handle, int propertyId, int flags);
 
@@ -282,9 +282,11 @@ public class QueryBuilder<T> {
      * @return A builder to define query conditions at the target entity side.
      */
     public <TARGET> QueryBuilder<TARGET> link(RelationInfo<TARGET> relationInfo) {
+        int sourceEntityId = relationInfo.sourceInfo.getEntityId();
         int targetEntityId = relationInfo.targetInfo.getEntityId();
         int propertyId = relationInfo.targetIdProperty != null ? relationInfo.targetIdProperty.id : 0;
-        long linkQBHandle = nativeLink(handle, storeHandle, targetEntityId, propertyId, relationInfo.relationId, false);
+        long linkQBHandle = nativeLink(handle, storeHandle, sourceEntityId, targetEntityId, propertyId,
+                relationInfo.relationId, false);
         return new QueryBuilder<>(storeHandle, linkQBHandle);
     }
 
