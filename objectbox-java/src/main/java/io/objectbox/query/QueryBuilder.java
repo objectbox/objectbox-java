@@ -41,7 +41,7 @@ import io.objectbox.relation.RelationInfo;
  *
  * @param <T> Entity class associated with this query builder.
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
 @Experimental
 public class QueryBuilder<T> {
 
@@ -165,7 +165,7 @@ public class QueryBuilder<T> {
         isSubQuery = false;
     }
 
-    public QueryBuilder(long storeHandle, long subQueryBuilderHandle) {
+    private QueryBuilder(long storeHandle, long subQueryBuilderHandle) {
         this.box = null;
         this.storeHandle = storeHandle;
         handle = subQueryBuilderHandle;
@@ -191,10 +191,8 @@ public class QueryBuilder<T> {
      * Builds the query and closes this QueryBuilder.
      */
     public Query<T> build() {
+        verifyNotSubQuery();
         verifyHandle();
-        if (isSubQuery) {
-            throw new IllegalStateException("Do not call build on a sub query builder (link)");
-        }
         if (combineNextWith != Operator.NONE) {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
@@ -202,6 +200,12 @@ public class QueryBuilder<T> {
         Query<T> query = new Query<>(box, queryHandle, hasOrder, eagerRelations, filter, comparator);
         close();
         return query;
+    }
+
+    private void verifyNotSubQuery() {
+        if (isSubQuery) {
+            throw new IllegalStateException("This call is not supported on sub query builders (links)");
+        }
     }
 
     private void verifyHandle() {
@@ -252,6 +256,7 @@ public class QueryBuilder<T> {
      * @see #orderDesc(Property)
      */
     public QueryBuilder<T> order(Property property, int flags) {
+        verifyNotSubQuery();
         verifyHandle();
         if (combineNextWith != Operator.NONE) {
             throw new IllegalStateException(
@@ -303,6 +308,7 @@ public class QueryBuilder<T> {
      * @param more         Supply further relations to be eagerly loaded.
      */
     public QueryBuilder<T> eager(int limit, RelationInfo relationInfo, RelationInfo... more) {
+        verifyNotSubQuery();
         if (eagerRelations == null) {
             eagerRelations = new ArrayList<>();
         }
@@ -330,6 +336,7 @@ public class QueryBuilder<T> {
      * Other find methods will throw a exception and aggregate functions will silently ignore the filter.
      */
     public QueryBuilder<T> filter(QueryFilter<T> filter) {
+        verifyNotSubQuery();
         if (this.filter != null) {
             throw new IllegalStateException("A filter was already defined, you can only assign one filter");
         }
