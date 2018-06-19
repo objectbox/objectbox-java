@@ -3,8 +3,8 @@ version= rootProject.version
 
 buildscript {
     ext.javadocDir = "$buildDir/docs/javadoc"
-    ext.kotlin_version = '1.2.31'
-    ext.dokka_version = '0.9.16'
+    ext.kotlin_version = '1.2.50'
+    ext.dokka_version = '0.9.17'
 
     repositories {
         jcenter()
