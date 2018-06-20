@@ -122,6 +122,10 @@ public class RelationInfo<TARGET> implements Serializable {
         this.backlinkToManyGetter = null;
     }
 
+    public boolean isBacklink() {
+        return backlinkToManyGetter != null || backlinkToOneGetter != null;
+    }
+
     @Override
     public String toString() {
         return "RelationInfo from " + sourceInfo.getEntityClass() + " to " + targetInfo.getEntityClass();
