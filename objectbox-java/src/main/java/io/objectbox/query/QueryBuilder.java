@@ -286,7 +286,7 @@ public class QueryBuilder<T> {
         int targetEntityId = relationInfo.targetInfo.getEntityId();
         int propertyId = relationInfo.targetIdProperty != null ? relationInfo.targetIdProperty.id : 0;
         long linkQBHandle = nativeLink(handle, storeHandle, sourceEntityId, targetEntityId, propertyId,
-                relationInfo.relationId, false);
+                relationInfo.relationId, relationInfo.isBacklink());
         return new QueryBuilder<>(storeHandle, linkQBHandle);
     }
 
