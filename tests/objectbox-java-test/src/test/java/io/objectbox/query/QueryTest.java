@@ -361,54 +361,69 @@ public class QueryTest extends AbstractObjectBoxTest {
     @Test
     public void testSetParameterInt() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().equal(simpleInt, 2007).build();
+        Query<TestEntity> query = box.query().equal(simpleInt, 2007).parameterAlias("foo").build();
         assertEquals(8, query.findUnique().getId());
         query.setParameter(simpleInt, 2004);
         assertEquals(5, query.findUnique().getId());
+
+        query.setParameter("foo", 2002);
+        assertEquals(3, query.findUnique().getId());
     }
 
     @Test
     public void testSetParameter2Ints() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().between(simpleInt, 2005, 2008).build();
+        Query<TestEntity> query = box.query().between(simpleInt, 2005, 2008).parameterAlias("foo").build();
         assertEquals(4, query.count());
         query.setParameters(simpleInt, 2002, 2003);
         List<TestEntity> entities = query.find();
         assertEquals(2, entities.size());
         assertEquals(3, entities.get(0).getId());
         assertEquals(4, entities.get(1).getId());
+
+        query.setParameters("foo", 2007, 2007);
+        assertEquals(8, query.findUnique().getId());
     }
 
     @Test
     public void testSetParameterFloat() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().greater(simpleFloat, 400.65).build();
+        Query<TestEntity> query = box.query().greater(simpleFloat, 400.65).parameterAlias("foo").build();
         assertEquals(3, query.count());
         query.setParameter(simpleFloat, 400.75);
         assertEquals(2, query.count());
+
+        query.setParameter("foo", 400.85);
+        assertEquals(1, query.count());
     }
 
     @Test
     public void testSetParameter2Floats() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().between(simpleFloat, 400.15, 400.75).build();
+        Query<TestEntity> query = box.query().between(simpleFloat, 400.15, 400.75).parameterAlias("foo").build();
         assertEquals(6, query.count());
         query.setParameters(simpleFloat, 400.65, 400.85);
         List<TestEntity> entities = query.find();
         assertEquals(2, entities.size());
         assertEquals(8, entities.get(0).getId());
         assertEquals(9, entities.get(1).getId());
+
+        query.setParameters("foo", 400.45, 400.55);
+        assertEquals(6, query.findUnique().getId());
     }
 
     @Test
     public void testSetParameterString() {
         putTestEntitiesStrings();
-        Query<TestEntity> query = box.query().equal(simpleString, "banana").build();
+        Query<TestEntity> query = box.query().equal(simpleString, "banana").parameterAlias("foo").build();
         assertEquals(1, query.findUnique().getId());
         query.setParameter(simpleString, "bar");
         assertEquals(3, query.findUnique().getId());
 
         assertNull(query.setParameter(simpleString, "not here!").findUnique());
+
+        query.setParameter("foo", "apple");
+        assertEquals(2, query.findUnique().getId());
     }
 
     @Test

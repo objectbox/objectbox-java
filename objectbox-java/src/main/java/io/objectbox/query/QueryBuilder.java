@@ -116,6 +116,9 @@ public class QueryBuilder<T> {
 
     private native long nativeCombine(long handle, long condition1, long condition2, boolean combineUsingOr);
 
+    private native long nativeSetParameterAlias(long conditionHandle, String alias);
+
+
     // ------------------------------ (Not)Null------------------------------
 
     private native long nativeNull(long handle, int propertyId);
@@ -612,6 +615,15 @@ public class QueryBuilder<T> {
     public QueryBuilder<T> between(Property property, double value1, double value2) {
         verifyHandle();
         checkCombineCondition(nativeBetween(handle, property.getId(), value1, value2));
+        return this;
+    }
+
+    public QueryBuilder<T> parameterAlias(String alias) {
+        verifyHandle();
+        if (lastCondition == 0) {
+            throw new IllegalStateException("No previous condition. Before you can assign an alias, you must first have a condition.");
+        }
+        nativeSetParameterAlias(lastCondition, alias);
         return this;
     }
 
