@@ -116,7 +116,7 @@ public class QueryBuilder<T> {
 
     private native long nativeCombine(long handle, long condition1, long condition2, boolean combineUsingOr);
 
-    private native long nativeSetParameterAlias(long conditionHandle, String alias);
+    private native void nativeSetParameterAlias(long conditionHandle, String alias);
 
 
     // ------------------------------ (Not)Null------------------------------
