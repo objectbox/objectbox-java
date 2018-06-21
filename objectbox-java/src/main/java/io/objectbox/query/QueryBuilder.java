@@ -110,7 +110,7 @@ public class QueryBuilder<T> {
 
     private native long nativeBuild(long handle);
 
-    private native long nativeLink(long handle, long storeHandle, int sourceEntityId, int targetEntityId,
+    private native long nativeLink(long handle, long storeHandle, int relationOwnerEntityId, int targetEntityId,
                                    int propertyId, int relationId, boolean backlink);
 
     private native void nativeOrder(long handle, int propertyId, int flags);
@@ -286,13 +286,15 @@ public class QueryBuilder<T> {
      * @return A builder to define query conditions at the target entity side.
      */
     public <TARGET> QueryBuilder<TARGET> link(RelationInfo<TARGET> relationInfo) {
-        return link(relationInfo, relationInfo.sourceInfo, relationInfo.targetInfo, relationInfo.isBacklink());
+        boolean backlink = relationInfo.isBacklink();
+        EntityInfo relationOwner = backlink ? relationInfo.targetInfo : relationInfo.sourceInfo;
+        return link(relationInfo, relationOwner, relationInfo.targetInfo, backlink);
     }
 
-    private <TARGET> QueryBuilder<TARGET> link(RelationInfo relationInfo, EntityInfo source, EntityInfo target,
+    private <TARGET> QueryBuilder<TARGET> link(RelationInfo relationInfo, EntityInfo relationOwner, EntityInfo target,
                                                boolean backlink) {
         int propertyId = relationInfo.targetIdProperty != null ? relationInfo.targetIdProperty.id : 0;
-        long linkQBHandle = nativeLink(handle, storeHandle, source.getEntityId(), target.getEntityId(), propertyId,
+        long linkQBHandle = nativeLink(handle, storeHandle, relationOwner.getEntityId(), target.getEntityId(), propertyId,
                 relationInfo.relationId, relationInfo.isBacklink());
         return new QueryBuilder<>(storeHandle, linkQBHandle);
     }
@@ -314,8 +316,7 @@ public class QueryBuilder<T> {
         if (relationInfo.isBacklink()) {
             throw new IllegalArgumentException("Double backlink: The relation is already a backlink, please use a regular link on the original relation instead.");
         }
-
-        return link(relationInfo, relationInfo.targetInfo, relationInfo.sourceInfo, false);
+        return link(relationInfo, relationInfo.sourceInfo, relationInfo.sourceInfo, true);
     }
 
     /**
