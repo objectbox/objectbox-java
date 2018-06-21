@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
+import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
 import io.objectbox.DebugFlags;
 import io.objectbox.TestEntity;
@@ -360,6 +361,11 @@ public class QueryTest extends AbstractObjectBoxTest {
 
     @Test
     public void testSetParameterInt() {
+        String versionNative = BoxStore.getVersionNative();
+        String minVersion = "1.5.1-2018-06-21";
+        String versionStart = versionNative.substring(0, minVersion.length());
+        assertTrue(versionStart, versionStart.compareTo(minVersion) >= 0);
+
         putTestEntitiesScalars();
         Query<TestEntity> query = box.query().equal(simpleInt, 2007).parameterAlias("foo").build();
         assertEquals(8, query.findUnique().getId());
