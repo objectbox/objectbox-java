@@ -1,10 +1,12 @@
 // Just too many sub projects, so each can reference rootProject.version
-version = '1.5.1-SNAPSHOT'
+version = ob_version
 
 buildscript {
-    ext.ob_native_version = version // Be careful to diverge here; easy to forget and hard to find JNI problems
-    ext.ob_expected_version = project.hasProperty('expectedVersion') ? project.property('expectedVersion') : 'UNDEFINED'
     ext {
+        ob_version = '1.5.1-SNAPSHOT'
+        ob_native_version = ob_version // Be careful to diverge here; easy to forget and hard to find JNI problems
+        ob_expected_version = project.hasProperty('expectedVersion') ? project.property('expectedVersion') : 'UNDEFINED'
+
         isLinux = System.getProperty("os.name").contains("Linux")
         isMac = !isLinux && System.getProperty("os.name").toLowerCase().contains("mac")
         isWin = System.getProperty("os.name").toLowerCase().contains("windows")
