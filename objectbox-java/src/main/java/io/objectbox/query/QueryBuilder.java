@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 import io.objectbox.Box;
+import io.objectbox.EntityInfo;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
@@ -285,12 +286,36 @@ public class QueryBuilder<T> {
      * @return A builder to define query conditions at the target entity side.
      */
     public <TARGET> QueryBuilder<TARGET> link(RelationInfo<TARGET> relationInfo) {
-        int sourceEntityId = relationInfo.sourceInfo.getEntityId();
-        int targetEntityId = relationInfo.targetInfo.getEntityId();
+        return link(relationInfo, relationInfo.sourceInfo, relationInfo.targetInfo, relationInfo.isBacklink());
+    }
+
+    private <TARGET> QueryBuilder<TARGET> link(RelationInfo relationInfo, EntityInfo source, EntityInfo target,
+                                               boolean backlink) {
         int propertyId = relationInfo.targetIdProperty != null ? relationInfo.targetIdProperty.id : 0;
-        long linkQBHandle = nativeLink(handle, storeHandle, sourceEntityId, targetEntityId, propertyId,
+        long linkQBHandle = nativeLink(handle, storeHandle, source.getEntityId(), target.getEntityId(), propertyId,
                 relationInfo.relationId, relationInfo.isBacklink());
         return new QueryBuilder<>(storeHandle, linkQBHandle);
+    }
+
+    /**
+     * Creates a backlink (reversed link) to another entity,
+     * for which you also can describe conditions using the returned builder.
+     * <p>
+     * Note: only use this method over {@link #link(RelationInfo)},
+     * if you did not define @{@link io.objectbox.annotation.Backlink} in the entity already.
+     * <p>
+     * Note: in relational databases you would use a "join" for this.
+     *
+     * @param relationInfo Relation meta info (generated) of the original relation (reverse direction)
+     * @param <TARGET>     The target entity. For parent/tree like relations, it can be the same type.
+     * @return A builder to define query conditions at the target entity side.
+     */
+    public <TARGET> QueryBuilder<TARGET> backlink(RelationInfo relationInfo) {
+        if (relationInfo.isBacklink()) {
+            throw new IllegalArgumentException("Double backlink: The relation is already a backlink, please use a regular link on the original relation instead.");
+        }
+
+        return link(relationInfo, relationInfo.targetInfo, relationInfo.sourceInfo, false);
     }
 
     /**
