@@ -20,7 +20,6 @@ package io.objectbox;
 // Copied from generated tests (& removed some unused Properties)
 
 import io.objectbox.TestEntityCursor.Factory;
-
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
@@ -47,18 +46,18 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
 
     private static int ID;
 
-    public final static Property id = new Property(__INSTANCE, ID++, ID, long.class, "id", true, "id");
-    public final static Property simpleBoolean = new Property(__INSTANCE, ID++, ID, boolean.class, "simpleBoolean", false, "simpleBoolean");
-    public final static Property simpleByte = new Property(__INSTANCE, ID++, ID, byte.class, "simpleByte", false, "simpleByte");
-    public final static Property simpleShort = new Property(__INSTANCE, ID++, ID, short.class, "simpleShort", false, "simpleShort");
-    public final static Property simpleInt = new Property(__INSTANCE, ID++, ID, int.class, "simpleInt", false, "simpleInt");
-    public final static Property simpleLong = new Property(__INSTANCE, ID++, ID, long.class, "simpleLong", false, "simpleLong");
-    public final static Property simpleFloat = new Property(__INSTANCE, ID++, ID, float.class, "simpleFloat", false, "simpleFloat");
-    public final static Property simpleDouble = new Property(__INSTANCE, ID++, ID, double.class, "simpleDouble", false, "simpleDouble");
-    public final static Property simpleString = new Property(__INSTANCE, ID++, ID, String.class, "simpleString", false, "simpleString");
-    public final static Property simpleByteArray = new Property(__INSTANCE, ID++, ID, byte[].class, "simpleByteArray", false, "simpleByteArray");
+    public final static Property<TestEntity> id = new Property(__INSTANCE, ID++, ID, long.class, "id", true, "id");
+    public final static Property<TestEntity> simpleBoolean = new Property(__INSTANCE, ID++, ID, boolean.class, "simpleBoolean", false, "simpleBoolean");
+    public final static Property<TestEntity> simpleByte = new Property(__INSTANCE, ID++, ID, byte.class, "simpleByte", false, "simpleByte");
+    public final static Property<TestEntity> simpleShort = new Property(__INSTANCE, ID++, ID, short.class, "simpleShort", false, "simpleShort");
+    public final static Property<TestEntity> simpleInt = new Property(__INSTANCE, ID++, ID, int.class, "simpleInt", false, "simpleInt");
+    public final static Property<TestEntity> simpleLong = new Property(__INSTANCE, ID++, ID, long.class, "simpleLong", false, "simpleLong");
+    public final static Property<TestEntity> simpleFloat = new Property(__INSTANCE, ID++, ID, float.class, "simpleFloat", false, "simpleFloat");
+    public final static Property<TestEntity> simpleDouble = new Property(__INSTANCE, ID++, ID, double.class, "simpleDouble", false, "simpleDouble");
+    public final static Property<TestEntity> simpleString = new Property(__INSTANCE, ID++, ID, String.class, "simpleString", false, "simpleString");
+    public final static Property<TestEntity> simpleByteArray = new Property(__INSTANCE, ID++, ID, byte[].class, "simpleByteArray", false, "simpleByteArray");
 
-    public final static Property[] __ALL_PROPERTIES = {
+    public final static Property<TestEntity>[] __ALL_PROPERTIES = new Property[]{
             id,
             simpleInt,
             simpleShort,
