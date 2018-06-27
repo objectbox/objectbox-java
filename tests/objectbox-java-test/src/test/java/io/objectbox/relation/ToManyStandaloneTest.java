@@ -42,7 +42,7 @@ public class ToManyStandaloneTest extends AbstractRelationTest {
         Cursor<Customer> cursorSource = InternalAccess.getWriter(customerBox);
         long[] orderIds = {order1.getId(), order2.getId()};
         cursorSource.modifyRelations(1, customerId, orderIds, false);
-        RelationInfo<Order> info = Customer_.ordersStandalone;
+        RelationInfo<Customer, Order> info = Customer_.ordersStandalone;
         int sourceEntityId = info.sourceInfo.getEntityId();
         Cursor<Order> targetCursor = cursorSource.getTx().createCursor(Order.class);
         List<Order> related = targetCursor.getRelationEntities(sourceEntityId, info.relationId, customerId, false);

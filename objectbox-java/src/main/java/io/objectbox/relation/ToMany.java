@@ -67,7 +67,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     private final static Integer ONE = Integer.valueOf(1);
 
     private final Object entity;
-    private final RelationInfo<TARGET> relationInfo;
+    private final RelationInfo<Object, TARGET> relationInfo;
 
     private ListFactory listFactory;
     private List<TARGET> entities;
@@ -90,7 +90,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     transient private boolean removeFromTargetBox;
     transient private Comparator<TARGET> comparator;
 
-    public ToMany(Object sourceEntity, RelationInfo<TARGET> relationInfo) {
+    public ToMany(Object sourceEntity, RelationInfo<? extends Object, TARGET> relationInfo) {
         if (sourceEntity == null) {
             throw new IllegalArgumentException("No source entity given (null)");
         }
@@ -98,7 +98,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             throw new IllegalArgumentException("No relation info given (null)");
         }
         this.entity = sourceEntity;
-        this.relationInfo = relationInfo;
+        this.relationInfo = (RelationInfo<Object, TARGET>) relationInfo;
     }
 
     /** Currently only used for non-persisted entities (id == 0). */

@@ -105,7 +105,7 @@ public class Customer_ implements EntityInfo<Customer> {
         }
     }
 
-    static final RelationInfo<Order> orders =
+    static final RelationInfo<Customer, Order> orders =
             new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, new ToManyGetter<Customer>() {
                 @Override
                 public ToMany<Order> getToMany(Customer customer) {
@@ -118,7 +118,7 @@ public class Customer_ implements EntityInfo<Customer> {
                 }
             });
 
-    static final RelationInfo<Order> ordersStandalone =
+    static final RelationInfo<Customer, Order> ordersStandalone =
             new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, new ToManyGetter<Customer>() {
                 @Override
                 public ToMany<Order> getToMany(Customer customer) {

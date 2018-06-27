@@ -285,7 +285,7 @@ public class QueryBuilder<T> {
      * @param <TARGET>     The target entity. For parent/tree like relations, it can be the same type.
      * @return A builder to define query conditions at the target entity side.
      */
-    public <TARGET> QueryBuilder<TARGET> link(RelationInfo<TARGET> relationInfo) {
+    public <TARGET> QueryBuilder<TARGET> link(RelationInfo<?, TARGET> relationInfo) {
         boolean backlink = relationInfo.isBacklink();
         EntityInfo relationOwner = backlink ? relationInfo.targetInfo : relationInfo.sourceInfo;
         return link(relationInfo, relationOwner, relationInfo.targetInfo, backlink);
@@ -312,7 +312,7 @@ public class QueryBuilder<T> {
      * @param <TARGET>     The target entity. For parent/tree like relations, it can be the same type.
      * @return A builder to define query conditions at the target entity side.
      */
-    public <TARGET> QueryBuilder<TARGET> backlink(RelationInfo relationInfo) {
+    public <TARGET> QueryBuilder<TARGET> backlink(RelationInfo<TARGET, ?> relationInfo) {
         if (relationInfo.isBacklink()) {
             throw new IllegalArgumentException("Double backlink: The relation is already a backlink, please use a regular link on the original relation instead.");
         }
