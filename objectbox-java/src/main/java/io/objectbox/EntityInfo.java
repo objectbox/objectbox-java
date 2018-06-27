@@ -32,9 +32,9 @@ public interface EntityInfo<T> extends Serializable {
 
     int getEntityId();
 
-    Property[] getAllProperties();
+    Property<T>[] getAllProperties();
 
-    Property getIdProperty();
+    Property<T> getIdProperty();
 
     IdGetter<T> getIdGetter();
 
