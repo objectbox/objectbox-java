@@ -29,9 +29,10 @@ import io.objectbox.query.QueryCondition.PropertyCondition.Operation;
 /**
  * Meta data describing a property
  */
-public class Property implements Serializable {
+public class Property<ENTITY> implements Serializable {
     private static final long serialVersionUID = 8613291105982758093L;
 
+    public final EntityInfo<ENTITY> entity;
     public final int ordinal;
     public final int id;
 
@@ -39,7 +40,7 @@ public class Property implements Serializable {
     public final Class<?> type;
 
     public final String name;
-    public final boolean primaryKey;
+    public final boolean isId;
     public final String dbName;
     public final Class<? extends PropertyConverter> converterClass;
 
@@ -50,21 +51,23 @@ public class Property implements Serializable {
     // Also, this should make the Property class truly @Immutable.
     private boolean idVerified;
 
-    public Property(int ordinal, int id, Class<?> type, String name, boolean primaryKey, String dbName) {
-        this(ordinal, id, type, name, primaryKey, dbName, null, null);
+    public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name) {
+        this(entity, ordinal, id, type, name, false, name, null, null);
     }
 
-    public Property(int ordinal, int id, Class<?> type, String name) {
-        this(ordinal, id, type, name, false, name, null, null);
+    public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name, boolean isId,
+                    String dbName) {
+        this(entity, ordinal, id, type, name, isId, dbName, null, null);
     }
 
-    public Property(int ordinal, int id, Class<?> type, String name, boolean primaryKey, String dbName,
-                    Class<? extends PropertyConverter> converterClass, Class customType) {
+    public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name, boolean isId,
+                    String dbName, Class<? extends PropertyConverter> converterClass, Class customType) {
+        this.entity = entity;
         this.ordinal = ordinal;
         this.id = id;
         this.type = type;
         this.name = name;
-        this.primaryKey = primaryKey;
+        this.isId = isId;
         this.dbName = dbName;
         this.converterClass = converterClass;
         this.customType = customType;

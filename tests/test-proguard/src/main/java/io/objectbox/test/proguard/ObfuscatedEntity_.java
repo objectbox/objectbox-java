@@ -48,9 +48,11 @@ public final class ObfuscatedEntity_ implements EntityInfo<ObfuscatedEntity> {
     @Internal
     static final ObfuscatedEntityIdGetter __ID_GETTER = new ObfuscatedEntityIdGetter();
 
-    public final static Property id = new Property(0, 1, long.class, "id", true, "id");
-    public final static Property myInt = new Property(1, 2, int.class, "myInt");
-    public final static Property myString = new Property(2, 3, String.class, "myString");
+    public final static ObfuscatedEntity_ __INSTANCE = new ObfuscatedEntity_();
+
+    public final static Property id = new Property(__INSTANCE, 0, 1, long.class, "id", true, "id");
+    public final static Property myInt = new Property(__INSTANCE, 1, 2, int.class, "myInt");
+    public final static Property myString = new Property(__INSTANCE, 2, 3, String.class, "myString");
 
     public final static Property[] __ALL_PROPERTIES = {
         id,
@@ -59,8 +61,6 @@ public final class ObfuscatedEntity_ implements EntityInfo<ObfuscatedEntity> {
     };
 
     public final static Property __ID_PROPERTY = id;
-
-    public final static ObfuscatedEntity_ __INSTANCE = new ObfuscatedEntity_();
 
     @Override
     public String getEntityName() {

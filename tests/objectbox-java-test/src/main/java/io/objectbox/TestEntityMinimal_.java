@@ -47,10 +47,12 @@ public final class TestEntityMinimal_ implements EntityInfo<TestEntityMinimal> {
         }
     };
 
+    public final static TestEntityMinimal_ __INSTANCE = new TestEntityMinimal_();
+
     private static int ID;
 
-    public final static Property id = new Property(ID++, ID, long.class, "id", true, "id");
-    public final static Property text = new Property(ID++, ID, String.class, "text", false, "text");
+    public final static Property id = new Property(__INSTANCE, ID++, ID, long.class, "id", true, "id");
+    public final static Property text = new Property(__INSTANCE, ID++, ID, String.class, "text", false, "text");
 
     public final static Property[] __ALL_PROPERTIES = {
             id,

@@ -36,13 +36,15 @@ public class EntityLongIndex_ implements EntityInfo<EntityLongIndex> {
 
     public static final String __NAME_IN_DB = "EntityLongIndex";
 
-    public final static Property id = new Property(0, 7, long.class, "id", true, "_id");
-    public final static Property indexedLong = new Property(1, 1, long.class, "indexedLong");
-    public final static Property float1 = new Property(2, 2, Float.class, "float1");
-    public final static Property float2 = new Property(3, 3, Float.class, "float2");
-    public final static Property float3 = new Property(4, 4, Float.class, "float3");
-    public final static Property float4 = new Property(5, 5, Float.class, "float4");
-    public final static Property float5 = new Property(6, 6, Float.class, "float5");
+    public final static EntityLongIndex_ __INSTANCE = new EntityLongIndex_();
+
+    public final static Property id = new Property(__INSTANCE, 0, 7, long.class, "id", true, "_id");
+    public final static Property indexedLong = new Property(__INSTANCE, 1, 1, long.class, "indexedLong");
+    public final static Property float1 = new Property(__INSTANCE, 2, 2, Float.class, "float1");
+    public final static Property float2 = new Property(__INSTANCE, 3, 3, Float.class, "float2");
+    public final static Property float3 = new Property(__INSTANCE, 4, 4, Float.class, "float3");
+    public final static Property float4 = new Property(__INSTANCE, 5, 5, Float.class, "float4");
+    public final static Property float5 = new Property(__INSTANCE, 6, 6, Float.class, "float5");
 
     public final static Property[] __ALL_PROPERTIES = {
             id,

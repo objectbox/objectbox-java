@@ -46,8 +46,10 @@ public class Customer_ implements EntityInfo<Customer> {
     @Internal
     static final CustomerIdGetter __ID_GETTER = new CustomerIdGetter();
 
-    public final static Property id = new Property(0, 1, long.class, "id", true, "_id");
-    public final static Property name = new Property(1, 2, String.class, "name");
+    public final static Customer_ __INSTANCE = new Customer_();
+
+    public final static Property id = new Property(__INSTANCE, 0, 1, long.class, "id", true, "_id");
+    public final static Property name = new Property(__INSTANCE, 1, 2, String.class, "name");
 
     public final static Property[] __ALL_PROPERTIES = {
             id,
@@ -55,8 +57,6 @@ public class Customer_ implements EntityInfo<Customer> {
     };
 
     public final static Property __ID_PROPERTY = id;
-
-    public final static Customer_ __INSTANCE = new Customer_();
 
     @Override
     public String getEntityName() {

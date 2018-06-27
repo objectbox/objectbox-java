@@ -51,10 +51,12 @@ public class Order_ implements EntityInfo<Order> {
     @Internal
     static final OrderIdGetter __ID_GETTER = new OrderIdGetter();
 
-    public final static Property id = new Property(0, 1, long.class, "id", true, "_id");
-    public final static Property date = new Property(1, 2, java.util.Date.class, "date");
-    public final static Property customerId = new Property(2, 3, long.class, "customerId");
-    public final static Property text = new Property(3, 4, String.class, "text");
+    public final static Order_ __INSTANCE = new Order_();
+
+    public final static Property id = new Property(__INSTANCE, 0, 1, long.class, "id", true, "_id");
+    public final static Property date = new Property(__INSTANCE, 1, 2, java.util.Date.class, "date");
+    public final static Property customerId = new Property(__INSTANCE, 2, 3, long.class, "customerId");
+    public final static Property text = new Property(__INSTANCE, 3, 4, String.class, "text");
 
     public final static Property[] __ALL_PROPERTIES = {
             id,
@@ -64,8 +66,6 @@ public class Order_ implements EntityInfo<Order> {
     };
 
     public final static Property __ID_PROPERTY = id;
-
-    public final static Order_ __INSTANCE = new Order_();
 
     @Override
     public String getEntityName() {
