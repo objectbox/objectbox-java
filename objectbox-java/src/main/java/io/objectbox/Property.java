@@ -141,6 +141,11 @@ public class Property<ENTITY> implements Serializable {
     }
 
     @Internal
+    public int getEntityId() {
+        return entity.getEntityId();
+    }
+
+    @Internal
     public int getId() {
         if (this.id <= 0) {
             throw new IllegalStateException("Illegal property ID " + id + " for " + toString());
