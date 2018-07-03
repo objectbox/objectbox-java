@@ -42,6 +42,7 @@ def projectNamesToPublish =
          'objectbox-java-api',
          'objectbox-java',
          'objectbox-kotlin',
+         'objectbox-rxjava',
          'objectbox-generator',
          'objectbox-daocompat',
          'linux',
@@ -139,6 +140,7 @@ task installAll {
     dependsOn ':objectbox-java-api:install'
     dependsOn ':objectbox-java:install'
     dependsOn ':objectbox-kotlin:install'
+    dependsOn ':objectbox-rxjava:install'
     doLast {
         println("Installed version $version")
     }
@@ -150,6 +152,7 @@ task deployAll {
     dependsOn ':objectbox-java-api:uploadArchives'
     dependsOn ':objectbox-java:uploadArchives'
     dependsOn ':objectbox-kotlin:uploadArchives'
+    dependsOn ':objectbox-rxjava:uploadArchives'
 }
 
 // this task is also used by the composite build ('objectbox-deploy'), check before making changes
