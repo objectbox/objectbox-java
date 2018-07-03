@@ -37,17 +37,12 @@ if (JavaVersion.current().isJava8Compatible()) {
     }
 }
 
-def projectNamesToPublish =
-        ['objectbox',
-         'objectbox-java-api',
-         'objectbox-java',
-         'objectbox-kotlin',
-         'objectbox-rxjava',
-         'objectbox-generator',
-         'objectbox-daocompat',
-         'linux',
-         'msbuild',
-        ]
+def projectNamesToPublish = [
+        'objectbox-java-api',
+        'objectbox-java',
+        'objectbox-kotlin',
+        'objectbox-rxjava'
+]
 
 configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
     apply plugin: 'maven'
