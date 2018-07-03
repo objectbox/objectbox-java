@@ -4,7 +4,6 @@ group = 'io.objectbox'
 version= rootProject.version
 
 sourceCompatibility = 1.7
-targetCompatibility = 1.7
 
 javadoc {
     failOnError = false

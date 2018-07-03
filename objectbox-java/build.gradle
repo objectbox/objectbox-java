@@ -1,11 +1,10 @@
 apply plugin: 'java'
 apply plugin: 'findbugs'
 
-targetCompatibility = '1.7'
-sourceCompatibility = '1.7'
-
 group = 'io.objectbox'
 version= rootProject.version
+
+sourceCompatibility = '1.7'
 
 tasks.withType(FindBugs) {
     reports {
