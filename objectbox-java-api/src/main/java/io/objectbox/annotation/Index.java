@@ -30,7 +30,7 @@ public @interface Index {
     IndexType type() default IndexType.DEFAULT;
 
     /** Only allowed for {@link IndexType#VALUE} and types String and byte[]. */
-    int maxLength() default 0;
+    int maxValueLength() default 0;
 
 //    /**
 //     * Whether the unique constraint should be created with base on this index
