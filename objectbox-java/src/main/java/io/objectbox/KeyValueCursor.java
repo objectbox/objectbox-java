@@ -21,6 +21,7 @@ import java.io.Closeable;
 import javax.annotation.concurrent.NotThreadSafe;
 
 @NotThreadSafe
+@SuppressWarnings("WeakerAccess,UnusedReturnValue, unused")
 public class KeyValueCursor implements Closeable {
     private static final int PUT_FLAG_FIRST = 1;
     private static final int PUT_FLAG_COMPLETE = 1 << 1;

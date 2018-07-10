@@ -45,6 +45,7 @@ import io.objectbox.query.QueryBuilder;
  */
 @Beta
 @ThreadSafe
+@SuppressWarnings("WeakerAccess,UnusedReturnValue,unused")
 public class Box<T> {
     private final BoxStore store;
     private final Class<T> entityClass;
@@ -427,7 +428,7 @@ public class Box<T> {
     /**
      * Removes (deletes) Objects by their ID in a single transaction.
      */
-    public void remove(long... ids) {
+    public void remove(@Nullable long... ids) {
         if (ids == null || ids.length == 0) {
             return;
         }

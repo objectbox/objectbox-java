@@ -49,7 +49,7 @@ public interface QueryCondition {
             this.values = null;
         }
 
-        AbstractCondition(Object[] values) {
+        AbstractCondition(@Nullable Object[] values) {
             this.value = null;
             this.values = values;
         }
@@ -75,13 +75,13 @@ public interface QueryCondition {
         public final Property property;
         private final Operation operation;
 
-        public PropertyCondition(Property property, Operation operation, Object value) {
+        public PropertyCondition(Property property, Operation operation, @Nullable Object value) {
             super(checkValueForType(property, value));
             this.property = property;
             this.operation = operation;
         }
 
-        public PropertyCondition(Property property, Operation operation, Object[] values) {
+        public PropertyCondition(Property property, Operation operation, @Nullable Object[] values) {
             super(checkValuesForType(property, operation, values));
             this.property = property;
             this.operation = operation;

@@ -26,6 +26,7 @@ import io.objectbox.internal.CursorFactory;
 
 @Internal
 @NotThreadSafe
+@SuppressWarnings("WeakerAccess,UnusedReturnValue,unused")
 public class Transaction implements Closeable {
     /** May be set by tests */
     @Internal

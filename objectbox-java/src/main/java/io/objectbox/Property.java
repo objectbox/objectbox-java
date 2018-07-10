@@ -19,6 +19,8 @@ package io.objectbox;
 import java.io.Serializable;
 import java.util.Collection;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbException;
@@ -29,6 +31,7 @@ import io.objectbox.query.QueryCondition.PropertyCondition.Operation;
 /**
  * Meta data describing a property
  */
+@SuppressWarnings("WeakerAccess,UnusedReturnValue, unused")
 public class Property<ENTITY> implements Serializable {
     private static final long serialVersionUID = 8613291105982758093L;
 
@@ -56,12 +59,13 @@ public class Property<ENTITY> implements Serializable {
     }
 
     public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name, boolean isId,
-                    String dbName) {
+                    @Nullable String dbName) {
         this(entity, ordinal, id, type, name, isId, dbName, null, null);
     }
 
     public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name, boolean isId,
-                    String dbName, Class<? extends PropertyConverter> converterClass, Class customType) {
+                    @Nullable String dbName, @Nullable Class<? extends PropertyConverter> converterClass,
+                    @Nullable Class customType) {
         this.entity = entity;
         this.ordinal = ordinal;
         this.id = id;

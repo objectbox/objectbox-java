@@ -27,7 +27,7 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.annotation.apihint.Temporary;
 import io.objectbox.relation.ToMany;
 
-@SuppressWarnings({"unchecked", "SameParameterValue", "unused"})
+@SuppressWarnings({"unchecked", "SameParameterValue", "unused", "WeakerAccess", "UnusedReturnValue"})
 @Beta
 @Internal
 @NotThreadSafe
