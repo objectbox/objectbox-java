@@ -29,6 +29,7 @@ pipeline {
                 bat 'gradlew build install'
             }
         }
+    }
 
     // For global vars see /jenkins/pipeline-syntax/globals
     post {
