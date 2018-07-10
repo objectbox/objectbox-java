@@ -1,0 +1,51 @@
+def COLOR_MAP = ['SUCCESS': 'good', 'FAILURE': 'danger', 'UNSTABLE': 'danger', 'ABORTED': 'danger']
+
+String buildsToKeep = '500'
+
+// https://jenkins.io/doc/book/pipeline/syntax/
+pipeline {
+    agent { label 'windows' }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: buildsToKeep, artifactNumToKeepStr: buildsToKeep))
+    }
+
+    triggers {
+        upstream(upstreamProjects: "objectbox-windows/${env.BRANCH_NAME.replaceAll("/", "%2F")}",
+                threshold: hudson.model.Result.SUCCESS)
+        cron(cronSchedule)
+    }
+
+    stages {
+        stage('init') {
+            steps {
+                // "cmd /c" for an OK exit code if no file is found
+                bat 'cmd /c del tests/objectbox-java-test/hs_err_pid*.log'
+            }
+        }
+
+        stage('build-java') {
+            steps {
+                bat 'gradlew build install'
+            }
+        }
+
+    // For global vars see /jenkins/pipeline-syntax/globals
+    post {
+        always {
+            junit '**/build/test-results/**/TEST-*.xml'
+            archive 'tests/*/hs_err_pid*.log'
+            archive '**/build/reports/findbugs/*'
+        }
+
+        changed {
+            slackSend color: COLOR_MAP[currentBuild.currentResult],
+                    message: "Changed to ${currentBuild.currentResult}: ${currentBuild.fullDisplayName}\n${env.BUILD_URL}"
+        }
+
+        failure {
+            slackSend color: "danger",
+                    message: "Failed: ${currentBuild.fullDisplayName}\n${env.BUILD_URL}"
+        }
+    }
+}
