@@ -19,13 +19,13 @@ pipeline {
         stage('init') {
             steps {
                 // "cmd /c" for an OK exit code if no file is found
-                bat 'cmd /c del tests/objectbox-java-test/hs_err_pid*.log'
+                bat 'cmd /c del tests\\objectbox-java-test\\hs_err_pid*.log'
             }
         }
 
         stage('build-java') {
             steps {
-                bat 'gradlew build install'
+                bat 'gradlew build test install'
             }
         }
     }
