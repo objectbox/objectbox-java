@@ -17,7 +17,6 @@
 package io.objectbox.index.model;
 
 import io.objectbox.annotation.Entity;
-import io.objectbox.annotation.Generated;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Index;
 
@@ -35,11 +34,9 @@ public class EntityLongIndex {
     Float float4;
     Float float5;
 
-    @Generated(37687253)
     public EntityLongIndex() {
     }
 
-    @Generated(2116856237)
     public EntityLongIndex(long id, long indexedLong, Float float1, Float float2, Float float3, Float float4, Float float5) {
         this.id = id;
         this.indexedLong = indexedLong;
