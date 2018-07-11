@@ -94,6 +94,8 @@ public class PropertyQuery {
 
     native double nativeAvg(long handle, long cursorHandle, int propertyId);
 
+    native long nativeCount(long handle, long cursorHandle, int propertyId, boolean distinct);
+
     /** Clears all values (e.g. distinct and null value). */
     public PropertyQuery reset() {
         distinct = false;
@@ -446,6 +448,15 @@ public class PropertyQuery {
             @Override
             public Double call() {
                 return nativeAvg(queryHandle, query.cursorHandle(), propertyId);
+            }
+        });
+    }
+
+    public long count() {
+        return (Long) query.callInReadTx(new Callable<Long>() {
+            @Override
+            public Long call() {
+                return nativeCount(queryHandle, query.cursorHandle(), propertyId, distinct);
             }
         });
     }
