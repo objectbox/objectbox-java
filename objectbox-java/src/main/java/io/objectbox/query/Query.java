@@ -59,51 +59,7 @@ public class Query<T> {
 
     native long[] nativeFindKeysUnordered(long handle, long cursorHandle);
 
-    native String[] nativeFindStrings(long handle, long cursorHandle, int propertyId, boolean distinct,
-                                      boolean distinctNoCase, boolean enableNull, String nullValue);
-
-    native long[] nativeFindLongs(long handle, long cursorHandle, int propertyId, boolean distinct, boolean enableNull,
-                                  long nullValue);
-
-    native int[] nativeFindInts(long handle, long cursorHandle, int propertyId, boolean distinct, boolean enableNull,
-                                int nullValue);
-
-    native short[] nativeFindShorts(long handle, long cursorHandle, int propertyId, boolean distinct,
-                                    boolean enableNull, short nullValue);
-
-    native char[] nativeFindChars(long handle, long cursorHandle, int propertyId, boolean distinct, boolean enableNull,
-                                  char nullValue);
-
-    native byte[] nativeFindBytes(long handle, long cursorHandle, int propertyId, boolean distinct, boolean enableNull,
-                                  byte nullValue);
-
-    native float[] nativeFindFloats(long handle, long cursorHandle, int propertyId, boolean distinct,
-                                    boolean enableNull, float nullValue);
-
-    native double[] nativeFindDoubles(long handle, long cursorHandle, int propertyId, boolean distinct,
-                                      boolean enableNull, double nullValue);
-
-    native Object nativeFindNumber(long handle, long cursorHandle, int propertyId, boolean unique, boolean distinct,
-                                   boolean enableNull, long nullValue, float nullValueFloat, double nullValueDouble);
-
-    native String nativeFindString(long handle, long cursorHandle, int propertyId, boolean unique, boolean distinct,
-                                   boolean distinctCase, boolean enableNull, String nullValue);
-
     native long nativeCount(long handle, long cursorHandle);
-
-    native long nativeSum(long handle, long cursorHandle, int propertyId);
-
-    native double nativeSumDouble(long handle, long cursorHandle, int propertyId);
-
-    native long nativeMax(long handle, long cursorHandle, int propertyId);
-
-    native double nativeMaxDouble(long handle, long cursorHandle, int propertyId);
-
-    native long nativeMin(long handle, long cursorHandle, int propertyId);
-
-    native double nativeMinDouble(long handle, long cursorHandle, int propertyId);
-
-    native double nativeAvg(long handle, long cursorHandle, int propertyId);
 
     native long nativeRemove(long handle, long cursorHandle);
 

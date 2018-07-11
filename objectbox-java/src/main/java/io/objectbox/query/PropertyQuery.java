@@ -50,6 +50,50 @@ public class PropertyQuery {
         propertyId = property.id;
     }
 
+    native String[] nativeFindStrings(long handle, long cursorHandle, int propertyId, boolean distinct,
+                                      boolean distinctNoCase, boolean enableNull, String nullValue);
+
+    native long[] nativeFindLongs(long handle, long cursorHandle, int propertyId, boolean distinct, boolean enableNull,
+                                  long nullValue);
+
+    native int[] nativeFindInts(long handle, long cursorHandle, int propertyId, boolean distinct, boolean enableNull,
+                                int nullValue);
+
+    native short[] nativeFindShorts(long handle, long cursorHandle, int propertyId, boolean distinct,
+                                    boolean enableNull, short nullValue);
+
+    native char[] nativeFindChars(long handle, long cursorHandle, int propertyId, boolean distinct, boolean enableNull,
+                                  char nullValue);
+
+    native byte[] nativeFindBytes(long handle, long cursorHandle, int propertyId, boolean distinct, boolean enableNull,
+                                  byte nullValue);
+
+    native float[] nativeFindFloats(long handle, long cursorHandle, int propertyId, boolean distinct,
+                                    boolean enableNull, float nullValue);
+
+    native double[] nativeFindDoubles(long handle, long cursorHandle, int propertyId, boolean distinct,
+                                      boolean enableNull, double nullValue);
+
+    native Object nativeFindNumber(long handle, long cursorHandle, int propertyId, boolean unique, boolean distinct,
+                                   boolean enableNull, long nullValue, float nullValueFloat, double nullValueDouble);
+
+    native String nativeFindString(long handle, long cursorHandle, int propertyId, boolean unique, boolean distinct,
+                                   boolean distinctCase, boolean enableNull, String nullValue);
+
+    native long nativeSum(long handle, long cursorHandle, int propertyId);
+
+    native double nativeSumDouble(long handle, long cursorHandle, int propertyId);
+
+    native long nativeMax(long handle, long cursorHandle, int propertyId);
+
+    native double nativeMaxDouble(long handle, long cursorHandle, int propertyId);
+
+    native long nativeMin(long handle, long cursorHandle, int propertyId);
+
+    native double nativeMinDouble(long handle, long cursorHandle, int propertyId);
+
+    native double nativeAvg(long handle, long cursorHandle, int propertyId);
+
     /** Clears all values (e.g. distinct and null value). */
     public PropertyQuery reset() {
         distinct = false;
@@ -143,7 +187,7 @@ public class PropertyQuery {
             public String[] call() {
                 boolean distinctNoCase = distinct && noCaseIfDistinct;
                 long cursorHandle = query.cursorHandle();
-                return query.nativeFindStrings(queryHandle, cursorHandle, propertyId, distinct, distinctNoCase,
+                return nativeFindStrings(queryHandle, cursorHandle, propertyId, distinct, distinctNoCase,
                         enableNull, nullValueString);
             }
         });
@@ -164,7 +208,7 @@ public class PropertyQuery {
         return (long[]) query.callInReadTx(new Callable<long[]>() {
             @Override
             public long[] call() {
-                return query.nativeFindLongs(queryHandle, query.cursorHandle(), propertyId, distinct,
+                return nativeFindLongs(queryHandle, query.cursorHandle(), propertyId, distinct,
                         enableNull, nullValueLong);
             }
         });
@@ -183,7 +227,7 @@ public class PropertyQuery {
         return (int[]) query.callInReadTx(new Callable<int[]>() {
             @Override
             public int[] call() {
-                return query.nativeFindInts(queryHandle, query.cursorHandle(), propertyId, distinct,
+                return nativeFindInts(queryHandle, query.cursorHandle(), propertyId, distinct,
                         enableNull, (int) nullValueLong);
             }
         });
@@ -202,7 +246,7 @@ public class PropertyQuery {
         return (short[]) query.callInReadTx(new Callable<short[]>() {
             @Override
             public short[] call() {
-                return query.nativeFindShorts(queryHandle, query.cursorHandle(), propertyId, distinct,
+                return nativeFindShorts(queryHandle, query.cursorHandle(), propertyId, distinct,
                         enableNull, (short) nullValueLong);
             }
         });
@@ -221,7 +265,7 @@ public class PropertyQuery {
         return (char[]) query.callInReadTx(new Callable<char[]>() {
             @Override
             public char[] call() {
-                return query.nativeFindChars(queryHandle, query.cursorHandle(), propertyId, distinct,
+                return nativeFindChars(queryHandle, query.cursorHandle(), propertyId, distinct,
                         enableNull, (char) nullValueLong);
             }
         });
@@ -238,7 +282,7 @@ public class PropertyQuery {
         return (byte[]) query.callInReadTx(new Callable<byte[]>() {
             @Override
             public byte[] call() {
-                return query.nativeFindBytes(queryHandle, query.cursorHandle(), propertyId, distinct,
+                return nativeFindBytes(queryHandle, query.cursorHandle(), propertyId, distinct,
                         enableNull, (byte) nullValueLong);
             }
         });
@@ -257,7 +301,7 @@ public class PropertyQuery {
         return (float[]) query.callInReadTx(new Callable<float[]>() {
             @Override
             public float[] call() {
-                return query.nativeFindFloats(queryHandle, query.cursorHandle(), propertyId, distinct,
+                return nativeFindFloats(queryHandle, query.cursorHandle(), propertyId, distinct,
                         enableNull, nullValueFloat);
             }
         });
@@ -276,7 +320,7 @@ public class PropertyQuery {
         return (double[]) query.callInReadTx(new Callable<double[]>() {
             @Override
             public double[] call() {
-                return query.nativeFindDoubles(queryHandle, query.cursorHandle(), propertyId, distinct,
+                return nativeFindDoubles(queryHandle, query.cursorHandle(), propertyId, distinct,
                         enableNull, nullValueDouble);
             }
         });
@@ -287,7 +331,7 @@ public class PropertyQuery {
             @Override
             public String call() {
                 boolean distinctCase = distinct && !noCaseIfDistinct;
-                return query.nativeFindString(queryHandle, query.cursorHandle(), propertyId, unique, distinct,
+                return nativeFindString(queryHandle, query.cursorHandle(), propertyId, unique, distinct,
                         distinctCase, enableNull, nullValueString);
             }
         });
@@ -297,7 +341,7 @@ public class PropertyQuery {
         return query.callInReadTx(new Callable<Object>() {
             @Override
             public Object call() {
-                return query.nativeFindNumber(queryHandle, query.cursorHandle(), propertyId, unique, distinct,
+                return nativeFindNumber(queryHandle, query.cursorHandle(), propertyId, unique, distinct,
                         enableNull, nullValueLong, nullValueFloat, nullValueDouble);
             }
         });
@@ -341,7 +385,7 @@ public class PropertyQuery {
         return (Long) query.callInReadTx(new Callable<Long>() {
             @Override
             public Long call() {
-                return query.nativeSum(queryHandle, query.cursorHandle(), propertyId);
+                return nativeSum(queryHandle, query.cursorHandle(), propertyId);
             }
         });
     }
@@ -351,7 +395,7 @@ public class PropertyQuery {
         return (Double) query.callInReadTx(new Callable<Double>() {
             @Override
             public Double call() {
-                return query.nativeSumDouble(queryHandle, query.cursorHandle(), propertyId);
+                return nativeSumDouble(queryHandle, query.cursorHandle(), propertyId);
             }
         });
     }
@@ -361,7 +405,7 @@ public class PropertyQuery {
         return (Long) query.callInReadTx(new Callable<Long>() {
             @Override
             public Long call() {
-                return query.nativeMax(queryHandle, query.cursorHandle(), propertyId);
+                return nativeMax(queryHandle, query.cursorHandle(), propertyId);
             }
         });
     }
@@ -371,7 +415,7 @@ public class PropertyQuery {
         return (Double) query.callInReadTx(new Callable<Double>() {
             @Override
             public Double call() {
-                return query.nativeMaxDouble(queryHandle, query.cursorHandle(), propertyId);
+                return nativeMaxDouble(queryHandle, query.cursorHandle(), propertyId);
             }
         });
     }
@@ -381,7 +425,7 @@ public class PropertyQuery {
         return (Long) query.callInReadTx(new Callable<Long>() {
             @Override
             public Long call() {
-                return query.nativeMin(queryHandle, query.cursorHandle(), propertyId);
+                return nativeMin(queryHandle, query.cursorHandle(), propertyId);
             }
         });
     }
@@ -391,7 +435,7 @@ public class PropertyQuery {
         return (Double) query.callInReadTx(new Callable<Double>() {
             @Override
             public Double call() {
-                return query.nativeMinDouble(queryHandle, query.cursorHandle(), propertyId);
+                return nativeMinDouble(queryHandle, query.cursorHandle(), propertyId);
             }
         });
     }
@@ -401,7 +445,7 @@ public class PropertyQuery {
         return (Double) query.callInReadTx(new Callable<Double>() {
             @Override
             public Double call() {
-                return query.nativeAvg(queryHandle, query.cursorHandle(), propertyId);
+                return nativeAvg(queryHandle, query.cursorHandle(), propertyId);
             }
         });
     }
