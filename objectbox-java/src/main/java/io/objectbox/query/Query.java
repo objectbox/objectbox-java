@@ -78,6 +78,9 @@ public class Query<T> {
     native void nativeSetParameters(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
                                     double value1, double value2);
 
+    native void nativeSetParameters(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
+                                    String[] values);
+
     final Box<T> box;
     private final BoxStore store;
     private final boolean hasOrder;
@@ -532,6 +535,24 @@ public class Query<T> {
      */
     public Query<T> setParameters(String alias, double value1, double value2) {
         nativeSetParameters(handle, 0, 0, alias, value1, value2);
+        return this;
+    }
+
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     */
+    public Query<T> setParameters(Property property, String[] values) {
+        nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
+        return this;
+    }
+
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     *
+     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     */
+    public Query<T> setParameters(String alias, String[] values) {
+        nativeSetParameters(handle, 0, 0, alias, values);
         return this;
     }
 
