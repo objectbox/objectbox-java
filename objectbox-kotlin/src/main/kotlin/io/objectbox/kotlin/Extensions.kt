@@ -39,6 +39,15 @@ inline fun <reified T> QueryBuilder<T>.inValues(property: Property<T>, values: L
 inline fun <reified T> QueryBuilder<T>.inValues(property: Property<T>, values: IntArray): QueryBuilder<T>
         = `in`(property, values)
 
+/** An alias for the "in" method, which is a reserved keyword in Kotlin. */
+inline fun <reified T> QueryBuilder<T>.inValues(property: Property<T>, values: Array<String>): QueryBuilder<T>
+        = `in`(property, values)
+
+/** An alias for the "in" method, which is a reserved keyword in Kotlin. */
+inline fun <reified T> QueryBuilder<T>.inValues(property: Property<T>, values: Array<String>,
+                                                stringOrder: QueryBuilder.StringOrder): QueryBuilder<T>
+        = `in`(property, values, stringOrder)
+
 /**
  * Allows building a query for this Box instance with a call to [build][QueryBuilder.build] to return a [Query] instance.
  * ```

@@ -154,6 +154,12 @@ public class QueryBuilder<T> {
 
     private native long nativeEndsWith(long handle, int propertyId, String value, boolean caseSensitive);
 
+    private native long nativeLess(long handle, int propertyId, String value, boolean caseSensitive);
+
+    private native long nativeGreater(long handle, int propertyId, String value, boolean caseSensitive);
+
+    private native long nativeIn(long handle, int propertyId, String[] value, boolean caseSensitive);
+
     // ------------------------------ FPs ------------------------------
     private native long nativeLess(long handle, int propertyId, double value);
 
@@ -619,6 +625,36 @@ public class QueryBuilder<T> {
     public QueryBuilder<T> endsWith(Property<T> property, String value, StringOrder order) {
         verifyHandle();
         checkCombineCondition(nativeEndsWith(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
+        return this;
+    }
+
+    public QueryBuilder<T> less(Property<T> property, String value) {
+        return less(property, value, StringOrder.CASE_INSENSITIVE);
+    }
+
+    public QueryBuilder<T> less(Property<T> property, String value, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeLess(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
+        return this;
+    }
+
+    public QueryBuilder<T> greater(Property<T> property, String value) {
+        return greater(property, value, StringOrder.CASE_INSENSITIVE);
+    }
+
+    public QueryBuilder<T> greater(Property<T> property, String value, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeGreater(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
+        return this;
+    }
+
+    public QueryBuilder<T> in(Property<T> property, String[] values) {
+        return in(property, values, StringOrder.CASE_INSENSITIVE);
+    }
+
+    public QueryBuilder<T> in(Property<T> property, String[] values, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeIn(handle, property.getId(), values, order == StringOrder.CASE_SENSITIVE));
         return this;
     }
 

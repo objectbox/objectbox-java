@@ -440,6 +440,90 @@ public class PropertyQueryTest extends AbstractObjectBoxTest {
         assertEquals(6, stringQuery.distinct().count());
     }
 
+    @Test
+    public void testStringLess() {
+        putTestEntitiesStrings();
+        putTestEntity("BaNaNa Split", 100);
+        Query<TestEntity> query = box.query().less(simpleString, "banana juice").order(simpleString).build();
+        List<TestEntity> entities = query.find();
+        assertEquals(2, entities.size());
+        assertEquals("apple", entities.get(0).getSimpleString());
+        assertEquals("banana", entities.get(1).getSimpleString());
+
+        query.setParameter(simpleString, "BANANA MZ");
+        entities = query.find();
+        assertEquals(3, entities.size());
+        assertEquals("apple", entities.get(0).getSimpleString());
+        assertEquals("banana", entities.get(1).getSimpleString());
+        assertEquals("banana milk shake", entities.get(2).getSimpleString());
+
+        // Case sensitive
+        query = box.query().less(simpleString, "BANANA", StringOrder.CASE_SENSITIVE).order(simpleString).build();
+        assertEquals(0, query.count());
+
+        query.setParameter(simpleString, "banana a");
+        entities = query.find();
+        assertEquals(3, entities.size());
+        assertEquals("apple", entities.get(0).getSimpleString());
+        assertEquals("banana", entities.get(1).getSimpleString());
+        assertEquals("BaNaNa Split", entities.get(2).getSimpleString());
+    }
+
+    @Test
+    public void testStringGreater() {
+        putTestEntitiesStrings();
+        putTestEntity("FOO", 100);
+        Query<TestEntity> query = box.query().greater(simpleString, "banana juice").order(simpleString).build();
+        List<TestEntity> entities = query.find();
+        assertEquals(4, entities.size());
+        assertEquals("banana milk shake", entities.get(0).getSimpleString());
+        assertEquals("bar", entities.get(1).getSimpleString());
+        assertEquals("FOO", entities.get(2).getSimpleString());
+        assertEquals("foo bar", entities.get(3).getSimpleString());
+
+        query.setParameter(simpleString, "FO");
+        entities = query.find();
+        assertEquals(2, entities.size());
+        assertEquals("FOO", entities.get(0).getSimpleString());
+        assertEquals("foo bar", entities.get(1).getSimpleString());
+
+        // Case sensitive
+        query = box.query().greater(simpleString, "banana", StringOrder.CASE_SENSITIVE).order(simpleString).build();
+        entities = query.find();
+        assertEquals(3, entities.size());
+        assertEquals("banana milk shake", entities.get(0).getSimpleString());
+        assertEquals("bar", entities.get(1).getSimpleString());
+        assertEquals("foo bar", entities.get(2).getSimpleString());
+    }
+
+    @Test
+    public void testStringIn() {
+        putTestEntitiesStrings();
+        putTestEntity("BAR", 100);
+        String[] values = {"bar", "foo bar"};
+        Query<TestEntity> query = box.query().in(simpleString, values).order(simpleString, OrderFlags.CASE_SENSITIVE)
+                .build();
+        List<TestEntity> entities = query.find();
+        assertEquals(3, entities.size());
+        assertEquals("BAR", entities.get(0).getSimpleString());
+        assertEquals("bar", entities.get(1).getSimpleString());
+        assertEquals("foo bar", entities.get(2).getSimpleString());
+
+        String[] values2 = {"bar"};
+        query.setParameters(simpleString, values2);
+        entities = query.find();
+        assertEquals(2, entities.size());
+        assertEquals("BAR", entities.get(0).getSimpleString());
+        assertEquals("bar", entities.get(1).getSimpleString());
+
+        // Case sensitive
+        query = box.query().in(simpleString, values, StringOrder.CASE_SENSITIVE).order(simpleString).build();
+        entities = query.find();
+        assertEquals(2, entities.size());
+        assertEquals("bar", entities.get(0).getSimpleString());
+        assertEquals("foo bar", entities.get(1).getSimpleString());
+    }
+
     private List<TestEntity> putTestEntitiesScalars() {
         return putTestEntities(10, null, 2000);
     }
