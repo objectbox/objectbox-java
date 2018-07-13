@@ -453,6 +453,10 @@ public class QueryBuilder<T> {
         return this;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                              Integers
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public QueryBuilder<T> equal(Property<T> property, long value) {
         verifyHandle();
         checkCombineCondition(nativeEqual(handle, property.getId(), value));
@@ -554,27 +558,31 @@ public class QueryBuilder<T> {
         return this;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                              String
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public QueryBuilder<T> equal(Property<T> property, String value) {
         verifyHandle();
         checkCombineCondition(nativeEqual(handle, property.getId(), value, false));
         return this;
     }
 
-    // Help people with floating point equality...
-
-    /**
-     * Floating point equality is non-trivial; this is just a convenience for
-     * {@link #between(Property, double, double)} with parameters(property, value - tolerance, value + tolerance).
-     * When using {@link Query#setParameters(Property, double, double)},
-     * consider that the params are the lower and upper bounds.
-     */
-    public QueryBuilder<T> equal(Property<T> property, double value, double tolerance) {
-        return between(property, value - tolerance, value + tolerance);
+    public QueryBuilder<T> equal(Property<T> property, String value, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeEqual(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
+        return this;
     }
 
     public QueryBuilder<T> notEqual(Property<T> property, String value) {
         verifyHandle();
         checkCombineCondition(nativeNotEqual(handle, property.getId(), value, false));
+        return this;
+    }
+
+    public QueryBuilder<T> notEqual(Property<T> property, String value, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeNotEqual(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
         return this;
     }
 
@@ -596,18 +604,6 @@ public class QueryBuilder<T> {
         return this;
     }
 
-    public QueryBuilder<T> equal(Property<T> property, String value, StringOrder order) {
-        verifyHandle();
-        checkCombineCondition(nativeEqual(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
-        return this;
-    }
-
-    public QueryBuilder<T> notEqual(Property<T> property, String value, StringOrder order) {
-        verifyHandle();
-        checkCombineCondition(nativeNotEqual(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
-        return this;
-    }
-
     public QueryBuilder<T> contains(Property<T> property, String value, StringOrder order) {
         verifyHandle();
         checkCombineCondition(nativeContains(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
@@ -624,6 +620,23 @@ public class QueryBuilder<T> {
         verifyHandle();
         checkCombineCondition(nativeEndsWith(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
         return this;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                             Floating point
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // Help people with floating point equality...
+
+    /**
+     * Floating point equality is non-trivial; this is just a convenience for
+     * {@link #between(Property, double, double)} with parameters(property, value - tolerance, value + tolerance).
+     * When using {@link Query#setParameters(Property, double, double)},
+     * consider that the params are the lower and upper bounds.
+     */
+    public QueryBuilder<T> equal(Property<T> property, double value, double tolerance) {
+        return between(property, value - tolerance, value + tolerance);
     }
 
     public QueryBuilder<T> less(Property<T> property, double value) {
