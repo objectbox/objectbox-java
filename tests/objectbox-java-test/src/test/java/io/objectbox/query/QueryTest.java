@@ -16,7 +16,6 @@
 
 package io.objectbox.query;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -26,7 +25,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
@@ -41,22 +39,21 @@ import io.objectbox.relation.MyObjectBox;
 import io.objectbox.relation.Order;
 import io.objectbox.relation.Order_;
 
-import static io.objectbox.TestEntity_.*;
-import static org.junit.Assert.*;
 
-public class QueryTest extends AbstractObjectBoxTest {
+import static io.objectbox.TestEntity_.simpleBoolean;
+import static io.objectbox.TestEntity_.simpleFloat;
+import static io.objectbox.TestEntity_.simpleInt;
+import static io.objectbox.TestEntity_.simpleLong;
+import static io.objectbox.TestEntity_.simpleShort;
+import static io.objectbox.TestEntity_.simpleString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-    private Box<TestEntity> box;
-
-    @Override
-    protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
-        return super.createBoxStoreBuilder(withIndex).debugFlags(DebugFlags.LOG_QUERY_PARAMETERS);
-    }
-
-    @Before
-    public void setUpBox() {
-        box = getTestEntityBox();
-    }
+public class QueryTest extends AbstractQueryTest {
 
     @Test
     public void testBuild() {
@@ -266,6 +263,90 @@ public class QueryTest extends AbstractObjectBoxTest {
         assertEquals(4, box.query().startsWith(simpleString, "ba").endsWith(simpleString, "shake").build().findUnique()
                 .getId());
         assertEquals(2, box.query().contains(simpleString, "nana").build().count());
+    }
+
+    @Test
+    public void testStringLess() {
+        putTestEntitiesStrings();
+        putTestEntity("BaNaNa Split", 100);
+        Query<TestEntity> query = box.query().less(simpleString, "banana juice").order(simpleString).build();
+        List<TestEntity> entities = query.find();
+        assertEquals(2, entities.size());
+        assertEquals("apple", entities.get(0).getSimpleString());
+        assertEquals("banana", entities.get(1).getSimpleString());
+
+        query.setParameter(simpleString, "BANANA MZ");
+        entities = query.find();
+        assertEquals(3, entities.size());
+        assertEquals("apple", entities.get(0).getSimpleString());
+        assertEquals("banana", entities.get(1).getSimpleString());
+        assertEquals("banana milk shake", entities.get(2).getSimpleString());
+
+        // Case sensitive
+        query = box.query().less(simpleString, "BANANA", StringOrder.CASE_SENSITIVE).order(simpleString).build();
+        assertEquals(0, query.count());
+
+        query.setParameter(simpleString, "banana a");
+        entities = query.find();
+        assertEquals(3, entities.size());
+        assertEquals("apple", entities.get(0).getSimpleString());
+        assertEquals("banana", entities.get(1).getSimpleString());
+        assertEquals("BaNaNa Split", entities.get(2).getSimpleString());
+    }
+
+    @Test
+    public void testStringGreater() {
+        putTestEntitiesStrings();
+        putTestEntity("FOO", 100);
+        Query<TestEntity> query = box.query().greater(simpleString, "banana juice").order(simpleString).build();
+        List<TestEntity> entities = query.find();
+        assertEquals(4, entities.size());
+        assertEquals("banana milk shake", entities.get(0).getSimpleString());
+        assertEquals("bar", entities.get(1).getSimpleString());
+        assertEquals("FOO", entities.get(2).getSimpleString());
+        assertEquals("foo bar", entities.get(3).getSimpleString());
+
+        query.setParameter(simpleString, "FO");
+        entities = query.find();
+        assertEquals(2, entities.size());
+        assertEquals("FOO", entities.get(0).getSimpleString());
+        assertEquals("foo bar", entities.get(1).getSimpleString());
+
+        // Case sensitive
+        query = box.query().greater(simpleString, "banana", StringOrder.CASE_SENSITIVE).order(simpleString).build();
+        entities = query.find();
+        assertEquals(3, entities.size());
+        assertEquals("banana milk shake", entities.get(0).getSimpleString());
+        assertEquals("bar", entities.get(1).getSimpleString());
+        assertEquals("foo bar", entities.get(2).getSimpleString());
+    }
+
+    @Test
+    public void testStringIn() {
+        putTestEntitiesStrings();
+        putTestEntity("BAR", 100);
+        String[] values = {"bar", "foo bar"};
+        Query<TestEntity> query = box.query().in(simpleString, values).order(simpleString, OrderFlags.CASE_SENSITIVE)
+                .build();
+        List<TestEntity> entities = query.find();
+        assertEquals(3, entities.size());
+        assertEquals("BAR", entities.get(0).getSimpleString());
+        assertEquals("bar", entities.get(1).getSimpleString());
+        assertEquals("foo bar", entities.get(2).getSimpleString());
+
+        String[] values2 = {"bar"};
+        query.setParameters(simpleString, values2);
+        entities = query.find();
+        assertEquals(2, entities.size());
+        assertEquals("BAR", entities.get(0).getSimpleString());
+        assertEquals("bar", entities.get(1).getSimpleString());
+
+        // Case sensitive
+        query = box.query().in(simpleString, values, StringOrder.CASE_SENSITIVE).order(simpleString).build();
+        entities = query.find();
+        assertEquals(2, entities.size());
+        assertEquals("bar", entities.get(0).getSimpleString());
+        assertEquals("foo bar", entities.get(1).getSimpleString());
     }
 
     @Test
@@ -613,24 +694,6 @@ public class QueryTest extends AbstractObjectBoxTest {
                 return entity.getSimpleString().contains("e");
             }
         };
-    }
-
-    /**
-     * Puts 10 TestEntity starting at nr 2000 using {@link AbstractObjectBoxTest#createTestEntity(String, int)}.
-     */
-    private List<TestEntity> putTestEntitiesScalars() {
-        return putTestEntities(10, null, 2000);
-    }
-
-    private List<TestEntity> putTestEntitiesStrings() {
-        List<TestEntity> entities = new ArrayList<>();
-        entities.add(createTestEntity("banana", 1));
-        entities.add(createTestEntity("apple", 2));
-        entities.add(createTestEntity("bar", 3));
-        entities.add(createTestEntity("banana milk shake", 4));
-        entities.add(createTestEntity("foo bar", 5));
-        box.put(entities);
-        return entities;
     }
 
 }
