@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2018 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,6 @@ public class QueryBuilder<T> {
 
     private native void nativeSetParameterAlias(long conditionHandle, String alias);
 
-
     // ------------------------------ (Not)Null------------------------------
 
     private native long nativeNull(long handle, int propertyId);
@@ -161,11 +160,20 @@ public class QueryBuilder<T> {
     private native long nativeIn(long handle, int propertyId, String[] value, boolean caseSensitive);
 
     // ------------------------------ FPs ------------------------------
+
     private native long nativeLess(long handle, int propertyId, double value);
 
     private native long nativeGreater(long handle, int propertyId, double value);
 
     private native long nativeBetween(long handle, int propertyId, double value1, double value2);
+
+    // ------------------------------ Bytes ------------------------------
+
+    private native long nativeEqual(long handle, int propertyId, byte[] value);
+
+    private native long nativeLess(long handle, int propertyId, byte[] value);
+
+    private native long nativeGreater(long handle, int propertyId, byte[] value);
 
     @Internal
     public QueryBuilder(Box<T> box, long storeHandle, String entityName) {
@@ -279,6 +287,21 @@ public class QueryBuilder<T> {
 
     public QueryBuilder<T> sort(Comparator<T> comparator) {
         this.comparator = comparator;
+        return this;
+    }
+
+
+    /**
+     * Asigns the given alias to the previous condition.
+     *
+     * @param alias The string alias for use with setParameter(s) methods.
+     */
+    public QueryBuilder<T> parameterAlias(String alias) {
+        verifyHandle();
+        if (lastCondition == 0) {
+            throw new IllegalStateException("No previous condition. Before you can assign an alias, you must first have a condition.");
+        }
+        nativeSetParameterAlias(lastCondition, alias);
         return this;
     }
 
@@ -693,12 +716,25 @@ public class QueryBuilder<T> {
         return this;
     }
 
-    public QueryBuilder<T> parameterAlias(String alias) {
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                                 Bytes
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public QueryBuilder<T> equal(Property<T> property, byte[] value) {
         verifyHandle();
-        if (lastCondition == 0) {
-            throw new IllegalStateException("No previous condition. Before you can assign an alias, you must first have a condition.");
-        }
-        nativeSetParameterAlias(lastCondition, alias);
+        checkCombineCondition(nativeEqual(handle, property.getId(), value));
+        return this;
+    }
+
+    public QueryBuilder<T> less(Property<T> property, byte[] value) {
+        verifyHandle();
+        checkCombineCondition(nativeLess(handle, property.getId(), value));
+        return this;
+    }
+
+    public QueryBuilder<T> greater(Property<T> property, byte[] value) {
+        verifyHandle();
+        checkCombineCondition(nativeGreater(handle, property.getId(), value));
         return this;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2018 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import io.objectbox.relation.ToOne;
  * @see QueryBuilder
  */
 @SuppressWarnings({"SameParameterValue", "UnusedReturnValue", "WeakerAccess"})
-@Beta
 public class Query<T> {
 
     native void nativeDestroy(long handle);
@@ -86,6 +85,9 @@ public class Query<T> {
 
     native void nativeSetParameters(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
                                     String[] values);
+
+    native void nativeSetParameter(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
+                                   byte[] value);
 
     final Box<T> box;
     private final BoxStore store;
@@ -595,6 +597,24 @@ public class Query<T> {
      */
     public Query<T> setParameters(String alias, String[] values) {
         nativeSetParameters(handle, 0, 0, alias, values);
+        return this;
+    }
+
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     */
+    public Query<T> setParameter(Property property, byte[] value) {
+        nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
+        return this;
+    }
+
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     *
+     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     */
+    public Query<T> setParameter(String alias, byte[] value) {
+        nativeSetParameter(handle, 0, 0, alias, value);
         return this;
     }
 
