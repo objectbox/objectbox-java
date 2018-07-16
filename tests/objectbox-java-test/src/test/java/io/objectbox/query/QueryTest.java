@@ -186,16 +186,37 @@ public class QueryTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testScalarNotIn() {
+    public void testIntNotIn() {
         putTestEntitiesScalars();
 
         int[] valuesInt = {1, 1, 2, 3, 2003, 2007, 2002, -1};
-        Query<TestEntity> query = box.query().notIn(simpleInt, valuesInt).build();
+        Query<TestEntity> query = box.query().notIn(simpleInt, valuesInt).parameterAlias("int").build();
         assertEquals(7, query.count());
 
+        int[] valuesInt2 = {2003};
+        query.setParameters(simpleInt, valuesInt2);
+        assertEquals(9, query.count());
+
+        int[] valuesInt3 = {2003, 2007};
+        query.setParameters("int", valuesInt3);
+        assertEquals(8, query.count());
+    }
+
+    @Test
+    public void testLongNotIn() {
+        putTestEntitiesScalars();
+
         long[] valuesLong = {1, 1, 2, 3, 3003, 3007, 3002, -1};
-        query = box.query().notIn(simpleLong, valuesLong).build();
+        Query<TestEntity> query = box.query().notIn(simpleLong, valuesLong).parameterAlias("long").build();
         assertEquals(7, query.count());
+
+        long[] valuesLong2 = {3003};
+        query.setParameters(simpleLong, valuesLong2);
+        assertEquals(9, query.count());
+
+        long[] valuesLong3 = {3003, 3007};
+        query.setParameters("long", valuesLong3);
+        assertEquals(8, query.count());
     }
 
     @Test
