@@ -19,6 +19,7 @@ package io.objectbox.query;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -41,12 +42,14 @@ import io.objectbox.relation.Order_;
 
 
 import static io.objectbox.TestEntity_.simpleBoolean;
+import static io.objectbox.TestEntity_.simpleByteArray;
 import static io.objectbox.TestEntity_.simpleFloat;
 import static io.objectbox.TestEntity_.simpleInt;
 import static io.objectbox.TestEntity_.simpleLong;
 import static io.objectbox.TestEntity_.simpleShort;
 import static io.objectbox.TestEntity_.simpleString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -347,6 +350,65 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(2, entities.size());
         assertEquals("bar", entities.get(0).getSimpleString());
         assertEquals("foo bar", entities.get(1).getSimpleString());
+    }
+
+    @Test
+    public void testByteArrayEqualsAndSetParameter() {
+        putTestEntitiesScalars();
+
+        byte[] value = {1, 2, (byte) 2000};
+        Query<TestEntity> query = box.query().equal(simpleByteArray, value).parameterAlias("bytes").build();
+
+        assertEquals(1, query.count());
+        TestEntity first = query.findFirst();
+        assertNotNull(first);
+        assertTrue(Arrays.equals(value, first.getSimpleByteArray()));
+
+        byte[] value2 = {1, 2, (byte) 2001};
+        query.setParameter(simpleByteArray, value2);
+
+        assertEquals(1, query.count());
+        TestEntity first2 = query.findFirst();
+        assertNotNull(first2);
+        assertTrue(Arrays.equals(value2, first2.getSimpleByteArray()));
+
+        byte[] value3 = {1, 2, (byte) 2002};
+        query.setParameter("bytes", value3);
+
+        assertEquals(1, query.count());
+        TestEntity first3 = query.findFirst();
+        assertNotNull(first3);
+        assertTrue(Arrays.equals(value3, first3.getSimpleByteArray()));
+    }
+
+    @Test
+    public void testByteArrayLess() {
+        putTestEntitiesScalars();
+
+        byte[] value = {1, 2, (byte) 2005};
+        Query<TestEntity> query = box.query().less(simpleByteArray, value).build();
+        List<TestEntity> results = query.find();
+
+        assertEquals(5, results.size());
+        // Java does not have compareTo for arrays, so just make sure its not equal to the value
+        for (TestEntity result : results) {
+            assertFalse(Arrays.equals(value, result.getSimpleByteArray()));
+        }
+    }
+
+    @Test
+    public void testByteArrayGreater() {
+        putTestEntitiesScalars();
+
+        byte[] value = {1, 2, (byte) 2005};
+        Query<TestEntity> query = box.query().greater(simpleByteArray, value).build();
+        List<TestEntity> results = query.find();
+
+        assertEquals(4, results.size());
+        // Java does not have compareTo for arrays, so just make sure its not equal to the value
+        for (TestEntity result : results) {
+            assertFalse(Arrays.equals(value, result.getSimpleByteArray()));
+        }
     }
 
     @Test

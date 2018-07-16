@@ -219,6 +219,7 @@ public abstract class AbstractObjectBoxTest {
         entity.setSimpleLong(1000 + nr);
         entity.setSimpleFloat(200 + nr / 10f);
         entity.setSimpleDouble(2000 + nr / 100f);
+        entity.setSimpleByteArray(new byte[]{1, 2, (byte) nr});
         return entity;
     }
 
