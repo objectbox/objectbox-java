@@ -152,16 +152,37 @@ public class QueryTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testScalarIn() {
+    public void testIntIn() {
         putTestEntitiesScalars();
 
         int[] valuesInt = {1, 1, 2, 3, 2003, 2007, 2002, -1};
-        Query<TestEntity> query = box.query().in(simpleInt, valuesInt).build();
+        Query<TestEntity> query = box.query().in(simpleInt, valuesInt).parameterAlias("int").build();
         assertEquals(3, query.count());
 
+        int[] valuesInt2 = {2003};
+        query.setParameters(simpleInt, valuesInt2);
+        assertEquals(1, query.count());
+
+        int[] valuesInt3 = {2003, 2007};
+        query.setParameters("int", valuesInt3);
+        assertEquals(2, query.count());
+    }
+
+    @Test
+    public void testLongIn() {
+        putTestEntitiesScalars();
+
         long[] valuesLong = {1, 1, 2, 3, 3003, 3007, 3002, -1};
-        query = box.query().in(simpleLong, valuesLong).build();
+        Query<TestEntity> query = box.query().in(simpleLong, valuesLong).parameterAlias("long").build();
         assertEquals(3, query.count());
+
+        long[] valuesLong2 = {3003};
+        query.setParameters(simpleLong, valuesLong2);
+        assertEquals(1, query.count());
+
+        long[] valuesLong3 = {3003, 3007};
+        query.setParameters("long", valuesLong3);
+        assertEquals(2, query.count());
     }
 
     @Test
@@ -573,6 +594,9 @@ public class QueryTest extends AbstractObjectBoxTest {
         };
     }
 
+    /**
+     * Puts 10 TestEntity starting at nr 2000 using {@link AbstractObjectBoxTest#createTestEntity(String, int)}.
+     */
     private List<TestEntity> putTestEntitiesScalars() {
         return putTestEntities(10, null, 2000);
     }
