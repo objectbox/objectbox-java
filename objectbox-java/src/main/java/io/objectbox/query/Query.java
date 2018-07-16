@@ -70,6 +70,12 @@ public class Query<T> {
                                    long value);
 
     native void nativeSetParameters(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
+                                    int[] values);
+
+    native void nativeSetParameters(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
+                                    long[] values);
+
+    native void nativeSetParameters(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
                                     long value1, long value2);
 
     native void nativeSetParameter(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
@@ -517,6 +523,42 @@ public class Query<T> {
      */
     public Query<T> setParameters(String alias, long value1, long value2) {
         nativeSetParameters(handle, 0, 0, alias, value1, value2);
+        return this;
+    }
+
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     */
+    public Query<T> setParameters(Property property, int[] values) {
+        nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
+        return this;
+    }
+
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     *
+     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     */
+    public Query<T> setParameters(String alias, int[] values) {
+        nativeSetParameters(handle, 0, 0, alias, values);
+        return this;
+    }
+
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     */
+    public Query<T> setParameters(Property property, long[] values) {
+        nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
+        return this;
+    }
+
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     *
+     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     */
+    public Query<T> setParameters(String alias, long[] values) {
+        nativeSetParameters(handle, 0, 0, alias, values);
         return this;
     }
 
