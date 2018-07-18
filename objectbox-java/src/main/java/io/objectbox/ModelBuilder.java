@@ -63,6 +63,7 @@ public class ModelBuilder {
         private long uid;
         private int indexId;
         private long indexUid;
+        private int indexMaxValueLength;
 
         PropertyBuilder(String name, @Nullable String targetEntityName, @Nullable String virtualTarget, int type) {
             this.type = type;
@@ -82,6 +83,12 @@ public class ModelBuilder {
             checkNotFinished();
             this.indexId = indexId;
             this.indexUid = indexUid;
+            return this;
+        }
+
+        public PropertyBuilder indexMaxValueLength(int indexMaxValueLength) {
+            checkNotFinished();
+            this.indexMaxValueLength = indexMaxValueLength;
             return this;
         }
 
@@ -124,6 +131,9 @@ public class ModelBuilder {
             if (indexId != 0) {
                 int indexIdOffset = IdUid.createIdUid(fbb, indexId, indexUid);
                 ModelProperty.addIndexId(fbb, indexIdOffset);
+            }
+            if (indexMaxValueLength > 0) {
+                ModelProperty.addMaxIndexValueLength(fbb, indexMaxValueLength);
             }
             ModelProperty.addType(fbb, type);
             if (flags != 0) {
