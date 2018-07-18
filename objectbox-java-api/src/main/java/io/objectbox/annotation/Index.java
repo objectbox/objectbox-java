@@ -21,6 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import io.objectbox.annotation.apihint.Internal;
+
 /**
  * Specifies that the property should be indexed, which is highly recommended if you do queries using this property.
  *
@@ -31,7 +33,13 @@ import java.lang.annotation.Target;
 public @interface Index {
     IndexType type() default IndexType.DEFAULT;
 
-    /** Only allowed for {@link IndexType#VALUE} and types String and byte[]. */
+    /**
+     * Not implemented yet!!
+     * Limit the length of index values (see {@link IndexType#VALUE}) for property types String and byte[].
+     * This can save storage for long values if the differ in the beginning.
+     * Valid values are in the range of 1-450.
+     */
+    @Internal // Not really internal, but not yet implemented
     int maxValueLength() default 0;
 
 }
