@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2018 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractObjectBoxTest {
+    private static boolean printedVersionsOnce;
+
     protected File boxStoreDir;
     protected BoxStore store;
     protected Random random = new Random();
@@ -58,6 +60,14 @@ public abstract class AbstractObjectBoxTest {
         File tempFile = File.createTempFile("object-store-test", "");
         tempFile.delete();
         boxStoreDir = tempFile;
+
+        if (!printedVersionsOnce) {
+            System.out.println("ObjectBox Java version: " + BoxStore.getVersion());
+            System.out.println("ObjectBox Core version: " + BoxStore.getVersionNative());
+            System.out.println("First DB dir: " + boxStoreDir);
+            printedVersionsOnce = true;
+        }
+
         store = createBoxStore();
         runExtensiveTests = System.getProperty("extensive-tests") != null;
     }
