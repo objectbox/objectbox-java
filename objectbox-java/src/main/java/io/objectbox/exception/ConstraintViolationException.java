@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package io.objectbox.exception;
 
-/** Thrown when a @{@link io.objectbox.annotation.Unique} constraint would be violated during a put operation. */
-public class UniqueViolationException extends ConstraintViolationException {
-    public UniqueViolationException(String message) {
+/** Base class for exceptions thrown when a constraint would be violated during a put operation. */
+public class ConstraintViolationException extends DbException {
+    public ConstraintViolationException(String message) {
         super(message);
     }
 }
