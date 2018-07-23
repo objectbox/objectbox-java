@@ -41,7 +41,7 @@ public final class PropertyFlags {
    */
   public static final int RESERVED = 16;
   /**
-   * Unused yet: Unique index
+   * Unique index
    */
   public static final int UNIQUE = 32;
   /**
