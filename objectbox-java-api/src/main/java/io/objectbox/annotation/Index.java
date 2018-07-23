@@ -26,20 +26,10 @@ import io.objectbox.annotation.apihint.Internal;
 /**
  * Specifies that the property should be indexed, which is highly recommended if you do queries using this property.
  *
- * To fine tune indexing you can specify {@link IndexType} and/or use {@link #maxValueLength()} if necessary.
+ * To fine tune indexing you can specify {@link IndexType} if necessary.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 public @interface Index {
     IndexType type() default IndexType.DEFAULT;
-
-    /**
-     * Not implemented yet!!
-     * Limit the length of index values (see {@link IndexType#VALUE}) for property types String and byte[].
-     * This can save storage for long values if the differ in the beginning.
-     * Valid values are in the range of 1-450.
-     */
-    @Internal // Not really internal, but not yet implemented
-    int maxValueLength() default 0;
-
 }
