@@ -234,30 +234,6 @@ public class QueryTest extends AbstractQueryTest {
     }
 
     @Test
-    public void testAggregates() {
-        putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().less(simpleInt, 2002).build();
-        assertEquals(2000.5, query.avg(simpleInt), 0.0001);
-        assertEquals(2000, query.min(simpleInt), 0.0001);
-        assertEquals(400, query.minDouble(simpleFloat), 0.001);
-        assertEquals(2001, query.max(simpleInt), 0.0001);
-        assertEquals(400.1, query.maxDouble(simpleFloat), 0.001);
-        assertEquals(4001, query.sum(simpleInt), 0.0001);
-        assertEquals(800.1, query.sumDouble(simpleFloat), 0.001);
-    }
-
-    @Test
-    public void testSumDoubleOfFloats() {
-        TestEntity entity = new TestEntity();
-        entity.setSimpleFloat(0);
-        TestEntity entity2 = new TestEntity();
-        entity2.setSimpleFloat(-2.05f);
-        box.put(entity, entity2);
-        double sum = box.query().build().sumDouble(simpleFloat);
-        assertEquals(-2.05, sum, 0.0001);
-    }
-
-    @Test
     public void testString() {
         List<TestEntity> entities = putTestEntitiesStrings();
         int count = entities.size();

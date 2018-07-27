@@ -433,4 +433,31 @@ public class PropertyQueryTest extends AbstractQueryTest {
         assertEquals(6, stringQuery.distinct().count());
     }
 
+
+    @Test
+    public void testAggregates() {
+        putTestEntitiesScalars();
+        Query<TestEntity> query = box.query().less(simpleInt, 2002).build();
+        PropertyQuery intQuery = query.property(simpleInt);
+        PropertyQuery floatQuery = query.property(simpleFloat);
+        assertEquals(2000.5, intQuery.avg(), 0.0001);
+        assertEquals(2000, intQuery.min(), 0.0001);
+        assertEquals(400, floatQuery.minDouble(), 0.001);
+        assertEquals(2001, intQuery.max(), 0.0001);
+        assertEquals(400.1, floatQuery.maxDouble(), 0.001);
+        assertEquals(4001, intQuery.sum(), 0.0001);
+        assertEquals(800.1, floatQuery.sumDouble(), 0.001);
+    }
+
+    @Test
+    public void testSumDoubleOfFloats() {
+        TestEntity entity = new TestEntity();
+        entity.setSimpleFloat(0);
+        TestEntity entity2 = new TestEntity();
+        entity2.setSimpleFloat(-2.05f);
+        box.put(entity, entity2);
+        double sum = box.query().build().property(simpleFloat).sumDouble();
+        assertEquals(-2.05, sum, 0.0001);
+    }
+
 }
