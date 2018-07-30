@@ -169,7 +169,7 @@ public class Query<T> {
     /**
      * Find the unique Object matching the query.
      *
-     * @throws io.objectbox.exception.DbException if result was not unique
+     * @throws io.objectbox.exception.NonUniqueResultException if result was not unique
      */
     @Nullable
     public T findUnique() {

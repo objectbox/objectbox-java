@@ -33,8 +33,8 @@ import io.objectbox.DebugFlags;
 import io.objectbox.TestEntity;
 import io.objectbox.TestEntity_;
 import io.objectbox.TxCallback;
-import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbExceptionListener;
+import io.objectbox.exception.NonUniqueResultException;
 import io.objectbox.query.QueryBuilder.StringOrder;
 import io.objectbox.relation.MyObjectBox;
 import io.objectbox.relation.Order;
@@ -720,7 +720,7 @@ public class QueryTest extends AbstractQueryTest {
         try {
             query.findUnique();
             fail("Should have thrown");
-        } catch (DbException e) {
+        } catch (NonUniqueResultException e) {
             assertSame(e, exs[0]);
         }
     }
