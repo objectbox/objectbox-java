@@ -21,7 +21,7 @@ Adding the library to your project
 -----------------
 Grab via Gradle:
 ```gradle
-compile 'io.objectbox:objectbox-rxjava:objectboxVersion'
+implementation "io.objectbox:objectbox-rxjava:$objectboxVersion"
 ```
 
 Links
