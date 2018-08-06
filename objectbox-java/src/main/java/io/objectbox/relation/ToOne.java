@@ -112,7 +112,6 @@ public class ToOne<TARGET> implements Serializable {
             Field boxStoreField = ReflectionCache.getInstance().getField(entity.getClass(), "__boxStore");
             try {
                 boxStore = (BoxStore) boxStoreField.get(entity);
-                debugRelations = boxStore.isDebugRelations();
                 if (boxStore == null) {
                     if (target != null) {
                         boxStoreField = ReflectionCache.getInstance().getField(target.getClass(), "__boxStore");
@@ -123,6 +122,7 @@ public class ToOne<TARGET> implements Serializable {
                                 "call box.attach(entity) beforehand.");
                     }
                 }
+                debugRelations = boxStore.isDebugRelations();
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
