@@ -3,7 +3,7 @@ version = ob_version
 
 buildscript {
     ext {
-        ob_version = '2.0.0'
+        ob_version = '2.1.0'
         ob_native_version = ob_version // Be careful to diverge here; easy to forget and hard to find JNI problems
         ob_expected_version = project.hasProperty('expectedVersion') ? project.property('expectedVersion') : 'UNDEFINED'
 
