@@ -227,7 +227,7 @@ public class BoxStoreBuilder {
     }
 
     /**
-     * Sets the maximum number of concurrent readers. For most applications, the default is fine (> 100 readers).
+     * Sets the maximum number of concurrent readers. For most applications, the default is fine (&gt; 100 readers).
      * <p>
      * A "reader" is short for a thread involved in a read transaction.
      * <p>

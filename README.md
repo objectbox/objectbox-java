@@ -3,7 +3,7 @@
 # ObjectBox Java (Kotlin, Android)
 ObjectBox is a superfast object-oriented database with strong relation support. ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
-**Latest version: [2.0.0 (2018/07/25)](http://objectbox.io/changelog)**
+**Latest version: [2.1.0 (2018/08/15)](https://objectbox.io/changelog)**
 
 Demo code using ObjectBox:
 
@@ -20,7 +20,7 @@ Add this to your root build.gradle (project level):
 
 ```groovy
 buildscript {
-    ext.objectboxVersion = '2.0.0'
+    ext.objectboxVersion = '2.1.0'
     dependencies {
         classpath "io.objectbox:objectbox-gradle-plugin:$objectboxVersion"
     }
