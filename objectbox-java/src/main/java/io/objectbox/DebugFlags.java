@@ -27,9 +27,8 @@ public final class DebugFlags {
   public static final int LOG_TRANSACTIONS_WRITE = 2;
   public static final int LOG_QUERIES = 4;
   public static final int LOG_QUERY_PARAMETERS = 8;
-
-  public static final String[] names = { "LOG_TRANSACTIONS_READ", "LOG_TRANSACTIONS_WRITE", "", "LOG_QUERIES", "", "", "", "LOG_QUERY_PARAMETERS", };
-
-  public static String name(int e) { return names[e - LOG_TRANSACTIONS_READ]; }
+  public static final int LOG_ASYNC_QUEUE = 16;
+  public static final int LOG_CACHE_HITS = 32;
+  public static final int LOG_CACHE_ALL = 64;
 }
 
