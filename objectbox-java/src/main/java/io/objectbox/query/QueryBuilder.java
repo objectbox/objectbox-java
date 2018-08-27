@@ -323,8 +323,9 @@ public class QueryBuilder<T> {
     private <TARGET> QueryBuilder<TARGET> link(RelationInfo relationInfo, EntityInfo relationOwner, EntityInfo target,
                                                boolean backlink) {
         int propertyId = relationInfo.targetIdProperty != null ? relationInfo.targetIdProperty.id : 0;
+        int relationId = relationInfo.targetRelationId != 0 ? relationInfo.targetRelationId : relationInfo.relationId;
         long linkQBHandle = nativeLink(handle, storeHandle, relationOwner.getEntityId(), target.getEntityId(),
-                propertyId, relationInfo.relationId, backlink);
+                propertyId, relationId, backlink);
         return new QueryBuilder<>(storeHandle, linkQBHandle);
     }
 
