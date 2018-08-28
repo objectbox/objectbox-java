@@ -79,7 +79,7 @@ public class ToOne<TARGET> implements Serializable {
         }
         this.entity = sourceEntity;
         this.relationInfo = relationInfo;
-        virtualProperty = relationInfo.targetIdProperty == null;
+        virtualProperty = relationInfo.targetIdProperty.isVirtual;
     }
 
     /**
