@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 public class ToOneTest extends AbstractRelationTest {
 
     @Test
-    public void testTargetId_withTargetIdProperty() {
+    public void testTargetId_regularTargetIdProperty() {
         Order entity = putOrder(null, null);
         ToOne<Customer> toOne = new ToOne<>(entity, getRelationInfo(Order_.customerId));
         entity.setCustomerId(1042);
@@ -49,10 +49,15 @@ public class ToOneTest extends AbstractRelationTest {
         return new RelationInfo<>(new Order_(), new Customer_(), targetIdProperty, null);
     }
 
+    private RelationInfo<Order, Customer> getRelationInfoVirtualTargetProperty() {
+        Property<Order> virtualTargetProperty = new Property<>(Order_.__INSTANCE, 2, 3, long.class, "customerId", true);
+        return new RelationInfo<>(new Order_(), new Customer_(), virtualTargetProperty, null);
+    }
+
     @Test
-    public void testTargetId_noTargetIdProperty() {
+    public void testTargetId_virtualTargetIdProperty() {
         Order entity = putOrder(null, null);
-        ToOne<Customer> toOne = new ToOne<>(entity, getRelationInfo(null));
+        ToOne<Customer> toOne = new ToOne<>(entity, getRelationInfoVirtualTargetProperty());
         entity.setCustomerId(1042);
         assertEquals(0, toOne.getTargetId());
         toOne.setTargetId(1977);
@@ -71,15 +76,15 @@ public class ToOneTest extends AbstractRelationTest {
         customerBox.put(target, target2);
         Order source = putOrder(null, null);
 
-        // Without customerId
-        ToOne<Customer> toOne = new ToOne<>(source, getRelationInfo(null));
+        // With virtual customerId
+        ToOne<Customer> toOne = new ToOne<>(source, getRelationInfoVirtualTargetProperty());
         toOne.setTargetId(1977);
         assertEquals("target1", toOne.getTarget().getName());
 
         toOne.setTarget(target2);
         assertEquals(target2.getId(), toOne.getTargetId());
 
-        // With customerId
+        // With regular customerId
         toOne = new ToOne<>(source, getRelationInfo(Order_.customerId));
         source.setCustomerId(1977);
         assertEquals("target1", toOne.getTarget().getName());

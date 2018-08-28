@@ -44,6 +44,7 @@ public class Property<ENTITY> implements Serializable {
 
     public final String name;
     public final boolean isId;
+    public final boolean isVirtual;
     public final String dbName;
     public final Class<? extends PropertyConverter> converterClass;
 
@@ -58,6 +59,10 @@ public class Property<ENTITY> implements Serializable {
         this(entity, ordinal, id, type, name, false, name, null, null);
     }
 
+    public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name, boolean isVirtual) {
+        this(entity, ordinal, id, type, name, false, isVirtual, name, null, null);
+    }
+
     public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name, boolean isId,
                     @Nullable String dbName) {
         this(entity, ordinal, id, type, name, isId, dbName, null, null);
@@ -66,12 +71,19 @@ public class Property<ENTITY> implements Serializable {
     public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name, boolean isId,
                     @Nullable String dbName, @Nullable Class<? extends PropertyConverter> converterClass,
                     @Nullable Class customType) {
+        this(entity, ordinal, id, type, name, isId, false, dbName, converterClass, customType);
+    }
+
+    public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name, boolean isId,
+                    boolean isVirtual, @Nullable String dbName,
+                    @Nullable Class<? extends PropertyConverter> converterClass, @Nullable Class customType) {
         this.entity = entity;
         this.ordinal = ordinal;
         this.id = id;
         this.type = type;
         this.name = name;
         this.isId = isId;
+        this.isVirtual = isVirtual;
         this.dbName = dbName;
         this.converterClass = converterClass;
         this.customType = customType;
