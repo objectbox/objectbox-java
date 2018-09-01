@@ -33,8 +33,8 @@ import java.net.URLConnection;
  */
 public class NativeLibraryLoader {
     static {
-        String libname = "objectbox";
-        String filename = "objectbox.so";
+        String libname = "objectbox-jni";
+        String filename = libname + ".so";
         boolean isLinux = false;
         // For Android, os.name is also "Linux", so we need an extra check
         // Is not completely reliable (e.g. Vivo devices), see workaround on load failure
@@ -72,7 +72,7 @@ public class NativeLibraryLoader {
             } catch (UnsatisfiedLinkError e) {
                 if (!android && isLinux) {
                     // maybe is Android, but check failed: try loading Android lib
-                    System.loadLibrary("objectbox");
+                    System.loadLibrary("objectbox-jni");
                 } else {
                     throw e;
                 }
