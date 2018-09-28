@@ -1,9 +1,10 @@
 <img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png">
 
 # ObjectBox Java (Kotlin, Android)
-ObjectBox is a superfast object-oriented database with strong relation support. ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
+ObjectBox is a superfast object-oriented database with strong relation support.
+ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
-**Latest version: [2.1.0 (2018/08/15)](https://objectbox.io/changelog)**
+**Latest version: [2.2.0 (2018/09/27)](https://objectbox.io/changelog)**
 
 Demo code using ObjectBox:
 
@@ -14,13 +15,21 @@ playlist.songs.add(new Song("Lololo"));
 box.put(playlist);
 ```
 
+Other languages/bindings
+------------------------
+ObjectBox is a multi platform database supporting multiple language.
+Besides JVM based languages like Java and Kotlin, ObjectBox also offers: 
+
+* [ObjectBox C API](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
+* ObjectBox Swift: [coming soon](https://objectbox.io/ios-alpha/)
+
 Gradle setup
 ------------
 Add this to your root build.gradle (project level): 
 
 ```groovy
 buildscript {
-    ext.objectboxVersion = '2.1.0'
+    ext.objectboxVersion = '2.2.0'
     dependencies {
         classpath "io.objectbox:objectbox-gradle-plugin:$objectboxVersion"
     }
