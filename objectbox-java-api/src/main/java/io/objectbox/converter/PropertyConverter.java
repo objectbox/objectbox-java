@@ -23,6 +23,8 @@ package io.objectbox.converter;
  * <ul>
  * <li>Converters are created by the default constructor</li>
  * <li>Converters must be implemented thread-safe</li>
+ * <li>Converters must not interact with the database (such as using Box or BoxStore)</li>
+ * <li>Converters must handle null values</li>
  * </ul>
  */
 public interface PropertyConverter<P, D> {
