@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
  * Enforces that the value of a property is unique among all objects in a box before an object can be put.
  * <p>
  * Trying to put an object with offending values will result in a UniqueViolationException.
+ * Specify a {@link ConflictStrategy} to change this default behavior.
  * <p>
  * Unique properties are based on an {@link Index @Index}, so the same restrictions apply.
  * It is supported to explicitly add the {@link Index @Index} annotation to configure the index.
@@ -32,4 +33,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 public @interface Unique {
+    ConflictStrategy onConflict() default ConflictStrategy.FAIL;
 }
