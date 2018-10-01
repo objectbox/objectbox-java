@@ -161,6 +161,5 @@ task verifyVersion {
 
 task wrapper(type: Wrapper) {
     group 'build setup'
-    gradleVersion = '4.5.1'
     distributionType = Wrapper.DistributionType.ALL
 }
