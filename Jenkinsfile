@@ -7,9 +7,14 @@ String buildsToKeep = '500'
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
     agent any
+    
+    environment {
+        GITLAB_URL = credentials('gitlab_url')
+    }
 
     options {
         buildDiscarder(logRotator(numToKeepStr: buildsToKeep, artifactNumToKeepStr: buildsToKeep))
+        gitLabConnection("${env.GITLAB_URL}")
     }
 
     triggers {
@@ -87,6 +92,11 @@ pipeline {
         failure {
             slackSend color: "danger",
                     message: "Failed: ${currentBuild.fullDisplayName}\n${env.BUILD_URL}"
+            updateGitlabCommitStatus name: 'build', state: 'failed'
+        }
+
+        success {
+            updateGitlabCommitStatus name: 'build', state: 'success'
         }
     }
 }
