@@ -251,4 +251,20 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertEquals(entity.getId(), box.getId(entity));
     }
 
+    @Test
+    public void testCountMaxAndIsEmpty() {
+        assertTrue(box.isEmpty());
+        putTestEntity("banana", 0);
+        assertFalse(box.isEmpty());
+
+        assertEquals(1, box.count(1));
+        assertEquals(1, box.count(2));
+        putTestEntity("apple", 0);
+        assertEquals(2, box.count(2));
+        assertEquals(2, box.count(3));
+
+        box.removeAll();
+        assertTrue(box.isEmpty());
+    }
+
 }
