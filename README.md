@@ -20,8 +20,9 @@ Other languages/bindings
 ObjectBox is a multi platform database supporting multiple language.
 Besides JVM based languages like Java and Kotlin, ObjectBox also offers: 
 
+* [ObjectBox Swift](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
+* [ObjectBox Go](https://github.com/objectbox/objectbox-go): great for data-driven tools and small server applications 
 * [ObjectBox C API](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
-* ObjectBox Swift: [coming soon](https://objectbox.io/ios-alpha/)
 
 Gradle setup
 ------------
@@ -68,13 +69,12 @@ For details please check the [docs](http://objectbox.io/documentation/).
 
 Links
 -----
-[Features](http://objectbox.io/features/)
+[Features](https://objectbox.io/features/)
 
-[Documentation](http://objectbox.io/documentation/)
+[Docs & Changelog](https://docs.objectbox.io/)
 
 [Examples](https://github.com/objectbox/objectbox-examples)
 
-[Changelog](http://objectbox.io/changelog/)
 
 We love to get your feedback
 ----------------------------
