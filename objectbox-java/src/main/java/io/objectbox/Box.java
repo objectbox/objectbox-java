@@ -294,6 +294,11 @@ public class Box<T> {
         }
     }
 
+    /** Returns true if no objects are in this box. */
+    public boolean isEmpty() {
+        return count(1) == 0;
+    }
+
     @Temporary
     public List<T> find(Property property, String value) {
         Cursor<T> reader = getReader();
@@ -578,11 +583,6 @@ public class Box<T> {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    // Sketching future API extension
-    private boolean isEmpty() {
-        return false;
     }
 
     // Sketching future API extension
