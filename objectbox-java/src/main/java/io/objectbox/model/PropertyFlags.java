@@ -74,28 +74,5 @@ public final class PropertyFlags {
    * (recommended mostly for 64 bit machines with values longer >200 bytes; small values are faster with a 32 bit hash)
    */
   public static final int INDEX_HASH64 = 4096;
-  /**
-   * Unused yet: While our default are signed ints, queries (& indexes) need do know signing info
-   */
-  public static final int UNSIGNED = 8192;
-  /**
-   * Unique on-conflict strategy: ignore the offending object (no changes to the existing conflicting object).
-   * If there are multiple unique properties in an entity, this strategy is evaluated first:
-   * if the property conflicts, no other properties will be checked for conflicts.
-   */
-  public static final int UNIQUE_ON_CONFLICT_IGNORE = 16384;
-  /**
-   * Unique on-conflict strategy: the offending object replaces the existing conflicting object (deletes it).
-   * If there are multiple properties using this strategy, a single put can potentially replace (delete) multiple
-   * existing objects.
-   */
-  public static final int UNIQUE_ON_CONFLICT_REPLACE = 32768;
-  /**
-   * Unique on-conflict strategy: the offending object overwrites the existing conflicting object while keeping
-   * its ID. Thus, all relations pointing to the existing entity stay intact.
-   * This is useful for a "secondary" ID, e.g. a string "ID".
-   * Within an entity, this strategy may be used once only (update target would be ambiguous otherwise).
-   */
-  public static final int UNIQUE_ON_CONFLICT_UPDATE = 65536;
 }
 
