@@ -55,7 +55,7 @@ public class Query<T> {
 
     native List nativeFind(long handle, long cursorHandle, long offset, long limit);
 
-    native long[] nativeFindKeysUnordered(long handle, long cursorHandle);
+    native long[] nativeFindIds(long handle, long cursorHandle, long offset, long limit);
 
     native long nativeCount(long handle, long cursorHandle);
 
@@ -242,7 +242,7 @@ public class Query<T> {
         return box.internalCallWithReaderHandle(new CallWithHandle<long[]>() {
             @Override
             public long[] call(long cursorHandle) {
-                return nativeFindKeysUnordered(handle, cursorHandle);
+                return nativeFindIds(handle, cursorHandle, 0, 0);
             }
         });
     }
