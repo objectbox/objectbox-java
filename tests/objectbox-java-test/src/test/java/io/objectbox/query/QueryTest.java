@@ -458,7 +458,7 @@ public class QueryTest extends AbstractQueryTest {
     }
 
     @Test
-    public void testFindKeysUnordered() {
+    public void testFindIds() {
         putTestEntitiesScalars();
         assertEquals(10, box.query().build().findIds().length);
 
@@ -468,6 +468,21 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(8, keys[0]);
         assertEquals(9, keys[1]);
         assertEquals(10, keys[2]);
+    }
+
+    @Test
+    public void testFindIdsWithOrder() {
+        putTestEntitiesScalars();
+        Query<TestEntity> query = box.query().orderDesc(TestEntity_.simpleInt).build();
+        long[] ids = query.findIds();
+        assertEquals(10, ids.length);
+        assertEquals(10, ids[0]);
+        assertEquals(1, ids[9]);
+
+        ids = query.findIds(3, 2);
+        assertEquals(2, ids.length);
+        assertEquals(7, ids[0]);
+        assertEquals(6, ids[1]);
     }
 
     @Test
