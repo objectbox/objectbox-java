@@ -235,15 +235,15 @@ public abstract class Cursor<T> implements Closeable {
         return nativePropertyId(cursor, propertyName);
     }
 
-    @Temporary
-    public List<T> find(Property property, long value) {
-        return nativeFindScalarPropertyId(cursor, property.id, value);
-    }
-
-    @Temporary
-    public List<T> find(Property property, String value) {
-        return nativeFindStringPropertyId(cursor, property.id, value);
-    }
+//    @Temporary
+//    public List<T> find(Property property, long value) {
+//        return nativeFindScalarPropertyId(cursor, property.id, value);
+//    }
+//
+//    @Temporary
+//    public List<T> find(Property property, String value) {
+//        return nativeFindStringPropertyId(cursor, property.id, value);
+//    }
 
     /**
      * @return key or 0 if not found
