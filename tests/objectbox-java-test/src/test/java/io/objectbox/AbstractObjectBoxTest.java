@@ -82,6 +82,7 @@ public abstract class AbstractObjectBoxTest {
 
     protected BoxStoreBuilder createBoxStoreBuilderWithTwoEntities(boolean withIndex) {
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModelWithTwoEntities(withIndex)).directory(boxStoreDir);
+        builder.debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE);
         builder.entity(new TestEntity_());
         builder.entity(new TestEntityMinimal_());
         return builder;
@@ -89,6 +90,7 @@ public abstract class AbstractObjectBoxTest {
 
     protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(withIndex)).directory(boxStoreDir);
+        builder.debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE);
         builder.entity(new TestEntity_());
         return builder;
     }
