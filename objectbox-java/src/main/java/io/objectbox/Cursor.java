@@ -194,7 +194,7 @@ public abstract class Cursor<T> implements Closeable {
         return (T) nativeFirstEntity(cursor);
     }
 
-    /** Does not work yet, also probably won't be faster than {@link Box#getAll()}. */
+    /** ~10% slower than iterating with {@link #first()} and {@link #next()} as done by {@link Box#getAll()}. */
     public List<T> getAll() {
         return (List) nativeGetAllEntities(cursor);
     }
