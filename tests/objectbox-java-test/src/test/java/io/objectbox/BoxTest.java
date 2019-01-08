@@ -161,29 +161,6 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertEquals(0, all.size());
     }
 
-    // same as above, but using getAll2
-    @Test
-    public void testGetAll2AfterGetAndRemove() {
-        assertEquals(0, box.count());
-        assertEquals(0, box.getAll2().size());
-
-        System.out.println("PUT");
-        List<TestEntity> entities = putTestEntities(10);
-
-        System.out.println("GET");
-        TestEntity entity = box.get(entities.get(1).getId());
-        assertNotNull(entity);
-
-        System.out.println("REMOVE_ALL");
-        box.removeAll();
-
-        System.out.println("COUNT");
-        assertEquals(0, box.count());
-        System.out.println("GET_ALL2");
-        List<TestEntity> all = box.getAll2();
-        assertEquals(0, all.size());
-    }
-
     @Test
     public void testPanicModeRemoveAllObjects() {
         assertEquals(0, box.panicModeRemoveAll());
