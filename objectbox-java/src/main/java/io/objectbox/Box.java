@@ -31,7 +31,6 @@ import javax.annotation.concurrent.ThreadSafe;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.annotation.apihint.Temporary;
 import io.objectbox.exception.DbException;
 import io.objectbox.internal.CallWithHandle;
 import io.objectbox.internal.IdGetter;
