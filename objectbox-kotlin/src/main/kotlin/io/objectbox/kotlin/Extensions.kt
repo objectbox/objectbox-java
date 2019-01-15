@@ -48,6 +48,82 @@ inline fun <reified T> QueryBuilder<T>.inValues(property: Property<T>, values: A
                                                 stringOrder: QueryBuilder.StringOrder): QueryBuilder<T>
         = `in`(property, values, stringOrder)
 
+// Shortcuts for Short
+
+/** Shortcut for [equal(property, value.toLong())][QueryBuilder.equal] */
+inline fun <reified T> QueryBuilder<T>.equal(property: Property<T>, value: Short): QueryBuilder<T> {
+    return equal(property, value.toLong())
+}
+
+/** Shortcut for [notEqual(property, value.toLong())][QueryBuilder.notEqual] */
+inline fun <reified T> QueryBuilder<T>.notEqual(property: Property<T>, value: Short): QueryBuilder<T> {
+    return notEqual(property, value.toLong())
+}
+
+/** Shortcut for [less(property, value.toLong())][QueryBuilder.less] */
+inline fun <reified T> QueryBuilder<T>.less(property: Property<T>, value: Short): QueryBuilder<T> {
+    return less(property, value.toLong())
+}
+
+/** Shortcut for [greater(property, value.toLong())][QueryBuilder.greater] */
+inline fun <reified T> QueryBuilder<T>.greater(property: Property<T>, value: Short): QueryBuilder<T> {
+    return greater(property, value.toLong())
+}
+
+/** Shortcut for [between(property, value1.toLong(), value2.toLong())][QueryBuilder.between] */
+inline fun <reified T> QueryBuilder<T>.between(property: Property<T>, value1: Short, value2: Short): QueryBuilder<T> {
+    return between(property, value1.toLong(), value2.toLong())
+}
+
+// Shortcuts for Int
+
+/** Shortcut for [equal(property, value.toLong())][QueryBuilder.equal] */
+inline fun <reified T> QueryBuilder<T>.equal(property: Property<T>, value: Int): QueryBuilder<T> {
+    return equal(property, value.toLong())
+}
+
+/** Shortcut for [notEqual(property, value.toLong())][QueryBuilder.notEqual] */
+inline fun <reified T> QueryBuilder<T>.notEqual(property: Property<T>, value: Int): QueryBuilder<T> {
+    return notEqual(property, value.toLong())
+}
+
+/** Shortcut for [less(property, value.toLong())][QueryBuilder.less] */
+inline fun <reified T> QueryBuilder<T>.less(property: Property<T>, value: Int): QueryBuilder<T> {
+    return less(property, value.toLong())
+}
+
+/** Shortcut for [greater(property, value.toLong())][QueryBuilder.greater] */
+inline fun <reified T> QueryBuilder<T>.greater(property: Property<T>, value: Int): QueryBuilder<T> {
+    return greater(property, value.toLong())
+}
+
+/** Shortcut for [between(property, value1.toLong(), value2.toLong())][QueryBuilder.between] */
+inline fun <reified T> QueryBuilder<T>.between(property: Property<T>, value1: Int, value2: Int): QueryBuilder<T> {
+    return between(property, value1.toLong(), value2.toLong())
+}
+
+// Shortcuts for Float
+
+/** Shortcut for [equal(property, value.toDouble(), tolerance.toDouble())][QueryBuilder.equal] */
+inline fun <reified T> QueryBuilder<T>.equal(property: Property<T>, value: Float, tolerance: Float): QueryBuilder<T> {
+    return equal(property, value.toDouble(), tolerance.toDouble())
+}
+
+/** Shortcut for [less(property, value.toDouble())][QueryBuilder.less] */
+inline fun <reified T> QueryBuilder<T>.less(property: Property<T>, value: Float): QueryBuilder<T> {
+    return less(property, value.toDouble())
+}
+
+/** Shortcut for [greater(property, value.toDouble())][QueryBuilder.greater] */
+inline fun <reified T> QueryBuilder<T>.greater(property: Property<T>, value: Float): QueryBuilder<T> {
+    return greater(property, value.toDouble())
+}
+
+/** Shortcut for [between(property, value1.toDouble(), value2.toDouble())][QueryBuilder.between] */
+inline fun <reified T> QueryBuilder<T>.between(property: Property<T>, value1: Float, value2: Float): QueryBuilder<T> {
+    return between(property, value1.toDouble(), value2.toDouble())
+}
+
 /**
  * Allows building a query for this Box instance with a call to [build][QueryBuilder.build] to return a [Query] instance.
  * ```
