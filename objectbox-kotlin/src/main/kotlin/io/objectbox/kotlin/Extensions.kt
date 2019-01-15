@@ -50,16 +50,6 @@ inline fun <reified T> QueryBuilder<T>.inValues(property: Property<T>, values: A
 
 // Shortcuts for Short
 
-/** Shortcut for [Box.get(id.toLong())][Box.get] */
-inline fun <reified T> Box<T>.get(id: Short): T? {
-    return get(id.toLong())
-}
-
-/** Shortcut for [Box.remove(id.toLong())][Box.remove] */
-inline fun <reified T> Box<T>.remove(id: Short) {
-    remove(id.toLong())
-}
-
 /** Shortcut for [equal(property, value.toLong())][QueryBuilder.equal] */
 inline fun <reified T> QueryBuilder<T>.equal(property: Property<T>, value: Short): QueryBuilder<T> {
     return equal(property, value.toLong())
@@ -86,16 +76,6 @@ inline fun <reified T> QueryBuilder<T>.between(property: Property<T>, value1: Sh
 }
 
 // Shortcuts for Int
-
-/** Shortcut for [Box.get(id.toLong())][Box.get] */
-inline fun <reified T> Box<T>.get(id: Int): T? {
-    return get(id.toLong())
-}
-
-/** Shortcut for [Box.remove(id.toLong())][Box.remove] */
-inline fun <reified T> Box<T>.remove(id: Int) {
-    remove(id.toLong())
-}
 
 /** Shortcut for [equal(property, value.toLong())][QueryBuilder.equal] */
 inline fun <reified T> QueryBuilder<T>.equal(property: Property<T>, value: Int): QueryBuilder<T> {
