@@ -49,17 +49,16 @@ public final class TestEntityMinimal_ implements EntityInfo<TestEntityMinimal> {
 
     public final static TestEntityMinimal_ __INSTANCE = new TestEntityMinimal_();
 
-    private static int ID;
+    public final static Property<TestEntityMinimal> id = new Property<>(__INSTANCE, 0, 1, long.class, "id", true, "id");
+    public final static Property<TestEntityMinimal> text = new Property<>(__INSTANCE, 1, 2, String.class, "text", false, "text");
 
-    public final static Property id = new Property(__INSTANCE, ID++, ID, long.class, "id", true, "id");
-    public final static Property text = new Property(__INSTANCE, ID++, ID, String.class, "text", false, "text");
-
-    public final static Property[] __ALL_PROPERTIES = {
+    @SuppressWarnings("unchecked")
+    public final static Property<TestEntityMinimal>[] __ALL_PROPERTIES = new Property[]{
             id,
             text,
     };
 
-    public final static Property __ID_PROPERTY = id;
+    public final static Property<TestEntityMinimal> __ID_PROPERTY = id;
 
     @Override
     public String getEntityName() {
@@ -82,12 +81,12 @@ public final class TestEntityMinimal_ implements EntityInfo<TestEntityMinimal> {
     }
 
     @Override
-    public Property[] getAllProperties() {
+    public Property<TestEntityMinimal>[] getAllProperties() {
         return __ALL_PROPERTIES;
     }
 
     @Override
-    public Property getIdProperty() {
+    public Property<TestEntityMinimal> getIdProperty() {
         return __ID_PROPERTY;
     }
 

@@ -44,19 +44,18 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
 
     public final static TestEntity_ __INSTANCE = new TestEntity_();
 
-    private static int ID;
+    public final static Property<TestEntity> id = new Property<>(__INSTANCE, 0, 1, long.class, "id", true, "id");
+    public final static Property<TestEntity> simpleBoolean = new Property<>(__INSTANCE, 1, 2, boolean.class, "simpleBoolean", false, "simpleBoolean");
+    public final static Property<TestEntity> simpleByte = new Property<>(__INSTANCE, 2, 3, byte.class, "simpleByte", false, "simpleByte");
+    public final static Property<TestEntity> simpleShort = new Property<>(__INSTANCE, 3, 4, short.class, "simpleShort", false, "simpleShort");
+    public final static Property<TestEntity> simpleInt = new Property<>(__INSTANCE, 4, 5, int.class, "simpleInt", false, "simpleInt");
+    public final static Property<TestEntity> simpleLong = new Property<>(__INSTANCE, 5, 6, long.class, "simpleLong", false, "simpleLong");
+    public final static Property<TestEntity> simpleFloat = new Property<>(__INSTANCE, 6, 7, float.class, "simpleFloat", false, "simpleFloat");
+    public final static Property<TestEntity> simpleDouble = new Property<>(__INSTANCE, 7, 8, double.class, "simpleDouble", false, "simpleDouble");
+    public final static Property<TestEntity> simpleString = new Property<>(__INSTANCE, 8, 9, String.class, "simpleString", false, "simpleString");
+    public final static Property<TestEntity> simpleByteArray = new Property<>(__INSTANCE, 9, 10, byte[].class, "simpleByteArray", false, "simpleByteArray");
 
-    public final static Property<TestEntity> id = new Property(__INSTANCE, ID++, ID, long.class, "id", true, "id");
-    public final static Property<TestEntity> simpleBoolean = new Property(__INSTANCE, ID++, ID, boolean.class, "simpleBoolean", false, "simpleBoolean");
-    public final static Property<TestEntity> simpleByte = new Property(__INSTANCE, ID++, ID, byte.class, "simpleByte", false, "simpleByte");
-    public final static Property<TestEntity> simpleShort = new Property(__INSTANCE, ID++, ID, short.class, "simpleShort", false, "simpleShort");
-    public final static Property<TestEntity> simpleInt = new Property(__INSTANCE, ID++, ID, int.class, "simpleInt", false, "simpleInt");
-    public final static Property<TestEntity> simpleLong = new Property(__INSTANCE, ID++, ID, long.class, "simpleLong", false, "simpleLong");
-    public final static Property<TestEntity> simpleFloat = new Property(__INSTANCE, ID++, ID, float.class, "simpleFloat", false, "simpleFloat");
-    public final static Property<TestEntity> simpleDouble = new Property(__INSTANCE, ID++, ID, double.class, "simpleDouble", false, "simpleDouble");
-    public final static Property<TestEntity> simpleString = new Property(__INSTANCE, ID++, ID, String.class, "simpleString", false, "simpleString");
-    public final static Property<TestEntity> simpleByteArray = new Property(__INSTANCE, ID++, ID, byte[].class, "simpleByteArray", false, "simpleByteArray");
-
+    @SuppressWarnings("unchecked")
     public final static Property<TestEntity>[] __ALL_PROPERTIES = new Property[]{
             id,
             simpleInt,
@@ -68,7 +67,7 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
             simpleByteArray
     };
 
-    public final static Property __ID_PROPERTY = id;
+    public final static Property<TestEntity> __ID_PROPERTY = id;
 
     @Override
     public String getEntityName() {
@@ -91,12 +90,12 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
     }
 
     @Override
-    public Property[] getAllProperties() {
+    public Property<TestEntity>[] getAllProperties() {
         return __ALL_PROPERTIES;
     }
 
     @Override
-    public Property getIdProperty() {
+    public Property<TestEntity> getIdProperty() {
         return __ID_PROPERTY;
     }
 

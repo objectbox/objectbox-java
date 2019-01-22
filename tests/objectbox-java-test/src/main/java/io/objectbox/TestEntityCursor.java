@@ -26,6 +26,8 @@ import io.objectbox.internal.CursorFactory;
  * Cursor for DB entity "TestEntity".
  */
 public final class TestEntityCursor extends Cursor<TestEntity> {
+
+    // For testing
     public static boolean INT_NULL_HACK;
 
     @Internal
@@ -35,10 +37,7 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
         }
     }
 
-    private static final TestEntity_ PROPERTIES = new TestEntity_();
-
-    private static final TestEntity_.TestEntityIdGetter ID_GETTER = PROPERTIES.__ID_GETTER;
-
+    private static final TestEntity_.TestEntityIdGetter ID_GETTER = TestEntity_.__ID_GETTER;
 
     // Property IDs get verified in Cursor base class
     private final static int __ID_simpleBoolean = TestEntity_.simpleBoolean.id;
@@ -52,7 +51,7 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
     private final static int __ID_simpleByteArray = TestEntity_.simpleByteArray.id;
 
     public TestEntityCursor(Transaction tx, long cursor, BoxStore boxStore) {
-        super(tx, cursor, PROPERTIES, boxStore);
+        super(tx, cursor, TestEntity_.__INSTANCE, boxStore);
     }
 
     @Override
@@ -68,20 +67,14 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
     @Override
     public final long put(TestEntity entity) {
         long __assignedId = collect313311(cursor, entity.getId(), PUT_FLAG_FIRST | PUT_FLAG_COMPLETE,
-                9, entity.getSimpleString(), 0, null, 0, null,
-                10, entity.getSimpleByteArray(),
-                0, 0, 6, entity.getSimpleLong(), INT_NULL_HACK ? 0 : 5, entity.getSimpleInt(),
-                4, entity.getSimpleShort(), 3, entity.getSimpleByte(),
-                2, entity.getSimpleBoolean() ? 1 : 0,
-                7, entity.getSimpleFloat(), 8, entity.getSimpleDouble()
-        );
+                __ID_simpleString, entity.getSimpleString(), 0, null,
+                0, null, __ID_simpleByteArray, entity.getSimpleByteArray(),
+                0, 0, __ID_simpleLong, entity.getSimpleLong(),
+                INT_NULL_HACK ? 0 : __ID_simpleInt, entity.getSimpleInt(), __ID_simpleShort, entity.getSimpleShort(),
+                __ID_simpleByte, entity.getSimpleByte(), __ID_simpleBoolean, entity.getSimpleBoolean() ? 1 : 0,
+                __ID_simpleFloat, entity.getSimpleFloat(), __ID_simpleDouble, entity.getSimpleDouble());
         entity.setId(__assignedId);
         return __assignedId;
-    }
-
-    // TODO do we need this? @Override
-    protected final boolean isEntityUpdateable() {
-        return true;
     }
 
 }

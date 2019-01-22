@@ -18,10 +18,8 @@ package io.objectbox;
 
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.CursorFactory;
-import io.objectbox.internal.IdGetter;
 
 public class TestEntityMinimalCursor extends Cursor<TestEntityMinimal> {
-    private static final TestEntityMinimal_ PROPERTIES = new TestEntityMinimal_();
 
     @Internal
     static final class Factory implements CursorFactory<TestEntityMinimal> {
@@ -30,8 +28,10 @@ public class TestEntityMinimalCursor extends Cursor<TestEntityMinimal> {
         }
     }
 
+    private final static int __ID_test = TestEntityMinimal_.text.id;
+
     public TestEntityMinimalCursor(Transaction tx, long cursor, BoxStore boxStore) {
-        super(tx, cursor, PROPERTIES, boxStore);
+        super(tx, cursor, TestEntityMinimal_.__INSTANCE, boxStore);
     }
 
     @Override
@@ -39,14 +39,22 @@ public class TestEntityMinimalCursor extends Cursor<TestEntityMinimal> {
         return entity.getId();
     }
 
+    /**
+     * Puts an object into its box.
+     *
+     * @return The ID of the object within its box.
+     */
+    @Override
     public long put(TestEntityMinimal entity) {
-        long key = entity.getId();
-        key = collect313311(cursor, key, PUT_FLAG_FIRST | PUT_FLAG_COMPLETE,
-                2, entity.getText(), 0, null, 0, null,
-                0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        );
-        entity.setId(key);
-        return key;
+        long __assignedId = collect313311(cursor, entity.getId(), PUT_FLAG_FIRST | PUT_FLAG_COMPLETE,
+                __ID_test, entity.getText(), 0, null,
+                0, null, 0, null,
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0);
+        entity.setId(__assignedId);
+        return __assignedId;
     }
 
 }
