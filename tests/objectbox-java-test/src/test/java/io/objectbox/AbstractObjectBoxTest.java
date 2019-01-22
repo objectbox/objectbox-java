@@ -264,7 +264,9 @@ public abstract class AbstractObjectBoxTest {
         assertEquals(200 + nr / 10f, actual.getSimpleFloat(), 0);
         assertEquals(2000 + nr / 100f, actual.getSimpleDouble(), 0);
         assertArrayEquals(new byte[]{1, 2, (byte) nr}, actual.getSimpleByteArray());
-        assertArrayEquals(new String[]{simpleString}, actual.getSimpleStringArray());
+        // null array items are ignored, so array will be empty
+        String[] expectedStringArray = simpleString == null ? new String[]{} : new String[]{simpleString};
+        assertArrayEquals(expectedStringArray, actual.getSimpleStringArray());
         assertEquals((short) (100 + nr), actual.getSimpleShortU());
         assertEquals(nr, actual.getSimpleIntU());
         assertEquals(1000 + nr, actual.getSimpleLongU());
