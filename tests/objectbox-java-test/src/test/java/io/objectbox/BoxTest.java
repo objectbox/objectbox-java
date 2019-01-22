@@ -37,15 +37,18 @@ public class BoxTest extends AbstractObjectBoxTest {
 
     @Test
     public void testPutAndGet() {
-        TestEntity entity = new TestEntity();
-        entity.setSimpleInt(1977);
+        final String simpleString = "sunrise";
+        final int simpleInt = 1977;
+
+        TestEntity entity = createTestEntity(simpleString, simpleInt);
         long key = box.put(entity);
         assertTrue(key != 0);
         assertEquals(key, entity.getId());
 
         TestEntity entityRead = box.get(key);
         assertNotNull(entityRead);
-        assertEquals(1977, entityRead.getSimpleInt());
+        assertEquals(key, entityRead.getId());
+        assertTestEntity(entityRead, simpleString, simpleInt);
     }
 
     @Test
