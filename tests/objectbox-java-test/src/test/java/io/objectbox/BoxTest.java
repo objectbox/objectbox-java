@@ -52,6 +52,34 @@ public class BoxTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testPutStringArray_withNull_ignoresNull() {
+        final String[] stringArray = new String[]{"sunrise", null, "sunset"};
+        final String[] expectedStringArray = new String[]{"sunrise", "sunset"};
+
+        TestEntity entity = new TestEntity();
+        entity.setSimpleStringArray(stringArray);
+        box.put(entity);
+
+        TestEntity entityRead = box.get(entity.getId());
+        assertNotNull(entityRead);
+        assertArrayEquals(expectedStringArray, entityRead.getSimpleStringArray());
+    }
+
+    @Test
+    public void testPutStringArray_onlyNull_isEmpty() {
+        final String[] stringArray = new String[]{null};
+        final String[] expectedStringArray = new String[]{};
+
+        TestEntity entity = new TestEntity();
+        entity.setSimpleStringArray(stringArray);
+        box.put(entity);
+
+        TestEntity entityRead = box.get(entity.getId());
+        assertNotNull(entityRead);
+        assertArrayEquals(expectedStringArray, entityRead.getSimpleStringArray());
+    }
+
+    @Test
     public void testPutGetUpdateGetRemove() {
         // create an entity
         TestEntity entity = new TestEntity();
