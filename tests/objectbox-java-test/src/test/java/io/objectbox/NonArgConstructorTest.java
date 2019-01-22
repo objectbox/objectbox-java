@@ -19,12 +19,11 @@ package io.objectbox;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import io.objectbox.ModelBuilder.EntityBuilder;
 import io.objectbox.model.EntityFlags;
 
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -56,6 +55,8 @@ public class NonArgConstructorTest extends AbstractObjectBoxTest {
         entity.setSimpleLong(789437444354L);
         entity.setSimpleShort((short) 233);
         entity.setSimpleString("foo");
+        String[] strings = {"foo", "bar"};
+        entity.setSimpleStringArray(strings);
         long key = box.put(entity);
 
         TestEntity entityRead = box.get(key);
@@ -68,8 +69,9 @@ public class NonArgConstructorTest extends AbstractObjectBoxTest {
         assertEquals(789437444354L, entityRead.getSimpleLong());
         assertEquals(3.14f, entityRead.getSimpleFloat(), 0.000001f);
         assertEquals(3.141f, entityRead.getSimpleDouble(), 0.000001);
-        assertTrue(Arrays.equals(bytes, entityRead.getSimpleByteArray()));
+        assertArrayEquals(bytes, entityRead.getSimpleByteArray());
         assertEquals("foo", entityRead.getSimpleString());
+        assertArrayEquals(strings, entityRead.getSimpleStringArray());
     }
 
 }
