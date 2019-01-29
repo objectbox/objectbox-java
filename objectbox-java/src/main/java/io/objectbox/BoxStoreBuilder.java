@@ -66,9 +66,9 @@ public class BoxStoreBuilder {
     /** BoxStore uses this */
     File directory;
 
-    /** Android Context used for native library loading. */
-    @Nullable
-    Object context;
+    /** On Android used for native library loading. */
+    @Nullable Object context;
+    @Nullable Object relinker;
 
     /** Ignored by BoxStore */
     private File baseDirectory;
@@ -192,6 +192,18 @@ public class BoxStoreBuilder {
         }
         baseDirectory = baseDir;
         android = true;
+        return this;
+    }
+
+    /**
+     * Pass a custom ReLinkerInstance, for example {@code ReLinker.log(logger)} to use for loading the native library
+     * on Android devices. Note that setting {@link #androidContext(Object)} is required for ReLinker to work.
+     */
+    public BoxStoreBuilder androidReLinker(Object reLinkerInstance) {
+        if (reLinkerInstance == null) {
+            throw new NullPointerException("ReLinkerInstance may not be null");
+        }
+        this.relinker = reLinkerInstance;
         return this;
     }
 

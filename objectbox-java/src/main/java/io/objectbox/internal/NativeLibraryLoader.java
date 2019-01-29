@@ -131,11 +131,16 @@ public class NativeLibraryLoader {
 
         try {
             Class<?> context = Class.forName("android.content.Context");
-            Class<?> relinker = Class.forName("com.getkeepsafe.relinker.ReLinker");
-            // ReLinker.loadLibrary(Context context, String library)
-            Method loadLibrary = relinker.getMethod("loadLibrary", context, String.class);
-
-            loadLibrary.invoke(null, BoxStore.context, libname);
+            if (BoxStore.relinker == null) {
+                // use default ReLinker
+                Class<?> relinker = Class.forName("com.getkeepsafe.relinker.ReLinker");
+                Method loadLibrary = relinker.getMethod("loadLibrary", context, String.class);
+                loadLibrary.invoke(null, BoxStore.context, libname);
+            } else {
+                // use custom ReLinkerInstance
+                Method loadLibrary = BoxStore.relinker.getClass().getMethod("loadLibrary", context, String.class);
+                loadLibrary.invoke(BoxStore.relinker, BoxStore.context, libname);
+            }
         } catch (ReflectiveOperationException e) {
             // note: do not catch Exception as it will swallow ReLinker exceptions useful for debugging
             return false;

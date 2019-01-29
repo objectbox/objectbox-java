@@ -59,8 +59,9 @@ import io.objectbox.reactive.SubscriptionBuilder;
 @ThreadSafe
 public class BoxStore implements Closeable {
 
-    /** Android Context used for native library loading. */
+    /** On Android used for native library loading. */
     @Nullable public static Object context;
+    @Nullable public static Object relinker;
 
     private static final String VERSION = "2.4.0-2019-01-08";
     private static BoxStore defaultStore;
@@ -190,6 +191,7 @@ public class BoxStore implements Closeable {
 
     BoxStore(BoxStoreBuilder builder) {
         context = builder.context;
+        relinker = builder.relinker;
         NativeLibraryLoader.ensureLoaded();
 
         directory = builder.directory;
