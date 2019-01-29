@@ -134,12 +134,12 @@ public class NativeLibraryLoader {
             if (BoxStore.relinker == null) {
                 // use default ReLinker
                 Class<?> relinker = Class.forName("com.getkeepsafe.relinker.ReLinker");
-                Method loadLibrary = relinker.getMethod("loadLibrary", context, String.class);
-                loadLibrary.invoke(null, BoxStore.context, libname);
+                Method loadLibrary = relinker.getMethod("loadLibrary", context, String.class, String.class);
+                loadLibrary.invoke(null, BoxStore.context, libname, BoxStore.JNI_VERSION);
             } else {
                 // use custom ReLinkerInstance
-                Method loadLibrary = BoxStore.relinker.getClass().getMethod("loadLibrary", context, String.class);
-                loadLibrary.invoke(BoxStore.relinker, BoxStore.context, libname);
+                Method loadLibrary = BoxStore.relinker.getClass().getMethod("loadLibrary", context, String.class, String.class);
+                loadLibrary.invoke(BoxStore.relinker, BoxStore.context, libname, BoxStore.JNI_VERSION);
             }
         } catch (ReflectiveOperationException e) {
             // note: do not catch Exception as it will swallow ReLinker exceptions useful for debugging
