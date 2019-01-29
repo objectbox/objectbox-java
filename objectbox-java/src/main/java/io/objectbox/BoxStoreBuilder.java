@@ -66,6 +66,10 @@ public class BoxStoreBuilder {
     /** BoxStore uses this */
     File directory;
 
+    /** Android Context used for native library loading. */
+    @Nullable
+    Object context;
+
     /** Ignored by BoxStore */
     private File baseDirectory;
 
@@ -174,6 +178,8 @@ public class BoxStoreBuilder {
         if (context == null) {
             throw new NullPointerException("Context may not be null");
         }
+        this.context = context;
+
         File baseDir = getAndroidBaseDir(context);
         if (!baseDir.exists()) {
             baseDir.mkdir();
