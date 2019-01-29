@@ -159,7 +159,6 @@ task verifyVersion {
     }
 }
 
-task wrapper(type: Wrapper) {
-    group 'build setup'
+wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
