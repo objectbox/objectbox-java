@@ -200,6 +200,9 @@ public class BoxStoreBuilder {
      * on Android devices. Note that setting {@link #androidContext(Object)} is required for ReLinker to work.
      */
     public BoxStoreBuilder androidReLinker(Object reLinkerInstance) {
+        if (context == null) {
+            throw new IllegalArgumentException("Set a Context using androidContext(context) first");
+        }
         if (reLinkerInstance == null) {
             throw new NullPointerException("ReLinkerInstance may not be null");
         }
