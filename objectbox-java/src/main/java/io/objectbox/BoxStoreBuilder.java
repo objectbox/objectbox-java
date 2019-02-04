@@ -178,7 +178,7 @@ public class BoxStoreBuilder {
         if (context == null) {
             throw new NullPointerException("Context may not be null");
         }
-        this.context = context;
+        this.context = getApplicationContext(context);
 
         File baseDir = getAndroidBaseDir(context);
         if (!baseDir.exists()) {
@@ -193,6 +193,14 @@ public class BoxStoreBuilder {
         baseDirectory = baseDir;
         android = true;
         return this;
+    }
+
+    private Object getApplicationContext(Object context) {
+        try {
+            return context.getClass().getMethod("getApplicationContext").invoke(context);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("context must be a valid Android Context", e);
+        }
     }
 
     /**
