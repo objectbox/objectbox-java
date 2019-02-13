@@ -26,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -198,7 +199,8 @@ public class BoxStoreBuilder {
     private Object getApplicationContext(Object context) {
         try {
             return context.getClass().getMethod("getApplicationContext").invoke(context);
-        } catch (ReflectiveOperationException e) {
+        } catch (Exception e) {
+            // note: can't catch ReflectiveOperationException, is K+ (19+) on Android
             throw new RuntimeException("context must be a valid Android Context", e);
         }
     }

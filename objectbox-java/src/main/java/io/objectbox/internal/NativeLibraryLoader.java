@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
@@ -129,6 +130,7 @@ public class NativeLibraryLoader {
             return false;
         }
 
+        //noinspection TryWithIdenticalCatches
         try {
             Class<?> context = Class.forName("android.content.Context");
             if (BoxStore.relinker == null) {
@@ -141,10 +143,17 @@ public class NativeLibraryLoader {
                 Method loadLibrary = BoxStore.relinker.getClass().getMethod("loadLibrary", context, String.class, String.class);
                 loadLibrary.invoke(BoxStore.relinker, BoxStore.context, libname, BoxStore.JNI_VERSION);
             }
-        } catch (ReflectiveOperationException e) {
-            // note: do not catch Exception as it will swallow ReLinker exceptions useful for debugging
+        } catch (NoSuchMethodException e) {
+            return false;
+        } catch (IllegalAccessException e) {
+            return false;
+        } catch (InvocationTargetException e) {
+            return false;
+        } catch (ClassNotFoundException e) {
             return false;
         }
+        // note: do not catch Exception as it will swallow ReLinker exceptions useful for debugging
+        // note: can't catch ReflectiveOperationException, is K+ (19+) on Android
 
         return true;
     }
