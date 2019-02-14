@@ -25,7 +25,7 @@ dependencies {
 javadoc {
     failOnError = false
     title = " ObjectBox Java ${version} API"
-    options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
+    options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017-2019 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
     exclude("**/com/google/**")
     exclude("**/io/objectbox/Cursor.java")
     exclude("**/io/objectbox/KeyValueCursor.java")
@@ -41,10 +41,14 @@ javadoc {
     if (!srcApi.directory) throw new GradleScriptException("Not a directory: ${srcApi}", null)
     source += srcApi
     doLast {
-        copy {
-            from '../javadoc-style'
-            into "build/docs/javadoc/"
-        }
+        // Primary background
+        ant.replace(file: "build/docs/javadoc/stylesheet.css", token: "background-color:#4D7A97", value: "background-color:#17A6A6")
+
+        // "Active" background
+        ant.replace(file: "build/docs/javadoc/stylesheet.css", token: "background-color:#F8981D", value: "background-color:#7DDC7D")
+
+        // Hover
+        ant.replace(file: "build/docs/javadoc/stylesheet.css", token: "color:#bb7a2a", value: "color:#E61955")
     }
 }
 
