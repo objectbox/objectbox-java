@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
@@ -85,6 +86,12 @@ public abstract class AbstractObjectBoxTest {
         builder.debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE);
         builder.entity(new TestEntity_());
         builder.entity(new TestEntityMinimal_());
+        return builder;
+    }
+
+    protected BoxStoreBuilder createBoxStoreBuilderWithTwoEntities(boolean withIndex, ExecutorService executorService) {
+        BoxStoreBuilder builder = createBoxStoreBuilderWithTwoEntities(withIndex);
+        builder.executorService(executorService);
         return builder;
     }
 

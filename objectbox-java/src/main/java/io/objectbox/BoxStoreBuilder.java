@@ -30,6 +30,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -95,7 +96,10 @@ public class BoxStoreBuilder {
     TxCallback failedReadTxAttemptCallback;
 
     final List<EntityInfo> entityInfoList = new ArrayList<>();
+
     private Factory<InputStream> initialDbFileFactory;
+
+    ExecutorService executorService;
 
     /** Not for application use. */
     public static BoxStoreBuilder createDebugWithoutModel() {
@@ -368,6 +372,20 @@ public class BoxStoreBuilder {
     @Experimental
     public BoxStoreBuilder initialDbFile(Factory<InputStream> initialDbFileFactory) {
         this.initialDbFileFactory = initialDbFileFactory;
+        return this;
+    }
+
+    /**
+     * Configure a different {@linkplain ExecutorService} that ObjectBox should use to perform its asynchronous
+     * computations like observing data changes. If {@code null} is supplied, the default {@linkplain ExecutorService}
+     * is used.
+     * <p>
+     * To facilitate testing asynchronous computations, supply a {@linkplain ExecutorService} that runs all its
+     * computations synchronously on the calling thread.
+     */
+    @Experimental
+    public BoxStoreBuilder executorService(@Nullable ExecutorService executorService) {
+        this.executorService = executorService;
         return this;
     }
 

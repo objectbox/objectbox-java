@@ -169,7 +169,7 @@ public class BoxStore implements Closeable {
     private final int[] allEntityTypeIds;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
-    private final ExecutorService threadPool = new ObjectBoxThreadPool(this);
+    private final ExecutorService threadPool;
     private final ObjectClassPublisher objectClassPublisher;
     final boolean debugTxRead;
     final boolean debugTxWrite;
@@ -199,6 +199,12 @@ public class BoxStore implements Closeable {
         directory = builder.directory;
         canonicalPath = getCanonicalPath(directory);
         verifyNotAlreadyOpen(canonicalPath);
+
+        if  (builder.executorService == null) {
+            this.threadPool = new ObjectBoxThreadPool(this);
+        } else {
+            this.threadPool = builder.executorService;
+        }
 
         handle = nativeCreate(canonicalPath, builder.maxSizeInKByte, builder.maxReaders, builder.model);
         int debugFlags = builder.debugFlags;
