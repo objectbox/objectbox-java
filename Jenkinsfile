@@ -26,9 +26,6 @@ pipeline {
     stages {
         stage('init') {
             steps {
-                // Copied file exists on CI server only
-                sh 'cp /var/my-private-files/private.properties ./gradle.properties'
-
                 sh 'chmod +x gradlew'
 
                 // "|| true" for an OK exit code if no file is found
