@@ -1,20 +1,23 @@
 package io.objectbox.sync;
 
+import javax.annotation.Nullable;
+
 class SyncCredentialsImpl extends SyncCredentials {
 
-    private final String token;
+    @Nullable private final String token;
     private final CredentialsType type;
 
-    SyncCredentialsImpl(String token, CredentialsType type) {
+    SyncCredentialsImpl(@Nullable String token, CredentialsType type) {
         this.token = token;
         this.type = type;
     }
 
-    public String getToken() {
+    @Nullable
+    String getToken() {
         return token;
     }
 
-    public int getTypeId() {
+    int getTypeId() {
         return type.id;
     }
 }

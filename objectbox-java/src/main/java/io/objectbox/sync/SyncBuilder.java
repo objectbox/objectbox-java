@@ -1,12 +1,16 @@
 package io.objectbox.sync;
 
+import io.objectbox.BoxStore;
+
 @SuppressWarnings("unused")
 public class SyncBuilder {
 
-    private final String url;
-    private SyncCredentials credentials;
+    public final BoxStore boxStore;
+    public final String url;
+    public SyncCredentials credentials;
 
-    public SyncBuilder(String url) {
+    public SyncBuilder(BoxStore boxStore, String url) {
+        this.boxStore = boxStore;
         this.url = url;
     }
 
@@ -15,8 +19,8 @@ public class SyncBuilder {
         return null;
     }
 
-    public void start() {
-        // TODO
+    public SyncClient build() {
+        return new SyncClientImpl(this);
     }
 
 }
