@@ -3,9 +3,9 @@ package io.objectbox.sync;
 class SyncCredentialsImpl extends SyncCredentials {
 
     private final String token;
-    private final AuthenticationType type;
+    private final CredentialsType type;
 
-    SyncCredentialsImpl(String token, AuthenticationType type) {
+    SyncCredentialsImpl(String token, CredentialsType type) {
         this.token = token;
         this.type = type;
     }
@@ -14,7 +14,7 @@ class SyncCredentialsImpl extends SyncCredentials {
         return token;
     }
 
-    public String getTypeId() {
+    public int getTypeId() {
         return type.id;
     }
 }

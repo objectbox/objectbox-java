@@ -3,14 +3,23 @@ package io.objectbox.sync;
 @SuppressWarnings("unused")
 public class SyncCredentials {
 
-    public static SyncCredentials apiKey(String apiKey) {
-        ensureNotEmpty(apiKey, "API key");
-        return new SyncCredentialsImpl(apiKey, AuthenticationType.API_KEY);
+    public static SyncCredentials none() {
+        return new SyncCredentialsImpl(null, CredentialsType.NONE);
     }
 
+    /** Authenticate with a pre-shared key. */
+    public static SyncCredentials apiKey(String apiKey) {
+        ensureNotEmpty(apiKey, "API key");
+        return new SyncCredentialsImpl(apiKey, CredentialsType.API_KEY);
+    }
+
+    /**
+     * Authenticate with a Google account ID token obtained via
+     * <a href="https://developers.google.com/identity/sign-in/android/backend-auth" target="_top">Google Sign-In</a>.
+     */
     public static SyncCredentials google(String idToken) {
         ensureNotEmpty(idToken, "Google ID token");
-        return new SyncCredentialsImpl(idToken, AuthenticationType.GOOGLE);
+        return new SyncCredentialsImpl(idToken, CredentialsType.GOOGLE);
     }
 
     private static void ensureNotEmpty(String token, String name) {
@@ -22,15 +31,18 @@ public class SyncCredentials {
     SyncCredentials() {
     }
 
-    public enum AuthenticationType {
+    public enum CredentialsType {
+        // note: this needs to match with CredentialsType in Core
 
-        API_KEY("api_key"),
+        NONE(0),
 
-        GOOGLE("google");
+        API_KEY(1),
 
-        public String id;
+        GOOGLE(2);
 
-        AuthenticationType(String id) {
+        public int id;
+
+        CredentialsType(int id) {
             this.id = id;
         }
     }
