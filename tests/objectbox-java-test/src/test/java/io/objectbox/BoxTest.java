@@ -245,30 +245,6 @@ public class BoxTest extends AbstractObjectBoxTest {
         box.removeByKeys(null);
     }
 
-//    @Test
-//    public void testFindString() {
-//        putTestEntity("banana", 0);
-//        putTestEntity("apple", 0);
-//        putTestEntity("banana", 0);
-//
-//        List<TestEntity> list = box.find(TestEntity_.simpleString, "banana");
-//        assertEquals(2, list.size());
-//        assertEquals(1, list.get(0).getId());
-//        assertEquals(3, list.get(1).getId());
-//    }
-//
-//    @Test
-//    public void testFindInt() {
-//        putTestEntity(null, 42);
-//        putTestEntity(null, 23);
-//        putTestEntity(null, 42);
-//
-//        List<TestEntity> list = box.find(TestEntity_.simpleInt, 42);
-//        assertEquals(2, list.size());
-//        assertEquals(1, list.get(0).getId());
-//        assertEquals(3, list.get(1).getId());
-//    }
-
     @Test
     public void testGetId() {
         TestEntity entity = putTestEntity(null, 42);
