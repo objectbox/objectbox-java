@@ -2,11 +2,11 @@
 set -e
 
 if [ -z "$ASAN_LIB_SO" ]; then
-    export ASAN_LIB_SO="$(find /usr/lib/llvm-6.0/ -name libclang_rt.asan-x86_64.so | head -1)"
+    export ASAN_LIB_SO="$(find /usr/lib/llvm-7/ -name libclang_rt.asan-x86_64.so | head -1)"
 fi
 
 if [ -z "$ASAN_SYMBOLIZER_PATH" ]; then
-    export ASAN_SYMBOLIZER_PATH="$(find /usr/lib/llvm-6.0 -name llvm-symbolizer | head -1 )"
+    export ASAN_SYMBOLIZER_PATH="$(find /usr/lib/llvm-7 -name llvm-symbolizer | head -1 )"
 fi
 
 if [ -z "$ASAN_OPTIONS" ]; then
