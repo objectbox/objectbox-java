@@ -9,6 +9,7 @@ import io.objectbox.InternalAccess;
 class SyncClientImpl implements SyncClient {
 
     private final String url;
+    @Nullable private final String certificatePath;
     private final String objectBoxClientId;
     private final SyncCredentialsImpl credentials;
     private final long storeHandle;
@@ -17,6 +18,7 @@ class SyncClientImpl implements SyncClient {
 
     SyncClientImpl(SyncBuilder syncBuilder) {
         this.url = syncBuilder.url;
+        this.certificatePath = syncBuilder.certificatePath;
         this.objectBoxClientId = syncBuilder.objectBoxClientId;
         this.credentials = (SyncCredentialsImpl) syncBuilder.credentials;
         this.storeHandle = InternalAccess.getHandle(syncBuilder.boxStore);
@@ -34,7 +36,7 @@ class SyncClientImpl implements SyncClient {
         }
 
         try {
-            syncClientHandle = nativeCreate(storeHandle, url, null);
+            syncClientHandle = nativeCreate(storeHandle, url, certificatePath);
 
             nativeStart(syncClientHandle);
 
