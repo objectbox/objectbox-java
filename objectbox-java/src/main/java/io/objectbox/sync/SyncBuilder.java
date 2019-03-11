@@ -14,6 +14,9 @@ public class SyncBuilder {
     public SyncCredentials credentials;
 
     public SyncBuilder(BoxStore boxStore, String objectBoxClientId, String url) {
+        checkNotNull(boxStore, "BoxStore is required.");
+        checkNotNull(objectBoxClientId, "Sync client ID is required.");
+        checkNotNull(url, "Sync server URL is required.");
         this.boxStore = boxStore;
         this.objectBoxClientId = objectBoxClientId;
         this.url = url;
@@ -30,7 +33,16 @@ public class SyncBuilder {
     }
 
     public SyncClient build() {
+        if (credentials == null) {
+            throw new IllegalStateException("Credentials are required.");
+        }
         return new SyncClientImpl(this);
+    }
+
+    private void checkNotNull(Object object, String message) {
+        if (object == null) {
+            throw new IllegalArgumentException(message);
+        }
     }
 
 }
