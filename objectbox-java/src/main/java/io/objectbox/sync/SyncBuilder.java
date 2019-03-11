@@ -6,11 +6,13 @@ import io.objectbox.BoxStore;
 public class SyncBuilder {
 
     public final BoxStore boxStore;
+    public final String objectBoxClientId;
     public final String url;
     public SyncCredentials credentials;
 
-    public SyncBuilder(BoxStore boxStore, String url) {
+    public SyncBuilder(BoxStore boxStore, String objectBoxClientId, String url) {
         this.boxStore = boxStore;
+        this.objectBoxClientId = objectBoxClientId;
         this.url = url;
     }
 

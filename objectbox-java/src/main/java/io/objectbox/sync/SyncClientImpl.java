@@ -1,5 +1,7 @@
 package io.objectbox.sync;
 
+import java.io.UnsupportedEncodingException;
+
 import javax.annotation.Nullable;
 
 import io.objectbox.InternalAccess;
@@ -7,6 +9,7 @@ import io.objectbox.InternalAccess;
 class SyncClientImpl implements SyncClient {
 
     private final String url;
+    private final String objectBoxClientId;
     private final SyncCredentialsImpl credentials;
     private final long storeHandle;
 
@@ -14,6 +17,7 @@ class SyncClientImpl implements SyncClient {
 
     SyncClientImpl(SyncBuilder syncBuilder) {
         this.url = syncBuilder.url;
+        this.objectBoxClientId = syncBuilder.objectBoxClientId;
         this.credentials = (SyncCredentialsImpl) syncBuilder.credentials;
         this.storeHandle = InternalAccess.getHandle(syncBuilder.boxStore);
     }
@@ -36,10 +40,9 @@ class SyncClientImpl implements SyncClient {
 
             byte[] credentialsBytes = null;
             if (credentials.getToken() != null) {
-                //noinspection CharsetObjectCanBeUsed only added in Android API level 19 (K)
-                credentialsBytes = credentials.getToken().getBytes("UTF-8");
+                credentialsBytes = getAsBytesUtf8(credentials.getToken());
             }
-            nativeLogin(syncClientHandle, credentials.getTypeId(), credentialsBytes);
+            nativeLogin(syncClientHandle, getAsBytesUtf8(objectBoxClientId), credentials.getTypeId(), credentialsBytes);
 
             callback.onComplete(null);
         } catch (Exception e) {
@@ -58,11 +61,16 @@ class SyncClientImpl implements SyncClient {
         syncClientHandle = 0;
     }
 
+    private byte[] getAsBytesUtf8(String text) throws UnsupportedEncodingException {
+        //noinspection CharsetObjectCanBeUsed only added in Android API level 19 (K)
+        return text.getBytes("UTF-8");
+    }
+
     static native long nativeCreate(long storeHandle, String uri, @Nullable String certificatePath);
 
     static native void nativeDelete(long handle);
 
     static native void nativeStart(long handle);
 
-    static native void nativeLogin(long handle, int credentialsType, @Nullable byte[] credentials);
+    static native void nativeLogin(long handle, byte[] clientId, int credentialsType, @Nullable byte[] credentials);
 }
