@@ -22,6 +22,7 @@ public class SyncBuilder {
         this.url = url;
     }
 
+    // TODO Check if this should remain exposed in the final API
     public SyncBuilder certificatePath(String certificatePath) {
         this.certificatePath = certificatePath;
         return this;
