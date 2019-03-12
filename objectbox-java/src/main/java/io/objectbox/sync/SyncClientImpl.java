@@ -10,7 +10,6 @@ class SyncClientImpl implements SyncClient {
 
     private final String url;
     @Nullable private final String certificatePath;
-    private final String objectBoxClientId;
     private final SyncCredentialsImpl credentials;
     private final long storeHandle;
 
@@ -19,7 +18,6 @@ class SyncClientImpl implements SyncClient {
     SyncClientImpl(SyncBuilder syncBuilder) {
         this.url = syncBuilder.url;
         this.certificatePath = syncBuilder.certificatePath;
-        this.objectBoxClientId = syncBuilder.objectBoxClientId;
         this.credentials = (SyncCredentialsImpl) syncBuilder.credentials;
         this.storeHandle = InternalAccess.getHandle(syncBuilder.boxStore);
     }
@@ -44,7 +42,7 @@ class SyncClientImpl implements SyncClient {
             if (credentials.getToken() != null) {
                 credentialsBytes = getAsBytesUtf8(credentials.getToken());
             }
-            nativeLogin(syncClientHandle, getAsBytesUtf8(objectBoxClientId), credentials.getTypeId(), credentialsBytes);
+            nativeLogin(syncClientHandle, credentials.getTypeId(), credentialsBytes);
 
             callback.onComplete(null);
         } catch (Exception e) {
@@ -74,5 +72,5 @@ class SyncClientImpl implements SyncClient {
 
     static native void nativeStart(long handle);
 
-    static native void nativeLogin(long handle, byte[] clientId, int credentialsType, @Nullable byte[] credentials);
+    static native void nativeLogin(long handle, int credentialsType, @Nullable byte[] credentials);
 }
