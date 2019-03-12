@@ -29,7 +29,7 @@ class SyncClientImpl implements SyncClient {
         return url;
     }
 
-    public void connect(ConnectCallback callback) {
+    public synchronized void connect(ConnectCallback callback) {
         if (syncClientHandle != 0) {
             callback.onComplete(null);
             return;
@@ -53,7 +53,7 @@ class SyncClientImpl implements SyncClient {
     }
 
     @Override
-    public void disconnect() {
+    public synchronized void disconnect() {
         if (syncClientHandle == 0) return;
 
         try {

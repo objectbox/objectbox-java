@@ -1,6 +1,7 @@
 package io.objectbox.sync;
 
-/** Public sync client API. */
+/** Public sync client API. SyncClient is thread-safe. */
+@SuppressWarnings("unused")
 public interface SyncClient {
 
     /** Get the sync server URL this client is connected to. */
