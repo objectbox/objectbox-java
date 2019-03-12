@@ -30,7 +30,7 @@ public class SyncBuilder {
 
     public SyncBuilder credentials(SyncCredentials credentials) {
         this.credentials = credentials;
-        return null;
+        return this;
     }
 
     public SyncClient build() {
