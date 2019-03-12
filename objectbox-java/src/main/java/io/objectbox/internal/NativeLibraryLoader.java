@@ -42,7 +42,9 @@ public class NativeLibraryLoader {
     static {
         String libname = OBJECTBOX_JNI;
         String filename = libname + ".so";
-        boolean isLinux = false;
+        // Some Android devices are detected as neither Android or Linux below,
+        // so assume Linux by default to always fallback to Android
+        boolean isLinux = true;
         // For Android, os.name is also "Linux", so we need an extra check
         // Is not completely reliable (e.g. Vivo devices), see workaround on load failure
         // Note: can not use check for Android classes as testing frameworks (Robolectric)
@@ -53,15 +55,16 @@ public class NativeLibraryLoader {
             String sunArch = System.getProperty("sun.arch.data.model");
             String cpuArchPostfix = "32".equals(sunArch) ? "-x86" : "-x64";
             if (osName.contains("windows")) {
+                isLinux = false;
                 libname += "-windows" + cpuArchPostfix;
                 filename = libname + ".dll";
                 checkUnpackLib(filename);
             } else if (osName.contains("linux")) {
-                isLinux = true;
                 libname += "-linux" + cpuArchPostfix;
                 filename = "lib" + libname + ".so";
                 checkUnpackLib(filename);
             } else if (osName.contains("mac")) {
+                isLinux = false;
                 libname += "-macos" + cpuArchPostfix;
                 filename = "lib" + libname + ".dylib";
                 checkUnpackLib(filename);
