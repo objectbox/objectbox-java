@@ -24,6 +24,10 @@ public class InternalAccess {
         return box.getReader();
     }
 
+    public static long getHandle(BoxStore boxStore) {
+        return boxStore.internalHandle();
+    }
+
     public static long getHandle(Cursor reader) {
         return reader.internalHandle();
     }

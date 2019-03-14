@@ -1,16 +1,46 @@
 package io.objectbox.sync;
 
+import javax.annotation.Nullable;
+
+import io.objectbox.BoxStore;
+
 @SuppressWarnings("unused")
 public class SyncBuilder {
 
-    private final String url;
+    public final BoxStore boxStore;
+    public final String url;
+    @Nullable public String certificatePath;
+    public SyncCredentials credentials;
 
-    public SyncBuilder(String url) {
+    public SyncBuilder(BoxStore boxStore, String url) {
+        checkNotNull(boxStore, "BoxStore is required.");
+        checkNotNull(url, "Sync server URL is required.");
+        this.boxStore = boxStore;
         this.url = url;
     }
 
-    public void start() {
-        // TODO
+    // TODO Check if this should remain exposed in the final API
+    public SyncBuilder certificatePath(String certificatePath) {
+        this.certificatePath = certificatePath;
+        return this;
+    }
+
+    public SyncBuilder credentials(SyncCredentials credentials) {
+        this.credentials = credentials;
+        return this;
+    }
+
+    public SyncClient build() {
+        if (credentials == null) {
+            throw new IllegalStateException("Credentials are required.");
+        }
+        return new SyncClientImpl(this);
+    }
+
+    private void checkNotNull(Object object, String message) {
+        if (object == null) {
+            throw new IllegalArgumentException(message);
+        }
     }
 
 }

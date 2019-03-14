@@ -6,7 +6,7 @@ String buildsToKeep = '500'
 
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
-    agent any
+    agent { label 'java' }
     
     environment {
         GITLAB_URL = credentials('gitlab_url')
