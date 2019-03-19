@@ -78,17 +78,21 @@ public class NativeLibraryLoader {
             if (file.exists()) {
                 System.load(file.getAbsolutePath());
             } else {
-                if (!android) {
-                    System.err.println("File not available: " + file.getAbsolutePath());
-                }
                 try {
-                    if (!android || !loadLibraryAndroid()) { // if android && loadLibraryAndroid OK: done
+                    if (android) {
+                        boolean success = loadLibraryAndroid();
+                        if (!success) {
+                            System.loadLibrary(libname);
+                        }
+                    } else {
+                        System.err.println("File not available: " + file.getAbsolutePath());
                         System.loadLibrary(libname);
                     }
                 } catch (UnsatisfiedLinkError e) {
                     if (!android && isLinux) {
                         // maybe is Android, but check failed: try loading Android lib
-                        if (!loadLibraryAndroid()) {
+                        boolean success = loadLibraryAndroid();
+                        if (!success) {
                             System.loadLibrary(OBJECTBOX_JNI);
                         }
                     } else {
@@ -138,7 +142,6 @@ public class NativeLibraryLoader {
         }
     }
 
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted") // more readable
     private static boolean loadLibraryAndroid() {
         if (BoxStore.context == null) {
             return false;
