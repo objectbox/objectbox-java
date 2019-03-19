@@ -82,13 +82,13 @@ public class NativeLibraryLoader {
                     System.err.println("File not available: " + file.getAbsolutePath());
                 }
                 try {
-                    if (!android || !loadLibraryAndroid(libname)) { // if android && loadLibraryAndroid OK: done
+                    if (!android || !loadLibraryAndroid()) { // if android && loadLibraryAndroid OK: done
                         System.loadLibrary(libname);
                     }
                 } catch (UnsatisfiedLinkError e) {
                     if (!android && isLinux) {
                         // maybe is Android, but check failed: try loading Android lib
-                        if (!loadLibraryAndroid(OBJECTBOX_JNI)) {
+                        if (!loadLibraryAndroid()) {
                             System.loadLibrary(OBJECTBOX_JNI);
                         }
                     } else {
@@ -139,7 +139,7 @@ public class NativeLibraryLoader {
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted") // more readable
-    private static boolean loadLibraryAndroid(String libname) {
+    private static boolean loadLibraryAndroid() {
         if (BoxStore.context == null) {
             return false;
         }
@@ -151,11 +151,11 @@ public class NativeLibraryLoader {
                 // use default ReLinker
                 Class<?> relinker = Class.forName("com.getkeepsafe.relinker.ReLinker");
                 Method loadLibrary = relinker.getMethod("loadLibrary", context, String.class, String.class);
-                loadLibrary.invoke(null, BoxStore.context, libname, BoxStore.JNI_VERSION);
+                loadLibrary.invoke(null, BoxStore.context, OBJECTBOX_JNI, BoxStore.JNI_VERSION);
             } else {
                 // use custom ReLinkerInstance
                 Method loadLibrary = BoxStore.relinker.getClass().getMethod("loadLibrary", context, String.class, String.class);
-                loadLibrary.invoke(BoxStore.relinker, BoxStore.context, libname, BoxStore.JNI_VERSION);
+                loadLibrary.invoke(BoxStore.relinker, BoxStore.context, OBJECTBOX_JNI, BoxStore.JNI_VERSION);
             }
         } catch (NoSuchMethodException e) {
             return false;
