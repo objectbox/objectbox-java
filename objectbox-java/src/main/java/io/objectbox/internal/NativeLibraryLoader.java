@@ -82,7 +82,7 @@ public class NativeLibraryLoader {
                     System.err.println("File not available: " + file.getAbsolutePath());
                 }
                 try {
-                    if (!android || !loadLibraryAndroid(libname)) {
+                    if (!android || !loadLibraryAndroid(libname)) { // if android && loadLibraryAndroid OK: done
                         System.loadLibrary(libname);
                     }
                 } catch (UnsatisfiedLinkError e) {
@@ -101,7 +101,7 @@ public class NativeLibraryLoader {
                     "Loading ObjectBox native library failed: vendor=%s,os=%s,arch=%s,android=%s,linux=%s",
                     vendor, osName, sunArch, android, isLinux
             );
-            throw new RuntimeException(message, e);
+            throw new LinkageError(message, e); // UnsatisfiedLinkError does not allow a cause; use its super class
         }
     }
 
