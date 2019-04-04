@@ -103,6 +103,22 @@ public class BoxTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testGetAllResultIsAlwaysMutable() {
+        assertEquals(0, box.count());
+        List<TestEntity> all = box.getAll();
+        all.add(new TestEntity());
+
+        assertEquals(0, box.count());
+        box.put(new TestEntity());
+
+        assertEquals(1, box.count());
+        all = box.getAll();
+
+        assertEquals(1, all.size());
+        all.add(new TestEntity());
+    }
+
+    @Test
     public void testRemoveMany() {
         List<TestEntity> entities = new ArrayList<>();
         for (int i = 0; i < 10; i++) {

@@ -306,7 +306,7 @@ public class Box<T> {
         try {
             T first = cursor.first();
             if (first == null) {
-                return Collections.emptyList();
+                return new ArrayList<>();
             } else {
                 ArrayList<T> list = new ArrayList<>();
                 list.add(first);
