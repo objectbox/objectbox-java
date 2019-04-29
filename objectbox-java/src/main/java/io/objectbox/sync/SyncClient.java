@@ -8,6 +8,16 @@ public interface SyncClient {
     String url();
 
     /**
+     * Sets a {@link SyncClientListener}. Replaces a previously set listener.
+     */
+    void setSyncListener(SyncClientListener listener);
+
+    /**
+     * Removes a previously set {@link SyncClientListener}. Does nothing if no listener was set.
+     */
+    void removeSyncListener();
+
+    /**
      * Logs the client in with the sync server and starts or resumes syncing.
      * If successful no exception will be returned with the callback.
      */

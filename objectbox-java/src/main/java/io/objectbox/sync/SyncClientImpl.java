@@ -14,6 +14,7 @@ class SyncClientImpl implements SyncClient {
     private final long storeHandle;
 
     private long syncClientHandle;
+    @Nullable private SyncClientListener listener;
 
     SyncClientImpl(SyncBuilder syncBuilder) {
         this.url = syncBuilder.url;
@@ -25,6 +26,23 @@ class SyncClientImpl implements SyncClient {
     @Override
     public String url() {
         return url;
+    }
+
+    @Override
+    public synchronized void setSyncListener(SyncClientListener listener) {
+        checkNotNull(listener, "Listener must not be null. Use removeSyncListener to remove existing listener.");
+        this.listener = listener;
+        if (syncClientHandle != 0) {
+            nativeSetListener(syncClientHandle, listener);
+        }
+    }
+
+    @Override
+    public synchronized void removeSyncListener() {
+        this.listener = null;
+        if (syncClientHandle != 0) {
+            nativeSetListener(syncClientHandle, null);
+        }
     }
 
     public synchronized void connect(ConnectCallback callback) {
@@ -43,6 +61,11 @@ class SyncClientImpl implements SyncClient {
                 credentialsBytes = getAsBytesUtf8(credentials.getToken());
             }
             nativeLogin(syncClientHandle, credentials.getTypeId(), credentialsBytes);
+
+            // if listener was set before connecting register it now
+            if (listener != null) {
+                nativeSetListener(syncClientHandle, listener);
+            }
 
             callback.onComplete(null);
         } catch (Exception e) {
@@ -66,6 +89,12 @@ class SyncClientImpl implements SyncClient {
         return text.getBytes("UTF-8");
     }
 
+    private void checkNotNull(Object object, String message) {
+        if (object == null) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
     static native long nativeCreate(long storeHandle, String uri, @Nullable String certificatePath);
 
     static native void nativeDelete(long handle);
@@ -73,4 +102,7 @@ class SyncClientImpl implements SyncClient {
     static native void nativeStart(long handle);
 
     static native void nativeLogin(long handle, int credentialsType, @Nullable byte[] credentials);
+
+    static native void nativeSetListener(long handle, @Nullable SyncClientListener listener);
+
 }
