@@ -7,10 +7,10 @@ import io.objectbox.BoxStore;
 @SuppressWarnings("unused")
 public class SyncBuilder {
 
-    public final BoxStore boxStore;
-    public final String url;
-    @Nullable public String certificatePath;
-    public SyncCredentials credentials;
+    final BoxStore boxStore;
+    final String url;
+    @Nullable String certificatePath;
+    SyncCredentials credentials;
 
     public SyncBuilder(BoxStore boxStore, String url) {
         checkNotNull(boxStore, "BoxStore is required.");
