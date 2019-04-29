@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import io.objectbox.InternalAccess;
 
-class SyncClientImpl implements SyncClient {
+public class SyncClientImpl implements SyncClient {
 
     private final String url;
     @Nullable private final String certificatePath;
@@ -15,6 +15,7 @@ class SyncClientImpl implements SyncClient {
 
     private long syncClientHandle;
     @Nullable private SyncClientListener listener;
+    @Nullable private SyncChangesListener syncChangesListener;
 
     SyncClientImpl(SyncBuilder syncBuilder) {
         this.url = syncBuilder.url;
@@ -45,6 +46,23 @@ class SyncClientImpl implements SyncClient {
         }
     }
 
+    @Override
+    public void setSyncChangesListener(SyncChangesListener changesListener) {
+        checkNotNull(changesListener, "Listener must not be null. Use removeSyncChangesListener to remove existing listener.");
+        this.syncChangesListener = changesListener;
+        if (syncClientHandle != 0) {
+            nativeSetSyncChangesListener(syncClientHandle, changesListener);
+        }
+    }
+
+    @Override
+    public void removeSyncChangesListener() {
+        this.syncChangesListener = null;
+        if (syncClientHandle != 0) {
+            nativeSetSyncChangesListener(syncClientHandle, null);
+        }
+    }
+
     public synchronized void connect(ConnectCallback callback) {
         if (syncClientHandle != 0) {
             callback.onComplete(null);
@@ -54,6 +72,14 @@ class SyncClientImpl implements SyncClient {
         try {
             syncClientHandle = nativeCreate(storeHandle, url, certificatePath);
 
+            // if listeners were set before connecting register them now
+            if (syncChangesListener != null) {
+                nativeSetSyncChangesListener(syncClientHandle, syncChangesListener);
+            }
+            if (listener != null) {
+                nativeSetListener(syncClientHandle, listener);
+            }
+
             nativeStart(syncClientHandle);
 
             byte[] credentialsBytes = null;
@@ -62,15 +88,21 @@ class SyncClientImpl implements SyncClient {
             }
             nativeLogin(syncClientHandle, credentials.getTypeId(), credentialsBytes);
 
-            // if listener was set before connecting register it now
-            if (listener != null) {
-                nativeSetListener(syncClientHandle, listener);
-            }
+            // actually start syncing
+            nativeRequestUpdates(syncClientHandle, true);
 
             callback.onComplete(null);
         } catch (Exception e) {
             callback.onComplete(e);
         }
+    }
+
+    /**
+     * Currently internal and for testing only. Stop receiving sync updates.
+     */
+    public synchronized void cancelUpdates() {
+        if (syncClientHandle == 0) return;
+        nativeCancelUpdates(syncClientHandle);
     }
 
     @Override
@@ -104,5 +136,15 @@ class SyncClientImpl implements SyncClient {
     static native void nativeLogin(long handle, int credentialsType, @Nullable byte[] credentials);
 
     static native void nativeSetListener(long handle, @Nullable SyncClientListener listener);
+
+    static native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangesListener advancedListener);
+
+    /**
+     * Request sync updates. Set {@code subscribeForPushes} to automatically receive updates for future changes.
+     */
+    static native void nativeRequestUpdates(long handle, boolean subscribeForPushes);
+
+    /** (Optional) Cancel sync updates. */
+    static native void nativeCancelUpdates(long handle);
 
 }

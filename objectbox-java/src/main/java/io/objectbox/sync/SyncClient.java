@@ -18,6 +18,16 @@ public interface SyncClient {
     void removeSyncListener();
 
     /**
+     * Sets a {@link SyncChangesListener}. Replaces a previously set listener.
+     */
+    void setSyncChangesListener(SyncChangesListener listener);
+
+    /**
+     * Removes a previously set {@link SyncChangesListener}. Does nothing if no listener was set.
+     */
+    void removeSyncChangesListener();
+
+    /**
      * Logs the client in with the sync server and starts or resumes syncing.
      * If successful no exception will be returned with the callback.
      */
