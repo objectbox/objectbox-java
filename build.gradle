@@ -55,8 +55,8 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
     }
 
     dependencies {
-        deployerJars 'org.apache.maven.wagon:wagon-webdav:1.0-beta-2'
-        deployerJars 'org.apache.maven.wagon:wagon-ftp:2.2'
+        deployerJars 'org.apache.maven.wagon:wagon-webdav-jackrabbit:3.3.2'
+        deployerJars 'org.apache.maven.wagon:wagon-ftp:3.3.2'
     }
 
     signing {

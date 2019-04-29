@@ -85,7 +85,8 @@ public abstract class RxQuery {
 
     /**
      * The returned Observable emits Query results as Lists.
-     * Never completes, so you will get updates when underlying data changes.
+     * Never completes, so you will get updates when underlying data changes
+     * (see {@link Query#subscribe()} for details).
      */
     public static <T> Observable<List<T>> observable(final Query<T> query) {
         return Observable.create(new ObservableOnSubscribe<List<T>>() {
