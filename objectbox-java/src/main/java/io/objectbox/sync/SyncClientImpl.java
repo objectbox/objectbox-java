@@ -52,14 +52,11 @@ class SyncClientImpl implements SyncClient {
         }
 
         try {
-            // JNI does not accept null value for certificatePath
-            String safeCertificatePath = certificatePath != null ? certificatePath : "";
-            syncClientHandle = nativeCreate(storeHandle, url, safeCertificatePath);
+            syncClientHandle = nativeCreate(storeHandle, url, certificatePath);
 
             nativeStart(syncClientHandle);
 
-            // JNI does not accept null value for credentialsBytes
-            byte[] credentialsBytes = new byte[]{};
+            byte[] credentialsBytes = null;
             if (credentials.getToken() != null) {
                 credentialsBytes = getAsBytesUtf8(credentials.getToken());
             }
