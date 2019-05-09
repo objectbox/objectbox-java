@@ -244,7 +244,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         box.put((TestEntity[]) null);
         box.remove((Collection) null);
         box.remove((long[]) null);
-        box.removeByKeys(null);
+        box.removeByIds(null);
     }
 
     @Test

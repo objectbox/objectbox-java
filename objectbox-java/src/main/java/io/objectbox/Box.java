@@ -420,10 +420,16 @@ public class Box<T> {
         }
     }
 
+    @Deprecated
+    /** @deprecated use {@link #removeByIds(Collection)} instead. */
+    public void removeByKeys(@Nullable Collection<Long> ids) {
+        removeByIds(ids);
+    }
+
     /**
      * Due to type erasure collision, we cannot simply use "remove" as a method name here.
      */
-    public void removeByKeys(@Nullable Collection<Long> ids) {
+    public void removeByIds(@Nullable Collection<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return;
         }
