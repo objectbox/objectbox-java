@@ -5,6 +5,7 @@ String cronSchedule = BRANCH_NAME == 'dev' ? '*/30 1-5 * * *' : ''
 String buildsToKeep = '500'
 
 String gradleArgs = '-Dorg.gradle.daemon=false --stacktrace'
+String versionPostfix = BRANCH_NAME == 'dev' ? '' : BRANCH_NAME // build script detects empty string as not set
 
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
@@ -46,11 +47,13 @@ pipeline {
         }
 
         stage('upload-to-repo') {
-            // Note: to avoid conflicts between snapshot versions, add the branch name
-            // before '-SNAPSHOT' to the version string, like '1.2.3-branch-SNAPSHOT'
             when { expression { return BRANCH_NAME != 'publish' } }
+            environment {
+                MVN_REPO_URL = credentials('objectbox_internal_mvn_repo')
+                MVN_REPO_LOGIN = credentials('objectbox_internal_mvn_user')
+            }
             steps {
-                sh "./gradlew $gradleArgs -PpreferredRepo=local uploadArchives"
+                sh "./gradlew $gradleArgs -PversionPostFix=${versionPostfix} -PpreferredRepo=${MVN_REPO_URL} -PpreferredUsername=${MVN_REPO_LOGIN_USR} -PpreferredPassword=${MVN_REPO_LOGIN_PSW} uploadArchives"
             }
         }
 
