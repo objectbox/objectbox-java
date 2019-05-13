@@ -4,6 +4,7 @@ package io.objectbox.sync;
  * Notifies you of fine granular changes happening during sync.
  * Most will want to use {@link SyncClientListener} instead.
  */
+@SuppressWarnings({"unused"})
 public interface SyncChangesListener {
 
     /**

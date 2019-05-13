@@ -1,5 +1,6 @@
 package io.objectbox.sync;
 
+@SuppressWarnings({"unused"})
 public interface SyncClientListener {
 
     /**

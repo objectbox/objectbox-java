@@ -3,6 +3,7 @@ package io.objectbox.sync;
 /**
  * A collection of changes made to one entity type during a sync transaction.
  */
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class SyncChange {
     final long entityTypeId;
 

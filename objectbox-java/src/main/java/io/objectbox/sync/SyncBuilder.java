@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class SyncBuilder {
 
     final BoxStore boxStore;
