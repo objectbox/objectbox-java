@@ -9,6 +9,7 @@ public class SyncBuilder {
 
     final BoxStore boxStore;
     final String url;
+    boolean manualUpdateRequests;
     @Nullable String certificatePath;
     SyncCredentials credentials;
 
@@ -27,6 +28,15 @@ public class SyncBuilder {
 
     public SyncBuilder credentials(SyncCredentials credentials) {
         this.credentials = credentials;
+        return this;
+    }
+
+    /**
+     * By default, sync automatically requests updates from the backend; with this, you can override this behavior.
+     * @see SyncClient#requestUpdates()
+     */
+    public SyncBuilder manualUpdateRequests() {
+        manualUpdateRequests = true;
         return this;
     }
 

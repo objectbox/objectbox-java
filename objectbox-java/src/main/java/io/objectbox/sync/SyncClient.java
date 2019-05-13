@@ -38,4 +38,23 @@ public interface SyncClient {
      */
     void disconnect();
 
+
+    /**
+     * In combination with {@link SyncBuilder#manualUpdateRequests}, this manually requests updates from the sync
+     * backend including pushes of future changes.
+     * Also resumes updates after {@link #cancelUpdates()} was called.
+     */
+    void requestUpdates();
+
+    /**
+     * In combination with {@link SyncBuilder#manualUpdateRequests}, this manually requests updates from the sync
+     * backend until we are up-to-date once without pushes for future changes.
+     */
+    void requestUpdatesOnce();
+
+    /**
+     * Stop receiving sync updates.
+     */
+    void cancelUpdates();
+
 }

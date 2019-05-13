@@ -12,6 +12,7 @@ public class SyncClientImpl implements SyncClient {
     @Nullable private final String certificatePath;
     private final SyncCredentialsImpl credentials;
     private final long storeHandle;
+    private final boolean manualUpdateRequests;
 
     private long syncClientHandle;
     @Nullable private SyncClientListener listener;
@@ -22,6 +23,7 @@ public class SyncClientImpl implements SyncClient {
         this.certificatePath = syncBuilder.certificatePath;
         this.credentials = (SyncCredentialsImpl) syncBuilder.credentials;
         this.storeHandle = InternalAccess.getHandle(syncBuilder.boxStore);
+        this.manualUpdateRequests = syncBuilder.manualUpdateRequests;
     }
 
     @Override
@@ -88,8 +90,9 @@ public class SyncClientImpl implements SyncClient {
             }
             nativeLogin(syncClientHandle, credentials.getTypeId(), credentialsBytes);
 
-            // actually start syncing
-            nativeRequestUpdates(syncClientHandle, true);
+            if(!manualUpdateRequests) {
+                requestUpdates();
+            }
 
             callback.onComplete(null);
         } catch (Exception e) {
@@ -97,9 +100,19 @@ public class SyncClientImpl implements SyncClient {
         }
     }
 
-    /**
-     * Currently internal and for testing only. Stop receiving sync updates.
-     */
+    /** {@inheritDoc} */
+    public synchronized void requestUpdates() {
+        if (syncClientHandle == 0) return;
+        nativeRequestUpdates(syncClientHandle, true);
+    }
+
+    /** {@inheritDoc} */
+    public synchronized void requestUpdatesOnce() {
+        if (syncClientHandle == 0) return;
+        nativeRequestUpdates(syncClientHandle, false);
+    }
+
+    /** {@inheritDoc} */
     public synchronized void cancelUpdates() {
         if (syncClientHandle == 0) return;
         nativeCancelUpdates(syncClientHandle);
