@@ -1,12 +1,16 @@
 package io.objectbox.sync;
 
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
 import io.objectbox.InternalAccess;
 
 public class SyncClientImpl implements SyncClient {
+
+    private static final long LOGIN_TIMEOUT_SECONDS = 15;
 
     private final String url;
     @Nullable private final String certificatePath;
@@ -35,17 +39,11 @@ public class SyncClientImpl implements SyncClient {
     public synchronized void setSyncListener(SyncClientListener listener) {
         checkNotNull(listener, "Listener must not be null. Use removeSyncListener to remove existing listener.");
         this.listener = listener;
-        if (syncClientHandle != 0) {
-            nativeSetListener(syncClientHandle, listener);
-        }
     }
 
     @Override
     public synchronized void removeSyncListener() {
         this.listener = null;
-        if (syncClientHandle != 0) {
-            nativeSetListener(syncClientHandle, null);
-        }
     }
 
     @Override
@@ -78,9 +76,24 @@ public class SyncClientImpl implements SyncClient {
             if (syncChangesListener != null) {
                 nativeSetSyncChangesListener(syncClientHandle, syncChangesListener);
             }
-            if (listener != null) {
-                nativeSetListener(syncClientHandle, listener);
-            }
+            // always set a SyncClientListener, forward to a user-set listener
+            final CountDownLatch loginLatch = new CountDownLatch(1);
+            nativeSetListener(syncClientHandle, new SyncClientListener() {
+                @Override
+                public void onLogin(long response) {
+                    if (listener != null) {
+                        listener.onLogin(response);
+                    }
+                    loginLatch.countDown();
+                }
+
+                @Override
+                public void onSyncComplete() {
+                    if (listener != null) {
+                        listener.onSyncComplete();
+                    }
+                }
+            });
 
             nativeStart(syncClientHandle);
 
@@ -89,6 +102,8 @@ public class SyncClientImpl implements SyncClient {
                 credentialsBytes = getAsBytesUtf8(credentials.getToken());
             }
             nativeLogin(syncClientHandle, credentials.getTypeId(), credentialsBytes);
+
+            loginLatch.await(LOGIN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
             if(!manualUpdateRequests) {
                 requestUpdates();
