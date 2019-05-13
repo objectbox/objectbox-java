@@ -14,6 +14,9 @@ pipeline {
     
     environment {
         GITLAB_URL = credentials('gitlab_url')
+        MVN_REPO_URL = credentials('objectbox_internal_mvn_repo_http')
+        MVN_REPO_URL_PUBLISH = credentials('objectbox_internal_mvn_repo')
+        MVN_REPO_LOGIN = credentials('objectbox_internal_mvn_user')
     }
 
     options {
@@ -39,7 +42,9 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh './test-with-asan.sh -Dextensive-tests=true clean test ' +
+                sh './test-with-asan.sh -Dextensive-tests=true ' +
+                        '-PinternalObjectBoxRepo=${MVN_REPO_URL} -PinternalObjectBoxRepoUser=${MVN_REPO_LOGIN_USR} -PinternalObjectBoxRepoPassword=${MVN_REPO_LOGIN_PSW} ' +
+                        'clean test ' +
                         '--tests io.objectbox.FunctionalTestSuite ' +
                         '--tests io.objectbox.test.proguard.ObfuscatedEntityTest ' +
                         '--tests io.objectbox.rx.QueryObserverTest ' +
@@ -49,12 +54,11 @@ pipeline {
 
         stage('upload-to-repo') {
             when { expression { return BRANCH_NAME != publishBranch } }
-            environment {
-                MVN_REPO_URL = credentials('objectbox_internal_mvn_repo')
-                MVN_REPO_LOGIN = credentials('objectbox_internal_mvn_user')
-            }
             steps {
-                sh "./gradlew $gradleArgs -PversionPostFix=${versionPostfix} -PpreferredRepo=${MVN_REPO_URL} -PpreferredUsername=${MVN_REPO_LOGIN_USR} -PpreferredPassword=${MVN_REPO_LOGIN_PSW} uploadArchives"
+                sh "./gradlew $gradleArgs " +
+                   "-PversionPostFix=${versionPostfix} " +
+                   "-PpreferredRepo=${MVN_REPO_URL_PUBLISH} -PpreferredUsername=${MVN_REPO_LOGIN_USR} -PpreferredPassword=${MVN_REPO_LOGIN_PSW} " +
+                   "uploadArchives"
             }
         }
 

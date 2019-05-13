@@ -5,6 +5,20 @@ uploadArchives.enabled = false
 targetCompatibility = '1.7'
 sourceCompatibility = '1.7'
 
+// Native lib might be deployed only in internal repo 
+if (project.hasProperty('internalObjectBoxRepo')) {
+    println("Using internal ObjectBox repository $internalObjectBoxRepo.")
+    maven {
+        credentials {
+            username project.property('internalObjectBoxRepoUser')
+            password project.property('internalObjectBoxRepoPassword')
+        }
+        url internalObjectBoxRepo
+    }
+} else {
+    println "Warning: internalObjectBoxRepo, internalObjectBoxRepoUser and internalObjectBoxRepoPassword missing from gradle.properties."
+}
+
 dependencies {
     compile project(':objectbox-java')
     compile 'org.greenrobot:essentials:3.0.0-RC1'
