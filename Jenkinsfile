@@ -42,13 +42,13 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh './test-with-asan.sh -Dextensive-tests=true ' +
-                        '-PinternalObjectBoxRepo=${MVN_REPO_URL} -PinternalObjectBoxRepoUser=${MVN_REPO_LOGIN_USR} -PinternalObjectBoxRepoPassword=${MVN_REPO_LOGIN_PSW} ' +
-                        'clean test ' +
-                        '--tests io.objectbox.FunctionalTestSuite ' +
-                        '--tests io.objectbox.test.proguard.ObfuscatedEntityTest ' +
-                        '--tests io.objectbox.rx.QueryObserverTest ' +
-                        'assemble'
+                sh "./test-with-asan.sh -Dextensive-tests=true " +
+                        "-PinternalObjectBoxRepo=${MVN_REPO_URL} -PinternalObjectBoxRepoUser=${MVN_REPO_LOGIN_USR} -PinternalObjectBoxRepoPassword=${MVN_REPO_LOGIN_PSW} " +
+                        "clean test " +
+                        "--tests io.objectbox.FunctionalTestSuite " +
+                        "--tests io.objectbox.test.proguard.ObfuscatedEntityTest " +
+                        "--tests io.objectbox.rx.QueryObserverTest " +
+                        "assemble"
             }
         }
 
@@ -91,14 +91,7 @@ pipeline {
             archive '**/build/reports/findbugs/*'
         }
 
-        changed {
-            slackSend color: COLOR_MAP[currentBuild.currentResult],
-                    message: "Changed to ${currentBuild.currentResult}: ${currentBuild.fullDisplayName}\n${env.BUILD_URL}"
-        }
-
         failure {
-            slackSend color: "danger",
-                    message: "Failed: ${currentBuild.fullDisplayName}\n${env.BUILD_URL}"
             updateGitlabCommitStatus name: 'build', state: 'failed'
         }
 

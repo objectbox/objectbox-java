@@ -32,9 +32,9 @@ pipeline {
 
         stage('build-java') {
             steps {
-                bat 'gradlew ' +
-                 '-PinternalObjectBoxRepo=${MVN_REPO_URL} -PinternalObjectBoxRepoUser=${MVN_REPO_LOGIN_USR} -PinternalObjectBoxRepoPassword=${MVN_REPO_LOGIN_PSW} ' +
-                 'cleanTest build test'
+                bat "gradlew " +
+                 "-PinternalObjectBoxRepo=${MVN_REPO_URL} -PinternalObjectBoxRepoUser=${MVN_REPO_LOGIN_USR} -PinternalObjectBoxRepoPassword=${MVN_REPO_LOGIN_PSW} " +
+                 "cleanTest build test"
             }
         }
     }
