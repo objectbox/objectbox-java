@@ -4,6 +4,8 @@ def COLOR_MAP = ['SUCCESS': 'good', 'FAILURE': 'danger', 'UNSTABLE': 'danger', '
 String cronSchedule = BRANCH_NAME == 'dev' ? '*/30 1-5 * * *' : ''
 String buildsToKeep = '500'
 
+String gradleArgs = '-Dorg.gradle.daemon=false --stacktrace'
+
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
     agent { label 'java' }
@@ -48,7 +50,7 @@ pipeline {
             // before '-SNAPSHOT' to the version string, like '1.2.3-branch-SNAPSHOT'
             when { expression { return BRANCH_NAME != 'publish' } }
             steps {
-                sh './gradlew --stacktrace -PpreferedRepo=local uploadArchives'
+                sh "./gradlew $gradleArgs -PpreferredRepo=local uploadArchives"
             }
         }
 
@@ -63,7 +65,7 @@ pipeline {
                     slackSend color: "#42ebf4",
                             message: "Publishing ${currentBuild.fullDisplayName} to Bintray...\n${env.BUILD_URL}"
                 }
-                sh './gradlew --stacktrace -PpreferedRepo=${BINTRAY_URL} -PpreferedUsername=${BINTRAY_LOGIN_USR} -PpreferedPassword=${BINTRAY_LOGIN_PSW} uploadArchives'
+                sh "./gradlew $gradleArgs -PpreferredRepo=${BINTRAY_URL} -PpreferredUsername=${BINTRAY_LOGIN_USR} -PpreferredPassword=${BINTRAY_LOGIN_PSW} uploadArchives"
                 script {
                     slackSend color: "##41f4cd",
                             message: "Published ${currentBuild.fullDisplayName} successfully to Bintray - check https://bintray.com/objectbox/objectbox\n${env.BUILD_URL}"

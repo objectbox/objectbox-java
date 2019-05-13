@@ -54,7 +54,8 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
     }
 
     dependencies {
-        deployerJars 'org.apache.maven.wagon:wagon-webdav-jackrabbit:3.3.2'
+        // Using an older version to remain compatible with Wagon API used by Gradle/Maven
+        deployerJars 'org.apache.maven.wagon:wagon-webdav-jackrabbit:3.2.0'
         deployerJars 'org.apache.maven.wagon:wagon-ftp:3.3.2'
     }
 
@@ -72,19 +73,24 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
         uploadArchives {
             repositories {
                 mavenDeployer {
-                    if (project.hasProperty('preferedRepo') && preferedRepo == 'local') {
+                    def preferredRepo = project.findProperty('preferredRepo')
+                    println "preferredRepo=$preferredRepo"
+                    
+                    if (preferredRepo == 'local') {
                         repository url: repositories.mavenLocal().url
-                    } else if (project.hasProperty('preferedRepo') && project.hasProperty('preferedUsername')
-                            && project.hasProperty('preferedPassword')) {
+                    } else if (preferredRepo != null 
+                            && project.hasProperty('preferredUsername') 
+                            && project.hasProperty('preferredPassword')) {
                         configuration = configurations.deployerJars
-                        // Replace for bintray's dynamic URL
-                        preferedRepo = preferedRepo.replace('__groupId__', project.group)
-                        preferedRepo = preferedRepo.replace('__artifactId__', project.archivesBaseName)
-                        // println preferedRepo
-                        repository(url: preferedRepo) {
-                            authentication(userName: preferedUsername, password: preferedPassword)
+                        // replace placeholders
+                        def repositoryUrl = preferredRepo
+                                .replace('__groupId__', project.group)
+                                .replace('__artifactId__', project.archivesBaseName)
+                        repository(url: repositoryUrl) {
+                            authentication(userName: preferredUsername, password: preferredPassword)
                         }
-                    } else if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+                    } else if (project.hasProperty('sonatypeUsername') 
+                            && project.hasProperty('sonatypePassword')) {
                         beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
                         def isSnapshot = version.endsWith('-SNAPSHOT')
                         def sonatypeRepositoryUrl = isSnapshot ?
@@ -94,7 +100,7 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                             authentication(userName: sonatypeUsername, password: sonatypePassword)
                         }
                     } else {
-                        println "Settings sonatypeUsername/sonatypePassword missing/incomplete for ${project.name}"
+                        println "Deployment settings missing/incomplete for ${project.name}."
                     }
 
                     pom.project {
