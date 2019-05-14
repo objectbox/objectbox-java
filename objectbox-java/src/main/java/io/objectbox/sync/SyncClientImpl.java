@@ -102,6 +102,7 @@ public class SyncClientImpl implements SyncClient {
                 credentialsBytes = getAsBytesUtf8(credentials.getToken());
             }
             nativeLogin(syncClientHandle, credentials.getTypeId(), credentialsBytes);
+            credentials.clear();  // Clear immediately, not needed anymore
 
             loginLatch.await(LOGIN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
