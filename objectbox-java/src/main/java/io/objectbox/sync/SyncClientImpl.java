@@ -19,8 +19,8 @@ public class SyncClientImpl implements SyncClient {
     private final boolean manualUpdateRequests;
 
     private long syncClientHandle;
-    @Nullable private SyncClientListener listener;
-    @Nullable private SyncChangesListener syncChangesListener;
+    @Nullable private volatile SyncClientListener listener;
+    @Nullable private volatile SyncChangesListener syncChangesListener;
 
     SyncClientImpl(SyncBuilder syncBuilder) {
         this.url = syncBuilder.url;
@@ -78,19 +78,23 @@ public class SyncClientImpl implements SyncClient {
             }
             // always set a SyncClientListener, forward to a user-set listener
             final CountDownLatch loginLatch = new CountDownLatch(1);
+
+            // We might be able to set the user listener natively in the near future; without our delegating listener
             nativeSetListener(syncClientHandle, new SyncClientListener() {
                 @Override
                 public void onLogin(long response) {
-                    if (listener != null) {
-                        listener.onLogin(response);
+                    SyncClientListener listenerToFire = listener;
+                    if (listenerToFire != null) {
+                        listenerToFire.onLogin(response);
                     }
                     loginLatch.countDown();
                 }
 
                 @Override
                 public void onSyncComplete() {
-                    if (listener != null) {
-                        listener.onSyncComplete();
+                    SyncClientListener listenerToFire = listener;
+                    if (listenerToFire != null) {
+                        listenerToFire.onSyncComplete();
                     }
                 }
             });
