@@ -16,6 +16,10 @@ public class SyncBuilder {
     public SyncBuilder(BoxStore boxStore, String url) {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(url, "Sync server URL is required.");
+        if (!BoxStore.isSyncAvailable()) {
+            throw new IllegalStateException(
+                    "This ObjectBox library (JNI) does not include sync. Please update your dependencies.");
+        }
         this.boxStore = boxStore;
         this.url = url;
     }

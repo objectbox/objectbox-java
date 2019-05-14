@@ -200,4 +200,15 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         };
     }
 
+    @Test
+    public void testIsObjectBrowserAvailable() {
+        assertFalse(BoxStore.isObjectBrowserAvailable());
+    }
+
+    @Test
+    public void testIsSyncAvailable() {
+        assertFalse(BoxStore.isSyncAvailable());
+        assertFalse(BoxStore.isSyncServerAvailable());
+    }
+
 }

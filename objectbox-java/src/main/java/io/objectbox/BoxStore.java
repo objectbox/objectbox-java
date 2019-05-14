@@ -152,9 +152,33 @@ public class BoxStore implements Closeable {
 
     static native boolean nativeIsObjectBrowserAvailable();
 
+    static native int nativeGetSupportedSync();
+
     public static boolean isObjectBrowserAvailable() {
         NativeLibraryLoader.ensureLoaded();
         return nativeIsObjectBrowserAvailable();
+    }
+
+    private static int getSupportedSync() {
+        NativeLibraryLoader.ensureLoaded();
+        try {
+            int supportedSync = nativeGetSupportedSync();
+            if (supportedSync < 0 || supportedSync > 2) {
+                throw new IllegalStateException("Unexpected sync support: " + supportedSync);
+            }
+            return supportedSync;
+        } catch (UnsatisfiedLinkError e) {
+            System.err.println("Old JNI lib? " + e);  // No stack
+            return 0;
+        }
+    }
+
+    public static boolean isSyncAvailable() {
+        return getSupportedSync() != 0;
+    }
+
+    public static boolean isSyncServerAvailable() {
+        return getSupportedSync() == 2;
     }
 
     native long nativePanicModeRemoveAllObjects(long store, int entityId);
