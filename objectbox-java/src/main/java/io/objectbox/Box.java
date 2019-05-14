@@ -387,15 +387,18 @@ public class Box<T> {
 
     /**
      * Removes (deletes) the Object by its ID.
+     * @return true if an entity was actually removed (false if no entity exists with the given ID)
      */
-    public void remove(long id) {
+    public boolean remove(long id) {
         Cursor<T> cursor = getWriter();
+        boolean removed;
         try {
-            cursor.deleteEntity(id);
+            removed = cursor.deleteEntity(id);
             commitWriter(cursor);
         } finally {
             releaseWriter(cursor);
         }
+        return removed;
     }
 
     /**
@@ -417,10 +420,16 @@ public class Box<T> {
         }
     }
 
+    @Deprecated
+    /** @deprecated use {@link #removeByIds(Collection)} instead. */
+    public void removeByKeys(@Nullable Collection<Long> ids) {
+        removeByIds(ids);
+    }
+
     /**
      * Due to type erasure collision, we cannot simply use "remove" as a method name here.
      */
-    public void removeByKeys(@Nullable Collection<Long> ids) {
+    public void removeByIds(@Nullable Collection<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return;
         }
@@ -437,16 +446,19 @@ public class Box<T> {
 
     /**
      * Removes (deletes) the given Object.
+     * @return true if an entity was actually removed (false if no entity exists with the given ID)
      */
-    public void remove(T object) {
+    public boolean remove(T object) {
         Cursor<T> cursor = getWriter();
+        boolean removed;
         try {
-            long key = cursor.getId(object);
-            cursor.deleteEntity(key);
+            long id = cursor.getId(object);
+            removed = cursor.deleteEntity(id);
             commitWriter(cursor);
         } finally {
             releaseWriter(cursor);
         }
+        return removed;
     }
 
     /**

@@ -4,12 +4,19 @@ def COLOR_MAP = ['SUCCESS': 'good', 'FAILURE': 'danger', 'UNSTABLE': 'danger', '
 String cronSchedule = BRANCH_NAME == 'dev' ? '*/30 1-5 * * *' : ''
 String buildsToKeep = '500'
 
+String gradleArgs = '-Dorg.gradle.daemon=false --stacktrace'
+def publishBranch = 'publish'
+String versionPostfix = BRANCH_NAME == 'dev' ? '' : BRANCH_NAME // build script detects empty string as not set
+
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
     agent { label 'java' }
     
     environment {
         GITLAB_URL = credentials('gitlab_url')
+        MVN_REPO_URL = credentials('objectbox_internal_mvn_repo_http')
+        MVN_REPO_URL_PUBLISH = credentials('objectbox_internal_mvn_repo')
+        MVN_REPO_LOGIN = credentials('objectbox_internal_mvn_user')
     }
 
     options {
@@ -35,25 +42,28 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh './test-with-asan.sh -Dextensive-tests=true clean test ' +
-                        '--tests io.objectbox.FunctionalTestSuite ' +
-                        '--tests io.objectbox.test.proguard.ObfuscatedEntityTest ' +
-                        '--tests io.objectbox.rx.QueryObserverTest ' +
-                        'assemble'
+                sh "./test-with-asan.sh -Dextensive-tests=true " +
+                        "-PinternalObjectBoxRepo=${MVN_REPO_URL} -PinternalObjectBoxRepoUser=${MVN_REPO_LOGIN_USR} -PinternalObjectBoxRepoPassword=${MVN_REPO_LOGIN_PSW} " +
+                        "clean test " +
+                        "--tests io.objectbox.FunctionalTestSuite " +
+                        "--tests io.objectbox.test.proguard.ObfuscatedEntityTest " +
+                        "--tests io.objectbox.rx.QueryObserverTest " +
+                        "assemble"
             }
         }
 
         stage('upload-to-repo') {
-            // Note: to avoid conflicts between snapshot versions, add the branch name
-            // before '-SNAPSHOT' to the version string, like '1.2.3-branch-SNAPSHOT'
-            when { expression { return BRANCH_NAME != 'publish' } }
+            when { expression { return BRANCH_NAME != publishBranch } }
             steps {
-                sh './gradlew --stacktrace -PpreferedRepo=local uploadArchives'
+                sh "./gradlew $gradleArgs " +
+                   "-PversionPostFix=${versionPostfix} " +
+                   "-PpreferredRepo=${MVN_REPO_URL_PUBLISH} -PpreferredUsername=${MVN_REPO_LOGIN_USR} -PpreferredPassword=${MVN_REPO_LOGIN_PSW} " +
+                   "uploadArchives"
             }
         }
 
         stage('upload-to-bintray') {
-            when { expression { return BRANCH_NAME == 'publish' } }
+            when { expression { return BRANCH_NAME == publishBranch } }
             environment {
                 BINTRAY_URL = credentials('bintray_url')
                 BINTRAY_LOGIN = credentials('bintray_login')
@@ -63,7 +73,7 @@ pipeline {
                     slackSend color: "#42ebf4",
                             message: "Publishing ${currentBuild.fullDisplayName} to Bintray...\n${env.BUILD_URL}"
                 }
-                sh './gradlew --stacktrace -PpreferedRepo=${BINTRAY_URL} -PpreferedUsername=${BINTRAY_LOGIN_USR} -PpreferedPassword=${BINTRAY_LOGIN_PSW} uploadArchives'
+                sh "./gradlew $gradleArgs -PpreferredRepo=${BINTRAY_URL} -PpreferredUsername=${BINTRAY_LOGIN_USR} -PpreferredPassword=${BINTRAY_LOGIN_PSW} uploadArchives"
                 script {
                     slackSend color: "##41f4cd",
                             message: "Published ${currentBuild.fullDisplayName} successfully to Bintray - check https://bintray.com/objectbox/objectbox\n${env.BUILD_URL}"
@@ -81,14 +91,7 @@ pipeline {
             archive '**/build/reports/findbugs/*'
         }
 
-        changed {
-            slackSend color: COLOR_MAP[currentBuild.currentResult],
-                    message: "Changed to ${currentBuild.currentResult}: ${currentBuild.fullDisplayName}\n${env.BUILD_URL}"
-        }
-
         failure {
-            slackSend color: "danger",
-                    message: "Failed: ${currentBuild.fullDisplayName}\n${env.BUILD_URL}"
             updateGitlabCommitStatus name: 'build', state: 'failed'
         }
 

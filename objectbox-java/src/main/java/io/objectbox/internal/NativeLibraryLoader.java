@@ -45,7 +45,6 @@ public class NativeLibraryLoader {
 
         final String vendor = System.getProperty("java.vendor");
         final String osName = System.getProperty("os.name").toLowerCase();
-        final String sunArch = System.getProperty("sun.arch.data.model");
 
         // Some Android devices are detected as neither Android or Linux below,
         // so assume Linux by default to always fallback to Android
@@ -56,7 +55,7 @@ public class NativeLibraryLoader {
         // may provide them on non-Android devices
         final boolean android = vendor.contains("Android");
         if (!android) {
-            String cpuArchPostfix = "32".equals(sunArch) ? "-x86" : "-x64";
+            String cpuArchPostfix = "-" + getCpuArch();
             if (osName.contains("windows")) {
                 isLinux = false;
                 libname += "-windows" + cpuArchPostfix;
@@ -101,12 +100,51 @@ public class NativeLibraryLoader {
                 }
             }
         } catch (UnsatisfiedLinkError e) {
+            String osArch = System.getProperty("os.arch");
+            String sunArch = System.getProperty("sun.arch.data.model");
             String message = String.format(
-                    "Loading ObjectBox native library failed: vendor=%s,os=%s,arch=%s,android=%s,linux=%s",
-                    vendor, osName, sunArch, android, isLinux
+                    "Loading ObjectBox native library failed: vendor=%s,os=%s,os.arch=%s,sun.arch=%s,android=%s,linux=%s",
+                    vendor, osName, osArch, sunArch, android, isLinux
             );
             throw new LinkageError(message, e); // UnsatisfiedLinkError does not allow a cause; use its super class
         }
+    }
+
+    private static String getCpuArch() {
+        String osArch = System.getProperty("os.arch");
+        String cpuArch = null;
+        if (osArch != null) {
+            osArch = osArch.toLowerCase();
+            if (osArch.equalsIgnoreCase("amd64") || osArch.equalsIgnoreCase("x86_64")) {
+                cpuArch = "x64";
+            } else if (osArch.equalsIgnoreCase("x86")) {
+                cpuArch = "x86";
+            } else if (osArch.startsWith("arm")) {
+                switch (osArch) {
+                    case "armv7":
+                    case "armv7l":
+                    case "armeabi-v7a": // os.arch "armeabi-v7a" might be Android only, but let's try anyway...
+                        cpuArch = "armv7";
+                        break;
+                    case "arm64-v8a":
+                        cpuArch = "arm64";
+                        break;
+                    case "armv6":
+                        cpuArch = "armv6";
+                        break;
+                    default:
+                        cpuArch = "armv6";  // Lowest version we support
+                        System.err.println("Unknown os.arch \"" + osArch + "\" - ObjectBox is defaulting to " + cpuArch);
+                        break;
+                }
+            }
+        }
+        if (cpuArch == null) {
+            String sunArch = System.getProperty("sun.arch.data.model");
+            cpuArch = "32".equals(sunArch) ? "x86" : "x64";
+            System.err.println("Unknown os.arch \"" + osArch + "\" - ObjectBox is defaulting to " + cpuArch);
+        }
+        return cpuArch;
     }
 
     private static void checkUnpackLib(String filename) {

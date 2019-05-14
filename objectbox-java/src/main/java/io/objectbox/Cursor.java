@@ -44,7 +44,7 @@ public abstract class Cursor<T> implements Closeable {
 
     static native void nativeDestroy(long cursor);
 
-    static native void nativeDeleteEntity(long cursor, long key);
+    static native boolean nativeDeleteEntity(long cursor, long key);
 
     static native void nativeDeleteAll(long cursor);
 
@@ -195,8 +195,8 @@ public abstract class Cursor<T> implements Closeable {
         return (List) nativeGetAllEntities(cursor);
     }
 
-    public void deleteEntity(long key) {
-        nativeDeleteEntity(cursor, key);
+    public boolean deleteEntity(long key) {
+        return nativeDeleteEntity(cursor, key);
     }
 
     public void deleteAll() {
