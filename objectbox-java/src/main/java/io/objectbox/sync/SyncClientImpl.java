@@ -1,6 +1,7 @@
 package io.objectbox.sync;
 
 import java.io.UnsupportedEncodingException;
+import java.rmi.ConnectException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -63,7 +64,7 @@ public class SyncClientImpl implements SyncClient {
         }
     }
 
-    public synchronized void connect(ConnectCallback callback) {
+    public synchronized void connect(final ConnectCallback callback) {
         if (syncClientHandle != 0) {
             callback.onComplete(null);
             return;
@@ -76,18 +77,28 @@ public class SyncClientImpl implements SyncClient {
             if (syncChangesListener != null) {
                 nativeSetSyncChangesListener(syncClientHandle, syncChangesListener);
             }
-            // always set a SyncClientListener, forward to a user-set listener
-            final CountDownLatch loginLatch = new CountDownLatch(1);
 
+            final CountDownLatch loginLatch = new CountDownLatch(1);
+            // always set a SyncClientListener, forward to a user-set listener
             // We might be able to set the user listener natively in the near future; without our delegating listener
             nativeSetListener(syncClientHandle, new SyncClientListener() {
                 @Override
                 public void onLogin(long response) {
+                    loginLatch.countDown();
+
+                    if (response == 20 /* OK */) {
+                        if (!manualUpdateRequests) {
+                            requestUpdates();
+                        }
+                        callback.onComplete(null);
+                    } else {
+                        callback.onComplete(new ConnectException("Failed to connect (code " + response + ")."));
+                    }
+
                     SyncClientListener listenerToFire = listener;
                     if (listenerToFire != null) {
                         listenerToFire.onLogin(response);
                     }
-                    loginLatch.countDown();
                 }
 
                 @Override
@@ -108,13 +119,11 @@ public class SyncClientImpl implements SyncClient {
             nativeLogin(syncClientHandle, credentials.getTypeId(), credentialsBytes);
             credentials.clear();  // Clear immediately, not needed anymore
 
-            loginLatch.await(LOGIN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-
-            if(!manualUpdateRequests) {
-                requestUpdates();
+            boolean onLoginCalled = loginLatch.await(LOGIN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            if (!onLoginCalled) {
+                disconnect();
+                callback.onComplete(new ConnectException("Failed to connect within " + LOGIN_TIMEOUT_SECONDS + " seconds."));
             }
-
-            callback.onComplete(null);
         } catch (Exception e) {
             callback.onComplete(e);
         }
