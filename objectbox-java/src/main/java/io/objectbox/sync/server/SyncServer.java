@@ -30,4 +30,7 @@ public interface SyncServer extends Closeable {
     /** Destroys all native resources - do not use this object anymore after calling this! */
     void close();
 
+    /** Get some statistics from the sync server */
+    String getStatsString();
+
 }

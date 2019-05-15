@@ -68,12 +68,18 @@ public class SyncServerImpl implements SyncServer {
         nativeStop(handle);
     }
 
+    @Override
     public void close() {
         long handleToDelete = handle;
         handle = 0;
         if (handleToDelete != 0) {
             nativeDelete(handleToDelete);
         }
+    }
+
+    @Override
+    public String getStatsString() {
+        return nativeGetStatsString(handle);
     }
 
     private void checkNotNull(Object object, String message) {
@@ -91,6 +97,8 @@ public class SyncServerImpl implements SyncServer {
     private native void nativeStop(long handle);
 
     private native void nativeSetAuthenticator(long handle, long credentialsType, @Nullable byte[] credentials);
+
+    private native String nativeGetStatsString(long handle);
 
     // TODO not yet implemented
     private native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangesListener advancedListener);
