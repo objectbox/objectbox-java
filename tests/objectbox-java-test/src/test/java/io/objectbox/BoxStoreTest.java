@@ -207,8 +207,12 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void testIsSyncAvailable() {
-        assertFalse(BoxStore.isSyncAvailable());
-        assertFalse(BoxStore.isSyncServerAvailable());
+        // The individual values don't matter; basically just ensure the methods are available and don't crash...
+        if(BoxStore.isSyncServerAvailable()) {
+            assertTrue(BoxStore.isSyncAvailable());
+        } else {
+            BoxStore.isSyncAvailable();
+        }
     }
 
 }
