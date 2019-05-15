@@ -112,7 +112,7 @@ public class SyncClientImpl implements SyncClient {
             nativeStart(syncClientHandle);
 
             byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(credentials);
-            nativeSetLogin(syncClientHandle, credentials.getTypeId(), credentialsBytes);
+            nativeSetLoginInfo(syncClientHandle, credentials.getTypeId(), credentialsBytes);
             credentials.clear();  // Clear immediately, not needed anymore
 
             boolean onLoginCalled = loginLatch.await(LOGIN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
@@ -166,7 +166,7 @@ public class SyncClientImpl implements SyncClient {
 
     private native void nativeStart(long handle);
 
-    private native void nativeSetLogin(long handle, long credentialsType, @Nullable byte[] credentials);
+    private native void nativeSetLoginInfo(long handle, long credentialsType, @Nullable byte[] credentials);
 
     private native void nativeSetListener(long handle, @Nullable SyncClientListener listener);
 
