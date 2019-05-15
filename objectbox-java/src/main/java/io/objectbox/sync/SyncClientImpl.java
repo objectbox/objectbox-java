@@ -54,8 +54,7 @@ public class SyncClientImpl implements SyncClient {
         super.finalize();
     }
 
-    public synchronized void setLoginCredentials(SyncCredentials credentials) {
-        if (handle == 0) return;
+    public void setLoginCredentials(SyncCredentials credentials) {
         byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(credentials);
         nativeSetLoginInfo(handle, credentials.getTypeId(), credentialsBytes);
         credentials.clear();  // Clear immediately, not needed anymore
@@ -78,18 +77,14 @@ public class SyncClientImpl implements SyncClient {
     }
 
     @Override
-    public synchronized void setSyncChangesListener(SyncChangesListener changesListener) {
+    public void setSyncChangesListener(SyncChangesListener changesListener) {
         checkNotNull(changesListener, "Listener must not be null. Use removeSyncChangesListener to remove existing listener.");
-        if (handle != 0) {
-            nativeSetSyncChangesListener(handle, changesListener);
-        }
+        nativeSetSyncChangesListener(handle, changesListener);
     }
 
     @Override
-    public synchronized void removeSyncChangesListener() {
-        if (handle != 0) {
-            nativeSetSyncChangesListener(handle, null);
-        }
+    public void removeSyncChangesListener() {
+        nativeSetSyncChangesListener(handle, null);
     }
 
     public boolean awaitFirstLogin(long millisToWait) {
@@ -100,7 +95,6 @@ public class SyncClientImpl implements SyncClient {
     }
 
     public synchronized void start() {
-        if (handle == 0) return;
         nativeStart(handle);
         started = true;
     }
@@ -110,26 +104,22 @@ public class SyncClientImpl implements SyncClient {
     }
 
     public synchronized void stop() {
-        if (handle == 0) return;
         nativeStop(handle);
         started = false;
     }
 
     /** {@inheritDoc} */
-    public synchronized void requestUpdates() {
-        if (handle == 0) return;
+    public void requestUpdates() {
         nativeRequestUpdates(handle, true);
     }
 
     /** {@inheritDoc} */
-    public synchronized void requestUpdatesOnce() {
-        if (handle == 0) return;
+    public void requestUpdatesOnce() {
         nativeRequestUpdates(handle, false);
     }
 
     /** {@inheritDoc} */
-    public synchronized void cancelUpdates() {
-        if (handle == 0) return;
+    public void cancelUpdates() {
         nativeCancelUpdates(handle);
     }
 
