@@ -9,9 +9,14 @@ public class SyncBuilder {
 
     final BoxStore boxStore;
     final String url;
-    boolean manualUpdateRequests;
     @Nullable String certificatePath;
     SyncCredentials credentials;
+
+    SyncClientListener listener;
+    SyncChangesListener changesListener;
+
+    boolean manualUpdateRequests;
+    boolean manualStart;
 
     public SyncBuilder(BoxStore boxStore, String url) {
         checkNotNull(boxStore, "BoxStore is required.");
@@ -41,6 +46,34 @@ public class SyncBuilder {
      */
     public SyncBuilder manualUpdateRequests() {
         manualUpdateRequests = true;
+        return this;
+    }
+
+
+    /**
+     * By default, sync automatically starts; with this, you can override this behavior.
+     * @see SyncClient#start()
+     */
+    public SyncBuilder manualStart() {
+        manualStart = true;
+        return this;
+    }
+
+    /**
+     * Sets the synchronization listener.
+     * @see SyncClient#setSyncListener(SyncClientListener)
+     */
+    public SyncBuilder listener(SyncClientListener listener) {
+        this.listener = listener;
+        return this;
+    }
+
+    /**
+     * Sets the synchronization listener.
+     * @see SyncClient#setSyncChangesListener(SyncChangesListener)
+     */
+    public SyncBuilder changesListener(SyncChangesListener changesListener) {
+        this.changesListener = changesListener;
         return this;
     }
 

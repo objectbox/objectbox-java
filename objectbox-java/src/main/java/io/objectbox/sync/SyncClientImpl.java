@@ -1,6 +1,5 @@
 package io.objectbox.sync;
 
-import java.rmi.ConnectException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -13,25 +12,50 @@ public class SyncClientImpl implements SyncClient {
     private static final long LOGIN_TIMEOUT_SECONDS = 15;
 
     private final String url;
+    private final InternalListener internalListener;
     private final boolean manualUpdateRequests;
 
     private volatile long handle;
     @Nullable private volatile SyncClientListener listener;
-    @Nullable private volatile SyncChangesListener syncChangesListener;
 
-    private boolean started;
+    private volatile long lastLoginCode;
 
-    SyncClientImpl(SyncBuilder syncBuilder) {
-        this.url = syncBuilder.url;
-        long storeHandle = InternalAccess.getHandle(syncBuilder.boxStore);
-        this.manualUpdateRequests = syncBuilder.manualUpdateRequests;
+    private volatile boolean started;
 
-        handle = nativeCreate(storeHandle, url, syncBuilder.certificatePath);
+    SyncClientImpl(SyncBuilder builder) {
+        this.url = builder.url;
+        long storeHandle = InternalAccess.getHandle(builder.boxStore);
+        this.manualUpdateRequests = builder.manualUpdateRequests;
+
+        handle = nativeCreate(storeHandle, url, builder.certificatePath);
         if (handle == 0) {
             throw new RuntimeException("Handle is zero");
         }
 
-        SyncCredentials credentials = syncBuilder.credentials;
+        listener = builder.listener;
+
+        internalListener = new InternalListener();
+        nativeSetListener(handle, internalListener);
+
+        if(builder.changesListener != null) {
+            setSyncChangesListener(builder.changesListener);
+        }
+
+        setLoginCredentials(builder.credentials);
+
+        if(!builder.manualStart) {
+            start();
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        stop();
+        super.finalize();
+    }
+
+    public synchronized void setLoginCredentials(SyncCredentials credentials) {
+        if (handle == 0) return;
         byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(credentials);
         nativeSetLoginInfo(handle, credentials.getTypeId(), credentialsBytes);
         credentials.clear();  // Clear immediately, not needed anymore
@@ -43,92 +67,46 @@ public class SyncClientImpl implements SyncClient {
     }
 
     @Override
-    public synchronized void setSyncListener(SyncClientListener listener) {
+    public void setSyncListener(SyncClientListener listener) {
         checkNotNull(listener, "Listener must not be null. Use removeSyncListener to remove existing listener.");
         this.listener = listener;
     }
 
     @Override
-    public synchronized void removeSyncListener() {
+    public void removeSyncListener() {
         this.listener = null;
     }
 
     @Override
-    public void setSyncChangesListener(SyncChangesListener changesListener) {
+    public synchronized void setSyncChangesListener(SyncChangesListener changesListener) {
         checkNotNull(changesListener, "Listener must not be null. Use removeSyncChangesListener to remove existing listener.");
-        this.syncChangesListener = changesListener;
         if (handle != 0) {
             nativeSetSyncChangesListener(handle, changesListener);
         }
     }
 
     @Override
-    public void removeSyncChangesListener() {
-        this.syncChangesListener = null;
+    public synchronized void removeSyncChangesListener() {
         if (handle != 0) {
             nativeSetSyncChangesListener(handle, null);
         }
     }
 
-    public synchronized void awaitLogin(final ConnectCallback callback) {
-        if (started) {
-            throw new IllegalStateException("Already started");
-        }
-
-        try {
-            // if listeners were set before connecting register them now
-            if (syncChangesListener != null) {
-                nativeSetSyncChangesListener(handle, syncChangesListener);
-            }
-
-            final CountDownLatch loginLatch = new CountDownLatch(1);
-            // always set a SyncClientListener, forward to a user-set listener
-            // We might be able to set the user listener natively in the near future; without our delegating listener
-            nativeSetListener(handle, new SyncClientListener() {
-                @Override
-                public void onLogin(long response) {
-                    loginLatch.countDown();
-
-                    if (response == 20 /* OK */) {
-                        if (!manualUpdateRequests) {
-                            requestUpdates();
-                        }
-                        callback.onComplete(null);
-                    } else {
-                        callback.onComplete(new ConnectException("Failed to connect (code " + response + ")."));
-                    }
-
-                    SyncClientListener listenerToFire = listener;
-                    if (listenerToFire != null) {
-                        listenerToFire.onLogin(response);
-                    }
-                }
-
-                @Override
-                public void onSyncComplete() {
-                    SyncClientListener listenerToFire = listener;
-                    if (listenerToFire != null) {
-                        listenerToFire.onSyncComplete();
-                    }
-                }
-            });
-
+    public boolean awaitFirstLogin(long millisToWait) {
+        if (!started) {
             start();
-
-            boolean onLoginCalled = loginLatch.await(LOGIN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            if (!onLoginCalled) {
-                close();
-                callback.onComplete(new ConnectException("Failed to connect within " + LOGIN_TIMEOUT_SECONDS + " seconds."));
-            }
-        } catch (Exception e) {
-            callback.onComplete(e);
         }
+        return internalListener.awaitFirstLogin(millisToWait);
     }
 
     public synchronized void start() {
         if (handle == 0) return;
         nativeStart(handle);
         started = true;
+    }
+
+    public boolean isStarted() {
+        return started;
     }
 
     public synchronized void stop() {
@@ -156,9 +134,12 @@ public class SyncClientImpl implements SyncClient {
     }
 
     @Override
-    public synchronized void close() {
-        long handleToDelete = this.handle;
-        handle = 0;
+    public void close() {
+        long handleToDelete;
+        synchronized(this) {
+            handleToDelete = this.handle;
+            handle = 0;
+        }
 
         if(handleToDelete != 0) {
             nativeDelete(handleToDelete);
@@ -169,6 +150,14 @@ public class SyncClientImpl implements SyncClient {
         if (object == null) {
             throw new IllegalArgumentException(message);
         }
+    }
+
+    public long getLastLoginCode() {
+        return lastLoginCode;
+    }
+
+    public boolean isLoggedIn() {
+        return lastLoginCode == 20;
     }
 
     private static native long nativeCreate(long storeHandle, String uri, @Nullable String certificatePath);
@@ -193,4 +182,47 @@ public class SyncClientImpl implements SyncClient {
     /** (Optional) Cancel sync updates. */
     private native void nativeCancelUpdates(long handle);
 
+    private class InternalListener implements SyncClientListener {
+        private final CountDownLatch firstLoginLatch = new CountDownLatch(1);
+
+        @Override
+        public void onLogin() {
+            lastLoginCode = 20;
+            firstLoginLatch.countDown();
+            if (!manualUpdateRequests) {
+                requestUpdates();
+            }
+            SyncClientListener listenerToFire = listener;
+            if (listenerToFire != null) {
+                listenerToFire.onLogin();
+            }
+        }
+
+        @Override
+        public void onLoginFailure(long errorCode) {
+            lastLoginCode = errorCode;
+            firstLoginLatch.countDown();
+
+            SyncClientListener listenerToFire = listener;
+            if (listenerToFire != null) {
+                listenerToFire.onLoginFailure(errorCode);
+            }
+        }
+
+        @Override
+        public void onSyncComplete() {
+            SyncClientListener listenerToFire = listener;
+            if (listenerToFire != null) {
+                listenerToFire.onSyncComplete();
+            }
+        }
+
+        boolean awaitFirstLogin(long millisToWait) {
+            try {
+                return firstLoginLatch.await(millisToWait, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                return false;
+            }
+        }
+    }
 }

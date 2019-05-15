@@ -1,10 +1,19 @@
 package io.objectbox.sync;
 
+import io.objectbox.BoxStore;
+
 import java.io.Closeable;
 
-/** Public sync client API. SyncClient is thread-safe. */
+/**
+ * Data synchronization client built with {@link Sync#with(BoxStore, String)}.
+ *
+ * SyncClient is thread-safe.
+ */
 @SuppressWarnings("unused")
 public interface SyncClient extends Closeable {
+
+    /** Just in case you need to update since calling {@link SyncBuilder#credentials(SyncCredentials)}. */
+    void setLoginCredentials(SyncCredentials credentials);
 
     /** Get the sync server URL this client is connected to. */
     String url();
@@ -30,10 +39,12 @@ public interface SyncClient extends Closeable {
     void removeSyncChangesListener();
 
     /**
-     * Logs the client in with the sync server and starts or resumes syncing.
-     * If successful no exception will be returned with the callback.
+     * Waits for the sync client to make its first (connection and) login attempt.
+     * Check the actual outcome of the login using {@link #isLoggedIn()} and/or {@link #getLastLoginCode()}.
+     *
+     * @return true if we got a response to the first login attempt in time
      */
-    void awaitLogin(ConnectCallback callback);
+    boolean awaitFirstLogin(long millisToWait);
 
     /** Closes everything (e.g. deletes native resources); do not use this object afterwards. */
     void close();
@@ -43,6 +54,12 @@ public interface SyncClient extends Closeable {
 
     /** Stops the synchronization. */
     void stop();
+
+    boolean isStarted();
+
+    long getLastLoginCode();
+
+    boolean isLoggedIn();
 
     /**
      * In combination with {@link SyncBuilder#manualUpdateRequests}, this manually requests updates from the sync
