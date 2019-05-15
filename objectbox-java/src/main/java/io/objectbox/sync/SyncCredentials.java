@@ -40,9 +40,9 @@ public class SyncCredentials {
 
         GOOGLE(2);
 
-        public int id;
+        public long id;
 
-        CredentialsType(int id) {
+        CredentialsType(long id) {
             this.id = id;
         }
     }

@@ -22,7 +22,7 @@ class SyncCredentialsImpl extends SyncCredentials {
         return token;
     }
 
-    int getTypeId() {
+    long getTypeId() {
         return type.id;
     }
 

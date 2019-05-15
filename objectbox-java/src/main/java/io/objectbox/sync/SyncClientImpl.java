@@ -116,7 +116,7 @@ public class SyncClientImpl implements SyncClient {
             if (credentials.getToken() != null) {
                 credentialsBytes = getAsBytesUtf8(credentials.getToken());
             }
-            nativeLogin(syncClientHandle, credentials.getTypeId(), credentialsBytes);
+            nativeSetLogin(syncClientHandle, credentials.getTypeId(), credentialsBytes);
             credentials.clear();  // Clear immediately, not needed anymore
 
             boolean onLoginCalled = loginLatch.await(LOGIN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
@@ -171,22 +171,22 @@ public class SyncClientImpl implements SyncClient {
 
     static native long nativeCreate(long storeHandle, String uri, @Nullable String certificatePath);
 
-    static native void nativeDelete(long handle);
+    private native void nativeDelete(long handle);
 
-    static native void nativeStart(long handle);
+    private native void nativeStart(long handle);
 
-    static native void nativeLogin(long handle, int credentialsType, @Nullable byte[] credentials);
+    private native void nativeSetLogin(long handle, long credentialsType, @Nullable byte[] credentials);
 
-    static native void nativeSetListener(long handle, @Nullable SyncClientListener listener);
+    private native void nativeSetListener(long handle, @Nullable SyncClientListener listener);
 
-    static native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangesListener advancedListener);
+    private native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangesListener advancedListener);
 
     /**
      * Request sync updates. Set {@code subscribeForPushes} to automatically receive updates for future changes.
      */
-    static native void nativeRequestUpdates(long handle, boolean subscribeForPushes);
+    private native void nativeRequestUpdates(long handle, boolean subscribeForPushes);
 
     /** (Optional) Cancel sync updates. */
-    static native void nativeCancelUpdates(long handle);
+    private native void nativeCancelUpdates(long handle);
 
 }
