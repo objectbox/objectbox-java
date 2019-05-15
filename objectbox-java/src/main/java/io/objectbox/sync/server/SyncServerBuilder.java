@@ -1,0 +1,63 @@
+package io.objectbox.sync.server;
+
+import io.objectbox.BoxStore;
+import io.objectbox.sync.SyncCredentials;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+
+@SuppressWarnings({"unused"})
+/** Create a builder using #with. */
+public class SyncServerBuilder {
+
+    final BoxStore boxStore;
+    final String url;
+    @Nullable String certificatePath;
+
+    final List<SyncCredentials> credentials = new ArrayList<>();
+
+    public static SyncServerBuilder with(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
+        return new SyncServerBuilder(boxStore, url, authenticatorCredentials);
+    }
+
+    private SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
+        checkNotNull(boxStore, "BoxStore is required.");
+        checkNotNull(url, "Sync server URL is required.");
+        checkNotNull(authenticatorCredentials, "Authenticator credentials is required.");
+        if (!BoxStore.isSyncServerAvailable()) {
+            throw new IllegalStateException(
+                    "This ObjectBox library (JNI) does not include sync server. Please update your dependencies.");
+        }
+        this.boxStore = boxStore;
+        this.url = url;
+        authenticatorCredentials(authenticatorCredentials);
+    }
+
+    public SyncServerBuilder certificatePath(String certificatePath) {
+        this.certificatePath = certificatePath;
+        return this;
+    }
+
+    /** Provides additional authenticator credentials */
+    public SyncServerBuilder authenticatorCredentials(SyncCredentials authenticatorCredentials) {
+        checkNotNull(authenticatorCredentials, "Authenticator credentials is required.");
+        credentials.add(authenticatorCredentials);
+        return this;
+    }
+
+
+    /** Note: this clears all previously set authenticator credentials. */
+    public SyncServer build() {
+        SyncServerImpl syncServer = new SyncServerImpl(this);
+        credentials.clear();  // Those are cleared anyway by now
+        return syncServer;
+    }
+
+    private void checkNotNull(Object object, String message) {
+        if (object == null) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+}
