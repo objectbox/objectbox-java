@@ -1,6 +1,5 @@
 package io.objectbox.sync;
 
-import java.io.UnsupportedEncodingException;
 import java.rmi.ConnectException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +14,7 @@ public class SyncClientImpl implements SyncClient {
 
     private final String url;
     @Nullable private final String certificatePath;
-    private final SyncCredentialsImpl credentials;
+    private final SyncCredentials credentials;
     private final long storeHandle;
     private final boolean manualUpdateRequests;
 
@@ -26,7 +25,7 @@ public class SyncClientImpl implements SyncClient {
     SyncClientImpl(SyncBuilder syncBuilder) {
         this.url = syncBuilder.url;
         this.certificatePath = syncBuilder.certificatePath;
-        this.credentials = (SyncCredentialsImpl) syncBuilder.credentials;
+        this.credentials = syncBuilder.credentials;
         this.storeHandle = InternalAccess.getHandle(syncBuilder.boxStore);
         this.manualUpdateRequests = syncBuilder.manualUpdateRequests;
     }
@@ -112,10 +111,7 @@ public class SyncClientImpl implements SyncClient {
 
             nativeStart(syncClientHandle);
 
-            byte[] credentialsBytes = null;
-            if (credentials.getToken() != null) {
-                credentialsBytes = getAsBytesUtf8(credentials.getToken());
-            }
+            byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(credentials);
             nativeSetLogin(syncClientHandle, credentials.getTypeId(), credentialsBytes);
             credentials.clear();  // Clear immediately, not needed anymore
 
@@ -156,11 +152,6 @@ public class SyncClientImpl implements SyncClient {
         } catch (Exception ignored) {
         }
         syncClientHandle = 0;
-    }
-
-    private byte[] getAsBytesUtf8(String text) throws UnsupportedEncodingException {
-        //noinspection CharsetObjectCanBeUsed only added in Android API level 19 (K)
-        return text.getBytes("UTF-8");
     }
 
     private void checkNotNull(Object object, String message) {
