@@ -1,8 +1,10 @@
 package io.objectbox.sync;
 
+import java.io.Closeable;
+
 /** Public sync client API. SyncClient is thread-safe. */
 @SuppressWarnings("unused")
-public interface SyncClient {
+public interface SyncClient extends Closeable {
 
     /** Get the sync server URL this client is connected to. */
     String url();
@@ -31,13 +33,16 @@ public interface SyncClient {
      * Logs the client in with the sync server and starts or resumes syncing.
      * If successful no exception will be returned with the callback.
      */
-    void connect(ConnectCallback callback);
+    void awaitLogin(ConnectCallback callback);
 
-    /**
-     * Disconnects from the sync server and stops syncing.
-     */
-    void disconnect();
+    /** Closes everything (e.g. deletes native resources); do not use this object afterwards. */
+    void close();
 
+    /** Starts the synchronization. */
+    void start();
+
+    /** Stops the synchronization. */
+    void stop();
 
     /**
      * In combination with {@link SyncBuilder#manualUpdateRequests}, this manually requests updates from the sync
@@ -52,9 +57,7 @@ public interface SyncClient {
      */
     void requestUpdatesOnce();
 
-    /**
-     * Stop receiving sync updates.
-     */
+    /** Stop receiving sync updates. */
     void cancelUpdates();
 
 }

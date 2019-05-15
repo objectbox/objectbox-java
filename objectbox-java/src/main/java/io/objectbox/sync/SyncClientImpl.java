@@ -13,21 +13,28 @@ public class SyncClientImpl implements SyncClient {
     private static final long LOGIN_TIMEOUT_SECONDS = 15;
 
     private final String url;
-    @Nullable private final String certificatePath;
-    private final SyncCredentials credentials;
-    private final long storeHandle;
     private final boolean manualUpdateRequests;
 
-    private long syncClientHandle;
+    private volatile long handle;
     @Nullable private volatile SyncClientListener listener;
     @Nullable private volatile SyncChangesListener syncChangesListener;
 
+    private boolean started;
+
     SyncClientImpl(SyncBuilder syncBuilder) {
         this.url = syncBuilder.url;
-        this.certificatePath = syncBuilder.certificatePath;
-        this.credentials = syncBuilder.credentials;
-        this.storeHandle = InternalAccess.getHandle(syncBuilder.boxStore);
+        long storeHandle = InternalAccess.getHandle(syncBuilder.boxStore);
         this.manualUpdateRequests = syncBuilder.manualUpdateRequests;
+
+        handle = nativeCreate(storeHandle, url, syncBuilder.certificatePath);
+        if (handle == 0) {
+            throw new RuntimeException("Handle is zero");
+        }
+
+        SyncCredentials credentials = syncBuilder.credentials;
+        byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(credentials);
+        nativeSetLoginInfo(handle, credentials.getTypeId(), credentialsBytes);
+        credentials.clear();  // Clear immediately, not needed anymore
     }
 
     @Override
@@ -50,37 +57,34 @@ public class SyncClientImpl implements SyncClient {
     public void setSyncChangesListener(SyncChangesListener changesListener) {
         checkNotNull(changesListener, "Listener must not be null. Use removeSyncChangesListener to remove existing listener.");
         this.syncChangesListener = changesListener;
-        if (syncClientHandle != 0) {
-            nativeSetSyncChangesListener(syncClientHandle, changesListener);
+        if (handle != 0) {
+            nativeSetSyncChangesListener(handle, changesListener);
         }
     }
 
     @Override
     public void removeSyncChangesListener() {
         this.syncChangesListener = null;
-        if (syncClientHandle != 0) {
-            nativeSetSyncChangesListener(syncClientHandle, null);
+        if (handle != 0) {
+            nativeSetSyncChangesListener(handle, null);
         }
     }
 
-    public synchronized void connect(final ConnectCallback callback) {
-        if (syncClientHandle != 0) {
-            callback.onComplete(null);
-            return;
+    public synchronized void awaitLogin(final ConnectCallback callback) {
+        if (started) {
+            throw new IllegalStateException("Already started");
         }
 
         try {
-            syncClientHandle = nativeCreate(storeHandle, url, certificatePath);
-
             // if listeners were set before connecting register them now
             if (syncChangesListener != null) {
-                nativeSetSyncChangesListener(syncClientHandle, syncChangesListener);
+                nativeSetSyncChangesListener(handle, syncChangesListener);
             }
 
             final CountDownLatch loginLatch = new CountDownLatch(1);
             // always set a SyncClientListener, forward to a user-set listener
             // We might be able to set the user listener natively in the near future; without our delegating listener
-            nativeSetListener(syncClientHandle, new SyncClientListener() {
+            nativeSetListener(handle, new SyncClientListener() {
                 @Override
                 public void onLogin(long response) {
                     loginLatch.countDown();
@@ -109,15 +113,11 @@ public class SyncClientImpl implements SyncClient {
                 }
             });
 
-            nativeStart(syncClientHandle);
-
-            byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(credentials);
-            nativeSetLoginInfo(syncClientHandle, credentials.getTypeId(), credentialsBytes);
-            credentials.clear();  // Clear immediately, not needed anymore
+            start();
 
             boolean onLoginCalled = loginLatch.await(LOGIN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             if (!onLoginCalled) {
-                disconnect();
+                close();
                 callback.onComplete(new ConnectException("Failed to connect within " + LOGIN_TIMEOUT_SECONDS + " seconds."));
             }
         } catch (Exception e) {
@@ -125,33 +125,44 @@ public class SyncClientImpl implements SyncClient {
         }
     }
 
+    public synchronized void start() {
+        if (handle == 0) return;
+        nativeStart(handle);
+        started = true;
+    }
+
+    public synchronized void stop() {
+        if (handle == 0) return;
+        nativeStop(handle);
+        started = false;
+    }
+
     /** {@inheritDoc} */
     public synchronized void requestUpdates() {
-        if (syncClientHandle == 0) return;
-        nativeRequestUpdates(syncClientHandle, true);
+        if (handle == 0) return;
+        nativeRequestUpdates(handle, true);
     }
 
     /** {@inheritDoc} */
     public synchronized void requestUpdatesOnce() {
-        if (syncClientHandle == 0) return;
-        nativeRequestUpdates(syncClientHandle, false);
+        if (handle == 0) return;
+        nativeRequestUpdates(handle, false);
     }
 
     /** {@inheritDoc} */
     public synchronized void cancelUpdates() {
-        if (syncClientHandle == 0) return;
-        nativeCancelUpdates(syncClientHandle);
+        if (handle == 0) return;
+        nativeCancelUpdates(handle);
     }
 
     @Override
-    public synchronized void disconnect() {
-        if (syncClientHandle == 0) return;
+    public synchronized void close() {
+        long handleToDelete = this.handle;
+        handle = 0;
 
-        try {
-            nativeDelete(syncClientHandle);
-        } catch (Exception ignored) {
+        if(handleToDelete != 0) {
+            nativeDelete(handleToDelete);
         }
-        syncClientHandle = 0;
     }
 
     private void checkNotNull(Object object, String message) {
@@ -160,11 +171,13 @@ public class SyncClientImpl implements SyncClient {
         }
     }
 
-    static native long nativeCreate(long storeHandle, String uri, @Nullable String certificatePath);
+    private static native long nativeCreate(long storeHandle, String uri, @Nullable String certificatePath);
 
     private native void nativeDelete(long handle);
 
     private native void nativeStart(long handle);
+
+    private native void nativeStop(long handle);
 
     private native void nativeSetLoginInfo(long handle, long credentialsType, @Nullable byte[] credentials);
 
