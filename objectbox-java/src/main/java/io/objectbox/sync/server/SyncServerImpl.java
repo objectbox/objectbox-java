@@ -100,7 +100,6 @@ public class SyncServerImpl implements SyncServer {
 
     private native String nativeGetStatsString(long handle);
 
-    // TODO not yet implemented
-    private native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangesListener advancedListener);
+    private native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangesListener changesListener);
 
 }

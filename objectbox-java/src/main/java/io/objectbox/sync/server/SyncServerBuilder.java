@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings({"unused"})
-/** Create a builder using #with. */
+/** Creates a {@link SyncServer} and allows to set additional configuration. */
+@SuppressWarnings({"unused", "UnusedReturnValue", "WeakerAccess"})
 public class SyncServerBuilder {
 
     final BoxStore boxStore;
@@ -17,11 +17,7 @@ public class SyncServerBuilder {
 
     final List<SyncCredentials> credentials = new ArrayList<>();
 
-    public static SyncServerBuilder with(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
-        return new SyncServerBuilder(boxStore, url, authenticatorCredentials);
-    }
-
-    private SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
+    public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(url, "Sync server URL is required.");
         checkNotNull(authenticatorCredentials, "Authenticator credentials is required.");
