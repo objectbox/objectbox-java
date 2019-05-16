@@ -82,6 +82,16 @@ public class SyncServerImpl implements SyncServer {
         return nativeGetStatsString(handle);
     }
 
+    @Override
+    public boolean isRunning() {
+        return nativeIsRunning(handle);
+    }
+
+    @Override
+    public int getPort() {
+        return nativeGetPort(handle);
+    }
+
     private void checkNotNull(Object object, String message) {
         if (object == null) {
             throw new IllegalArgumentException(message);
@@ -95,6 +105,10 @@ public class SyncServerImpl implements SyncServer {
     private native void nativeStart(long handle);
 
     private native void nativeStop(long handle);
+
+    private native boolean nativeIsRunning(long handle);
+
+    private native int nativeGetPort(long handle);
 
     private native void nativeSetAuthenticator(long handle, long credentialsType, @Nullable byte[] credentials);
 

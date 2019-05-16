@@ -33,4 +33,10 @@ public interface SyncServer extends Closeable {
     /** Get some statistics from the sync server */
     String getStatsString();
 
+    /** Is the server up and running? */
+    boolean isRunning();
+
+    /** The port the server has bound to. */
+    int getPort();
+
 }
