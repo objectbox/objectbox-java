@@ -9,8 +9,9 @@ public class SyncBuilder {
 
     final BoxStore boxStore;
     final String url;
+    final SyncCredentials credentials;
+
     @Nullable String certificatePath;
-    SyncCredentials credentials;
 
     SyncClientListener listener;
     SyncChangesListener changesListener;
@@ -18,25 +19,22 @@ public class SyncBuilder {
     boolean manualUpdateRequests;
     boolean manualStart;
 
-    public SyncBuilder(BoxStore boxStore, String url) {
+    public SyncBuilder(BoxStore boxStore, String url, SyncCredentials credentials) {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(url, "Sync server URL is required.");
+        checkNotNull(credentials, "Sync credentials are required.");
         if (!BoxStore.isSyncAvailable()) {
             throw new IllegalStateException(
                     "This ObjectBox library (JNI) does not include sync. Please update your dependencies.");
         }
         this.boxStore = boxStore;
         this.url = url;
+        this.credentials = credentials;
     }
 
     // TODO Check if this should remain exposed in the final API
     public SyncBuilder certificatePath(String certificatePath) {
         this.certificatePath = certificatePath;
-        return this;
-    }
-
-    public SyncBuilder credentials(SyncCredentials credentials) {
-        this.credentials = credentials;
         return this;
     }
 
