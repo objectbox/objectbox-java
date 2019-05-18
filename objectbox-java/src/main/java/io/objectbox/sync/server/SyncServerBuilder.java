@@ -1,6 +1,7 @@
 package io.objectbox.sync.server;
 
 import io.objectbox.BoxStore;
+import io.objectbox.sync.SyncChangesListener;
 import io.objectbox.sync.SyncCredentials;
 
 import javax.annotation.Nullable;
@@ -14,6 +15,8 @@ public class SyncServerBuilder {
     final BoxStore boxStore;
     final String url;
     @Nullable String certificatePath;
+    SyncChangesListener changesListener;
+    boolean manualStart;
 
     final List<SyncCredentials> credentials = new ArrayList<>();
 
@@ -42,6 +45,23 @@ public class SyncServerBuilder {
         return this;
     }
 
+    /**
+     * By default, sync automatically starts; with this, you can override this behavior.
+     * @see SyncServer#start()
+     */
+    public SyncServerBuilder manualStart() {
+        manualStart = true;
+        return this;
+    }
+
+    /**
+     * Sets the synchronization listener.
+     * @see SyncServer#setSyncChangesListener(SyncChangesListener)
+     */
+    public SyncServerBuilder changesListener(SyncChangesListener changesListener) {
+        this.changesListener = changesListener;
+        return this;
+    }
 
     /** Note: this clears all previously set authenticator credentials. */
     public SyncServer build() {

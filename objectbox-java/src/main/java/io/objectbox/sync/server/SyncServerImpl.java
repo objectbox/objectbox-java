@@ -16,14 +16,14 @@ public class SyncServerImpl implements SyncServer {
     @Nullable
     private volatile SyncChangesListener syncChangesListener;
 
-    SyncServerImpl(SyncServerBuilder syncServerBuilder) {
-        this.url = syncServerBuilder.url;
-        List<SyncCredentials> credentialsList = syncServerBuilder.credentials;
+    SyncServerImpl(SyncServerBuilder builder) {
+        this.url = builder.url;
+        List<SyncCredentials> credentialsList = builder.credentials;
         if (credentialsList.isEmpty()) {
             throw new IllegalStateException("You must provide at least one authenticator");
         }
-        long storeHandle = InternalAccess.getHandle(syncServerBuilder.boxStore);
-        handle = nativeCreate(storeHandle, url, syncServerBuilder.certificatePath);
+        long storeHandle = InternalAccess.getHandle(builder.boxStore);
+        handle = nativeCreate(storeHandle, url, builder.certificatePath);
         if (handle == 0) {
             throw new RuntimeException("Handle is zero");
         }
@@ -31,6 +31,14 @@ public class SyncServerImpl implements SyncServer {
             byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(credentials);
             nativeSetAuthenticator(handle, credentials.getTypeId(), credentialsBytes);
             credentials.clear();
+        }
+
+        if(builder.changesListener != null) {
+            setSyncChangesListener(builder.changesListener);
+        }
+
+        if(!builder.manualStart) {
+            start();
         }
     }
 
