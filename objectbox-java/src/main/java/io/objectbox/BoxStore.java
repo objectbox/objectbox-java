@@ -430,6 +430,14 @@ public class BoxStore implements Closeable {
         synchronized (this) {
             oldClosedState = closed;
             if (!closed) {
+                if(objectBrowserPort != 0) { // not linked natively (yet), so clean up here
+                    try {
+                        stopObjectBrowser();
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 closed = true;
                 List<Transaction> transactionsToClose;
                 synchronized (transactions) {
@@ -946,7 +954,7 @@ public class BoxStore implements Closeable {
     }
 
     @Experimental
-    public boolean stopObjectBrowser() {
+    public synchronized boolean stopObjectBrowser() {
         if(objectBrowserPort == 0) {
             throw new IllegalStateException("ObjectBrowser has not been started before");
         }
