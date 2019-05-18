@@ -21,6 +21,8 @@ import org.greenrobot.essentials.collections.LongHashMap;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -148,7 +150,9 @@ public class BoxStore implements Closeable {
 
     static native void nativeSetDebugFlags(long store, int debugFlags);
 
-    static native String nativeStartObjectBrowser(long store, @Nullable String urlPath, int port);
+    private native String nativeStartObjectBrowser(long store, @Nullable String urlPath, int port);
+
+    private native boolean nativeStopObjectBrowser(long store);
 
     static native boolean nativeIsObjectBrowserAvailable();
 
@@ -536,7 +540,6 @@ public class BoxStore implements Closeable {
      * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
      * Note: If false is returned, any number of files may have been deleted before the failure happened.
      * @throws IllegalStateException if the given name is still used by a open {@link BoxStore}.
-     *
      */
     public static boolean deleteAllFiles(Object androidContext, @Nullable String customDbNameOrNull) {
         File dbDir = BoxStoreBuilder.getAndroidDbDir(androidContext, customDbNameOrNull);
@@ -923,6 +926,32 @@ public class BoxStore implements Closeable {
             objectBrowserPort = port;
         }
         return url;
+    }
+
+    @Experimental
+    @Nullable
+    public String startObjectBrowser(String urlToBindTo) {
+        verifyObjectBrowserNotRunning();
+        int port;
+        try {
+            port = new URL(urlToBindTo).getPort(); // Gives -1 if not available
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Can not start Object Browser at " + urlToBindTo, e);
+        }
+        String url = nativeStartObjectBrowser(handle, urlToBindTo, 0);
+        if (url != null) {
+            objectBrowserPort = port;
+        }
+        return url;
+    }
+
+    @Experimental
+    public boolean stopObjectBrowser() {
+        if(objectBrowserPort == 0) {
+            throw new IllegalStateException("ObjectBrowser has not been started before");
+        }
+        objectBrowserPort = 0;
+        return nativeStopObjectBrowser(handle);
     }
 
     @Experimental
