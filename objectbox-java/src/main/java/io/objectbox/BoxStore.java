@@ -967,6 +967,10 @@ public class BoxStore implements Closeable {
         return objectBrowserPort;
     }
 
+    public boolean isObjectBrowserRunning() {
+        return objectBrowserPort != 0;
+    }
+
     private void verifyObjectBrowserNotRunning() {
         if (objectBrowserPort != 0) {
             throw new DbException("ObjectBrowser is already running at port " + objectBrowserPort);
