@@ -5,14 +5,17 @@ import io.objectbox.BoxStore;
 import java.io.Closeable;
 
 /**
- * Data synchronization client built with {@link Sync#with(BoxStore, String)}.
- *
+ * Data synchronization client built with {@link Sync#client(BoxStore, String, SyncCredentials)}.
+ * <p>
  * SyncClient is thread-safe.
  */
 @SuppressWarnings("unused")
 public interface SyncClient extends Closeable {
 
-    /** Just in case you need to update since calling {@link SyncBuilder#credentials(SyncCredentials)}. */
+    /**
+     * Just in case you need to update...
+     * Usually you just pass credential once via {@link Sync#client(BoxStore, String, SyncCredentials)}
+     */
     void setLoginCredentials(SyncCredentials credentials);
 
     /** Get the sync server URL this client is connected to. */

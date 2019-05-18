@@ -9,8 +9,6 @@ import io.objectbox.InternalAccess;
 
 public class SyncClientImpl implements SyncClient {
 
-    private static final long LOGIN_TIMEOUT_SECONDS = 15;
-
     private final String url;
     private final InternalListener internalListener;
     private final boolean manualUpdateRequests;
@@ -54,6 +52,7 @@ public class SyncClientImpl implements SyncClient {
         super.finalize();
     }
 
+    @Override
     public void setLoginCredentials(SyncCredentials credentials) {
         byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(credentials);
         nativeSetLoginInfo(handle, credentials.getTypeId(), credentialsBytes);
@@ -87,6 +86,7 @@ public class SyncClientImpl implements SyncClient {
         nativeSetSyncChangesListener(handle, null);
     }
 
+    @Override
     public boolean awaitFirstLogin(long millisToWait) {
         if (!started) {
             start();
@@ -94,31 +94,34 @@ public class SyncClientImpl implements SyncClient {
         return internalListener.awaitFirstLogin(millisToWait);
     }
 
+    @Override
     public synchronized void start() {
         nativeStart(handle);
         started = true;
     }
 
+    @Override
     public boolean isStarted() {
         return started;
     }
 
+    @Override
     public synchronized void stop() {
         nativeStop(handle);
         started = false;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void requestUpdates() {
         nativeRequestUpdates(handle, true);
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void requestUpdatesOnce() {
         nativeRequestUpdates(handle, false);
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void cancelUpdates() {
         nativeCancelUpdates(handle);
     }
@@ -142,10 +145,12 @@ public class SyncClientImpl implements SyncClient {
         }
     }
 
+    @Override
     public long getLastLoginCode() {
         return lastLoginCode;
     }
 
+    @Override
     public boolean isLoggedIn() {
         return lastLoginCode == 20;
     }
