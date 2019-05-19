@@ -5,8 +5,8 @@ String cronSchedule = BRANCH_NAME == 'dev' ? '*/30 1-5 * * *' : ''
 String buildsToKeep = '500'
 
 String gradleArgs = '-Dorg.gradle.daemon=false --stacktrace'
-def publishBranch = 'publish'
-String versionPostfix = BRANCH_NAME == 'dev' ? '' : BRANCH_NAME // build script detects empty string as not set
+boolean isPublish = BRANCH_NAME == 'publish'
+String internalRepoVersionPostfix = isPublish ? '' : BRANCH_NAME // build script detects empty string as not set
 
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
@@ -21,6 +21,7 @@ pipeline {
 
     options {
         buildDiscarder(logRotator(numToKeepStr: buildsToKeep, artifactNumToKeepStr: buildsToKeep))
+        timeout(time: 1, unit: 'HOURS') // If build hangs (regular build should be much quicker)
         gitLabConnection("${env.GITLAB_URL}")
     }
 
@@ -52,32 +53,29 @@ pipeline {
             }
         }
 
-        stage('upload-to-repo') {
-            when { expression { return BRANCH_NAME != publishBranch } }
+        stage('upload-to-internal') {
             steps {
                 sh "./gradlew $gradleArgs " +
-                   "-PversionPostFix=${versionPostfix} " +
+                   "-PinternalRepoVersionPostfix=${internalRepoVersionPostfix} " +
                    "-PpreferredRepo=${MVN_REPO_URL_PUBLISH} -PpreferredUsername=${MVN_REPO_LOGIN_USR} -PpreferredPassword=${MVN_REPO_LOGIN_PSW} " +
                    "uploadArchives"
             }
         }
 
         stage('upload-to-bintray') {
-            when { expression { return BRANCH_NAME == publishBranch } }
+            when { expression { return isPublish } }
             environment {
                 BINTRAY_URL = credentials('bintray_url')
                 BINTRAY_LOGIN = credentials('bintray_login')
             }
             steps {
-                script {
-                    slackSend color: "#42ebf4",
-                            message: "Publishing ${currentBuild.fullDisplayName} to Bintray...\n${env.BUILD_URL}"
-                }
+                googlechatnotification url: 'id:gchat_java',
+                    message: "*Publishing* ${currentBuild.fullDisplayName} to Bintray...\n${env.BUILD_URL}"
+
                 sh "./gradlew $gradleArgs -PpreferredRepo=${BINTRAY_URL} -PpreferredUsername=${BINTRAY_LOGIN_USR} -PpreferredPassword=${BINTRAY_LOGIN_PSW} uploadArchives"
-                script {
-                    slackSend color: "##41f4cd",
-                            message: "Published ${currentBuild.fullDisplayName} successfully to Bintray - check https://bintray.com/objectbox/objectbox\n${env.BUILD_URL}"
-                }
+
+                googlechatnotification url: 'id:gchat_java',
+                    message: "Published ${currentBuild.fullDisplayName} successfully to Bintray - check https://bintray.com/objectbox/objectbox\n${env.BUILD_URL}"
             }
         }
 
@@ -89,10 +87,27 @@ pipeline {
             junit '**/build/test-results/**/TEST-*.xml'
             archive 'tests/*/hs_err_pid*.log'
             archive '**/build/reports/findbugs/*'
+
+            googlechatnotification url: 'id:gchat_java', message: "${currentBuild.currentResult}: ${currentBuild.fullDisplayName}\n${env.BUILD_URL}",
+                                   notifyFailure: 'true', notifyUnstable: 'true', notifyBackToNormal: 'true'
         }
 
         failure {
             updateGitlabCommitStatus name: 'build', state: 'failed'
+
+            emailext (
+                subject: "${currentBuild.currentResult}: ${currentBuild.fullDisplayName}",
+                mimeType: 'text/html',
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+                body: """
+                    <p>${currentBuild.currentResult}:
+                        <a href='${env.BUILD_URL}'>${currentBuild.fullDisplayName}</a>
+                        (<a href='${env.BUILD_URL}/console'>console</a>)
+                    </p>
+                    <p>Git: ${GIT_COMMIT} (${GIT_BRANCH})
+                    <p>Build time: ${currentBuild.durationString}
+                """
+            )
         }
 
         success {
