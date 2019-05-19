@@ -95,6 +95,20 @@ pipeline {
 
         failure {
             updateGitlabCommitStatus name: 'build', state: 'failed'
+
+            emailext (
+                subject: "${currentBuild.currentResult}: ${currentBuild.fullDisplayName}",
+                mimeType: 'text/html',
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+                body: """
+                    <p>${currentBuild.currentResult}:
+                        <a href='${env.BUILD_URL}'>${currentBuild.fullDisplayName}</a>
+                        (<a href='${env.BUILD_URL}/console'>console</a>)
+                    </p>
+                    <p>Git: ${GIT_COMMIT} (${GIT_BRANCH})
+                    <p>Build time: ${currentBuild.durationString}
+                """
+            )
         }
 
         success {
