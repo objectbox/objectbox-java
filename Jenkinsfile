@@ -21,6 +21,7 @@ pipeline {
 
     options {
         buildDiscarder(logRotator(numToKeepStr: buildsToKeep, artifactNumToKeepStr: buildsToKeep))
+        timeout(time: 1, unit: 'HOURS') // If build hangs (regular build should be much quicker)
         gitLabConnection("${env.GITLAB_URL}")
     }
 
@@ -69,15 +70,13 @@ pipeline {
                 BINTRAY_LOGIN = credentials('bintray_login')
             }
             steps {
-                script {
-                    slackSend color: "#42ebf4",
-                            message: "Publishing ${currentBuild.fullDisplayName} to Bintray...\n${env.BUILD_URL}"
-                }
+                googlechatnotification url: 'id:gchat_java',
+                    message: "*Publishing* ${currentBuild.fullDisplayName} to Bintray...\n${env.BUILD_URL}"
+
                 sh "./gradlew $gradleArgs -PpreferredRepo=${BINTRAY_URL} -PpreferredUsername=${BINTRAY_LOGIN_USR} -PpreferredPassword=${BINTRAY_LOGIN_PSW} uploadArchives"
-                script {
-                    slackSend color: "##41f4cd",
-                            message: "Published ${currentBuild.fullDisplayName} successfully to Bintray - check https://bintray.com/objectbox/objectbox\n${env.BUILD_URL}"
-                }
+
+                googlechatnotification url: 'id:gchat_java',
+                    message: "Published ${currentBuild.fullDisplayName} successfully to Bintray - check https://bintray.com/objectbox/objectbox\n${env.BUILD_URL}"
             }
         }
 
@@ -89,6 +88,9 @@ pipeline {
             junit '**/build/test-results/**/TEST-*.xml'
             archive 'tests/*/hs_err_pid*.log'
             archive '**/build/reports/findbugs/*'
+
+            googlechatnotification url: 'id:gchat_java', message: "${currentBuild.currentResult}: ${currentBuild.fullDisplayName}\n${env.BUILD_URL}",
+                                   notifyFailure: 'true', notifyUnstable: 'true', notifyBackToNormal: 'true'
         }
 
         failure {
