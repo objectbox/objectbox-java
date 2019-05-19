@@ -5,8 +5,8 @@ String cronSchedule = BRANCH_NAME == 'dev' ? '*/30 1-5 * * *' : ''
 String buildsToKeep = '500'
 
 String gradleArgs = '-Dorg.gradle.daemon=false --stacktrace'
-def publishBranch = 'publish'
-String versionPostfix = BRANCH_NAME == 'dev' ? '' : BRANCH_NAME // build script detects empty string as not set
+boolean isPublish = BRANCH_NAME == 'publish'
+String internalRepoVersionPostfix = isPublish ? '' : BRANCH_NAME // build script detects empty string as not set
 
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
@@ -53,18 +53,17 @@ pipeline {
             }
         }
 
-        stage('upload-to-repo') {
-            when { expression { return BRANCH_NAME != publishBranch } }
+        stage('upload-to-internal') {
             steps {
                 sh "./gradlew $gradleArgs " +
-                   "-PversionPostFix=${versionPostfix} " +
+                   "-PinternalRepoVersionPostfix=${internalRepoVersionPostfix} " +
                    "-PpreferredRepo=${MVN_REPO_URL_PUBLISH} -PpreferredUsername=${MVN_REPO_LOGIN_USR} -PpreferredPassword=${MVN_REPO_LOGIN_PSW} " +
                    "uploadArchives"
             }
         }
 
         stage('upload-to-bintray') {
-            when { expression { return BRANCH_NAME == publishBranch } }
+            when { expression { return isPublish } }
             environment {
                 BINTRAY_URL = credentials('bintray_url')
                 BINTRAY_LOGIN = credentials('bintray_login')
