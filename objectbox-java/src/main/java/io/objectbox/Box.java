@@ -615,7 +615,7 @@ public class Box<T> {
     }
 
     public List<T> getRelationBacklinkEntities(RelationInfo relationInfo, long id) {
-        return internalGetRelationEntities(relationInfo.targetInfo.getEntityId(), relationInfo.relationId, id, true);
+        return internalGetRelationEntities(relationInfo.sourceInfo.getEntityId(), relationInfo.relationId, id, true);
     }
 
     public long[] getRelationIds(RelationInfo relationInfo, long id) {
