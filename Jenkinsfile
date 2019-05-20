@@ -56,7 +56,7 @@ pipeline {
         stage('upload-to-internal') {
             steps {
                 sh "./gradlew $gradleArgs " +
-                   "-PinternalRepoVersionPostfix=${internalRepoVersionPostfix} " +
+                   "-PversionPostFix=${internalRepoVersionPostfix} " +
                    "-PpreferredRepo=${MVN_REPO_URL_PUBLISH} -PpreferredUsername=${MVN_REPO_LOGIN_USR} -PpreferredPassword=${MVN_REPO_LOGIN_PSW} " +
                    "uploadArchives"
             }
