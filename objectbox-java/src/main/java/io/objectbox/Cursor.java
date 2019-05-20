@@ -24,7 +24,6 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.annotation.apihint.Temporary;
 import io.objectbox.relation.ToMany;
 
 @SuppressWarnings({"unchecked", "SameParameterValue", "unused", "WeakerAccess", "UnusedReturnValue"})
@@ -113,7 +112,11 @@ public abstract class Cursor<T> implements Closeable {
 
     static native List nativeGetBacklinkEntities(long cursor, int entityId, int propertyId, long key);
 
+    static native long[] nativeGetBacklinkIds(long cursor, int entityId, int propertyId, long key);
+
     static native List nativeGetRelationEntities(long cursor, int sourceEntityId, int relationId, long key, boolean backlink);
+
+    static native long[] nativeGetRelationIds(long cursor, int sourceEntityId, int relationId, long key, boolean backlink);
 
     static native void nativeModifyRelations(long cursor, int relationId, long key, long[] targetKeys, boolean remove);
 
@@ -282,8 +285,23 @@ public abstract class Cursor<T> implements Closeable {
     }
 
     @Internal
+    long[] getBacklinkIds(int entityId, Property relationIdProperty, long key) {
+        try {
+            return nativeGetBacklinkIds(cursor, entityId, relationIdProperty.getId(), key);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Please check if the given property belongs to a valid @Relation: "
+                    + relationIdProperty, e);
+        }
+    }
+
+    @Internal
     public List<T> getRelationEntities(int sourceEntityId, int relationId, long key, boolean backlink) {
         return nativeGetRelationEntities(cursor, sourceEntityId, relationId, key, backlink);
+    }
+
+    @Internal
+    public long[] getRelationIds(int sourceEntityId, int relationId, long key, boolean backlink) {
+        return nativeGetRelationIds(cursor, sourceEntityId, relationId, key, backlink);
     }
 
     @Internal

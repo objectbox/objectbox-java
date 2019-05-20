@@ -36,6 +36,7 @@ import io.objectbox.internal.CallWithHandle;
 import io.objectbox.internal.IdGetter;
 import io.objectbox.internal.ReflectionCache;
 import io.objectbox.query.QueryBuilder;
+import io.objectbox.relation.RelationInfo;
 
 /**
  * A box to store objects of a particular class.
@@ -597,6 +598,32 @@ public class Box<T> {
         } finally {
             releaseReader(reader);
         }
+    }
+
+    @Internal
+    public long[] internalGetRelationIds(int sourceEntityId, int relationId, long key, boolean backlink) {
+        Cursor<T> reader = getReader();
+        try {
+            return reader.getRelationIds(sourceEntityId, relationId, key, backlink);
+        } finally {
+            releaseReader(reader);
+        }
+    }
+
+    public List<T> getRelationEntities(RelationInfo relationInfo, long id) {
+        return internalGetRelationEntities(relationInfo.sourceInfo.getEntityId(), relationInfo.relationId, id, false);
+    }
+
+    public List<T> getRelationBacklinkEntities(RelationInfo relationInfo, long id) {
+        return internalGetRelationEntities(relationInfo.targetInfo.getEntityId(), relationInfo.relationId, id, true);
+    }
+
+    public long[] getRelationIds(RelationInfo relationInfo, long id) {
+        return internalGetRelationIds(relationInfo.sourceInfo.getEntityId(), relationInfo.relationId, id, false);
+    }
+
+    public long[] getRelationBacklinkIds(RelationInfo relationInfo, long id) {
+        return internalGetRelationIds(relationInfo.targetInfo.getEntityId(), relationInfo.relationId, id, true);
     }
 
     @Internal
