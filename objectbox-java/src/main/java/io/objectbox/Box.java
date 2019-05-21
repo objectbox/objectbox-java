@@ -623,7 +623,7 @@ public class Box<T> {
     }
 
     public long[] getRelationBacklinkIds(RelationInfo relationInfo, long id) {
-        return internalGetRelationIds(relationInfo.targetInfo.getEntityId(), relationInfo.relationId, id, true);
+        return internalGetRelationIds(relationInfo.sourceInfo.getEntityId(), relationInfo.relationId, id, true);
     }
 
     @Internal
