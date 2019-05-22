@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2019 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,10 +62,11 @@ public class BoxStore implements Closeable {
     /** On Android used for native library loading. */
     @Nullable public static Object context;
     @Nullable public static Object relinker;
+
     /** Change so ReLinker will update native library when using workaround loading. */
     public static final String JNI_VERSION = "2.4.0";
 
-    private static final String VERSION = "2.4.0-2019-03-20";
+    private static final String VERSION = "2.4.0-2019-05-21";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
