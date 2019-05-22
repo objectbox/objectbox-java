@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2019 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -383,6 +384,36 @@ public class Box<T> {
             commitWriter(cursor);
         } finally {
             releaseWriter(cursor);
+        }
+    }
+
+    /**
+     * Puts the given entities in a box in batches using a separate transaction for each batch.
+     *
+     * @param entities  It is fine to pass null or an empty collection:
+     *                  this case is handled efficiently without overhead.
+     * @param batchSize Number of entities that will be put in one transaction. Must be 1 or greater.
+     */
+    public void putBatched(@Nullable Collection<T> entities, int batchSize) {
+        if (batchSize < 1) {
+            throw new IllegalArgumentException("Batch size must be 1 or greater but was " + batchSize);
+        }
+        if (entities == null) {
+            return;
+        }
+
+        Iterator<T> iterator = entities.iterator();
+        while (iterator.hasNext()) {
+            Cursor<T> cursor = getWriter();
+            try {
+                int number = 0;
+                while (number++ < batchSize && iterator.hasNext()) {
+                    cursor.put(iterator.next());
+                }
+                commitWriter(cursor);
+            } finally {
+                releaseWriter(cursor);
+            }
         }
     }
 

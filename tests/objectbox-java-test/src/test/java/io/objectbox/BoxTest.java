@@ -104,6 +104,25 @@ public class BoxTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testPutBatched() {
+        List<TestEntity> entities = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            TestEntity entity = new TestEntity();
+            entity.setSimpleInt(2000 + i);
+            entities.add(entity);
+        }
+        box.putBatched(entities, 4);
+        assertEquals(entities.size(), box.count());
+
+        List<TestEntity> entitiesRead = box.getAll();
+        assertEquals(entities.size(), entitiesRead.size());
+
+        for (int i = 0; i < entities.size(); i++) {
+            assertEquals(2000 + i, entitiesRead.get(i).getSimpleInt());
+        }
+    }
+
+    @Test
     public void testRemoveMany() {
         List<TestEntity> entities = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
