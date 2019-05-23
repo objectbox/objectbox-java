@@ -22,15 +22,22 @@ public class SyncServerImpl implements SyncServer {
         if (credentialsList.isEmpty()) {
             throw new IllegalStateException("You must provide at least one authenticator");
         }
+
         long storeHandle = InternalAccess.getHandle(builder.boxStore);
         handle = nativeCreate(storeHandle, url, builder.certificatePath);
         if (handle == 0) {
             throw new RuntimeException("Handle is zero");
         }
+
         for (SyncCredentials credentials : credentialsList) {
             byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(credentials);
             nativeSetAuthenticator(handle, credentials.getTypeId(), credentialsBytes);
             credentials.clear();
+        }
+
+        for (PeerInfo peer : builder.peers) {
+            byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(peer.credentials);
+            nativeAddPeer(handle, peer.url, peer.credentials.getTypeId(), credentialsBytes);
         }
 
         if(builder.changesListener != null) {
@@ -119,6 +126,8 @@ public class SyncServerImpl implements SyncServer {
     private native int nativeGetPort(long handle);
 
     private native void nativeSetAuthenticator(long handle, long credentialsType, @Nullable byte[] credentials);
+
+    private native void nativeAddPeer(long handle, String uri, long credentialsType, @Nullable byte[] credentials);
 
     private native String nativeGetStatsString(long handle);
 

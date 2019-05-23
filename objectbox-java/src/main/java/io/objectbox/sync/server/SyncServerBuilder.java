@@ -19,6 +19,7 @@ public class SyncServerBuilder {
     boolean manualStart;
 
     final List<SyncCredentials> credentials = new ArrayList<>();
+    final List<PeerInfo> peers = new ArrayList<>();
 
     public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         checkNotNull(boxStore, "BoxStore is required.");
@@ -60,6 +61,17 @@ public class SyncServerBuilder {
      */
     public SyncServerBuilder changesListener(SyncChangesListener changesListener) {
         this.changesListener = changesListener;
+        return this;
+    }
+
+    /** Adds a server peer, to which we connect to as a client using {@link SyncCredentials#none()}. */
+    public SyncServerBuilder peer(String url) {
+        return peer(url, SyncCredentials.none());
+    }
+
+    /** Adds a server peer, to which we connect to as a client using the given credentials. */
+    public SyncServerBuilder peer(String url, SyncCredentials credentials) {
+        peers.add(new PeerInfo(url, credentials));
         return this;
     }
 
