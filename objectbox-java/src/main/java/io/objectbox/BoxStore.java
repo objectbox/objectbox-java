@@ -73,6 +73,7 @@ public class BoxStore implements Closeable {
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
     private static final Set<String> openFiles = new HashSet<>();
+    private static volatile Thread openFilesCheckerThread;
 
     /**
      * Convenience singleton instance which gets set up using {@link BoxStoreBuilder#buildDefault()}.
@@ -288,7 +289,7 @@ public class BoxStore implements Closeable {
         }
     }
 
-    private static void verifyNotAlreadyOpen(String canonicalPath) {
+    static void verifyNotAlreadyOpen(String canonicalPath) {
         synchronized (openFiles) {
             isFileOpen(canonicalPath); // for retries
             if (!openFiles.add(canonicalPath)) {
@@ -299,15 +300,44 @@ public class BoxStore implements Closeable {
     }
 
     /** Also retries up to 500ms to improve GC race condition situation. */
-    private static boolean isFileOpen(String canonicalPath) {
+    static boolean isFileOpen(final String canonicalPath) {
+        synchronized (openFiles) {
+            if (!openFiles.contains(canonicalPath)) return false;
+        }
+        if(openFilesCheckerThread == null || !openFilesCheckerThread.isAlive()) {
+            // Use a thread to avoid finalizers that block us
+            openFilesCheckerThread = new Thread() {
+                @Override
+                public void run() {
+                    isFileOpenSync(canonicalPath, true);
+                    openFilesCheckerThread = null; // Clean ref to itself
+                }
+            };
+            openFilesCheckerThread.setDaemon(true);
+            openFilesCheckerThread.start();
+            try {
+                openFilesCheckerThread.join(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            // Waiting for finalizers are blocking; only do that in the thread ^
+            return isFileOpenSync(canonicalPath, false);
+        }
+        synchronized (openFiles) {
+            return openFiles.contains(canonicalPath);
+        }
+    }
+
+    static boolean isFileOpenSync(String canonicalPath, boolean runFinalization) {
         synchronized (openFiles) {
             int tries = 0;
             while (tries < 5 && openFiles.contains(canonicalPath)) {
                 tries++;
                 System.gc();
-                System.runFinalization();
+                if (runFinalization && tries > 1) System.runFinalization();
                 System.gc();
-                System.runFinalization();
+                if (runFinalization && tries > 1) System.runFinalization();
                 try {
                     openFiles.wait(100);
                 } catch (InterruptedException e) {
