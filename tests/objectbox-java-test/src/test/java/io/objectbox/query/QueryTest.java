@@ -47,6 +47,7 @@ import static io.objectbox.TestEntity_.simpleInt;
 import static io.objectbox.TestEntity_.simpleLong;
 import static io.objectbox.TestEntity_.simpleShort;
 import static io.objectbox.TestEntity_.simpleString;
+import static io.objectbox.TestEntity_.simpleStringArray;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -241,6 +242,16 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(4, box.query().startsWith(simpleString, "ba").endsWith(simpleString, "shake").build().findUnique()
                 .getId());
         assertEquals(2, box.query().contains(simpleString, "nana").build().count());
+    }
+
+    @Test
+    public void testStringArray() {
+        putTestEntitiesStrings();
+        // contains(prop, value) matches if value is equal to one of the array items.
+        // Verify by not matching entity where 'banana' is only a substring of an array item ('banana milk shake').
+        List<TestEntity> results = box.query().contains(simpleStringArray, "banana").build().find();
+        assertEquals(1, results.size());
+        assertEquals("banana", results.get(0).getSimpleStringArray()[0]);
     }
 
     @Test
