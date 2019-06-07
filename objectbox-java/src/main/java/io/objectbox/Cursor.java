@@ -41,15 +41,15 @@ public abstract class Cursor<T> implements Closeable {
     protected static final int PUT_FLAG_FIRST = 1;
     protected static final int PUT_FLAG_COMPLETE = 1 << 1;
 
-    static native void nativeDestroy(long cursor);
+    native void nativeDestroy(long cursor);
 
     static native boolean nativeDeleteEntity(long cursor, long key);
 
-    static native void nativeDeleteAll(long cursor);
+    native void nativeDeleteAll(long cursor);
 
     static native boolean nativeSeek(long cursor, long key);
 
-    static native Object nativeGetAllEntities(long cursor);
+    native Object nativeGetAllEntities(long cursor);
 
     static native Object nativeGetEntity(long cursor, long key);
 
@@ -57,14 +57,11 @@ public abstract class Cursor<T> implements Closeable {
 
     static native Object nativeFirstEntity(long cursor);
 
-    static native long nativeCount(long cursor, long maxCountOrZero);
-
-    // TODO not implemented
-    static native long nativeGetKey(long cursor);
+    native long nativeCount(long cursor, long maxCountOrZero);
 
     static native long nativeLookupKeyUsingIndex(long cursor, int propertyId, String value);
 
-    static native long nativeRenew(long cursor);
+    native long nativeRenew(long cursor);
 
     protected static native long collect313311(long cursor, long keyIfComplete, int flags,
                                                int idStr1, @Nullable String valueStr1,
@@ -108,21 +105,21 @@ public abstract class Cursor<T> implements Closeable {
                                                int idLong3, long valueLong3, int idLong4, long valueLong4
     );
 
-    static native int nativePropertyId(long cursor, String propertyValue);
+    native int nativePropertyId(long cursor, String propertyValue);
 
-    static native List nativeGetBacklinkEntities(long cursor, int entityId, int propertyId, long key);
+    native List nativeGetBacklinkEntities(long cursor, int entityId, int propertyId, long key);
 
-    static native long[] nativeGetBacklinkIds(long cursor, int entityId, int propertyId, long key);
+    native long[] nativeGetBacklinkIds(long cursor, int entityId, int propertyId, long key);
 
-    static native List nativeGetRelationEntities(long cursor, int sourceEntityId, int relationId, long key, boolean backlink);
+    native List nativeGetRelationEntities(long cursor, int sourceEntityId, int relationId, long key, boolean backlink);
 
-    static native long[] nativeGetRelationIds(long cursor, int sourceEntityId, int relationId, long key, boolean backlink);
+    native long[] nativeGetRelationIds(long cursor, int sourceEntityId, int relationId, long key, boolean backlink);
 
-    static native void nativeModifyRelations(long cursor, int relationId, long key, long[] targetKeys, boolean remove);
+    native void nativeModifyRelations(long cursor, int relationId, long key, long[] targetKeys, boolean remove);
 
-    static native void nativeModifyRelationsSingle(long cursor, int relationId, long key, long targetKey, boolean remove);
+    native void nativeModifyRelationsSingle(long cursor, int relationId, long key, long targetKey, boolean remove);
 
-    static native void nativeSetBoxStoreForEntities(long cursor, Object boxStore);
+    native void nativeSetBoxStoreForEntities(long cursor, Object boxStore);
 
     protected final Transaction tx;
     protected final long cursor;
@@ -204,10 +201,6 @@ public abstract class Cursor<T> implements Closeable {
 
     public void deleteAll() {
         nativeDeleteAll(cursor);
-    }
-
-    public long getKey() {
-        return nativeGetKey(cursor);
     }
 
     public boolean seek(long key) {

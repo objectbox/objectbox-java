@@ -42,29 +42,29 @@ public class Transaction implements Closeable {
     /** volatile because finalizer thread may interfere with "one thread, one TX" rule */
     private volatile boolean closed;
 
-    static native void nativeDestroy(long transaction);
+    native void nativeDestroy(long transaction);
 
-    static native int[] nativeCommit(long transaction);
+    native int[] nativeCommit(long transaction);
 
-    static native void nativeAbort(long transaction);
+    native void nativeAbort(long transaction);
 
-    static native void nativeReset(long transaction);
+    native void nativeReset(long transaction);
 
-    static native void nativeRecycle(long transaction);
+    native void nativeRecycle(long transaction);
 
-    static native void nativeRenew(long transaction);
+    native void nativeRenew(long transaction);
 
-    static native long nativeCreateKeyValueCursor(long transaction);
+    native long nativeCreateKeyValueCursor(long transaction);
 
-    static native long nativeCreateCursor(long transaction, String entityName, Class entityClass);
+    native long nativeCreateCursor(long transaction, String entityName, Class entityClass);
 
-    //static native long nativeGetStore(long transaction);
+    // native long nativeGetStore(long transaction);
 
-    static native boolean nativeIsActive(long transaction);
+    native boolean nativeIsActive(long transaction);
 
-    static native boolean nativeIsRecycled(long transaction);
+    native boolean nativeIsRecycled(long transaction);
 
-    static native boolean nativeIsReadOnly(long transaction);
+    native boolean nativeIsReadOnly(long transaction);
 
     public Transaction(BoxStore store, long transaction, int initialCommitCount) {
         this.store = store;
