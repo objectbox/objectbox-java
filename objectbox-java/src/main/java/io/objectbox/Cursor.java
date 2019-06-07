@@ -24,6 +24,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.internal.CursorFactory;
 import io.objectbox.relation.ToMany;
 
 @SuppressWarnings({"unchecked", "SameParameterValue", "unused", "WeakerAccess", "UnusedReturnValue"})
@@ -120,6 +121,8 @@ public abstract class Cursor<T> implements Closeable {
     native void nativeModifyRelationsSingle(long cursor, int relationId, long key, long targetKey, boolean remove);
 
     native void nativeSetBoxStoreForEntities(long cursor, Object boxStore);
+
+    native long nativeGetCursorFor(long cursor, int entityId);
 
     protected final Transaction tx;
     protected final long cursor;
@@ -248,11 +251,16 @@ public abstract class Cursor<T> implements Closeable {
         return closed;
     }
 
+    /**
+     * Note: this returns a secondary cursor, which does not survive standalone.
+     * Secondary native cursors are destroyed once their hosting Cursor is destroyed.
+     * Thus, use it only locally and don't store it long term.
+     */
     protected <TARGET> Cursor<TARGET> getRelationTargetCursor(Class<TARGET> targetClass) {
-        // minor to do: optimize by using existing native cursor handle?
-        // (Note: Cursor should not destroy the native cursor then.)
-
-        return tx.createCursor(targetClass);
+        EntityInfo entityInfo = boxStoreForEntities.getEntityInfo(targetClass);
+        long cursorHandle = nativeGetCursorFor(cursor, entityInfo.getEntityId());
+        CursorFactory<TARGET> factory = entityInfo.getCursorFactory();
+        return factory.createCursor(tx, cursorHandle, boxStoreForEntities);
     }
 
     /**
