@@ -10,9 +10,9 @@ buildscript {
         
         // Core version for tests
         // Be careful to diverge here; easy to forget and hard to find JNI problems
-        ob_native_version = "2.4.0-SNAPSHOT"
+        ob_native_version = "2.4.0-dev-SNAPSHOT"
 
-        println "Version $ob_version. Tests use Core version $ob_native_version."
+        println "ObjectBox Java version $ob_version. Tests use Core version $ob_native_version."
         
         ob_expected_version = project.hasProperty('expectedVersion') ? project.property('expectedVersion') : 'UNDEFINED'
 
