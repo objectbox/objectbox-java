@@ -62,6 +62,8 @@ public class Transaction implements Closeable {
 
     native boolean nativeIsActive(long transaction);
 
+    native boolean nativeIsOwnerThread(long transaction);
+
     native boolean nativeIsRecycled(long transaction);
 
     native boolean nativeIsReadOnly(long transaction);
@@ -77,15 +79,6 @@ public class Transaction implements Closeable {
 
     @Override
     protected void finalize() throws Throwable {
-        // Committed & aborted transactions are fine: remaining native resources are not expensive
-        if (!closed && nativeIsActive(transaction)) { // TODO what about recycled state?
-            System.err.println("Transaction was not finished (initial commit count: " + initialCommitCount + ").");
-            if (creationThrowable != null) {
-                System.err.println("Transaction was initially created here:");
-                creationThrowable.printStackTrace();
-            }
-            System.err.flush();
-        }
         close();
         super.finalize();
     }
@@ -101,6 +94,27 @@ public class Transaction implements Closeable {
         if (!closed) {
             closed = true;
             store.unregisterTransaction(this);
+
+            if (!nativeIsOwnerThread(transaction)) {
+                boolean isActive = nativeIsActive(transaction);
+                boolean isRecycled = nativeIsRecycled(transaction);
+                if (isActive || isRecycled) {
+                    String msgPostfix = " (initial commit count: " + initialCommitCount + ").";
+                    if (isActive) {
+                        System.err.println("Transaction is still active" + msgPostfix);
+                    } else {
+                        // This is not uncommon when using Box; as it keeps a thread-local Cursor and recycles the TX
+                        System.out.println("Hint: use closeThreadResources() to avoid finalizing recycled transactions"
+                                + msgPostfix);
+                        System.out.flush();
+                    }
+                    if (creationThrowable != null) {
+                        System.err.println("Transaction was initially created here:");
+                        creationThrowable.printStackTrace();
+                    }
+                    System.err.flush();
+                }
+            }
 
             // If store is already closed natively, destroying the tx would cause EXCEPTION_ACCESS_VIOLATION
             // TODO not destroying is probably only a small leak on rare occasions, but still could be fixed
