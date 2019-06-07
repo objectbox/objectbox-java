@@ -142,6 +142,7 @@ public class IndexReaderRenewTest extends AbstractObjectBoxTest {
                 query.setParameter(EntityLongIndex_.indexedLong, 0);
                 results[3] = query.findUnique();
                 latchRead2.countDown();
+                box.closeThreadResources();
             }
         }.start();
 

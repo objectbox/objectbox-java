@@ -159,6 +159,7 @@ public class Box<T> {
         Cursor<T> cursor = threadLocalReader.get();
         if (cursor != null) {
             cursor.close();
+            cursor.getTx().close(); // a read TX is always started when the threadLocalReader is set
             threadLocalReader.remove();
         }
     }

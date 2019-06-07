@@ -90,6 +90,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
                 } catch (Exception e) {
                     exHolder[0] = e;
                 }
+                getTestEntityBox().closeThreadResources();
             }
         });
 
