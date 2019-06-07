@@ -7,7 +7,7 @@ sourceCompatibility = 1.7
 
 dependencies {
     compile project(':objectbox-java')
-    compile 'io.reactivex.rxjava2:rxjava:2.2.7'
+    compile 'io.reactivex.rxjava2:rxjava:2.2.9'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:2.25.1'
@@ -17,7 +17,7 @@ javadoc {
     failOnError = false
     title = "ObjectBox RxJava2 ${version} API"
     excludes = [] // Unfinished APIs if any
-    options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2018 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
+    options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2018-2019 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
     doLast {
         copy {
             from '../javadoc-style/'
