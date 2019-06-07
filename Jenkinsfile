@@ -57,6 +57,7 @@ pipeline {
             steps {
                 sh "./gradlew $gradleArgs " +
                    "-PversionPostFix=${internalRepoVersionPostfix} " +
+                   "-PinternalObjectBoxRepo=${MVN_REPO_URL} -PinternalObjectBoxRepoUser=${MVN_REPO_LOGIN_USR} -PinternalObjectBoxRepoPassword=${MVN_REPO_LOGIN_PSW} " +
                    "-PpreferredRepo=${MVN_REPO_URL_PUBLISH} -PpreferredUsername=${MVN_REPO_LOGIN_USR} -PpreferredPassword=${MVN_REPO_LOGIN_PSW} " +
                    "uploadArchives"
             }
