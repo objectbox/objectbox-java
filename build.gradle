@@ -35,7 +35,6 @@ allprojects {
     repositories {
         mavenCentral()
         jcenter()
-        mavenLocal()
     }
 }
 
@@ -45,6 +44,10 @@ if (JavaVersion.current().isJava8Compatible()) {
             options.addStringOption('Xdoclint:none', '-quiet')
         }
     }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'  // SNAPSHOTS
 }
 
 def projectNamesToPublish = [
