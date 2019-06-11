@@ -23,4 +23,7 @@ public interface SyncClientListener {
      */
     void onSyncComplete();
 
+    /** Called when the client looses connection to the sync server. */
+    void onDisconnect();
+
 }

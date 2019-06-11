@@ -212,6 +212,14 @@ public class SyncClientImpl implements SyncClient {
             }
         }
 
+        @Override
+        public void onDisconnect() {
+            SyncClientListener listenerToFire = listener;
+            if (listenerToFire != null) {
+                listenerToFire.onDisconnect();
+            }
+        }
+
         boolean awaitFirstLogin(long millisToWait) {
             try {
                 return firstLoginLatch.await(millisToWait, TimeUnit.MILLISECONDS);
