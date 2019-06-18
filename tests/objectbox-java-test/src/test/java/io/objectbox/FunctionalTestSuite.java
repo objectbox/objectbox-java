@@ -18,6 +18,7 @@ package io.objectbox;
 
 import io.objectbox.index.IndexReaderRenewTest;
 import io.objectbox.query.LazyListTest;
+import io.objectbox.query.PropertyQueryTest;
 import io.objectbox.query.QueryObserverTest;
 import io.objectbox.query.QueryTest;
 import io.objectbox.relation.RelationEagerTest;
@@ -29,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+/** Used to run tests on CI, excludes performance tests. */
 @RunWith(Suite.class)
 @SuiteClasses({
         BoxTest.class,
@@ -36,10 +38,12 @@ import org.junit.runners.Suite.SuiteClasses;
         BoxStoreBuilderTest.class,
         CursorTest.class,
         CursorBytesTest.class,
+        DebugCursorTest.class,
         LazyListTest.class,
         NonArgConstructorTest.class,
         IndexReaderRenewTest.class,
         ObjectClassObserverTest.class,
+        PropertyQueryTest.class,
         QueryObserverTest.class,
         QueryTest.class,
         RelationTest.class,
