@@ -642,19 +642,33 @@ public class Box<T> {
         }
     }
 
-    public List<T> getRelationEntities(RelationInfo relationInfo, long id) {
+    /**
+     * Given a ToMany relation and the ID of a source entity gets the target entities of the relation from their box,
+     * for example {@code orderBox.getRelationEntities(Customer_.orders, customer.getId())}.
+     */
+    public List<T> getRelationEntities(RelationInfo<?, T> relationInfo, long id) {
         return internalGetRelationEntities(relationInfo.sourceInfo.getEntityId(), relationInfo.relationId, id, false);
     }
 
-    public List<T> getRelationBacklinkEntities(RelationInfo relationInfo, long id) {
+    /**
+     * Given a ToMany relation and the ID of a target entity gets all source entities pointing to this target entity,
+     * for example {@code customerBox.getRelationEntities(Customer_.orders, order.getId())}.
+     */
+    public List<T> getRelationBacklinkEntities(RelationInfo<T, ?> relationInfo, long id) {
         return internalGetRelationEntities(relationInfo.sourceInfo.getEntityId(), relationInfo.relationId, id, true);
     }
 
-    public long[] getRelationIds(RelationInfo relationInfo, long id) {
+    /**
+     * Like {@link #getRelationEntities(RelationInfo, long)}, but only returns the IDs of the target entities.
+     */
+    public long[] getRelationIds(RelationInfo<?, T> relationInfo, long id) {
         return internalGetRelationIds(relationInfo.sourceInfo.getEntityId(), relationInfo.relationId, id, false);
     }
 
-    public long[] getRelationBacklinkIds(RelationInfo relationInfo, long id) {
+    /**
+     * Like {@link #getRelationBacklinkEntities(RelationInfo, long)}, but only returns the IDs of the source entities.
+     */
+    public long[] getRelationBacklinkIds(RelationInfo<T, ?> relationInfo, long id) {
         return internalGetRelationIds(relationInfo.sourceInfo.getEntityId(), relationInfo.relationId, id, true);
     }
 

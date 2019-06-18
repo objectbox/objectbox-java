@@ -16,14 +16,13 @@
 
 package io.objectbox.relation;
 
+import io.objectbox.Cursor;
+import io.objectbox.InternalAccess;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import io.objectbox.Cursor;
-import io.objectbox.InternalAccess;
 
 import static org.junit.Assert.*;
 
@@ -62,10 +61,6 @@ public class ToManyStandaloneTest extends AbstractRelationTest {
         customer = customerBox.get(customer.getId());
         final ToMany<Order> toMany = customer.getOrdersStandalone();
 
-        //        RelationInfo<Order> info = Customer_.ordersStandalone;
-        //        int sourceEntityId = info.sourceInfo.getEntityId();
-        //        assertEquals(2, orderBox.internalGetRelationEntities(sourceEntityId, info.relationId, customer.getId()).size());
-
         assertGetOrder1And2(toMany);
     }
 
@@ -90,6 +85,60 @@ public class ToManyStandaloneTest extends AbstractRelationTest {
                 assertGetOrder1And2(toMany);
             }
         });
+    }
+
+    @Test
+    public void testGetRelationEntitiesAndIds() {
+        Customer customer = putCustomerWithOrders(2);
+        putOrder(null, "order3"); // without customer
+        Customer customerNoOrders = putCustomer();
+
+        // customer with orders
+        long customerId = customer.getId();
+        List<Order> ordersActual = orderBox.getRelationEntities(Customer_.ordersStandalone, customerId);
+        assertEquals(2, ordersActual.size());
+        assertEquals("order1", ordersActual.get(0).getText());
+        assertEquals("order2", ordersActual.get(1).getText());
+
+        long[] orderIdsActual = orderBox.getRelationIds(Customer_.ordersStandalone, customerId);
+        assertEquals(2, orderIdsActual.length);
+        assertEquals(ordersActual.get(0).getId(), orderIdsActual[0]);
+        assertEquals(ordersActual.get(1).getId(), orderIdsActual[1]);
+
+        // customer without orders
+        long customerNoOrdersId = customerNoOrders.getId();
+        List<Order> noOrdersActual = orderBox.getRelationEntities(Customer_.ordersStandalone, customerNoOrdersId);
+        assertEquals(0, noOrdersActual.size());
+
+        long[] noOrderIdsActual = orderBox.getRelationIds(Customer_.ordersStandalone, customerNoOrdersId);
+        assertEquals(0, noOrderIdsActual.length);
+    }
+
+    @Test
+    public void testGetRelationBacklinkEntitiesAndIds() {
+        Customer customer = putCustomerWithOrders(2);
+        Order order1 = customer.getOrdersStandalone().get(0);
+        putCustomer(); // without orders
+        Order orderNoCustomer = putOrder(null, "order3");
+
+        // order with customer
+        long order1Id = order1.getId();
+        List<Customer> customersActual = customerBox.getRelationBacklinkEntities(Customer_.ordersStandalone, order1Id);
+        assertEquals(1, customersActual.size());
+        assertEquals(customer.getId(), customersActual.get(0).getId());
+
+        long[] customerIdsActual = customerBox.getRelationBacklinkIds(Customer_.ordersStandalone, order1Id);
+        assertEquals(1, customerIdsActual.length);
+        assertEquals(customer.getId(), customerIdsActual[0]);
+
+        // order without customer
+        long orderNoCustomerId = orderNoCustomer.getId();
+        List<Customer> noCustomersActual = customerBox
+                .getRelationBacklinkEntities(Customer_.ordersStandalone, orderNoCustomerId);
+        assertEquals(0, noCustomersActual.size());
+
+        long[] noCustomerIdsActual = customerBox.getRelationBacklinkIds(Customer_.ordersStandalone, orderNoCustomerId);
+        assertEquals(0, noCustomerIdsActual.length);
     }
 
     @Test
