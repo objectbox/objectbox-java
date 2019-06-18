@@ -16,17 +16,18 @@
 
 package io.objectbox;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-
 import io.objectbox.index.IndexReaderRenewTest;
 import io.objectbox.query.LazyListTest;
 import io.objectbox.query.QueryObserverTest;
 import io.objectbox.query.QueryTest;
 import io.objectbox.relation.RelationEagerTest;
 import io.objectbox.relation.RelationTest;
+import io.objectbox.relation.ToManyStandaloneTest;
+import io.objectbox.relation.ToManyTest;
 import io.objectbox.relation.ToOneTest;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -43,6 +44,8 @@ import io.objectbox.relation.ToOneTest;
         QueryTest.class,
         RelationTest.class,
         RelationEagerTest.class,
+        ToManyStandaloneTest.class,
+        ToManyTest.class,
         ToOneTest.class,
         TransactionTest.class,
 })
