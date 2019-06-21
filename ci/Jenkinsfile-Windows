@@ -43,8 +43,8 @@ pipeline {
     post {
         always {
             junit '**/build/test-results/**/TEST-*.xml'
-            archive 'tests/*/hs_err_pid*.log'
-            archive '**/build/reports/findbugs/*'
+            archiveArtifacts 'tests/*/hs_err_pid*.log'
+            archiveArtifacts '**/build/reports/findbugs/*'
         }
 
         failure {

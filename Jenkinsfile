@@ -86,8 +86,8 @@ pipeline {
     post {
         always {
             junit '**/build/test-results/**/TEST-*.xml'
-            archive 'tests/*/hs_err_pid*.log'
-            archive '**/build/reports/findbugs/*'
+            archiveArtifacts artifacts: 'tests/*/hs_err_pid*.log', allowEmptyArchive: true
+            // currently unused: archiveArtifacts '**/build/reports/findbugs/*'
 
             googlechatnotification url: 'id:gchat_java', message: "${currentBuild.currentResult}: ${currentBuild.fullDisplayName}\n${env.BUILD_URL}",
                                    notifyFailure: 'true', notifyUnstable: 'true', notifyBackToNormal: 'true'
