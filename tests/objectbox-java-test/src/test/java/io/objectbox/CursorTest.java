@@ -234,10 +234,10 @@ public class CursorTest extends AbstractObjectBoxTest {
             }
         }.start();
         assertTrue(latchBeforeBeginTx.await(1, TimeUnit.SECONDS));
-        long waitTime = 50 + duration * 10;
+        long waitTime = 100 + duration * 10;
         assertFalse(latchAfterBeginTx.await(waitTime, TimeUnit.MILLISECONDS));
         tx.close();
-        assertTrue(latchAfterBeginTx.await(waitTime, TimeUnit.MILLISECONDS));
+        assertTrue(latchAfterBeginTx.await(waitTime * 2, TimeUnit.MILLISECONDS));
     }
 
     @Test

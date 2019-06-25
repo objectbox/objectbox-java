@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2019 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ import io.objectbox.query.QueryCondition.PropertyCondition;
 import io.objectbox.query.QueryCondition.PropertyCondition.Operation;
 
 /**
- * Meta data describing a property
+ * Meta data describing a property of an ObjectBox entity.
+ * Properties are typically used to define query criteria using {@link io.objectbox.query.QueryBuilder}.
  */
 @SuppressWarnings("WeakerAccess,UnusedReturnValue, unused")
 public class Property<ENTITY> implements Serializable {
@@ -89,48 +90,48 @@ public class Property<ENTITY> implements Serializable {
         this.customType = customType;
     }
 
-    /** Creates an "equal ('=')" condition  for this property. */
+    /** Creates an "equal ('=')" condition for this property. */
     public QueryCondition eq(Object value) {
         return new PropertyCondition(this, Operation.EQUALS, value);
     }
 
-    /** Creates an "not equal ('&lt;&gt;')" condition  for this property. */
+    /** Creates an "not equal ('&lt;&gt;')" condition for this property. */
     public QueryCondition notEq(Object value) {
         return new PropertyCondition(this, Operation.NOT_EQUALS, value);
     }
 
-    /** Creates an "BETWEEN ... AND ..." condition  for this property. */
+    /** Creates an "BETWEEN ... AND ..." condition for this property. */
     public QueryCondition between(Object value1, Object value2) {
         Object[] values = {value1, value2};
         return new PropertyCondition(this, Operation.BETWEEN, values);
     }
 
-    /** Creates an "IN (..., ..., ...)" condition  for this property. */
+    /** Creates an "IN (..., ..., ...)" condition for this property. */
     public QueryCondition in(Object... inValues) {
         return new PropertyCondition(this, Operation.IN, inValues);
     }
 
-    /** Creates an "IN (..., ..., ...)" condition  for this property. */
+    /** Creates an "IN (..., ..., ...)" condition for this property. */
     public QueryCondition in(Collection<?> inValues) {
         return in(inValues.toArray());
     }
 
-    /** Creates an "greater than ('&gt;')" condition  for this property. */
+    /** Creates an "greater than ('&gt;')" condition for this property. */
     public QueryCondition gt(Object value) {
         return new PropertyCondition(this, Operation.GREATER_THAN, value);
     }
 
-    /** Creates an "less than ('&lt;')" condition  for this property. */
+    /** Creates an "less than ('&lt;')" condition for this property. */
     public QueryCondition lt(Object value) {
         return new PropertyCondition(this, Operation.LESS_THAN, value);
     }
 
-    /** Creates an "IS NULL" condition  for this property. */
+    /** Creates an "IS NULL" condition for this property. */
     public QueryCondition isNull() {
         return new PropertyCondition(this, Operation.IS_NULL, null);
     }
 
-    /** Creates an "IS NOT NULL" condition  for this property. */
+    /** Creates an "IS NOT NULL" condition for this property. */
     public QueryCondition isNotNull() {
         return new PropertyCondition(this, Operation.IS_NOT_NULL, null);
     }
