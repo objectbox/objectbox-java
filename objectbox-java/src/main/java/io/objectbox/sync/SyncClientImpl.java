@@ -14,7 +14,8 @@ public class SyncClientImpl implements SyncClient {
     private final boolean manualUpdateRequests;
 
     private volatile long handle;
-    @Nullable private volatile SyncClientListener listener;
+    @Nullable
+    private volatile SyncClientListener listener;
 
     private volatile long lastLoginCode;
 
@@ -35,13 +36,13 @@ public class SyncClientImpl implements SyncClient {
         internalListener = new InternalListener();
         nativeSetListener(handle, internalListener);
 
-        if(builder.changesListener != null) {
+        if (builder.changesListener != null) {
             setSyncChangesListener(builder.changesListener);
         }
 
         setLoginCredentials(builder.credentials);
 
-        if(!builder.manualStart) {
+        if (!builder.manualStart) {
             start();
         }
     }
@@ -112,6 +113,16 @@ public class SyncClientImpl implements SyncClient {
     }
 
     @Override
+    public void requestFullSync() {
+        nativeRequestFullSync(handle, false);
+    }
+
+    @Override
+    public void requestFullSyncAndUpdates() {
+        nativeRequestFullSync(handle, true);
+    }
+
+    @Override
     public void requestUpdates() {
         nativeRequestUpdates(handle, true);
     }
@@ -129,12 +140,12 @@ public class SyncClientImpl implements SyncClient {
     @Override
     public void close() {
         long handleToDelete;
-        synchronized(this) {
+        synchronized (this) {
             handleToDelete = this.handle;
             handle = 0;
         }
 
-        if(handleToDelete != 0) {
+        if (handleToDelete != 0) {
             nativeDelete(handleToDelete);
         }
     }
@@ -169,10 +180,11 @@ public class SyncClientImpl implements SyncClient {
 
     private native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangesListener advancedListener);
 
-    /**
-     * Request sync updates. Set {@code subscribeForPushes} to automatically receive updates for future changes.
-     */
+    /** @param subscribeForPushes pass true to automatically receive updates for future changes */
     private native void nativeRequestUpdates(long handle, boolean subscribeForPushes);
+
+    /** @param subscribeForPushes pass true to automatically receive updates for future changes */
+    private native void nativeRequestFullSync(long handle, boolean subscribeForPushes);
 
     /** (Optional) Cancel sync updates. */
     private native void nativeCancelUpdates(long handle);

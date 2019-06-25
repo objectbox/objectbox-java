@@ -1,6 +1,7 @@
 package io.objectbox.sync;
 
 import io.objectbox.BoxStore;
+import io.objectbox.annotation.apihint.Temporary;
 
 import java.io.Closeable;
 
@@ -63,6 +64,14 @@ public interface SyncClient extends Closeable {
     long getLastLoginCode();
 
     boolean isLoggedIn();
+
+    /** This will probably be private API in the future. */
+    @Temporary
+    void requestFullSync();
+
+    /** This will probably be private API in the future. */
+    @Temporary
+    void requestFullSyncAndUpdates();
 
     /**
      * In combination with {@link SyncBuilder#manualUpdateRequests}, this manually requests updates from the sync
