@@ -49,7 +49,7 @@ public class SyncClientImpl implements SyncClient {
 
     @Override
     protected void finalize() throws Throwable {
-        stop();
+        close();
         super.finalize();
     }
 
@@ -108,7 +108,10 @@ public class SyncClientImpl implements SyncClient {
 
     @Override
     public synchronized void stop() {
-        nativeStop(handle);
+        long handleToStop = this.handle;
+        if (handleToStop != 0) {
+            nativeStop(handleToStop);
+        }
         started = false;
     }
 
@@ -117,7 +120,7 @@ public class SyncClientImpl implements SyncClient {
         nativeRequestFullSync(handle, false);
     }
 
-    @Override
+    // needs fixing @Override
     public void requestFullSyncAndUpdates() {
         nativeRequestFullSync(handle, true);
     }

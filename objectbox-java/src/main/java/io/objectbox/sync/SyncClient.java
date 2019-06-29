@@ -50,13 +50,16 @@ public interface SyncClient extends Closeable {
      */
     boolean awaitFirstLogin(long millisToWait);
 
-    /** Closes everything (e.g. deletes native resources); do not use this object afterwards. */
+    /**
+     * Closes everything (e.g. deletes native resources); do not use this object afterwards.
+     * If the sync client is already closed, nothing happens.
+     */
     void close();
 
     /** Starts the synchronization. */
     void start();
 
-    /** Stops the synchronization. */
+    /** Stops the synchronization. If the sync client is already stopped or closed, nothing happens. */
     void stop();
 
     boolean isStarted();
@@ -69,9 +72,10 @@ public interface SyncClient extends Closeable {
     @Temporary
     void requestFullSync();
 
-    /** This will probably be private API in the future. */
-    @Temporary
-    void requestFullSyncAndUpdates();
+    // Fix this on the native side?
+//    /** This will probably be private API in the future. */
+//    @Temporary
+//    void requestFullSyncAndUpdates();
 
     /**
      * In combination with {@link SyncBuilder#manualUpdateRequests}, this manually requests updates from the sync
