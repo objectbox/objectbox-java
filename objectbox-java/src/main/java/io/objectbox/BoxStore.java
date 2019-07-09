@@ -603,6 +603,8 @@ public class BoxStore implements Closeable {
 
     /**
      * Returns a Box for the given type. Objects are put into (and get from) their individual Box.
+     * <p>
+     * Creates a Box only once and then always returns the cached instance.
      */
     @SuppressWarnings("unchecked")
     public <T> Box<T> boxFor(Class<T> entityClass) {
