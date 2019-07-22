@@ -75,6 +75,13 @@ public class SyncClientImpl implements SyncClient {
         return lastLoginCode == SyncLoginCodes.OK;
     }
 
+    /**
+     * Gets the current state of this sync client. Throws if {@link #close()} was called.
+     */
+    public SyncClientState getSyncState() {
+        return SyncClientState.fromId(nativeGetState(handle));
+    }
+
     @Override
     public void setSyncListener(SyncClientListener listener) {
         checkNotNull(listener, "Listener must not be null. Use removeSyncListener to remove existing listener.");
@@ -209,6 +216,11 @@ public class SyncClientImpl implements SyncClient {
      * @param uncommittedAcks Default is false.
      */
     private native void nativeSetUncommittedAcks(long handle, boolean uncommittedAcks);
+
+    /**
+     * Returns the current {@link SyncClientState} value.
+     */
+    private native int nativeGetState(long handle);
 
     /** @param subscribeForPushes Pass true to automatically receive updates for future changes. */
     private native void nativeRequestUpdates(long handle, boolean subscribeForPushes);
