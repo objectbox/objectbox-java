@@ -1,8 +1,8 @@
 package io.objectbox.sync;
 
-import javax.annotation.Nullable;
-
 import io.objectbox.BoxStore;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class SyncBuilder {
@@ -39,8 +39,11 @@ public class SyncBuilder {
     }
 
     /**
-     * By default, sync automatically requests updates from the backend; with this, you can override this behavior.
+     * Disables automatic sync updates from the server.
+     * Sync updates will need to be enabled using the sync client.
+     *
      * @see SyncClient#requestUpdates()
+     * @see SyncClient#requestUpdatesOnce()
      */
     public SyncBuilder manualUpdateRequests() {
         manualUpdateRequests = true;
@@ -49,7 +52,9 @@ public class SyncBuilder {
 
 
     /**
-     * By default, sync automatically starts; with this, you can override this behavior.
+     * Prevents sync from starting automatically.
+     * Sync will need to be started manually using the sync client.
+     *
      * @see SyncClient#start()
      */
     public SyncBuilder manualStart() {
@@ -58,7 +63,9 @@ public class SyncBuilder {
     }
 
     /**
-     * Sets the synchronization listener.
+     * Sets a listener to observe sync events like login or sync completion.
+     * This listener can also be set (or removed) on the sync client directly.
+     *
      * @see SyncClient#setSyncListener(SyncClientListener)
      */
     public SyncBuilder listener(SyncClientListener listener) {
@@ -67,7 +74,9 @@ public class SyncBuilder {
     }
 
     /**
-     * Sets the synchronization listener.
+     * Sets a listener to observe fine granular changes happening during sync.
+     * This listener can also be set (or removed) on the sync client directly.
+     *
      * @see SyncClient#setSyncChangesListener(SyncChangesListener)
      */
     public SyncBuilder changesListener(SyncChangesListener changesListener) {
