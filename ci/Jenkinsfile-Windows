@@ -43,8 +43,8 @@ pipeline {
     post {
         always {
             junit '**/build/test-results/**/TEST-*.xml'
-            archiveArtifacts 'tests/*/hs_err_pid*.log'
-            archiveArtifacts '**/build/reports/findbugs/*'
+            archiveArtifacts artifacts: 'tests/*/hs_err_pid*.log', allowEmptyArchive: true  // Only on JVM crash.
+            // currently unused: archiveArtifacts '**/build/reports/findbugs/*'
         }
 
         failure {
