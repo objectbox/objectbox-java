@@ -1,39 +1,41 @@
 package io.objectbox.sync;
 
+import io.objectbox.InternalAccess;
+import io.objectbox.annotation.apihint.Experimental;
+
+import javax.annotation.Nullable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
-
-import io.objectbox.InternalAccess;
-
+/**
+ * Internal sync client implementation. Use {@link SyncClient} to access functionality,
+ * this class may change without notice.
+ */
 public class SyncClientImpl implements SyncClient {
 
-    private final String url;
+    private final String serverUrl;
     private final InternalListener internalListener;
     private final boolean manualUpdateRequests;
 
     private volatile long handle;
     @Nullable
     private volatile SyncClientListener listener;
-
     private volatile long lastLoginCode;
-
     private volatile boolean started;
 
     SyncClientImpl(SyncBuilder builder) {
-        this.url = builder.url;
-        long storeHandle = InternalAccess.getHandle(builder.boxStore);
+        this.serverUrl = builder.url;
         this.manualUpdateRequests = builder.manualUpdateRequests;
 
-        handle = nativeCreate(storeHandle, url, builder.certificatePath);
+        long boxStoreHandle = InternalAccess.getHandle(builder.boxStore);
+        this.handle = nativeCreate(boxStoreHandle, serverUrl, builder.certificatePath);
         if (handle == 0) {
-            throw new RuntimeException("Handle is zero");
+            throw new RuntimeException("Failed to create sync client: handle is zero.");
         }
 
-        listener = builder.listener;
+        this.listener = builder.listener;
 
-        internalListener = new InternalListener();
+        this.internalListener = new InternalListener();
         nativeSetListener(handle, internalListener);
 
         if (builder.changesListener != null) {
@@ -48,21 +50,18 @@ public class SyncClientImpl implements SyncClient {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        close();
-        super.finalize();
+    public String getServerUrl() {
+        return serverUrl;
     }
 
     @Override
-    public void setLoginCredentials(SyncCredentials credentials) {
-        SyncCredentialsToken credentialsInternal = (SyncCredentialsToken) credentials;
-        nativeSetLoginInfo(handle, credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
-        credentialsInternal.clear(); // Clear immediately, not needed anymore.
+    public long getLastLoginCode() {
+        return lastLoginCode;
     }
 
     @Override
-    public String url() {
-        return url;
+    public boolean isLoggedIn() {
+        return lastLoginCode == SyncLoginCodes.OK;
     }
 
     @Override
@@ -85,6 +84,13 @@ public class SyncClientImpl implements SyncClient {
     @Override
     public void removeSyncChangesListener() {
         nativeSetSyncChangesListener(handle, null);
+    }
+
+    @Override
+    public void setLoginCredentials(SyncCredentials credentials) {
+        SyncCredentialsToken credentialsInternal = (SyncCredentialsToken) credentials;
+        nativeSetLoginInfo(handle, credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
+        credentialsInternal.clear(); // Clear immediately, not needed anymore.
     }
 
     @Override
@@ -116,11 +122,31 @@ public class SyncClientImpl implements SyncClient {
     }
 
     @Override
+    public void close() {
+        long handleToDelete;
+        synchronized (this) {
+            handleToDelete = this.handle;
+            handle = 0;
+        }
+
+        if (handleToDelete != 0) {
+            nativeDelete(handleToDelete);
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
+    }
+
+    @Override
     public void requestFullSync() {
         nativeRequestFullSync(handle, false);
     }
 
-    // needs fixing @Override
+    // TODO: broken?
+    @Experimental
     public void requestFullSyncAndUpdates() {
         nativeRequestFullSync(handle, true);
     }
@@ -140,33 +166,10 @@ public class SyncClientImpl implements SyncClient {
         nativeCancelUpdates(handle);
     }
 
-    @Override
-    public void close() {
-        long handleToDelete;
-        synchronized (this) {
-            handleToDelete = this.handle;
-            handle = 0;
-        }
-
-        if (handleToDelete != 0) {
-            nativeDelete(handleToDelete);
-        }
-    }
-
     private void checkNotNull(Object object, String message) {
         if (object == null) {
             throw new IllegalArgumentException(message);
         }
-    }
-
-    @Override
-    public long getLastLoginCode() {
-        return lastLoginCode;
-    }
-
-    @Override
-    public boolean isLoggedIn() {
-        return lastLoginCode == 20;
     }
 
     private static native long nativeCreate(long storeHandle, String uri, @Nullable String certificatePath);
@@ -183,13 +186,13 @@ public class SyncClientImpl implements SyncClient {
 
     private native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangesListener advancedListener);
 
-    /** @param subscribeForPushes pass true to automatically receive updates for future changes */
+    /** @param subscribeForPushes Pass true to automatically receive updates for future changes. */
     private native void nativeRequestUpdates(long handle, boolean subscribeForPushes);
 
-    /** @param subscribeForPushes pass true to automatically receive updates for future changes */
+    /** @param subscribeForPushes Pass true to automatically receive updates for future changes. */
     private native void nativeRequestFullSync(long handle, boolean subscribeForPushes);
 
-    /** (Optional) Cancel sync updates. */
+    /** (Optional) Pause sync updates. */
     private native void nativeCancelUpdates(long handle);
 
     private class InternalListener implements SyncClientListener {
@@ -197,7 +200,7 @@ public class SyncClientImpl implements SyncClient {
 
         @Override
         public void onLogin() {
-            lastLoginCode = 20;
+            lastLoginCode = SyncLoginCodes.OK;
             firstLoginLatch.countDown();
             if (!manualUpdateRequests) {
                 requestUpdates();

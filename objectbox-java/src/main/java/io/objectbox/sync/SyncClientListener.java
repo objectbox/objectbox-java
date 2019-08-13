@@ -9,14 +9,7 @@ public interface SyncClientListener {
     void onLogin();
 
     /**
-     * Called on a login failure.
-     *
-     * Possible response code values:
-     *     CREDENTIALS_REJECTED = 43,
-     *     UNKNOWN = 50,
-     *     AUTH_UNREACHABLE = 53,
-     *     BAD_VERSION = 55,
-     *     CLIENT_ID_TAKEN = 61.
+     * Called on a login failure. One of {@link SyncLoginCodes}, but never {@link SyncLoginCodes#OK}.
      */
     void onLoginFailure(long response);
 

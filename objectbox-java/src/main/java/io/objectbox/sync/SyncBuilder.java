@@ -52,8 +52,8 @@ public class SyncBuilder {
 
 
     /**
-     * Prevents sync from starting automatically.
-     * Sync will need to be started manually using the sync client.
+     * Prevents the client from starting (connecting, logging in, syncing) automatically.
+     * It will need to be started manually later.
      *
      * @see SyncClient#start()
      */

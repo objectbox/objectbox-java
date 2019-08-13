@@ -1,12 +1,12 @@
 package io.objectbox.sync;
 
 import io.objectbox.BoxStore;
-import io.objectbox.annotation.apihint.Temporary;
+import io.objectbox.annotation.apihint.Experimental;
 
 import java.io.Closeable;
 
 /**
- * Data synchronization client built with {@link Sync#client(BoxStore, String, SyncCredentials)}.
+ * ObjectBox sync client. Build a client with {@link Sync#client}.
  * <p>
  * SyncClient is thread-safe.
  */
@@ -14,13 +14,18 @@ import java.io.Closeable;
 public interface SyncClient extends Closeable {
 
     /**
-     * Just in case you need to update...
-     * Usually you just pass credential once via {@link Sync#client(BoxStore, String, SyncCredentials)}
+     * Gets the sync server URL this client is connected to.
      */
-    void setLoginCredentials(SyncCredentials credentials);
+    String getServerUrl();
 
-    /** Get the sync server URL this client is connected to. */
-    String url();
+    boolean isStarted();
+
+    boolean isLoggedIn();
+
+    /**
+     * Response code of last login attempt. One of {@link SyncLoginCodes}.
+     */
+    long getLastLoginCode();
 
     /**
      * Sets a {@link SyncClientListener}. Replaces a previously set listener.
@@ -43,54 +48,65 @@ public interface SyncClient extends Closeable {
     void removeSyncChangesListener();
 
     /**
-     * Waits for the sync client to make its first (connection and) login attempt.
-     * Check the actual outcome of the login using {@link #isLoggedIn()} and/or {@link #getLastLoginCode()}.
+     * Updates the login credentials. This should not be required during regular use.
+     * The original credentials were passed when building sync client.
+     */
+    void setLoginCredentials(SyncCredentials credentials);
+
+    /**
+     * Waits until the sync client receives a response to its first (connection and) login attempt
+     * or until the given time has expired.
+     * Use {@link #isLoggedIn()} or {@link #getLastLoginCode()} afterwards to determine if login was successful.
+     * Starts the sync if it is not already.
      *
-     * @return true if we got a response to the first login attempt in time
+     * @return true if a response was received in the given time window.
      */
     boolean awaitFirstLogin(long millisToWait);
 
     /**
-     * Closes everything (e.g. deletes native resources); do not use this object afterwards.
-     * If the sync client is already closed, nothing happens.
+     * Starts the client. It will connect to the server, log in (authenticate) and start syncing.
+     */
+    void start();
+
+    /**
+     * Stops the client. Does nothing if the sync client is already stopped or closed.
+     */
+    void stop();
+
+    /**
+     * Closes and cleans up all resources used by this sync client.
+     * It can no longer be used afterwards, build a new sync client instead.
+     * Does nothing if this sync client has already been closed.
      */
     void close();
 
-    /** Starts the synchronization. */
-    void start();
-
-    /** Stops the synchronization. If the sync client is already stopped or closed, nothing happens. */
-    void stop();
-
-    boolean isStarted();
-
-    long getLastLoginCode();
-
-    boolean isLoggedIn();
-
-    /** This will probably be private API in the future. */
-    @Temporary
-    void requestFullSync();
-
-    // Fix this on the native side?
-//    /** This will probably be private API in the future. */
-//    @Temporary
-//    void requestFullSyncAndUpdates();
-
     /**
-     * In combination with {@link SyncBuilder#manualUpdateRequests}, this manually requests updates from the sync
-     * backend including pushes of future changes.
-     * Also resumes updates after {@link #cancelUpdates()} was called.
+     * Asks the sync server to resume sync updates.
+     * This requires that the sync client was built with {@link SyncBuilder#manualUpdateRequests} set.
+     *
+     * @see #cancelUpdates()
      */
     void requestUpdates();
 
     /**
-     * In combination with {@link SyncBuilder#manualUpdateRequests}, this manually requests updates from the sync
-     * backend until we are up-to-date once without pushes for future changes.
+     * Asks the server to send sync updates until this sync client is up-to-date, then pauses sync updates again.
+     * This requires that the sync client was built with {@link SyncBuilder#manualUpdateRequests} set.
      */
     void requestUpdatesOnce();
 
-    /** Stop receiving sync updates. */
+    /**
+     * Asks the server to pause sync updates.
+     *
+     * @see #requestUpdates()
+     */
     void cancelUpdates();
+
+    /**
+     * Experimental. This API might change or be removed in the future.
+     *
+     * Request a sync of all previous changes from the server.
+     */
+    @Experimental
+    void requestFullSync();
 
 }
