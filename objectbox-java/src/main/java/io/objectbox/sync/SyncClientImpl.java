@@ -55,9 +55,9 @@ public class SyncClientImpl implements SyncClient {
 
     @Override
     public void setLoginCredentials(SyncCredentials credentials) {
-        byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(credentials);
-        nativeSetLoginInfo(handle, credentials.getTypeId(), credentialsBytes);
-        credentials.clear();  // Clear immediately, not needed anymore
+        SyncCredentialsToken credentialsInternal = (SyncCredentialsToken) credentials;
+        nativeSetLoginInfo(handle, credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
+        credentialsInternal.clear(); // Clear immediately, not needed anymore.
     }
 
     @Override

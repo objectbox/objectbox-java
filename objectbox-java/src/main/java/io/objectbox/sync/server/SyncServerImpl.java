@@ -30,14 +30,14 @@ public class SyncServerImpl implements SyncServer {
         }
 
         for (SyncCredentials credentials : credentialsList) {
-            byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(credentials);
-            nativeSetAuthenticator(handle, credentials.getTypeId(), credentialsBytes);
-            credentials.clear();
+            SyncCredentialsToken credentialsInternal = (SyncCredentialsToken) credentials;
+            nativeSetAuthenticator(handle, credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
+            credentialsInternal.clear(); // Clear immediately, not needed anymore.
         }
 
         for (PeerInfo peer : builder.peers) {
-            byte[] credentialsBytes = SyncCredentialsToken.getTokenOrNull(peer.credentials);
-            nativeAddPeer(handle, peer.url, peer.credentials.getTypeId(), credentialsBytes);
+            SyncCredentialsToken credentialsInternal = (SyncCredentialsToken) peer.credentials;
+            nativeAddPeer(handle, peer.url, credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
         }
 
         if(builder.changesListener != null) {
