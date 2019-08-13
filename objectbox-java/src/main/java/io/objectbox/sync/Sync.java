@@ -8,7 +8,7 @@ import io.objectbox.sync.server.SyncServerBuilder;
  * or a server using Sync.{@link #server(BoxStore, String, SyncCredentials)}.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public abstract class Sync {
+public final class Sync {
 
     /**
      * Start building a sync client. Requires the BoxStore that should be synced with the server,
