@@ -20,6 +20,8 @@ buildscript {
 apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.dokka'
 
+sourceCompatibility = 1.7
+
 dokka {
     outputFormat = 'html'
     outputDirectory = javadocDir
@@ -36,7 +38,7 @@ task sourcesJar(type: Jar) {
 }
 
 artifacts {
-    archives jar
+    // java plugin adds jar.
     archives javadocJar
     archives sourcesJar
 }
