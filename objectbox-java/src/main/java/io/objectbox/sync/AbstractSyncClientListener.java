@@ -1,8 +1,8 @@
 package io.objectbox.sync;
 
 /**
- * Abstract implementation for {@link SyncClientListener} providing empty methods doing nothing ("adapter class").
- * Helpful if you do not want to implement all methods.
+ * A {@link SyncClientListener} with empty implementations of all interface methods.
+ * This is helpful if you only want to override some methods.
  */
 public abstract class AbstractSyncClientListener implements SyncClientListener {
     @Override

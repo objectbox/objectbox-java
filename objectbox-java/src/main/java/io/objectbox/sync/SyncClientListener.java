@@ -3,7 +3,9 @@ package io.objectbox.sync;
 @SuppressWarnings({"unused"})
 public interface SyncClientListener {
 
-    /** Called on a successful login. */
+    /**
+     * Called on a successful login.
+     */
     void onLogin();
 
     /**
@@ -14,7 +16,7 @@ public interface SyncClientListener {
      *     UNKNOWN = 50,
      *     AUTH_UNREACHABLE = 53,
      *     BAD_VERSION = 55,
-     *     CLIENT_ID_TAKEN = 61,
+     *     CLIENT_ID_TAKEN = 61.
      */
     void onLoginFailure(long response);
 
@@ -23,7 +25,9 @@ public interface SyncClientListener {
      */
     void onSyncComplete();
 
-    /** Called when the client looses connection to the sync server. */
+    /**
+     * Called when the client is disconnected from the sync server, e.g. due to a network error.
+     */
     void onDisconnect();
 
 }

@@ -10,7 +10,7 @@ public class SyncChange {
     final long[] changedIds;
     final long[] removedIds;
 
-    // note: this constructor is called by JNI, check before modifying/removing it
+    // Note: this constructor is called by JNI, check before modifying/removing it.
     public SyncChange(long entityTypeId, long[] changedIds, long[] removedIds) {
         this.entityTypeId = entityTypeId;
         this.changedIds = changedIds;
