@@ -1,15 +1,35 @@
 package io.objectbox.sync.server;
 
+import io.objectbox.sync.Sync;
 import io.objectbox.sync.SyncChangesListener;
 
 import java.io.Closeable;
 
-/** A sync server built by {@link SyncServerBuilder}. */
+/**
+ * ObjectBox sync server. Build a server with {@link Sync#server}.
+ */
 @SuppressWarnings("unused")
 public interface SyncServer extends Closeable {
 
-    /** Get the sync server URL. */
-    String url();
+    /**
+     * Gets the URL the server is running at.
+     */
+    String getUrl();
+
+    /**
+     * Gets the port the server has bound to.
+     */
+    int getPort();
+
+    /**
+     * Returns if the server is up and running.
+     */
+    boolean isRunning();
+
+    /**
+     * Gets some statistics from the sync server.
+     */
+    String getStatsString();
 
     /**
      * Sets a {@link SyncChangesListener}. Replaces a previously set listener.
@@ -21,22 +41,21 @@ public interface SyncServer extends Closeable {
      */
     void removeSyncChangesListener();
 
-    /** Actually starts the server (e.g. bind to port) and get everything operational. */
+    /**
+     * Starts the server (e.g. bind to port) and gets everything operational.
+     */
     void start();
 
-    /** Stops the server */
+    /**
+     * Stops the server.
+     */
     void stop();
 
-    /** Destroys all native resources - do not use this object anymore after calling this! */
+    /**
+     * Closes and cleans up all resources used by this sync server.
+     * It can no longer be used afterwards, build a new sync server instead.
+     * Does nothing if this sync server has already been closed.
+     */
     void close();
-
-    /** Get some statistics from the sync server */
-    String getStatsString();
-
-    /** Is the server up and running? */
-    boolean isRunning();
-
-    /** The port the server has bound to. */
-    int getPort();
 
 }

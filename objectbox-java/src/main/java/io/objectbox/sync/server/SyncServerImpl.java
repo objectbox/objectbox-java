@@ -6,8 +6,11 @@ import io.objectbox.sync.SyncCredentials;
 import io.objectbox.sync.SyncCredentialsToken;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
+/**
+ * Internal sync server implementation. Use {@link SyncServer} to access functionality,
+ * this class may change without notice.
+ */
 public class SyncServerImpl implements SyncServer {
 
     private final String url;
@@ -18,18 +21,14 @@ public class SyncServerImpl implements SyncServer {
 
     SyncServerImpl(SyncServerBuilder builder) {
         this.url = builder.url;
-        List<SyncCredentials> credentialsList = builder.credentials;
-        if (credentialsList.isEmpty()) {
-            throw new IllegalStateException("You must provide at least one authenticator");
-        }
 
         long storeHandle = InternalAccess.getHandle(builder.boxStore);
         handle = nativeCreate(storeHandle, url, builder.certificatePath);
         if (handle == 0) {
-            throw new RuntimeException("Handle is zero");
+            throw new RuntimeException("Failed to create sync server: handle is zero.");
         }
 
-        for (SyncCredentials credentials : credentialsList) {
+        for (SyncCredentials credentials : builder.credentials) {
             SyncCredentialsToken credentialsInternal = (SyncCredentialsToken) credentials;
             nativeSetAuthenticator(handle, credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
             credentialsInternal.clear(); // Clear immediately, not needed anymore.
@@ -40,24 +39,33 @@ public class SyncServerImpl implements SyncServer {
             nativeAddPeer(handle, peer.url, credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
         }
 
-        if(builder.changesListener != null) {
+        if (builder.changesListener != null) {
             setSyncChangesListener(builder.changesListener);
         }
 
-        if(!builder.manualStart) {
+        if (!builder.manualStart) {
             start();
         }
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        close();
-        super.finalize();
+    public String getUrl() {
+        return url;
     }
 
     @Override
-    public String url() {
-        return url;
+    public int getPort() {
+        return nativeGetPort(handle);
+    }
+
+    @Override
+    public boolean isRunning() {
+        return nativeIsRunning(handle);
+    }
+
+    @Override
+    public String getStatsString() {
+        return nativeGetStatsString(handle);
     }
 
     @Override
@@ -93,18 +101,9 @@ public class SyncServerImpl implements SyncServer {
     }
 
     @Override
-    public String getStatsString() {
-        return nativeGetStatsString(handle);
-    }
-
-    @Override
-    public boolean isRunning() {
-        return nativeIsRunning(handle);
-    }
-
-    @Override
-    public int getPort() {
-        return nativeGetPort(handle);
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
     }
 
     private void checkNotNull(Object object, String message) {
