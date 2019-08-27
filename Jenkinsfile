@@ -6,7 +6,7 @@ String buildsToKeep = '500'
 
 String gradleArgs = '-Dorg.gradle.daemon=false --stacktrace'
 boolean isPublish = BRANCH_NAME == 'publish'
-String internalRepoVersionPostfix = isPublish ? '' : BRANCH_NAME // build script detects empty string as not set
+String versionPostfix = isPublish ? '' : BRANCH_NAME // Build script detects empty string as not set.
 
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
@@ -14,9 +14,16 @@ pipeline {
     
     environment {
         GITLAB_URL = credentials('gitlab_url')
-        MVN_REPO_URL = credentials('objectbox_internal_mvn_repo_http')
-        MVN_REPO_URL_PUBLISH = credentials('objectbox_internal_mvn_repo')
         MVN_REPO_LOGIN = credentials('objectbox_internal_mvn_user')
+        MVN_REPO_URL = credentials('objectbox_internal_mvn_repo_http')
+        MVN_REPO_ARGS = "-PinternalObjectBoxRepo=$MVN_REPO_URL " +
+                        "-PinternalObjectBoxRepoUser=$MVN_REPO_LOGIN_USR " +
+                        "-PinternalObjectBoxRepoPassword=$MVN_REPO_LOGIN_PSW"
+        MVN_REPO_UPLOAD_URL = credentials('objectbox_internal_mvn_repo')
+        MVN_REPO_UPLOAD_ARGS = "-PpreferredRepo=$MVN_REPO_UPLOAD_URL " +
+                        "-PpreferredUsername=$MVN_REPO_LOGIN_USR " +
+                        "-PpreferredPassword=$MVN_REPO_LOGIN_PSW " +
+                        "-PversionPostFix=$versionPostfix"
     }
 
     options {
@@ -43,8 +50,7 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh "./test-with-asan.sh -Dextensive-tests=true " +
-                        "-PinternalObjectBoxRepo=${MVN_REPO_URL} -PinternalObjectBoxRepoUser=${MVN_REPO_LOGIN_USR} -PinternalObjectBoxRepoPassword=${MVN_REPO_LOGIN_PSW} " +
+                sh "./test-with-asan.sh -Dextensive-tests=true $MVN_REPO_ARGS " +
                         "clean test " +
                         "--tests io.objectbox.FunctionalTestSuite " +
                         "--tests io.objectbox.test.proguard.ObfuscatedEntityTest " +
@@ -55,11 +61,7 @@ pipeline {
 
         stage('upload-to-internal') {
             steps {
-                sh "./gradlew $gradleArgs " +
-                   "-PversionPostFix=${internalRepoVersionPostfix} " +
-                   "-PinternalObjectBoxRepo=${MVN_REPO_URL} -PinternalObjectBoxRepoUser=${MVN_REPO_LOGIN_USR} -PinternalObjectBoxRepoPassword=${MVN_REPO_LOGIN_PSW} " +
-                   "-PpreferredRepo=${MVN_REPO_URL_PUBLISH} -PpreferredUsername=${MVN_REPO_LOGIN_USR} -PpreferredPassword=${MVN_REPO_LOGIN_PSW} " +
-                   "uploadArchives"
+                sh "./gradlew $gradleArgs $MVN_REPO_ARGS $MVN_REPO_UPLOAD_ARGS uploadArchives"
             }
         }
 
@@ -73,7 +75,11 @@ pipeline {
                 googlechatnotification url: 'id:gchat_java',
                     message: "*Publishing* ${currentBuild.fullDisplayName} to Bintray...\n${env.BUILD_URL}"
 
-                sh "./gradlew $gradleArgs -PpreferredRepo=${BINTRAY_URL} -PpreferredUsername=${BINTRAY_LOGIN_USR} -PpreferredPassword=${BINTRAY_LOGIN_PSW} uploadArchives"
+                // Not supplying internal Maven repo info to ensure dependencies are fetched from public repo.
+                // Note: add quotes around URL parameter to avoid line breaks due to semicolon in URL.
+                sh "./gradlew $gradleArgs " +
+                   "\"-PpreferredRepo=${BINTRAY_URL}\" -PpreferredUsername=${BINTRAY_LOGIN_USR} -PpreferredPassword=${BINTRAY_LOGIN_PSW} " +
+                   "uploadArchives"
 
                 googlechatnotification url: 'id:gchat_java',
                     message: "Published ${currentBuild.fullDisplayName} successfully to Bintray - check https://bintray.com/objectbox/objectbox\n${env.BUILD_URL}"
