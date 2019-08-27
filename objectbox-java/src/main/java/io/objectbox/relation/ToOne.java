@@ -106,7 +106,7 @@ public class ToOne<TARGET> implements Serializable {
         return targetNew;
     }
 
-    private void ensureBoxes(TARGET target) {
+    private void ensureBoxes(@Nullable TARGET target) {
         // Only check the property set last
         if (targetBox == null) {
             Field boxStoreField = ReflectionCache.getInstance().getField(entity.getClass(), "__boxStore");
