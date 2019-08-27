@@ -33,8 +33,9 @@ import io.objectbox.internal.ReflectionCache;
  * A to-relation is unidirectional: it points from the source entity to the target entity.
  * The target is referenced by its ID, which is persisted in the source entity.
  * <p>
- * If their is a backlink {@link ToMany} relation based on this to-one relation,
- * the ToMany object will not be notified/updated about changes done here (use {@link ToMany#reset()} if required).
+ * If there is a {@link ToMany} relation linking back to this to-one relation (@Backlink),
+ * the ToMany object will not be notified/updated about persisted changes here.
+ * Call {@link ToMany#reset()} so it will update when next accessed.
  */
 // TODO add more tests
 // TODO not exactly thread safe
