@@ -148,6 +148,14 @@ public class ToOne<TARGET> implements Serializable {
         return getTargetId() == 0 && target == null;
     }
 
+    /**
+     * Sets or clears the target ID in the source entity. Pass 0 to clear.
+     * <p>
+     * Put the source entity to persist changes.
+     * If the ID is not 0 creates a relation to the target entity with this ID, otherwise dissolves it.
+     *
+     * @see #setTarget
+     */
     public void setTargetId(long targetId) {
         if (virtualProperty) {
             this.targetId = targetId;
@@ -172,10 +180,13 @@ public class ToOne<TARGET> implements Serializable {
     }
 
     /**
-     * Sets the relation ID in the enclosed entity to the ID of the given target entity.
-     * If the target entity was not put in the DB yet (its ID is 0), it will be put before to get its ID.
+     * Sets or clears the target entity and ID in the source entity. Pass null to clear.
+     * <p>
+     * Put the source entity to persist changes.
+     * If the target entity was not put yet (its ID is 0), it will be stored when the source entity is put.
+     *
+     * @see #setTargetId
      */
-    // TODO provide a overload with a ToMany parameter, which also gets updated
     public void setTarget(@Nullable final TARGET target) {
         if (target != null) {
             long targetId = relationInfo.targetInfo.getIdGetter().getId(target);
@@ -189,10 +200,11 @@ public class ToOne<TARGET> implements Serializable {
     }
 
     /**
-     * Sets the relation ID in the enclosed entity to the ID of the given target entity and puts the enclosed entity.
-     * If the target entity was not put in the DB yet (its ID is 0), it will be put before to get its ID.
+     * Sets or clears the target entity and ID in the source entity, then puts the source entity to persist changes.
+     * Pass null to clear.
+     * <p>
+     * If the target entity was not put yet (its ID is 0), it will be put before the source entity.
      */
-    // TODO provide a overload with a ToMany parameter, which also gets updated
     public void setAndPutTarget(@Nullable final TARGET target) {
         ensureBoxes(target);
         if (target != null) {
@@ -212,9 +224,13 @@ public class ToOne<TARGET> implements Serializable {
     }
 
     /**
-     * Sets the relation ID in the enclosed entity to the ID of the given target entity and puts both entities.
+     * Sets or clears the target entity and ID in the source entity,
+     * then puts the target (if not null) and source entity to persist changes.
+     * Pass null to clear.
+     * <p>
+     * When clearing the target entity, this does not remove it from its box.
+     * This only dissolves the relation.
      */
-    // TODO provide a overload with a ToMany parameter, which also gets updated
     public void setAndPutTargetAlways(@Nullable final TARGET target) {
         ensureBoxes(target);
         if (target != null) {
