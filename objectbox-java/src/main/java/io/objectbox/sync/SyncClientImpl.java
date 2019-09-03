@@ -32,7 +32,7 @@ public class SyncClientImpl implements SyncClient {
         this.connectivityMonitor = builder.platform.getConnectivityMonitor();
 
         long boxStoreHandle = InternalAccess.getHandle(builder.boxStore);
-        this.handle = nativeCreate(boxStoreHandle, serverUrl, builder.certificatePath);
+        this.handle = nativeCreate(boxStoreHandle, serverUrl, builder.trustedCertPaths);
         if (handle == 0) {
             throw new RuntimeException("Failed to create sync client: handle is zero.");
         }
@@ -214,7 +214,11 @@ public class SyncClientImpl implements SyncClient {
         }
     }
 
-    private static native long nativeCreate(long storeHandle, String uri, @Nullable String certificatePath);
+    /**
+     * Creates a native sync client for the given store handle ready to connect to the server at the given URI.
+     * Uses certificate authorities trusted by the host if no trusted certificate paths are passed.
+     */
+    private static native long nativeCreate(long storeHandle, String uri, @Nullable String[] certificateDirsOrPaths);
 
     private native void nativeDelete(long handle);
 
