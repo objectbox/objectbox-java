@@ -50,7 +50,7 @@ public class MyObjectBox {
         entityBuilder = modelBuilder.entity("EntityLongIndex");
         entityBuilder.id(7, 3183490968395198467L).lastPropertyId(7, 4606523800036319028L);
         entityBuilder.property("_id", PropertyType.Long).id(7, 4606523800036319028L)
-            .flags(PropertyFlags.ID | PropertyFlags.ID_SELF_ASSIGNABLE | PropertyFlags.NOT_NULL);
+            .flags(PropertyFlags.ID | PropertyFlags.ID_SELF_ASSIGNABLE);
         entityBuilder.property("indexedLong", PropertyType.Long).id(1, 4720210528670921467L)
             .flags(PropertyFlags.NOT_NULL | PropertyFlags.INDEXED).indexId(4, 3512264863194799103L);
         entityBuilder.property("float1", PropertyType.Float).id(2, 26653300209568714L)
