@@ -90,7 +90,6 @@ public class Query<T> {
 
     final Box<T> box;
     private final BoxStore store;
-    private final boolean hasOrder;
     private final QueryPublisher<T> publisher;
     private final List<EagerRelation> eagerRelations;
     private final QueryFilter<T> filter;
@@ -100,13 +99,12 @@ public class Query<T> {
 
     long handle;
 
-    Query(Box<T> box, long queryHandle, boolean hasOrder, List<EagerRelation> eagerRelations, QueryFilter<T> filter,
+    Query(Box<T> box, long queryHandle, List<EagerRelation> eagerRelations, QueryFilter<T> filter,
           Comparator<T> comparator) {
         this.box = box;
         store = box.getStore();
         queryAttempts = store.internalQueryAttempts();
         handle = queryHandle;
-        this.hasOrder = hasOrder;
         publisher = new QueryPublisher<>(this, box);
         this.eagerRelations = eagerRelations;
         this.filter = filter;

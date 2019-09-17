@@ -91,8 +91,6 @@ public class QueryBuilder<T> {
 
     private long handle;
 
-    private boolean hasOrder;
-
     private long lastCondition;
     private Operator combineNextWith = Operator.NONE;
 
@@ -215,7 +213,7 @@ public class QueryBuilder<T> {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
         long queryHandle = nativeBuild(handle);
-        Query<T> query = new Query<>(box, queryHandle, hasOrder, eagerRelations, filter, comparator);
+        Query<T> query = new Query<>(box, queryHandle, eagerRelations, filter, comparator);
         close();
         return query;
     }
@@ -281,7 +279,6 @@ public class QueryBuilder<T> {
                     "An operator is pending. Use operators like and() and or() only between two conditions.");
         }
         nativeOrder(handle, property.getId(), flags);
-        hasOrder = true;
         return this;
     }
 
