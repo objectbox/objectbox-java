@@ -35,7 +35,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
 
     private final Query<T> query;
     private final Box<T> box;
-    private final Set<DataObserver<List<T>>> observers = new CopyOnWriteArraySet();
+    private final Set<DataObserver<List<T>>> observers = new CopyOnWriteArraySet<>();
 
     private DataObserver<Class<T>> objectClassObserver;
     private DataSubscription objectClassSubscription;

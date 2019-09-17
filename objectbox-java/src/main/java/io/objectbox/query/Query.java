@@ -53,7 +53,7 @@ public class Query<T> {
 
     native Object nativeFindUnique(long handle, long cursorHandle);
 
-    native List nativeFind(long handle, long cursorHandle, long offset, long limit);
+    native List<T> nativeFind(long handle, long cursorHandle, long offset, long limit) throws Exception;
 
     native long[] nativeFindIds(long handle, long cursorHandle, long offset, long limit);
 
@@ -90,29 +90,31 @@ public class Query<T> {
 
     final Box<T> box;
     private final BoxStore store;
-    private final boolean hasOrder;
     private final QueryPublisher<T> publisher;
     private final List<EagerRelation> eagerRelations;
     private final QueryFilter<T> filter;
     private final Comparator<T> comparator;
     private final int queryAttempts;
-    private final int initialRetryBackOffInMs = 10;
+    private static final int INITIAL_RETRY_BACK_OFF_IN_MS = 10;
 
     long handle;
 
-    Query(Box<T> box, long queryHandle, boolean hasOrder, List<EagerRelation> eagerRelations, QueryFilter<T> filter,
+    Query(Box<T> box, long queryHandle, List<EagerRelation> eagerRelations, QueryFilter<T> filter,
           Comparator<T> comparator) {
         this.box = box;
         store = box.getStore();
         queryAttempts = store.internalQueryAttempts();
         handle = queryHandle;
-        this.hasOrder = hasOrder;
         publisher = new QueryPublisher<>(this, box);
         this.eagerRelations = eagerRelations;
         this.filter = filter;
         this.comparator = comparator;
     }
 
+    /**
+     * Explicitly call {@link #close()} instead.
+     */
+    @SuppressWarnings("deprecation") // finalize()
     @Override
     protected void finalize() throws Throwable {
         close();
@@ -220,8 +222,8 @@ public class Query<T> {
         ensureNoFilterNoComparator();
         return callInReadTx(new Callable<List<T>>() {
             @Override
-            public List<T> call() {
-                List entities = nativeFind(handle, cursorHandle(), offset, limit);
+            public List<T> call() throws Exception {
+                List<T> entities = nativeFind(handle, cursorHandle(), offset, limit);
                 resolveEagerRelations(entities);
                 return entities;
             }
@@ -232,7 +234,7 @@ public class Query<T> {
      * Very efficient way to get just the IDs without creating any objects. IDs can later be used to lookup objects
      * (lookups by ID are also very efficient in ObjectBox).
      * <p>
-     * Note: a filter set with {@link QueryBuilder#filter} will be silently ignored!
+     * Note: a filter set with {@link QueryBuilder#filter(QueryFilter)} will be silently ignored!
      */
     @Nonnull
     public long[] findIds() {
@@ -242,7 +244,7 @@ public class Query<T> {
     /**
      * Like {@link #findIds()} but with a offset/limit param, e.g. for pagination.
      * <p>
-     * Note: a filter set with {@link QueryBuilder#filter} will be silently ignored!
+     * Note: a filter set with {@link QueryBuilder#filter(QueryFilter)} will be silently ignored!
      */
     @Nonnull
     public long[] findIds(final long offset, final long limit) {
@@ -277,7 +279,7 @@ public class Query<T> {
     }
 
     <R> R callInReadTx(Callable<R> callable) {
-        return store.callInReadTxWithRetry(callable, queryAttempts, initialRetryBackOffInMs, true);
+        return store.callInReadTxWithRetry(callable, queryAttempts, INITIAL_RETRY_BACK_OFF_IN_MS, true);
     }
 
     /**
@@ -328,10 +330,10 @@ public class Query<T> {
         return new LazyList<>(box, findIds(), true);
     }
 
-    void resolveEagerRelations(List entities) {
+    void resolveEagerRelations(List<T> entities) {
         if (eagerRelations != null) {
             int entityIndex = 0;
-            for (Object entity : entities) {
+            for (T entity : entities) {
                 resolveEagerRelationForNonNullEagerRelations(entity, entityIndex);
                 entityIndex++;
             }
@@ -339,7 +341,7 @@ public class Query<T> {
     }
 
     /** Note: no null check on eagerRelations! */
-    void resolveEagerRelationForNonNullEagerRelations(@Nonnull Object entity, int entityIndex) {
+    void resolveEagerRelationForNonNullEagerRelations(@Nonnull T entity, int entityIndex) {
         for (EagerRelation eagerRelation : eagerRelations) {
             if (eagerRelation.limit == 0 || entityIndex < eagerRelation.limit) {
                 resolveEagerRelation(entity, eagerRelation);
@@ -347,7 +349,7 @@ public class Query<T> {
         }
     }
 
-    void resolveEagerRelation(@Nullable Object entity) {
+    void resolveEagerRelation(@Nullable T entity) {
         if (eagerRelations != null && entity != null) {
             for (EagerRelation eagerRelation : eagerRelations) {
                 resolveEagerRelation(entity, eagerRelation);
@@ -355,10 +357,11 @@ public class Query<T> {
         }
     }
 
-    void resolveEagerRelation(@Nonnull Object entity, EagerRelation eagerRelation) {
+    void resolveEagerRelation(@Nonnull T entity, EagerRelation eagerRelation) {
         if (eagerRelations != null) {
             RelationInfo relationInfo = eagerRelation.relationInfo;
             if (relationInfo.toOneGetter != null) {
+                //noinspection unchecked Can't know target entity type.
                 ToOne toOne = relationInfo.toOneGetter.getToOne(entity);
                 if (toOne != null) {
                     toOne.getTarget();
@@ -367,8 +370,10 @@ public class Query<T> {
                 if (relationInfo.toManyGetter == null) {
                     throw new IllegalStateException("Relation info without relation getter: " + relationInfo);
                 }
+                //noinspection unchecked Can't know target entity type.
                 List toMany = relationInfo.toManyGetter.getToMany(entity);
                 if (toMany != null) {
+                    //noinspection ResultOfMethodCallIgnored Triggers fetching target entities.
                     toMany.size();
                 }
             }
