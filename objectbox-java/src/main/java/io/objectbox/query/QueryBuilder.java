@@ -28,6 +28,8 @@ import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.relation.RelationInfo;
 
+import javax.annotation.Nullable;
+
 /**
  * With QueryBuilder you define custom queries returning matching entities. Using the methods of this class you can
  * select (filter) results for specific data (for example #{@link #equal(Property, String)} and
@@ -188,6 +190,10 @@ public class QueryBuilder<T> {
         isSubQuery = true;
     }
 
+    /**
+     * Explicitly call {@link #close()} instead.
+     */
+    @SuppressWarnings("deprecation") // finalize()
     @Override
     protected void finalize() throws Throwable {
         close();
@@ -365,7 +371,7 @@ public class QueryBuilder<T> {
      * @param relationInfo The relation as found in the generated meta info class ("EntityName_") of class T.
      * @param more         Supply further relations to be eagerly loaded.
      */
-    public QueryBuilder<T> eager(int limit, RelationInfo relationInfo, RelationInfo... more) {
+    public QueryBuilder<T> eager(int limit, RelationInfo relationInfo, @Nullable RelationInfo... more) {
         verifyNotSubQuery();
         if (eagerRelations == null) {
             eagerRelations = new ArrayList<>();
