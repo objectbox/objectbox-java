@@ -91,8 +91,7 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
         query.subscribe().transform(new DataTransformer<List<TestEntity>, Integer>() {
 
             @Override
-            @SuppressWarnings("NullableProblems")
-            public Integer transform(List<TestEntity> source) throws Exception {
+            public Integer transform(List<TestEntity> source) {
                 int sum = 0;
                 for (TestEntity entity : source) {
                     sum += entity.getSimpleInt();
@@ -118,8 +117,8 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
         assertEquals(2003 + 2007 + 2002, (int) receivedSums.get(1));
     }
 
-    private List<TestEntity> putTestEntitiesScalars() {
-        return putTestEntities(10, null, 2000);
+    private void putTestEntitiesScalars() {
+        putTestEntities(10, null, 2000);
     }
 
     @Override
