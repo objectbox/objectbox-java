@@ -51,7 +51,7 @@ public class MyObjectBox {
         entityBuilder = modelBuilder.entity("Customer");
         entityBuilder.id(1, 8247662514375611729L).lastPropertyId(2, 7412962174183812632L);
         entityBuilder.property("_id", PropertyType.Long).id(1, 1888039726372206411L)
-                .flags(PropertyFlags.ID | PropertyFlags.NOT_NULL | PropertyFlags.ID_SELF_ASSIGNABLE);
+                .flags(PropertyFlags.ID | PropertyFlags.ID_SELF_ASSIGNABLE);
         entityBuilder.property("name", PropertyType.String).id(2, 7412962174183812632L)
                 .flags(PropertyFlags.INDEXED).indexId(1, 5782921847050580892L);
         entityBuilder.relation("ordersStandalone", 1, 8943758920347589435L, 3, 6367118380491771428L);
@@ -62,7 +62,7 @@ public class MyObjectBox {
 //        entityBuilder = modelBuilder.entity("Order");
         entityBuilder.id(3, 6367118380491771428L).lastPropertyId(4, 1061627027714085430L);
         entityBuilder.property("_id", PropertyType.Long).id(1, 7221142423462017794L)
-                .flags(PropertyFlags.ID | PropertyFlags.ID_SELF_ASSIGNABLE | PropertyFlags.NOT_NULL);
+                .flags(PropertyFlags.ID | PropertyFlags.ID_SELF_ASSIGNABLE);
         entityBuilder.property("date", PropertyType.Date).id(2, 2751944693239151491L);
         entityBuilder.property("customerId", "Customer", PropertyType.Relation).id(3, 7825181002293047239L)
                 .flags(PropertyFlags.NOT_NULL | PropertyFlags.INDEXED | PropertyFlags.INDEX_PARTIAL_SKIP_ZERO).indexId(2, 8919874872236271392L);
