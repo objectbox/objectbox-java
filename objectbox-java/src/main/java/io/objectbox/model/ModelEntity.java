@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import com.google.flatbuffers.*;
 @SuppressWarnings("unused")
 public final class ModelEntity extends Table {
   public static ModelEntity getRootAsModelEntity(ByteBuffer _bb) { return getRootAsModelEntity(_bb, new ModelEntity()); }
-  public static ModelEntity getRootAsModelEntity(ByteBuffer _bb, ModelEntity obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
-  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
+  public static ModelEntity getRootAsModelEntity(ByteBuffer _bb, ModelEntity obj) { Constants.FLATBUFFERS_1_11_1(); _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; vtable_start = bb_pos - bb.getInt(bb_pos); vtable_size = bb.getShort(vtable_start); }
   public ModelEntity __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   public IdUid id() { return id(new IdUid()); }
@@ -54,7 +54,7 @@ public final class ModelEntity extends Table {
   public ByteBuffer nameSecondaryAsByteBuffer() { return __vector_as_bytebuffer(16, 1); }
   public ByteBuffer nameSecondaryInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 16, 1); }
 
-  public static void startModelEntity(FlatBufferBuilder builder) { builder.startObject(7); }
+  public static void startModelEntity(FlatBufferBuilder builder) { builder.startTable(7); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addStruct(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addProperties(FlatBufferBuilder builder, int propertiesOffset) { builder.addOffset(2, propertiesOffset, 0); }
@@ -67,7 +67,7 @@ public final class ModelEntity extends Table {
   public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(5, (int)flags, (int)0L); }
   public static void addNameSecondary(FlatBufferBuilder builder, int nameSecondaryOffset) { builder.addOffset(6, nameSecondaryOffset, 0); }
   public static int endModelEntity(FlatBufferBuilder builder) {
-    int o = builder.endObject();
+    int o = builder.endTable();
     return o;
   }
 }
