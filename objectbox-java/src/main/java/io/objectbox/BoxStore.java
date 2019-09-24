@@ -320,6 +320,10 @@ public class BoxStore implements Closeable {
         }
     }
 
+    /**
+     * Explicitly call {@link #close()} instead to avoid expensive finalization.
+     */
+    @SuppressWarnings("deprecation") // finalize()
     @Override
     protected void finalize() throws Throwable {
         close();
@@ -433,6 +437,7 @@ public class BoxStore implements Closeable {
         synchronized (this) {
             oldClosedState = closed;
             if (!closed) {
+                // Closeable recommendation: mark as closed before any code that might throw.
                 closed = true;
                 List<Transaction> transactionsToClose;
                 synchronized (transactions) {

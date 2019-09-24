@@ -16,6 +16,7 @@
 
 package io.objectbox.query;
 
+import java.io.Closeable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -45,7 +46,7 @@ import io.objectbox.relation.ToOne;
  * @see QueryBuilder
  */
 @SuppressWarnings({"SameParameterValue", "UnusedReturnValue", "WeakerAccess"})
-public class Query<T> {
+public class Query<T> implements Closeable {
 
     native void nativeDestroy(long handle);
 
@@ -112,7 +113,7 @@ public class Query<T> {
     }
 
     /**
-     * Explicitly call {@link #close()} instead.
+     * Explicitly call {@link #close()} instead to avoid expensive finalization.
      */
     @SuppressWarnings("deprecation") // finalize()
     @Override
@@ -126,8 +127,10 @@ public class Query<T> {
      */
     public synchronized void close() {
         if (handle != 0) {
-            nativeDestroy(handle);
+            // Closeable recommendation: mark as "closed" before nativeDestroy could throw.
+            long handleCopy = handle;
             handle = 0;
+            nativeDestroy(handleCopy);
         }
     }
 

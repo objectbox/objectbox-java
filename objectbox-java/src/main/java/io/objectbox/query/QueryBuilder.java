@@ -16,6 +16,7 @@
 
 package io.objectbox.query;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -46,7 +47,7 @@ import javax.annotation.Nullable;
  */
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
 @Experimental
-public class QueryBuilder<T> {
+public class QueryBuilder<T> implements Closeable {
 
     public enum StringOrder {
         /** The default: case insensitive ASCII characters */
@@ -191,7 +192,7 @@ public class QueryBuilder<T> {
     }
 
     /**
-     * Explicitly call {@link #close()} instead.
+     * Explicitly call {@link #close()} instead to avoid expensive finalization.
      */
     @SuppressWarnings("deprecation") // finalize()
     @Override
@@ -202,10 +203,12 @@ public class QueryBuilder<T> {
 
     public synchronized void close() {
         if (handle != 0) {
-            if (!isSubQuery) {
-                nativeDestroy(handle);
-            }
+            // Closeable recommendation: mark as "closed" before nativeDestroy could throw.
+            long handleCopy = handle;
             handle = 0;
+            if (!isSubQuery) {
+                nativeDestroy(handleCopy);
+            }
         }
     }
 

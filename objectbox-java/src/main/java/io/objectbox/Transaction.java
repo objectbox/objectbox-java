@@ -77,6 +77,10 @@ public class Transaction implements Closeable {
         creationThrowable = TRACK_CREATION_STACK ? new Throwable() : null;
     }
 
+    /**
+     * Explicitly call {@link #close()} instead to avoid expensive finalization.
+     */
+    @SuppressWarnings("deprecation") // finalize()
     @Override
     protected void finalize() throws Throwable {
         close();
@@ -92,6 +96,7 @@ public class Transaction implements Closeable {
     @Override
     public synchronized void close() {
         if (!closed) {
+            // Closeable recommendation: mark as closed before any code that might throw.
             closed = true;
             store.unregisterTransaction(this);
 
