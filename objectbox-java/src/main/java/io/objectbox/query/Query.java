@@ -157,17 +157,21 @@ public class Query<T> implements Closeable {
     }
 
     private void ensureNoFilterNoComparator() {
-        if (filter != null) {
-            throw new UnsupportedOperationException("Does not yet work with a filter yet. " +
-                    "At this point, only find() and forEach() are supported with filters.");
-        }
+        ensureNoFilter();
         ensureNoComparator();
+    }
+
+    private void ensureNoFilter() {
+        if (filter != null) {
+            throw new UnsupportedOperationException("Does not work with a filter. " +
+                    "Only find() and forEach() support filters.");
+        }
     }
 
     private void ensureNoComparator() {
         if (comparator != null) {
-            throw new UnsupportedOperationException("Does not yet work with a sorting comparator yet. " +
-                    "At this point, only find() is supported with sorting comparators.");
+            throw new UnsupportedOperationException("Does not work with a sorting comparator. " +
+                    "Only find() supports sorting with a comparator.");
         }
     }
 
@@ -385,6 +389,7 @@ public class Query<T> implements Closeable {
 
     /** Returns the count of Objects matching the query. */
     public long count() {
+        ensureNoFilter();
         return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
             @Override
             public Long call(long cursorHandle) {
