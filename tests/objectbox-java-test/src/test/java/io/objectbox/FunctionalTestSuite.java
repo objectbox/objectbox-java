@@ -19,6 +19,7 @@ package io.objectbox;
 import io.objectbox.index.IndexReaderRenewTest;
 import io.objectbox.query.LazyListTest;
 import io.objectbox.query.PropertyQueryTest;
+import io.objectbox.query.QueryFilterComparatorTest;
 import io.objectbox.query.QueryObserverTest;
 import io.objectbox.query.QueryTest;
 import io.objectbox.relation.RelationEagerTest;
@@ -44,6 +45,7 @@ import org.junit.runners.Suite.SuiteClasses;
         IndexReaderRenewTest.class,
         ObjectClassObserverTest.class,
         PropertyQueryTest.class,
+        QueryFilterComparatorTest.class,
         QueryObserverTest.class,
         QueryTest.class,
         RelationTest.class,

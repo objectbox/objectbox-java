@@ -642,46 +642,6 @@ public class QueryTest extends AbstractQueryTest {
     }
 
     @Test
-    public void testForEachWithFilter() {
-        putTestEntitiesStrings();
-        final StringBuilder stringBuilder = new StringBuilder();
-        box.query().filter(createTestFilter()).build()
-                .forEach(new QueryConsumer<TestEntity>() {
-                    @Override
-                    public void accept(TestEntity data) {
-                        stringBuilder.append(data.getSimpleString()).append('#');
-                    }
-                });
-        assertEquals("apple#banana milk shake#", stringBuilder.toString());
-    }
-
-    @Test
-    public void testFindWithFilter() {
-        putTestEntitiesStrings();
-        List<TestEntity> entities = box.query().filter(createTestFilter()).build().find();
-        assertEquals(2, entities.size());
-        assertEquals("apple", entities.get(0).getSimpleString());
-        assertEquals("banana milk shake", entities.get(1).getSimpleString());
-    }
-
-    @Test
-    public void testFindWithComparator() {
-        putTestEntitiesStrings();
-        List<TestEntity> entities = box.query().sort(new Comparator<TestEntity>() {
-            @Override
-            public int compare(TestEntity o1, TestEntity o2) {
-                return o1.getSimpleString().substring(1).compareTo(o2.getSimpleString().substring(1));
-            }
-        }).build().find();
-        assertEquals(5, entities.size());
-        assertEquals("banana", entities.get(0).getSimpleString());
-        assertEquals("banana milk shake", entities.get(1).getSimpleString());
-        assertEquals("bar", entities.get(2).getSimpleString());
-        assertEquals("foo bar", entities.get(3).getSimpleString());
-        assertEquals("apple", entities.get(4).getSimpleString());
-    }
-
-    @Test
     // TODO can we improve? More than just "still works"?
     public void testQueryAttempts() {
         store.close();
@@ -738,15 +698,6 @@ public class QueryTest extends AbstractQueryTest {
         } catch (NonUniqueResultException e) {
             assertSame(e, exs[0]);
         }
-    }
-
-    private QueryFilter<TestEntity> createTestFilter() {
-        return new QueryFilter<TestEntity>() {
-            @Override
-            public boolean keep(TestEntity entity) {
-                return entity.getSimpleString().contains("e");
-            }
-        };
     }
 
 }
