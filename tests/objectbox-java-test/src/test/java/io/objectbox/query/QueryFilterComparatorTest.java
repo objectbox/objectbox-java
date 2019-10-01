@@ -76,6 +76,14 @@ public class QueryFilterComparatorTest extends AbstractQueryTest {
     }
 
     @Test(expected = UnsupportedOperationException.class)
+    public void filter_remove_unsupported() {
+        box.query()
+                .filter(createTestFilter())
+                .build()
+                .remove();
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
     public void filter_findFirst_unsupported() {
         box.query()
                 .filter(createTestFilter())

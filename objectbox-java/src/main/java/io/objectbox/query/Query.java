@@ -601,6 +601,7 @@ public class Query<T> implements Closeable {
      * @return count of removed Objects
      */
     public long remove() {
+        ensureNoFilter();
         return box.internalCallWithWriterHandle(new CallWithHandle<Long>() {
             @Override
             public Long call(long cursorHandle) {
