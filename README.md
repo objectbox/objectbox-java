@@ -4,7 +4,9 @@
 ObjectBox is a superfast object-oriented database with strong relation support.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
-**Latest version: [2.3.4 (2019/03/19)](https://objectbox.io/changelog)**
+**Latest version: [2.4.0 RC (2019/10/03)](https://objectbox.io/changelog)**
+
+**Latest stable version: [2.3.4 (2019/03/19)](https://objectbox.io/changelog)**
 
 Demo code using ObjectBox:
 
