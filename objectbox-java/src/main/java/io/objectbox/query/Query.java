@@ -182,7 +182,7 @@ public class Query<T> implements Closeable {
      */
     @Nullable
     public T findUnique() {
-        ensureNoFilterNoComparator();
+        ensureNoFilter();  // Comparator is fine: does not make any difference for a unique result
         return callInReadTx(new Callable<T>() {
             @Override
             public T call() {

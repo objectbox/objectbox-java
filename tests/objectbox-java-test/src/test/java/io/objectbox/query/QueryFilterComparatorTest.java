@@ -144,8 +144,8 @@ public class QueryFilterComparatorTest extends AbstractQueryTest {
                 .findFirst();
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void comparator_findUnique_unsupported() {
+    @Test
+    public void comparator_findUnique_supported() {
         box.query()
                 .sort(createTestComparator())
                 .build()
