@@ -24,7 +24,7 @@ dependencies {
 
 javadoc {
     failOnError = false
-    title = " ObjectBox Java ${version} API"
+    title = "ObjectBox Java ${version} API"
     options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017-2019 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
     exclude("**/com/google/**")
     exclude("**/io/objectbox/Cursor.java")
@@ -41,14 +41,30 @@ javadoc {
     if (!srcApi.directory) throw new GradleScriptException("Not a directory: ${srcApi}", null)
     source += srcApi
     doLast {
+        // Note: frequently check the vanilla stylesheet.css if values still match.
+        def stylesheetPath = "$buildDir/docs/javadoc/stylesheet.css"
+
         // Primary background
-        ant.replace(file: "build/docs/javadoc/stylesheet.css", token: "background-color:#4D7A97", value: "background-color:#17A6A6")
+        ant.replace(file: stylesheetPath, token: "#4D7A97", value: "#17A6A6")
 
         // "Active" background
-        ant.replace(file: "build/docs/javadoc/stylesheet.css", token: "background-color:#F8981D", value: "background-color:#7DDC7D")
+        ant.replace(file: stylesheetPath, token: "#F8981D", value: "#7DDC7D")
 
         // Hover
-        ant.replace(file: "build/docs/javadoc/stylesheet.css", token: "color:#bb7a2a", value: "color:#E61955")
+        ant.replace(file: stylesheetPath, token: "#bb7a2a", value: "#E61955")
+
+        // Note: in CSS stylesheets the last added rule wins, so append to default stylesheet.
+        // Code blocks
+        file(stylesheetPath).append("pre {\nwhite-space: normal;\noverflow-x: auto;\n}\n")
+        // Member summary tables
+        file(stylesheetPath).append(".memberSummary {\noverflow: auto;\n}\n")
+        // Descriptions and signatures
+        file(stylesheetPath).append(".block {\n" +
+                "    display:block;\n" +
+                "    margin:3px 10px 2px 0px;\n" +
+                "    color:#474747;\n" +
+                "    overflow:auto;\n" +
+                "}")
     }
 }
 
