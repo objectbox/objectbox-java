@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,10 @@
  */
 
 /**
- * Classes related to {@link io.objectbox.query.QueryBuilder building}
- * a {@link io.objectbox.query.Query} or {@link io.objectbox.query.PropertyQuery}.
+ * For use with {@link io.objectbox.annotation.Convert @Convert}: {@link io.objectbox.converter.PropertyConverter}
+ * to convert custom property types.
  * <p>
  * For more details look at the documentation of individual classes and
- * <a href="https://docs.objectbox.io/queries">docs.objectbox.io/queries</a>.
+ * <a href="https://docs.objectbox.io/advanced/custom-types">docs.objectbox.io/advanced/custom-types</a>.
  */
-@ParametersAreNonnullByDefault
-package io.objectbox.query;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+package io.objectbox.converter;

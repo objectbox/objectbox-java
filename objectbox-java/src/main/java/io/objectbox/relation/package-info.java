@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * Classes to manage {@link io.objectbox.relation.ToOne} and {@link io.objectbox.relation.ToMany}
+ * relations between entities.
+ * <p>
+ * For more details look at the documentation of individual classes and
+ * <a href="https://docs.objectbox.io/relations">docs.objectbox.io/relations</a>.
+ */
 @ParametersAreNonnullByDefault
 package io.objectbox.relation;
 
