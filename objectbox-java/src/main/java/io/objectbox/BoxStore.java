@@ -999,4 +999,23 @@ public class BoxStore implements Closeable {
         return nativePanicModeRemoveAllObjects(handle, entityId);
     }
 
+    /**
+     * If you want to use the same ObjectBox store using the C API, e.g. via JNI, this gives the required pointer,
+     * which you have to pass on to obx_store_wrap().
+     * The procedure is like this:<br>
+     * 1) you create a BoxStore on the Java side<br>
+     * 2) you call this method to get the native store pointer<br>
+     * 3) you pass the native store pointer to your native code (e.g. via JNI)<br>
+     * 4) your native code calls obx_store_wrap() with the native store pointer to get a OBX_store pointer<br>
+     * 5) Using the OBX_store pointer, you can use the C API.
+     *
+     * Note: Once you {@link #close()} this BoxStore, do not use it from the C API.
+     */
+    public long getNativeStore() {
+        if (closed) {
+            throw new IllegalStateException("Store must still be open");
+        }
+        return handle;
+    }
+
 }
