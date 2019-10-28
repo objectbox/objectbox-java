@@ -22,12 +22,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks values of a property to be unique.
- * The property will be indexed behind the scenes, just like using @{@link Index}.
- * Thus you do not need to put an extra @{@link Index} on the property, unless you want to configure the index with
- * additional parameters.
- *
- * Trying to put object with offending values will result in a UniqueViolationException.
+ * Enforces that the value of a property is unique among all objects in a box before an object can be put.
+ * <p>
+ * Trying to put an object with offending values will result in a UniqueViolationException.
+ * <p>
+ * Unique properties are based on an {@link Index @Index}, so the same restrictions apply.
+ * It is supported to explicitly add the {@link Index @Index} annotation to configure the index.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
