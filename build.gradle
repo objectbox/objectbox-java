@@ -6,8 +6,7 @@ buildscript {
         // version post fix: '-<value>' or '' if not defined; e.g. used by CI to pass in branch name
         def versionPostFixValue = project.findProperty('versionPostFix')
         def versionPostFix = versionPostFixValue ? "-$versionPostFixValue" : ''
-//        ob_version = "2.4.1$versionPostFix-SNAPSHOT"
-        ob_version = "2.4.1"
+        ob_version = "2.4.2$versionPostFix-SNAPSHOT"
         println "ObjectBox Java version $ob_version"
 
         ob_expected_version = project.hasProperty('expectedVersion') ? project.property('expectedVersion') : 'UNDEFINED'
