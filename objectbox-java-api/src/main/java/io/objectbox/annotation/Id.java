@@ -22,7 +22,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks field is the primary key of the entity's table
+ * Marks the ID property of an {@link Entity @Entity}.
+ * The property must be of type long (or Long in Kotlin) and have not-private visibility
+ * (or a not-private getter and setter method).
+ * <p>
+ * ID properties are unique and indexed by default.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
@@ -35,8 +39,10 @@ public @interface Id {
 //    boolean monotonic() default false;
 
     /**
-     * Allows IDs to be assigned by the developer. This may make sense for using IDs originating somewhere else, e.g.
-     * from the server.
+     * Allows IDs of new entities to be assigned manually.
+     * Warning: This has side effects, check the online documentation on self-assigned object IDs for details.
+     * <p>
+     * This may allow re-use of IDs assigned elsewhere, e.g. by a server.
      */
     boolean assignable() default false;
 }

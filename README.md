@@ -4,7 +4,7 @@
 ObjectBox is a superfast object-oriented database with strong relation support.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
-**Latest version: [2.4.0 (2019/10/15)](https://objectbox.io/changelog)**
+**Latest version: [2.4.1 (2019/10/29)](https://objectbox.io/changelog)**
 
 Demo code using ObjectBox:
 
@@ -30,7 +30,7 @@ Add this to your root build.gradle (project level):
 
 ```groovy
 buildscript {
-    ext.objectboxVersion = '2.4.0'
+    ext.objectboxVersion = '2.4.1'
     dependencies {
         classpath "io.objectbox:objectbox-gradle-plugin:$objectboxVersion"
     }

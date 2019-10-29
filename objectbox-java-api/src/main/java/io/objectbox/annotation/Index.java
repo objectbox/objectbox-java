@@ -21,15 +21,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.objectbox.annotation.apihint.Internal;
-
 /**
- * Specifies that the property should be indexed, which is highly recommended if you do queries using this property.
- *
- * To fine tune indexing you can specify {@link IndexType} if necessary.
+ * Specifies that the property should be indexed.
+ * <p>
+ * It is highly recommended to index properties that are used in a query to improve query performance.
+ * <p>
+ * To fine tune indexing of a property you can override the default index {@link #type()}.
+ * <p>
+ * Note: indexes are currently not supported for byte array, float or double properties.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 public @interface Index {
+    /**
+     * Sets the {@link IndexType}, defaults to {@link IndexType#DEFAULT}.
+     */
     IndexType type() default IndexType.DEFAULT;
 }

@@ -6,16 +6,16 @@ buildscript {
         // version post fix: '-<value>' or '' if not defined; e.g. used by CI to pass in branch name
         def versionPostFixValue = project.findProperty('versionPostFix')
         def versionPostFix = versionPostFixValue ? "-$versionPostFixValue" : ''
-//        ob_version = "2.4.0$versionPostFix-SNAPSHOT"
-        ob_version = "2.4.0"
+//        ob_version = "2.4.1$versionPostFix-SNAPSHOT"
+        ob_version = "2.4.1"
         println "ObjectBox Java version $ob_version"
 
         ob_expected_version = project.hasProperty('expectedVersion') ? project.property('expectedVersion') : 'UNDEFINED'
 
         // Core version for tests
         // Be careful to diverge here; easy to forget and hard to find JNI problems
-//        ob_native_version = "2.4.0-dev-SNAPSHOT"
-        ob_native_version = "2.4.0"
+//        ob_native_version = "2.4.1-dev-SNAPSHOT"
+        ob_native_version = "2.4.1"
 
         def osName = System.getProperty("os.name").toLowerCase()
         objectboxPlatform = osName.contains('linux') ? 'linux'
