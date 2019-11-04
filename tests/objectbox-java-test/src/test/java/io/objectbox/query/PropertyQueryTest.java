@@ -422,17 +422,20 @@ public class PropertyQueryTest extends AbstractQueryTest {
 
     @Test
     public void testCount() {
+        Query<TestEntity> query = box.query().build();
+        PropertyQuery stringQuery = query.property(simpleString);
+
+        assertEquals(0, stringQuery.count());
+
         putTestEntity(null, 1000);
         putTestEntity("BAR", 100);
         putTestEntitiesStrings();
         putTestEntity("banana", 101);
-        Query<TestEntity> query = box.query().build();
-        PropertyQuery stringQuery = query.property(simpleString);
+
         assertEquals(8, query.count());
         assertEquals(7, stringQuery.count());
         assertEquals(6, stringQuery.distinct().count());
     }
-
 
     @Test
     public void testAggregates() {
