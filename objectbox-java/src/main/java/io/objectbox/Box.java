@@ -303,26 +303,16 @@ public class Box<T> {
 
     /**
      * Returns all stored Objects in this Box.
+     * @return since 2.4 the returned list is always mutable (before an empty result list was immutable)
      */
     public List<T> getAll() {
+        ArrayList<T> list = new ArrayList<>();
         Cursor<T> cursor = getReader();
         try {
-            T first = cursor.first();
-            if (first == null) {
-                return Collections.emptyList();
-            } else {
-                ArrayList<T> list = new ArrayList<>();
-                list.add(first);
-                while (true) {
-                    T next = cursor.next();
-                    if (next != null) {
-                        list.add(next);
-                    } else {
-                        break;
-                    }
-                }
-                return list;
+            for (T object = cursor.first(); object != null; object = cursor.next()) {
+                list.add(object);
             }
+            return list;
         } finally {
             releaseReader(cursor);
         }

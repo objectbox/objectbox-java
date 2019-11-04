@@ -18,12 +18,6 @@ javadoc {
     title = "ObjectBox RxJava2 ${version} API"
     excludes = [] // Unfinished APIs if any
     options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2018-2019 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
-    doLast {
-        copy {
-            from '../javadoc-style/'
-            into "build/docs/javadoc/"
-        }
-    }
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {

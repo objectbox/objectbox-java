@@ -17,20 +17,22 @@
 package io.objectbox.annotation;
 
 /**
- * ObjectBox offers three index types, from which it chooses from with a reasonable default (see {@link #DEFAULT}).
+ * ObjectBox offers a value and two hash index types, from which it chooses a reasonable default (see {@link #DEFAULT}).
  * <p>
  * For some queries/use cases it might make sense to override the default choice for optimization purposes.
+ * <p>
+ * Note: hash indexes are currently only supported for string properties.
  */
 public enum IndexType {
     /**
      * Use the default index type depending on the property type:
-     * {@link #VALUE} for scalars and {@link #HASH} for Strings and byte arrays.
+     * {@link #VALUE} for scalars and {@link #HASH} for Strings.
      */
     DEFAULT,
 
     /**
      * Use the property value to build the index.
-     * For Strings and byte arrays this may occupy more space than the default setting.
+     * For Strings this may occupy more space than the default setting.
      */
     VALUE,
 

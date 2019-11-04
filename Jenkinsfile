@@ -75,9 +75,9 @@ pipeline {
                 googlechatnotification url: 'id:gchat_java',
                     message: "*Publishing* ${currentBuild.fullDisplayName} to Bintray...\n${env.BUILD_URL}"
 
-                // Not supplying internal Maven repo info to ensure dependencies are fetched from public repo.
+                // Note: supply internal Maven repo as tests use native dependencies (can't publish those without the Java libraries).
                 // Note: add quotes around URL parameter to avoid line breaks due to semicolon in URL.
-                sh "./gradlew $gradleArgs " +
+                sh "./gradlew $gradleArgs $MVN_REPO_ARGS " +
                    "\"-PpreferredRepo=${BINTRAY_URL}\" -PpreferredUsername=${BINTRAY_LOGIN_USR} -PpreferredPassword=${BINTRAY_LOGIN_PSW} " +
                    "uploadArchives"
 

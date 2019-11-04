@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import com.google.flatbuffers.*;
  */
 public final class Model extends Table {
   public static Model getRootAsModel(ByteBuffer _bb) { return getRootAsModel(_bb, new Model()); }
-  public static Model getRootAsModel(ByteBuffer _bb, Model obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
-  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
+  public static Model getRootAsModel(ByteBuffer _bb, Model obj) { Constants.FLATBUFFERS_1_11_1(); _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; vtable_start = bb_pos - bb.getInt(bb_pos); vtable_size = bb.getShort(vtable_start); }
   public Model __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   /**
@@ -62,7 +62,7 @@ public final class Model extends Table {
   public IdUid lastRelationId() { return lastRelationId(new IdUid()); }
   public IdUid lastRelationId(IdUid obj) { int o = __offset(18); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
 
-  public static void startModel(FlatBufferBuilder builder) { builder.startObject(8); }
+  public static void startModel(FlatBufferBuilder builder) { builder.startTable(8); }
   public static void addModelVersion(FlatBufferBuilder builder, long modelVersion) { builder.addInt(0, (int)modelVersion, (int)0L); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addVersion(FlatBufferBuilder builder, long version) { builder.addLong(2, version, 0L); }
@@ -74,7 +74,7 @@ public final class Model extends Table {
   public static void addLastSequenceId(FlatBufferBuilder builder, int lastSequenceIdOffset) { builder.addStruct(6, lastSequenceIdOffset, 0); }
   public static void addLastRelationId(FlatBufferBuilder builder, int lastRelationIdOffset) { builder.addStruct(7, lastRelationIdOffset, 0); }
   public static int endModel(FlatBufferBuilder builder) {
-    int o = builder.endObject();
+    int o = builder.endTable();
     return o;
   }
   public static void finishModelBuffer(FlatBufferBuilder builder, int offset) { builder.finish(offset); }

@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * Classes related to {@link io.objectbox.query.QueryBuilder building}
+ * a {@link io.objectbox.query.Query} or {@link io.objectbox.query.PropertyQuery}.
+ * <p>
+ * For more details look at the documentation of individual classes and
+ * <a href="https://docs.objectbox.io/queries">docs.objectbox.io/queries</a>.
+ */
 @ParametersAreNonnullByDefault
 package io.objectbox.query;
 

@@ -51,6 +51,7 @@ public class DebugCursor implements Closeable {
     @Override
     public synchronized void close() {
         if (!closed) {
+            // Closeable recommendation: mark as closed before any code that might throw.
             closed = true;
             // tx is null despite check in constructor in some tests (called by finalizer):
             // Null check avoids NPE in finalizer and seems to stabilize Android instrumentation perf tests.
@@ -60,6 +61,10 @@ public class DebugCursor implements Closeable {
         }
     }
 
+    /**
+     * Explicitly call {@link #close()} instead to avoid expensive finalization.
+     */
+    @SuppressWarnings("deprecation") // finalize()
     @Override
     protected void finalize() throws Throwable {
         if (!closed) {

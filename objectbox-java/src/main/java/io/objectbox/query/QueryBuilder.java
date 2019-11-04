@@ -16,6 +16,7 @@
 
 package io.objectbox.query;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -27,6 +28,8 @@ import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.relation.RelationInfo;
+
+import javax.annotation.Nullable;
 
 /**
  * With QueryBuilder you define custom queries returning matching entities. Using the methods of this class you can
@@ -44,7 +47,7 @@ import io.objectbox.relation.RelationInfo;
  */
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
 @Experimental
-public class QueryBuilder<T> {
+public class QueryBuilder<T> implements Closeable {
 
     public enum StringOrder {
         /** The default: case insensitive ASCII characters */
@@ -90,8 +93,6 @@ public class QueryBuilder<T> {
     private final long storeHandle;
 
     private long handle;
-
-    private boolean hasOrder;
 
     private long lastCondition;
     private Operator combineNextWith = Operator.NONE;
@@ -190,6 +191,10 @@ public class QueryBuilder<T> {
         isSubQuery = true;
     }
 
+    /**
+     * Explicitly call {@link #close()} instead to avoid expensive finalization.
+     */
+    @SuppressWarnings("deprecation") // finalize()
     @Override
     protected void finalize() throws Throwable {
         close();
@@ -198,10 +203,12 @@ public class QueryBuilder<T> {
 
     public synchronized void close() {
         if (handle != 0) {
-            if (!isSubQuery) {
-                nativeDestroy(handle);
-            }
+            // Closeable recommendation: mark as "closed" before nativeDestroy could throw.
+            long handleCopy = handle;
             handle = 0;
+            if (!isSubQuery) {
+                nativeDestroy(handleCopy);
+            }
         }
     }
 
@@ -215,7 +222,7 @@ public class QueryBuilder<T> {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
         long queryHandle = nativeBuild(handle);
-        Query<T> query = new Query<>(box, queryHandle, hasOrder, eagerRelations, filter, comparator);
+        Query<T> query = new Query<>(box, queryHandle, eagerRelations, filter, comparator);
         close();
         return query;
     }
@@ -281,7 +288,6 @@ public class QueryBuilder<T> {
                     "An operator is pending. Use operators like and() and or() only between two conditions.");
         }
         nativeOrder(handle, property.getId(), flags);
-        hasOrder = true;
         return this;
     }
 
@@ -368,7 +374,7 @@ public class QueryBuilder<T> {
      * @param relationInfo The relation as found in the generated meta info class ("EntityName_") of class T.
      * @param more         Supply further relations to be eagerly loaded.
      */
-    public QueryBuilder<T> eager(int limit, RelationInfo relationInfo, RelationInfo... more) {
+    public QueryBuilder<T> eager(int limit, RelationInfo relationInfo, @Nullable RelationInfo... more) {
         verifyNotSubQuery();
         if (eagerRelations == null) {
             eagerRelations = new ArrayList<>();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@
 package io.objectbox.model;
 
 /**
- * Not really an enum, but binary flags to use across languages
+ * Bit-flags defining the behavior of properties.
+ * Note: Numbers indicate the bit position
  */
 public final class PropertyFlags {
   private PropertyFlags() { }
   /**
-   * One long property on an entity must be the ID
+   * 64 bit long property (internally unsigned) representing the ID of the entity.
+   * May be combined with: NON_PRIMITIVE_TYPE, ID_MONOTONIC_SEQUENCE, ID_SELF_ASSIGNABLE.
    */
   public static final int ID = 1;
   /**
@@ -74,5 +76,10 @@ public final class PropertyFlags {
    * (recommended mostly for 64 bit machines with values longer >200 bytes; small values are faster with a 32 bit hash)
    */
   public static final int INDEX_HASH64 = 4096;
+  /**
+   * Unused yet: While our default are signed ints, queries & indexes need do know signing info.
+   * Note: Don't combine with ID (IDs are always unsigned internally).
+   */
+  public static final int UNSIGNED = 8192;
 }
 
