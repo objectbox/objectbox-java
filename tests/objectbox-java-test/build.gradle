@@ -2,8 +2,8 @@ apply plugin: 'java'
 
 uploadArchives.enabled = false
 
-targetCompatibility = '1.7'
-sourceCompatibility = '1.7'
+targetCompatibility = '1.8'
+sourceCompatibility = '1.8'
 
 repositories {
     // Native lib might be deployed only in internal repo
