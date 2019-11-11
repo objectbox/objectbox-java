@@ -16,31 +16,40 @@
 
 package io.objectbox.query;
 
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.List;
-
 import io.objectbox.TestEntity;
 import io.objectbox.TestEntityCursor;
 import io.objectbox.exception.DbException;
 import io.objectbox.query.QueryBuilder.StringOrder;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import java.util.Arrays;
+import java.util.List;
 
-import static io.objectbox.TestEntity_.simpleBoolean;
-import static io.objectbox.TestEntity_.simpleByte;
-import static io.objectbox.TestEntity_.simpleDouble;
-import static io.objectbox.TestEntity_.simpleFloat;
-import static io.objectbox.TestEntity_.simpleInt;
-import static io.objectbox.TestEntity_.simpleLong;
-import static io.objectbox.TestEntity_.simpleShort;
-import static io.objectbox.TestEntity_.simpleString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static io.objectbox.TestEntity_.*;
+import static org.junit.Assert.*;
 
 public class PropertyQueryTest extends AbstractQueryTest {
+
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
+
+    private void putTestEntityInteger(byte vByte, short vShort, int vInt, long vLong) {
+        TestEntity entity = new TestEntity();
+        entity.setSimpleByte(vByte);
+        entity.setSimpleShort(vShort);
+        entity.setSimpleInt(vInt);
+        entity.setSimpleLong(vLong);
+        box.put(entity);
+    }
+
+    private void putTestEntityFloat(float vFloat, double vDouble) {
+        TestEntity entity = new TestEntity();
+        entity.setSimpleFloat(vFloat);
+        entity.setSimpleDouble(vDouble);
+        box.put(entity);
+    }
 
     @Test
     public void testFindStrings() {
@@ -435,6 +444,240 @@ public class PropertyQueryTest extends AbstractQueryTest {
         assertEquals(8, query.count());
         assertEquals(7, stringQuery.count());
         assertEquals(6, stringQuery.distinct().count());
+    }
+
+    private void assertUnsupported(Runnable runnable, String exceptionMessage) {
+        try {
+            runnable.run();
+            fail("Should have thrown IllegalArgumentException: " + exceptionMessage);
+        } catch (Exception e) {
+            assertTrue(
+                    "Expected IllegalArgumentException, but was " + e.getClass().getSimpleName() + ".",
+                    e instanceof IllegalArgumentException
+            );
+            assertTrue(
+                    "Expected exception message '" + exceptionMessage + "', but was '" + e.getMessage() + "'.",
+                    e.getMessage().contains(exceptionMessage)
+            );
+        }
+    }
+
+    @Test
+    public void avg_notSupported() {
+        Query<TestEntity> query = box.query().build();
+        String exceptionMessage = "Property does not allow avg";
+        assertUnsupported(() -> query.property(simpleBoolean).avg(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleByteArray).avg(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleString).avg(), exceptionMessage);
+    }
+
+    @Test
+    public void min_notSupported() {
+        Query<TestEntity> query = box.query().build();
+        String exceptionMessage = "Property does not allow max"; // Note: currently JNI returns wrong error message.
+        assertUnsupported(() -> query.property(simpleBoolean).min(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleByteArray).min(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleString).min(), exceptionMessage);
+
+        assertUnsupported(() -> query.property(simpleFloat).min(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleDouble).min(), exceptionMessage);
+    }
+
+    @Test
+    public void minDouble_notSupported() {
+        Query<TestEntity> query = box.query().build();
+        String exceptionMessage = "Property does not allow min (double)";
+        assertUnsupported(() -> query.property(simpleBoolean).minDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleByteArray).minDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleString).minDouble(), exceptionMessage);
+
+        assertUnsupported(() -> query.property(simpleByte).minDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleShort).minDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleInt).minDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleLong).minDouble(), exceptionMessage);
+    }
+
+    @Test
+    public void max_notSupported() {
+        Query<TestEntity> query = box.query().build();
+        String exceptionMessage = "Property does not allow max";
+        assertUnsupported(() -> query.property(simpleBoolean).max(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleByteArray).max(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleString).max(), exceptionMessage);
+
+        assertUnsupported(() -> query.property(simpleFloat).max(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleDouble).max(), exceptionMessage);
+    }
+
+    @Test
+    public void maxDouble_notSupported() {
+        Query<TestEntity> query = box.query().build();
+        String exceptionMessage = "Property does not allow max (double)";
+        assertUnsupported(() -> query.property(simpleBoolean).maxDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleByteArray).maxDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleString).maxDouble(), exceptionMessage);
+
+        assertUnsupported(() -> query.property(simpleByte).maxDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleShort).maxDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleInt).maxDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleLong).maxDouble(), exceptionMessage);
+    }
+
+    @Test
+    public void sum_notSupported() {
+        Query<TestEntity> query = box.query().build();
+        String exceptionMessage = "Property does not allow sum";
+        assertUnsupported(() -> query.property(simpleByteArray).sum(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleString).sum(), exceptionMessage);
+
+        String exceptionMessage2 = "Please use double based sum (e.g. `sumDouble()`) instead for property";
+        assertUnsupported(() -> query.property(simpleFloat).sum(), exceptionMessage2);
+        assertUnsupported(() -> query.property(simpleDouble).sum(), exceptionMessage2);
+    }
+
+    @Test
+    public void avg_noData() {
+        Query<TestEntity> baseQuery = box.query().build();
+        // Integer.
+        assertEquals(0, baseQuery.property(simpleByte).avg(), 0.0001);
+        assertEquals(0, baseQuery.property(simpleShort).avg(), 0.0001);
+        assertEquals(0, baseQuery.property(simpleInt).avg(), 0.0001);
+        assertEquals(0, baseQuery.property(simpleLong).avg(), 0.0001);
+        // Float.
+        assertEquals(0, baseQuery.property(simpleFloat).avg(), 0.0001);
+        assertEquals(0, baseQuery.property(simpleDouble).avg(), 0.0001);
+    }
+
+    @Test
+    public void min_noData() {
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(Long.MAX_VALUE, baseQuery.property(simpleByte).min());
+        assertEquals(Long.MAX_VALUE, baseQuery.property(simpleShort).min());
+        assertEquals(Long.MAX_VALUE, baseQuery.property(simpleInt).min());
+        assertEquals(Long.MAX_VALUE, baseQuery.property(simpleLong).min());
+    }
+
+    @Test
+    public void minDouble_noData() {
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(Double.NaN, baseQuery.property(simpleFloat).minDouble(), 0.0001);
+        assertEquals(Double.NaN, baseQuery.property(simpleDouble).minDouble(), 0.0001);
+    }
+
+    @Test
+    public void max_noData() {
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(Long.MIN_VALUE, baseQuery.property(simpleByte).max());
+        assertEquals(Long.MIN_VALUE, baseQuery.property(simpleShort).max());
+        assertEquals(Long.MIN_VALUE, baseQuery.property(simpleInt).max());
+        assertEquals(Long.MIN_VALUE, baseQuery.property(simpleLong).max());
+    }
+
+    @Test
+    public void maxDouble_noData() {
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(Double.NaN, baseQuery.property(simpleFloat).maxDouble(), 0.0001);
+        assertEquals(Double.NaN, baseQuery.property(simpleDouble).maxDouble(), 0.0001);
+    }
+
+    @Test
+    public void sum_noData() {
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(0, baseQuery.property(simpleByte).sum());
+        assertEquals(0, baseQuery.property(simpleShort).sum());
+        assertEquals(0, baseQuery.property(simpleInt).sum());
+        assertEquals(0, baseQuery.property(simpleLong).sum());
+    }
+
+    @Test
+    public void sumDouble_noData() {
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(0, baseQuery.property(simpleFloat).sumDouble(), 0.0001);
+        assertEquals(0, baseQuery.property(simpleDouble).sumDouble(), 0.0001);
+    }
+
+    @Test
+    public void avg_positiveOverflow() {
+        putTestEntityFloat(Float.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+        putTestEntityFloat(1, 1);
+
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(Float.NaN, baseQuery.property(simpleFloat).avg(), 0.001);
+        assertEquals(Double.NaN, baseQuery.property(simpleDouble).avg(), 0.001);
+    }
+
+    @Test
+    public void avg_negativeOverflow() {
+        putTestEntityFloat(Float.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
+        putTestEntityFloat(-1, -1);
+
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(Float.NaN, baseQuery.property(simpleFloat).avg(), 0.001);
+        assertEquals(Double.NaN, baseQuery.property(simpleDouble).avg(), 0.001);
+    }
+
+    @Test
+    public void avg_NaN() {
+        putTestEntityFloat(Float.NaN, Double.NaN);
+        putTestEntityFloat(1, 1);
+
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(Float.NaN, baseQuery.property(simpleFloat).avg(), 0.001);
+        assertEquals(Double.NaN, baseQuery.property(simpleDouble).avg(), 0.001);
+    }
+
+    @Test
+    public void sum_byteShortIntOverflow() {
+        putTestEntityInteger(Byte.MAX_VALUE, Short.MAX_VALUE, Integer.MAX_VALUE, 0);
+        putTestEntityInteger((byte) 1, (short) 1, 1, 0);
+
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(Byte.MAX_VALUE + 1, baseQuery.property(simpleByte).sum());
+        assertEquals(Short.MAX_VALUE + 1, baseQuery.property(simpleShort).sum());
+        assertEquals(Integer.MAX_VALUE + 1L, baseQuery.property(simpleInt).sum());
+    }
+
+    @Test
+    public void sum_longOverflow_exception() {
+        exceptionRule.expect(DbException.class);
+        exceptionRule.expectMessage("Numeric overflow");
+
+        putTestEntityInteger((byte) 0, (short) 0, 0, Long.MAX_VALUE);
+        putTestEntityInteger((byte) 0, (short) 0, 0, 1);
+
+        assertEquals(Long.MAX_VALUE, box.query().build().property(simpleLong).sum());
+    }
+
+    @Test
+    public void sumDouble_positiveOverflow_exception() {
+        exceptionRule.expect(DbException.class);
+        exceptionRule.expectMessage("Numeric overflow");
+
+        putTestEntityFloat(0, Double.POSITIVE_INFINITY);
+        putTestEntityFloat(0, 1);
+
+        box.query().build().property(simpleDouble).sumDouble();
+    }
+
+    @Test
+    public void sumDouble_negativeOverflow_exception() {
+        exceptionRule.expect(DbException.class);
+        exceptionRule.expectMessage("Numeric overflow (negative)");
+
+        putTestEntityFloat(0, Double.NEGATIVE_INFINITY);
+        putTestEntityFloat(0, -1);
+
+        box.query().build().property(simpleDouble).sumDouble();
+    }
+
+    @Test
+    public void sumDouble_NaN() {
+        putTestEntityFloat(Float.NaN, Double.NaN);
+        putTestEntityFloat(1, 1);
+
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(Float.NaN, baseQuery.property(simpleFloat).sumDouble(), 0.001);
+        assertEquals(Double.NaN, baseQuery.property(simpleDouble).sumDouble(), 0.001);
     }
 
     @Test
