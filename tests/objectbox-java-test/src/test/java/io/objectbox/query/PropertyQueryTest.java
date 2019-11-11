@@ -683,16 +683,48 @@ public class PropertyQueryTest extends AbstractQueryTest {
     @Test
     public void testAggregates() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().less(simpleInt, 2002).build();
+        Query<TestEntity> query = box.query().less(simpleInt, 2002).build(); // 2 results.
+        PropertyQuery booleanQuery = query.property(simpleBoolean);
+        PropertyQuery byteQuery = query.property(simpleByte);
+        PropertyQuery shortQuery = query.property(simpleShort);
         PropertyQuery intQuery = query.property(simpleInt);
+        PropertyQuery longQuery = query.property(simpleLong);
         PropertyQuery floatQuery = query.property(simpleFloat);
+        PropertyQuery doubleQuery = query.property(simpleDouble);
+        // avg
+        assertEquals(-37.5, byteQuery.avg(), 0.0001);
+        assertEquals(2100.5, shortQuery.avg(), 0.0001);
         assertEquals(2000.5, intQuery.avg(), 0.0001);
-        assertEquals(2000, intQuery.min(), 0.0001);
+        assertEquals(3000.5, longQuery.avg(), 0.0001);
+        assertEquals(400.05, floatQuery.avg(), 0.0001);
+        assertEquals(2020.005, doubleQuery.avg(), 0.0001);
+        // min
+        assertEquals(-38, byteQuery.min());
+        assertEquals(2100, shortQuery.min());
+        assertEquals(2000, intQuery.min());
+        assertEquals(3000, longQuery.min());
         assertEquals(400, floatQuery.minDouble(), 0.001);
-        assertEquals(2001, intQuery.max(), 0.0001);
+        assertEquals(2020, doubleQuery.minDouble(), 0.001);
+        // max
+        assertEquals(-37, byteQuery.max());
+        assertEquals(2101, shortQuery.max());
+        assertEquals(2001, intQuery.max());
+        assertEquals(3001, longQuery.max());
         assertEquals(400.1, floatQuery.maxDouble(), 0.001);
-        assertEquals(4001, intQuery.sum(), 0.0001);
+        assertEquals(2020.01, doubleQuery.maxDouble(), 0.001);
+        // sum
+        assertEquals(1, booleanQuery.sum());
+        assertEquals(1, booleanQuery.sumDouble(), 0.001);
+        assertEquals(-75, byteQuery.sum());
+        assertEquals(-75, byteQuery.sumDouble(), 0.001);
+        assertEquals(4201, shortQuery.sum());
+        assertEquals(4201, shortQuery.sumDouble(), 0.001);
+        assertEquals(4001, intQuery.sum());
+        assertEquals(4001, intQuery.sumDouble(), 0.001);
+        assertEquals(6001, longQuery.sum());
+        assertEquals(6001, longQuery.sumDouble(), 0.001);
         assertEquals(800.1, floatQuery.sumDouble(), 0.001);
+        assertEquals(4040.01, doubleQuery.sumDouble(), 0.001);
     }
 
     @Test
