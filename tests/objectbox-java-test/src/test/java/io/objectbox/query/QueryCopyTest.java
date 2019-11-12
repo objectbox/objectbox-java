@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
 
@@ -78,5 +81,36 @@ public class QueryCopyTest extends AbstractQueryTest {
     private void assertTestEntityEquals(TestEntity expected, TestEntity actual) {
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getSimpleString(), actual.getSimpleString());
+    }
+
+    @Test
+    public void queryThreadLocal() throws InterruptedException {
+        Query<TestEntity> queryOriginal = box.query().build();
+        QueryThreadLocal<TestEntity> threadLocal = new QueryThreadLocal<>(queryOriginal);
+
+        AtomicReference<Query<TestEntity>> queryThreadAtomic = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        new Thread(() -> {
+            queryThreadAtomic.set(threadLocal.get());
+            latch.countDown();
+        }).start();
+
+        assertTrue(latch.await(1, TimeUnit.SECONDS));
+
+        Query<TestEntity> queryThread = queryThreadAtomic.get();
+        Query<TestEntity> queryMain = threadLocal.get();
+
+        // Assert that initialValue returns something.
+        assertNotNull(queryThread);
+        assertNotNull(queryMain);
+
+        // Assert that initialValue returns clones.
+        assertNotEquals(queryThread.handle, queryOriginal.handle);
+        assertNotEquals(queryMain.handle, queryOriginal.handle);
+        assertNotEquals(queryThread.handle, queryMain.handle);
+
+        queryOriginal.close();
+        queryMain.close();
+        queryThread.close();
     }
 }
