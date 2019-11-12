@@ -97,10 +97,13 @@ public class QueryBuilder<T> implements Closeable {
     private long lastCondition;
     private Operator combineNextWith = Operator.NONE;
 
+    @Nullable
     private List<EagerRelation> eagerRelations;
 
+    @Nullable
     private QueryFilter<T> filter;
 
+    @Nullable
     private Comparator<T> comparator;
 
     private final boolean isSubQuery;
