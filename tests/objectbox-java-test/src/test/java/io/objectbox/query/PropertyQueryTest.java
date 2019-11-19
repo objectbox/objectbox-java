@@ -693,6 +693,7 @@ public class PropertyQueryTest extends AbstractQueryTest {
         PropertyQuery floatQuery = query.property(simpleFloat);
         PropertyQuery doubleQuery = query.property(simpleDouble);
         // avg
+        assertEquals(0.5, booleanQuery.avg(), 0.0001);
         assertEquals(-37.5, byteQuery.avg(), 0.0001);
         assertEquals(2100.5, shortQuery.avg(), 0.0001);
         assertEquals(2000.5, intQuery.avg(), 0.0001);
