@@ -645,7 +645,7 @@ public class PropertyQueryTest extends AbstractQueryTest {
         putTestEntityInteger((byte) 0, (short) 0, 0, Long.MAX_VALUE);
         putTestEntityInteger((byte) 0, (short) 0, 0, 1);
 
-        assertEquals(Long.MAX_VALUE, box.query().build().property(simpleLong).sum());
+        box.query().build().property(simpleLong).sum();
     }
 
     @Test
