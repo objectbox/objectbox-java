@@ -465,8 +465,7 @@ public class PropertyQueryTest extends AbstractQueryTest {
     @Test
     public void avg_notSupported() {
         Query<TestEntity> query = box.query().build();
-        String exceptionMessage = "Property does not allow avg";
-        assertUnsupported(() -> query.property(simpleBoolean).avg(), exceptionMessage);
+        String exceptionMessage = "Cannot calculate sum. This function is for integer types only. This operation is not supported for Property ";
         assertUnsupported(() -> query.property(simpleByteArray).avg(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleString).avg(), exceptionMessage);
     }
@@ -474,19 +473,20 @@ public class PropertyQueryTest extends AbstractQueryTest {
     @Test
     public void min_notSupported() {
         Query<TestEntity> query = box.query().build();
-        String exceptionMessage = "Property does not allow max"; // Note: currently JNI returns wrong error message.
+        String exceptionMessage = "This operation is not supported for Property ";
         assertUnsupported(() -> query.property(simpleBoolean).min(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleByteArray).min(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleString).min(), exceptionMessage);
 
-        assertUnsupported(() -> query.property(simpleFloat).min(), exceptionMessage);
-        assertUnsupported(() -> query.property(simpleDouble).min(), exceptionMessage);
+        String exceptionMessage2 = "Use double based min (e.g. `minDouble()`) instead. This operation is not supported for Property ";
+        assertUnsupported(() -> query.property(simpleFloat).min(), exceptionMessage2);
+        assertUnsupported(() -> query.property(simpleDouble).min(), exceptionMessage2);
     }
 
     @Test
     public void minDouble_notSupported() {
         Query<TestEntity> query = box.query().build();
-        String exceptionMessage = "Property does not allow min (double)";
+        String exceptionMessage = "Not a floating point type. This operation is not supported for Property ";
         assertUnsupported(() -> query.property(simpleBoolean).minDouble(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleByteArray).minDouble(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleString).minDouble(), exceptionMessage);
@@ -500,19 +500,20 @@ public class PropertyQueryTest extends AbstractQueryTest {
     @Test
     public void max_notSupported() {
         Query<TestEntity> query = box.query().build();
-        String exceptionMessage = "Property does not allow max";
+        String exceptionMessage = "This operation is not supported for Property ";
         assertUnsupported(() -> query.property(simpleBoolean).max(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleByteArray).max(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleString).max(), exceptionMessage);
 
-        assertUnsupported(() -> query.property(simpleFloat).max(), exceptionMessage);
-        assertUnsupported(() -> query.property(simpleDouble).max(), exceptionMessage);
+        String exceptionMessage2 = "Use double based max (e.g. `maxDouble()`) instead. This operation is not supported for Property ";
+        assertUnsupported(() -> query.property(simpleFloat).max(), exceptionMessage2);
+        assertUnsupported(() -> query.property(simpleDouble).max(), exceptionMessage2);
     }
 
     @Test
     public void maxDouble_notSupported() {
         Query<TestEntity> query = box.query().build();
-        String exceptionMessage = "Property does not allow max (double)";
+        String exceptionMessage = "Not a floating point type. This operation is not supported for Property ";
         assertUnsupported(() -> query.property(simpleBoolean).maxDouble(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleByteArray).maxDouble(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleString).maxDouble(), exceptionMessage);
@@ -526,11 +527,11 @@ public class PropertyQueryTest extends AbstractQueryTest {
     @Test
     public void sum_notSupported() {
         Query<TestEntity> query = box.query().build();
-        String exceptionMessage = "Property does not allow sum";
+        String exceptionMessage = "Cannot calculate sum. This function is for integer types only. This operation is not supported for Property ";
         assertUnsupported(() -> query.property(simpleByteArray).sum(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleString).sum(), exceptionMessage);
 
-        String exceptionMessage2 = "Please use double based sum (e.g. `sumDouble()`) instead for property";
+        String exceptionMessage2 = "Please use the double based sum instead. This operation is not supported for Property ";
         assertUnsupported(() -> query.property(simpleFloat).sum(), exceptionMessage2);
         assertUnsupported(() -> query.property(simpleDouble).sum(), exceptionMessage2);
     }
