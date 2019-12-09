@@ -382,7 +382,13 @@ public class PropertyQuery {
     }
 
 
-    /** Sums up all values for the given property over all Objects matching the query. */
+    /**
+     * Sums up all values for the given property over all Objects matching the query.
+     * <p>
+     * Note: throws {@link io.objectbox.exception.NumericOverflowException NumericOverflowException} if
+     * the sum exceeds the numbers {@link Long} can represent. This is different from Java arithmetic
+     * where it would "wrap around" (e.g. max. value + 1 = min. value).
+     */
     public long sum() {
         return (Long) query.callInReadTx(new Callable<Long>() {
             @Override

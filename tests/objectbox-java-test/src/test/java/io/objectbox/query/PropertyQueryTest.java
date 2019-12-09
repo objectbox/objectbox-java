@@ -19,6 +19,7 @@ package io.objectbox.query;
 import io.objectbox.TestEntity;
 import io.objectbox.TestEntityCursor;
 import io.objectbox.exception.DbException;
+import io.objectbox.exception.NumericOverflowException;
 import io.objectbox.query.QueryBuilder.StringOrder;
 import org.junit.Rule;
 import org.junit.Test;
@@ -640,7 +641,7 @@ public class PropertyQueryTest extends AbstractQueryTest {
 
     @Test
     public void sum_longOverflow_exception() {
-        exceptionRule.expect(DbException.class);
+        exceptionRule.expect(NumericOverflowException.class);
         exceptionRule.expectMessage("Numeric overflow");
 
         putTestEntityInteger((byte) 0, (short) 0, 0, Long.MAX_VALUE);
