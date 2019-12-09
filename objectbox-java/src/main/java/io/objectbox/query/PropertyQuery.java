@@ -94,6 +94,8 @@ public class PropertyQuery {
 
     native double nativeAvg(long handle, long cursorHandle, int propertyId);
 
+    native long nativeAvgLong(long handle, long cursorHandle, int propertyId);
+
     native long nativeCount(long handle, long cursorHandle, int propertyId, boolean distinct);
 
     /** Clears all values (e.g. distinct and null value). */
@@ -448,12 +450,30 @@ public class PropertyQuery {
         });
     }
 
-    /** Calculates the average of all values for the given property over all Objects matching the query. */
+    /**
+     * Calculates the average of all values for the given number property over all Objects matching the query.
+     * <p>
+     * For integer properties you can also use {@link #avgLong()}.
+     */
     public double avg() {
         return (Double) query.callInReadTx(new Callable<Double>() {
             @Override
             public Double call() {
                 return nativeAvg(queryHandle, query.cursorHandle(), propertyId);
+            }
+        });
+    }
+
+    /**
+     * Calculates the average of all values for the given integer property over all Objects matching the query.
+     * <p>
+     * For floating-point properties use {@link #avg()}.
+     */
+    public long avgLong() {
+        return (Long) query.callInReadTx(new Callable<Long>() {
+            @Override
+            public Long call() {
+                return nativeAvgLong(queryHandle, query.cursorHandle(), propertyId);
             }
         });
     }
