@@ -452,8 +452,8 @@ public class PropertyQueryTest extends AbstractQueryTest {
             fail("Should have thrown IllegalArgumentException: " + exceptionMessage);
         } catch (Exception e) {
             assertTrue(
-                    "Expected IllegalArgumentException, but was " + e.getClass().getSimpleName() + ".",
-                    e instanceof IllegalArgumentException
+                    "Expected IllegalStateException, but was " + e.getClass().getSimpleName() + ".",
+                    e instanceof IllegalStateException
             );
             assertTrue(
                     "Expected exception message '" + exceptionMessage + "', but was '" + e.getMessage() + "'.",
