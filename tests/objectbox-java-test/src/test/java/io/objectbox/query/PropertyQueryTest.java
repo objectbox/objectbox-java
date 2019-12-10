@@ -603,8 +603,8 @@ public class PropertyQueryTest extends AbstractQueryTest {
         putTestEntityFloat(1, 1);
 
         Query<TestEntity> baseQuery = box.query().build();
-        assertEquals(Float.NaN, baseQuery.property(simpleFloat).avg(), 0.001);
-        assertEquals(Double.NaN, baseQuery.property(simpleDouble).avg(), 0.001);
+        assertEquals(Float.POSITIVE_INFINITY, baseQuery.property(simpleFloat).avg(), 0.001);
+        assertEquals(Double.POSITIVE_INFINITY, baseQuery.property(simpleDouble).avg(), 0.001);
     }
 
     @Test
@@ -613,8 +613,8 @@ public class PropertyQueryTest extends AbstractQueryTest {
         putTestEntityFloat(-1, -1);
 
         Query<TestEntity> baseQuery = box.query().build();
-        assertEquals(Float.NaN, baseQuery.property(simpleFloat).avg(), 0.001);
-        assertEquals(Double.NaN, baseQuery.property(simpleDouble).avg(), 0.001);
+        assertEquals(Float.NEGATIVE_INFINITY, baseQuery.property(simpleFloat).avg(), 0.001);
+        assertEquals(Double.NEGATIVE_INFINITY, baseQuery.property(simpleDouble).avg(), 0.001);
     }
 
     @Test
