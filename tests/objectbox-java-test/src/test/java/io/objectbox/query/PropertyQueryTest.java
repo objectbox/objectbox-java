@@ -541,13 +541,13 @@ public class PropertyQueryTest extends AbstractQueryTest {
     public void avg_noData() {
         Query<TestEntity> baseQuery = box.query().build();
         // Integer.
-        assertEquals(0, baseQuery.property(simpleByte).avg(), 0.0001);
-        assertEquals(0, baseQuery.property(simpleShort).avg(), 0.0001);
-        assertEquals(0, baseQuery.property(simpleInt).avg(), 0.0001);
-        assertEquals(0, baseQuery.property(simpleLong).avg(), 0.0001);
+        assertEquals(Double.NaN, baseQuery.property(simpleByte).avg(), 0.0);
+        assertEquals(Double.NaN, baseQuery.property(simpleShort).avg(), 0.0);
+        assertEquals(Double.NaN, baseQuery.property(simpleInt).avg(), 0.0);
+        assertEquals(Double.NaN, baseQuery.property(simpleLong).avg(), 0.0);
         // Float.
-        assertEquals(0, baseQuery.property(simpleFloat).avg(), 0.0001);
-        assertEquals(0, baseQuery.property(simpleDouble).avg(), 0.0001);
+        assertEquals(Double.NaN, baseQuery.property(simpleFloat).avg(), 0.0);
+        assertEquals(Double.NaN, baseQuery.property(simpleDouble).avg(), 0.0);
     }
 
     @Test
