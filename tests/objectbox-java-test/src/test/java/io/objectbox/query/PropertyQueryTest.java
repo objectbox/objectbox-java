@@ -651,24 +651,22 @@ public class PropertyQueryTest extends AbstractQueryTest {
 
     @Test
     public void sumDouble_positiveOverflow_exception() {
-        exceptionRule.expect(DbException.class);
-        exceptionRule.expectMessage("Numeric overflow");
+        putTestEntityFloat(Float.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+        putTestEntityFloat(1, 1);
 
-        putTestEntityFloat(0, Double.POSITIVE_INFINITY);
-        putTestEntityFloat(0, 1);
-
-        box.query().build().property(simpleDouble).sumDouble();
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(Float.POSITIVE_INFINITY, baseQuery.property(simpleFloat).avg(), 0.001);
+        assertEquals(Double.POSITIVE_INFINITY, baseQuery.property(simpleDouble).avg(), 0.001);
     }
 
     @Test
     public void sumDouble_negativeOverflow_exception() {
-        exceptionRule.expect(DbException.class);
-        exceptionRule.expectMessage("Numeric overflow (negative)");
+        putTestEntityFloat(Float.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
+        putTestEntityFloat(-1, -1);
 
-        putTestEntityFloat(0, Double.NEGATIVE_INFINITY);
-        putTestEntityFloat(0, -1);
-
-        box.query().build().property(simpleDouble).sumDouble();
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(Float.NEGATIVE_INFINITY, baseQuery.property(simpleFloat).avg(), 0.001);
+        assertEquals(Double.NEGATIVE_INFINITY, baseQuery.property(simpleDouble).avg(), 0.001);
     }
 
     @Test
