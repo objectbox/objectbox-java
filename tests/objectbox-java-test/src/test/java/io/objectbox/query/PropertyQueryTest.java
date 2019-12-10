@@ -45,6 +45,14 @@ public class PropertyQueryTest extends AbstractQueryTest {
         box.put(entity);
     }
 
+    private void putTestEntityUnsignedInteger(short vShort, int vInt, long vLong) {
+        TestEntity entity = new TestEntity();
+        entity.setSimpleShortU(vShort);
+        entity.setSimpleIntU(vInt);
+        entity.setSimpleLongU(vLong);
+        box.put(entity);
+    }
+
     private void putTestEntityFloat(float vFloat, double vDouble) {
         TestEntity entity = new TestEntity();
         entity.setSimpleFloat(vFloat);
@@ -496,6 +504,9 @@ public class PropertyQueryTest extends AbstractQueryTest {
         assertUnsupported(() -> query.property(simpleShort).minDouble(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleInt).minDouble(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleLong).minDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleShortU).minDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleIntU).minDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleLongU).minDouble(), exceptionMessage);
     }
 
     @Test
@@ -523,6 +534,9 @@ public class PropertyQueryTest extends AbstractQueryTest {
         assertUnsupported(() -> query.property(simpleShort).maxDouble(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleInt).maxDouble(), exceptionMessage);
         assertUnsupported(() -> query.property(simpleLong).maxDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleShortU).maxDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleIntU).maxDouble(), exceptionMessage);
+        assertUnsupported(() -> query.property(simpleLongU).maxDouble(), exceptionMessage);
     }
 
     @Test
@@ -545,6 +559,10 @@ public class PropertyQueryTest extends AbstractQueryTest {
         assertEquals(Double.NaN, baseQuery.property(simpleShort).avg(), 0.0);
         assertEquals(Double.NaN, baseQuery.property(simpleInt).avg(), 0.0);
         assertEquals(Double.NaN, baseQuery.property(simpleLong).avg(), 0.0);
+        // Integer treated as unsigned.
+        assertEquals(Double.NaN, baseQuery.property(simpleShortU).avg(), 0.0);
+        assertEquals(Double.NaN, baseQuery.property(simpleIntU).avg(), 0.0);
+        assertEquals(Double.NaN, baseQuery.property(simpleLongU).avg(), 0.0);
         // Float.
         assertEquals(Double.NaN, baseQuery.property(simpleFloat).avg(), 0.0);
         assertEquals(Double.NaN, baseQuery.property(simpleDouble).avg(), 0.0);
@@ -557,6 +575,10 @@ public class PropertyQueryTest extends AbstractQueryTest {
         assertEquals(0, baseQuery.property(simpleShort).min());
         assertEquals(0, baseQuery.property(simpleInt).min());
         assertEquals(0, baseQuery.property(simpleLong).min());
+        // Integer treated as unsigned.
+        assertEquals(0, baseQuery.property(simpleShortU).min());
+        assertEquals(0, baseQuery.property(simpleIntU).min());
+        assertEquals(0, baseQuery.property(simpleLongU).min());
     }
 
     @Test
@@ -573,6 +595,10 @@ public class PropertyQueryTest extends AbstractQueryTest {
         assertEquals(0, baseQuery.property(simpleShort).max());
         assertEquals(0, baseQuery.property(simpleInt).max());
         assertEquals(0, baseQuery.property(simpleLong).max());
+        // Integer treated as unsigned.
+        assertEquals(0, baseQuery.property(simpleShortU).max());
+        assertEquals(0, baseQuery.property(simpleIntU).max());
+        assertEquals(0, baseQuery.property(simpleLongU).max());
     }
 
     @Test
@@ -589,6 +615,10 @@ public class PropertyQueryTest extends AbstractQueryTest {
         assertEquals(0, baseQuery.property(simpleShort).sum());
         assertEquals(0, baseQuery.property(simpleInt).sum());
         assertEquals(0, baseQuery.property(simpleLong).sum());
+        // Integer treated as unsigned.
+        assertEquals(0, baseQuery.property(simpleShortU).sum());
+        assertEquals(0, baseQuery.property(simpleIntU).sum());
+        assertEquals(0, baseQuery.property(simpleLongU).sum());
     }
 
     @Test
@@ -640,6 +670,16 @@ public class PropertyQueryTest extends AbstractQueryTest {
     }
 
     @Test
+    public void sum_unsignedShortIntOverflow() {
+        putTestEntityUnsignedInteger((short) -1, -1, 0);
+        putTestEntityUnsignedInteger((short) 1, 1, 0);
+
+        Query<TestEntity> baseQuery = box.query().build();
+        assertEquals(0x1_0000, baseQuery.property(simpleShortU).sum());
+        assertEquals(0x1_0000_0000L, baseQuery.property(simpleIntU).sum());
+    }
+
+    @Test
     public void sum_longOverflow_exception() {
         exceptionRule.expect(NumericOverflowException.class);
         exceptionRule.expectMessage("Numeric overflow");
@@ -648,6 +688,28 @@ public class PropertyQueryTest extends AbstractQueryTest {
         putTestEntityInteger((byte) 0, (short) 0, 0, 1);
 
         box.query().build().property(simpleLong).sum();
+    }
+
+    @Test
+    public void sum_longUnderflow_exception() {
+        exceptionRule.expect(NumericOverflowException.class);
+        exceptionRule.expectMessage("Numeric overflow");
+
+        putTestEntityInteger((byte) 0, (short) 0, 0, Long.MIN_VALUE);
+        putTestEntityInteger((byte) 0, (short) 0, 0, -1);
+
+        box.query().build().property(simpleLong).sum();
+    }
+
+    @Test
+    public void sum_unsignedLongOverflow_exception() {
+        exceptionRule.expect(NumericOverflowException.class);
+        exceptionRule.expectMessage("Numeric overflow");
+
+        putTestEntityUnsignedInteger((short) 0, 0, -1);
+        putTestEntityUnsignedInteger((short) 0, 0, 1);
+
+        box.query().build().property(simpleLongU).sum();
     }
 
     @Test
@@ -691,6 +753,9 @@ public class PropertyQueryTest extends AbstractQueryTest {
         PropertyQuery longQuery = query.property(simpleLong);
         PropertyQuery floatQuery = query.property(simpleFloat);
         PropertyQuery doubleQuery = query.property(simpleDouble);
+        PropertyQuery shortUQuery = query.property(simpleShortU);
+        PropertyQuery intUQuery = query.property(simpleIntU);
+        PropertyQuery longUQuery = query.property(simpleLongU);
         // avg
         assertEquals(0.5, booleanQuery.avg(), 0.0001);
         assertEquals(-37.5, byteQuery.avg(), 0.0001);
@@ -699,6 +764,9 @@ public class PropertyQueryTest extends AbstractQueryTest {
         assertEquals(3000.5, longQuery.avg(), 0.0001);
         assertEquals(400.05, floatQuery.avg(), 0.0001);
         assertEquals(2020.005, doubleQuery.avg(), 0.0001);
+        assertEquals(2100.5, shortUQuery.avg(), 0.0001);
+        assertEquals(2000.5, intUQuery.avg(), 0.0001);
+        assertEquals(3000.5, longUQuery.avg(), 0.0001);
         // min
         assertEquals(-38, byteQuery.min());
         assertEquals(2100, shortQuery.min());
@@ -706,6 +774,9 @@ public class PropertyQueryTest extends AbstractQueryTest {
         assertEquals(3000, longQuery.min());
         assertEquals(400, floatQuery.minDouble(), 0.001);
         assertEquals(2020, doubleQuery.minDouble(), 0.001);
+        assertEquals(2100, shortUQuery.min());
+        assertEquals(2000, intUQuery.min());
+        assertEquals(3000, longUQuery.min());
         // max
         assertEquals(-37, byteQuery.max());
         assertEquals(2101, shortQuery.max());
@@ -713,6 +784,9 @@ public class PropertyQueryTest extends AbstractQueryTest {
         assertEquals(3001, longQuery.max());
         assertEquals(400.1, floatQuery.maxDouble(), 0.001);
         assertEquals(2020.01, doubleQuery.maxDouble(), 0.001);
+        assertEquals(2101, shortUQuery.max());
+        assertEquals(2001, intUQuery.max());
+        assertEquals(3001, longUQuery.max());
         // sum
         assertEquals(1, booleanQuery.sum());
         assertEquals(1, booleanQuery.sumDouble(), 0.001);
@@ -726,6 +800,12 @@ public class PropertyQueryTest extends AbstractQueryTest {
         assertEquals(6001, longQuery.sumDouble(), 0.001);
         assertEquals(800.1, floatQuery.sumDouble(), 0.001);
         assertEquals(4040.01, doubleQuery.sumDouble(), 0.001);
+        assertEquals(4201, shortUQuery.sum());
+        assertEquals(4201, shortUQuery.sumDouble(), 0.001);
+        assertEquals(4001, intUQuery.sum());
+        assertEquals(4001, intUQuery.sumDouble(), 0.001);
+        assertEquals(6001, longUQuery.sum());
+        assertEquals(6001, longUQuery.sumDouble(), 0.001);
     }
 
     @Test
