@@ -51,6 +51,9 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
     private final static int __ID_simpleDouble = TestEntity_.simpleDouble.id;
     private final static int __ID_simpleString = TestEntity_.simpleString.id;
     private final static int __ID_simpleByteArray = TestEntity_.simpleByteArray.id;
+    private final static int __ID_simpleShortU = TestEntity_.simpleShortU.id;
+    private final static int __ID_simpleIntU = TestEntity_.simpleIntU.id;
+    private final static int __ID_simpleLongU = TestEntity_.simpleLongU.id;
 
     public TestEntityCursor(io.objectbox.Transaction tx, long cursor, BoxStore boxStore) {
         super(tx, cursor, TestEntity_.__INSTANCE, boxStore);
@@ -73,13 +76,17 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
         byte[] simpleByteArray = entity.getSimpleByteArray();
         int __id9 = simpleByteArray != null ? __ID_simpleByteArray : 0;
 
-        long __assignedId = collect313311(cursor, entity.getId(), PUT_FLAG_FIRST | PUT_FLAG_COMPLETE,
+        collect313311(cursor, 0, PUT_FLAG_FIRST,
                 __id8, simpleString, 0, null,
                 0, null, __id9, simpleByteArray,
-                __ID_simpleLong, entity.getSimpleLong(), INT_NULL_HACK ? 0 : __ID_simpleInt, entity.getSimpleInt(),
-                __ID_simpleShort, entity.getSimpleShort(), __ID_simpleByte, entity.getSimpleByte(),
-                __ID_simpleBoolean, entity.getSimpleBoolean() ? 1 : 0, 0, 0,
+                __ID_simpleLong, entity.getSimpleLong(), __ID_simpleLongU, entity.getSimpleLongU(),
+                INT_NULL_HACK ? 0 : __ID_simpleInt, entity.getSimpleInt(), __ID_simpleIntU, entity.getSimpleIntU(),
+                __ID_simpleShort, entity.getSimpleShort(), __ID_simpleShortU, entity.getSimpleShortU(),
                 __ID_simpleFloat, entity.getSimpleFloat(), __ID_simpleDouble, entity.getSimpleDouble());
+
+        long __assignedId = collect004000(cursor, entity.getId(), PUT_FLAG_COMPLETE,
+                __ID_simpleByte, entity.getSimpleByte(), __ID_simpleBoolean, entity.getSimpleBoolean() ? 1 : 0,
+                0, 0, 0, 0);
 
         entity.setId(__assignedId);
 

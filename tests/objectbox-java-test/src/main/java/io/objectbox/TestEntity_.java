@@ -77,6 +77,15 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
     public final static io.objectbox.Property<TestEntity> simpleByteArray =
             new io.objectbox.Property<>(__INSTANCE, 9, 10, byte[].class, "simpleByteArray");
 
+    public final static io.objectbox.Property<TestEntity> simpleShortU =
+            new io.objectbox.Property<>(__INSTANCE, 10, 11, short.class, "simpleShortU");
+
+    public final static io.objectbox.Property<TestEntity> simpleIntU =
+            new io.objectbox.Property<>(__INSTANCE, 11, 12, int.class, "simpleIntU");
+
+    public final static io.objectbox.Property<TestEntity> simpleLongU =
+            new io.objectbox.Property<>(__INSTANCE, 12, 13, long.class, "simpleLongU");
+
     @SuppressWarnings("unchecked")
     public final static io.objectbox.Property<TestEntity>[] __ALL_PROPERTIES = new io.objectbox.Property[]{
             id,
@@ -88,7 +97,10 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
             simpleFloat,
             simpleDouble,
             simpleString,
-            simpleByteArray
+            simpleByteArray,
+            simpleShortU,
+            simpleIntU,
+            simpleLongU
     };
 
     public final static io.objectbox.Property<TestEntity> __ID_PROPERTY = id;
