@@ -16,8 +16,10 @@
 
 package io.objectbox;
 
+/** In "real" entity would be annotated with @Entity. */
 public class TestEntity {
 
+    /** In "real" entity would be annotated with @Id. */
     private long id;
     private boolean simpleBoolean;
     private byte simpleByte;
