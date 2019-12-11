@@ -600,14 +600,14 @@ public class PropertyQueryTest extends AbstractQueryTest {
     @Test
     public void min_noData() {
         Query<TestEntity> baseQuery = box.query().build();
-        assertEquals(0, baseQuery.property(simpleByte).min());
-        assertEquals(0, baseQuery.property(simpleShort).min());
-        assertEquals(0, baseQuery.property(simpleInt).min());
-        assertEquals(0, baseQuery.property(simpleLong).min());
+        assertEquals(Long.MAX_VALUE, baseQuery.property(simpleByte).min());
+        assertEquals(Long.MAX_VALUE, baseQuery.property(simpleShort).min());
+        assertEquals(Long.MAX_VALUE, baseQuery.property(simpleInt).min());
+        assertEquals(Long.MAX_VALUE, baseQuery.property(simpleLong).min());
         // Integer treated as unsigned.
-        assertEquals(0, baseQuery.property(simpleShortU).min());
-        assertEquals(0, baseQuery.property(simpleIntU).min());
-        assertEquals(0, baseQuery.property(simpleLongU).min());
+        assertEquals(Long.MAX_VALUE, baseQuery.property(simpleShortU).min());
+        assertEquals(Long.MAX_VALUE, baseQuery.property(simpleIntU).min());
+        assertEquals(Long.MAX_VALUE, baseQuery.property(simpleLongU).min());
     }
 
     @Test
@@ -620,14 +620,14 @@ public class PropertyQueryTest extends AbstractQueryTest {
     @Test
     public void max_noData() {
         Query<TestEntity> baseQuery = box.query().build();
-        assertEquals(0, baseQuery.property(simpleByte).max());
-        assertEquals(0, baseQuery.property(simpleShort).max());
-        assertEquals(0, baseQuery.property(simpleInt).max());
-        assertEquals(0, baseQuery.property(simpleLong).max());
+        assertEquals(Long.MIN_VALUE, baseQuery.property(simpleByte).max());
+        assertEquals(Long.MIN_VALUE, baseQuery.property(simpleShort).max());
+        assertEquals(Long.MIN_VALUE, baseQuery.property(simpleInt).max());
+        assertEquals(Long.MIN_VALUE, baseQuery.property(simpleLong).max());
         // Integer treated as unsigned.
-        assertEquals(0, baseQuery.property(simpleShortU).max());
-        assertEquals(0, baseQuery.property(simpleIntU).max());
-        assertEquals(0, baseQuery.property(simpleLongU).max());
+        assertEquals(Long.MIN_VALUE, baseQuery.property(simpleShortU).max());
+        assertEquals(Long.MIN_VALUE, baseQuery.property(simpleIntU).max());
+        assertEquals(Long.MIN_VALUE, baseQuery.property(simpleLongU).max());
     }
 
     @Test
@@ -785,7 +785,7 @@ public class PropertyQueryTest extends AbstractQueryTest {
     }
 
     @Test
-    public void sumDouble_positiveOverflow_exception() {
+    public void sumDouble_positiveInfinity() {
         putTestEntityFloat(Float.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
         putTestEntityFloat(1, 1);
 
@@ -795,7 +795,7 @@ public class PropertyQueryTest extends AbstractQueryTest {
     }
 
     @Test
-    public void sumDouble_negativeOverflow_exception() {
+    public void sumDouble_negativeInfinity() {
         putTestEntityFloat(Float.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
         putTestEntityFloat(-1, -1);
 
