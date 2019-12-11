@@ -197,7 +197,16 @@ public abstract class AbstractObjectBoxTest {
             pb.flags(PropertyFlags.INDEXED).indexId(++lastIndexId, lastIndexUid);
         }
         entityBuilder.property("simpleByteArray", PropertyType.ByteVector).id(TestEntity_.simpleByteArray.id, ++lastUid);
-        int lastId = TestEntity_.simpleByteArray.id;
+
+        // Unsigned integers.
+        entityBuilder.property("simpleShortU", PropertyType.Short).id(TestEntity_.simpleShortU.id, ++lastUid)
+                .flags(PropertyFlags.UNSIGNED);
+        entityBuilder.property("simpleIntU", PropertyType.Int).id(TestEntity_.simpleIntU.id, ++lastUid)
+                .flags(PropertyFlags.UNSIGNED);
+        entityBuilder.property("simpleLongU", PropertyType.Long).id(TestEntity_.simpleLongU.id, ++lastUid)
+                .flags(PropertyFlags.UNSIGNED);
+
+        int lastId = TestEntity_.simpleLongU.id;
         entityBuilder.lastPropertyId(lastId, lastUid);
         addOptionalFlagsToTestEntity(entityBuilder);
         entityBuilder.entityDone();
@@ -232,6 +241,9 @@ public abstract class AbstractObjectBoxTest {
         entity.setSimpleFloat(200 + nr / 10f);
         entity.setSimpleDouble(2000 + nr / 100f);
         entity.setSimpleByteArray(new byte[]{1, 2, (byte) nr});
+        entity.setSimpleShortU((short) (100 + nr));
+        entity.setSimpleIntU(nr);
+        entity.setSimpleLongU(1000 + nr);
         return entity;
     }
 
