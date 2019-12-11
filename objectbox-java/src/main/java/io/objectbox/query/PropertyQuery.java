@@ -181,7 +181,7 @@ public class PropertyQuery {
      * <p>
      * Note: results are not guaranteed to be in any particular order.
      * <p>
-     * See also: {@link #distinct}, {@link #distinct(QueryBuilder.StringOrder)}
+     * See also: {@link #distinct()}, {@link #distinct(QueryBuilder.StringOrder)}
      *
      * @return Found strings
      */
@@ -204,7 +204,7 @@ public class PropertyQuery {
      * <p>
      * Note: results are not guaranteed to be in any particular order.
      * <p>
-     * See also: {@link #distinct}
+     * See also: {@link #distinct()}
      *
      * @return Found longs
      */
@@ -225,7 +225,7 @@ public class PropertyQuery {
      * <p>
      * Note: results are not guaranteed to be in any particular order.
      * <p>
-     * See also: {@link #distinct}
+     * See also: {@link #distinct()}
      */
     public int[] findInts() {
         return (int[]) query.callInReadTx(new Callable<int[]>() {
@@ -244,7 +244,7 @@ public class PropertyQuery {
      * <p>
      * Note: results are not guaranteed to be in any particular order.
      * <p>
-     * See also: {@link #distinct}
+     * See also: {@link #distinct()}
      */
     public short[] findShorts() {
         return (short[]) query.callInReadTx(new Callable<short[]>() {
@@ -263,7 +263,7 @@ public class PropertyQuery {
      * <p>
      * Note: results are not guaranteed to be in any particular order.
      * <p>
-     * See also: {@link #distinct}
+     * See also: {@link #distinct()}
      */
     public char[] findChars() {
         return (char[]) query.callInReadTx(new Callable<char[]>() {
@@ -299,7 +299,7 @@ public class PropertyQuery {
      * <p>
      * Note: results are not guaranteed to be in any particular order.
      * <p>
-     * See also: {@link #distinct}
+     * See also: {@link #distinct()}
      */
     public float[] findFloats() {
         return (float[]) query.callInReadTx(new Callable<float[]>() {
@@ -318,7 +318,7 @@ public class PropertyQuery {
      * <p>
      * Note: results are not guaranteed to be in any particular order.
      * <p>
-     * See also: {@link #distinct}
+     * See also: {@link #distinct()}
      */
     public double[] findDoubles() {
         return (double[]) query.callInReadTx(new Callable<double[]>() {
@@ -383,13 +383,16 @@ public class PropertyQuery {
         return (Double) findNumber();
     }
 
-
     /**
      * Sums up all values for the given property over all Objects matching the query.
-     * <p>
-     * Note: throws {@link io.objectbox.exception.NumericOverflowException NumericOverflowException} if
-     * the sum exceeds the numbers {@link Long} can represent. This is different from Java arithmetic
-     * where it would "wrap around" (e.g. max. value + 1 = min. value).
+     *
+     * Note: this method is not recommended for properties of type long unless you know the contents of the DB not to
+     *       overflow. Use {@link #sumDouble()} instead if you cannot guarantee the sum to be in the long value range.
+     * 
+     * @return 0 in case no elements matched the query
+     * @throws io.objectbox.exception.NumericOverflowException if the sum exceeds the numbers {@link Long} can
+     * represent.
+     * This is different from Java arithmetic where it would "wrap around" (e.g. max. value + 1 = min. value).
      */
     public long sum() {
         return (Long) query.callInReadTx(new Callable<Long>() {
@@ -400,7 +403,13 @@ public class PropertyQuery {
         });
     }
 
-    /** Sums up all values for the given property over all Objects matching the query. */
+    /** 
+     * Sums up all values for the given property over all Objects matching the query.
+     * 
+     * Note: for integer types int and smaller, {@link #sum()} is usually preferred for sums.
+     *       
+     * @return 0 in case no elements matched the query
+     */
     public double sumDouble() {
         return (Double) query.callInReadTx(new Callable<Double>() {
             @Override
@@ -410,7 +419,11 @@ public class PropertyQuery {
         });
     }
 
-    /** Finds the maximum value for the given property over all Objects matching the query. */
+    /**
+     * Finds the maximum value for the given property over all Objects matching the query.
+     *
+     * @return Long.MIN_VALUE in case no elements matched the query
+     */
     public long max() {
         return (Long) query.callInReadTx(new Callable<Long>() {
             @Override
@@ -420,7 +433,11 @@ public class PropertyQuery {
         });
     }
 
-    /** Finds the maximum value for the given property over all Objects matching the query. */
+    /** 
+     * Finds the maximum value for the given property over all Objects matching the query.
+     * 
+     * @return NaN in case no elements matched the query
+     */
     public double maxDouble() {
         return (Double) query.callInReadTx(new Callable<Double>() {
             @Override
@@ -430,7 +447,11 @@ public class PropertyQuery {
         });
     }
 
-    /** Finds the minimum value for the given property over all Objects matching the query. */
+    /**
+     * Finds the minimum value for the given property over all Objects matching the query.
+     *
+     * @return Long.MAX_VALUE in case no elements matched the query
+     */
     public long min() {
         return (Long) query.callInReadTx(new Callable<Long>() {
             @Override
@@ -440,7 +461,11 @@ public class PropertyQuery {
         });
     }
 
-    /** Finds the minimum value for the given property over all Objects matching the query. */
+    /**
+     * Finds the minimum value for the given property over all objects matching the query.
+     *
+     * @return NaN in case no elements matched the query
+     */
     public double minDouble() {
         return (Double) query.callInReadTx(new Callable<Double>() {
             @Override
@@ -454,6 +479,8 @@ public class PropertyQuery {
      * Calculates the average of all values for the given number property over all Objects matching the query.
      * <p>
      * For integer properties you can also use {@link #avgLong()}.
+     *
+     * @return NaN in case no elements matched the query
      */
     public double avg() {
         return (Double) query.callInReadTx(new Callable<Double>() {
@@ -468,6 +495,8 @@ public class PropertyQuery {
      * Calculates the average of all values for the given integer property over all Objects matching the query.
      * <p>
      * For floating-point properties use {@link #avg()}.
+     *
+     * @return 0 in case no elements matched the query
      */
     public long avgLong() {
         return (Long) query.callInReadTx(new Callable<Long>() {
@@ -478,6 +507,11 @@ public class PropertyQuery {
         });
     }
 
+    /**
+     * The count of non-null values.
+     * <p>
+     * See also: {@link #distinct()}
+     */
     public long count() {
         return (Long) query.callInReadTx(new Callable<Long>() {
             @Override
