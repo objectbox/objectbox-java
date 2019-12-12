@@ -575,16 +575,21 @@ public class BoxStore implements Closeable {
         return deleteAllFiles(dbDir);
     }
 
+    /**
+     * Removes all objects from all boxes, e.g. deletes all database content.
+     *
+     * Internally reads the current schema, drops all database content,
+     * then restores the schema in a single transaction.
+     */
+    public void removeAllObjects() {
+        nativeDropAllData(handle);
+    }
+
     @Internal
     public void unregisterTransaction(Transaction transaction) {
         synchronized (transactions) {
             transactions.remove(transaction);
         }
-    }
-
-    // TODO not implemented on native side; rename to "nukeData" (?)
-    void dropAllData() {
-        nativeDropAllData(handle);
     }
 
     void txCommitted(Transaction tx, @Nullable int[] entityTypeIdsAffected) {
