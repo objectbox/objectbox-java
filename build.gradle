@@ -3,17 +3,21 @@ version = ob_version
 
 buildscript {
     ext {
+        // Typically, only edit those two:
+        def objectboxVersionNumber = '2.5.0' // without "-SNAPSHOT", e.g. '2.5.0' or '2.4.0-RC'
+        def objectboxVersionRelease = true  // set to true for releasing to ignore versionPostFix to avoid e.g. "-dev" versions
+
         // version post fix: '-<value>' or '' if not defined; e.g. used by CI to pass in branch name
         def versionPostFixValue = project.findProperty('versionPostFix')
         def versionPostFix = versionPostFixValue ? "-$versionPostFixValue" : ''
-        ob_version = "2.5.0$versionPostFix-SNAPSHOT"
+        ob_version = objectboxVersionNumber + (objectboxVersionRelease? "" : "$versionPostFix-SNAPSHOT")
         println "ObjectBox Java version $ob_version"
 
         ob_expected_version = project.hasProperty('expectedVersion') ? project.property('expectedVersion') : 'UNDEFINED'
 
         // Core version for tests
         // Be careful to diverge here; easy to forget and hard to find JNI problems
-        ob_native_version = "2.5.0-dev-SNAPSHOT"
+        ob_native_version = objectboxVersionNumber + (objectboxVersionRelease? "": "-dev-SNAPSHOT")
 
         def osName = System.getProperty("os.name").toLowerCase()
         objectboxPlatform = osName.contains('linux') ? 'linux'
