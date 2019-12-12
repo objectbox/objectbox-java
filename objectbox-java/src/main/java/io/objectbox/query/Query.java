@@ -62,6 +62,10 @@ public class Query<T> implements Closeable {
 
     native long nativeRemove(long handle, long cursorHandle);
 
+    native String nativeToString(long handle);
+
+    native String nativeDescribeParameters(long handle);
+
     native void nativeSetParameter(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
                                    String value);
 
@@ -652,6 +656,26 @@ public class Query<T> implements Closeable {
      */
     public void publish() {
         publisher.publish();
+    }
+
+    /**
+     * For logging and testing, returns a string describing this query
+     * like "Query for entity Example with 4 conditions with properties prop1, prop2".
+     * <p>
+     * Note: the format of the returned string may change without notice.
+     */
+    public String describe() {
+        return nativeToString(handle);
+    }
+
+    /**
+     * For logging and testing, returns a string describing the conditions of this query
+     * like "(prop1 == A AND prop2 is null)".
+     * <p>
+     * Note: the format of the returned string may change without notice.
+     */
+    public String describeParameters() {
+        return nativeDescribeParameters(handle);
     }
 
 }
