@@ -145,6 +145,27 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         BoxStore.deleteAllFiles(boxStoreDir);
     }
 
+    @Test
+    public void removeAllObjects() {
+        // Insert at least two different kinds.
+        store.close();
+        store.deleteAllFiles();
+        store = createBoxStoreBuilderWithTwoEntities(false).build();
+        putTestEntities(5);
+        Box<TestEntityMinimal> minimalBox = store.boxFor(TestEntityMinimal.class);
+        minimalBox.put(new TestEntityMinimal(0, "Sally"));
+        assertEquals(5, getTestEntityBox().count());
+        assertEquals(1, minimalBox.count());
+
+        store.removeAllObjects();
+        assertEquals(0, getTestEntityBox().count());
+        assertEquals(0, minimalBox.count());
+
+        // Assert inserting is still possible.
+        putTestEntities(1);
+        assertEquals(1, getTestEntityBox().count());
+    }
+
     private void closeStoreForTest() {
         assertTrue(boxStoreDir.exists());
         store.close();

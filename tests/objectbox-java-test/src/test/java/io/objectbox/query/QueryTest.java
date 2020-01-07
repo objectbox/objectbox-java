@@ -20,7 +20,6 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -700,4 +699,25 @@ public class QueryTest extends AbstractQueryTest {
         }
     }
 
+    @Test
+    public void testDescribe() {
+        // Note: description string correctness is fully asserted in core library.
+
+        // No conditions.
+        Query<TestEntity> queryNoConditions = box.query().build();
+        assertEquals("Query for entity TestEntity with 1 conditions",queryNoConditions.describe());
+        assertEquals("TRUE", queryNoConditions.describeParameters());
+
+        // Some conditions.
+        Query<TestEntity> query = box.query()
+                .equal(TestEntity_.simpleString, "Hello")
+                .or().greater(TestEntity_.simpleInt, 42)
+                .build();
+        String describeActual = query.describe();
+        assertTrue(describeActual.startsWith("Query for entity TestEntity with 3 conditions with properties "));
+        // Note: the order properties are listed in is not fixed.
+        assertTrue(describeActual.contains(TestEntity_.simpleString.name));
+        assertTrue(describeActual.contains(TestEntity_.simpleInt.name));
+        assertEquals("(simpleString ==(i) \"Hello\"\n OR simpleInt > 42)", query.describeParameters());
+    }
 }

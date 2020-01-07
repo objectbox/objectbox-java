@@ -1,10 +1,14 @@
 <img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png">
 
+# Do you ♥️ using ObjectBox?
+We want to [hear about your app](https://docs.google.com/forms/d/e/1FAIpQLScIYiOIThcq-AnDVoCvnZOMgxO4S-fBtDSFPQfWldJnhi2c7Q/viewform)!
+It will - literally - take just a minute, but help us a lot. Thank you!​ 🙏​
+
 # ObjectBox Java (Kotlin, Android)
 ObjectBox is a superfast object-oriented database with strong relation support.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
-**Latest version: [2.4.1 (2019/10/29)](https://objectbox.io/changelog)**
+**Latest version: [2.5.0 (2019/12/12)](https://docs.objectbox.io/#objectbox-changelog)**
 
 Demo code using ObjectBox:
 
@@ -21,6 +25,7 @@ ObjectBox supports multiple platforms and languages.
 Besides JVM based languages like Java and Kotlin, ObjectBox also offers: 
 
 * [ObjectBox Swift](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
+* [ObjectBox Dart/Flutter](https://github.com/objectbox/objectbox-dart): cross-plattform for mobile and desktop apps (beta) 
 * [ObjectBox Go](https://github.com/objectbox/objectbox-go): great for data-driven tools and small server applications 
 * [ObjectBox C API](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
 
@@ -30,7 +35,7 @@ Add this to your root build.gradle (project level):
 
 ```groovy
 buildscript {
-    ext.objectboxVersion = '2.4.1'
+    ext.objectboxVersion = '2.5.0'
     dependencies {
         classpath "io.objectbox:objectbox-gradle-plugin:$objectboxVersion"
     }

@@ -62,6 +62,10 @@ public class Query<T> implements Closeable {
 
     native long nativeRemove(long handle, long cursorHandle);
 
+    native String nativeToString(long handle);
+
+    native String nativeDescribeParameters(long handle);
+
     native void nativeSetParameter(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
                                    String value);
 
@@ -92,16 +96,16 @@ public class Query<T> implements Closeable {
     final Box<T> box;
     private final BoxStore store;
     private final QueryPublisher<T> publisher;
-    private final List<EagerRelation> eagerRelations;
-    private final QueryFilter<T> filter;
-    private final Comparator<T> comparator;
+    @Nullable private final List<EagerRelation> eagerRelations;
+    @Nullable private final QueryFilter<T> filter;
+    @Nullable private final Comparator<T> comparator;
     private final int queryAttempts;
     private static final int INITIAL_RETRY_BACK_OFF_IN_MS = 10;
 
     long handle;
 
-    Query(Box<T> box, long queryHandle, List<EagerRelation> eagerRelations, QueryFilter<T> filter,
-          Comparator<T> comparator) {
+    Query(Box<T> box, long queryHandle, @Nullable List<EagerRelation> eagerRelations, @Nullable  QueryFilter<T> filter,
+          @Nullable Comparator<T> comparator) {
         this.box = box;
         store = box.getStore();
         queryAttempts = store.internalQueryAttempts();
@@ -349,6 +353,7 @@ public class Query<T> implements Closeable {
 
     /** Note: no null check on eagerRelations! */
     void resolveEagerRelationForNonNullEagerRelations(@Nonnull T entity, int entityIndex) {
+        //noinspection ConstantConditions No null check.
         for (EagerRelation eagerRelation : eagerRelations) {
             if (eagerRelation.limit == 0 || entityIndex < eagerRelation.limit) {
                 resolveEagerRelation(entity, eagerRelation);
@@ -651,6 +656,26 @@ public class Query<T> implements Closeable {
      */
     public void publish() {
         publisher.publish();
+    }
+
+    /**
+     * For logging and testing, returns a string describing this query
+     * like "Query for entity Example with 4 conditions with properties prop1, prop2".
+     * <p>
+     * Note: the format of the returned string may change without notice.
+     */
+    public String describe() {
+        return nativeToString(handle);
+    }
+
+    /**
+     * For logging and testing, returns a string describing the conditions of this query
+     * like "(prop1 == A AND prop2 is null)".
+     * <p>
+     * Note: the format of the returned string may change without notice.
+     */
+    public String describeParameters() {
+        return nativeDescribeParameters(handle);
     }
 
 }

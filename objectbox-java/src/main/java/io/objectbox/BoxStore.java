@@ -66,9 +66,9 @@ public class BoxStore implements Closeable {
     @Nullable public static Object relinker;
 
     /** Change so ReLinker will update native library when using workaround loading. */
-    public static final String JNI_VERSION = "2.4.2";
+    public static final String JNI_VERSION = "2.5.0";
 
-    private static final String VERSION = "2.4.2-2019-10-29";
+    private static final String VERSION = "2.5.1-2019-12-12";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
@@ -611,16 +611,21 @@ public class BoxStore implements Closeable {
         return deleteAllFiles(dbDir);
     }
 
+    /**
+     * Removes all objects from all boxes, e.g. deletes all database content.
+     *
+     * Internally reads the current schema, drops all database content,
+     * then restores the schema in a single transaction.
+     */
+    public void removeAllObjects() {
+        nativeDropAllData(handle);
+    }
+
     @Internal
     public void unregisterTransaction(Transaction transaction) {
         synchronized (transactions) {
             transactions.remove(transaction);
         }
-    }
-
-    // TODO not implemented on native side; rename to "nukeData" (?)
-    void dropAllData() {
-        nativeDropAllData(handle);
     }
 
     void txCommitted(Transaction tx, @Nullable int[] entityTypeIdsAffected) {
