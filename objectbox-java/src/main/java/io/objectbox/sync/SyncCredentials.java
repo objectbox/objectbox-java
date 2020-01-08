@@ -1,9 +1,12 @@
 package io.objectbox.sync;
 
+import io.objectbox.annotation.apihint.Experimental;
+
 /**
  * Use the static helper methods to build sync credentials, for example {@link #apiKey SyncCredentials.apiKey("key")}.
  */
 @SuppressWarnings("unused")
+@Experimental
 public class SyncCredentials {
 
     /**

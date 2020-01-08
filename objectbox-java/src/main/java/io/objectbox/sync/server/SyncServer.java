@@ -1,5 +1,6 @@
 package io.objectbox.sync.server;
 
+import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.Sync;
 import io.objectbox.sync.SyncChangesListener;
 
@@ -9,6 +10,7 @@ import java.io.Closeable;
  * ObjectBox sync server. Build a server with {@link Sync#server}.
  */
 @SuppressWarnings("unused")
+@Experimental
 public interface SyncServer extends Closeable {
 
     /**

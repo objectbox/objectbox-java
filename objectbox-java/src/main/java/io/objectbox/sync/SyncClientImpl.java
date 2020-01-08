@@ -2,6 +2,7 @@ package io.objectbox.sync;
 
 import io.objectbox.InternalAccess;
 import io.objectbox.annotation.apihint.Experimental;
+import io.objectbox.annotation.apihint.Internal;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.CountDownLatch;
@@ -11,6 +12,7 @@ import java.util.concurrent.TimeUnit;
  * Internal sync client implementation. Use {@link SyncClient} to access functionality,
  * this class may change without notice.
  */
+@Internal
 public class SyncClientImpl implements SyncClient {
 
     private final String serverUrl;

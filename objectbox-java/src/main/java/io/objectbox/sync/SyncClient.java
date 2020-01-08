@@ -1,16 +1,19 @@
 package io.objectbox.sync;
 
-import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Experimental;
 
 import java.io.Closeable;
 
 /**
  * ObjectBox sync client. Build a client with {@link Sync#client}.
+ *
+ * Keep the instance around (avoid garbage collection) while you want to have sync ongoing.
+ * For a clean shutdown, call {@link #close()}.
  * <p>
  * SyncClient is thread-safe.
  */
 @SuppressWarnings("unused")
+@Experimental
 public interface SyncClient extends Closeable {
 
     /**
@@ -18,8 +21,16 @@ public interface SyncClient extends Closeable {
      */
     String getServerUrl();
 
+    /**
+     * Flag indicating if the sync client was started.
+     * Started clients try to connect, login, and sync with the sync destination.
+     */
     boolean isStarted();
 
+    /**
+     * Flag indicating if the sync client was started.
+     * Logged in clients can sync with the sync destination to exchange data.
+     */
     boolean isLoggedIn();
 
     /**
@@ -103,7 +114,7 @@ public interface SyncClient extends Closeable {
 
     /**
      * Experimental. This API might change or be removed in the future.
-     *
+     * <p>
      * Request a sync of all previous changes from the server.
      */
     @Experimental

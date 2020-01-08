@@ -1,9 +1,15 @@
 package io.objectbox.sync;
 
 import io.objectbox.BoxStore;
+import io.objectbox.annotation.apihint.Experimental;
 
 import javax.annotation.Nullable;
 
+/**
+ * A builder to create a {@link SyncClient}; the builder itself should be created via
+ * {@link Sync#client(BoxStore, String, SyncCredentials)}.
+ */
+@Experimental
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class SyncBuilder {
 
@@ -11,7 +17,8 @@ public class SyncBuilder {
     final String url;
     final SyncCredentials credentials;
 
-    @Nullable String certificatePath;
+    @Nullable
+    String certificatePath;
 
     SyncClientListener listener;
     SyncChangesListener changesListener;

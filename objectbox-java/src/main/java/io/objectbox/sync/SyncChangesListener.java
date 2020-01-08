@@ -1,10 +1,16 @@
 package io.objectbox.sync;
 
+import io.objectbox.annotation.apihint.Experimental;
+
 /**
- * Notifies you of fine granular changes happening during sync.
- * Most will want to use {@link SyncClientListener} instead.
+ * Notifies of fine granular changes on the object level happening during sync.
+ * Register your listener using {@link SyncBuilder#changesListener(SyncChangesListener)}.
+ * Note that enabling fine granular notification can slightly reduce performance.
+ * <p>
+ * See also {@link SyncClientListener} for the general sync listener.
  */
 @SuppressWarnings({"unused"})
+@Experimental
 public interface SyncChangesListener {
 
     /**

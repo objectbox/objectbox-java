@@ -1,6 +1,7 @@
 package io.objectbox.sync.server;
 
 import io.objectbox.InternalAccess;
+import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.sync.SyncChangesListener;
 import io.objectbox.sync.SyncCredentials;
 import io.objectbox.sync.SyncCredentialsToken;
@@ -11,6 +12,7 @@ import javax.annotation.Nullable;
  * Internal sync server implementation. Use {@link SyncServer} to access functionality,
  * this class may change without notice.
  */
+@Internal
 public class SyncServerImpl implements SyncServer {
 
     private final String url;

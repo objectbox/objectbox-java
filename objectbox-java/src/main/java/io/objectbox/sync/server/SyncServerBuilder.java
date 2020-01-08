@@ -1,6 +1,7 @@
 package io.objectbox.sync.server;
 
 import io.objectbox.BoxStore;
+import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.SyncChangesListener;
 import io.objectbox.sync.SyncCredentials;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * Creates a {@link SyncServer} and allows to set additional configuration.
  */
 @SuppressWarnings({"unused", "UnusedReturnValue", "WeakerAccess"})
+@Experimental
 public class SyncServerBuilder {
 
     final BoxStore boxStore;

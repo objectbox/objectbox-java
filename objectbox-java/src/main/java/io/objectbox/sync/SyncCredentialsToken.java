@@ -1,5 +1,7 @@
 package io.objectbox.sync;
 
+import io.objectbox.annotation.apihint.Internal;
+
 import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -7,6 +9,7 @@ import java.util.Arrays;
 /**
  * Internal credentials implementation. Use {@link SyncCredentials} to build credentials.
  */
+@Internal
 public class SyncCredentialsToken extends SyncCredentials {
 
     private final CredentialsType type;

@@ -1,5 +1,11 @@
 package io.objectbox.sync;
 
+import io.objectbox.annotation.apihint.Experimental;
+
+/**
+ * Codes used by {@link SyncClientListener#onLoginFailure(long)}.
+ */
+@Experimental
 public class SyncLoginCodes {
 
     public static final long OK = 20;
