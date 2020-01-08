@@ -1,6 +1,8 @@
 <img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png">
 
 # Do you ♥️ using ObjectBox?
+[![Follow ObjectBox on Twitter](https://img.shields.io/twitter/follow/ObjectBox_io.svg?style=flat-square&logo=twitter&color=fff)](https://twitter.com/ObjectBox_io)
+
 We want to [hear about your app](https://docs.google.com/forms/d/e/1FAIpQLScIYiOIThcq-AnDVoCvnZOMgxO4S-fBtDSFPQfWldJnhi2c7Q/viewform)!
 It will - literally - take just a minute, but help us a lot. Thank you!​ 🙏​
 
@@ -76,7 +78,7 @@ Links
 -----
 [Features](https://objectbox.io/features/)
 
-[Docs & Changelog](https://docs.objectbox.io/)
+[Docs & Changelog](https://docs.objectbox.io/), [JavaDocs](https://objectbox.io/docfiles/java/current/)
 
 [Examples](https://github.com/objectbox/objectbox-examples)
 
@@ -89,7 +91,7 @@ Thanks!
 
 License
 -------
-    Copyright 2017-2019 ObjectBox Ltd. All rights reserved.
+    Copyright 2017-2020 ObjectBox Ltd. All rights reserved.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
