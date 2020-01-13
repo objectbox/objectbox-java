@@ -20,6 +20,7 @@ public class SyncBuilder {
     @Nullable
     String certificatePath;
 
+    @Nullable ConnectivityMonitor connectivityMonitor;
     SyncClientListener listener;
     SyncChangesListener changesListener;
 
@@ -104,6 +105,15 @@ public class SyncBuilder {
      */
     public SyncBuilder manualStart() {
         manualStart = true;
+        return this;
+    }
+
+    /**
+     * Supply a connectivity monitor to faster react to network changes.
+     * E.g. on Android pass an AndroidConnectivityMonitor.
+     */
+    public SyncBuilder connectivityMonitor(ConnectivityMonitor connectivityMonitor) {
+        this.connectivityMonitor = connectivityMonitor;
         return this;
     }
 

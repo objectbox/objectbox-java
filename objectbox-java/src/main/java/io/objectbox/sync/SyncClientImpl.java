@@ -18,6 +18,8 @@ public class SyncClientImpl implements SyncClient {
 
     private final String serverUrl;
     private final InternalListener internalListener;
+    @Nullable
+    private final ConnectivityMonitor connectivityMonitor;
 
     private volatile long handle;
     @Nullable
@@ -27,6 +29,7 @@ public class SyncClientImpl implements SyncClient {
 
     SyncClientImpl(SyncBuilder builder) {
         this.serverUrl = builder.url;
+        this.connectivityMonitor = builder.connectivityMonitor;
 
         long boxStoreHandle = InternalAccess.getHandle(builder.boxStore);
         this.handle = nativeCreate(boxStoreHandle, serverUrl, builder.certificatePath);
@@ -123,6 +126,9 @@ public class SyncClientImpl implements SyncClient {
     public synchronized void start() {
         nativeStart(handle);
         started = true;
+        if (connectivityMonitor != null) {
+            connectivityMonitor.setObserver(this);
+        }
     }
 
     @Override
@@ -137,6 +143,9 @@ public class SyncClientImpl implements SyncClient {
             nativeStop(handleToStop);
         }
         started = false;
+        if (connectivityMonitor != null) {
+            connectivityMonitor.removeObserver();
+        }
     }
 
     @Override
@@ -186,6 +195,11 @@ public class SyncClientImpl implements SyncClient {
     @Override
     public void cancelUpdates() {
         nativeCancelUpdates(handle);
+    }
+
+    @Override
+    public void notifyConnectionAvailable() {
+        start();
     }
 
     private void checkNotNull(Object object, String message) {
