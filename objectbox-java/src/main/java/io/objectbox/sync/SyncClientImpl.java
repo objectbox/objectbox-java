@@ -39,6 +39,10 @@ public class SyncClientImpl implements SyncClient {
             boolean autoRequestUpdates = builder.requestUpdatesMode != RequestUpdatesMode.MANUAL;
             nativeSetRequestUpdatesMode(handle, autoRequestUpdates, false);
         }
+        // Only change setting if not default (uncommitted acks are off).
+        if (builder.uncommittedAcks) {
+            nativeSetUncommittedAcks(handle, true);
+        }
 
         this.listener = builder.listener;
 
@@ -200,6 +204,11 @@ public class SyncClientImpl implements SyncClient {
 
     /** @param subscribeForPushes Pass true to automatically receive updates for future changes. */
     private native void nativeSetRequestUpdatesMode(long handle, boolean autoRequestUpdates, boolean subscribeForPushes);
+
+    /**
+     * @param uncommittedAcks Default is false.
+     */
+    private native void nativeSetUncommittedAcks(long handle, boolean uncommittedAcks);
 
     /** @param subscribeForPushes Pass true to automatically receive updates for future changes. */
     private native void nativeRequestUpdates(long handle, boolean subscribeForPushes);

@@ -23,6 +23,7 @@ public class SyncBuilder {
     SyncClientListener listener;
     SyncChangesListener changesListener;
 
+    boolean uncommittedAcks;
     boolean manualStart;
 
     RequestUpdatesMode requestUpdatesMode = RequestUpdatesMode.AUTO;
@@ -83,6 +84,14 @@ public class SyncBuilder {
      */
     public SyncBuilder requestUpdatesMode(RequestUpdatesMode requestUpdatesMode) {
         this.requestUpdatesMode = requestUpdatesMode;
+        return this;
+    }
+
+    /**
+     * Turns on sending of uncommitted acks.
+     */
+    public SyncBuilder uncommittedAcks() {
+        this.uncommittedAcks = true;
         return this;
     }
 
