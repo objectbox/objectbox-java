@@ -99,6 +99,7 @@ public class SyncBuilder {
     }
 
     private void checkNotNull(Object object, String message) {
+        //noinspection ConstantConditions Non-null annotation does not enforce, so check for null.
         if (object == null) {
             throw new IllegalArgumentException(message);
         }
