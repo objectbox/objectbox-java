@@ -136,6 +136,10 @@ public class SyncClientImpl implements SyncClient {
         }
     }
 
+    /**
+     * Users of this class should explicitly call {@link #close()} instead to avoid expensive finalization.
+     */
+    @SuppressWarnings("deprecation") // finalize()
     @Override
     protected void finalize() throws Throwable {
         close();
