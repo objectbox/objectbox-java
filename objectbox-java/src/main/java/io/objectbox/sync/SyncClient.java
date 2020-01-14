@@ -1,6 +1,7 @@
 package io.objectbox.sync;
 
 import io.objectbox.annotation.apihint.Experimental;
+import io.objectbox.sync.SyncBuilder.RequestUpdatesMode;
 
 import java.io.Closeable;
 
@@ -93,7 +94,8 @@ public interface SyncClient extends Closeable {
 
     /**
      * Asks the sync server to resume sync updates.
-     * This requires that the sync client was built with {@link SyncBuilder#manualUpdateRequests} set.
+     * This is useful if sync updates were turned off with
+     * {@link SyncBuilder#requestUpdatesMode(RequestUpdatesMode) requestUpdatesMode(MANUAL)}.
      *
      * @see #cancelUpdates()
      */
@@ -101,7 +103,8 @@ public interface SyncClient extends Closeable {
 
     /**
      * Asks the server to send sync updates until this sync client is up-to-date, then pauses sync updates again.
-     * This requires that the sync client was built with {@link SyncBuilder#manualUpdateRequests} set.
+     * This is useful if sync updates were turned off with
+     * {@link SyncBuilder#requestUpdatesMode(RequestUpdatesMode) requestUpdatesMode(MANUAL)}.
      */
     void requestUpdatesOnce();
 

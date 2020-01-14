@@ -23,8 +23,38 @@ public class SyncBuilder {
     SyncClientListener listener;
     SyncChangesListener changesListener;
 
-    boolean manualUpdateRequests;
+    boolean uncommittedAcks;
     boolean manualStart;
+
+    RequestUpdatesMode requestUpdatesMode = RequestUpdatesMode.AUTO;
+
+    public enum RequestUpdatesMode {
+        /**
+         * Once logged in, does not request any sync updates automatically.
+         * <p>
+         * Sync updates will have to be requested manually.
+         *
+         * @see SyncClient#requestUpdates()
+         * @see SyncClient#requestUpdatesOnce()
+         */
+        MANUAL,
+
+        /**
+         * Once logged in, requests sync updates automatically including subsequent pushes for data changes.
+         * This is the default.
+         */
+        AUTO,
+
+        /**
+         * Once logged in, requests updates automatically once without subsequent pushes for data changes.
+         * <p>
+         * After the initial sync update, further updates will have to be requested manually.
+         *
+         * @see SyncClient#requestUpdates()
+         * @see SyncClient#requestUpdatesOnce()
+         */
+        AUTO_NO_PUSHES
+    }
 
     public SyncBuilder(BoxStore boxStore, String url, SyncCredentials credentials) {
         checkNotNull(boxStore, "BoxStore is required.");
@@ -46,14 +76,22 @@ public class SyncBuilder {
     }
 
     /**
-     * Disables automatic sync updates from the server.
-     * Sync updates will need to be enabled using the sync client.
+     * Configure automatic sync updates from the server.
+     * If automatic sync updates are turned off, they will need to be requested using the sync client.
      *
      * @see SyncClient#requestUpdates()
      * @see SyncClient#requestUpdatesOnce()
      */
-    public SyncBuilder manualUpdateRequests() {
-        manualUpdateRequests = true;
+    public SyncBuilder requestUpdatesMode(RequestUpdatesMode requestUpdatesMode) {
+        this.requestUpdatesMode = requestUpdatesMode;
+        return this;
+    }
+
+    /**
+     * Turns on sending of uncommitted acks.
+     */
+    public SyncBuilder uncommittedAcks() {
+        this.uncommittedAcks = true;
         return this;
     }
 

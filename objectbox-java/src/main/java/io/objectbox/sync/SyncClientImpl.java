@@ -3,6 +3,7 @@ package io.objectbox.sync;
 import io.objectbox.InternalAccess;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.sync.SyncBuilder.RequestUpdatesMode;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.CountDownLatch;
@@ -17,7 +18,6 @@ public class SyncClientImpl implements SyncClient {
 
     private final String serverUrl;
     private final InternalListener internalListener;
-    private final boolean manualUpdateRequests;
 
     private volatile long handle;
     @Nullable
@@ -27,12 +27,21 @@ public class SyncClientImpl implements SyncClient {
 
     SyncClientImpl(SyncBuilder builder) {
         this.serverUrl = builder.url;
-        this.manualUpdateRequests = builder.manualUpdateRequests;
 
         long boxStoreHandle = InternalAccess.getHandle(builder.boxStore);
         this.handle = nativeCreate(boxStoreHandle, serverUrl, builder.certificatePath);
         if (handle == 0) {
             throw new RuntimeException("Failed to create sync client: handle is zero.");
+        }
+
+        // Only change setting if not default (automatic sync updates and push subscription enabled).
+        if (builder.requestUpdatesMode != RequestUpdatesMode.AUTO) {
+            boolean autoRequestUpdates = builder.requestUpdatesMode != RequestUpdatesMode.MANUAL;
+            nativeSetRequestUpdatesMode(handle, autoRequestUpdates, false);
+        }
+        // Only change setting if not default (uncommitted acks are off).
+        if (builder.uncommittedAcks) {
+            nativeSetUncommittedAcks(handle, true);
         }
 
         this.listener = builder.listener;
@@ -194,6 +203,14 @@ public class SyncClientImpl implements SyncClient {
     private native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangesListener advancedListener);
 
     /** @param subscribeForPushes Pass true to automatically receive updates for future changes. */
+    private native void nativeSetRequestUpdatesMode(long handle, boolean autoRequestUpdates, boolean subscribeForPushes);
+
+    /**
+     * @param uncommittedAcks Default is false.
+     */
+    private native void nativeSetUncommittedAcks(long handle, boolean uncommittedAcks);
+
+    /** @param subscribeForPushes Pass true to automatically receive updates for future changes. */
     private native void nativeRequestUpdates(long handle, boolean subscribeForPushes);
 
     /** @param subscribeForPushes Pass true to automatically receive updates for future changes. */
@@ -209,9 +226,7 @@ public class SyncClientImpl implements SyncClient {
         public void onLogin() {
             lastLoginCode = SyncLoginCodes.OK;
             firstLoginLatch.countDown();
-            if (!manualUpdateRequests) {
-                requestUpdates();
-            }
+
             SyncClientListener listenerToFire = listener;
             if (listenerToFire != null) {
                 listenerToFire.onLogin();
