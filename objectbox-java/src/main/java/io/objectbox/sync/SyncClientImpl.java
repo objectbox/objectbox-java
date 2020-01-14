@@ -29,7 +29,7 @@ public class SyncClientImpl implements SyncClient {
 
     SyncClientImpl(SyncBuilder builder) {
         this.serverUrl = builder.url;
-        this.connectivityMonitor = builder.connectivityMonitor;
+        this.connectivityMonitor = builder.platform.getConnectivityMonitor();
 
         long boxStoreHandle = InternalAccess.getHandle(builder.boxStore);
         this.handle = nativeCreate(boxStoreHandle, serverUrl, builder.certificatePath);

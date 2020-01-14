@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 /**
  * Used by {@link SyncClient} to observe connectivity changes.
  * <p>
- * Instead of this class, use the platform-specific implementations.
+ * Implementations are provided by a {@link io.objectbox.sync.internal.Platform platform}.
  */
 public abstract class ConnectivityMonitor {
 
@@ -14,16 +14,31 @@ public abstract class ConnectivityMonitor {
 
     void setObserver(SyncClient syncClient) {
         this.syncClient = syncClient;
+        onObserverSet();
     }
 
     void removeObserver() {
         this.syncClient = null;
+        onObserverRemoved();
     }
 
     /**
-     * Called if a working network connection is available.
+     * Called right after the observer was set.
      */
-    public void onConnectionAvailable() {
+    public void onObserverSet() {
+    }
+
+    /**
+     * Called right after the observer was removed.
+     */
+    public void onObserverRemoved() {
+    }
+
+    /**
+     * Notifies the observer that a connection is available.
+     * Implementers should call this once a working network connection is available.
+     */
+    public final void notifyConnectionAvailable() {
         SyncClient syncClient = this.syncClient;
         if (syncClient != null) {
             syncClient.notifyConnectionAvailable();
