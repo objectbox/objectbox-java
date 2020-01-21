@@ -199,7 +199,7 @@ public class SyncClientImpl implements SyncClient {
 
     @Override
     public void notifyConnectionAvailable() {
-        start();
+        nativeTriggerReconnect(handle);
     }
 
     private void checkNotNull(Object object, String message) {
@@ -244,6 +244,9 @@ public class SyncClientImpl implements SyncClient {
 
     /** (Optional) Pause sync updates. */
     private native void nativeCancelUpdates(long handle);
+
+    /** Hints to the native client that an active network connection is available. */
+    private native void nativeTriggerReconnect(long handle);
 
     private class InternalListener implements SyncClientListener {
         private final CountDownLatch firstLoginLatch = new CountDownLatch(1);
