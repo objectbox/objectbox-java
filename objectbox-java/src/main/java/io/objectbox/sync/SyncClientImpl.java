@@ -138,18 +138,23 @@ public class SyncClientImpl implements SyncClient {
 
     @Override
     public synchronized void stop() {
+        if (connectivityMonitor != null) {
+            connectivityMonitor.removeObserver();
+        }
+
         long handleToStop = this.handle;
         if (handleToStop != 0) {
             nativeStop(handleToStop);
         }
         started = false;
-        if (connectivityMonitor != null) {
-            connectivityMonitor.removeObserver();
-        }
     }
 
     @Override
     public void close() {
+        if (connectivityMonitor != null) {
+            connectivityMonitor.removeObserver();
+        }
+
         long handleToDelete;
         synchronized (this) {
             handleToDelete = this.handle;
