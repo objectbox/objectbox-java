@@ -73,11 +73,11 @@ public final class PropertyFlags {
   public static final int INDEX_HASH = 2048;
   /**
    * Index uses a 64 bit hash instead of the value
-   * (recommended mostly for 64 bit machines with values longer >200 bytes; small values are faster with a 32 bit hash)
+   * (recommended mostly for 64 bit machines with values longer than 200 bytes; small values are faster with a 32 bit hash)
    */
   public static final int INDEX_HASH64 = 4096;
   /**
-   * Unused yet: While our default are signed ints, queries & indexes need do know signing info.
+   * Unused yet: While our default are signed ints, queries and indexes need do know signing info.
    * Note: Don't combine with ID (IDs are always unsigned internally).
    */
   public static final int UNSIGNED = 8192;
