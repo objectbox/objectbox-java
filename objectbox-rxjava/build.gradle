@@ -13,13 +13,6 @@ dependencies {
     testCompile 'org.mockito:mockito-core:2.25.1'
 }
 
-javadoc {
-    failOnError = false
-    title = "ObjectBox RxJava2 ${version} API"
-    excludes = [] // Unfinished APIs if any
-    options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2018-2020 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
-}
-
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from 'build/docs/javadoc'
