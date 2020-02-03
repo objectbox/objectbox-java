@@ -23,10 +23,7 @@ dependencies {
 }
 
 javadoc {
-    failOnError = false
-    title = "ObjectBox Java ${version} API"
-    options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017-2020 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
-    exclude("**/com/google/**")
+    // Hide internal API from javadoc artifact.
     exclude("**/io/objectbox/Cursor.java")
     exclude("**/io/objectbox/KeyValueCursor.java")
     exclude("**/io/objectbox/ModelBuilder.java")
@@ -37,12 +34,40 @@ javadoc {
     exclude("**/io/objectbox/internal/**")
     exclude("**/io/objectbox/reactive/DataPublisherUtils.java")
     exclude("**/io/objectbox/reactive/WeakDataObserver.java")
+}
+
+// Note: use packageJavadocForWeb to get as ZIP.
+// Note: the style changes only work if using JDK 10+.
+task javadocForWeb(type: Javadoc) {
+    group = 'documentation'
+    description = 'Builds Javadoc incl. objectbox-java-api classes with web tweaks.'
+
     def srcApi = project(':objectbox-java-api').file('src/main/java/')
     if (!srcApi.directory) throw new GradleScriptException("Not a directory: ${srcApi}", null)
-    source += srcApi
+    // Hide internal API from javadoc artifact.
+    def filteredSources = sourceSets.main.allJava.matching {
+        exclude("**/io/objectbox/Cursor.java")
+        exclude("**/io/objectbox/KeyValueCursor.java")
+        exclude("**/io/objectbox/ModelBuilder.java")
+        exclude("**/io/objectbox/Properties.java")
+        exclude("**/io/objectbox/Transaction.java")
+        exclude("**/io/objectbox/model/**")
+        exclude("**/io/objectbox/ideasonly/**")
+        exclude("**/io/objectbox/internal/**")
+        exclude("**/io/objectbox/reactive/DataPublisherUtils.java")
+        exclude("**/io/objectbox/reactive/WeakDataObserver.java")
+    }
+    source = filteredSources + srcApi
+
+    classpath = sourceSets.main.output + sourceSets.main.compileClasspath
+    destinationDir = reporting.file("web-api-docs")
+
+    title = "ObjectBox Java ${version} API"
+    options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017-2020 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
+
     doLast {
         // Note: frequently check the vanilla stylesheet.css if values still match.
-        def stylesheetPath = "$buildDir/docs/javadoc/stylesheet.css"
+        def stylesheetPath = "$destinationDir/stylesheet.css"
 
         // Primary background
         ant.replace(file: stylesheetPath, token: "#4D7A97", value: "#17A6A6")
@@ -65,6 +90,20 @@ javadoc {
                 "    color:#474747;\n" +
                 "    overflow:auto;\n" +
                 "}")
+    }
+}
+
+task packageJavadocForWeb(type: Zip, dependsOn: javadocForWeb) {
+    group = 'documentation'
+    description = 'Packages Javadoc incl. objectbox-java-api classes with web tweaks as ZIP.'
+
+    archiveFileName = "objectbox-java-web-api-docs.zip"
+    destinationDirectory = file("$buildDir/dist")
+
+    from reporting.file("web-api-docs")
+
+    doLast {
+        println "Javadoc for web packaged to ${file("$buildDir/dist/objectbox-java-web-api-docs.zip")}"
     }
 }
 
