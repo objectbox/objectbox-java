@@ -42,6 +42,7 @@ pipeline {
         stage('init') {
             steps {
                 sh 'chmod +x gradlew'
+                sh './gradlew -version'
 
                 // "|| true" for an OK exit code if no file is found
                 sh 'rm tests/objectbox-java-test/hs_err_pid*.log || true'
