@@ -10,7 +10,7 @@ It will - literally - take just a minute, but help us a lot. Thank you!​ 🙏�
 ObjectBox is a superfast object-oriented database with strong relation support.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
-**Latest version: [2.5.0 (2019/12/12)](https://docs.objectbox.io/#objectbox-changelog)**
+**Latest version: [2.5.1 (2020/02/10)](https://docs.objectbox.io/#objectbox-changelog)**
 
 Demo code using ObjectBox:
 
@@ -37,7 +37,7 @@ Add this to your root build.gradle (project level):
 
 ```groovy
 buildscript {
-    ext.objectboxVersion = '2.5.0'
+    ext.objectboxVersion = '2.5.1'
     dependencies {
         classpath "io.objectbox:objectbox-gradle-plugin:$objectboxVersion"
     }
