@@ -26,8 +26,10 @@ import io.objectbox.query.QueryBuilder
 import io.objectbox.relation.ToMany
 import kotlin.reflect.KClass
 
+/** Shortcut for `BoxStore.boxFor(Entity::class.java)`. */
 inline fun <reified T> BoxStore.boxFor(): Box<T> = boxFor(T::class.java)
 
+/** Shortcut for `BoxStore.boxFor(Entity::class.java)`. */
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T : Any> BoxStore.boxFor(clazz: KClass<T>): Box<T> = boxFor(clazz.java)
 

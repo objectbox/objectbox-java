@@ -1,5 +1,3 @@
-def COLOR_MAP = ['SUCCESS': 'good', 'FAILURE': 'danger', 'UNSTABLE': 'danger', 'ABORTED': 'danger']
-
 // dev branch only: every 30 minutes at night (1:00 - 5:00)
 String cronSchedule = BRANCH_NAME == 'dev' ? '*/30 1-5 * * *' : ''
 String buildsToKeep = '500'
@@ -42,6 +40,8 @@ pipeline {
         stage('init') {
             steps {
                 sh 'chmod +x gradlew'
+                sh 'chmod +x ci/test-with-asan.sh'
+                sh './gradlew -version'
 
                 // "|| true" for an OK exit code if no file is found
                 sh 'rm tests/objectbox-java-test/hs_err_pid*.log || true'
@@ -50,8 +50,7 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh "./test-with-asan.sh -Dextensive-tests=true $MVN_REPO_ARGS " +
-                        "clean test " +
+                sh "./ci/test-with-asan.sh $gradleArgs $MVN_REPO_ARGS -Dextensive-tests=true clean test " +
                         "--tests io.objectbox.FunctionalTestSuite " +
                         "--tests io.objectbox.test.proguard.ObfuscatedEntityTest " +
                         "--tests io.objectbox.rx.QueryObserverTest " +
