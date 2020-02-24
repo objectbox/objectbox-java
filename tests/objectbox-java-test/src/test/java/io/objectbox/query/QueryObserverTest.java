@@ -23,11 +23,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.TestEntity;
 import io.objectbox.reactive.DataObserver;
+import io.objectbox.reactive.DataSubscription;
 import io.objectbox.reactive.DataTransformer;
 
 
@@ -63,6 +65,43 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
 
         assertEquals(1, receivedChanges.size());
         assertEquals(3, receivedChanges.get(0).size());
+    }
+
+    @Test
+    public void observer_resultsDeliveredInOrder() {
+        Query<TestEntity> query = box.query().build();
+
+        final CountDownLatch latch = new CountDownLatch(2);
+        final AtomicBoolean isLongTransform = new AtomicBoolean(true);
+        final List<Integer> placing = new CopyOnWriteArrayList<>();
+
+        // Block first onData call long enough so second one can race it.
+        DataSubscription subscription = query.subscribe().observer(data -> {
+            if (isLongTransform.compareAndSet(true, false)) {
+                // Wait long enough so publish triggered by transaction
+                // can overtake publish triggered during observer() call.
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                placing.add(1); // First, during observer() call.
+            } else {
+                placing.add(2); // Second, due to transaction.
+            }
+            latch.countDown();
+        });
+
+        // Trigger publish due to transaction.
+        store.runInTx(() -> putTestEntities(1));
+
+        assertLatchCountedDown(latch, 3);
+        subscription.cancel();
+
+        // Second publish request should still deliver second.
+        assertEquals(2, placing.size());
+        assertEquals(1, (int) placing.get(0));
+        assertEquals(2, (int) placing.get(1));
     }
 
     @Test
