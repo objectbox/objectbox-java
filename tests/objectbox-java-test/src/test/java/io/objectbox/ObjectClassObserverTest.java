@@ -48,22 +48,16 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
     final List<Class> classesWithChanges = new ArrayList<>();
 
-    DataObserver objectClassObserver = new DataObserver<Class>() {
-        @Override
-        public void onData(Class objectClass) {
-            classesWithChanges.add(objectClass);
-            observerLatch.countDown();
-        }
+    DataObserver objectClassObserver = (DataObserver<Class>) objectClass -> {
+        classesWithChanges.add(objectClass);
+        observerLatch.countDown();
     };
 
-    Runnable txRunnable = new Runnable() {
-        @Override
-        public void run() {
-            putTestEntities(3);
-            Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
-            boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
-            assertEquals(0, classesWithChanges.size());
-        }
+    Runnable txRunnable = () -> {
+        putTestEntities(3);
+        Box<TestEntityMinimal> boxMini = store.boxFor(TestEntityMinimal.class);
+        boxMini.put(new TestEntityMinimal(), new TestEntityMinimal());
+        assertEquals(0, classesWithChanges.size());
     };
 
     @Before
@@ -83,12 +77,9 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
 
     public void testTwoObjectClassesChanged_catchAllObserver(boolean weak) {
         DataSubscription subscription = subscribe(weak, null);
-        store.runInTx(new Runnable() {
-            @Override
-            public void run() {
-                // Dummy TX, still will be committed
-                getTestEntityBox().count();
-            }
+        store.runInTx(() -> {
+            // Dummy TX, still will be committed
+            getTestEntityBox().count();
         });
         assertEquals(0, classesWithChanges.size());
 
@@ -172,31 +163,21 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         final Thread testThread = Thread.currentThread();
 
         SubscriptionBuilder<Long> subscriptionBuilder = store.subscribe().onlyChanges().
-                transform(new DataTransformer<Class, Long>() {
-            @Override
-            @SuppressWarnings("NullableProblems")
-            public Long transform(Class source) throws Exception {
-                assertNotSame(testThread, Thread.currentThread());
-                return store.boxFor(source).count();
-            }
-        });
+                transform(source -> {
+                    assertNotSame(testThread, Thread.currentThread());
+                    return store.boxFor(source).count();
+                });
         if (scheduler != null) {
             subscriptionBuilder.on(scheduler);
         }
-        DataSubscription subscription = subscriptionBuilder.observer(new DataObserver<Long>() {
-            @Override
-            public void onData(Long data) {
-                objectCounts.add(data);
-                latch.countDown();
-            }
+        DataSubscription subscription = subscriptionBuilder.observer(data -> {
+            objectCounts.add(data);
+            latch.countDown();
         });
 
-        store.runInTx(new Runnable() {
-            @Override
-            public void run() {
-                // Dummy TX, still will be committed, should not add anything to objectCounts
-                getTestEntityBox().count();
-            }
+        store.runInTx(() -> {
+            // Dummy TX, still will be committed, should not add anything to objectCounts
+            getTestEntityBox().count();
         });
 
         store.runInTx(txRunnable);
@@ -262,24 +243,14 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         final CountDownLatch latch = new CountDownLatch(2);
         final Thread testThread = Thread.currentThread();
 
-        DataSubscription subscription = store.subscribe().onlyChanges().transform(new DataTransformer<Class, Long>() {
-            @Override
-            @SuppressWarnings("NullableProblems")
-            public Long transform(Class source) throws Exception {
-                throw new Exception("Boo");
-            }
-        }).onError(new ErrorObserver() {
-            @Override
-            public void onError(Throwable th) {
-                assertNotSame(testThread, Thread.currentThread());
-                errors.add(th);
-                latch.countDown();
-            }
-        }).on(scheduler).observer(new DataObserver<Long>() {
-            @Override
-            public void onData(Long data) {
-                throw new RuntimeException("Should not reach this");
-            }
+        DataSubscription subscription = store.subscribe().onlyChanges().transform((DataTransformer<Class, Long>) source -> {
+            throw new Exception("Boo");
+        }).onError(throwable -> {
+            assertNotSame(testThread, Thread.currentThread());
+            errors.add(throwable);
+            latch.countDown();
+        }).on(scheduler).observer(data -> {
+            throw new RuntimeException("Should not reach this");
         });
 
         store.runInTx(txRunnable);
@@ -312,18 +283,12 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         final CountDownLatch latch = new CountDownLatch(2);
         final Thread testThread = Thread.currentThread();
 
-        DataSubscription subscription = store.subscribe().onlyChanges().onError(new ErrorObserver() {
-            @Override
-            public void onError(Throwable th) {
-                assertNotSame(testThread, Thread.currentThread());
-                errors.add(th);
-                latch.countDown();
-            }
-        }).on(scheduler).observer(new DataObserver<Class>() {
-            @Override
-            public void onData(Class data) {
-                throw new RuntimeException("Boo");
-            }
+        DataSubscription subscription = store.subscribe().onlyChanges().onError(th -> {
+            assertNotSame(testThread, Thread.currentThread());
+            errors.add(th);
+            latch.countDown();
+        }).on(scheduler).observer(data -> {
+            throw new RuntimeException("Boo");
         });
 
         store.runInTx(txRunnable);
@@ -430,13 +395,9 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     @Test
     public void testSingleCancelSubscription() throws InterruptedException {
         DataSubscription subscription = store.subscribe().single()
-                .transform(new DataTransformer<Class, Class>() {
-                    @Override
-                    @SuppressWarnings("NullableProblems")
-                    public Class transform(Class source) throws Exception {
-                        Thread.sleep(20);
-                        return source;
-                    }
+                .transform(source -> {
+                    Thread.sleep(20);
+                    return source;
                 }).observer(objectClassObserver);
         subscription.cancel();
         Thread.sleep(40);

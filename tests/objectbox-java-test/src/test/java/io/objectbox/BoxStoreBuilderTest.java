@@ -82,29 +82,23 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         builder = createBoxStoreBuilder(false);
         store = builder.maxReaders(1).build();
         final Exception[] exHolder = {null};
-        final Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    getTestEntityBox().count();
-                } catch (Exception e) {
-                    exHolder[0] = e;
-                }
-                getTestEntityBox().closeThreadResources();
+        final Thread thread = new Thread(() -> {
+            try {
+                getTestEntityBox().count();
+            } catch (Exception e) {
+                exHolder[0] = e;
             }
+            getTestEntityBox().closeThreadResources();
         });
 
         getTestEntityBox().count();
-        store.runInReadTx(new Runnable() {
-            @Override
-            public void run() {
-                getTestEntityBox().count();
-                thread.start();
-                try {
-                    thread.join(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        store.runInReadTx(() -> {
+            getTestEntityBox().count();
+            thread.start();
+            try {
+                thread.join(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         });
 

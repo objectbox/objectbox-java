@@ -180,12 +180,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
     @Test
     public void testCommitReadTxException_exceptionListener() {
         final Exception[] exs = {null};
-        DbExceptionListener exceptionListener = new DbExceptionListener() {
-            @Override
-            public void onDbException(Exception e) {
-                exs[0] = e;
-            }
-        };
+        DbExceptionListener exceptionListener = e -> exs[0] = e;
         Transaction tx = store.beginReadTx();
         store.setDbExceptionListener(exceptionListener);
         try {
@@ -232,17 +227,14 @@ public class TransactionTest extends AbstractObjectBoxTest {
         final AtomicInteger threadsOK = new AtomicInteger();
         final AtomicInteger readersFull = new AtomicInteger();
         for (int i = 0; i < count; i++) {
-            threads[i] = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        store.beginReadTx();
-                    } catch (DbMaxReadersExceededException e) {
-                        readersFull.incrementAndGet();
-                    }
-                    threadsOK.incrementAndGet();
+            threads[i] = new Thread(() -> {
+                try {
+                    store.beginReadTx();
+                } catch (DbMaxReadersExceededException e) {
+                    readersFull.incrementAndGet();
                 }
-            };
+                threadsOK.incrementAndGet();
+            });
         }
         for (Thread thread : threads) {
             thread.start();
@@ -284,31 +276,21 @@ public class TransactionTest extends AbstractObjectBoxTest {
     public void testRunInTxRecursive() {
         final Box<TestEntity> box = getTestEntityBox();
         final long[] counts = {0, 0, 0};
-        store.runInTx(new Runnable() {
-            @Override
-            public void run() {
-                box.put(new TestEntity());
-                counts[0] = box.count();
-                try {
-                    store.callInTx(new Callable<Void>() {
-                        @Override
-                        public Void call() {
-                            store.runInTx(new Runnable() {
-                                @Override
-                                public void run() {
-                                    box.put(new TestEntity());
-                                    counts[1] = box.count();
-                                }
-                            });
-                            box.put(new TestEntity());
-                            counts[2] = box.count();
-                            return null;
-                        }
-
+        store.runInTx(() -> {
+            box.put(new TestEntity());
+            counts[0] = box.count();
+            try {
+                store.callInTx((Callable<Void>) () -> {
+                    store.runInTx(() -> {
+                        box.put(new TestEntity());
+                        counts[1] = box.count();
                     });
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                    box.put(new TestEntity());
+                    counts[2] = box.count();
+                    return null;
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
         assertEquals(1, counts[0]);
@@ -322,17 +304,9 @@ public class TransactionTest extends AbstractObjectBoxTest {
         final Box<TestEntity> box = getTestEntityBox();
         final long[] counts = {0, 0};
         box.put(new TestEntity());
-        store.runInReadTx(new Runnable() {
-            @Override
-            public void run() {
-                counts[0] = box.count();
-                store.runInReadTx(new Runnable() {
-                    @Override
-                    public void run() {
-                        counts[1] = box.count();
-                    }
-                });
-            }
+        store.runInReadTx(() -> {
+            counts[0] = box.count();
+            store.runInReadTx(() -> counts[1] = box.count());
         });
         assertEquals(1, counts[0]);
         assertEquals(1, counts[1]);
@@ -342,17 +316,9 @@ public class TransactionTest extends AbstractObjectBoxTest {
     public void testCallInReadTx() {
         final Box<TestEntity> box = getTestEntityBox();
         box.put(new TestEntity());
-        long[] counts = store.callInReadTx(new Callable<long[]>() {
-            @Override
-            public long[] call() throws Exception {
-                long count1 = store.callInReadTx(new Callable<Long>() {
-                    @Override
-                    public Long call() throws Exception {
-                        return box.count();
-                    }
-                });
-                return new long[]{box.count(), count1};
-            }
+        long[] counts = store.callInReadTx(() -> {
+            long count1 = store.callInReadTx(box::count);
+            return new long[]{box.count(), count1};
         });
         assertEquals(1, counts[0]);
         assertEquals(1, counts[1]);
@@ -361,12 +327,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
     @Test
     public void testRunInReadTxAndThenPut() {
         final Box<TestEntity> box = getTestEntityBox();
-        store.runInReadTx(new Runnable() {
-            @Override
-            public void run() {
-                box.count();
-            }
-        });
+        store.runInReadTx(box::count);
         // Verify that box does not hang on to the read-only TX by doing a put
         box.put(new TestEntity());
         assertEquals(1, box.count());
@@ -374,31 +335,20 @@ public class TransactionTest extends AbstractObjectBoxTest {
 
     @Test
     public void testRunInReadTx_recursiveWriteTxFails() {
-        store.runInReadTx(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    store.runInTx(new Runnable() {
-                        @Override
-                        public void run() {
-                        }
-                    });
-                    fail("Should have thrown");
-                } catch (IllegalStateException e) {
-                    // OK
-                }
+        store.runInReadTx(() -> {
+            try {
+                store.runInTx(() -> {
+                });
+                fail("Should have thrown");
+            } catch (IllegalStateException e) {
+                // OK
             }
         });
     }
 
     @Test(expected = DbException.class)
     public void testRunInReadTx_putFails() {
-        store.runInReadTx(new Runnable() {
-            @Override
-            public void run() {
-                getTestEntityBox().put(new TestEntity());
-            }
-        });
+        store.runInReadTx(() -> getTestEntityBox().put(new TestEntity()));
     }
 
     @Test
@@ -406,14 +356,11 @@ public class TransactionTest extends AbstractObjectBoxTest {
         final Box<TestEntity> box = getTestEntityBox();
         final long[] counts = {0};
         box.put(new TestEntity());
-        store.runInTx(new Runnable() {
-            @Override
-            public void run() {
-                putTestEntities(2);
-                box.removeAll();
-                putTestEntity("hello", 3);
-                counts[0] = box.count();
-            }
+        store.runInTx(() -> {
+            putTestEntities(2);
+            box.removeAll();
+            putTestEntity("hello", 3);
+            counts[0] = box.count();
         });
         assertEquals(1, counts[0]);
     }
@@ -428,32 +375,24 @@ public class TransactionTest extends AbstractObjectBoxTest {
         final int countEntities = runExtensiveTests ? 1000 : 100;
         final CountDownLatch threadsDoneLatch = new CountDownLatch(countThreads);
 
-        Callable<Object> callable = new Callable<Object>() {
-            @Override
-            public Long call() throws Exception {
-                assertNotSame(mainTestThread, Thread.currentThread());
-                for (int i = 0; i < countEntities; i++) {
-                    TestEntity entity = new TestEntity();
-                    final int value = number.incrementAndGet();
-                    entity.setSimpleInt(value);
-                    long key = box.put(entity);
-                    TestEntity read = box.get(key);
-                    assertEquals(value, read.getSimpleInt());
-                }
-                return box.count();
+        Callable<Object> callable = () -> {
+            assertNotSame(mainTestThread, Thread.currentThread());
+            for (int i = 0; i < countEntities; i++) {
+                TestEntity entity = new TestEntity();
+                final int value = number.incrementAndGet();
+                entity.setSimpleInt(value);
+                long key = box.put(entity);
+                TestEntity read = box.get(key);
+                assertEquals(value, read.getSimpleInt());
             }
+            return box.count();
         };
-        TxCallback<Object> callback = new TxCallback<Object>() {
-            @Override
-
-            @SuppressWarnings("NullableProblems")
-            public void txFinished(Object result, @Nullable Throwable error) {
-                if (error != null) {
-                    errorCount.incrementAndGet();
-                    error.printStackTrace();
-                }
-                threadsDoneLatch.countDown();
+        TxCallback<Object> callback = (result, error) -> {
+            if (error != null) {
+                errorCount.incrementAndGet();
+                error.printStackTrace();
             }
+            threadsDoneLatch.countDown();
         };
         for (int i = 0; i < countThreads; i++) {
             store.callInTxAsync(callable, callback);
@@ -466,24 +405,14 @@ public class TransactionTest extends AbstractObjectBoxTest {
 
     @Test
     public void testCallInTxAsync_Error() throws InterruptedException {
-        Callable<Object> callable = new Callable<Object>() {
-            @Override
-            public Long call() throws Exception {
-                TestEntity entity = new TestEntity();
-                entity.setId(-1);
-                getTestEntityBox().put(entity);
-                return null;
-            }
+        Callable<Object> callable = () -> {
+            TestEntity entity = new TestEntity();
+            entity.setId(-1);
+            getTestEntityBox().put(entity);
+            return null;
         };
         final LinkedBlockingQueue<Throwable> queue = new LinkedBlockingQueue<>();
-        TxCallback<Object> callback = new TxCallback<Object>() {
-            @Override
-
-            @SuppressWarnings("NullableProblems")
-            public void txFinished(Object result, @Nullable Throwable error) {
-                queue.add(error);
-            }
-        };
+        TxCallback<Object> callback = (result, error) -> queue.add(error);
         store.callInTxAsync(callable, callback);
 
         Throwable result = queue.poll(5, TimeUnit.SECONDS);
