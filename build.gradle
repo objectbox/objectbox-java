@@ -28,6 +28,7 @@ buildscript {
         objectboxNativeDependency = "io.objectbox:objectbox-$objectboxPlatform:$ob_native_version"
         println "ObjectBox native dependency: $objectboxNativeDependency"
     }
+    ext.junit_version = '4.13'
 
     repositories {
         mavenCentral()

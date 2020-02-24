@@ -58,8 +58,6 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     compile project(':objectbox-java')
-
-    //testCompile 'junit:junit:4.12'
 }
 
 

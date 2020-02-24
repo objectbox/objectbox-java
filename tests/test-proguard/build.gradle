@@ -33,5 +33,5 @@ dependencies {
         println "Did NOT add native dependency"
     }
 
-    testCompile 'junit:junit:4.12'
+    testCompile "junit:junit:$junit_version"
 }
