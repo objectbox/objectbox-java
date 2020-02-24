@@ -611,7 +611,7 @@ public class Query<T> implements Closeable {
      * it may be GCed and observers may become stale (won't receive anymore data).
      */
     public SubscriptionBuilder<List<T>> subscribe() {
-        return new SubscriptionBuilder<>(publisher, null, box.getStore().internalThreadPool());
+        return new SubscriptionBuilder<>(publisher, null);
     }
 
     /**
