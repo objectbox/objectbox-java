@@ -203,8 +203,7 @@ public class CursorTest extends AbstractObjectBoxTest {
 
     @Test
     public void testClose() {
-        Transaction tx = store.beginReadTx();
-        try {
+        try (Transaction tx = store.beginReadTx()) {
             Cursor<TestEntity> cursor = tx.createCursor(TestEntity.class);
             assertFalse(cursor.isClosed());
             cursor.close();
@@ -212,8 +211,6 @@ public class CursorTest extends AbstractObjectBoxTest {
 
             // Double close should be fine
             cursor.close();
-        } finally {
-            tx.close();
         }
     }
 
