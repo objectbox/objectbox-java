@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
+import io.objectbox.ObjectClassObserverTest;
 import io.objectbox.TestEntity;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataSubscription;
@@ -147,6 +148,44 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
         assertEquals(2, receivedSums.size());
         assertEquals(0, (int) receivedSums.get(0));
         assertEquals(2003 + 2007 + 2002, (int) receivedSums.get(1));
+    }
+
+    /**
+     * There is an identical test asserting ObjectClassPublisher at
+     * {@link ObjectClassObserverTest#transform_inOrderOfPublish()}.
+     */
+    @Test
+    public void transform_inOrderOfPublish() {
+        Query<TestEntity> query = box.query().build();
+
+        final CountDownLatch latch = new CountDownLatch(2);
+        final AtomicBoolean isLongTransform = new AtomicBoolean(true);
+        final List<Integer> placing = new CopyOnWriteArrayList<>();
+
+        // Make first transformation take longer than second.
+        DataSubscription subscription = query.subscribe().transform(source -> {
+            if (isLongTransform.compareAndSet(true, false)) {
+                // Wait long enough so publish triggered by transaction
+                // can overtake publish triggered during observer() call.
+                Thread.sleep(1000);
+                return 1; // First, during observer() call.
+            }
+            return 2; // Second, due to transaction.
+        }).observer(data -> {
+            placing.add(data);
+            latch.countDown();
+        });
+
+        // Trigger publish due to transaction.
+        store.runInTx(() -> putTestEntities(1));
+
+        assertLatchCountedDown(latch, 3);
+        subscription.cancel();
+
+        // Second publish request should still deliver second.
+        assertEquals(2, placing.size());
+        assertEquals(1, (int) placing.get(0));
+        assertEquals(2, (int) placing.get(1));
     }
 
     private void putTestEntitiesScalars() {
