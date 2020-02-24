@@ -78,7 +78,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testMaxReaders() throws InterruptedException {
+    public void testMaxReaders() {
         builder = createBoxStoreBuilder(false);
         store = builder.maxReaders(1).build();
         final Exception[] exHolder = {null};

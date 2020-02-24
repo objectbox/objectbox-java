@@ -157,7 +157,7 @@ public class IndexReaderRenewTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testOldReaderWithIndex() throws InterruptedException {
+    public void testOldReaderWithIndex() {
         final Box<EntityLongIndex> box = store.boxFor(EntityLongIndex.class);
         final int initialValue = 1;
 

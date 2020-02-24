@@ -171,7 +171,7 @@ public class CursorTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testLookupKeyUsingIndex() throws IOException {
+    public void testLookupKeyUsingIndex() {
         insertTestEntities("find me", "not me");
 
         Transaction transaction = store.beginTx();
@@ -247,7 +247,7 @@ public class CursorTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testRenew() throws IOException {
+    public void testRenew() {
         insertTestEntities("orange");
 
         Transaction transaction = store.beginReadTx();

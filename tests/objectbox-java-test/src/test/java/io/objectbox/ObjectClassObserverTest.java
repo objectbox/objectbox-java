@@ -195,7 +195,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testScheduler() throws InterruptedException {
+    public void testScheduler() {
         TestScheduler scheduler = new TestScheduler();
         store.subscribe().onlyChanges().on(scheduler).observer(objectClassObserver);
 
