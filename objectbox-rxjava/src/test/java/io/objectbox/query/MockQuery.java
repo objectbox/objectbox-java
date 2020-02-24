@@ -35,7 +35,7 @@ public class MockQuery<T> {
         // when(box.getStore()).thenReturn(boxStore);
          query = mock(Query.class);
         fakeQueryPublisher = new FakeQueryPublisher();
-        SubscriptionBuilder subscriptionBuilder = new SubscriptionBuilder(fakeQueryPublisher, null, null);
+        SubscriptionBuilder subscriptionBuilder = new SubscriptionBuilder(fakeQueryPublisher, null);
         when(query.subscribe()).thenReturn(subscriptionBuilder);
     }
 
