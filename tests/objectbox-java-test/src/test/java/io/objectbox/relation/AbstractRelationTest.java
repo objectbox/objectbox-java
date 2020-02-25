@@ -27,6 +27,7 @@ import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
+import io.objectbox.DebugFlags;
 
 public abstract class AbstractRelationTest extends AbstractObjectBoxTest {
 
@@ -35,7 +36,9 @@ public abstract class AbstractRelationTest extends AbstractObjectBoxTest {
 
     @Override
     protected BoxStore createBoxStore() {
-        return MyObjectBox.builder().baseDirectory(boxStoreDir).debugTransactions().build();
+        return MyObjectBox.builder().baseDirectory(boxStoreDir)
+                .debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE)
+                .build();
     }
 
     @After

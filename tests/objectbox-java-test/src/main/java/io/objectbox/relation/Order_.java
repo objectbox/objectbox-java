@@ -17,13 +17,8 @@
 
 package io.objectbox.relation;
 
-import javax.annotation.Nullable;
-
-import io.objectbox.BoxStore;
-import io.objectbox.Cursor;
 import io.objectbox.EntityInfo;
 import io.objectbox.Property;
-import io.objectbox.Transaction;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
@@ -53,19 +48,20 @@ public class Order_ implements EntityInfo<Order> {
 
     public final static Order_ __INSTANCE = new Order_();
 
-    public final static Property id = new Property(__INSTANCE, 0, 1, long.class, "id", true, "_id");
-    public final static Property date = new Property(__INSTANCE, 1, 2, java.util.Date.class, "date");
-    public final static Property customerId = new Property(__INSTANCE, 2, 3, long.class, "customerId");
-    public final static Property text = new Property(__INSTANCE, 3, 4, String.class, "text");
+    public final static Property<Order> id = new Property<>(__INSTANCE, 0, 1, long.class, "id", true, "_id");
+    public final static Property<Order> date = new Property<>(__INSTANCE, 1, 2, java.util.Date.class, "date");
+    public final static Property<Order> customerId = new Property<>(__INSTANCE, 2, 3, long.class, "customerId");
+    public final static Property<Order> text = new Property<>(__INSTANCE, 3, 4, String.class, "text");
 
-    public final static Property[] __ALL_PROPERTIES = {
+    @SuppressWarnings("unchecked")
+    public final static Property<Order>[] __ALL_PROPERTIES = new Property[]{
             id,
             date,
             customerId,
             text
     };
 
-    public final static Property __ID_PROPERTY = id;
+    public final static Property<Order> __ID_PROPERTY = id;
 
     @Override
     public String getEntityName() {
@@ -88,12 +84,12 @@ public class Order_ implements EntityInfo<Order> {
     }
 
     @Override
-    public Property[] getAllProperties() {
+    public Property<Order>[] getAllProperties() {
         return __ALL_PROPERTIES;
     }
 
     @Override
-    public Property getIdProperty() {
+    public Property<Order> getIdProperty() {
         return __ID_PROPERTY;
     }
 
@@ -116,7 +112,7 @@ public class Order_ implements EntityInfo<Order> {
 
     static final RelationInfo<Order, Customer> customer = new RelationInfo<>(Order_.__INSTANCE, Customer_.__INSTANCE, customerId, new ToOneGetter<Order>() {
         @Override
-        public ToOne getToOne(Order object) {
+        public ToOne<Customer> getToOne(Order object) {
             return object.customer__toOne;
         }
     });

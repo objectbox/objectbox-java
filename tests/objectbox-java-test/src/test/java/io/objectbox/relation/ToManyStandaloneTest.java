@@ -79,12 +79,7 @@ public class ToManyStandaloneTest extends AbstractRelationTest {
         customer = customerBox.get(customer.getId());
         final ToMany<Order> toMany = customer.getOrdersStandalone();
 
-        store.runInReadTx(new Runnable() {
-            @Override
-            public void run() {
-                assertGetOrder1And2(toMany);
-            }
-        });
+        store.runInReadTx(() -> assertGetOrder1And2(toMany));
     }
 
     @Test

@@ -88,22 +88,15 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
         assertEquals(0, query.count());
         final List<Integer> receivedSums = new ArrayList<>();
 
-        query.subscribe().transform(new DataTransformer<List<TestEntity>, Integer>() {
-
-            @Override
-            public Integer transform(List<TestEntity> source) {
-                int sum = 0;
-                for (TestEntity entity : source) {
-                    sum += entity.getSimpleInt();
-                }
-                return sum;
+        query.subscribe().transform(source -> {
+            int sum = 0;
+            for (TestEntity entity : source) {
+                sum += entity.getSimpleInt();
             }
-        }).observer(new DataObserver<Integer>() {
-            @Override
-            public void onData(Integer data) {
-                receivedSums.add(data);
-                latch.countDown();
-            }
+            return sum;
+        }).observer(data -> {
+            receivedSums.add(data);
+            latch.countDown();
         });
         assertLatchCountedDown(latch, 5);
 
