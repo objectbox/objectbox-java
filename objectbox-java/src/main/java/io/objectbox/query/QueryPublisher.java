@@ -17,6 +17,7 @@
 package io.objectbox.query;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Set;
@@ -49,13 +50,13 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
     private final Deque<DataObserver<List<T>>> publishQueue = new ArrayDeque<>();
     private volatile boolean publisherRunning = false;
 
-    private static class AllObservers<T> implements DataObserver<List<T>> {
+    private static class SubscribedObservers<T> implements DataObserver<List<T>> {
         @Override
         public void onData(List<T> data) {
         }
     }
-    /** Placeholder observer if all observers should be notified. */
-    private final AllObservers<T> ALL_OBSERVERS = new AllObservers<>();
+    /** Placeholder observer if subscribed observers should be notified. */
+    private final SubscribedObservers<T> SUBSCRIBED_OBSERVERS = new SubscribedObservers<>();
 
     private DataObserver<Class<T>> objectClassObserver;
     private DataSubscription objectClassSubscription;
@@ -103,7 +104,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
 
     void publish() {
         synchronized (publishQueue) {
-            publishQueue.add(ALL_OBSERVERS);
+            publishQueue.add(SUBSCRIBED_OBSERVERS);
             if (!publisherRunning) {
                 publisherRunning = true;
                 box.getStore().internalScheduleThread(this);
@@ -111,34 +112,47 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
         }
     }
 
+    /**
+     * Processes publish requests for this query on a single thread to prevent
+     * older query results getting delivered after newer query results.
+     * To speed up processing each loop publishes to all queued observers instead of just the next in line.
+     * This reduces time spent querying and waiting for DataObserver.onData() and their potential DataTransformers.
+     */
     @Override
     public void run() {
-        /*
-         * Process publish requests for this query on a single thread to avoid an older request
-         * racing a new one (and causing outdated results to be delivered last).
-         */
         try {
             while (true) {
-                // Get next observer(s).
-                DataObserver<List<T>> observer;
+                // Get all queued observer(s), stop processing if none.
+                List<DataObserver<List<T>>> singlePublishObservers = new ArrayList<>();
+                boolean notifySubscribedObservers = false;
                 synchronized (publishQueue) {
-                    observer = publishQueue.pollFirst();
-                    if (observer == null) {
+                    DataObserver<List<T>> nextObserver;
+                    while ((nextObserver = publishQueue.poll()) != null) {
+                        if (SUBSCRIBED_OBSERVERS.equals(nextObserver)) {
+                            notifySubscribedObservers = true;
+                        } else {
+                            singlePublishObservers.add(nextObserver);
+                        }
+                    }
+                    if (!notifySubscribedObservers && singlePublishObservers.isEmpty()) {
                         publisherRunning = false;
-                        break;
+                        break; // Stop.
                     }
                 }
 
-                // Query, then notify observer(s).
+                // Query.
                 List<T> result = query.find();
-                if (ALL_OBSERVERS.equals(observer)) {
+
+                // Notify observer(s).
+                for (DataObserver<List<T>> observer : singlePublishObservers) {
+                    observer.onData(result);
+                }
+                if (notifySubscribedObservers) {
                     // Use current list of observers to avoid notifying unsubscribed observers.
                     Set<DataObserver<List<T>>> observers = this.observers;
                     for (DataObserver<List<T>> dataObserver : observers) {
                         dataObserver.onData(result);
                     }
-                } else {
-                    observer.onData(result);
                 }
             }
         } finally {
