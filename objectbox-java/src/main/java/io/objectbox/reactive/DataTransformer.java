@@ -16,17 +16,16 @@
 
 package io.objectbox.reactive;
 
-import javax.annotation.Nullable;
-
 /**
  * Transforms or processes data before it is given to subscribed {@link DataObserver}s. A transformer is set via
  * {@link SubscriptionBuilder#transform(DataTransformer)}.
- *
+ * <p>
  * Note that a transformer is not required to actually "transform" any data.
  * Technically, it's fine to return the same data it received and just do some processing with it.
- *
- * Threading notes: Note that the transformer is always executed asynchronously.
- * It is OK to perform long lasting operations.
+ * <p>
+ * Threading notes: transformations are executed sequentially on a background thread
+ * owned by the subscription publisher. It is OK to perform long lasting operations,
+ * however this will block notifications to all other observers until finished.
  *
  * @param <FROM> Data type this transformer receives
  * @param <TO> Type of transformed data
