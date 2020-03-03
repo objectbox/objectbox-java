@@ -23,6 +23,7 @@ import io.objectbox.BoxStore
 import io.objectbox.Property
 import io.objectbox.query.Query
 import io.objectbox.query.QueryBuilder
+import io.objectbox.query.QueryCondition
 import io.objectbox.relation.ToMany
 import kotlin.reflect.KClass
 
@@ -134,7 +135,7 @@ inline fun <reified T> QueryBuilder<T>.between(property: Property<T>, value1: Fl
  * }
  * ```
  */
-inline fun <T> Box<T>.query(block: QueryBuilder<T>.() -> Unit) : Query<T> {
+inline fun <T> Box<T>.query(block: QueryBuilder<T>.() -> Unit): Query<T> {
     val builder = query()
     block(builder)
     return builder.build()
@@ -154,4 +155,22 @@ inline fun <T> ToMany<T>.applyChangesToDb(resetFirst: Boolean = false, body: ToM
     if (resetFirst) reset()
     body()
     applyChangesToDb()
+}
+
+/**
+ * Combines the left hand side condition using AND with the right hand side condition.
+ *
+ * @see or
+ */
+infix fun <T> QueryCondition<T>.and(queryCondition: QueryCondition<T>): QueryCondition<T> {
+    return and(queryCondition)
+}
+
+/**
+ * Combines the left hand side condition using OR with the right hand side condition.
+ *
+ * @see and
+ */
+infix fun <T> QueryCondition<T>.or(queryCondition: QueryCondition<T>): QueryCondition<T> {
+    return or(queryCondition)
 }
