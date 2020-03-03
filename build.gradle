@@ -4,11 +4,13 @@ version = ob_version
 buildscript {
     ext {
         // Typically, only edit those two:
-        def objectboxVersionNumber = '2.5.2' // without "-SNAPSHOT", e.g. '2.5.0' or '2.4.0-RC'
+        def objectboxVersionNumber = '3.0.0-alpha2' // without "-SNAPSHOT", e.g. '2.5.0' or '2.4.0-RC'
         def objectboxVersionRelease = false  // set to true for releasing to ignore versionPostFix to avoid e.g. "-dev" versions
 
         // version post fix: '-<value>' or '' if not defined; e.g. used by CI to pass in branch name
-        def versionPostFixValue = project.findProperty('versionPostFix')
+//        def versionPostFixValue = project.findProperty('versionPostFix')
+        // PREVIEW RELEASE, do not use version post fix.
+        def versionPostFixValue = ''
         def versionPostFix = versionPostFixValue ? "-$versionPostFixValue" : ''
         ob_version = objectboxVersionNumber + (objectboxVersionRelease? "" : "$versionPostFix-SNAPSHOT")
         println "ObjectBox Java version $ob_version"
