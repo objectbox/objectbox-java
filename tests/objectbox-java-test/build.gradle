@@ -1,9 +1,17 @@
 apply plugin: 'java-library'
+apply plugin: 'kotlin'
 
 uploadArchives.enabled = false
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
+
+// Produce Java 8 byte code, would default to Java 6.
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
 
 repositories {
     // Native lib might be deployed only in internal repo
@@ -27,6 +35,8 @@ repositories {
 
 dependencies {
     implementation project(':objectbox-java')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation project(':objectbox-kotlin')
     implementation "org.greenrobot:essentials:$essentials_version"
 
     // Check flag to use locally compiled version to avoid dependency cycles
