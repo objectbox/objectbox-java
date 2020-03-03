@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'kotlin'
 
 uploadArchives.enabled = false
 
@@ -23,6 +24,7 @@ repositories {
 
 dependencies {
     compile project(':objectbox-java')
+    compile project(':objectbox-kotlin')
     compile 'org.greenrobot:essentials:3.0.0-RC1'
 
     // Check flag to use locally compiled version to avoid dependency cycles
