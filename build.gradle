@@ -19,7 +19,9 @@ buildscript {
 
         // Core version for tests
         // Be careful to diverge here; easy to forget and hard to find JNI problems
-        ob_native_version = objectboxVersionNumber + (objectboxVersionRelease? "": "-dev-SNAPSHOT")
+//        ob_native_version = objectboxVersionNumber + (objectboxVersionRelease? "": "-dev-SNAPSHOT")
+        // PREVIEW RELEASE, use last stable version 2.5.1 of native libraries.
+        ob_native_version = '2.5.1'
 
         def osName = System.getProperty("os.name").toLowerCase()
         objectboxPlatform = osName.contains('linux') ? 'linux'
