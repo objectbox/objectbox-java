@@ -1,10 +1,7 @@
 package io.objectbox.query
 
 import io.objectbox.TestEntity_
-import io.objectbox.kotlin.and
-import io.objectbox.kotlin.inValues
-import io.objectbox.kotlin.or
-import io.objectbox.kotlin.query
+import io.objectbox.kotlin.*
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -34,8 +31,8 @@ class QueryTestK : AbstractQueryTest() {
 
         // suggested query API
         val newQuery = box.query(
-                (TestEntity_.simpleInt.less(12) or TestEntity_.simpleLong.oneOf(longArrayOf(1012)))
-                        and TestEntity_.simpleString.equal("Fry")
+                (TestEntity_.simpleInt less 12 or (TestEntity_.simpleLong oneOf longArrayOf(1012)))
+                        and (TestEntity_.simpleString equal "Fry")
         ).order(TestEntity_.simpleInt).build()
         val resultsNew = newQuery.find()
         assertEquals(2, resultsNew.size)
@@ -44,15 +41,15 @@ class QueryTestK : AbstractQueryTest() {
 
         val newQueryOr = box.query(
                 // (EQ OR EQ) AND LESS
-                (TestEntity_.simpleString.equal("Fry") or TestEntity_.simpleString.equal("Sarah"))
-                        and TestEntity_.simpleInt.less(12)
+                (TestEntity_.simpleString equal "Fry" or (TestEntity_.simpleString equal "Sarah"))
+                        and (TestEntity_.simpleInt less 12)
         ).build().find()
         assertEquals(1, newQueryOr.size) // only the Fry age 10
 
         val newQueryAnd = box.query(
                 // EQ OR (EQ AND LESS)
-                TestEntity_.simpleString.equal("Fry") or
-                        (TestEntity_.simpleString.equal("Sarah") and TestEntity_.simpleInt.less(12))
+                TestEntity_.simpleString equal "Fry" or
+                        (TestEntity_.simpleString equal "Sarah" and (TestEntity_.simpleInt less 12))
         ).build().find()
         assertEquals(3, newQueryAnd.size) // all Fry's
     }
@@ -61,8 +58,8 @@ class QueryTestK : AbstractQueryTest() {
     fun intLessAndGreater() {
         putTestEntitiesScalars()
         val query = box.query(
-                TestEntity_.simpleInt.greater(2003)
-                        and TestEntity_.simpleShort.less(2107)
+                TestEntity_.simpleInt greater 2003
+                        and (TestEntity_.simpleShort less 2107)
         ).build()
         assertEquals(3, query.count())
     }
@@ -82,7 +79,7 @@ class QueryTestK : AbstractQueryTest() {
 
         val valuesInt = intArrayOf(1, 1, 2, 3, 2003, 2007, 2002, -1)
         val query = box.query(
-                TestEntity_.simpleInt.oneOf(valuesInt).alias("int")
+                (TestEntity_.simpleInt oneOf(valuesInt)).alias("int")
         ).build()
         assertEquals(3, query.count())
 
@@ -100,7 +97,7 @@ class QueryTestK : AbstractQueryTest() {
     fun or() {
         putTestEntitiesScalars()
         val query = box.query(
-                TestEntity_.simpleInt.equal(2007) or TestEntity_.simpleLong.equal(3002)
+                TestEntity_.simpleInt equal 2007 or (TestEntity_.simpleLong equal 3002)
         ).build()
         val entities = query.find()
         assertEquals(2, entities.size.toLong())
@@ -113,7 +110,7 @@ class QueryTestK : AbstractQueryTest() {
         putTestEntitiesScalars()
         // Result if OR precedence (wrong): {}, AND precedence (expected): {2008}
         val query = box.query(
-                TestEntity_.simpleInt.equal(2006) and TestEntity_.simpleInt.equal(2007) or TestEntity_.simpleInt.equal(2008)
+                TestEntity_.simpleInt equal 2006 and (TestEntity_.simpleInt equal 2007) or (TestEntity_.simpleInt equal 2008)
         ).build()
         val entities = query.find()
         assertEquals(1, entities.size.toLong())
