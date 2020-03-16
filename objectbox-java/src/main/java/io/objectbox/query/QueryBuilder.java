@@ -94,7 +94,14 @@ public class QueryBuilder<T> implements Closeable {
 
     private long handle;
 
+    /**
+     * Holds on to last condition. May be a property condition or a combined condition.
+     */
     private long lastCondition;
+    /**
+     * Holds on to last property condition to use with {@link #parameterAlias(String)}
+     */
+    private long lastPropertyCondition;
     private Operator combineNextWith = Operator.NONE;
 
     @Nullable
@@ -307,10 +314,10 @@ public class QueryBuilder<T> implements Closeable {
      */
     public QueryBuilder<T> parameterAlias(String alias) {
         verifyHandle();
-        if (lastCondition == 0) {
+        if (lastPropertyCondition == 0) {
             throw new IllegalStateException("No previous condition. Before you can assign an alias, you must first have a condition.");
         }
-        nativeSetParameterAlias(lastCondition, alias);
+        nativeSetParameterAlias(lastPropertyCondition, alias);
         return this;
     }
 
@@ -478,6 +485,7 @@ public class QueryBuilder<T> implements Closeable {
         } else {
             lastCondition = currentCondition;
         }
+        lastPropertyCondition = currentCondition;
     }
 
     public QueryBuilder<T> isNull(Property<T> property) {

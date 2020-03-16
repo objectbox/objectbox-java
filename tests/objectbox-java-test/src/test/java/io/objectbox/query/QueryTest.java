@@ -618,6 +618,27 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(2, query.findUnique().getId());
     }
 
+    /**
+     * https://github.com/objectbox/objectbox-java/issues/834
+     */
+    @Test
+    public void parameterAlias_combinedConditions() {
+        putTestEntitiesScalars();
+
+        Query<TestEntity> query = box.query()
+                .greater(simpleInt, 0).parameterAlias("greater")
+                .or()
+                .less(simpleInt, 0).parameterAlias("less")
+                .build();
+        List<TestEntity> results = query
+                .setParameter("greater", 2008)
+                .setParameter("less", 2001)
+                .find();
+        assertEquals(2, results.size());
+        assertEquals(2000, results.get(0).getSimpleInt());
+        assertEquals(2009, results.get(1).getSimpleInt());
+    }
+
     @Test
     public void testForEach() {
         List<TestEntity> testEntities = putTestEntitiesStrings();
