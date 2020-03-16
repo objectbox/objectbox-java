@@ -79,7 +79,7 @@ class QueryTestK : AbstractQueryTest() {
 
         val valuesInt = intArrayOf(1, 1, 2, 3, 2003, 2007, 2002, -1)
         val query = box.query(
-                (TestEntity_.simpleInt oneOf(valuesInt)).alias("int")
+                TestEntity_.simpleInt oneOf(valuesInt) alias "int"
         ).build()
         assertEquals(3, query.count())
 
