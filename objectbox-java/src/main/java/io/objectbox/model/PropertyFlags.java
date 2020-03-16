@@ -77,8 +77,9 @@ public final class PropertyFlags {
    */
   public static final int INDEX_HASH64 = 4096;
   /**
-   * Unused yet: While our default are signed ints, queries and indexes need do know signing info.
-   * Note: Don't combine with ID (IDs are always unsigned internally).
+   * In Java (and Kotlin) integers are stored as signed by default,
+   * but queries and indexes may choose to treat them as unsigned when using this flag.
+   * Note: Don't combine with ID, they are always unsigned internally.
    */
   public static final int UNSIGNED = 8192;
 }
