@@ -19,7 +19,6 @@ package io.objectbox;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +36,7 @@ import io.objectbox.internal.CallWithHandle;
 import io.objectbox.internal.IdGetter;
 import io.objectbox.internal.ReflectionCache;
 import io.objectbox.query.QueryBuilder;
+import io.objectbox.query.QueryCondition;
 import io.objectbox.relation.RelationInfo;
 
 /**
@@ -553,6 +553,30 @@ public class Box<T> {
      */
     public QueryBuilder<T> query() {
         return new QueryBuilder<>(this, store.internalHandle(), store.getDbName(entityClass));
+    }
+
+    /**
+     * Applies the given query conditions and returns the builder for further customization, such as result order.
+     * Build the condition using the properties from your entity underscore classes.
+     * <p>
+     * An example with a nested OR condition:
+     * <pre>
+     * # Java
+     * box.query(User_.name.equal("Jane")
+     *         .and(User_.age.less(12)
+     *                 .or(User_.status.equal("child"))));
+     *
+     * # Kotlin
+     * box.query(User_.name.equal("Jane")
+     *         and (User_.age.less(12)
+     *         or User_.status.equal("child")))
+     * </pre>
+     * This method is a shortcut for {@code query().apply(condition)}.
+     *
+     * @see QueryBuilder#apply(QueryCondition)
+     */
+    public QueryBuilder<T> query(QueryCondition<T> queryCondition) {
+        return query().apply(queryCondition);
     }
 
     public BoxStore getStore() {

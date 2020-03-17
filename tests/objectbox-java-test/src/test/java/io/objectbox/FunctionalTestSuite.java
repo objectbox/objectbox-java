@@ -22,6 +22,8 @@ import io.objectbox.query.PropertyQueryTest;
 import io.objectbox.query.QueryFilterComparatorTest;
 import io.objectbox.query.QueryObserverTest;
 import io.objectbox.query.QueryTest;
+import io.objectbox.query.QueryTest2;
+import io.objectbox.query.QueryTestK;
 import io.objectbox.relation.RelationEagerTest;
 import io.objectbox.relation.RelationTest;
 import io.objectbox.relation.ToManyStandaloneTest;
@@ -48,6 +50,8 @@ import org.junit.runners.Suite.SuiteClasses;
         QueryFilterComparatorTest.class,
         QueryObserverTest.class,
         QueryTest.class,
+        QueryTest2.class,
+        QueryTestK.class,
         RelationTest.class,
         RelationEagerTest.class,
         ToManyStandaloneTest.class,

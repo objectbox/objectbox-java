@@ -17,16 +17,26 @@
 package io.objectbox;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.Date;
 
 import javax.annotation.Nullable;
 
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbException;
-import io.objectbox.query.QueryCondition;
-import io.objectbox.query.QueryCondition.PropertyCondition;
-import io.objectbox.query.QueryCondition.PropertyCondition.Operation;
+import io.objectbox.query.PropertyQueryCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.ByteArrayCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.DoubleCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.DoubleDoubleCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.IntArrayCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.LongArrayCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.LongCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.LongLongCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.NullCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.StringArrayCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.StringCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.StringCondition.Operation;
+import io.objectbox.query.QueryBuilder.StringOrder;
 
 /**
  * Meta data describing a property of an ObjectBox entity.
@@ -90,71 +100,208 @@ public class Property<ENTITY> implements Serializable {
         this.customType = customType;
     }
 
-    /** Creates an "equal ('=')" condition for this property. */
-    public QueryCondition eq(Object value) {
-        return new PropertyCondition(this, Operation.EQUALS, value);
-    }
-
-    /** Creates an "not equal ('&lt;&gt;')" condition for this property. */
-    public QueryCondition notEq(Object value) {
-        return new PropertyCondition(this, Operation.NOT_EQUALS, value);
-    }
-
-    /** Creates an "BETWEEN ... AND ..." condition for this property. */
-    public QueryCondition between(Object value1, Object value2) {
-        Object[] values = {value1, value2};
-        return new PropertyCondition(this, Operation.BETWEEN, values);
-    }
-
-    /** Creates an "IN (..., ..., ...)" condition for this property. */
-    public QueryCondition in(Object... inValues) {
-        return new PropertyCondition(this, Operation.IN, inValues);
-    }
-
-    /** Creates an "IN (..., ..., ...)" condition for this property. */
-    public QueryCondition in(Collection<?> inValues) {
-        return in(inValues.toArray());
-    }
-
-    /** Creates an "greater than ('&gt;')" condition for this property. */
-    public QueryCondition gt(Object value) {
-        return new PropertyCondition(this, Operation.GREATER_THAN, value);
-    }
-
-    /** Creates an "less than ('&lt;')" condition for this property. */
-    public QueryCondition lt(Object value) {
-        return new PropertyCondition(this, Operation.LESS_THAN, value);
-    }
-
     /** Creates an "IS NULL" condition for this property. */
-    public QueryCondition isNull() {
-        return new PropertyCondition(this, Operation.IS_NULL, null);
+    public PropertyQueryCondition<ENTITY> isNull() {
+        return new NullCondition<>(this, NullCondition.Operation.IS_NULL);
     }
 
     /** Creates an "IS NOT NULL" condition for this property. */
-    public QueryCondition isNotNull() {
-        return new PropertyCondition(this, Operation.IS_NOT_NULL, null);
+    public PropertyQueryCondition<ENTITY> notNull() {
+        return new NullCondition<>(this, NullCondition.Operation.NOT_NULL);
+    }
+
+    /** Creates an "equal ('=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> equal(boolean value) {
+        return new LongCondition<>(this, LongCondition.Operation.EQUAL, value);
+    }
+
+    /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> notEqual(boolean value) {
+        return new LongCondition<>(this, LongCondition.Operation.NOT_EQUAL, value);
+    }
+
+    /** Creates an "IN (..., ..., ...)" condition for this property. */
+    public PropertyQueryCondition<ENTITY> oneOf(int[] values) {
+        return new IntArrayCondition<>(this, IntArrayCondition.Operation.IN, values);
+    }
+
+    /** Creates a "NOT IN (..., ..., ...)" condition for this property. */
+    public PropertyQueryCondition<ENTITY> notOneOf(int[] values) {
+        return new IntArrayCondition<>(this, IntArrayCondition.Operation.NOT_IN, values);
+    }
+
+    /** Creates an "equal ('=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> equal(long value) {
+        return new LongCondition<>(this, LongCondition.Operation.EQUAL, value);
+    }
+
+    /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> notEqual(long value) {
+        return new LongCondition<>(this, LongCondition.Operation.NOT_EQUAL, value);
+    }
+
+    /** Creates a "greater than ('&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greater(long value) {
+        return new LongCondition<>(this, LongCondition.Operation.GREATER, value);
+    }
+
+    /** Creates a "less than ('&lt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> less(long value) {
+        return new LongCondition<>(this, LongCondition.Operation.LESS, value);
+    }
+
+    /** Creates an "IN (..., ..., ...)" condition for this property. */
+    public PropertyQueryCondition<ENTITY> oneOf(long[] values) {
+        return new LongArrayCondition<>(this, LongArrayCondition.Operation.IN, values);
+    }
+
+    /** Creates a "NOT IN (..., ..., ...)" condition for this property. */
+    public PropertyQueryCondition<ENTITY> notOneOf(long[] values) {
+        return new LongArrayCondition<>(this, LongArrayCondition.Operation.NOT_IN, values);
+    }
+
+    /** Creates an "BETWEEN ... AND ..." condition for this property. */
+    public PropertyQueryCondition<ENTITY> between(long lowerBoundary, long upperBoundary) {
+        return new LongLongCondition<>(this, LongLongCondition.Operation.BETWEEN, lowerBoundary, upperBoundary);
     }
 
     /**
-     * @see io.objectbox.query.QueryBuilder#contains(Property, String)
+     * Calls {@link #between(double, double)} with {@code value - tolerance} as lower bound and
+     * {@code value + tolerance} as upper bound.
      */
-    public QueryCondition contains(String value) {
-        return new PropertyCondition(this, Operation.CONTAINS, value);
+    public PropertyQueryCondition<ENTITY> equal(double value, double tolerance) {
+        return new DoubleDoubleCondition<>(this, DoubleDoubleCondition.Operation.BETWEEN,
+                value - tolerance, value + tolerance);
     }
 
-    /**
-     * @see io.objectbox.query.QueryBuilder#startsWith(Property, String)
-     */
-    public QueryCondition startsWith(String value) {
-        return new PropertyCondition(this, Operation.STARTS_WITH, value);
+    /** Creates a "greater than ('&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greater(double value) {
+        return new DoubleCondition<>(this, DoubleCondition.Operation.GREATER, value);
     }
 
-    /**
-     * @see io.objectbox.query.QueryBuilder#endsWith(Property, String)
-     */
-    public QueryCondition endsWith(String value) {
-        return new PropertyCondition(this, Operation.ENDS_WITH, value);
+    /** Creates a "less than ('&lt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> less(double value) {
+        return new DoubleCondition<>(this, DoubleCondition.Operation.LESS, value);
+    }
+
+    /** Creates an "BETWEEN ... AND ..." condition for this property. */
+    public PropertyQueryCondition<ENTITY> between(double lowerBoundary, double upperBoundary) {
+        return new DoubleDoubleCondition<>(this, DoubleDoubleCondition.Operation.BETWEEN,
+                lowerBoundary, upperBoundary);
+    }
+
+    /** Creates an "equal ('=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> equal(Date value) {
+        return new LongCondition<>(this, LongCondition.Operation.EQUAL, value);
+    }
+
+    /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> notEqual(Date value) {
+        return new LongCondition<>(this, LongCondition.Operation.NOT_EQUAL, value);
+    }
+
+    /** Creates a "greater than ('&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greater(Date value) {
+        return new LongCondition<>(this, LongCondition.Operation.GREATER, value);
+    }
+
+    /** Creates a "less than ('&lt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> less(Date value) {
+        return new LongCondition<>(this, LongCondition.Operation.LESS, value);
+    }
+
+    /** Creates an "BETWEEN ... AND ..." condition for this property. */
+    public PropertyQueryCondition<ENTITY> between(Date lowerBoundary, Date upperBoundary) {
+        return new LongLongCondition<>(this, LongLongCondition.Operation.BETWEEN, lowerBoundary, upperBoundary);
+    }
+
+    /** Creates an "equal ('=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> equal(String value) {
+        return new StringCondition<>(this, StringCondition.Operation.EQUAL, value);
+    }
+
+    /** Creates an "equal ('=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> equal(String value, StringOrder order) {
+        return new StringCondition<>(this, StringCondition.Operation.EQUAL, value, order);
+    }
+
+    /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> notEqual(String value) {
+        return new StringCondition<>(this, StringCondition.Operation.NOT_EQUAL, value);
+    }
+
+    /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> notEqual(String value, StringOrder order) {
+        return new StringCondition<>(this, StringCondition.Operation.NOT_EQUAL, value, order);
+    }
+
+    /** Creates a "greater than ('&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greater(String value) {
+        return new StringCondition<>(this, StringCondition.Operation.GREATER, value);
+    }
+
+    /** Creates a "greater than ('&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greater(String value, StringOrder order) {
+        return new StringCondition<>(this, StringCondition.Operation.GREATER, value, order);
+    }
+
+    /** Creates a "less than ('&lt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> less(String value) {
+        return new StringCondition<>(this, StringCondition.Operation.LESS, value);
+    }
+
+    /** Creates a "less than ('&lt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> less(String value, StringOrder order) {
+        return new StringCondition<>(this, StringCondition.Operation.LESS, value, order);
+    }
+
+    public PropertyQueryCondition<ENTITY> contains(String value) {
+        return new StringCondition<>(this, StringCondition.Operation.CONTAINS, value);
+    }
+
+    public PropertyQueryCondition<ENTITY> contains(String value, StringOrder order) {
+        return new StringCondition<>(this, StringCondition.Operation.CONTAINS, value, order);
+    }
+
+    public PropertyQueryCondition<ENTITY> startsWith(String value) {
+        return new StringCondition<>(this, Operation.STARTS_WITH, value);
+    }
+
+    public PropertyQueryCondition<ENTITY> startsWith(String value, StringOrder order) {
+        return new StringCondition<>(this, Operation.STARTS_WITH, value, order);
+    }
+
+    public PropertyQueryCondition<ENTITY> endsWith(String value) {
+        return new StringCondition<>(this, Operation.ENDS_WITH, value);
+    }
+
+    public PropertyQueryCondition<ENTITY> endsWith(String value, StringOrder order) {
+        return new StringCondition<>(this, Operation.ENDS_WITH, value, order);
+    }
+
+    /** Creates an "IN (..., ..., ...)" condition for this property. */
+    public PropertyQueryCondition<ENTITY> oneOf(String[] values) {
+        return new StringArrayCondition<>(this, StringArrayCondition.Operation.IN, values);
+    }
+
+    /** Creates an "IN (..., ..., ...)" condition for this property. */
+    public PropertyQueryCondition<ENTITY> oneOf(String[] values, StringOrder order) {
+        return new StringArrayCondition<>(this, StringArrayCondition.Operation.IN, values, order);
+    }
+
+    /** Creates an "equal ('=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> equal(byte[] value) {
+        return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.EQUAL, value);
+    }
+
+    /** Creates a "greater than ('&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greater(byte[] value) {
+        return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.GREATER, value);
+    }
+
+    /** Creates a "less than ('&lt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> less(byte[] value) {
+        return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.LESS, value);
     }
 
     @Internal
