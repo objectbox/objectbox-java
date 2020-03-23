@@ -218,46 +218,111 @@ public class Property<ENTITY> implements Serializable {
         return new LongLongCondition<>(this, LongLongCondition.Operation.BETWEEN, lowerBoundary, upperBoundary);
     }
 
-    /** Creates an "equal ('=')" condition for this property. */
+    /**
+     * Creates an "equal ('=')" condition for this property.
+     * <p>
+     * Ignores case when matching results, e.g. {@code equal("example")} matches both "Example" and "example".
+     * <p>
+     * Use {@link #equal(String, StringOrder) equal(value, StringOrder.CASE_SENSITIVE)} to only match if case is equal.
+     * <p>
+     * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
+     * on {@code property}, dramatically speeding up look-up of results.
+     *
+     * @see #equal(String, StringOrder)
+     */
     public PropertyQueryCondition<ENTITY> equal(String value) {
         return new StringCondition<>(this, StringCondition.Operation.EQUAL, value);
     }
 
-    /** Creates an "equal ('=')" condition for this property. */
+    /**
+     * Creates an "equal ('=')" condition for this property.
+     * <p>
+     * Set {@code order} to {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to only match
+     * if case is equal. E.g. {@code equal("example", StringOrder.CASE_SENSITIVE)} only matches "example",
+     * but not "Example".
+     * <p>
+     * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
+     * on {@code property}, dramatically speeding up look-up of results.
+     */
     public PropertyQueryCondition<ENTITY> equal(String value, StringOrder order) {
         return new StringCondition<>(this, StringCondition.Operation.EQUAL, value, order);
     }
 
-    /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
+    /**
+     * Creates a "not equal ('&lt;&gt;')" condition for this property.
+     * <p>
+     * Ignores case when matching results, e.g. {@code notEqual("example")} excludes both "Example" and "example".
+     * <p>
+     * Use {@link #notEqual(String, StringOrder) notEqual(value, StringOrder.CASE_SENSITIVE)} to only exclude
+     * if case is equal.
+     * <p>
+     * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
+     * on {@code property}, dramatically speeding up look-up of results.
+     *
+     * @see #notEqual(String, StringOrder)
+     */
     public PropertyQueryCondition<ENTITY> notEqual(String value) {
         return new StringCondition<>(this, StringCondition.Operation.NOT_EQUAL, value);
     }
 
-    /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
+    /**
+     * Creates a "not equal ('&lt;&gt;')" condition for this property.
+     * <p>
+     * Set {@code order} to {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to only exclude
+     * if case is equal. E.g. {@code notEqual("example", StringOrder.CASE_SENSITIVE)} only excludes "example",
+     * but not "Example".
+     * <p>
+     * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
+     * on {@code property}, dramatically speeding up look-up of results.
+     */
     public PropertyQueryCondition<ENTITY> notEqual(String value, StringOrder order) {
         return new StringCondition<>(this, StringCondition.Operation.NOT_EQUAL, value, order);
     }
 
-    /** Creates a "greater than ('&gt;')" condition for this property. */
+    /**
+     * Creates a "greater than ('&gt;')" condition for this property.
+     * <p>
+     * Ignores case when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     *
+     * @see #greater(String, StringOrder)
+     */
     public PropertyQueryCondition<ENTITY> greater(String value) {
         return new StringCondition<>(this, StringCondition.Operation.GREATER, value);
     }
 
-    /** Creates a "greater than ('&gt;')" condition for this property. */
+    /**
+     * Creates a "greater than ('&gt;')" condition for this property.
+     */
     public PropertyQueryCondition<ENTITY> greater(String value, StringOrder order) {
         return new StringCondition<>(this, StringCondition.Operation.GREATER, value, order);
     }
 
-    /** Creates a "less than ('&lt;')" condition for this property. */
+    /**
+     * Creates a "less than ('&lt;')" condition for this property.
+     * <p>
+     * Ignores case when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     *
+     * @see #less(String, StringOrder)
+     */
     public PropertyQueryCondition<ENTITY> less(String value) {
         return new StringCondition<>(this, StringCondition.Operation.LESS, value);
     }
 
-    /** Creates a "less than ('&lt;')" condition for this property. */
+    /**
+     * Creates a "less than ('&lt;')" condition for this property.
+     */
     public PropertyQueryCondition<ENTITY> less(String value, StringOrder order) {
         return new StringCondition<>(this, StringCondition.Operation.LESS, value, order);
     }
 
+    /**
+     * Ignores case when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     *
+     * @see #contains(String, StringOrder)
+     */
     public PropertyQueryCondition<ENTITY> contains(String value) {
         return new StringCondition<>(this, StringCondition.Operation.CONTAINS, value);
     }
@@ -266,6 +331,12 @@ public class Property<ENTITY> implements Serializable {
         return new StringCondition<>(this, StringCondition.Operation.CONTAINS, value, order);
     }
 
+    /**
+     * Ignores case when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     *
+     * @see #startsWith(String, StringOrder)
+     */
     public PropertyQueryCondition<ENTITY> startsWith(String value) {
         return new StringCondition<>(this, Operation.STARTS_WITH, value);
     }
@@ -274,6 +345,12 @@ public class Property<ENTITY> implements Serializable {
         return new StringCondition<>(this, Operation.STARTS_WITH, value, order);
     }
 
+    /**
+     * Ignores case when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     *
+     * @see #endsWith(String, StringOrder)
+     */
     public PropertyQueryCondition<ENTITY> endsWith(String value) {
         return new StringCondition<>(this, Operation.ENDS_WITH, value);
     }
@@ -282,12 +359,21 @@ public class Property<ENTITY> implements Serializable {
         return new StringCondition<>(this, Operation.ENDS_WITH, value, order);
     }
 
-    /** Creates an "IN (..., ..., ...)" condition for this property. */
+    /**
+     * Creates an "IN (..., ..., ...)" condition for this property.
+     * <p>
+     * Ignores case when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     *
+     * @see #oneOf(String[], StringOrder)
+     */
     public PropertyQueryCondition<ENTITY> oneOf(String[] values) {
         return new StringArrayCondition<>(this, StringArrayCondition.Operation.IN, values);
     }
 
-    /** Creates an "IN (..., ..., ...)" condition for this property. */
+    /**
+     * Creates an "IN (..., ..., ...)" condition for this property.
+     */
     public PropertyQueryCondition<ENTITY> oneOf(String[] values, StringOrder order) {
         return new StringArrayCondition<>(this, StringArrayCondition.Operation.IN, values, order);
     }
