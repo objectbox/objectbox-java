@@ -7,11 +7,10 @@ sourceCompatibility = 1.8
 
 dependencies {
     compile project(':objectbox-java')
-    compile 'io.reactivex.rxjava2:rxjava:2.2.18'
+    compile 'io.reactivex.rxjava3:rxjava:3.0.1'
 
     testCompile "junit:junit:$junit_version"
-    // Mockito 3.x requires Java 8.
-    testCompile 'org.mockito:mockito-core:2.28.2'
+    testCompile 'org.mockito:mockito-core:3.3.3'
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
