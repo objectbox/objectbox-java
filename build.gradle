@@ -20,6 +20,7 @@ buildscript {
         ob_native_dep = "io.objectbox:objectbox-$objectboxPlatform:$nativeVersion"
 
         junit_version = '4.13'
+        mockito_version = '3.3.3'
 
         println "version=$ob_version"
         println "objectboxNativeDependency=$ob_native_dep"
