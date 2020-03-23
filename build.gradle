@@ -64,7 +64,8 @@ def projectNamesToPublish = [
         'objectbox-java-api',
         'objectbox-java',
         'objectbox-kotlin',
-        'objectbox-rxjava'
+        'objectbox-rxjava',
+        'objectbox-rxjava3'
 ]
 
 def hasSigningProperties() {
