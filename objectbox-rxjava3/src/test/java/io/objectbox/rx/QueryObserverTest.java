@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -31,7 +32,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import io.objectbox.query.FakeQueryPublisher;
 import io.objectbox.query.MockQuery;
-import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
@@ -41,20 +41,19 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.functions.Consumer;
 
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * This test has a counterpart in internal integration tests using a real Query and BoxStore.
+ */
 @RunWith(MockitoJUnitRunner.class)
-public class QueryObserverTest implements Observer<List<String>>, SingleObserver<List<String>>, Consumer<String> {
-
-    private List<List<String>> receivedChanges = new CopyOnWriteArrayList<>();
-    private CountDownLatch latch = new CountDownLatch(1);
+public class QueryObserverTest {
 
     private MockQuery<String> mockQuery = new MockQuery<>(false);
     private FakeQueryPublisher<String> publisher = mockQuery.getFakeQueryPublisher();
     private List<String> listResult = new ArrayList<>();
-    private Throwable error;
-
-    private AtomicInteger completedCount = new AtomicInteger();
 
     @Before
     public void prep() {
@@ -63,114 +62,155 @@ public class QueryObserverTest implements Observer<List<String>>, SingleObserver
     }
 
     @Test
-    public void testObservable() {
-        Observable observable = RxQuery.observable(mockQuery.getQuery());
-        observable.subscribe((Observer) this);
-        assertLatchCountedDown(latch, 2);
-        assertEquals(1, receivedChanges.size());
-        assertEquals(0, receivedChanges.get(0).size());
-        assertNull(error);
+    public void observable() {
+        Observable<List<String>> observable = RxQuery.observable(mockQuery.getQuery());
 
-        latch = new CountDownLatch(1);
-        receivedChanges.clear();
+        // Subscribe should emit.
+        TestObserver testObserver = new TestObserver();
+        observable.subscribe(testObserver);
+
+        testObserver.assertLatchCountedDown(2);
+        assertEquals(1, testObserver.receivedChanges.size());
+        assertEquals(0, testObserver.receivedChanges.get(0).size());
+        assertNull(testObserver.error);
+
+        // Publish should emit.
+        testObserver.resetLatch(1);
+        testObserver.receivedChanges.clear();
+
         publisher.setQueryResult(listResult);
         publisher.publish();
 
-        assertLatchCountedDown(latch, 5);
-        assertEquals(1, receivedChanges.size());
-        assertEquals(2, receivedChanges.get(0).size());
+        testObserver.assertLatchCountedDown(5);
+        assertEquals(1, testObserver.receivedChanges.size());
+        assertEquals(2, testObserver.receivedChanges.get(0).size());
 
-        assertEquals(0, completedCount.get());
-
-        //Unsubscribe?
-        //        receivedChanges.clear();
-        //        latch = new CountDownLatch(1);
-        //        assertLatchCountedDown(latch, 5);
-        //
-        //        assertEquals(1, receivedChanges.size());
-        //        assertEquals(3, receivedChanges.get(0).size());
+        // Finally, should not be completed.
+        assertEquals(0, testObserver.completedCount.get());
     }
 
     @Test
-    public void testFlowableOneByOne() {
+    public void flowableOneByOne() {
         publisher.setQueryResult(listResult);
 
-        latch = new CountDownLatch(2);
-        Flowable flowable = RxQuery.flowableOneByOne(mockQuery.getQuery());
-        flowable.subscribe(this);
-        assertLatchCountedDown(latch, 2);
-        assertEquals(2, receivedChanges.size());
-        assertEquals(1, receivedChanges.get(0).size());
-        assertEquals(1, receivedChanges.get(1).size());
-        assertNull(error);
+        Flowable<String> flowable = RxQuery.flowableOneByOne(mockQuery.getQuery());
 
-        receivedChanges.clear();
+        TestObserver testObserver = new TestObserver();
+        testObserver.resetLatch(2);
+        //noinspection ResultOfMethodCallIgnored
+        flowable.subscribe(testObserver);
+
+        testObserver.assertLatchCountedDown(2);
+        assertEquals(2, testObserver.receivedChanges.size());
+        assertEquals(1, testObserver.receivedChanges.get(0).size());
+        assertEquals(1, testObserver.receivedChanges.get(1).size());
+        assertNull(testObserver.error);
+
+        testObserver.receivedChanges.clear();
+
         publisher.publish();
-        assertNoMoreResults();
+        testObserver.assertNoMoreResults();
     }
 
     @Test
-    public void testSingle() {
+    public void single() {
         publisher.setQueryResult(listResult);
-        Single single = RxQuery.single(mockQuery.getQuery());
-        single.subscribe((SingleObserver) this);
-        assertLatchCountedDown(latch, 2);
-        assertEquals(1, receivedChanges.size());
-        assertEquals(2, receivedChanges.get(0).size());
 
-        receivedChanges.clear();
+        Single<List<String>> single = RxQuery.single(mockQuery.getQuery());
+
+        TestObserver testObserver = new TestObserver();
+        single.subscribe(testObserver);
+
+        testObserver.assertLatchCountedDown(2);
+        assertEquals(1, testObserver.receivedChanges.size());
+        assertEquals(2, testObserver.receivedChanges.get(0).size());
+
+        testObserver.receivedChanges.clear();
+
         publisher.publish();
-        assertNoMoreResults();
+        testObserver.assertNoMoreResults();
     }
 
-    protected void assertNoMoreResults() {
-        assertEquals(0, receivedChanges.size());
-        try {
-            Thread.sleep(20);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+    private static class TestObserver implements Observer<List<String>>, SingleObserver<List<String>>, Consumer<String> {
+
+        List<List<String>> receivedChanges = new CopyOnWriteArrayList<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        Throwable error;
+        AtomicInteger completedCount = new AtomicInteger();
+
+        private void log(String message) {
+            System.out.println("TestObserver: " + message);
         }
-        assertEquals(0, receivedChanges.size());
-    }
 
-    protected void assertLatchCountedDown(CountDownLatch latch, int seconds) {
-        try {
-            assertTrue(latch.await(seconds, TimeUnit.SECONDS));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        void printEvents() {
+            int count = receivedChanges.size();
+            log("Received " + count + " event(s):");
+            for (int i = 0; i < count; i++) {
+                List<String> receivedChange = receivedChanges.get(i);
+                log((i + 1) + "/" + count + ": size=" + receivedChange.size()
+                        + "; items=" + Arrays.toString(receivedChange.toArray()));
+            }
         }
-    }
 
-    @Override
-    public void onSubscribe(Disposable d) {
+        void resetLatch(int count) {
+            latch = new CountDownLatch(count);
+        }
 
-    }
+        void assertLatchCountedDown(int seconds) {
+            try {
+                assertTrue(latch.await(seconds, TimeUnit.SECONDS));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            printEvents();
+        }
 
-    @Override
-    public void onSuccess(List<String> queryResult) {
-        receivedChanges.add(queryResult);
-        latch.countDown();
-    }
+        void assertNoMoreResults() {
+            assertEquals(0, receivedChanges.size());
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            assertEquals(0, receivedChanges.size());
+        }
 
-    @Override
-    public void onNext(List<String> queryResult) {
-        receivedChanges.add(queryResult);
-        latch.countDown();
-    }
+        @Override
+        public void onSubscribe(Disposable d) {
+            log("onSubscribe");
+        }
 
-    @Override
-    public void onError(Throwable e) {
-        error = e;
-    }
+        @Override
+        public void onNext(List<String> t) {
+            log("onNext");
+            receivedChanges.add(t);
+            latch.countDown();
+        }
 
-    @Override
-    public void onComplete() {
-        completedCount.incrementAndGet();
-    }
+        @Override
+        public void onError(Throwable e) {
+            log("onError");
+            error = e;
+        }
 
-    @Override
-    public void accept(@NonNull String s) throws Exception {
-        receivedChanges.add(Collections.singletonList(s));
-        latch.countDown();
+        @Override
+        public void onComplete() {
+            log("onComplete");
+            completedCount.incrementAndGet();
+        }
+
+        @Override
+        public void accept(String t) {
+            log("accept");
+            receivedChanges.add(Collections.singletonList(t));
+            latch.countDown();
+        }
+
+        @Override
+        public void onSuccess(List<String> t) {
+            log("onSuccess");
+            receivedChanges.add(t);
+            latch.countDown();
+        }
     }
 }
