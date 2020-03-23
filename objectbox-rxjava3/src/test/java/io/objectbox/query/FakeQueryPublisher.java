@@ -24,9 +24,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import javax.annotation.Nullable;
+
 public class FakeQueryPublisher<T> implements DataPublisher<List<T>> {
 
-    private final Set<DataObserver<List<T>>> observers = new CopyOnWriteArraySet();
+    private final Set<DataObserver<List<T>>> observers = new CopyOnWriteArraySet<>();
 
     private List<T> queryResult = Collections.emptyList();
 
@@ -39,12 +41,12 @@ public class FakeQueryPublisher<T> implements DataPublisher<List<T>> {
     }
 
     @Override
-    public synchronized void subscribe(DataObserver<List<T>> observer, Object param) {
+    public synchronized void subscribe(DataObserver<List<T>> observer, @Nullable Object param) {
         observers.add(observer);
     }
 
     @Override
-    public void publishSingle(final DataObserver<List<T>> observer, Object param) {
+    public void publishSingle(final DataObserver<List<T>> observer, @Nullable Object param) {
         observer.onData(queryResult);
     }
 
@@ -55,7 +57,7 @@ public class FakeQueryPublisher<T> implements DataPublisher<List<T>> {
     }
 
     @Override
-    public synchronized void unsubscribe(DataObserver<List<T>> observer, Object param) {
+    public synchronized void unsubscribe(DataObserver<List<T>> observer, @Nullable Object param) {
         DataPublisherUtils.removeObserverFromCopyOnWriteSet(observers, observer);
     }
 

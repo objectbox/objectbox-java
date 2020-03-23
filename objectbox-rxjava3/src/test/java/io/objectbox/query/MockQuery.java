@@ -16,30 +16,37 @@
 
 package io.objectbox.query;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import java.util.List;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.reactive.SubscriptionBuilder;
 
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public class MockQuery<T> {
-    private Box box;
+    private Box<T> box;
     private BoxStore boxStore;
-    private final Query query;
-    private final FakeQueryPublisher fakeQueryPublisher;
+    private final Query<T> query;
+    private final FakeQueryPublisher<T> fakeQueryPublisher;
 
     public MockQuery(boolean hasOrder) {
         // box = mock(Box.class);
         // boxStore = mock(BoxStore.class);
         // when(box.getStore()).thenReturn(boxStore);
-         query = mock(Query.class);
-        fakeQueryPublisher = new FakeQueryPublisher();
-        SubscriptionBuilder subscriptionBuilder = new SubscriptionBuilder(fakeQueryPublisher, null, null);
+
+        //noinspection unchecked It's a unit test, casting is fine.
+        query = (Query<T>) mock(Query.class);
+        fakeQueryPublisher = new FakeQueryPublisher<>();
+        //noinspection ConstantConditions ExecutorService only used for transforms.
+        SubscriptionBuilder<List<T>> subscriptionBuilder = new SubscriptionBuilder<>(
+                fakeQueryPublisher, null, null);
         when(query.subscribe()).thenReturn(subscriptionBuilder);
     }
 
-    public Box getBox() {
+    public Box<T> getBox() {
         return box;
     }
 
@@ -47,11 +54,11 @@ public class MockQuery<T> {
         return boxStore;
     }
 
-    public Query getQuery() {
+    public Query<T> getQuery() {
         return query;
     }
 
-    public FakeQueryPublisher getFakeQueryPublisher() {
+    public FakeQueryPublisher<T> getFakeQueryPublisher() {
         return fakeQueryPublisher;
     }
 }
