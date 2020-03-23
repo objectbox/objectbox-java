@@ -1,0 +1,51 @@
+apply plugin: 'java'
+
+group = 'io.objectbox'
+version= rootProject.version
+
+sourceCompatibility = 1.8
+
+dependencies {
+    compile project(':objectbox-java')
+    compile 'io.reactivex.rxjava2:rxjava:2.2.18'
+
+    testCompile "junit:junit:$junit_version"
+    // Mockito 3.x requires Java 8.
+    testCompile 'org.mockito:mockito-core:2.28.2'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    // java plugin adds jar.
+    archives javadocJar
+    archives sourcesJar
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            // Basic definitions are defined in root project
+            pom.project {
+                name 'ObjectBox RxJava 3 API'
+                description 'RxJava 3 extensions for ObjectBox'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+            }
+        }
+    }
+}
