@@ -28,7 +28,8 @@ public abstract class RxBoxStore {
      * Using the returned Observable, you can be notified about data changes.
      * Once a transaction is committed, you will get info on classes with changed Objects.
      */
-    public static <T> Observable<Class> observable(final BoxStore boxStore) {
+    @SuppressWarnings("rawtypes") // BoxStore observer may return any (entity) type.
+    public static Observable<Class> observable(BoxStore boxStore) {
         return Observable.create(emitter -> {
             final DataSubscription dataSubscription = boxStore.subscribe().observer(data -> {
                 if (!emitter.isDisposed()) {
