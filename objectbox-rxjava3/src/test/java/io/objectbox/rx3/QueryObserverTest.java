@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.objectbox.rx;
+package io.objectbox.rx3;
 
 import org.junit.Before;
 import org.junit.Test;

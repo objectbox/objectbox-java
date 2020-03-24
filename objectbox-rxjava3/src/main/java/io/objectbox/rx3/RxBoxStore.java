@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.objectbox.rx;
+package io.objectbox.rx3;
 
 import io.objectbox.BoxStore;
 import io.objectbox.reactive.DataSubscription;
