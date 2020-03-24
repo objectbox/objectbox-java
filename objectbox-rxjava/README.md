@@ -1,3 +1,6 @@
+:information_source: This library will receive no new features.
+Development will continue with the [RxJava 3 APIs for ObjectBox](/objectbox-rxjava3).
+
 RxJava 2 APIs for ObjectBox
 ===========================
 While ObjectBox has [data observers and reactive extensions](https://docs.objectbox.io/data-observers-and-rx) built-in,
@@ -13,7 +16,7 @@ For general object changes, you can use `RxBoxStore` to create an `Observable`.
 For example to get query results and subscribe to future updates (Object changes will automatically emmit new data):
 
 ```java
-Query query = box.query().build();
+Query<User> query = box.query().build();
 RxQuery.observable(query).subscribe(this);
 ```
     
@@ -27,5 +30,3 @@ implementation "io.objectbox:objectbox-rxjava:$objectboxVersion"
 Links
 -----
 [Data Observers and Rx Documentation](https://docs.objectbox.io/data-observers-and-rx)
-
-[Note App example](https://github.com/objectbox/objectbox-examples/blob/master/objectbox-example/src/main/java/io/objectbox/example/ReactiveNoteActivity.java)
