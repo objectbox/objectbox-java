@@ -13,7 +13,7 @@ For general object changes, you can use `RxBoxStore` to create an `Observable`.
 For example to get query results and subscribe to future updates (Object changes will automatically emmit new data):
 
 ```java
-Query query = box.query().build();
+Query<User> query = box.query().build();
 RxQuery.observable(query).subscribe(this);
 ```
     
@@ -24,8 +24,16 @@ Grab via Gradle:
 implementation "io.objectbox:objectbox-rxjava3:$objectboxVersion"
 ```
 
+Migrating from RxJava 2
+-----------------------
+
+If you have previously used the ObjectBox RxJava library note the following changes:
+
+- The location of the dependency has changed to `objectbox-rxjava3` (see above).
+- The package name has changed to `io.objectbox.rx3` (from `io.objectbox.rx`).
+
+This should allow using both versions side-by-side while you migrate your code to RxJava 3.
+
 Links
 -----
 [Data Observers and Rx Documentation](https://docs.objectbox.io/data-observers-and-rx)
-
-[Note App example](https://github.com/objectbox/objectbox-examples/blob/master/objectbox-example/src/main/java/io/objectbox/example/ReactiveNoteActivity.java)
