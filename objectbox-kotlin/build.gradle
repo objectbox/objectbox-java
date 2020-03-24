@@ -20,7 +20,7 @@ buildscript {
 apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.dokka'
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 
 dokka {
     outputFormat = 'html'
@@ -58,6 +58,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     compile project(':objectbox-java')
+    compileOnly project(':objectbox-rxjava3')
 }
 
 
