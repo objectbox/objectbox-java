@@ -40,9 +40,8 @@ public class MockQuery<T> {
         //noinspection unchecked It's a unit test, casting is fine.
         query = (Query<T>) mock(Query.class);
         fakeQueryPublisher = new FakeQueryPublisher<>();
-        //noinspection ConstantConditions ExecutorService only used for transforms.
         SubscriptionBuilder<List<T>> subscriptionBuilder = new SubscriptionBuilder<>(
-                fakeQueryPublisher, null, null);
+                fakeQueryPublisher, null);
         when(query.subscribe()).thenReturn(subscriptionBuilder);
     }
 
