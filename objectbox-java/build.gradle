@@ -4,7 +4,8 @@ apply plugin: 'findbugs'
 group = 'io.objectbox'
 version= rootProject.version
 
-sourceCompatibility = '1.7'
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 tasks.withType(FindBugs) {
     reports {
