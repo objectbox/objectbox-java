@@ -13,6 +13,10 @@ public abstract class ConnectivityMonitor {
     private SyncClient syncClient;
 
     void setObserver(SyncClient syncClient) {
+        //noinspection ConstantConditions Annotations do not enforce non-null.
+        if (syncClient == null) {
+            throw new IllegalArgumentException("Sync client must not be null");
+        }
         this.syncClient = syncClient;
         onObserverSet();
     }
