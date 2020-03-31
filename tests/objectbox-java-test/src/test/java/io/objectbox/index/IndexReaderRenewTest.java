@@ -50,32 +50,26 @@ public class IndexReaderRenewTest extends AbstractObjectBoxTest {
         final AtomicInteger transformerCallCount = new AtomicInteger();
 
         final Query<EntityLongIndex> query = box.query().equal(EntityLongIndex_.indexedLong, 0).build();
-        store.subscribe(EntityLongIndex.class).transform(new DataTransformer<Class<EntityLongIndex>, EntityLongIndex>() {
-            @Override
-            public EntityLongIndex transform(Class<EntityLongIndex> clazz) throws Exception {
-                int callCount = transformerCallCount.incrementAndGet();
-                if (callCount == 1) {
-                    query.setParameter(EntityLongIndex_.indexedLong, 1);
-                    EntityLongIndex unique = query.findUnique();
-                    transformLatch1.countDown();
-                    return unique;
-                } else if (callCount == 2) {
-                    query.setParameter(EntityLongIndex_.indexedLong, 1);
-                    transformResults[0] = query.findUnique();
-                    transformResults[1] = query.findUnique();
-                    query.setParameter(EntityLongIndex_.indexedLong, 0);
-                    transformResults[2] = query.findUnique();
-                    transformLatch2.countDown();
-                    return transformResults[0];
-                } else {
-                    throw new RuntimeException("Unexpected: " + callCount);
-                }
+        store.subscribe(EntityLongIndex.class).transform(javaClass -> {
+            int callCount = transformerCallCount.incrementAndGet();
+            if (callCount == 1) {
+                query.setParameter(EntityLongIndex_.indexedLong, 1);
+                EntityLongIndex unique = query.findUnique();
+                transformLatch1.countDown();
+                return unique;
+            } else if (callCount == 2) {
+                query.setParameter(EntityLongIndex_.indexedLong, 1);
+                transformResults[0] = query.findUnique();
+                transformResults[1] = query.findUnique();
+                query.setParameter(EntityLongIndex_.indexedLong, 0);
+                transformResults[2] = query.findUnique();
+                transformLatch2.countDown();
+                return transformResults[0];
+            } else {
+                throw new RuntimeException("Unexpected: " + callCount);
             }
-        }).observer(new DataObserver<EntityLongIndex>() {
-            @Override
-            public void onData(EntityLongIndex data) {
-                // Dummy
-            }
+        }).observer(data -> {
+            // Dummy
         });
 
         assertTrue(transformLatch1.await(5, TimeUnit.SECONDS));
@@ -116,35 +110,32 @@ public class IndexReaderRenewTest extends AbstractObjectBoxTest {
         final CountDownLatch latchRead2 = new CountDownLatch(1);
         final Query<EntityLongIndex> query = box.query().equal(EntityLongIndex_.indexedLong, 0).build();
 
-        new Thread() {
-            @Override
-            public void run() {
-                query.setParameter(EntityLongIndex_.indexedLong, initialValue);
-                EntityLongIndex unique = query.findUnique();
-                assertNull(unique);
-                latchRead1.countDown();
-                System.out.println("BEFORE put: " + box.getReaderDebugInfo());
-                System.out.println("count before: " + box.count());
+        new Thread(() -> {
+            query.setParameter(EntityLongIndex_.indexedLong, initialValue);
+            EntityLongIndex unique = query.findUnique();
+            assertNull(unique);
+            latchRead1.countDown();
+            System.out.println("BEFORE put: " + box.getReaderDebugInfo());
+            System.out.println("count before: " + box.count());
 
-                try {
-                    latchPut.await();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
-                System.out.println("AFTER put: " + box.getReaderDebugInfo());
-                System.out.println("count after: " + box.count());
-
-                query.setParameter(EntityLongIndex_.indexedLong, initialValue);
-                results[0] = query.findUnique();
-                results[1] = box.get(1);
-                results[2] = query.findUnique();
-                query.setParameter(EntityLongIndex_.indexedLong, 0);
-                results[3] = query.findUnique();
-                latchRead2.countDown();
-                box.closeThreadResources();
+            try {
+                latchPut.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
             }
-        }.start();
+            System.out.println("AFTER put: " + box.getReaderDebugInfo());
+            System.out.println("count after: " + box.count());
+
+            query.setParameter(EntityLongIndex_.indexedLong, initialValue);
+            results[0] = query.findUnique();
+            results[1] = box.get(1);
+            results[2] = query.findUnique();
+            query.setParameter(EntityLongIndex_.indexedLong, 0);
+            results[3] = query.findUnique();
+            latchRead2.countDown();
+            box.closeThreadResources();
+        }).start();
 
         assertTrue(latchRead1.await(5, TimeUnit.SECONDS));
         box.put(createEntityLongIndex(initialValue));
@@ -166,7 +157,7 @@ public class IndexReaderRenewTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testOldReaderWithIndex() throws InterruptedException {
+    public void testOldReaderWithIndex() {
         final Box<EntityLongIndex> box = store.boxFor(EntityLongIndex.class);
         final int initialValue = 1;
 

@@ -59,12 +59,9 @@ public class RelationEagerTest extends AbstractRelationTest {
 
         // forEach
         final int count[] = {0};
-        customerBox.query().eager(1, Customer_.orders).build().forEach(new QueryConsumer<Customer>() {
-            @Override
-            public void accept(Customer data) {
-                assertEquals(count[0] == 0, ((ToMany) data.getOrders()).isResolved());
-                count[0]++;
-            }
+        customerBox.query().eager(1, Customer_.orders).build().forEach(data -> {
+            assertEquals(count[0] == 0, ((ToMany) data.getOrders()).isResolved());
+            count[0]++;
         });
         assertEquals(2, count[0]);
 
@@ -83,11 +80,8 @@ public class RelationEagerTest extends AbstractRelationTest {
         Query<Customer> query = customerBox.query().eager(Customer_.orders).build();
         query.find();
         query.findFirst();
-        query.forEach(new QueryConsumer<Customer>() {
-            @Override
-            public void accept(Customer data) {
+        query.forEach(data -> {
 
-            }
         });
     }
 
@@ -117,12 +111,9 @@ public class RelationEagerTest extends AbstractRelationTest {
 
         // forEach
         final int count[] = {0};
-        customerBox.query().eager(1, Customer_.orders).build().forEach(new QueryConsumer<Customer>() {
-            @Override
-            public void accept(Customer data) {
-                assertEquals(count[0] == 0, ((ToMany) data.getOrders()).isResolved());
-                count[0]++;
-            }
+        customerBox.query().eager(1, Customer_.orders).build().forEach(data -> {
+            assertEquals(count[0] == 0, ((ToMany) data.getOrders()).isResolved());
+            count[0]++;
         });
         assertEquals(1, count[0]);
 
@@ -141,11 +132,8 @@ public class RelationEagerTest extends AbstractRelationTest {
         Query<Order> query = orderBox.query().eager(Order_.customer).build();
         query.find();
         query.findFirst();
-        query.forEach(new QueryConsumer<Order>() {
-            @Override
-            public void accept(Order data) {
+        query.forEach(data -> {
 
-            }
         });
     }
 

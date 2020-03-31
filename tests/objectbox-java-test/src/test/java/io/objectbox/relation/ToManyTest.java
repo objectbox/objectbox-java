@@ -396,12 +396,7 @@ public class ToManyTest extends AbstractRelationTest {
     public void testHasA() {
         Customer customer = putCustomerWithOrders(3);
         ToMany<Order> toMany = (ToMany<Order>) customer.orders;
-        QueryFilter<Order> filter = new QueryFilter<Order>() {
-            @Override
-            public boolean keep(Order entity) {
-                return "order2".equals(entity.text);
-            }
-        };
+        QueryFilter<Order> filter = entity -> "order2".equals(entity.text);
         assertTrue(toMany.hasA(filter));
         toMany.remove(1);
         assertFalse(toMany.hasA(filter));
@@ -411,12 +406,7 @@ public class ToManyTest extends AbstractRelationTest {
     public void testHasAll() {
         Customer customer = putCustomerWithOrders(3);
         ToMany<Order> toMany = (ToMany<Order>) customer.orders;
-        QueryFilter<Order> filter = new QueryFilter<Order>() {
-            @Override
-            public boolean keep(Order entity) {
-                return entity.text.startsWith("order");
-            }
-        };
+        QueryFilter<Order> filter = entity -> entity.text.startsWith("order");
         assertTrue(toMany.hasAll(filter));
         toMany.get(0).text = "nope";
         assertFalse(toMany.hasAll(filter));
@@ -475,15 +465,12 @@ public class ToManyTest extends AbstractRelationTest {
     }
 
     private Customer putCustomerWithOrders(final int orderCount) {
-        return store.callInTxNoException(new Callable<Customer>() {
-            @Override
-            public Customer call() {
-                Customer customer = putCustomer();
-                for (int i = 1; i <= orderCount; i++) {
-                    putOrder(customer, "order" + i);
-                }
-                return customer;
+        return store.callInTxNoException(() -> {
+            Customer customer = putCustomer();
+            for (int i = 1; i <= orderCount; i++) {
+                putOrder(customer, "order" + i);
             }
+            return customer;
         });
     }
 }

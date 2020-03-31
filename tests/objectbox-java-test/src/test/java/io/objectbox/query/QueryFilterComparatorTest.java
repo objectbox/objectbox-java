@@ -14,12 +14,7 @@ import static org.junit.Assert.assertEquals;
 public class QueryFilterComparatorTest extends AbstractQueryTest {
 
     private QueryFilter<TestEntity> createTestFilter() {
-        return new QueryFilter<TestEntity>() {
-            @Override
-            public boolean keep(TestEntity entity) {
-                return entity.getSimpleString().contains("e");
-            }
-        };
+        return entity -> entity.getSimpleString().contains("e");
     }
 
     @Test
@@ -27,12 +22,7 @@ public class QueryFilterComparatorTest extends AbstractQueryTest {
         putTestEntitiesStrings();
         final StringBuilder stringBuilder = new StringBuilder();
         box.query().filter(createTestFilter()).build()
-                .forEach(new QueryConsumer<TestEntity>() {
-                    @Override
-                    public void accept(TestEntity data) {
-                        stringBuilder.append(data.getSimpleString()).append('#');
-                    }
-                });
+                .forEach(data -> stringBuilder.append(data.getSimpleString()).append('#'));
         assertEquals("apple#banana milk shake#", stringBuilder.toString());
     }
 
@@ -46,12 +36,7 @@ public class QueryFilterComparatorTest extends AbstractQueryTest {
     }
 
     private Comparator<TestEntity> createTestComparator() {
-        return new Comparator<TestEntity>() {
-            @Override
-            public int compare(TestEntity o1, TestEntity o2) {
-                return o1.getSimpleString().substring(1).compareTo(o2.getSimpleString().substring(1));
-            }
-        };
+        return Comparator.comparing(o -> o.getSimpleString().substring(1));
     }
 
     @Test
@@ -128,11 +113,8 @@ public class QueryFilterComparatorTest extends AbstractQueryTest {
         box.query()
                 .sort(createTestComparator())
                 .build()
-                .forEach(new QueryConsumer<TestEntity>() {
-                    @Override
-                    public void accept(TestEntity data) {
-                        // Do nothing.
-                    }
+                .forEach(data -> {
+                    // Do nothing.
                 });
     }
 

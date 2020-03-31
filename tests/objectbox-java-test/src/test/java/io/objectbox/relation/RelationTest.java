@@ -64,12 +64,7 @@ public class RelationTest extends AbstractRelationTest {
         putOrder(customer, "Apples");
 
         ToMany<Order> orders = (ToMany<Order>) customer.getOrders();
-        orders.setComparator(new Comparator<Order>() {
-            @Override
-            public int compare(Order o1, Order o2) {
-                return o1.text.compareTo(o2.text);
-            }
-        });
+        orders.setComparator(Comparator.comparing(o -> o.text));
         orders.reset();
 
         assertEquals(3, orders.size());
@@ -127,14 +122,11 @@ public class RelationTest extends AbstractRelationTest {
     public void testToOneBulk() {
         // JNI local refs are limited on Android (for example, 512 on Android 7)
         final int count = runExtensiveTests ? 10000 : 1000;
-        store.runInTx(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < count; i++) {
-                    Customer customer = new Customer(0, "Customer" + i);
-                    customerBox.put(customer);
-                    putOrder(customer, "order" + 1);
-                }
+        store.runInTx(() -> {
+            for (int i = 0; i < count; i++) {
+                Customer customer = new Customer(0, "Customer" + i);
+                customerBox.put(customer);
+                putOrder(customer, "order" + 1);
             }
         });
         assertEquals(count, customerBox.getAll().size());

@@ -100,7 +100,7 @@ public abstract class AbstractObjectBoxTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         // Collect dangling Cursors and TXs before store closes
         System.gc();
         System.runFinalization();

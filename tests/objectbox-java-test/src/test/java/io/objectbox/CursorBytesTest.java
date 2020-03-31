@@ -61,8 +61,7 @@ public class CursorBytesTest extends AbstractObjectBoxTest {
 
     @Test
     public void testRemove() {
-        Transaction transaction = store.beginTx();
-        try {
+        try (Transaction transaction = store.beginTx()) {
             KeyValueCursor cursor = transaction.createKeyValueCursor();
 
             cursor.put(1, new byte[]{1, 1, 0, 0});
@@ -76,8 +75,6 @@ public class CursorBytesTest extends AbstractObjectBoxTest {
             byte[] next = cursor.getNext();
             assertNotNull(next);
             assertTrue(Arrays.equals(new byte[]{4, 1, 0, 0}, next));
-        } finally {
-            transaction.close();
         }
     }
 

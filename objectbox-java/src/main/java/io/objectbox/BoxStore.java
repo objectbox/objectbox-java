@@ -304,7 +304,7 @@ public class BoxStore implements Closeable {
         synchronized (openFiles) {
             if (!openFiles.contains(canonicalPath)) return false;
         }
-        if(openFilesCheckerThread == null || !openFilesCheckerThread.isAlive()) {
+        if (openFilesCheckerThread == null || !openFilesCheckerThread.isAlive()) {
             // Use a thread to avoid finalizers that block us
             openFilesCheckerThread = new Thread() {
                 @Override
@@ -612,10 +612,19 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * Removes all objects from all boxes, e.g. deletes all database content.
-     *
-     * Internally reads the current schema, drops all database content,
-     * then restores the schema in a single transaction.
+     * Removes all objects from all types ("boxes"), e.g. deletes all database content
+     * (excluding meta data like the data model).
+     * This typically performs very quickly (e.g. faster than {@link Box#removeAll()}).
+     * <p>
+     * Note that this does not reclaim disk space: the already reserved space for the DB file(s) is used in the future
+     * resulting in better performance because no/less disk allocation has to be done.
+     * <p>
+     * If you want to reclaim disk space, delete the DB file(s) instead:
+     * <ul>
+     *     <li>{@link #close()} the BoxStore (and ensure that no thread access it)</li>
+     *     <li>{@link #deleteAllFiles()} of the BoxStore</li>
+     *     <li>Open a new BoxStore</li>
+     * </ul>
      */
     public void removeAllObjects() {
         nativeDropAllData(handle);
@@ -1079,7 +1088,7 @@ public class BoxStore implements Closeable {
      * 3) you pass the native store pointer to your native code (e.g. via JNI)<br>
      * 4) your native code calls obx_store_wrap() with the native store pointer to get a OBX_store pointer<br>
      * 5) Using the OBX_store pointer, you can use the C API.
-     *
+     * <p>
      * Note: Once you {@link #close()} this BoxStore, do not use it from the C API.
      */
     public long getNativeStore() {

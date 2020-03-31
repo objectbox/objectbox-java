@@ -171,7 +171,7 @@ public class CursorTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testLookupKeyUsingIndex() throws IOException {
+    public void testLookupKeyUsingIndex() {
         insertTestEntities("find me", "not me");
 
         Transaction transaction = store.beginTx();
@@ -203,8 +203,7 @@ public class CursorTest extends AbstractObjectBoxTest {
 
     @Test
     public void testClose() {
-        Transaction tx = store.beginReadTx();
-        try {
+        try (Transaction tx = store.beginReadTx()) {
             Cursor<TestEntity> cursor = tx.createCursor(TestEntity.class);
             assertFalse(cursor.isClosed());
             cursor.close();
@@ -212,8 +211,6 @@ public class CursorTest extends AbstractObjectBoxTest {
 
             // Double close should be fine
             cursor.close();
-        } finally {
-            tx.close();
         }
     }
 
@@ -224,15 +221,12 @@ public class CursorTest extends AbstractObjectBoxTest {
         long duration = System.currentTimeMillis() - time; // Usually 0 on desktop
         final CountDownLatch latchBeforeBeginTx = new CountDownLatch(1);
         final CountDownLatch latchAfterBeginTx = new CountDownLatch(1);
-        new Thread() {
-            @Override
-            public void run() {
-                latchBeforeBeginTx.countDown();
-                Transaction tx2 = store.beginTx();
-                latchAfterBeginTx.countDown();
-                tx2.close();
-            }
-        }.start();
+        new Thread(() -> {
+            latchBeforeBeginTx.countDown();
+            Transaction tx2 = store.beginTx();
+            latchAfterBeginTx.countDown();
+            tx2.close();
+        }).start();
         assertTrue(latchBeforeBeginTx.await(1, TimeUnit.SECONDS));
         long waitTime = 100 + duration * 10;
         assertFalse(latchAfterBeginTx.await(waitTime, TimeUnit.MILLISECONDS));
@@ -253,7 +247,7 @@ public class CursorTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testRenew() throws IOException {
+    public void testRenew() {
         insertTestEntities("orange");
 
         Transaction transaction = store.beginReadTx();

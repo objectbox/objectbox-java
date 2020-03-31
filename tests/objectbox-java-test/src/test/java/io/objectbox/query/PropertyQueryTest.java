@@ -16,25 +16,38 @@
 
 package io.objectbox.query;
 
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
 import io.objectbox.TestEntity;
 import io.objectbox.TestEntityCursor;
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.NumericOverflowException;
 import io.objectbox.query.QueryBuilder.StringOrder;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import java.util.Arrays;
-import java.util.List;
 
-import static io.objectbox.TestEntity_.*;
-import static org.junit.Assert.*;
+import static io.objectbox.TestEntity_.simpleBoolean;
+import static io.objectbox.TestEntity_.simpleByte;
+import static io.objectbox.TestEntity_.simpleByteArray;
+import static io.objectbox.TestEntity_.simpleDouble;
+import static io.objectbox.TestEntity_.simpleFloat;
+import static io.objectbox.TestEntity_.simpleInt;
+import static io.objectbox.TestEntity_.simpleIntU;
+import static io.objectbox.TestEntity_.simpleLong;
+import static io.objectbox.TestEntity_.simpleLongU;
+import static io.objectbox.TestEntity_.simpleShort;
+import static io.objectbox.TestEntity_.simpleShortU;
+import static io.objectbox.TestEntity_.simpleString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class PropertyQueryTest extends AbstractQueryTest {
-
-    @Rule
-    public ExpectedException exceptionRule = ExpectedException.none();
 
     private void putTestEntityInteger(byte vByte, short vShort, int vInt, long vLong) {
         TestEntity entity = new TestEntity();
@@ -753,35 +766,35 @@ public class PropertyQueryTest extends AbstractQueryTest {
 
     @Test
     public void sum_longOverflow_exception() {
-        exceptionRule.expect(NumericOverflowException.class);
-        exceptionRule.expectMessage("Numeric overflow");
-
         putTestEntityInteger((byte) 0, (short) 0, 0, Long.MAX_VALUE);
         putTestEntityInteger((byte) 0, (short) 0, 0, 1);
 
-        box.query().build().property(simpleLong).sum();
+        NumericOverflowException exception = assertThrows(NumericOverflowException.class, () ->
+                box.query().build().property(simpleLong).sum()
+        );
+        assertTrue(exception.getMessage().contains("Numeric overflow"));
     }
 
     @Test
     public void sum_longUnderflow_exception() {
-        exceptionRule.expect(NumericOverflowException.class);
-        exceptionRule.expectMessage("Numeric overflow");
-
         putTestEntityInteger((byte) 0, (short) 0, 0, Long.MIN_VALUE);
         putTestEntityInteger((byte) 0, (short) 0, 0, -1);
 
-        box.query().build().property(simpleLong).sum();
+        NumericOverflowException exception = assertThrows(NumericOverflowException.class, () ->
+                box.query().build().property(simpleLong).sum()
+        );
+        assertTrue(exception.getMessage().contains("Numeric overflow"));
     }
 
     @Test
     public void sum_unsignedLongOverflow_exception() {
-        exceptionRule.expect(NumericOverflowException.class);
-        exceptionRule.expectMessage("Numeric overflow");
-
         putTestEntityUnsignedInteger((short) 0, 0, -1);
         putTestEntityUnsignedInteger((short) 0, 0, 1);
 
-        box.query().build().property(simpleLongU).sum();
+        NumericOverflowException exception = assertThrows(NumericOverflowException.class, () ->
+                box.query().build().property(simpleLongU).sum()
+        );
+        assertTrue(exception.getMessage().contains("Numeric overflow"));
     }
 
     @Test

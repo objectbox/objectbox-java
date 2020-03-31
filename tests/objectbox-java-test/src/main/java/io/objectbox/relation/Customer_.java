@@ -17,6 +17,8 @@
 
 package io.objectbox.relation;
 
+import java.util.List;
+
 import io.objectbox.EntityInfo;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Internal;
@@ -48,15 +50,16 @@ public class Customer_ implements EntityInfo<Customer> {
 
     public final static Customer_ __INSTANCE = new Customer_();
 
-    public final static Property id = new Property(__INSTANCE, 0, 1, long.class, "id", true, "_id");
-    public final static Property name = new Property(__INSTANCE, 1, 2, String.class, "name");
+    public final static Property<Customer> id = new Property<>(__INSTANCE, 0, 1, long.class, "id", true, "_id");
+    public final static Property<Customer> name = new Property<>(__INSTANCE, 1, 2, String.class, "name");
 
-    public final static Property[] __ALL_PROPERTIES = {
+    @SuppressWarnings("unchecked")
+    public final static Property<Customer>[] __ALL_PROPERTIES = new Property[]{
             id,
             name
     };
 
-    public final static Property __ID_PROPERTY = id;
+    public final static Property<Customer> __ID_PROPERTY = id;
 
     @Override
     public String getEntityName() {
@@ -79,12 +82,12 @@ public class Customer_ implements EntityInfo<Customer> {
     }
 
     @Override
-    public Property[] getAllProperties() {
+    public Property<Customer>[] getAllProperties() {
         return __ALL_PROPERTIES;
     }
 
     @Override
-    public Property getIdProperty() {
+    public Property<Customer> getIdProperty() {
         return __ID_PROPERTY;
     }
 
@@ -108,8 +111,8 @@ public class Customer_ implements EntityInfo<Customer> {
     static final RelationInfo<Customer, Order> orders =
             new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, new ToManyGetter<Customer>() {
                 @Override
-                public ToMany<Order> getToMany(Customer customer) {
-                    return (ToMany<Order>) customer.getOrders();
+                public List<Order> getToMany(Customer customer) {
+                    return customer.getOrders();
                 }
             }, Order_.customerId, new ToOneGetter<Order>() {
                 @Override
@@ -121,8 +124,8 @@ public class Customer_ implements EntityInfo<Customer> {
     static final RelationInfo<Customer, Order> ordersStandalone =
             new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, new ToManyGetter<Customer>() {
                 @Override
-                public ToMany<Order> getToMany(Customer customer) {
-                    return (ToMany<Order>) customer.getOrders();
+                public List<Order> getToMany(Customer customer) {
+                    return customer.getOrders();
                 }
             }, 1);
 

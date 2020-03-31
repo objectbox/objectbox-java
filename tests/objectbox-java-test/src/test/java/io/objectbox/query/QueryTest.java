@@ -612,12 +612,7 @@ public class QueryTest extends AbstractQueryTest {
         List<TestEntity> testEntities = putTestEntitiesStrings();
         final StringBuilder stringBuilder = new StringBuilder();
         box.query().startsWith(simpleString, "banana").build()
-                .forEach(new QueryConsumer<TestEntity>() {
-                    @Override
-                    public void accept(TestEntity data) {
-                        stringBuilder.append(data.getSimpleString()).append('#');
-                    }
-                });
+                .forEach(data -> stringBuilder.append(data.getSimpleString()).append('#'));
         assertEquals("banana#banana milk shake#", stringBuilder.toString());
 
         // Verify that box does not hang on to the read-only TX by doing a put
@@ -630,12 +625,9 @@ public class QueryTest extends AbstractQueryTest {
         putTestEntitiesStrings();
         final StringBuilder stringBuilder = new StringBuilder();
         box.query().startsWith(simpleString, "banana").build()
-                .forEach(new QueryConsumer<TestEntity>() {
-                    @Override
-                    public void accept(TestEntity data) {
-                        stringBuilder.append(data.getSimpleString());
-                        throw new BreakForEach();
-                    }
+                .forEach(data -> {
+                    stringBuilder.append(data.getSimpleString());
+                    throw new BreakForEach();
                 });
         assertEquals("banana", stringBuilder.toString());
     }
@@ -646,12 +638,7 @@ public class QueryTest extends AbstractQueryTest {
         store.close();
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir)
                 .queryAttempts(5)
-                .failedReadTxAttemptCallback(new TxCallback() {
-                    @Override
-                    public void txFinished(@Nullable Object result, @Nullable Throwable error) {
-                        error.printStackTrace();
-                    }
-                });
+                .failedReadTxAttemptCallback((result, error) -> error.printStackTrace());
         builder.entity(new TestEntity_());
 
         store = builder.build();
@@ -682,12 +669,7 @@ public class QueryTest extends AbstractQueryTest {
     @Test
     public void testFailedUnique_exceptionListener() {
         final Exception[] exs = {null};
-        DbExceptionListener exceptionListener = new DbExceptionListener() {
-            @Override
-            public void onDbException(Exception e) {
-                exs[0] = e;
-            }
-        };
+        DbExceptionListener exceptionListener = e -> exs[0] = e;
         putTestEntitiesStrings();
         Query<TestEntity> query = box.query().build();
         store.setDbExceptionListener(exceptionListener);
