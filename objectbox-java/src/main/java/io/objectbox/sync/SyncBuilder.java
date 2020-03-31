@@ -1,10 +1,10 @@
 package io.objectbox.sync;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.internal.Platform;
-
-import javax.annotation.Nullable;
 
 /**
  * A builder to create a {@link SyncClient}; the builder itself should be created via
@@ -19,12 +19,11 @@ public class SyncBuilder {
     final String url;
     final SyncCredentials credentials;
 
-    @Nullable
-    String certificatePath;
-
     SyncClientListener listener;
     SyncChangesListener changesListener;
 
+    @Nullable
+    String[] trustedCertPaths;
     boolean uncommittedAcks;
     boolean manualStart;
 
@@ -72,9 +71,15 @@ public class SyncBuilder {
         this.credentials = credentials;
     }
 
-    // TODO Check if this should remain exposed in the final API
-    public SyncBuilder certificatePath(String certificatePath) {
-        this.certificatePath = certificatePath;
+    /**
+     * Configures a custom set of directory or file paths to search for trusted certificates in.
+     * The first path that exists will be used.
+     * <p>
+     * Using this option is not recommended in most cases, as by default the sync client uses
+     * the certificate authorities trusted by the host platform.
+     */
+    public SyncBuilder trustedCertificates(String[] paths) {
+        this.trustedCertPaths = paths;
         return this;
     }
 
