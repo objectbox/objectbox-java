@@ -27,6 +27,9 @@ import io.objectbox.relation.RelationTest;
 import io.objectbox.relation.ToManyStandaloneTest;
 import io.objectbox.relation.ToManyTest;
 import io.objectbox.relation.ToOneTest;
+import io.objectbox.sync.ConnectivityMonitorTest;
+import io.objectbox.sync.PlatformTest;
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -37,6 +40,7 @@ import org.junit.runners.Suite.SuiteClasses;
         BoxTest.class,
         BoxStoreTest.class,
         BoxStoreBuilderTest.class,
+        ConnectivityMonitorTest.class,
         CursorTest.class,
         CursorBytesTest.class,
         DebugCursorTest.class,
@@ -44,6 +48,7 @@ import org.junit.runners.Suite.SuiteClasses;
         NonArgConstructorTest.class,
         IndexReaderRenewTest.class,
         ObjectClassObserverTest.class,
+        PlatformTest.class,
         PropertyQueryTest.class,
         QueryFilterComparatorTest.class,
         QueryObserverTest.class,
