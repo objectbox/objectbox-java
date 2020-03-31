@@ -2,6 +2,7 @@ package io.objectbox.sync;
 
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Experimental;
+import io.objectbox.sync.internal.Platform;
 
 import javax.annotation.Nullable;
 
@@ -13,6 +14,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class SyncBuilder {
 
+    final Platform platform;
     final BoxStore boxStore;
     final String url;
     final SyncCredentials credentials;
@@ -64,6 +66,7 @@ public class SyncBuilder {
             throw new IllegalStateException(
                     "This ObjectBox library (JNI) does not include sync. Please update your dependencies.");
         }
+        this.platform = Platform.findPlatform();
         this.boxStore = boxStore;
         this.url = url;
         this.credentials = credentials;

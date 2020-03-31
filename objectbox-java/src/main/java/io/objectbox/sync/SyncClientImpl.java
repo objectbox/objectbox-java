@@ -18,6 +18,8 @@ public class SyncClientImpl implements SyncClient {
 
     private final String serverUrl;
     private final InternalListener internalListener;
+    @Nullable
+    private final ConnectivityMonitor connectivityMonitor;
 
     private volatile long handle;
     @Nullable
@@ -27,6 +29,7 @@ public class SyncClientImpl implements SyncClient {
 
     SyncClientImpl(SyncBuilder builder) {
         this.serverUrl = builder.url;
+        this.connectivityMonitor = builder.platform.getConnectivityMonitor();
 
         long boxStoreHandle = InternalAccess.getHandle(builder.boxStore);
         this.handle = nativeCreate(boxStoreHandle, serverUrl, builder.certificatePath);
@@ -123,6 +126,9 @@ public class SyncClientImpl implements SyncClient {
     public synchronized void start() {
         nativeStart(handle);
         started = true;
+        if (connectivityMonitor != null) {
+            connectivityMonitor.setObserver(this);
+        }
     }
 
     @Override
@@ -132,6 +138,10 @@ public class SyncClientImpl implements SyncClient {
 
     @Override
     public synchronized void stop() {
+        if (connectivityMonitor != null) {
+            connectivityMonitor.removeObserver();
+        }
+
         long handleToStop = this.handle;
         if (handleToStop != 0) {
             nativeStop(handleToStop);
@@ -141,6 +151,10 @@ public class SyncClientImpl implements SyncClient {
 
     @Override
     public void close() {
+        if (connectivityMonitor != null) {
+            connectivityMonitor.removeObserver();
+        }
+
         long handleToDelete;
         synchronized (this) {
             handleToDelete = this.handle;
@@ -188,6 +202,11 @@ public class SyncClientImpl implements SyncClient {
         nativeCancelUpdates(handle);
     }
 
+    @Override
+    public void notifyConnectionAvailable() {
+        nativeTriggerReconnect(handle);
+    }
+
     private void checkNotNull(Object object, String message) {
         //noinspection ConstantConditions Non-null annotation does not enforce, so check for null.
         if (object == null) {
@@ -230,6 +249,9 @@ public class SyncClientImpl implements SyncClient {
 
     /** (Optional) Pause sync updates. */
     private native void nativeCancelUpdates(long handle);
+
+    /** Hints to the native client that an active network connection is available. */
+    private native void nativeTriggerReconnect(long handle);
 
     private class InternalListener implements SyncClientListener {
         private final CountDownLatch firstLoginLatch = new CountDownLatch(1);

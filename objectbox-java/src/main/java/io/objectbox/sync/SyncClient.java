@@ -123,4 +123,12 @@ public interface SyncClient extends Closeable {
     @Experimental
     void requestFullSync();
 
+    /**
+     * Lets the sync client know that a working network connection
+     * is available.
+     * <p>
+     * This can help speed up reconnecting to the sync server.
+     */
+    void notifyConnectionAvailable();
+
 }
