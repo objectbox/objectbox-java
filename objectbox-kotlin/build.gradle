@@ -20,7 +20,15 @@ buildscript {
 apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.dokka'
 
-sourceCompatibility = 1.7
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+// Produce Java 8 byte code, would default to Java 6.
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
 
 dokka {
     outputFormat = 'html'
