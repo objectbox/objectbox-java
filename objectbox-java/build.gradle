@@ -1,5 +1,5 @@
 apply plugin: 'java'
-apply plugin: 'findbugs'
+apply plugin: "com.github.spotbugs"
 
 group = 'io.objectbox'
 version= rootProject.version
@@ -7,20 +7,16 @@ version= rootProject.version
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-tasks.withType(FindBugs) {
-    reports {
-        xml.enabled false
-        html.enabled true
-    }
-    ignoreFailures = true
-}
-
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':objectbox-java-api')
     compile 'org.greenrobot:essentials:3.0.0-RC1'
     compile 'com.google.flatbuffers:flatbuffers-java:1.11.1'
     compile 'com.google.code.findbugs:jsr305:3.0.2'
+}
+
+spotbugs {
+    ignoreFailures = true
 }
 
 javadoc {

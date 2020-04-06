@@ -31,6 +31,13 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.0.5"
     }
 }
 
