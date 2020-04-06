@@ -166,7 +166,7 @@ public class BoxStore implements Closeable {
     private final long handle;
     private final Map<Class, String> dbNameByClass = new HashMap<>();
     private final Map<Class, Integer> entityTypeIdByClass = new HashMap<>();
-    private final Map<Class, EntityInfo> propertiesByClass = new HashMap<>();
+    private final Map<Class<?>, EntityInfo<?>> propertiesByClass = new HashMap<>();
     private final LongHashMap<Class> classByEntityTypeId = new LongHashMap<>();
     private final int[] allEntityTypeIds;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
@@ -213,7 +213,7 @@ public class BoxStore implements Closeable {
         }
         debugRelations = builder.debugRelations;
 
-        for (EntityInfo entityInfo : builder.entityInfoList) {
+        for (EntityInfo<?> entityInfo : builder.entityInfoList) {
             try {
                 dbNameByClass.put(entityInfo.getEntityClass(), entityInfo.getDbName());
                 int entityId = nativeRegisterEntityClass(handle, entityInfo.getDbName(), entityInfo.getEntityClass());
@@ -368,9 +368,10 @@ public class BoxStore implements Closeable {
         return clazz;
     }
 
+    @SuppressWarnings("unchecked") // Shortcut to implementing a Map<Class<? extends B>, B>.
     @Internal
-    EntityInfo getEntityInfo(Class entityClass) {
-        return propertiesByClass.get(entityClass);
+    <T> EntityInfo<T> getEntityInfo(Class<T> entityClass) {
+        return (EntityInfo<T>) propertiesByClass.get(entityClass);
     }
 
     /**

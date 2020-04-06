@@ -92,7 +92,7 @@ public class BoxStoreBuilder {
 
     TxCallback failedReadTxAttemptCallback;
 
-    final List<EntityInfo> entityInfoList = new ArrayList<>();
+    final List<EntityInfo<?>> entityInfoList = new ArrayList<>();
     private Factory<InputStream> initialDbFileFactory;
 
     /** Not for application use. */
@@ -274,7 +274,7 @@ public class BoxStoreBuilder {
     }
 
     @Internal
-    public void entity(EntityInfo entityInfo) {
+    public void entity(EntityInfo<?> entityInfo) {
         entityInfoList.add(entityInfo);
     }
 

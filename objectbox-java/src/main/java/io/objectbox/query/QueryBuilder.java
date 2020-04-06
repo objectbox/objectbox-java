@@ -325,12 +325,12 @@ public class QueryBuilder<T> implements Closeable {
      */
     public <TARGET> QueryBuilder<TARGET> link(RelationInfo<?, TARGET> relationInfo) {
         boolean backlink = relationInfo.isBacklink();
-        EntityInfo relationOwner = backlink ? relationInfo.targetInfo : relationInfo.sourceInfo;
+        EntityInfo<?> relationOwner = backlink ? relationInfo.targetInfo : relationInfo.sourceInfo;
         return link(relationInfo, relationOwner, relationInfo.targetInfo, backlink);
     }
 
-    private <TARGET> QueryBuilder<TARGET> link(RelationInfo relationInfo, EntityInfo relationOwner, EntityInfo target,
-                                               boolean backlink) {
+    private <TARGET> QueryBuilder<TARGET> link(RelationInfo<?, ?> relationInfo, EntityInfo<?> relationOwner,
+                                               EntityInfo<?> target, boolean backlink) {
         int propertyId = relationInfo.targetIdProperty != null ? relationInfo.targetIdProperty.id : 0;
         int relationId = relationInfo.targetRelationId != 0 ? relationInfo.targetRelationId : relationInfo.relationId;
         long linkQBHandle = nativeLink(handle, storeHandle, relationOwner.getEntityId(), target.getEntityId(),

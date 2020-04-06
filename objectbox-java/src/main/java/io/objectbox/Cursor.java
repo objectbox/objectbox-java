@@ -126,7 +126,7 @@ public abstract class Cursor<T> implements Closeable {
 
     protected final Transaction tx;
     protected final long cursor;
-    protected final EntityInfo entityInfo;
+    protected final EntityInfo<T> entityInfo;
     protected final BoxStore boxStoreForEntities;
 
     protected final boolean readOnly;
@@ -134,7 +134,7 @@ public abstract class Cursor<T> implements Closeable {
 
     private final Throwable creationThrowable;
 
-    protected Cursor(Transaction tx, long cursor, EntityInfo entityInfo, BoxStore boxStore) {
+    protected Cursor(Transaction tx, long cursor, EntityInfo<T> entityInfo, BoxStore boxStore) {
         if (tx == null) {
             throw new IllegalArgumentException("Transaction is null");
         }
@@ -181,7 +181,7 @@ public abstract class Cursor<T> implements Closeable {
 
     public abstract long put(T entity);
 
-    public EntityInfo getEntityInfo() {
+    public EntityInfo<T> getEntityInfo() {
         return entityInfo;
     }
 
@@ -262,7 +262,7 @@ public abstract class Cursor<T> implements Closeable {
      * Thus, use it only locally and don't store it long term.
      */
     protected <TARGET> Cursor<TARGET> getRelationTargetCursor(Class<TARGET> targetClass) {
-        EntityInfo entityInfo = boxStoreForEntities.getEntityInfo(targetClass);
+        EntityInfo<TARGET> entityInfo = boxStoreForEntities.getEntityInfo(targetClass);
         long cursorHandle = nativeGetCursorFor(cursor, entityInfo.getEntityId());
         CursorFactory<TARGET> factory = entityInfo.getCursorFactory();
         return factory.createCursor(tx, cursorHandle, boxStoreForEntities);

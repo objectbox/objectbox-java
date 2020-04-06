@@ -56,7 +56,7 @@ public class Box<T> {
 
     private final IdGetter<T> idGetter;
 
-    private EntityInfo entityInfo;
+    private EntityInfo<T> entityInfo;
     private volatile Field boxStoreField;
 
     Box(BoxStore store, Class<T> entityClass) {
@@ -560,7 +560,7 @@ public class Box<T> {
         return store;
     }
 
-    public synchronized EntityInfo getEntityInfo() {
+    public synchronized EntityInfo<T> getEntityInfo() {
         if (entityInfo == null) {
             Cursor<T> reader = getReader();
             try {
