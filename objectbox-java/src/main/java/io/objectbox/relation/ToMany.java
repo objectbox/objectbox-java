@@ -553,13 +553,10 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         }
         if (internalCheckApplyToDbRequired()) {
             // We need a TX because we use two writers and both must use same TX (without: unchecked, SIGSEGV)
-            boxStore.runInTx(new Runnable() {
-                @Override
-                public void run() {
-                    Cursor sourceCursor = InternalAccess.getActiveTxCursor(entityBox);
-                    Cursor<TARGET> targetCursor = InternalAccess.getActiveTxCursor(targetBox);
-                    internalApplyToDb(sourceCursor, targetCursor);
-                }
+            boxStore.runInTx(() -> {
+                Cursor sourceCursor = InternalAccess.getActiveTxCursor(entityBox);
+                Cursor<TARGET> targetCursor = InternalAccess.getActiveTxCursor(targetBox);
+                internalApplyToDb(sourceCursor, targetCursor);
             });
         }
     }

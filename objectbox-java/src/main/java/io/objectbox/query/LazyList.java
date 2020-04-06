@@ -136,12 +136,10 @@ public class LazyList<E> implements List<E> {
         if (loadedCount != size) {
             checkCached();
             // use single reader only for efficiency
-            box.getStore().runInReadTx(new Runnable() {
-                @Override
-                public void run() {
-                    for (int i = 0; i < size; i++) {
-                        get(i);
-                    }
+            box.getStore().runInReadTx(() -> {
+                for (int i = 0; i < size; i++) {
+                    //noinspection ResultOfMethodCallIgnored
+                    get(i);
                 }
             });
         }

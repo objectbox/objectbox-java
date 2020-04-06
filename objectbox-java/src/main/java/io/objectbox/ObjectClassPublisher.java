@@ -77,17 +77,14 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
 
     @Override
     public void publishSingle(final DataObserver<Class> observer, @Nullable final Object forClass) {
-        boxStore.internalScheduleThread(new Runnable() {
-            @Override
-            public void run() {
-                Collection<Class> entityClasses = forClass != null ? Collections.singletonList((Class) forClass) :
-                        boxStore.getAllEntityClasses();
-                for (Class entityClass : entityClasses) {
-                    try {
-                        observer.onData(entityClass);
-                    } catch (RuntimeException e) {
-                        handleObserverException(entityClass);
-                    }
+        boxStore.internalScheduleThread(() -> {
+            Collection<Class> entityClasses = forClass != null ? Collections.singletonList((Class) forClass) :
+                    boxStore.getAllEntityClasses();
+            for (Class entityClass : entityClasses) {
+                try {
+                    observer.onData(entityClass);
+                } catch (RuntimeException e) {
+                    handleObserverException(entityClass);
                 }
             }
         });

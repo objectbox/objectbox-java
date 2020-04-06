@@ -278,13 +278,10 @@ public class BoxStore implements Closeable {
         }
         if (openFilesCheckerThread == null || !openFilesCheckerThread.isAlive()) {
             // Use a thread to avoid finalizers that block us
-            openFilesCheckerThread = new Thread() {
-                @Override
-                public void run() {
-                    isFileOpenSync(canonicalPath, true);
-                    openFilesCheckerThread = null; // Clean ref to itself
-                }
-            };
+            openFilesCheckerThread = new Thread(() -> {
+                isFileOpenSync(canonicalPath, true);
+                openFilesCheckerThread = null; // Clean ref to itself
+            });
             openFilesCheckerThread.setDaemon(true);
             openFilesCheckerThread.start();
             try {
@@ -834,18 +831,15 @@ public class BoxStore implements Closeable {
      * See also {@link #runInTx(Runnable)}.
      */
     public void runInTxAsync(final Runnable runnable, @Nullable final TxCallback<Void> callback) {
-        threadPool.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    runInTx(runnable);
-                    if (callback != null) {
-                        callback.txFinished(null, null);
-                    }
-                } catch (Throwable failure) {
-                    if (callback != null) {
-                        callback.txFinished(null, failure);
-                    }
+        threadPool.submit(() -> {
+            try {
+                runInTx(runnable);
+                if (callback != null) {
+                    callback.txFinished(null, null);
+                }
+            } catch (Throwable failure) {
+                if (callback != null) {
+                    callback.txFinished(null, failure);
                 }
             }
         });
@@ -858,18 +852,15 @@ public class BoxStore implements Closeable {
      * * See also {@link #callInTx(Callable)}.
      */
     public <R> void callInTxAsync(final Callable<R> callable, @Nullable final TxCallback<R> callback) {
-        threadPool.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    R result = callInTx(callable);
-                    if (callback != null) {
-                        callback.txFinished(result, null);
-                    }
-                } catch (Throwable failure) {
-                    if (callback != null) {
-                        callback.txFinished(null, failure);
-                    }
+        threadPool.submit(() -> {
+            try {
+                R result = callInTx(callable);
+                if (callback != null) {
+                    callback.txFinished(result, null);
+                }
+            } catch (Throwable failure) {
+                if (callback != null) {
+                    callback.txFinished(null, failure);
                 }
             }
         });

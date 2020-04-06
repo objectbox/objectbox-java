@@ -22,11 +22,9 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -353,12 +351,7 @@ public class BoxStoreBuilder {
      */
     @Experimental
     public BoxStoreBuilder initialDbFile(final File initialDbFile) {
-        return initialDbFile(new Factory<InputStream>() {
-            @Override
-            public InputStream provide() throws FileNotFoundException {
-                return new FileInputStream(initialDbFile);
-            }
-        });
+        return initialDbFile(() -> new FileInputStream(initialDbFile));
     }
 
     /**

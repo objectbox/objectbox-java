@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
 
-import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 
 /**
@@ -216,19 +215,16 @@ public class SubscriptionBuilder<T> {
         }
 
         private void transformAndContinue(final T data) {
-            threadPool.submit(new Runnable() {
-                @Override
-                public void run() {
-                    if (subscription.isCanceled()) {
-                        return;
-                    }
-                    try {
-                        // Type erasure FTW
-                        T result = (T) transformer.transform(data);
-                        callOnData(result);
-                    } catch (Throwable th) {
-                        callOnError(th, "Transformer failed without an ErrorObserver set");
-                    }
+            threadPool.submit(() -> {
+                if (subscription.isCanceled()) {
+                    return;
+                }
+                try {
+                    // Type erasure FTW
+                    T result = (T) transformer.transform(data);
+                    callOnData(result);
+                } catch (Throwable th) {
+                    callOnError(th, "Transformer failed without an ErrorObserver set");
                 }
             });
         }
