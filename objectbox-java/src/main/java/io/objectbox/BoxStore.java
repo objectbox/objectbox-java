@@ -243,7 +243,7 @@ public class BoxStore implements Closeable {
         objectClassPublisher = new ObjectClassPublisher(this);
 
         failedReadTxAttemptCallback = builder.failedReadTxAttemptCallback;
-        queryAttempts = builder.queryAttempts < 1 ? 1 : builder.queryAttempts;
+        queryAttempts = Math.max(builder.queryAttempts, 1);
     }
 
     static String getCanonicalPath(File directory) {
