@@ -170,7 +170,7 @@ public class BoxStore implements Closeable {
     private final LongHashMap<Class> classByEntityTypeId = new LongHashMap<>();
     private final int[] allEntityTypeIds;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
-    private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
+    private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<>());
     private final ExecutorService threadPool = new ObjectBoxThreadPool(this);
     private final ObjectClassPublisher objectClassPublisher;
     final boolean debugTxRead;
