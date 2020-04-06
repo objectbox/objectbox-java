@@ -13,8 +13,6 @@ buildscript {
         ob_version = objectboxVersionNumber + (objectboxVersionRelease? "" : "$versionPostFix-SNAPSHOT")
         println "ObjectBox Java version $ob_version"
 
-        ob_expected_version = project.hasProperty('expectedVersion') ? project.property('expectedVersion') : 'UNDEFINED'
-
         // Core version for tests
         // Be careful to diverge here; easy to forget and hard to find JNI problems
         ob_native_version = objectboxVersionNumber + (objectboxVersionRelease? "": "-dev-SNAPSHOT")
@@ -150,36 +148,6 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                 }
             }
         }
-    }
-}
-
-// this task is also used by the composite build ('objectbox-deploy'), check before making changes
-task installAll {
-    group 'deploy'
-    dependsOn ':objectbox-java-api:install'
-    dependsOn ':objectbox-java:install'
-    dependsOn ':objectbox-kotlin:install'
-    dependsOn ':objectbox-rxjava:install'
-    doLast {
-        println("Installed version $version")
-    }
-}
-
-// this task is also used by the composite build ('objectbox-deploy'), check before making changes
-task deployAll {
-    group 'deploy'
-    dependsOn ':objectbox-java-api:uploadArchives'
-    dependsOn ':objectbox-java:uploadArchives'
-    dependsOn ':objectbox-kotlin:uploadArchives'
-    dependsOn ':objectbox-rxjava:uploadArchives'
-}
-
-// this task is also used by the composite build ('objectbox-deploy'), check before making changes
-task verifyVersion {
-    group 'verify'
-    dependsOn ':objectbox-java:verifyVersion'
-    doLast {
-        assert ob_expected_version == version
     }
 }
 
