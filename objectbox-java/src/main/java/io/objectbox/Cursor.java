@@ -108,11 +108,11 @@ public abstract class Cursor<T> implements Closeable {
 
     native int nativePropertyId(long cursor, String propertyValue);
 
-    native List nativeGetBacklinkEntities(long cursor, int entityId, int propertyId, long key);
+    native List<T> nativeGetBacklinkEntities(long cursor, int entityId, int propertyId, long key);
 
     native long[] nativeGetBacklinkIds(long cursor, int entityId, int propertyId, long key);
 
-    native List nativeGetRelationEntities(long cursor, int sourceEntityId, int relationId, long key, boolean backlink);
+    native List<T> nativeGetRelationEntities(long cursor, int sourceEntityId, int relationId, long key, boolean backlink);
 
     native long[] nativeGetRelationIds(long cursor, int sourceEntityId, int relationId, long key, boolean backlink);
 
@@ -144,8 +144,8 @@ public abstract class Cursor<T> implements Closeable {
         this.entityInfo = entityInfo;
         this.boxStoreForEntities = boxStore;
 
-        Property[] allProperties = entityInfo.getAllProperties();
-        for (Property property : allProperties) {
+        Property<T>[] allProperties = entityInfo.getAllProperties();
+        for (Property<T> property : allProperties) {
             if (!property.isIdVerified()) {
                 int id = getPropertyId(property.dbName);
                 property.verifyId(id);
@@ -281,7 +281,7 @@ public abstract class Cursor<T> implements Closeable {
     }
 
     @Internal
-    List<T> getBacklinkEntities(int entityId, Property relationIdProperty, long key) {
+    List<T> getBacklinkEntities(int entityId, Property<?> relationIdProperty, long key) {
         try {
             return nativeGetBacklinkEntities(cursor, entityId, relationIdProperty.getId(), key);
         } catch (IllegalArgumentException e) {
@@ -291,7 +291,7 @@ public abstract class Cursor<T> implements Closeable {
     }
 
     @Internal
-    long[] getBacklinkIds(int entityId, Property relationIdProperty, long key) {
+    long[] getBacklinkIds(int entityId, Property<?> relationIdProperty, long key) {
         try {
             return nativeGetBacklinkIds(cursor, entityId, relationIdProperty.getId(), key);
         } catch (IllegalArgumentException e) {

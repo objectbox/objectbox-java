@@ -267,8 +267,8 @@ public class Query<T> implements Closeable {
      *
      * @param property the property for which to return values
      */
-    public PropertyQuery property(Property property) {
-        return new PropertyQuery(this, property);
+    public PropertyQuery<T> property(Property<T> property) {
+        return new PropertyQuery<>(this, property);
     }
 
     <R> R callInReadTx(Callable<R> callable) {
@@ -380,7 +380,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
      */
-    public Query<T> setParameter(Property property, String value) {
+    public Query<T> setParameter(Property<?> property, String value) {
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
         return this;
     }
@@ -398,7 +398,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
      */
-    public Query<T> setParameter(Property property, long value) {
+    public Query<T> setParameter(Property<?> property, long value) {
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
         return this;
     }
@@ -416,7 +416,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
      */
-    public Query<T> setParameter(Property property, double value) {
+    public Query<T> setParameter(Property<?> property, double value) {
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
         return this;
     }
@@ -436,7 +436,7 @@ public class Query<T> implements Closeable {
      *
      * @throws NullPointerException if given date is null
      */
-    public Query<T> setParameter(Property property, Date value) {
+    public Query<T> setParameter(Property<?> property, Date value) {
         return setParameter(property, value.getTime());
     }
 
@@ -453,7 +453,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
      */
-    public Query<T> setParameter(Property property, boolean value) {
+    public Query<T> setParameter(Property<?> property, boolean value) {
         return setParameter(property, value ? 1 : 0);
     }
 
@@ -469,7 +469,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
-    public Query<T> setParameters(Property property, long value1, long value2) {
+    public Query<T> setParameters(Property<?> property, long value1, long value2) {
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, value1, value2);
         return this;
     }
@@ -487,7 +487,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
-    public Query<T> setParameters(Property property, int[] values) {
+    public Query<T> setParameters(Property<?> property, int[] values) {
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
         return this;
     }
@@ -505,7 +505,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
-    public Query<T> setParameters(Property property, long[] values) {
+    public Query<T> setParameters(Property<?> property, long[] values) {
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
         return this;
     }
@@ -523,7 +523,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
-    public Query<T> setParameters(Property property, double value1, double value2) {
+    public Query<T> setParameters(Property<?> property, double value1, double value2) {
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, value1, value2);
         return this;
     }
@@ -541,7 +541,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
-    public Query<T> setParameters(Property property, String[] values) {
+    public Query<T> setParameters(Property<?> property, String[] values) {
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
         return this;
     }
@@ -559,7 +559,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
-    public Query<T> setParameter(Property property, byte[] value) {
+    public Query<T> setParameter(Property<?> property, byte[] value) {
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
         return this;
     }

@@ -220,7 +220,7 @@ public class BoxStore implements Closeable {
                 entityTypeIdByClass.put(entityInfo.getEntityClass(), entityId);
                 classByEntityTypeId.put(entityId, entityInfo.getEntityClass());
                 propertiesByClass.put(entityInfo.getEntityClass(), entityInfo);
-                for (Property property : entityInfo.getAllProperties()) {
+                for (Property<?> property : entityInfo.getAllProperties()) {
                     if (property.customType != null) {
                         if (property.converterClass == null) {
                             throw new RuntimeException("No converter class for custom type of " + property);
