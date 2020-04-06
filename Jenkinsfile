@@ -54,7 +54,7 @@ pipeline {
                         "--tests io.objectbox.FunctionalTestSuite " +
                         "--tests io.objectbox.test.proguard.ObfuscatedEntityTest " +
                         "--tests io.objectbox.rx.QueryObserverTest " +
-                        "assemble"
+                        "spotbugsMain assemble"
             }
         }
 
@@ -92,7 +92,7 @@ pipeline {
         always {
             junit '**/build/test-results/**/TEST-*.xml'
             archiveArtifacts artifacts: 'tests/*/hs_err_pid*.log', allowEmptyArchive: true  // Only on JVM crash.
-            // currently unused: archiveArtifacts '**/build/reports/findbugs/*'
+            recordIssues(tool: spotBugs(pattern: '**/build/reports/spotbugs/*.xml', useRankAsPriority: true))
 
             googlechatnotification url: 'id:gchat_java', message: "${currentBuild.currentResult}: ${currentBuild.fullDisplayName}\n${env.BUILD_URL}",
                                    notifyFailure: 'true', notifyUnstable: 'true', notifyBackToNormal: 'true'
