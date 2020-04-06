@@ -27,8 +27,8 @@ dependencies {
 
     // Check flag to use locally compiled version to avoid dependency cycles
     if (!project.hasProperty('noObjectBoxTestDepencies') || !noObjectBoxTestDepencies) {
-        println "Using $objectboxNativeDependency"
-        compile "$objectboxNativeDependency"
+        println "Using $ob_native_dep"
+        compile ob_native_dep
     } else {
         println "Did NOT add native dependency"
     }
