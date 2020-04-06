@@ -8,16 +8,16 @@ targetCompatibility = JavaVersion.VERSION_1_8
 repositories {
     // Native lib might be deployed only in internal repo
     if (project.hasProperty('internalObjectBoxRepo')) {
-        println("Using internal ObjectBox repository $internalObjectBoxRepo.")
+        println "internalObjectBoxRepo=$internalObjectBoxRepo added to repositories."
         maven {
             credentials {
-                username project.property('internalObjectBoxRepoUser')
-                password project.property('internalObjectBoxRepoPassword')
+                username internalObjectBoxRepoUser
+                password internalObjectBoxRepoPassword
             }
             url internalObjectBoxRepo
         }
     } else {
-        println "Warning: internalObjectBoxRepo, internalObjectBoxRepoUser and internalObjectBoxRepoPassword missing from gradle.properties."
+        println "WARNING: Property internalObjectBoxRepo not set."
     }
 }
 
@@ -27,8 +27,8 @@ dependencies {
 
     // Check flag to use locally compiled version to avoid dependency cycles
     if (!project.hasProperty('noObjectBoxTestDepencies') || !noObjectBoxTestDepencies) {
-        println "Using $objectboxNativeDependency"
-        compile "$objectboxNativeDependency"
+        println "Using $ob_native_dep"
+        compile ob_native_dep
     } else {
         println "Did NOT add native dependency"
     }
