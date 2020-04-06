@@ -1,8 +1,5 @@
 apply plugin: 'java'
 
-group = 'io.objectbox'
-version= rootProject.version
-
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 

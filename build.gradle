@@ -1,6 +1,3 @@
-// Just too many sub projects, so each can reference rootProject.version
-version = ob_version
-
 buildscript {
     ext {
         // Typically, only edit those two:
@@ -42,6 +39,9 @@ buildscript {
 }
 
 allprojects {
+    group = 'io.objectbox'
+    version = ob_version
+
     repositories {
         mavenCentral()
         jcenter()
