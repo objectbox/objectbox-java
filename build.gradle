@@ -100,10 +100,12 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                     
                     if (preferredRepo == 'local') {
                         repository url: repositories.mavenLocal().url
-                    } else if (preferredRepo != null 
+                        println "Uploading archives to mavenLocal()."
+                    } else if (preferredRepo != null
                             && project.hasProperty('preferredUsername') 
                             && project.hasProperty('preferredPassword')) {
                         configuration = configurations.deployerJars
+
                         // replace placeholders
                         def repositoryUrl = preferredRepo
                                 .replace('__groupId__', project.group)
@@ -111,23 +113,28 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                         repository(url: repositoryUrl) {
                             authentication(userName: preferredUsername, password: preferredPassword)
                         }
-                    } else if (project.hasProperty('sonatypeUsername') 
+
+                        println "Uploading archives to $repositoryUrl."
+                    } else if (project.hasProperty('sonatypeUsername')
                             && project.hasProperty('sonatypePassword')) {
                         beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
                         def isSnapshot = version.endsWith('-SNAPSHOT')
-                        def sonatypeRepositoryUrl = isSnapshot ?
-                                "https://oss.sonatype.org/content/repositories/snapshots/"
+                        def sonatypeRepositoryUrl = isSnapshot
+                                ? "https://oss.sonatype.org/content/repositories/snapshots/"
                                 : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
                         repository(url: sonatypeRepositoryUrl) {
                             authentication(userName: sonatypeUsername, password: sonatypePassword)
                         }
+
+                        println "Uploading archives to $sonatypeRepositoryUrl."
                     } else {
-                        println "Deployment settings missing/incomplete for ${project.name}."
+                        println "WARNING: preferredRepo NOT set, can not upload archives."
                     }
 
                     pom.project {
                         packaging 'jar'
-                        url 'http://objectbox.io'
+                        url 'https://objectbox.io'
 
                         scm {
                             url 'https://github.com/objectbox/objectbox-java'
@@ -149,7 +156,7 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
 
                         organization {
                             name 'ObjectBox Ltd.'
-                            url 'http://objectbox.io'
+                            url 'https://objectbox.io'
                         }
                     }
                 }
