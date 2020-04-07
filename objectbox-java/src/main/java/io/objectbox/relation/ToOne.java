@@ -235,13 +235,10 @@ public class ToOne<TARGET> implements Serializable {
     public void setAndPutTargetAlways(@Nullable final TARGET target) {
         ensureBoxes(target);
         if (target != null) {
-            boxStore.runInTx(new Runnable() {
-                @Override
-                public void run() {
-                    long targetKey = targetBox.put(target);
-                    setResolvedTarget(target, targetKey);
-                    entityBox.put(entity);
-                }
+            boxStore.runInTx(() -> {
+                long targetKey = targetBox.put(target);
+                setResolvedTarget(target, targetKey);
+                entityBox.put(entity);
             });
         } else {
             setTargetId(0);

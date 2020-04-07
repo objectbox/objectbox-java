@@ -31,7 +31,6 @@ import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
 import io.objectbox.Property;
-import io.objectbox.internal.CallWithHandle;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataSubscriptionList;
 import io.objectbox.reactive.SubscriptionBuilder;
@@ -149,14 +148,11 @@ public class Query<T> implements Closeable {
     @Nullable
     public T findFirst() {
         ensureNoFilterNoComparator();
-        return callInReadTx(new Callable<T>() {
-            @Override
-            public T call() {
-                @SuppressWarnings("unchecked")
-                T entity = (T) nativeFindFirst(handle, cursorHandle());
-                resolveEagerRelation(entity);
-                return entity;
-            }
+        return callInReadTx(() -> {
+            @SuppressWarnings("unchecked")
+            T entity = (T) nativeFindFirst(handle, cursorHandle());
+            resolveEagerRelation(entity);
+            return entity;
         });
     }
 
@@ -187,14 +183,11 @@ public class Query<T> implements Closeable {
     @Nullable
     public T findUnique() {
         ensureNoFilter();  // Comparator is fine: does not make any difference for a unique result
-        return callInReadTx(new Callable<T>() {
-            @Override
-            public T call() {
-                @SuppressWarnings("unchecked")
-                T entity = (T) nativeFindUnique(handle, cursorHandle());
-                resolveEagerRelation(entity);
-                return entity;
-            }
+        return callInReadTx(() -> {
+            @SuppressWarnings("unchecked")
+            T entity = (T) nativeFindUnique(handle, cursorHandle());
+            resolveEagerRelation(entity);
+            return entity;
         });
     }
 
@@ -203,25 +196,22 @@ public class Query<T> implements Closeable {
      */
     @Nonnull
     public List<T> find() {
-        return callInReadTx(new Callable<List<T>>() {
-            @Override
-            public List<T> call() throws Exception {
-                List<T> entities = nativeFind(Query.this.handle, cursorHandle(), 0, 0);
-                if (filter != null) {
-                    Iterator<T> iterator = entities.iterator();
-                    while (iterator.hasNext()) {
-                        T entity = iterator.next();
-                        if (!filter.keep(entity)) {
-                            iterator.remove();
-                        }
+        return callInReadTx(() -> {
+            List<T> entities = nativeFind(Query.this.handle, cursorHandle(), 0, 0);
+            if (filter != null) {
+                Iterator<T> iterator = entities.iterator();
+                while (iterator.hasNext()) {
+                    T entity = iterator.next();
+                    if (!filter.keep(entity)) {
+                        iterator.remove();
                     }
                 }
-                resolveEagerRelations(entities);
-                if (comparator != null) {
-                    Collections.sort(entities, comparator);
-                }
-                return entities;
             }
+            resolveEagerRelations(entities);
+            if (comparator != null) {
+                Collections.sort(entities, comparator);
+            }
+            return entities;
         });
     }
 
@@ -231,13 +221,10 @@ public class Query<T> implements Closeable {
     @Nonnull
     public List<T> find(final long offset, final long limit) {
         ensureNoFilterNoComparator();
-        return callInReadTx(new Callable<List<T>>() {
-            @Override
-            public List<T> call() throws Exception {
-                List<T> entities = nativeFind(handle, cursorHandle(), offset, limit);
-                resolveEagerRelations(entities);
-                return entities;
-            }
+        return callInReadTx(() -> {
+            List<T> entities = nativeFind(handle, cursorHandle(), offset, limit);
+            resolveEagerRelations(entities);
+            return entities;
         });
     }
 
@@ -259,12 +246,7 @@ public class Query<T> implements Closeable {
      */
     @Nonnull
     public long[] findIds(final long offset, final long limit) {
-        return box.internalCallWithReaderHandle(new CallWithHandle<long[]>() {
-            @Override
-            public long[] call(long cursorHandle) {
-                return nativeFindIds(handle, cursorHandle, offset, limit);
-            }
-        });
+        return box.internalCallWithReaderHandle(cursorHandle -> nativeFindIds(handle, cursorHandle, offset, limit));
     }
 
     /**
@@ -304,29 +286,26 @@ public class Query<T> implements Closeable {
      */
     public void forEach(final QueryConsumer<T> consumer) {
         ensureNoComparator();
-        box.getStore().runInReadTx(new Runnable() {
-            @Override
-            public void run() {
-                LazyList<T> lazyList = new LazyList<>(box, findIds(), false);
-                int size = lazyList.size();
-                for (int i = 0; i < size; i++) {
-                    T entity = lazyList.get(i);
-                    if (entity == null) {
-                        throw new IllegalStateException("Internal error: data object was null");
+        box.getStore().runInReadTx(() -> {
+            LazyList<T> lazyList = new LazyList<>(box, findIds(), false);
+            int size = lazyList.size();
+            for (int i = 0; i < size; i++) {
+                T entity = lazyList.get(i);
+                if (entity == null) {
+                    throw new IllegalStateException("Internal error: data object was null");
+                }
+                if (filter != null) {
+                    if (!filter.keep(entity)) {
+                        continue;
                     }
-                    if (filter != null) {
-                        if (!filter.keep(entity)) {
-                            continue;
-                        }
-                    }
-                    if (eagerRelations != null) {
-                        resolveEagerRelationForNonNullEagerRelations(entity, i);
-                    }
-                    try {
-                        consumer.accept(entity);
-                    } catch (BreakForEach breakForEach) {
-                        break;
-                    }
+                }
+                if (eagerRelations != null) {
+                    resolveEagerRelationForNonNullEagerRelations(entity, i);
+                }
+                try {
+                    consumer.accept(entity);
+                } catch (BreakForEach breakForEach) {
+                    break;
                 }
             }
         });
@@ -395,12 +374,7 @@ public class Query<T> implements Closeable {
     /** Returns the count of Objects matching the query. */
     public long count() {
         ensureNoFilter();
-        return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
-            @Override
-            public Long call(long cursorHandle) {
-                return nativeCount(handle, cursorHandle);
-            }
-        });
+        return box.internalCallWithReaderHandle(cursorHandle -> nativeCount(handle, cursorHandle));
     }
 
     /**
@@ -607,12 +581,7 @@ public class Query<T> implements Closeable {
      */
     public long remove() {
         ensureNoFilter();
-        return box.internalCallWithWriterHandle(new CallWithHandle<Long>() {
-            @Override
-            public Long call(long cursorHandle) {
-                return nativeRemove(handle, cursorHandle);
-            }
-        });
+        return box.internalCallWithWriterHandle(cursorHandle -> nativeRemove(handle, cursorHandle));
     }
 
     /**

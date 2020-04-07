@@ -324,11 +324,8 @@ public abstract class Cursor<T> implements Closeable {
         if (orders instanceof ToMany) {
             ToMany<TARGET> toMany = (ToMany<TARGET>) orders;
             if (toMany.internalCheckApplyToDbRequired()) {
-                Cursor<TARGET> targetCursor = getRelationTargetCursor(targetClass);
-                try {
+                try (Cursor<TARGET> targetCursor = getRelationTargetCursor(targetClass)) {
                     toMany.internalApplyToDb(this, targetCursor);
-                } finally {
-                    targetCursor.close();
                 }
             }
         }

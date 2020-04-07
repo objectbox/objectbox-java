@@ -170,7 +170,7 @@ public class BoxStore implements Closeable {
     private final LongHashMap<Class> classByEntityTypeId = new LongHashMap<>();
     private final int[] allEntityTypeIds;
     private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
-    private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<Transaction, Boolean>());
+    private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<>());
     private final ExecutorService threadPool = new ObjectBoxThreadPool(this);
     private final ObjectClassPublisher objectClassPublisher;
     final boolean debugTxRead;
@@ -243,7 +243,7 @@ public class BoxStore implements Closeable {
         objectClassPublisher = new ObjectClassPublisher(this);
 
         failedReadTxAttemptCallback = builder.failedReadTxAttemptCallback;
-        queryAttempts = builder.queryAttempts < 1 ? 1 : builder.queryAttempts;
+        queryAttempts = Math.max(builder.queryAttempts, 1);
     }
 
     static String getCanonicalPath(File directory) {
@@ -278,13 +278,10 @@ public class BoxStore implements Closeable {
         }
         if (openFilesCheckerThread == null || !openFilesCheckerThread.isAlive()) {
             // Use a thread to avoid finalizers that block us
-            openFilesCheckerThread = new Thread() {
-                @Override
-                public void run() {
-                    isFileOpenSync(canonicalPath, true);
-                    openFilesCheckerThread = null; // Clean ref to itself
-                }
-            };
+            openFilesCheckerThread = new Thread(() -> {
+                isFileOpenSync(canonicalPath, true);
+                openFilesCheckerThread = null; // Clean ref to itself
+            });
             openFilesCheckerThread.setDaemon(true);
             openFilesCheckerThread.start();
             try {
@@ -834,18 +831,15 @@ public class BoxStore implements Closeable {
      * See also {@link #runInTx(Runnable)}.
      */
     public void runInTxAsync(final Runnable runnable, @Nullable final TxCallback<Void> callback) {
-        threadPool.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    runInTx(runnable);
-                    if (callback != null) {
-                        callback.txFinished(null, null);
-                    }
-                } catch (Throwable failure) {
-                    if (callback != null) {
-                        callback.txFinished(null, failure);
-                    }
+        threadPool.submit(() -> {
+            try {
+                runInTx(runnable);
+                if (callback != null) {
+                    callback.txFinished(null, null);
+                }
+            } catch (Throwable failure) {
+                if (callback != null) {
+                    callback.txFinished(null, failure);
                 }
             }
         });
@@ -858,18 +852,15 @@ public class BoxStore implements Closeable {
      * * See also {@link #callInTx(Callable)}.
      */
     public <R> void callInTxAsync(final Callable<R> callable, @Nullable final TxCallback<R> callback) {
-        threadPool.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    R result = callInTx(callable);
-                    if (callback != null) {
-                        callback.txFinished(result, null);
-                    }
-                } catch (Throwable failure) {
-                    if (callback != null) {
-                        callback.txFinished(null, failure);
-                    }
+        threadPool.submit(() -> {
+            try {
+                R result = callInTx(callable);
+                if (callback != null) {
+                    callback.txFinished(result, null);
+                }
+            } catch (Throwable failure) {
+                if (callback != null) {
+                    callback.txFinished(null, failure);
                 }
             }
         });
