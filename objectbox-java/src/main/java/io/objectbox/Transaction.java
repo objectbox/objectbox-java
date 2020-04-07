@@ -56,7 +56,7 @@ public class Transaction implements Closeable {
 
     native long nativeCreateKeyValueCursor(long transaction);
 
-    native long nativeCreateCursor(long transaction, String entityName, Class entityClass);
+    native long nativeCreateCursor(long transaction, String entityName, Class<?> entityClass);
 
     // native long nativeGetStore(long transaction);
 

@@ -50,7 +50,7 @@ public abstract class Cursor<T> implements Closeable {
 
     static native boolean nativeSeek(long cursor, long key);
 
-    native Object nativeGetAllEntities(long cursor);
+    native List<T> nativeGetAllEntities(long cursor);
 
     static native Object nativeGetEntity(long cursor, long key);
 
@@ -199,7 +199,7 @@ public abstract class Cursor<T> implements Closeable {
 
     /** ~10% slower than iterating with {@link #first()} and {@link #next()} as done by {@link Box#getAll()}. */
     public List<T> getAll() {
-        return (List) nativeGetAllEntities(cursor);
+        return nativeGetAllEntities(cursor);
     }
 
     public boolean deleteEntity(long key) {
