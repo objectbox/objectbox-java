@@ -90,7 +90,7 @@ public class BoxStoreBuilder {
 
     int queryAttempts;
 
-    TxCallback failedReadTxAttemptCallback;
+    TxCallback<?> failedReadTxAttemptCallback;
 
     final List<EntityInfo<?>> entityInfoList = new ArrayList<>();
     private Factory<InputStream> initialDbFileFactory;
@@ -345,7 +345,7 @@ public class BoxStoreBuilder {
      * Useful for e.g. logging.
      */
     @Experimental
-    public BoxStoreBuilder failedReadTxAttemptCallback(TxCallback failedReadTxAttemptCallback) {
+    public BoxStoreBuilder failedReadTxAttemptCallback(TxCallback<?> failedReadTxAttemptCallback) {
         this.failedReadTxAttemptCallback = failedReadTxAttemptCallback;
         return this;
     }

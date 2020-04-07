@@ -191,7 +191,7 @@ public class BoxStore implements Closeable {
 
     private final int queryAttempts;
 
-    private final TxCallback failedReadTxAttemptCallback;
+    private final TxCallback<?> failedReadTxAttemptCallback;
 
     BoxStore(BoxStoreBuilder builder) {
         context = builder.context;
@@ -733,7 +733,6 @@ public class BoxStore implements Closeable {
                     cleanStaleReadTransactions();
                 }
                 if (failedReadTxAttemptCallback != null) {
-                    //noinspection unchecked
                     failedReadTxAttemptCallback.txFinished(null, new DbException(message + " \n" + diagnose, e));
                 }
                 try {
@@ -973,7 +972,7 @@ public class BoxStore implements Closeable {
     }
 
     @Internal
-    public Future internalScheduleThread(Runnable runnable) {
+    public Future<?> internalScheduleThread(Runnable runnable) {
         return threadPool.submit(runnable);
     }
 
@@ -993,7 +992,7 @@ public class BoxStore implements Closeable {
     }
 
     @Internal
-    public TxCallback internalFailedReadTxAttemptCallback() {
+    public TxCallback<?> internalFailedReadTxAttemptCallback() {
         return failedReadTxAttemptCallback;
     }
 
