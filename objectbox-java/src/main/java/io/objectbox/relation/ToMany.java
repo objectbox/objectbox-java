@@ -61,7 +61,6 @@ import static java.lang.Boolean.TRUE;
  *
  * @param <TARGET> Object type (entity).
  */
-@SuppressWarnings("unchecked")
 public class ToMany<TARGET> implements List<TARGET>, Serializable {
     private static final long serialVersionUID = 2367317778240689006L;
     private final static Integer ONE = Integer.valueOf(1);
@@ -85,7 +84,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     List<TARGET> entitiesToRemoveFromDb;
 
     transient private BoxStore boxStore;
-    transient private Box entityBox;
+    transient private Box<Object> entityBox;
     transient private volatile Box<TARGET> targetBox;
     transient private boolean removeFromTargetBox;
     transient private Comparator<TARGET> comparator;
@@ -295,12 +294,12 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             entitiesToClear.clear();
         }
 
-        Map setToClear = entitiesAdded;
+        Map<TARGET, Boolean> setToClear = entitiesAdded;
         if (setToClear != null) {
             setToClear.clear();
         }
 
-        Map entityCountsToClear = this.entityCounts;
+        Map<TARGET, Integer> entityCountsToClear = this.entityCounts;
         if (entityCountsToClear != null) {
             entityCountsToClear.clear();
         }
@@ -557,7 +556,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         if (internalCheckApplyToDbRequired()) {
             // We need a TX because we use two writers and both must use same TX (without: unchecked, SIGSEGV)
             boxStore.runInTx(() -> {
-                Cursor sourceCursor = InternalAccess.getActiveTxCursor(entityBox);
+                Cursor<Object> sourceCursor = InternalAccess.getActiveTxCursor(entityBox);
                 Cursor<TARGET> targetCursor = InternalAccess.getActiveTxCursor(targetBox);
                 internalApplyToDb(sourceCursor, targetCursor);
             });
@@ -782,7 +781,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
      * Convention: {@link #internalCheckApplyToDbRequired()} must be called before this call as it prepares .
      */
     @Internal
-    public void internalApplyToDb(Cursor sourceCursor, Cursor<TARGET> targetCursor) {
+    public void internalApplyToDb(Cursor<?> sourceCursor, Cursor<TARGET> targetCursor) {
         TARGET[] toRemoveFromDb;
         TARGET[] toPut;
         TARGET[] addedStandalone = null;
@@ -848,7 +847,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     /**
      * The list of removed entities may contain non-persisted entities, which will be ignored (removed from the list).
      */
-    private void removeStandaloneRelations(Cursor cursor, long sourceEntityId, List<TARGET> removed,
+    private void removeStandaloneRelations(Cursor<?> cursor, long sourceEntityId, List<TARGET> removed,
                                            IdGetter<TARGET> targetIdGetter) {
         Iterator<TARGET> iterator = removed.iterator();
         while (iterator.hasNext()) {
@@ -868,7 +867,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     /** The target array may not contain non-persisted entities. */
-    private void addStandaloneRelations(Cursor cursor, long sourceEntityId, TARGET[] added,
+    private void addStandaloneRelations(Cursor<?> cursor, long sourceEntityId, TARGET[] added,
                                         IdGetter<TARGET> targetIdGetter) {
         int length = added.length;
         long[] targetIds = new long[length];

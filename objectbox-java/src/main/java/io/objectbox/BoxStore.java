@@ -368,7 +368,7 @@ public class BoxStore implements Closeable {
         return clazz;
     }
 
-    @SuppressWarnings("unchecked") // Shortcut to implementing a Map<Class<? extends B>, B>.
+    @SuppressWarnings("unchecked") // Casting is easier than writing a custom Map.
     @Internal
     <T> EntityInfo<T> getEntityInfo(Class<T> entityClass) {
         return (EntityInfo<T>) propertiesByClass.get(entityClass);
