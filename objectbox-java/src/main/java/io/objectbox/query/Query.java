@@ -95,7 +95,7 @@ public class Query<T> implements Closeable {
     final Box<T> box;
     private final BoxStore store;
     private final QueryPublisher<T> publisher;
-    @Nullable private final List<EagerRelation> eagerRelations;
+    @Nullable private final List<EagerRelation<T, ?>> eagerRelations;
     @Nullable private final QueryFilter<T> filter;
     @Nullable private final Comparator<T> comparator;
     private final int queryAttempts;
@@ -103,7 +103,7 @@ public class Query<T> implements Closeable {
 
     long handle;
 
-    Query(Box<T> box, long queryHandle, @Nullable List<EagerRelation> eagerRelations, @Nullable  QueryFilter<T> filter,
+    Query(Box<T> box, long queryHandle, @Nullable List<EagerRelation<T, ?>> eagerRelations, @Nullable  QueryFilter<T> filter,
           @Nullable Comparator<T> comparator) {
         this.box = box;
         store = box.getStore();
@@ -333,7 +333,7 @@ public class Query<T> implements Closeable {
     /** Note: no null check on eagerRelations! */
     void resolveEagerRelationForNonNullEagerRelations(@Nonnull T entity, int entityIndex) {
         //noinspection ConstantConditions No null check.
-        for (EagerRelation eagerRelation : eagerRelations) {
+        for (EagerRelation<T, ?> eagerRelation : eagerRelations) {
             if (eagerRelation.limit == 0 || entityIndex < eagerRelation.limit) {
                 resolveEagerRelation(entity, eagerRelation);
             }
@@ -342,18 +342,17 @@ public class Query<T> implements Closeable {
 
     void resolveEagerRelation(@Nullable T entity) {
         if (eagerRelations != null && entity != null) {
-            for (EagerRelation eagerRelation : eagerRelations) {
+            for (EagerRelation<T, ?> eagerRelation : eagerRelations) {
                 resolveEagerRelation(entity, eagerRelation);
             }
         }
     }
 
-    void resolveEagerRelation(@Nonnull T entity, EagerRelation eagerRelation) {
+    void resolveEagerRelation(@Nonnull T entity, EagerRelation<T, ?> eagerRelation) {
         if (eagerRelations != null) {
-            RelationInfo relationInfo = eagerRelation.relationInfo;
+            RelationInfo<T, ?> relationInfo = eagerRelation.relationInfo;
             if (relationInfo.toOneGetter != null) {
-                //noinspection unchecked Can't know target entity type.
-                ToOne toOne = relationInfo.toOneGetter.getToOne(entity);
+                ToOne<?> toOne = relationInfo.toOneGetter.getToOne(entity);
                 if (toOne != null) {
                     toOne.getTarget();
                 }
@@ -361,8 +360,7 @@ public class Query<T> implements Closeable {
                 if (relationInfo.toManyGetter == null) {
                     throw new IllegalStateException("Relation info without relation getter: " + relationInfo);
                 }
-                //noinspection unchecked Can't know target entity type.
-                List toMany = relationInfo.toManyGetter.getToMany(entity);
+                List<?> toMany = relationInfo.toManyGetter.getToMany(entity);
                 if (toMany != null) {
                     //noinspection ResultOfMethodCallIgnored Triggers fetching target entities.
                     toMany.size();

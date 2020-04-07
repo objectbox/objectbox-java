@@ -98,7 +98,7 @@ public class QueryBuilder<T> implements Closeable {
     private Operator combineNextWith = Operator.NONE;
 
     @Nullable
-    private List<EagerRelation> eagerRelations;
+    private List<EagerRelation<T, ?>> eagerRelations;
 
     @Nullable
     private QueryFilter<T> filter;
@@ -382,10 +382,10 @@ public class QueryBuilder<T> implements Closeable {
         if (eagerRelations == null) {
             eagerRelations = new ArrayList<>();
         }
-        eagerRelations.add(new EagerRelation(limit, relationInfo));
+        eagerRelations.add(new EagerRelation<>(limit, relationInfo));
         if (more != null) {
             for (RelationInfo info : more) {
-                eagerRelations.add(new EagerRelation(limit, info));
+                eagerRelations.add(new EagerRelation<>(limit, info));
             }
         }
         return this;
