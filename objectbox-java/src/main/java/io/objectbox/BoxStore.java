@@ -136,11 +136,11 @@ public class BoxStore implements Closeable {
 
     /** @return entity ID */
     // TODO only use ids once we have them in Java
-    static native int nativeRegisterEntityClass(long store, String entityName, Class entityClass);
+    static native int nativeRegisterEntityClass(long store, String entityName, Class<?> entityClass);
 
     // TODO only use ids once we have them in Java
     static native void nativeRegisterCustomType(long store, int entityId, int propertyId, String propertyName,
-                                                Class<? extends PropertyConverter> converterClass, Class customType);
+                                                Class<? extends PropertyConverter> converterClass, Class<?> customType);
 
     static native String nativeDiagnose(long store);
 
@@ -164,10 +164,10 @@ public class BoxStore implements Closeable {
     private final File directory;
     private final String canonicalPath;
     private final long handle;
-    private final Map<Class, String> dbNameByClass = new HashMap<>();
-    private final Map<Class, Integer> entityTypeIdByClass = new HashMap<>();
+    private final Map<Class<?>, String> dbNameByClass = new HashMap<>();
+    private final Map<Class<?>, Integer> entityTypeIdByClass = new HashMap<>();
     private final Map<Class<?>, EntityInfo<?>> propertiesByClass = new HashMap<>();
-    private final LongHashMap<Class> classByEntityTypeId = new LongHashMap<>();
+    private final LongHashMap<Class<?>> classByEntityTypeId = new LongHashMap<>();
     private final int[] allEntityTypeIds;
     private final Map<Class<?>, Box<?>> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<>());
@@ -333,16 +333,16 @@ public class BoxStore implements Closeable {
         }
     }
 
-    String getDbName(Class entityClass) {
+    String getDbName(Class<?> entityClass) {
         return dbNameByClass.get(entityClass);
     }
 
-    Integer getEntityTypeId(Class entityClass) {
+    Integer getEntityTypeId(Class<?> entityClass) {
         return entityTypeIdByClass.get(entityClass);
     }
 
     @Internal
-    public int getEntityTypeIdOrThrow(Class entityClass) {
+    public int getEntityTypeIdOrThrow(Class<?> entityClass) {
         Integer id = entityTypeIdByClass.get(entityClass);
         if (id == null) {
             throw new DbSchemaException("No entity registered for " + entityClass);
@@ -350,7 +350,7 @@ public class BoxStore implements Closeable {
         return id;
     }
 
-    public Collection<Class> getAllEntityClasses() {
+    public Collection<Class<?>> getAllEntityClasses() {
         return dbNameByClass.keySet();
     }
 
@@ -360,8 +360,8 @@ public class BoxStore implements Closeable {
     }
 
     @Internal
-    Class getEntityClassOrThrow(int entityTypeId) {
-        Class clazz = classByEntityTypeId.get(entityTypeId);
+    Class<?> getEntityClassOrThrow(int entityTypeId) {
+        Class<?> clazz = classByEntityTypeId.get(entityTypeId);
         if (clazz == null) {
             throw new DbSchemaException("No entity registered for type ID " + entityTypeId);
         }
