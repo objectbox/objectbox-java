@@ -169,7 +169,7 @@ public class BoxStore implements Closeable {
     private final Map<Class<?>, EntityInfo<?>> propertiesByClass = new HashMap<>();
     private final LongHashMap<Class> classByEntityTypeId = new LongHashMap<>();
     private final int[] allEntityTypeIds;
-    private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
+    private final Map<Class<?>, Box<?>> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<>());
     private final ExecutorService threadPool = new ObjectBoxThreadPool(this);
     private final ObjectClassPublisher objectClassPublisher;
@@ -609,7 +609,7 @@ public class BoxStore implements Closeable {
             }
         }
 
-        for (Box box : boxes.values()) {
+        for (Box<?> box : boxes.values()) {
             box.txCommitted(tx);
         }
 
@@ -623,9 +623,9 @@ public class BoxStore implements Closeable {
      * <p>
      * Creates a Box only once and then always returns the cached instance.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // Casting is easier than writing a custom Map.
     public <T> Box<T> boxFor(Class<T> entityClass) {
-        Box box = boxes.get(entityClass);
+        Box<T> box = (Box<T>) boxes.get(entityClass);
         if (box == null) {
             if (!dbNameByClass.containsKey(entityClass)) {
                 throw new IllegalArgumentException(entityClass +
@@ -633,7 +633,7 @@ public class BoxStore implements Closeable {
             }
             // Ensure a box is created just once
             synchronized (boxes) {
-                box = boxes.get(entityClass);
+                box = (Box<T>) boxes.get(entityClass);
                 if (box == null) {
                     box = new Box<>(this, entityClass);
                     boxes.put(entityClass, box);
@@ -689,7 +689,7 @@ public class BoxStore implements Closeable {
 
                 // TODO That's rather a quick fix, replace with a more general solution
                 // (that could maybe be a TX listener with abort callback?)
-                for (Box box : boxes.values()) {
+                for (Box<?> box : boxes.values()) {
                     box.readTxFinished(tx);
                 }
 
@@ -773,7 +773,7 @@ public class BoxStore implements Closeable {
 
                 // TODO That's rather a quick fix, replace with a more general solution
                 // (that could maybe be a TX listener with abort callback?)
-                for (Box box : boxes.values()) {
+                for (Box<?> box : boxes.values()) {
                     box.readTxFinished(tx);
                 }
 
@@ -886,7 +886,7 @@ public class BoxStore implements Closeable {
      * {@link Box#closeThreadResources()} for all initiated boxes ({@link #boxFor(Class)}).
      */
     public void closeThreadResources() {
-        for (Box box : boxes.values()) {
+        for (Box<?> box : boxes.values()) {
             box.closeThreadResources();
         }
         // activeTx is cleaned up in finally blocks, so do not free them here
