@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
-/** TODO public */ @interface OrderBy {
+/* TODO public */ @interface OrderBy {
     /**
      * Comma-separated list of properties, e.g. "propertyA, propertyB, propertyC"
      * To specify direction, add ASC or DESC after property name, e.g.: "propertyA DESC, propertyB ASC"

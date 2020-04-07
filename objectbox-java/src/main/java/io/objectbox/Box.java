@@ -19,7 +19,6 @@ package io.objectbox;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -443,8 +442,10 @@ public class Box<T> {
         }
     }
 
+    /**
+     * @deprecated use {@link #removeByIds(Collection)} instead.
+     */
     @Deprecated
-    /** @deprecated use {@link #removeByIds(Collection)} instead. */
     public void removeByKeys(@Nullable Collection<Long> ids) {
         removeByIds(ids);
     }

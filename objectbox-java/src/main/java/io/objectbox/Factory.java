@@ -19,10 +19,10 @@ package io.objectbox;
 import io.objectbox.annotation.apihint.Experimental;
 
 
-@Experimental
 /**
  * Generic Factory that provides a resource on demand (if and when it is required).
  */
+@Experimental
 public interface Factory<T> {
     T provide() throws Exception;
 }

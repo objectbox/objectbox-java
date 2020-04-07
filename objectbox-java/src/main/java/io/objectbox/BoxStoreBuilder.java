@@ -104,8 +104,8 @@ public class BoxStoreBuilder {
         model = null;
     }
 
-    @Internal
     /** Called internally from the generated class "MyObjectBox". Check MyObjectBox.builder() to get an instance. */
+    @Internal
     public BoxStoreBuilder(byte[] model) {
         this.model = model;
         if (model == null) {
@@ -295,8 +295,10 @@ public class BoxStoreBuilder {
         return this;
     }
 
+    /**
+     * @deprecated Use {@link #debugFlags} instead.
+     */
     @Deprecated
-    /** @deprecated Use {@link #debugFlags} instead. */
     public BoxStoreBuilder debugTransactions() {
         this.debugFlags |= DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE;
         return this;

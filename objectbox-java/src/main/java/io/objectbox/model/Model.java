@@ -23,13 +23,13 @@ import java.lang.*;
 import java.util.*;
 import com.google.flatbuffers.*;
 
-@SuppressWarnings("unused")
 /**
  * A model describes all entities and other meta data.
  * The current model of an app is synced against ObjectBox's persisted schema.
  * The model itself is not persisted, and thus may change as long as both ends are consistent (Java and native).
  * There could be multiple models/schemas (one dbi per schema) in the future.
  */
+@SuppressWarnings("unused")
 public final class Model extends Table {
   public static Model getRootAsModel(ByteBuffer _bb) { return getRootAsModel(_bb, new Model()); }
   public static Model getRootAsModel(ByteBuffer _bb, Model obj) { Constants.FLATBUFFERS_1_11_1(); _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
