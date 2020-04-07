@@ -174,6 +174,7 @@ public class BoxStoreBuilder {
      * Alternatively, you can also use {@link #baseDirectory} or {@link #directory(File)} instead.
      */
     public BoxStoreBuilder androidContext(Object context) {
+        //noinspection ConstantConditions Annotation does not enforce non-null.
         if (context == null) {
             throw new NullPointerException("Context may not be null");
         }
@@ -211,6 +212,7 @@ public class BoxStoreBuilder {
         if (context == null) {
             throw new IllegalArgumentException("Set a Context using androidContext(context) first");
         }
+        //noinspection ConstantConditions Annotation does not enforce non-null.
         if (reLinkerInstance == null) {
             throw new NullPointerException("ReLinkerInstance may not be null");
         }
