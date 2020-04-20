@@ -136,11 +136,11 @@ public class BoxStore implements Closeable {
 
     /** @return entity ID */
     // TODO only use ids once we have them in Java
-    static native int nativeRegisterEntityClass(long store, String entityName, Class entityClass);
+    static native int nativeRegisterEntityClass(long store, String entityName, Class<?> entityClass);
 
     // TODO only use ids once we have them in Java
     static native void nativeRegisterCustomType(long store, int entityId, int propertyId, String propertyName,
-                                                Class<? extends PropertyConverter> converterClass, Class customType);
+                                                Class<? extends PropertyConverter> converterClass, Class<?> customType);
 
     static native String nativeDiagnose(long store);
 
@@ -164,12 +164,12 @@ public class BoxStore implements Closeable {
     private final File directory;
     private final String canonicalPath;
     private final long handle;
-    private final Map<Class, String> dbNameByClass = new HashMap<>();
-    private final Map<Class, Integer> entityTypeIdByClass = new HashMap<>();
-    private final Map<Class, EntityInfo> propertiesByClass = new HashMap<>();
-    private final LongHashMap<Class> classByEntityTypeId = new LongHashMap<>();
+    private final Map<Class<?>, String> dbNameByClass = new HashMap<>();
+    private final Map<Class<?>, Integer> entityTypeIdByClass = new HashMap<>();
+    private final Map<Class<?>, EntityInfo<?>> propertiesByClass = new HashMap<>();
+    private final LongHashMap<Class<?>> classByEntityTypeId = new LongHashMap<>();
     private final int[] allEntityTypeIds;
-    private final Map<Class, Box> boxes = new ConcurrentHashMap<>();
+    private final Map<Class<?>, Box<?>> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<>());
     private final ExecutorService threadPool = new ObjectBoxThreadPool(this);
     private final ObjectClassPublisher objectClassPublisher;
@@ -191,7 +191,7 @@ public class BoxStore implements Closeable {
 
     private final int queryAttempts;
 
-    private final TxCallback failedReadTxAttemptCallback;
+    private final TxCallback<?> failedReadTxAttemptCallback;
 
     BoxStore(BoxStoreBuilder builder) {
         context = builder.context;
@@ -213,14 +213,14 @@ public class BoxStore implements Closeable {
         }
         debugRelations = builder.debugRelations;
 
-        for (EntityInfo entityInfo : builder.entityInfoList) {
+        for (EntityInfo<?> entityInfo : builder.entityInfoList) {
             try {
                 dbNameByClass.put(entityInfo.getEntityClass(), entityInfo.getDbName());
                 int entityId = nativeRegisterEntityClass(handle, entityInfo.getDbName(), entityInfo.getEntityClass());
                 entityTypeIdByClass.put(entityInfo.getEntityClass(), entityId);
                 classByEntityTypeId.put(entityId, entityInfo.getEntityClass());
                 propertiesByClass.put(entityInfo.getEntityClass(), entityInfo);
-                for (Property property : entityInfo.getAllProperties()) {
+                for (Property<?> property : entityInfo.getAllProperties()) {
                     if (property.customType != null) {
                         if (property.converterClass == null) {
                             throw new RuntimeException("No converter class for custom type of " + property);
@@ -333,16 +333,16 @@ public class BoxStore implements Closeable {
         }
     }
 
-    String getDbName(Class entityClass) {
+    String getDbName(Class<?> entityClass) {
         return dbNameByClass.get(entityClass);
     }
 
-    Integer getEntityTypeId(Class entityClass) {
+    Integer getEntityTypeId(Class<?> entityClass) {
         return entityTypeIdByClass.get(entityClass);
     }
 
     @Internal
-    public int getEntityTypeIdOrThrow(Class entityClass) {
+    public int getEntityTypeIdOrThrow(Class<?> entityClass) {
         Integer id = entityTypeIdByClass.get(entityClass);
         if (id == null) {
             throw new DbSchemaException("No entity registered for " + entityClass);
@@ -350,7 +350,7 @@ public class BoxStore implements Closeable {
         return id;
     }
 
-    public Collection<Class> getAllEntityClasses() {
+    public Collection<Class<?>> getAllEntityClasses() {
         return dbNameByClass.keySet();
     }
 
@@ -360,17 +360,18 @@ public class BoxStore implements Closeable {
     }
 
     @Internal
-    Class getEntityClassOrThrow(int entityTypeId) {
-        Class clazz = classByEntityTypeId.get(entityTypeId);
+    Class<?> getEntityClassOrThrow(int entityTypeId) {
+        Class<?> clazz = classByEntityTypeId.get(entityTypeId);
         if (clazz == null) {
             throw new DbSchemaException("No entity registered for type ID " + entityTypeId);
         }
         return clazz;
     }
 
+    @SuppressWarnings("unchecked") // Casting is easier than writing a custom Map.
     @Internal
-    EntityInfo getEntityInfo(Class entityClass) {
-        return propertiesByClass.get(entityClass);
+    <T> EntityInfo<T> getEntityInfo(Class<T> entityClass) {
+        return (EntityInfo<T>) propertiesByClass.get(entityClass);
     }
 
     /**
@@ -608,7 +609,7 @@ public class BoxStore implements Closeable {
             }
         }
 
-        for (Box box : boxes.values()) {
+        for (Box<?> box : boxes.values()) {
             box.txCommitted(tx);
         }
 
@@ -622,9 +623,9 @@ public class BoxStore implements Closeable {
      * <p>
      * Creates a Box only once and then always returns the cached instance.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // Casting is easier than writing a custom Map.
     public <T> Box<T> boxFor(Class<T> entityClass) {
-        Box box = boxes.get(entityClass);
+        Box<T> box = (Box<T>) boxes.get(entityClass);
         if (box == null) {
             if (!dbNameByClass.containsKey(entityClass)) {
                 throw new IllegalArgumentException(entityClass +
@@ -632,7 +633,7 @@ public class BoxStore implements Closeable {
             }
             // Ensure a box is created just once
             synchronized (boxes) {
-                box = boxes.get(entityClass);
+                box = (Box<T>) boxes.get(entityClass);
                 if (box == null) {
                     box = new Box<>(this, entityClass);
                     boxes.put(entityClass, box);
@@ -688,7 +689,7 @@ public class BoxStore implements Closeable {
 
                 // TODO That's rather a quick fix, replace with a more general solution
                 // (that could maybe be a TX listener with abort callback?)
-                for (Box box : boxes.values()) {
+                for (Box<?> box : boxes.values()) {
                     box.readTxFinished(tx);
                 }
 
@@ -732,7 +733,6 @@ public class BoxStore implements Closeable {
                     cleanStaleReadTransactions();
                 }
                 if (failedReadTxAttemptCallback != null) {
-                    //noinspection unchecked
                     failedReadTxAttemptCallback.txFinished(null, new DbException(message + " \n" + diagnose, e));
                 }
                 try {
@@ -772,7 +772,7 @@ public class BoxStore implements Closeable {
 
                 // TODO That's rather a quick fix, replace with a more general solution
                 // (that could maybe be a TX listener with abort callback?)
-                for (Box box : boxes.values()) {
+                for (Box<?> box : boxes.values()) {
                     box.readTxFinished(tx);
                 }
 
@@ -885,7 +885,7 @@ public class BoxStore implements Closeable {
      * {@link Box#closeThreadResources()} for all initiated boxes ({@link #boxFor(Class)}).
      */
     public void closeThreadResources() {
-        for (Box box : boxes.values()) {
+        for (Box<?> box : boxes.values()) {
             box.closeThreadResources();
         }
         // activeTx is cleaned up in finally blocks, so do not free them here
@@ -972,7 +972,7 @@ public class BoxStore implements Closeable {
     }
 
     @Internal
-    public Future internalScheduleThread(Runnable runnable) {
+    public Future<?> internalScheduleThread(Runnable runnable) {
         return threadPool.submit(runnable);
     }
 
@@ -992,7 +992,7 @@ public class BoxStore implements Closeable {
     }
 
     @Internal
-    public TxCallback internalFailedReadTxAttemptCallback() {
+    public TxCallback<?> internalFailedReadTxAttemptCallback() {
         return failedReadTxAttemptCallback;
     }
 

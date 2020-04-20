@@ -56,6 +56,7 @@ public class TestUtils {
         return in;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Serializable> T serializeDeserialize(T entity) throws IOException, ClassNotFoundException {
         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(bytesOut);

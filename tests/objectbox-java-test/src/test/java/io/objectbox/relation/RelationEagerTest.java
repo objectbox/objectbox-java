@@ -42,37 +42,37 @@ public class RelationEagerTest extends AbstractRelationTest {
         // full list
         List<Customer> customers = customerBox.query().eager(Customer_.orders).build().find();
         assertEquals(2, customers.size());
-        assertTrue(((ToMany) customers.get(0).getOrders()).isResolved());
-        assertTrue(((ToMany) customers.get(1).getOrders()).isResolved());
+        assertTrue(((ToMany<Order>) customers.get(0).getOrders()).isResolved());
+        assertTrue(((ToMany<Order>) customers.get(1).getOrders()).isResolved());
 
         // full list paginated
         customers = customerBox.query().eager(Customer_.orders).build().find(0, 10);
         assertEquals(2, customers.size());
-        assertTrue(((ToMany) customers.get(0).getOrders()).isResolved());
-        assertTrue(((ToMany) customers.get(1).getOrders()).isResolved());
+        assertTrue(((ToMany<Order>) customers.get(0).getOrders()).isResolved());
+        assertTrue(((ToMany<Order>) customers.get(1).getOrders()).isResolved());
 
         // list with eager limit
         customers = customerBox.query().eager(1, Customer_.orders).build().find();
         assertEquals(2, customers.size());
-        assertTrue(((ToMany) customers.get(0).getOrders()).isResolved());
-        assertFalse(((ToMany) customers.get(1).getOrders()).isResolved());
+        assertTrue(((ToMany<Order>) customers.get(0).getOrders()).isResolved());
+        assertFalse(((ToMany<Order>) customers.get(1).getOrders()).isResolved());
 
         // forEach
-        final int count[] = {0};
+        final int[] count = {0};
         customerBox.query().eager(1, Customer_.orders).build().forEach(data -> {
-            assertEquals(count[0] == 0, ((ToMany) data.getOrders()).isResolved());
+            assertEquals(count[0] == 0, ((ToMany<Order>) data.getOrders()).isResolved());
             count[0]++;
         });
         assertEquals(2, count[0]);
 
         // first
         customer = customerBox.query().eager(Customer_.orders).build().findFirst();
-        assertTrue(((ToMany) customer.getOrders()).isResolved());
+        assertTrue(((ToMany<Order>) customer.getOrders()).isResolved());
 
         // unique
         customerBox.remove(customer);
         customer = customerBox.query().eager(Customer_.orders).build().findUnique();
-        assertTrue(((ToMany) customer.getOrders()).isResolved());
+        assertTrue(((ToMany<Order>) customer.getOrders()).isResolved());
     }
 
     @Test
@@ -110,9 +110,9 @@ public class RelationEagerTest extends AbstractRelationTest {
         assertFalse(orders.get(1).customer__toOne.isResolved());
 
         // forEach
-        final int count[] = {0};
+        final int[] count = {0};
         customerBox.query().eager(1, Customer_.orders).build().forEach(data -> {
-            assertEquals(count[0] == 0, ((ToMany) data.getOrders()).isResolved());
+            assertEquals(count[0] == 0, ((ToMany<Order>) data.getOrders()).isResolved());
             count[0]++;
         });
         assertEquals(1, count[0]);

@@ -59,7 +59,7 @@ public class QueryTest extends AbstractQueryTest {
 
     @Test
     public void testBuild() {
-        Query query = box.query().build();
+        Query<TestEntity> query = box.query().build();
         assertNotNull(query);
     }
 
