@@ -339,7 +339,8 @@ public class Box<T> {
     /**
      * Puts the given entities in a box using a single transaction.
      */
-    public void put(@Nullable T... entities) {
+    @SafeVarargs // Not using T... as Object[], no ClassCastException expected.
+    public final void put(@Nullable T... entities) {
         if (entities == null || entities.length == 0) {
             return;
         }
@@ -488,8 +489,9 @@ public class Box<T> {
     /**
      * Removes (deletes) the given Objects in a single transaction.
      */
+    @SafeVarargs // Not using T... as Object[], no ClassCastException expected.
     @SuppressWarnings("Duplicates") // Detected duplicate has different type
-    public void remove(@Nullable T... objects) {
+    public final void remove(@Nullable T... objects) {
         if (objects == null || objects.length == 0) {
             return;
         }
