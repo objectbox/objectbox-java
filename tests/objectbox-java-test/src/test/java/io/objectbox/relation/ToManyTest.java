@@ -335,7 +335,7 @@ public class ToManyTest extends AbstractRelationTest {
     public void testSyncToTargetBox_detached() {
         Customer customer = new Customer();
         customer.setId(42);
-        ((ToMany) customer.orders).applyChangesToDb();
+        ((ToMany<Order>) customer.orders).applyChangesToDb();
     }
 
     @Test

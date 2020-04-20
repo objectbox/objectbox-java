@@ -161,7 +161,7 @@ public class PropertyQueryTest extends AbstractQueryTest {
     @Test
     public void testFindString() {
         Query<TestEntity> query = box.query().greater(simpleLong, 1002).build();
-        PropertyQuery propertyQuery = query.property(simpleString);
+        PropertyQuery<TestEntity> propertyQuery = query.property(simpleString);
         assertNull(propertyQuery.findString());
         assertNull(propertyQuery.reset().unique().findString());
         putTestEntities(5);
@@ -457,7 +457,7 @@ public class PropertyQueryTest extends AbstractQueryTest {
     @Test
     public void testCount() {
         Query<TestEntity> query = box.query().build();
-        PropertyQuery stringQuery = query.property(simpleString);
+        PropertyQuery<TestEntity> stringQuery = query.property(simpleString);
 
         assertEquals(0, stringQuery.count());
 
@@ -831,16 +831,16 @@ public class PropertyQueryTest extends AbstractQueryTest {
     public void testAggregates() {
         putTestEntitiesScalars();
         Query<TestEntity> query = box.query().less(simpleInt, 2002).build(); // 2 results.
-        PropertyQuery booleanQuery = query.property(simpleBoolean);
-        PropertyQuery byteQuery = query.property(simpleByte);
-        PropertyQuery shortQuery = query.property(simpleShort);
-        PropertyQuery intQuery = query.property(simpleInt);
-        PropertyQuery longQuery = query.property(simpleLong);
-        PropertyQuery floatQuery = query.property(simpleFloat);
-        PropertyQuery doubleQuery = query.property(simpleDouble);
-        PropertyQuery shortUQuery = query.property(simpleShortU);
-        PropertyQuery intUQuery = query.property(simpleIntU);
-        PropertyQuery longUQuery = query.property(simpleLongU);
+        PropertyQuery<TestEntity> booleanQuery = query.property(simpleBoolean);
+        PropertyQuery<TestEntity> byteQuery = query.property(simpleByte);
+        PropertyQuery<TestEntity> shortQuery = query.property(simpleShort);
+        PropertyQuery<TestEntity> intQuery = query.property(simpleInt);
+        PropertyQuery<TestEntity> longQuery = query.property(simpleLong);
+        PropertyQuery<TestEntity> floatQuery = query.property(simpleFloat);
+        PropertyQuery<TestEntity> doubleQuery = query.property(simpleDouble);
+        PropertyQuery<TestEntity> shortUQuery = query.property(simpleShortU);
+        PropertyQuery<TestEntity> intUQuery = query.property(simpleIntU);
+        PropertyQuery<TestEntity> longUQuery = query.property(simpleLongU);
         // avg
         assertEquals(0.5, booleanQuery.avg(), 0.0001);
         assertEquals(-37.5, byteQuery.avg(), 0.0001);

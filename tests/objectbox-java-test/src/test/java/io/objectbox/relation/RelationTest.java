@@ -82,13 +82,13 @@ public class RelationTest extends AbstractRelationTest {
         List<Order> orders = customer.getOrders();
         assertEquals(2, orders.size());
         orderBox.remove(order1);
-        ((ToMany) orders).reset();
+        ((ToMany<Order>) orders).reset();
         assertEquals(1, orders.size());
 
         order2.setCustomer(null);
         orderBox.put(order2);
 
-        ((ToMany) orders).reset();
+        ((ToMany<Order>) orders).reset();
         assertEquals(0, orders.size());
     }
 
