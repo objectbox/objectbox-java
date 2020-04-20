@@ -865,7 +865,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     /** The target array may not contain non-persisted entities. */
-    private void addStandaloneRelations(Cursor cursor, long sourceEntityId, @Nullable TARGET[] added,
+    private void addStandaloneRelations(Cursor cursor, long sourceEntityId, TARGET[] added,
                                         IdGetter<TARGET> targetIdGetter, boolean remove) {
         int length = added.length;
         long[] targetIds = new long[length];
