@@ -91,9 +91,11 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     transient private Comparator<TARGET> comparator;
 
     public ToMany(Object sourceEntity, RelationInfo<? extends Object, TARGET> relationInfo) {
+        //noinspection ConstantConditions Annotation does not enforce non-null.
         if (sourceEntity == null) {
             throw new IllegalArgumentException("No source entity given (null)");
         }
+        //noinspection ConstantConditions Annotation does not enforce non-null.
         if (relationInfo == null) {
             throw new IllegalArgumentException("No relation info given (null)");
         }
@@ -104,6 +106,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     /** Currently only used for non-persisted entities (id == 0). */
     @Experimental
     public void setListFactory(ListFactory listFactory) {
+        //noinspection ConstantConditions Annotation does not enforce non-null.
         if (listFactory == null) {
             throw new IllegalArgumentException("ListFactory is null");
         }
