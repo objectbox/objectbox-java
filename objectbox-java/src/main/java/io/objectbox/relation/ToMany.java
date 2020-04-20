@@ -837,7 +837,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 removeStandaloneRelations(sourceCursor, entityId, removedStandalone, targetIdGetter);
             }
             if (addedStandalone != null) {
-                addStandaloneRelations(sourceCursor, entityId, addedStandalone, targetIdGetter, false);
+                addStandaloneRelations(sourceCursor, entityId, addedStandalone, targetIdGetter);
             }
         }
     }
@@ -866,7 +866,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     /** The target array may not contain non-persisted entities. */
     private void addStandaloneRelations(Cursor cursor, long sourceEntityId, TARGET[] added,
-                                        IdGetter<TARGET> targetIdGetter, boolean remove) {
+                                        IdGetter<TARGET> targetIdGetter) {
         int length = added.length;
         long[] targetIds = new long[length];
         for (int i = 0; i < length; i++) {
@@ -877,7 +877,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             }
             targetIds[i] = targetId;
         }
-        cursor.modifyRelations(relationInfo.relationId, sourceEntityId, targetIds, remove);
+        cursor.modifyRelations(relationInfo.relationId, sourceEntityId, targetIds, false);
     }
 
     /** For tests */
