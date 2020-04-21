@@ -82,8 +82,11 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
     }
 
     signing {
-        if (project.hasProperty('signing.keyId') && project.hasProperty('signing.password') &&
-                project.hasProperty('signing.secretKeyRingFile')) {
+        if (project.hasProperty('signingKeyId')
+                && project.hasProperty('signingKeyFile')
+                && project.hasProperty('signingPassword')) {
+            String signingKey = new File(signingKeyFile).text
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
             sign configurations.archives
         } else {
             println "Signing information missing/incomplete for ${project.name}"
