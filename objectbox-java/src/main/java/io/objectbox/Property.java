@@ -69,15 +69,16 @@ public class Property<ENTITY> implements Serializable {
         this(entity, ordinal, id, type, name, isId, dbName, null, null);
     }
 
-    public <P, D> Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<D> type, String name, boolean isId,
-                    @Nullable String dbName, @Nullable Class<? extends PropertyConverter<P, D>> converterClass,
-                    @Nullable Class<P> customType) {
+    // Note: types of PropertyConverter might not exactly match type and customtype, e.g. if using generics like List.class.
+    public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name, boolean isId,
+                    @Nullable String dbName, @Nullable Class<? extends PropertyConverter<?, ?>> converterClass,
+                    @Nullable Class<?> customType) {
         this(entity, ordinal, id, type, name, isId, false, dbName, converterClass, customType);
     }
 
-    public <P, D> Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<D> type, String name, boolean isId,
+    public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name, boolean isId,
                     boolean isVirtual, @Nullable String dbName,
-                    @Nullable Class<? extends PropertyConverter<P, D>> converterClass, @Nullable Class<P> customType) {
+                    @Nullable Class<? extends PropertyConverter<?, ?>> converterClass, @Nullable Class<?> customType) {
         this.entity = entity;
         this.ordinal = ordinal;
         this.id = id;
