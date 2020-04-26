@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -267,8 +267,8 @@ public class Query<T> implements Closeable {
      *
      * @param property the property for which to return values
      */
-    public PropertyQuery<T> property(Property<T> property) {
-        return new PropertyQuery<>(this, property);
+    public PropertyQuery property(Property<T> property) {
+        return new PropertyQuery(this, property);
     }
 
     <R> R callInReadTx(Callable<R> callable) {

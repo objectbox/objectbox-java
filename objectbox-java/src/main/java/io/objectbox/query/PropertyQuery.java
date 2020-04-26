@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import io.objectbox.Property;
  * (subject to change in a future version).
  */
 @SuppressWarnings("WeakerAccess") // WeakerAccess: allow inner class access without accessor
-public class PropertyQuery<T> {
-    final Query<T> query;
+public class PropertyQuery {
+    final Query<?> query;
     final long queryHandle;
-    final Property<T> property;
+    final Property<?> property;
     final int propertyId;
 
     boolean distinct;
@@ -41,7 +41,7 @@ public class PropertyQuery<T> {
     String nullValueString;
     long nullValueLong;
 
-    PropertyQuery(Query<T> query, Property<T> property) {
+    PropertyQuery(Query<?> query, Property<?> property) {
         this.query = query;
         queryHandle = query.handle;
         this.property = property;
@@ -97,7 +97,7 @@ public class PropertyQuery<T> {
     native long nativeCount(long handle, long cursorHandle, int propertyId, boolean distinct);
 
     /** Clears all values (e.g. distinct and null value). */
-    public PropertyQuery<T> reset() {
+    public PropertyQuery reset() {
         distinct = false;
         noCaseIfDistinct = true;
         unique = false;
@@ -115,7 +115,7 @@ public class PropertyQuery<T> {
      * Note: strings default to case-insensitive comparision;
      * to change that call {@link #distinct(QueryBuilder.StringOrder)}.
      */
-    public PropertyQuery<T> distinct() {
+    public PropertyQuery distinct() {
         distinct = true;
         return this;
     }
@@ -124,7 +124,7 @@ public class PropertyQuery<T> {
      * For string properties you can specify {@link io.objectbox.query.QueryBuilder.StringOrder#CASE_SENSITIVE} if you
      * want to have case sensitive distinct values (e.g. returning "foo","Foo","FOO" instead of "foo").
      */
-    public PropertyQuery<T> distinct(QueryBuilder.StringOrder stringOrder) {
+    public PropertyQuery distinct(QueryBuilder.StringOrder stringOrder) {
         if (property.type != String.class) {
             throw new RuntimeException("Reserved for string properties, but got " + property);
         }
@@ -142,7 +142,7 @@ public class PropertyQuery<T> {
      * <p>
      * Will be ignored for find methods returning multiple values, e.g. {@link #findInts()}.
      */
-    public PropertyQuery<T> unique() {
+    public PropertyQuery unique() {
         unique = true;
         return this;
     }
@@ -152,7 +152,7 @@ public class PropertyQuery<T> {
      * However, using this function, you can define an alternative value that will be returned for null values.
      * E.g. -1 for ins/longs or "NULL" for strings.
      */
-    public PropertyQuery<T> nullValue(Object nullValue) {
+    public PropertyQuery nullValue(Object nullValue) {
         //noinspection ConstantConditions Annotation can not enforce non-null.
         if (nullValue == null) {
             throw new IllegalArgumentException("Null values are not allowed");
