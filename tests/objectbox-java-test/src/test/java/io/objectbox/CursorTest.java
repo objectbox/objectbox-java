@@ -267,12 +267,12 @@ public class CursorTest extends AbstractObjectBoxTest {
 
         Transaction transaction = store.beginReadTx();
         Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
-        try {
-            cursor.get(1);
-            fail("Should have thrown");
-        } catch (RuntimeException e) {
-            assertEquals(TestEntity.EXCEPTION_IN_CONSTRUCTOR_MESSAGE, e.getMessage());
-        }
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> cursor.get(1)
+        );
+        assertEquals(TestEntity.EXCEPTION_IN_CONSTRUCTOR_MESSAGE, exception.getMessage());
 
         cursor.close();
         transaction.close();
