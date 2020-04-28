@@ -21,6 +21,8 @@ buildscript {
 
         junit_version = '4.13'
         mockito_version = '3.3.3'
+        kotlin_version = '1.3.61'
+        dokka_version = '0.10.1'
 
         println "version=$ob_version"
         println "objectboxNativeDependency=$ob_native_dep"
@@ -35,6 +37,8 @@ buildscript {
     }
 
     dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
         classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.0.5"
     }
 }

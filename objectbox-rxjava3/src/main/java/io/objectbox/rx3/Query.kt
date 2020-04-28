@@ -1,7 +1,6 @@
-package io.objectbox.kotlin
+package io.objectbox.rx3
 
 import io.objectbox.query.Query
-import io.objectbox.rx3.RxQuery
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Observable
