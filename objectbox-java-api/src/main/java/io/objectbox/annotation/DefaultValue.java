@@ -14,5 +14,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target({ElementType.FIELD})
 public @interface DefaultValue {
-    String value() default "";
+    String value();
 }
