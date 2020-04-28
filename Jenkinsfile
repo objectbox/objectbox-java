@@ -22,6 +22,10 @@ pipeline {
                         "-PpreferredUsername=$MVN_REPO_LOGIN_USR " +
                         "-PpreferredPassword=$MVN_REPO_LOGIN_PSW " +
                         "-PversionPostFix=$versionPostfix"
+        // Note: for key use Jenkins secret file with PGP key as text in ASCII-armored format.
+        ORG_GRADLE_PROJECT_signingKeyFile = credentials('objectbox_signing_key')
+        ORG_GRADLE_PROJECT_signingKeyId = credentials('objectbox_signing_key_id')
+        ORG_GRADLE_PROJECT_signingPassword = credentials('objectbox_signing_key_password')
     }
 
     options {

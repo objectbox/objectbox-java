@@ -67,6 +67,12 @@ def projectNamesToPublish = [
         'objectbox-rxjava'
 ]
 
+def hasSigningProperties() {
+    return (project.hasProperty('signingKeyId')
+            && project.hasProperty('signingKeyFile')
+            && project.hasProperty('signingPassword'))
+}
+
 configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
     apply plugin: 'maven'
     apply plugin: 'signing'
@@ -82,8 +88,9 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
     }
 
     signing {
-        if (project.hasProperty('signing.keyId') && project.hasProperty('signing.password') &&
-                project.hasProperty('signing.secretKeyRingFile')) {
+        if (hasSigningProperties()) {
+            String signingKey = new File(signingKeyFile).text
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
             sign configurations.archives
         } else {
             println "Signing information missing/incomplete for ${project.name}"
@@ -104,6 +111,10 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                     } else if (preferredRepo != null
                             && project.hasProperty('preferredUsername') 
                             && project.hasProperty('preferredPassword')) {
+                        if (!hasSigningProperties()) {
+                            throw new InvalidUserDataException("To upload to repo signing is required.")
+                        }
+
                         configuration = configurations.deployerJars
 
                         // replace placeholders
