@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ObjectBox Ltd. All rights reserved.
+ * Copyright 2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@
 
 package io.objectbox.model;
 
+/**
+ * Basic type of a property
+ */
 public final class PropertyType {
   private PropertyType() { }
   /**
@@ -34,14 +37,17 @@ public final class PropertyType {
   public static final short Double = 8;
   public static final short String = 9;
   /**
-   * Internally stored as a 64 bit long(?)
+   * Date/time stored as a 64 bit long representing milliseconds since 1970-01-01 (unix epoch)
    */
   public static final short Date = 10;
   /**
    * Relation to another entity
    */
   public static final short Relation = 11;
-  public static final short Reserved1 = 12;
+  /**
+   * High precision date/time stored as a 64 bit long representing nanoseconds since 1970-01-01 (unix epoch)
+   */
+  public static final short DateNano = 12;
   public static final short Reserved2 = 13;
   public static final short Reserved3 = 14;
   public static final short Reserved4 = 15;
@@ -61,8 +67,9 @@ public final class PropertyType {
   public static final short DoubleVector = 29;
   public static final short StringVector = 30;
   public static final short DateVector = 31;
+  public static final short DateNanoVector = 32;
 
-  public static final String[] names = { "Unknown", "Bool", "Byte", "Short", "Char", "Int", "Long", "Float", "Double", "String", "Date", "Relation", "Reserved1", "Reserved2", "Reserved3", "Reserved4", "Reserved5", "Reserved6", "Reserved7", "Reserved8", "Reserved9", "Reserved10", "BoolVector", "ByteVector", "ShortVector", "CharVector", "IntVector", "LongVector", "FloatVector", "DoubleVector", "StringVector", "DateVector", };
+  public static final String[] names = { "Unknown", "Bool", "Byte", "Short", "Char", "Int", "Long", "Float", "Double", "String", "Date", "Relation", "DateNano", "Reserved2", "Reserved3", "Reserved4", "Reserved5", "Reserved6", "Reserved7", "Reserved8", "Reserved9", "Reserved10", "BoolVector", "ByteVector", "ShortVector", "CharVector", "IntVector", "LongVector", "FloatVector", "DoubleVector", "StringVector", "DateVector", "DateNanoVector", };
 
   public static String name(int e) { return names[e]; }
 }

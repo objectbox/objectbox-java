@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ObjectBox Ltd. All rights reserved.
+ * Copyright 2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,18 @@ import java.lang.*;
 import java.util.*;
 import com.google.flatbuffers.*;
 
+@SuppressWarnings("unused")
 /**
  * A model describes all entities and other meta data.
  * The current model of an app is synced against ObjectBox's persisted schema.
  * The model itself is not persisted, and thus may change as long as both ends are consistent (Java and native).
  * There could be multiple models/schemas (one dbi per schema) in the future.
  */
-@SuppressWarnings("unused")
 public final class Model extends Table {
+  public static void ValidateVersion() { Constants.FLATBUFFERS_1_12_0(); }
   public static Model getRootAsModel(ByteBuffer _bb) { return getRootAsModel(_bb, new Model()); }
-  public static Model getRootAsModel(ByteBuffer _bb, Model obj) { Constants.FLATBUFFERS_1_11_1(); _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
-  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; vtable_start = bb_pos - bb.getInt(bb_pos); vtable_size = bb.getShort(vtable_start); }
+  public static Model getRootAsModel(ByteBuffer _bb, Model obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }
   public Model __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   /**
@@ -50,17 +51,19 @@ public final class Model extends Table {
    * User controlled version, not really used at the moment
    */
   public long version() { int o = __offset(8); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
-  public ModelEntity entities(int j) { return entities(new ModelEntity(), j); }
-  public ModelEntity entities(ModelEntity obj, int j) { int o = __offset(10); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
+  public io.objectbox.model.ModelEntity entities(int j) { return entities(new io.objectbox.model.ModelEntity(), j); }
+  public io.objectbox.model.ModelEntity entities(io.objectbox.model.ModelEntity obj, int j) { int o = __offset(10); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
   public int entitiesLength() { int o = __offset(10); return o != 0 ? __vector_len(o) : 0; }
-  public IdUid lastEntityId() { return lastEntityId(new IdUid()); }
-  public IdUid lastEntityId(IdUid obj) { int o = __offset(12); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
-  public IdUid lastIndexId() { return lastIndexId(new IdUid()); }
-  public IdUid lastIndexId(IdUid obj) { int o = __offset(14); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
-  public IdUid lastSequenceId() { return lastSequenceId(new IdUid()); }
-  public IdUid lastSequenceId(IdUid obj) { int o = __offset(16); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
-  public IdUid lastRelationId() { return lastRelationId(new IdUid()); }
-  public IdUid lastRelationId(IdUid obj) { int o = __offset(18); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
+  public io.objectbox.model.ModelEntity.Vector entitiesVector() { return entitiesVector(new io.objectbox.model.ModelEntity.Vector()); }
+  public io.objectbox.model.ModelEntity.Vector entitiesVector(io.objectbox.model.ModelEntity.Vector obj) { int o = __offset(10); return o != 0 ? obj.__assign(__vector(o), 4, bb) : null; }
+  public io.objectbox.model.IdUid lastEntityId() { return lastEntityId(new io.objectbox.model.IdUid()); }
+  public io.objectbox.model.IdUid lastEntityId(io.objectbox.model.IdUid obj) { int o = __offset(12); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
+  public io.objectbox.model.IdUid lastIndexId() { return lastIndexId(new io.objectbox.model.IdUid()); }
+  public io.objectbox.model.IdUid lastIndexId(io.objectbox.model.IdUid obj) { int o = __offset(14); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
+  public io.objectbox.model.IdUid lastSequenceId() { return lastSequenceId(new io.objectbox.model.IdUid()); }
+  public io.objectbox.model.IdUid lastSequenceId(io.objectbox.model.IdUid obj) { int o = __offset(16); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
+  public io.objectbox.model.IdUid lastRelationId() { return lastRelationId(new io.objectbox.model.IdUid()); }
+  public io.objectbox.model.IdUid lastRelationId(io.objectbox.model.IdUid obj) { int o = __offset(18); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
 
   public static void startModel(FlatBufferBuilder builder) { builder.startTable(8); }
   public static void addModelVersion(FlatBufferBuilder builder, long modelVersion) { builder.addInt(0, (int)modelVersion, (int)0L); }
@@ -79,5 +82,12 @@ public final class Model extends Table {
   }
   public static void finishModelBuffer(FlatBufferBuilder builder, int offset) { builder.finish(offset); }
   public static void finishSizePrefixedModelBuffer(FlatBufferBuilder builder, int offset) { builder.finishSizePrefixed(offset); }
+
+  public static final class Vector extends BaseVector {
+    public Vector __assign(int _vector, int _element_size, ByteBuffer _bb) { __reset(_vector, _element_size, _bb); return this; }
+
+    public Model get(int j) { return get(new Model(), j); }
+    public Model get(Model obj, int j) {  return obj.__assign(__indirect(__element(j), bb), bb); }
+  }
 }
 

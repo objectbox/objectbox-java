@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ObjectBox Ltd. All rights reserved.
+ * Copyright 2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,24 +25,29 @@ import com.google.flatbuffers.*;
 
 @SuppressWarnings("unused")
 public final class ModelEntity extends Table {
+  public static void ValidateVersion() { Constants.FLATBUFFERS_1_12_0(); }
   public static ModelEntity getRootAsModelEntity(ByteBuffer _bb) { return getRootAsModelEntity(_bb, new ModelEntity()); }
-  public static ModelEntity getRootAsModelEntity(ByteBuffer _bb, ModelEntity obj) { Constants.FLATBUFFERS_1_11_1(); _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
-  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; vtable_start = bb_pos - bb.getInt(bb_pos); vtable_size = bb.getShort(vtable_start); }
+  public static ModelEntity getRootAsModelEntity(ByteBuffer _bb, ModelEntity obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }
   public ModelEntity __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public IdUid id() { return id(new IdUid()); }
-  public IdUid id(IdUid obj) { int o = __offset(4); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
+  public io.objectbox.model.IdUid id() { return id(new io.objectbox.model.IdUid()); }
+  public io.objectbox.model.IdUid id(io.objectbox.model.IdUid obj) { int o = __offset(4); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
   public String name() { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
   public ByteBuffer nameInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 6, 1); }
-  public ModelProperty properties(int j) { return properties(new ModelProperty(), j); }
-  public ModelProperty properties(ModelProperty obj, int j) { int o = __offset(8); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
+  public io.objectbox.model.ModelProperty properties(int j) { return properties(new io.objectbox.model.ModelProperty(), j); }
+  public io.objectbox.model.ModelProperty properties(io.objectbox.model.ModelProperty obj, int j) { int o = __offset(8); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
   public int propertiesLength() { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; }
-  public IdUid lastPropertyId() { return lastPropertyId(new IdUid()); }
-  public IdUid lastPropertyId(IdUid obj) { int o = __offset(10); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
-  public ModelRelation relations(int j) { return relations(new ModelRelation(), j); }
-  public ModelRelation relations(ModelRelation obj, int j) { int o = __offset(12); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
+  public io.objectbox.model.ModelProperty.Vector propertiesVector() { return propertiesVector(new io.objectbox.model.ModelProperty.Vector()); }
+  public io.objectbox.model.ModelProperty.Vector propertiesVector(io.objectbox.model.ModelProperty.Vector obj) { int o = __offset(8); return o != 0 ? obj.__assign(__vector(o), 4, bb) : null; }
+  public io.objectbox.model.IdUid lastPropertyId() { return lastPropertyId(new io.objectbox.model.IdUid()); }
+  public io.objectbox.model.IdUid lastPropertyId(io.objectbox.model.IdUid obj) { int o = __offset(10); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
+  public io.objectbox.model.ModelRelation relations(int j) { return relations(new io.objectbox.model.ModelRelation(), j); }
+  public io.objectbox.model.ModelRelation relations(io.objectbox.model.ModelRelation obj, int j) { int o = __offset(12); return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null; }
   public int relationsLength() { int o = __offset(12); return o != 0 ? __vector_len(o) : 0; }
+  public io.objectbox.model.ModelRelation.Vector relationsVector() { return relationsVector(new io.objectbox.model.ModelRelation.Vector()); }
+  public io.objectbox.model.ModelRelation.Vector relationsVector(io.objectbox.model.ModelRelation.Vector obj) { int o = __offset(12); return o != 0 ? obj.__assign(__vector(o), 4, bb) : null; }
   /**
    * Can be language specific, e.g. if no-args constructor should be used
    */
@@ -69,6 +74,13 @@ public final class ModelEntity extends Table {
   public static int endModelEntity(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
+  }
+
+  public static final class Vector extends BaseVector {
+    public Vector __assign(int _vector, int _element_size, ByteBuffer _bb) { __reset(_vector, _element_size, _bb); return this; }
+
+    public ModelEntity get(int j) { return get(new ModelEntity(), j); }
+    public ModelEntity get(ModelEntity obj, int j) {  return obj.__assign(__indirect(__element(j), bb), bb); }
   }
 }
 

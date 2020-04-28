@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ObjectBox Ltd. All rights reserved.
+ * Copyright 2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,8 @@ public final class PropertyFlags {
    */
   public static final int INDEX_PARTIAL_SKIP_NULL = 256;
   /**
-   * Unused yet, used by References for 1) back-references and 2) to clear references to deleted objects (required for ID reuse)
+   * Unused yet in user land.
+   * Used internally by relations for 1) backlinks and 2) to clear references to deleted objects (required for ID reuse).
    */
   public static final int INDEX_PARTIAL_SKIP_ZERO = 512;
   /**
@@ -67,13 +68,16 @@ public final class PropertyFlags {
    */
   public static final int VIRTUAL = 1024;
   /**
-   * Index uses a 32 bit hash instead of the value
-   * (32 bits is shorter on disk, runs well on 32 bit systems, and should be OK even with a few collisions)
+   * Index uses a 32 bit hash instead of the value. 32 bit is the default hash size because:
+   * they take less disk space, run well on 32 bit systems, and also run quite well on 64 bit systems
+   * (especially for small to medium sized values).
+   * and should be OK even with a few collisions.
    */
   public static final int INDEX_HASH = 2048;
   /**
-   * Index uses a 64 bit hash instead of the value
-   * (recommended mostly for 64 bit machines with values longer than 200 bytes; small values are faster with a 32 bit hash)
+   * Index uses a 64 bit hash instead of the value.
+   * Recommended mostly for 64 bit machines with values longer than 200 bytes;
+   * small values are faster with a 32 bit hash even on 64 bit machines.
    */
   public static final int INDEX_HASH64 = 4096;
   /**
@@ -81,5 +85,13 @@ public final class PropertyFlags {
    * Note: Don't combine with ID (IDs are always unsigned internally).
    */
   public static final int UNSIGNED = 8192;
+  /**
+   * By defining an ID companion property, the entity type uses a special ID encoding scheme involving this property
+   * in addition to the ID.
+   *
+   * For Time Series IDs, a companion property of type Date or DateNano represents the exact timestamp.
+   * (Future idea: string hash IDs, with a String companion property to store the full string ID).
+   */
+  public static final int ID_COMPANION = 16384;
 }
 
