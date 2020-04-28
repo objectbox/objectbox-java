@@ -129,7 +129,7 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
 
                         println "Uploading archives to $sonatypeRepositoryUrl."
                     } else {
-                        println "WARNING: preferredRepo NOT set, can not upload archives."
+                        println "WARNING: preferredRepo or credentials NOT set, can not upload archives."
                     }
 
                     pom.project {
