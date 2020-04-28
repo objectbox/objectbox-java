@@ -2,6 +2,7 @@ buildscript {
     ext.javadocDir = "$buildDir/docs/javadoc"
 }
 
+apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.dokka'
 
@@ -31,6 +32,16 @@ dokka {
     }
 }
 
+dependencies {
+    compile project(':objectbox-java')
+    compile 'io.reactivex.rxjava3:rxjava:3.0.1'
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testCompile "junit:junit:$junit_version"
+    testCompile "org.mockito:mockito-core:$mockito_version"
+}
+
 task javadocJar(type: Jar, dependsOn: dokka) {
     classifier = 'javadoc'
     from "$javadocDir"
@@ -47,21 +58,13 @@ artifacts {
     archives sourcesJar
 }
 
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-
-    compile project(':objectbox-java')
-    compileOnly project(':objectbox-rxjava3')
-}
-
-
 uploadArchives {
     repositories {
         mavenDeployer {
             // Basic definitions are defined in root project
             pom.project {
-                name 'ObjectBox Kotlin'
-                description 'ObjectBox is a fast NoSQL database for Objects'
+                name 'ObjectBox RxJava 3 API'
+                description 'RxJava 3 extensions for ObjectBox'
 
                 licenses {
                     license {

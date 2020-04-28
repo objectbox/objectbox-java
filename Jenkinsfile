@@ -58,6 +58,7 @@ pipeline {
                         "--tests io.objectbox.FunctionalTestSuite " +
                         "--tests io.objectbox.test.proguard.ObfuscatedEntityTest " +
                         "--tests io.objectbox.rx.QueryObserverTest " +
+                        "--tests io.objectbox.rx3.QueryObserverTest " +
                         "spotbugsMain assemble"
             }
         }
