@@ -129,7 +129,7 @@ public final class MetaLeaf_ implements EntityInfo<MetaLeaf> {
 
     /** To-one relation "branch" to target entity "MetaBranch". */
     public static final RelationInfo<MetaLeaf, MetaBranch> branch =
-            new RelationInfo<>(MetaLeaf_.__INSTANCE, MetaBranch_.__INSTANCE, branchId, new ToOneGetter<MetaLeaf>() {
+            new RelationInfo<>(MetaLeaf_.__INSTANCE, MetaBranch_.__INSTANCE, branchId, new ToOneGetter<MetaLeaf, MetaBranch>() {
                 @Override
                 public ToOne<MetaBranch> getToOne(MetaLeaf entity) {
                     return entity.branch;

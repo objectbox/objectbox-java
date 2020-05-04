@@ -696,7 +696,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     private boolean prepareToManyBacklinkEntitiesForDb(long entityId, IdGetter<TARGET> idGetter,
                                                        @Nullable Map<TARGET, Boolean> setAdded, @Nullable Map<TARGET, Boolean> setRemoved) {
-        ToManyGetter<TARGET> backlinkToManyGetter = relationInfo.backlinkToManyGetter;
+        ToManyGetter<TARGET, Object> backlinkToManyGetter = relationInfo.backlinkToManyGetter;
 
         synchronized (this) {
             if (setAdded != null && !setAdded.isEmpty()) {
@@ -740,7 +740,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     private boolean prepareToOneBacklinkEntitiesForDb(long entityId, IdGetter<TARGET> idGetter,
                                                       @Nullable Map<TARGET, Boolean> setAdded, @Nullable Map<TARGET, Boolean> setRemoved) {
-        ToOneGetter<TARGET> backlinkToOneGetter = relationInfo.backlinkToOneGetter;
+        ToOneGetter<TARGET, Object> backlinkToOneGetter = relationInfo.backlinkToOneGetter;
 
         synchronized (this) {
             if (setAdded != null && !setAdded.isEmpty()) {

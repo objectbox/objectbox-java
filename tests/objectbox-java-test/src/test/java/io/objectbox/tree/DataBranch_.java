@@ -106,7 +106,7 @@ public final class DataBranch_ implements EntityInfo<DataBranch> {
 
     /** To-one relation "parent" to target entity "DataBranch". */
     public static final RelationInfo<DataBranch, DataBranch> parent =
-            new RelationInfo<>(DataBranch_.__INSTANCE, DataBranch_.__INSTANCE, parentId, new ToOneGetter<DataBranch>() {
+            new RelationInfo<>(DataBranch_.__INSTANCE, DataBranch_.__INSTANCE, parentId, new ToOneGetter<DataBranch, DataBranch>() {
                 @Override
                 public ToOne<DataBranch> getToOne(DataBranch entity) {
                     return entity.parent;
@@ -115,7 +115,7 @@ public final class DataBranch_ implements EntityInfo<DataBranch> {
 
     /** To-one relation "metaBranch" to target entity "MetaBranch". */
     public static final RelationInfo<DataBranch, MetaBranch> metaBranch =
-            new RelationInfo<>(DataBranch_.__INSTANCE, MetaBranch_.__INSTANCE, metaBranchId, new ToOneGetter<DataBranch>() {
+            new RelationInfo<>(DataBranch_.__INSTANCE, MetaBranch_.__INSTANCE, metaBranchId, new ToOneGetter<DataBranch, MetaBranch>() {
                 @Override
                 public ToOne<MetaBranch> getToOne(DataBranch entity) {
                     return entity.metaBranch;

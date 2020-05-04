@@ -22,6 +22,6 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.relation.ToOne;
 
 @Internal
-public interface ToOneGetter<SOURCE> extends Serializable {
-    <TARGET> ToOne<TARGET> getToOne(SOURCE object);
+public interface ToOneGetter<SOURCE, TARGET> extends Serializable {
+    ToOne<TARGET> getToOne(SOURCE object);
 }

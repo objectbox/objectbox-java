@@ -118,7 +118,7 @@ public final class DataLeaf_ implements EntityInfo<DataLeaf> {
 
     /** To-one relation "dataBranch" to target entity "DataBranch". */
     public static final RelationInfo<DataLeaf, DataBranch> dataBranch =
-            new RelationInfo<>(DataLeaf_.__INSTANCE, io.objectbox.tree.DataBranch_.__INSTANCE, dataBranchId, new ToOneGetter<DataLeaf>() {
+            new RelationInfo<>(DataLeaf_.__INSTANCE, io.objectbox.tree.DataBranch_.__INSTANCE, dataBranchId, new ToOneGetter<DataLeaf, DataBranch>() {
                 @Override
                 public ToOne<DataBranch> getToOne(DataLeaf entity) {
                     return entity.dataBranch;
@@ -127,7 +127,7 @@ public final class DataLeaf_ implements EntityInfo<DataLeaf> {
 
     /** To-one relation "metaLeaf" to target entity "MetaLeaf". */
     public static final RelationInfo<DataLeaf, MetaLeaf> metaLeaf =
-            new RelationInfo<>(DataLeaf_.__INSTANCE, io.objectbox.tree.MetaLeaf_.__INSTANCE, metaLeafId, new ToOneGetter<DataLeaf>() {
+            new RelationInfo<>(DataLeaf_.__INSTANCE, io.objectbox.tree.MetaLeaf_.__INSTANCE, metaLeafId, new ToOneGetter<DataLeaf, MetaLeaf>() {
                 @Override
                 public ToOne<MetaLeaf> getToOne(DataLeaf entity) {
                     return entity.metaLeaf;

@@ -106,7 +106,7 @@ public final class MetaBranch_ implements EntityInfo<MetaBranch> {
 
     /** To-one relation "parent" to target entity "MetaBranch". */
     public static final RelationInfo<MetaBranch, MetaBranch> parent =
-            new RelationInfo<>(MetaBranch_.__INSTANCE, MetaBranch_.__INSTANCE, parentId, new ToOneGetter<MetaBranch>() {
+            new RelationInfo<>(MetaBranch_.__INSTANCE, MetaBranch_.__INSTANCE, parentId, new ToOneGetter<MetaBranch, MetaBranch>() {
                 @Override
                 public ToOne<MetaBranch> getToOne(MetaBranch entity) {
                     return entity.parent;
