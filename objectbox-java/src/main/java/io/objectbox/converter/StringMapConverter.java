@@ -8,19 +8,26 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Converts a String map entity property to a byte array database value using FlexBuffers.
  */
 public class StringMapConverter implements PropertyConverter<Map<String, String>, byte[]> {
+
+    private static final AtomicReference<FlexBuffersBuilder> cachedBuilder = new AtomicReference<>();
+
     @Override
     public byte[] convertToDatabaseValue(Map<String, String> map) {
         if (map == null) return null;
 
-        FlexBuffersBuilder builder = new FlexBuffersBuilder(
-                new ArrayReadWriteBuf(512),
-                FlexBuffersBuilder.BUILDER_FLAG_SHARE_KEYS_AND_STRINGS
-        );
+        FlexBuffersBuilder builder = cachedBuilder.getAndSet(null);
+        if (builder == null) {
+            builder = new FlexBuffersBuilder(
+                    new ArrayReadWriteBuf(512),
+                    FlexBuffersBuilder.BUILDER_FLAG_SHARE_KEYS_AND_STRINGS
+            );
+        }
         int mapStart = builder.startMap();
 
         for (Entry<String, String> entry : map.entrySet()) {
@@ -35,6 +42,13 @@ public class StringMapConverter implements PropertyConverter<Map<String, String>
 
         byte[] out = new byte[buffer.limit()];
         buffer.get(out);
+
+        // Cache if builder does not consume too much memory
+        if (buffer.limit() <= 256 * 1024) {
+            builder.clear();
+            cachedBuilder.getAndSet(builder);
+        }
+
         return out;
     }
 
