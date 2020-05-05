@@ -164,7 +164,7 @@ inline fun <reified T> QueryBuilder<T>.between(property: Property<T>, value1: Fl
  * }
  * ```
  */
-inline fun <T> Box<T>.query(block: QueryBuilder<T>.() -> Unit) : Query<T> {
+inline fun <T> Box<T>.query(block: QueryBuilder<T>.() -> Unit): Query<T> {
     val builder = query()
     block(builder)
     return builder.build()
