@@ -34,6 +34,48 @@ infix fun <T> Property<T>.notEqual(value: Boolean): PropertyQueryCondition<T> {
     return notEqual(value)
 }
 
+// Short
+/** Creates an "equal ('=')" condition for this property. */
+infix fun <T> Property<T>.equal(value: Short): PropertyQueryCondition<T> {
+    return equal(value)
+}
+
+/** Creates a "not equal ('&lt;&gt;')" condition for this property. */
+infix fun <T> Property<T>.notEqual(value: Short): PropertyQueryCondition<T> {
+    return notEqual(value)
+}
+
+/** Creates a "greater than ('&gt;')" condition for this property. */
+infix fun <T> Property<T>.greater(value: Short): PropertyQueryCondition<T> {
+    return greater(value)
+}
+
+/** Creates a "less than ('&lt;')" condition for this property. */
+infix fun <T> Property<T>.less(value: Short): PropertyQueryCondition<T> {
+    return less(value)
+}
+
+// Int
+/** Creates an "equal ('=')" condition for this property. */
+infix fun <T> Property<T>.equal(value: Int): PropertyQueryCondition<T> {
+    return equal(value)
+}
+
+/** Creates a "not equal ('&lt;&gt;')" condition for this property. */
+infix fun <T> Property<T>.notEqual(value: Int): PropertyQueryCondition<T> {
+    return notEqual(value)
+}
+
+/** Creates a "greater than ('&gt;')" condition for this property. */
+infix fun <T> Property<T>.greater(value: Int): PropertyQueryCondition<T> {
+    return greater(value)
+}
+
+/** Creates a "less than ('&lt;')" condition for this property. */
+infix fun <T> Property<T>.less(value: Int): PropertyQueryCondition<T> {
+    return less(value)
+}
+
 // IntArray
 /** Creates an "IN (..., ..., ...)" condition for this property. */
 infix fun <T> Property<T>.oneOf(value: IntArray): PropertyQueryCondition<T> {

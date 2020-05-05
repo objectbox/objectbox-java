@@ -123,6 +123,56 @@ public class Property<ENTITY> implements Serializable {
         return new LongCondition<>(this, LongCondition.Operation.NOT_EQUAL, value);
     }
 
+    /** Creates an "equal ('=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> equal(short value) {
+        return equal((long) value);
+    }
+
+    /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> notEqual(short value) {
+        return notEqual((long) value);
+    }
+
+    /** Creates a "greater than ('&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greater(short value) {
+        return greater((long) value);
+    }
+
+    /** Creates a "less than ('&lt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> less(short value) {
+        return less((long) value);
+    }
+
+    /** Creates an "BETWEEN ... AND ..." condition for this property. */
+    public PropertyQueryCondition<ENTITY> between(short lowerBoundary, short upperBoundary) {
+        return between((long) lowerBoundary, upperBoundary);
+    }
+
+    /** Creates an "equal ('=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> equal(int value) {
+        return equal((long) value);
+    }
+
+    /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> notEqual(int value) {
+        return notEqual((long) value);
+    }
+
+    /** Creates a "greater than ('&gt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greater(int value) {
+        return greater((long) value);
+    }
+
+    /** Creates a "less than ('&lt;')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> less(int value) {
+        return less((long) value);
+    }
+
+    /** Creates an "BETWEEN ... AND ..." condition for this property. */
+    public PropertyQueryCondition<ENTITY> between(int lowerBoundary, int upperBoundary) {
+        return between((long) lowerBoundary, upperBoundary);
+    }
+
     /** Creates an "IN (..., ..., ...)" condition for this property. */
     public PropertyQueryCondition<ENTITY> oneOf(int[] values) {
         return new IntArrayCondition<>(this, IntArrayCondition.Operation.IN, values);
@@ -153,6 +203,11 @@ public class Property<ENTITY> implements Serializable {
         return new LongCondition<>(this, LongCondition.Operation.LESS, value);
     }
 
+    /** Creates an "BETWEEN ... AND ..." condition for this property. */
+    public PropertyQueryCondition<ENTITY> between(long lowerBoundary, long upperBoundary) {
+        return new LongLongCondition<>(this, LongLongCondition.Operation.BETWEEN, lowerBoundary, upperBoundary);
+    }
+
     /** Creates an "IN (..., ..., ...)" condition for this property. */
     public PropertyQueryCondition<ENTITY> oneOf(long[] values) {
         return new LongArrayCondition<>(this, LongArrayCondition.Operation.IN, values);
@@ -161,11 +216,6 @@ public class Property<ENTITY> implements Serializable {
     /** Creates a "NOT IN (..., ..., ...)" condition for this property. */
     public PropertyQueryCondition<ENTITY> notOneOf(long[] values) {
         return new LongArrayCondition<>(this, LongArrayCondition.Operation.NOT_IN, values);
-    }
-
-    /** Creates an "BETWEEN ... AND ..." condition for this property. */
-    public PropertyQueryCondition<ENTITY> between(long lowerBoundary, long upperBoundary) {
-        return new LongLongCondition<>(this, LongLongCondition.Operation.BETWEEN, lowerBoundary, upperBoundary);
     }
 
     /**
