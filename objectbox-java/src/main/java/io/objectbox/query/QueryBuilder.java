@@ -262,6 +262,29 @@ public class QueryBuilder<T> implements Closeable {
     }
 
     /**
+     * Applies the given query conditions and returns the builder for further customization, such as result order.
+     * Build the condition using the properties from your entity underscore classes.
+     * <p>
+     * An example with a nested OR condition:
+     * <pre>
+     * # Java
+     * builder.apply(User_.name.equal("Jane")
+     *         .and(User_.age.less(12)
+     *                 .or(User_.status.equal("child"))));
+     *
+     * # Kotlin
+     * builder.apply(User_.name.equal("Jane")
+     *         and (User_.age.less(12)
+     *         or User_.status.equal("child")))
+     * </pre>
+     * Use {@link Box#query(QueryCondition)} as a shortcut for this method.
+     */
+    public QueryBuilder<T> apply(QueryCondition<T> queryCondition) {
+        ((QueryConditionImpl<T>) queryCondition).apply(this);
+        return this;
+    }
+
+    /**
      * Specifies given property to be used for sorting.
      * Shorthand for {@link #order(Property, int)} with flags equal to 0.
      *
@@ -498,6 +521,21 @@ public class QueryBuilder<T> implements Closeable {
             lastCondition = currentCondition;
         }
         lastPropertyCondition = currentCondition;
+    }
+
+    @Internal
+    long internalGetLastCondition() {
+        return lastCondition;
+    }
+
+    @Internal
+    void internalAnd(long leftCondition, long rightCondition) {
+        lastCondition = nativeCombine(handle, leftCondition, rightCondition, false);
+    }
+
+    @Internal
+    void internalOr(long leftCondition, long rightCondition) {
+        lastCondition = nativeCombine(handle, leftCondition, rightCondition, true);
     }
 
     public QueryBuilder<T> isNull(Property<T> property) {
