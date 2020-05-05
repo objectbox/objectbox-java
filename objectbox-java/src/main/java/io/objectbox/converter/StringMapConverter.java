@@ -18,7 +18,7 @@ public class StringMapConverter implements PropertyConverter<Map<String, String>
         if (map == null) return null;
 
         FlexBuffersBuilder builder = new FlexBuffersBuilder(
-                new ArrayReadWriteBuf(),
+                new ArrayReadWriteBuf(512),
                 FlexBuffersBuilder.BUILDER_FLAG_SHARE_KEYS_AND_STRINGS
         );
         int mapStart = builder.startMap();
