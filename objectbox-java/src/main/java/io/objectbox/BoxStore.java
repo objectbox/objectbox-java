@@ -276,16 +276,19 @@ public class BoxStore implements Closeable {
         synchronized (openFiles) {
             if (!openFiles.contains(canonicalPath)) return false;
         }
-        if (openFilesCheckerThread == null || !openFilesCheckerThread.isAlive()) {
+        Thread checkerThread = BoxStore.openFilesCheckerThread;
+        if (checkerThread == null || !checkerThread.isAlive()) {
             // Use a thread to avoid finalizers that block us
-            openFilesCheckerThread = new Thread(() -> {
+            checkerThread = new Thread(() -> {
                 isFileOpenSync(canonicalPath, true);
-                openFilesCheckerThread = null; // Clean ref to itself
+                BoxStore.openFilesCheckerThread = null; // Clean ref to itself
             });
-            openFilesCheckerThread.setDaemon(true);
-            openFilesCheckerThread.start();
+            checkerThread.setDaemon(true);
+
+            BoxStore.openFilesCheckerThread = checkerThread;
+            checkerThread.start();
             try {
-                openFilesCheckerThread.join(500);
+                checkerThread.join(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
