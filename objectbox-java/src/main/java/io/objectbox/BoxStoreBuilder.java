@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -107,10 +108,11 @@ public class BoxStoreBuilder {
     /** Called internally from the generated class "MyObjectBox". Check MyObjectBox.builder() to get an instance. */
     @Internal
     public BoxStoreBuilder(byte[] model) {
-        this.model = model;
         if (model == null) {
             throw new IllegalArgumentException("Model may not be null");
         }
+        // Future-proofing: copy to prevent external modification.
+        this.model = Arrays.copyOf(model, model.length);
     }
 
     /**
