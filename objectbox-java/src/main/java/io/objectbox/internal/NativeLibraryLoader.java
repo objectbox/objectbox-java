@@ -181,22 +181,22 @@ public class NativeLibraryLoader {
     }
 
     private static boolean loadLibraryAndroid() {
-        if (BoxStore.context == null) {
+        if (BoxStore.getContext() == null) {
             return false;
         }
 
         //noinspection TryWithIdenticalCatches
         try {
             Class<?> context = Class.forName("android.content.Context");
-            if (BoxStore.relinker == null) {
+            if (BoxStore.getRelinker() == null) {
                 // use default ReLinker
                 Class<?> relinker = Class.forName("com.getkeepsafe.relinker.ReLinker");
                 Method loadLibrary = relinker.getMethod("loadLibrary", context, String.class, String.class);
-                loadLibrary.invoke(null, BoxStore.context, OBJECTBOX_JNI, BoxStore.JNI_VERSION);
+                loadLibrary.invoke(null, BoxStore.getContext(), OBJECTBOX_JNI, BoxStore.JNI_VERSION);
             } else {
                 // use custom ReLinkerInstance
-                Method loadLibrary = BoxStore.relinker.getClass().getMethod("loadLibrary", context, String.class, String.class);
-                loadLibrary.invoke(BoxStore.relinker, BoxStore.context, OBJECTBOX_JNI, BoxStore.JNI_VERSION);
+                Method loadLibrary = BoxStore.getRelinker().getClass().getMethod("loadLibrary", context, String.class, String.class);
+                loadLibrary.invoke(BoxStore.getRelinker(), BoxStore.getContext(), OBJECTBOX_JNI, BoxStore.JNI_VERSION);
             }
         } catch (NoSuchMethodException e) {
             return false;
