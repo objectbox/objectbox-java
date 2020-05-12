@@ -48,9 +48,9 @@ artifacts {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    compile project(':objectbox-java')
+    api project(':objectbox-java')
 }
 
 
