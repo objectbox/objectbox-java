@@ -22,18 +22,18 @@ repositories {
 }
 
 dependencies {
-    compile project(':objectbox-java')
-    compile 'org.greenrobot:essentials:3.0.0-RC1'
+    implementation project(':objectbox-java')
+    implementation 'org.greenrobot:essentials:3.0.0-RC1'
 
     // Check flag to use locally compiled version to avoid dependency cycles
     if (!project.hasProperty('noObjectBoxTestDepencies') || !noObjectBoxTestDepencies) {
         println "Using $ob_native_dep"
-        compile ob_native_dep
+        implementation ob_native_dep
     } else {
         println "Did NOT add native dependency"
     }
 
-    testCompile "junit:junit:$junit_version"
+    testImplementation "junit:junit:$junit_version"
 }
 
 test {
