@@ -32,10 +32,10 @@ public class ReflectionCache {
         return instance;
     }
 
-    private final Map<Class, Map<String, Field>> fields = new HashMap<>();
+    private final Map<Class<?>, Map<String, Field>> fields = new HashMap<>();
 
     @Nonnull
-    public synchronized Field getField(Class clazz, String name) {
+    public synchronized Field getField(Class<?> clazz, String name) {
         Map<String, Field> fieldsForClass = fields.get(clazz);
         if (fieldsForClass == null) {
             fieldsForClass = new HashMap<>();

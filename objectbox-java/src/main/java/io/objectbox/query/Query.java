@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
 import io.objectbox.Property;
-import io.objectbox.internal.CallWithHandle;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataSubscriptionList;
 import io.objectbox.reactive.SubscriptionBuilder;
@@ -96,7 +95,7 @@ public class Query<T> implements Closeable {
     final Box<T> box;
     private final BoxStore store;
     private final QueryPublisher<T> publisher;
-    @Nullable private final List<EagerRelation> eagerRelations;
+    @Nullable private final List<EagerRelation<T, ?>> eagerRelations;
     @Nullable private final QueryFilter<T> filter;
     @Nullable private final Comparator<T> comparator;
     private final int queryAttempts;
@@ -104,7 +103,7 @@ public class Query<T> implements Closeable {
 
     long handle;
 
-    Query(Box<T> box, long queryHandle, @Nullable List<EagerRelation> eagerRelations, @Nullable  QueryFilter<T> filter,
+    Query(Box<T> box, long queryHandle, @Nullable List<EagerRelation<T, ?>> eagerRelations, @Nullable  QueryFilter<T> filter,
           @Nullable Comparator<T> comparator) {
         this.box = box;
         store = box.getStore();
@@ -149,14 +148,11 @@ public class Query<T> implements Closeable {
     @Nullable
     public T findFirst() {
         ensureNoFilterNoComparator();
-        return callInReadTx(new Callable<T>() {
-            @Override
-            public T call() {
-                @SuppressWarnings("unchecked")
-                T entity = (T) nativeFindFirst(handle, cursorHandle());
-                resolveEagerRelation(entity);
-                return entity;
-            }
+        return callInReadTx(() -> {
+            @SuppressWarnings("unchecked")
+            T entity = (T) nativeFindFirst(handle, cursorHandle());
+            resolveEagerRelation(entity);
+            return entity;
         });
     }
 
@@ -187,14 +183,11 @@ public class Query<T> implements Closeable {
     @Nullable
     public T findUnique() {
         ensureNoFilter();  // Comparator is fine: does not make any difference for a unique result
-        return callInReadTx(new Callable<T>() {
-            @Override
-            public T call() {
-                @SuppressWarnings("unchecked")
-                T entity = (T) nativeFindUnique(handle, cursorHandle());
-                resolveEagerRelation(entity);
-                return entity;
-            }
+        return callInReadTx(() -> {
+            @SuppressWarnings("unchecked")
+            T entity = (T) nativeFindUnique(handle, cursorHandle());
+            resolveEagerRelation(entity);
+            return entity;
         });
     }
 
@@ -203,25 +196,22 @@ public class Query<T> implements Closeable {
      */
     @Nonnull
     public List<T> find() {
-        return callInReadTx(new Callable<List<T>>() {
-            @Override
-            public List<T> call() throws Exception {
-                List<T> entities = nativeFind(Query.this.handle, cursorHandle(), 0, 0);
-                if (filter != null) {
-                    Iterator<T> iterator = entities.iterator();
-                    while (iterator.hasNext()) {
-                        T entity = iterator.next();
-                        if (!filter.keep(entity)) {
-                            iterator.remove();
-                        }
+        return callInReadTx(() -> {
+            List<T> entities = nativeFind(Query.this.handle, cursorHandle(), 0, 0);
+            if (filter != null) {
+                Iterator<T> iterator = entities.iterator();
+                while (iterator.hasNext()) {
+                    T entity = iterator.next();
+                    if (!filter.keep(entity)) {
+                        iterator.remove();
                     }
                 }
-                resolveEagerRelations(entities);
-                if (comparator != null) {
-                    Collections.sort(entities, comparator);
-                }
-                return entities;
             }
+            resolveEagerRelations(entities);
+            if (comparator != null) {
+                Collections.sort(entities, comparator);
+            }
+            return entities;
         });
     }
 
@@ -231,13 +221,10 @@ public class Query<T> implements Closeable {
     @Nonnull
     public List<T> find(final long offset, final long limit) {
         ensureNoFilterNoComparator();
-        return callInReadTx(new Callable<List<T>>() {
-            @Override
-            public List<T> call() throws Exception {
-                List<T> entities = nativeFind(handle, cursorHandle(), offset, limit);
-                resolveEagerRelations(entities);
-                return entities;
-            }
+        return callInReadTx(() -> {
+            List<T> entities = nativeFind(handle, cursorHandle(), offset, limit);
+            resolveEagerRelations(entities);
+            return entities;
         });
     }
 
@@ -259,12 +246,7 @@ public class Query<T> implements Closeable {
      */
     @Nonnull
     public long[] findIds(final long offset, final long limit) {
-        return box.internalCallWithReaderHandle(new CallWithHandle<long[]>() {
-            @Override
-            public long[] call(long cursorHandle) {
-                return nativeFindIds(handle, cursorHandle, offset, limit);
-            }
-        });
+        return box.internalCallWithReaderHandle(cursorHandle -> nativeFindIds(handle, cursorHandle, offset, limit));
     }
 
     /**
@@ -285,7 +267,7 @@ public class Query<T> implements Closeable {
      *
      * @param property the property for which to return values
      */
-    public PropertyQuery property(Property property) {
+    public PropertyQuery property(Property<T> property) {
         return new PropertyQuery(this, property);
     }
 
@@ -304,29 +286,26 @@ public class Query<T> implements Closeable {
      */
     public void forEach(final QueryConsumer<T> consumer) {
         ensureNoComparator();
-        box.getStore().runInReadTx(new Runnable() {
-            @Override
-            public void run() {
-                LazyList<T> lazyList = new LazyList<>(box, findIds(), false);
-                int size = lazyList.size();
-                for (int i = 0; i < size; i++) {
-                    T entity = lazyList.get(i);
-                    if (entity == null) {
-                        throw new IllegalStateException("Internal error: data object was null");
+        box.getStore().runInReadTx(() -> {
+            LazyList<T> lazyList = new LazyList<>(box, findIds(), false);
+            int size = lazyList.size();
+            for (int i = 0; i < size; i++) {
+                T entity = lazyList.get(i);
+                if (entity == null) {
+                    throw new IllegalStateException("Internal error: data object was null");
+                }
+                if (filter != null) {
+                    if (!filter.keep(entity)) {
+                        continue;
                     }
-                    if (filter != null) {
-                        if (!filter.keep(entity)) {
-                            continue;
-                        }
-                    }
-                    if (eagerRelations != null) {
-                        resolveEagerRelationForNonNullEagerRelations(entity, i);
-                    }
-                    try {
-                        consumer.accept(entity);
-                    } catch (BreakForEach breakForEach) {
-                        break;
-                    }
+                }
+                if (eagerRelations != null) {
+                    resolveEagerRelationForNonNullEagerRelations(entity, i);
+                }
+                try {
+                    consumer.accept(entity);
+                } catch (BreakForEach breakForEach) {
+                    break;
                 }
             }
         });
@@ -354,7 +333,7 @@ public class Query<T> implements Closeable {
     /** Note: no null check on eagerRelations! */
     void resolveEagerRelationForNonNullEagerRelations(@Nonnull T entity, int entityIndex) {
         //noinspection ConstantConditions No null check.
-        for (EagerRelation eagerRelation : eagerRelations) {
+        for (EagerRelation<T, ?> eagerRelation : eagerRelations) {
             if (eagerRelation.limit == 0 || entityIndex < eagerRelation.limit) {
                 resolveEagerRelation(entity, eagerRelation);
             }
@@ -363,18 +342,17 @@ public class Query<T> implements Closeable {
 
     void resolveEagerRelation(@Nullable T entity) {
         if (eagerRelations != null && entity != null) {
-            for (EagerRelation eagerRelation : eagerRelations) {
+            for (EagerRelation<T, ?> eagerRelation : eagerRelations) {
                 resolveEagerRelation(entity, eagerRelation);
             }
         }
     }
 
-    void resolveEagerRelation(@Nonnull T entity, EagerRelation eagerRelation) {
+    void resolveEagerRelation(@Nonnull T entity, EagerRelation<T, ?> eagerRelation) {
         if (eagerRelations != null) {
-            RelationInfo relationInfo = eagerRelation.relationInfo;
+            RelationInfo<T, ?> relationInfo = eagerRelation.relationInfo;
             if (relationInfo.toOneGetter != null) {
-                //noinspection unchecked Can't know target entity type.
-                ToOne toOne = relationInfo.toOneGetter.getToOne(entity);
+                ToOne<?> toOne = relationInfo.toOneGetter.getToOne(entity);
                 if (toOne != null) {
                     toOne.getTarget();
                 }
@@ -382,8 +360,7 @@ public class Query<T> implements Closeable {
                 if (relationInfo.toManyGetter == null) {
                     throw new IllegalStateException("Relation info without relation getter: " + relationInfo);
                 }
-                //noinspection unchecked Can't know target entity type.
-                List toMany = relationInfo.toManyGetter.getToMany(entity);
+                List<?> toMany = relationInfo.toManyGetter.getToMany(entity);
                 if (toMany != null) {
                     //noinspection ResultOfMethodCallIgnored Triggers fetching target entities.
                     toMany.size();
@@ -395,18 +372,13 @@ public class Query<T> implements Closeable {
     /** Returns the count of Objects matching the query. */
     public long count() {
         ensureNoFilter();
-        return box.internalCallWithReaderHandle(new CallWithHandle<Long>() {
-            @Override
-            public Long call(long cursorHandle) {
-                return nativeCount(handle, cursorHandle);
-            }
-        });
+        return box.internalCallWithReaderHandle(cursorHandle -> nativeCount(handle, cursorHandle));
     }
 
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
      */
-    public Query<T> setParameter(Property property, String value) {
+    public Query<T> setParameter(Property<?> property, String value) {
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
         return this;
     }
@@ -424,7 +396,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
      */
-    public Query<T> setParameter(Property property, long value) {
+    public Query<T> setParameter(Property<?> property, long value) {
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
         return this;
     }
@@ -442,7 +414,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
      */
-    public Query<T> setParameter(Property property, double value) {
+    public Query<T> setParameter(Property<?> property, double value) {
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
         return this;
     }
@@ -462,7 +434,7 @@ public class Query<T> implements Closeable {
      *
      * @throws NullPointerException if given date is null
      */
-    public Query<T> setParameter(Property property, Date value) {
+    public Query<T> setParameter(Property<?> property, Date value) {
         return setParameter(property, value.getTime());
     }
 
@@ -479,7 +451,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
      */
-    public Query<T> setParameter(Property property, boolean value) {
+    public Query<T> setParameter(Property<?> property, boolean value) {
         return setParameter(property, value ? 1 : 0);
     }
 
@@ -495,7 +467,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
-    public Query<T> setParameters(Property property, long value1, long value2) {
+    public Query<T> setParameters(Property<?> property, long value1, long value2) {
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, value1, value2);
         return this;
     }
@@ -513,7 +485,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
-    public Query<T> setParameters(Property property, int[] values) {
+    public Query<T> setParameters(Property<?> property, int[] values) {
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
         return this;
     }
@@ -531,7 +503,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
-    public Query<T> setParameters(Property property, long[] values) {
+    public Query<T> setParameters(Property<?> property, long[] values) {
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
         return this;
     }
@@ -549,7 +521,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
-    public Query<T> setParameters(Property property, double value1, double value2) {
+    public Query<T> setParameters(Property<?> property, double value1, double value2) {
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, value1, value2);
         return this;
     }
@@ -567,7 +539,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
-    public Query<T> setParameters(Property property, String[] values) {
+    public Query<T> setParameters(Property<?> property, String[] values) {
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
         return this;
     }
@@ -585,7 +557,7 @@ public class Query<T> implements Closeable {
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
-    public Query<T> setParameter(Property property, byte[] value) {
+    public Query<T> setParameter(Property<?> property, byte[] value) {
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
         return this;
     }
@@ -607,12 +579,7 @@ public class Query<T> implements Closeable {
      */
     public long remove() {
         ensureNoFilter();
-        return box.internalCallWithWriterHandle(new CallWithHandle<Long>() {
-            @Override
-            public Long call(long cursorHandle) {
-                return nativeRemove(handle, cursorHandle);
-            }
-        });
+        return box.internalCallWithWriterHandle(cursorHandle -> nativeRemove(handle, cursorHandle));
     }
 
     /**

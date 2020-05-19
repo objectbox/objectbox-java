@@ -19,7 +19,6 @@ package io.objectbox;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -57,7 +56,7 @@ public class Box<T> {
 
     private final IdGetter<T> idGetter;
 
-    private EntityInfo entityInfo;
+    private EntityInfo<T> entityInfo;
     private volatile Field boxStoreField;
 
     Box(BoxStore store, Class<T> entityClass) {
@@ -340,7 +339,8 @@ public class Box<T> {
     /**
      * Puts the given entities in a box using a single transaction.
      */
-    public void put(@Nullable T... entities) {
+    @SafeVarargs // Not using T... as Object[], no ClassCastException expected.
+    public final void put(@Nullable T... entities) {
         if (entities == null || entities.length == 0) {
             return;
         }
@@ -443,8 +443,10 @@ public class Box<T> {
         }
     }
 
+    /**
+     * @deprecated use {@link #removeByIds(Collection)} instead.
+     */
     @Deprecated
-    /** @deprecated use {@link #removeByIds(Collection)} instead. */
     public void removeByKeys(@Nullable Collection<Long> ids) {
         removeByIds(ids);
     }
@@ -487,8 +489,9 @@ public class Box<T> {
     /**
      * Removes (deletes) the given Objects in a single transaction.
      */
+    @SafeVarargs // Not using T... as Object[], no ClassCastException expected.
     @SuppressWarnings("Duplicates") // Detected duplicate has different type
-    public void remove(@Nullable T... objects) {
+    public final void remove(@Nullable T... objects) {
         if (objects == null || objects.length == 0) {
             return;
         }
@@ -559,7 +562,7 @@ public class Box<T> {
         return store;
     }
 
-    public synchronized EntityInfo getEntityInfo() {
+    public synchronized EntityInfo<T> getEntityInfo() {
         if (entityInfo == null) {
             Cursor<T> reader = getReader();
             try {
@@ -603,7 +606,7 @@ public class Box<T> {
     }
 
     @Internal
-    public List<T> internalGetBacklinkEntities(int entityId, Property relationIdProperty, long key) {
+    public List<T> internalGetBacklinkEntities(int entityId, Property<?> relationIdProperty, long key) {
         Cursor<T> reader = getReader();
         try {
             return reader.getBacklinkEntities(entityId, relationIdProperty, key);

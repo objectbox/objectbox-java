@@ -23,10 +23,10 @@ import java.lang.*;
 import java.util.*;
 import com.google.flatbuffers.*;
 
-@SuppressWarnings("unused")
 /**
  * ID tuple: besides the main ID there is also a UID for verification
  */
+@SuppressWarnings("unused")
 public final class IdUid extends Struct {
   public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; }
   public IdUid __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }

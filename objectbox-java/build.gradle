@@ -1,18 +1,8 @@
 apply plugin: 'java'
-apply plugin: 'findbugs'
+apply plugin: "com.github.spotbugs"
 
-group = 'io.objectbox'
-version= rootProject.version
-
-sourceCompatibility = '1.7'
-
-tasks.withType(FindBugs) {
-    reports {
-        xml.enabled false
-        html.enabled true
-    }
-    ignoreFailures = true
-}
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -20,6 +10,10 @@ dependencies {
     compile 'org.greenrobot:essentials:3.0.0-RC1'
     compile 'com.google.flatbuffers:flatbuffers-java:1.11.1'
     compile 'com.google.code.findbugs:jsr305:3.0.2'
+}
+
+spotbugs {
+    ignoreFailures = true
 }
 
 javadoc {
@@ -140,25 +134,5 @@ uploadArchives {
                 }
             }
         }
-    }
-}
-
-// this task is also used by the composite build ('objectbox-deploy'), check before making changes
-task verifyVersion {
-    group 'verify'
-    doLast {
-        // verify version in Boxstore.java
-        File storeFile = file('src/main/java/io/objectbox/BoxStore.java')
-        def versionLine = storeFile.filterLine { line ->
-            line.contains("String VERSION =")
-        }.toString()
-
-        if (versionLine == null || versionLine.empty) {
-            throw new GradleException('Could not find VERSION in ObjectStore.cpp')
-        }
-
-        // matches snippet like '12.34.56'
-        def boxStoreVersion = versionLine.find("\\d+\\.\\d+\\.\\d+")
-        assert ob_expected_version == boxStoreVersion
     }
 }

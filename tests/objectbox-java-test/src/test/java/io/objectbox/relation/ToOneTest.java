@@ -45,7 +45,7 @@ public class ToOneTest extends AbstractRelationTest {
         assertEquals(1977, entity.getCustomerId());
     }
 
-    private RelationInfo<Order, Customer> getRelationInfo(Property targetIdProperty) {
+    private RelationInfo<Order, Customer> getRelationInfo(Property<Order> targetIdProperty) {
         return new RelationInfo<>(new Order_(), new Customer_(), targetIdProperty, null);
     }
 

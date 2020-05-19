@@ -18,11 +18,11 @@ package io.objectbox.query;
 
 import io.objectbox.relation.RelationInfo;
 
-class EagerRelation {
+class EagerRelation<S, T> {
     public final int limit;
-    public final RelationInfo relationInfo;
+    public final RelationInfo<S, T> relationInfo;
 
-    EagerRelation(int limit, RelationInfo relationInfo) {
+    EagerRelation(int limit, RelationInfo<S, T> relationInfo) {
         this.limit = limit;
         this.relationInfo = relationInfo;
     }

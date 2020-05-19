@@ -49,12 +49,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
     public synchronized void subscribe(DataObserver<List<T>> observer, @Nullable Object param) {
         final BoxStore store = box.getStore();
         if (objectClassObserver == null) {
-            objectClassObserver = new DataObserver<Class<T>>() {
-                @Override
-                public void onData(Class<T> objectClass) {
-                    publish();
-                }
-            };
+            objectClassObserver = objectClass -> publish();
         }
         if (observers.isEmpty()) {
             if (objectClassSubscription != null) {
@@ -77,23 +72,17 @@ class QueryPublisher<T> implements DataPublisher<List<T>> {
 
     @Override
     public void publishSingle(final DataObserver<List<T>> observer, @Nullable Object param) {
-        box.getStore().internalScheduleThread(new Runnable() {
-            @Override
-            public void run() {
-                List<T> result = query.find();
-                observer.onData(result);
-            }
+        box.getStore().internalScheduleThread(() -> {
+            List<T> result = query.find();
+            observer.onData(result);
         });
     }
 
     void publish() {
-        box.getStore().internalScheduleThread(new Runnable() {
-            @Override
-            public void run() {
-                List<T> result = query.find();
-                for (DataObserver<List<T>> observer : observers) {
-                    observer.onData(result);
-                }
+        box.getStore().internalScheduleThread(() -> {
+            List<T> result = query.find();
+            for (DataObserver<List<T>> observer : observers) {
+                observer.onData(result);
             }
         });
     }

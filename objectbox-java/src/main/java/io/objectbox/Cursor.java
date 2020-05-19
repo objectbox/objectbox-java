@@ -50,7 +50,7 @@ public abstract class Cursor<T> implements Closeable {
 
     static native boolean nativeSeek(long cursor, long key);
 
-    native Object nativeGetAllEntities(long cursor);
+    native List<T> nativeGetAllEntities(long cursor);
 
     static native Object nativeGetEntity(long cursor, long key);
 
@@ -108,11 +108,11 @@ public abstract class Cursor<T> implements Closeable {
 
     native int nativePropertyId(long cursor, String propertyValue);
 
-    native List nativeGetBacklinkEntities(long cursor, int entityId, int propertyId, long key);
+    native List<T> nativeGetBacklinkEntities(long cursor, int entityId, int propertyId, long key);
 
     native long[] nativeGetBacklinkIds(long cursor, int entityId, int propertyId, long key);
 
-    native List nativeGetRelationEntities(long cursor, int sourceEntityId, int relationId, long key, boolean backlink);
+    native List<T> nativeGetRelationEntities(long cursor, int sourceEntityId, int relationId, long key, boolean backlink);
 
     native long[] nativeGetRelationIds(long cursor, int sourceEntityId, int relationId, long key, boolean backlink);
 
@@ -126,7 +126,7 @@ public abstract class Cursor<T> implements Closeable {
 
     protected final Transaction tx;
     protected final long cursor;
-    protected final EntityInfo entityInfo;
+    protected final EntityInfo<T> entityInfo;
     protected final BoxStore boxStoreForEntities;
 
     protected final boolean readOnly;
@@ -134,7 +134,7 @@ public abstract class Cursor<T> implements Closeable {
 
     private final Throwable creationThrowable;
 
-    protected Cursor(Transaction tx, long cursor, EntityInfo entityInfo, BoxStore boxStore) {
+    protected Cursor(Transaction tx, long cursor, EntityInfo<T> entityInfo, BoxStore boxStore) {
         if (tx == null) {
             throw new IllegalArgumentException("Transaction is null");
         }
@@ -144,8 +144,8 @@ public abstract class Cursor<T> implements Closeable {
         this.entityInfo = entityInfo;
         this.boxStoreForEntities = boxStore;
 
-        Property[] allProperties = entityInfo.getAllProperties();
-        for (Property property : allProperties) {
+        Property<T>[] allProperties = entityInfo.getAllProperties();
+        for (Property<T> property : allProperties) {
             if (!property.isIdVerified()) {
                 int id = getPropertyId(property.dbName);
                 property.verifyId(id);
@@ -181,7 +181,7 @@ public abstract class Cursor<T> implements Closeable {
 
     public abstract long put(T entity);
 
-    public EntityInfo getEntityInfo() {
+    public EntityInfo<T> getEntityInfo() {
         return entityInfo;
     }
 
@@ -199,7 +199,7 @@ public abstract class Cursor<T> implements Closeable {
 
     /** ~10% slower than iterating with {@link #first()} and {@link #next()} as done by {@link Box#getAll()}. */
     public List<T> getAll() {
-        return (List) nativeGetAllEntities(cursor);
+        return nativeGetAllEntities(cursor);
     }
 
     public boolean deleteEntity(long key) {
@@ -262,7 +262,7 @@ public abstract class Cursor<T> implements Closeable {
      * Thus, use it only locally and don't store it long term.
      */
     protected <TARGET> Cursor<TARGET> getRelationTargetCursor(Class<TARGET> targetClass) {
-        EntityInfo entityInfo = boxStoreForEntities.getEntityInfo(targetClass);
+        EntityInfo<TARGET> entityInfo = boxStoreForEntities.getEntityInfo(targetClass);
         long cursorHandle = nativeGetCursorFor(cursor, entityInfo.getEntityId());
         CursorFactory<TARGET> factory = entityInfo.getCursorFactory();
         return factory.createCursor(tx, cursorHandle, boxStoreForEntities);
@@ -281,7 +281,7 @@ public abstract class Cursor<T> implements Closeable {
     }
 
     @Internal
-    List<T> getBacklinkEntities(int entityId, Property relationIdProperty, long key) {
+    List<T> getBacklinkEntities(int entityId, Property<?> relationIdProperty, long key) {
         try {
             return nativeGetBacklinkEntities(cursor, entityId, relationIdProperty.getId(), key);
         } catch (IllegalArgumentException e) {
@@ -291,7 +291,7 @@ public abstract class Cursor<T> implements Closeable {
     }
 
     @Internal
-    long[] getBacklinkIds(int entityId, Property relationIdProperty, long key) {
+    long[] getBacklinkIds(int entityId, Property<?> relationIdProperty, long key) {
         try {
             return nativeGetBacklinkIds(cursor, entityId, relationIdProperty.getId(), key);
         } catch (IllegalArgumentException e) {
@@ -324,11 +324,8 @@ public abstract class Cursor<T> implements Closeable {
         if (orders instanceof ToMany) {
             ToMany<TARGET> toMany = (ToMany<TARGET>) orders;
             if (toMany.internalCheckApplyToDbRequired()) {
-                Cursor<TARGET> targetCursor = getRelationTargetCursor(targetClass);
-                try {
+                try (Cursor<TARGET> targetCursor = getRelationTargetCursor(targetClass)) {
                     toMany.internalApplyToDb(this, targetCursor);
-                } finally {
-                    targetCursor.close();
                 }
             }
         }

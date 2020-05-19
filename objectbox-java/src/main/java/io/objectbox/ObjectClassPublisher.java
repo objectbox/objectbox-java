@@ -47,11 +47,11 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
     public void subscribe(DataObserver<Class> observer, @Nullable Object forClass) {
         if (forClass == null) {
             for (int entityTypeId : boxStore.getAllEntityTypeIds()) {
-                observersByEntityTypeId.putElement(entityTypeId, (DataObserver) observer);
+                observersByEntityTypeId.putElement(entityTypeId, observer);
             }
         } else {
-            int entityTypeId = boxStore.getEntityTypeIdOrThrow((Class) forClass);
-            observersByEntityTypeId.putElement(entityTypeId, (DataObserver) observer);
+            int entityTypeId = boxStore.getEntityTypeIdOrThrow((Class<?>) forClass);
+            observersByEntityTypeId.putElement(entityTypeId, observer);
         }
     }
 
@@ -61,7 +61,7 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
      */
     public void unsubscribe(DataObserver<Class> observer, @Nullable Object forClass) {
         if (forClass != null) {
-            int entityTypeId = boxStore.getEntityTypeIdOrThrow((Class) forClass);
+            int entityTypeId = boxStore.getEntityTypeIdOrThrow((Class<?>) forClass);
             unsubscribe(observer, entityTypeId);
         } else {
             for (int entityTypeId : boxStore.getAllEntityTypeIds()) {
@@ -77,17 +77,14 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
 
     @Override
     public void publishSingle(final DataObserver<Class> observer, @Nullable final Object forClass) {
-        boxStore.internalScheduleThread(new Runnable() {
-            @Override
-            public void run() {
-                Collection<Class> entityClasses = forClass != null ? Collections.singletonList((Class) forClass) :
-                        boxStore.getAllEntityClasses();
-                for (Class entityClass : entityClasses) {
-                    try {
-                        observer.onData(entityClass);
-                    } catch (RuntimeException e) {
-                        handleObserverException(entityClass);
-                    }
+        boxStore.internalScheduleThread(() -> {
+            Collection<Class<?>> entityClasses = forClass != null ? Collections.singletonList((Class<?>) forClass) :
+                    boxStore.getAllEntityClasses();
+            for (Class<?> entityClass : entityClasses) {
+                try {
+                    observer.onData(entityClass);
+                } catch (RuntimeException e) {
+                    handleObserverException(entityClass);
                 }
             }
         });
@@ -132,7 +129,7 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
                 for (int entityTypeId : entityTypeIdsAffected) {
                     Collection<DataObserver<Class>> observers = observersByEntityTypeId.get(entityTypeId);
                     if (observers != null && !observers.isEmpty()) {
-                        Class objectClass = boxStore.getEntityClassOrThrow(entityTypeId);
+                        Class<?> objectClass = boxStore.getEntityClassOrThrow(entityTypeId);
                         try {
                             for (DataObserver<Class> observer : observers) {
                                 observer.onData(objectClass);

@@ -40,7 +40,7 @@ public class ObjectBoxThreadPool extends ThreadPoolExecutor {
     private final BoxStore boxStore;
 
     public ObjectBoxThreadPool(BoxStore boxStore) {
-        super(0, Integer.MAX_VALUE, 20L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
+        super(0, Integer.MAX_VALUE, 20L, TimeUnit.SECONDS, new SynchronousQueue<>(),
                 new ObjectBoxThreadFactory());
         this.boxStore = boxStore;
     }

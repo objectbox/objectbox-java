@@ -1,6 +1,3 @@
-// Just too many sub projects, so each can reference rootProject.version
-version = ob_version
-
 buildscript {
     ext {
         // Typically, only edit those two:
@@ -11,32 +8,40 @@ buildscript {
         def versionPostFixValue = project.findProperty('versionPostFix')
         def versionPostFix = versionPostFixValue ? "-$versionPostFixValue" : ''
         ob_version = objectboxVersionNumber + (objectboxVersionRelease? "" : "$versionPostFix-SNAPSHOT")
-        println "ObjectBox Java version $ob_version"
 
-        ob_expected_version = project.hasProperty('expectedVersion') ? project.property('expectedVersion') : 'UNDEFINED'
-
-        // Core version for tests
+        // Native library version for tests
         // Be careful to diverge here; easy to forget and hard to find JNI problems
-        ob_native_version = objectboxVersionNumber + (objectboxVersionRelease? "": "-dev-SNAPSHOT")
-
+        def nativeVersion = objectboxVersionNumber + (objectboxVersionRelease? "": "-dev-SNAPSHOT")
         def osName = System.getProperty("os.name").toLowerCase()
-        objectboxPlatform = osName.contains('linux') ? 'linux'
+        def objectboxPlatform = osName.contains('linux') ? 'linux'
                 : osName.contains("windows")? 'windows'
                 : osName.contains("mac")? 'macos'
                 : 'unsupported'
+        ob_native_dep = "io.objectbox:objectbox-$objectboxPlatform:$nativeVersion"
 
-        objectboxNativeDependency = "io.objectbox:objectbox-$objectboxPlatform:$ob_native_version"
-        println "ObjectBox native dependency: $objectboxNativeDependency"
+        junit_version = '4.13'
+
+        println "version=$ob_version"
+        println "objectboxNativeDependency=$ob_native_dep"
     }
-    ext.junit_version = '4.13'
 
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.0.5"
     }
 }
 
 allprojects {
+    group = 'io.objectbox'
+    version = ob_version
+
     repositories {
         mavenCentral()
         jcenter()
@@ -95,10 +100,12 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                     
                     if (preferredRepo == 'local') {
                         repository url: repositories.mavenLocal().url
-                    } else if (preferredRepo != null 
+                        println "Uploading archives to mavenLocal()."
+                    } else if (preferredRepo != null
                             && project.hasProperty('preferredUsername') 
                             && project.hasProperty('preferredPassword')) {
                         configuration = configurations.deployerJars
+
                         // replace placeholders
                         def repositoryUrl = preferredRepo
                                 .replace('__groupId__', project.group)
@@ -106,23 +113,28 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                         repository(url: repositoryUrl) {
                             authentication(userName: preferredUsername, password: preferredPassword)
                         }
-                    } else if (project.hasProperty('sonatypeUsername') 
+
+                        println "Uploading archives to $repositoryUrl."
+                    } else if (project.hasProperty('sonatypeUsername')
                             && project.hasProperty('sonatypePassword')) {
                         beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
                         def isSnapshot = version.endsWith('-SNAPSHOT')
-                        def sonatypeRepositoryUrl = isSnapshot ?
-                                "https://oss.sonatype.org/content/repositories/snapshots/"
+                        def sonatypeRepositoryUrl = isSnapshot
+                                ? "https://oss.sonatype.org/content/repositories/snapshots/"
                                 : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
                         repository(url: sonatypeRepositoryUrl) {
                             authentication(userName: sonatypeUsername, password: sonatypePassword)
                         }
+
+                        println "Uploading archives to $sonatypeRepositoryUrl."
                     } else {
-                        println "Deployment settings missing/incomplete for ${project.name}."
+                        println "WARNING: preferredRepo NOT set, can not upload archives."
                     }
 
                     pom.project {
                         packaging 'jar'
-                        url 'http://objectbox.io'
+                        url 'https://objectbox.io'
 
                         scm {
                             url 'https://github.com/objectbox/objectbox-java'
@@ -144,42 +156,12 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
 
                         organization {
                             name 'ObjectBox Ltd.'
-                            url 'http://objectbox.io'
+                            url 'https://objectbox.io'
                         }
                     }
                 }
             }
         }
-    }
-}
-
-// this task is also used by the composite build ('objectbox-deploy'), check before making changes
-task installAll {
-    group 'deploy'
-    dependsOn ':objectbox-java-api:install'
-    dependsOn ':objectbox-java:install'
-    dependsOn ':objectbox-kotlin:install'
-    dependsOn ':objectbox-rxjava:install'
-    doLast {
-        println("Installed version $version")
-    }
-}
-
-// this task is also used by the composite build ('objectbox-deploy'), check before making changes
-task deployAll {
-    group 'deploy'
-    dependsOn ':objectbox-java-api:uploadArchives'
-    dependsOn ':objectbox-java:uploadArchives'
-    dependsOn ':objectbox-kotlin:uploadArchives'
-    dependsOn ':objectbox-rxjava:uploadArchives'
-}
-
-// this task is also used by the composite build ('objectbox-deploy'), check before making changes
-task verifyVersion {
-    group 'verify'
-    dependsOn ':objectbox-java:verifyVersion'
-    doLast {
-        assert ob_expected_version == version
     }
 }
 

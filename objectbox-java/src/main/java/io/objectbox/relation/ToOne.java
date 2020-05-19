@@ -44,11 +44,11 @@ public class ToOne<TARGET> implements Serializable {
     private static final long serialVersionUID = 5092547044335989281L;
 
     private final Object entity;
-    private final RelationInfo relationInfo;
+    private final RelationInfo<Object, TARGET> relationInfo;
     private final boolean virtualProperty;
 
     transient private BoxStore boxStore;
-    transient private Box entityBox;
+    transient private Box<Object> entityBox;
     transient private volatile Box<TARGET> targetBox;
     transient private Field targetIdField;
 
@@ -71,7 +71,8 @@ public class ToOne<TARGET> implements Serializable {
      * @param sourceEntity The source entity that owns the to-one relation.
      * @param relationInfo Meta info as generated in the Entity_ (entity name plus underscore) classes.
      */
-    public ToOne(Object sourceEntity, RelationInfo relationInfo) {
+    @SuppressWarnings("unchecked") // RelationInfo cast: ? is at least Object.
+    public ToOne(Object sourceEntity, RelationInfo<?, TARGET> relationInfo) {
         if (sourceEntity == null) {
             throw new IllegalArgumentException("No source entity given (null)");
         }
@@ -79,7 +80,7 @@ public class ToOne<TARGET> implements Serializable {
             throw new IllegalArgumentException("No relation info given (null)");
         }
         this.entity = sourceEntity;
-        this.relationInfo = relationInfo;
+        this.relationInfo = (RelationInfo<Object, TARGET>) relationInfo;
         virtualProperty = relationInfo.targetIdProperty.isVirtual;
     }
 
@@ -128,7 +129,6 @@ public class ToOne<TARGET> implements Serializable {
                 throw new RuntimeException(e);
             }
             entityBox = boxStore.boxFor(relationInfo.sourceInfo.getEntityClass());
-            //noinspection unchecked
             targetBox = boxStore.boxFor(relationInfo.targetInfo.getEntityClass());
         }
     }
@@ -235,13 +235,10 @@ public class ToOne<TARGET> implements Serializable {
     public void setAndPutTargetAlways(@Nullable final TARGET target) {
         ensureBoxes(target);
         if (target != null) {
-            boxStore.runInTx(new Runnable() {
-                @Override
-                public void run() {
-                    long targetKey = targetBox.put(target);
-                    setResolvedTarget(target, targetKey);
-                    entityBox.put(entity);
-                }
+            boxStore.runInTx(() -> {
+                long targetKey = targetBox.put(target);
+                setResolvedTarget(target, targetKey);
+                entityBox.put(entity);
             });
         } else {
             setTargetId(0);

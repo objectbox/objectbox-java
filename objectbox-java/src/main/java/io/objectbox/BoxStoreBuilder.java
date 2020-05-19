@@ -22,11 +22,9 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,9 +90,9 @@ public class BoxStoreBuilder {
 
     int queryAttempts;
 
-    TxCallback failedReadTxAttemptCallback;
+    TxCallback<?> failedReadTxAttemptCallback;
 
-    final List<EntityInfo> entityInfoList = new ArrayList<>();
+    final List<EntityInfo<?>> entityInfoList = new ArrayList<>();
     private Factory<InputStream> initialDbFileFactory;
 
     /** Not for application use. */
@@ -106,8 +104,8 @@ public class BoxStoreBuilder {
         model = null;
     }
 
-    @Internal
     /** Called internally from the generated class "MyObjectBox". Check MyObjectBox.builder() to get an instance. */
+    @Internal
     public BoxStoreBuilder(byte[] model) {
         this.model = model;
         if (model == null) {
@@ -176,6 +174,7 @@ public class BoxStoreBuilder {
      * Alternatively, you can also use {@link #baseDirectory} or {@link #directory(File)} instead.
      */
     public BoxStoreBuilder androidContext(Object context) {
+        //noinspection ConstantConditions Annotation does not enforce non-null.
         if (context == null) {
             throw new NullPointerException("Context may not be null");
         }
@@ -213,6 +212,7 @@ public class BoxStoreBuilder {
         if (context == null) {
             throw new IllegalArgumentException("Set a Context using androidContext(context) first");
         }
+        //noinspection ConstantConditions Annotation does not enforce non-null.
         if (reLinkerInstance == null) {
             throw new NullPointerException("ReLinkerInstance may not be null");
         }
@@ -274,7 +274,7 @@ public class BoxStoreBuilder {
     }
 
     @Internal
-    public void entity(EntityInfo entityInfo) {
+    public void entity(EntityInfo<?> entityInfo) {
         entityInfoList.add(entityInfo);
     }
 
@@ -297,8 +297,10 @@ public class BoxStoreBuilder {
         return this;
     }
 
+    /**
+     * @deprecated Use {@link #debugFlags} instead.
+     */
     @Deprecated
-    /** @deprecated Use {@link #debugFlags} instead. */
     public BoxStoreBuilder debugTransactions() {
         this.debugFlags |= DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE;
         return this;
@@ -343,7 +345,7 @@ public class BoxStoreBuilder {
      * Useful for e.g. logging.
      */
     @Experimental
-    public BoxStoreBuilder failedReadTxAttemptCallback(TxCallback failedReadTxAttemptCallback) {
+    public BoxStoreBuilder failedReadTxAttemptCallback(TxCallback<?> failedReadTxAttemptCallback) {
         this.failedReadTxAttemptCallback = failedReadTxAttemptCallback;
         return this;
     }
@@ -353,12 +355,7 @@ public class BoxStoreBuilder {
      */
     @Experimental
     public BoxStoreBuilder initialDbFile(final File initialDbFile) {
-        return initialDbFile(new Factory<InputStream>() {
-            @Override
-            public InputStream provide() throws FileNotFoundException {
-                return new FileInputStream(initialDbFile);
-            }
-        });
+        return initialDbFile(() -> new FileInputStream(initialDbFile));
     }
 
     /**

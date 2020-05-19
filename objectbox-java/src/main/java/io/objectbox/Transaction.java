@@ -56,7 +56,7 @@ public class Transaction implements Closeable {
 
     native long nativeCreateKeyValueCursor(long transaction);
 
-    native long nativeCreateCursor(long transaction, String entityName, Class entityClass);
+    native long nativeCreateCursor(long transaction, String entityName, Class<?> entityClass);
 
     // native long nativeGetStore(long transaction);
 
@@ -180,7 +180,7 @@ public class Transaction implements Closeable {
 
     public <T> Cursor<T> createCursor(Class<T> entityClass) {
         checkOpen();
-        EntityInfo entityInfo = store.getEntityInfo(entityClass);
+        EntityInfo<T> entityInfo = store.getEntityInfo(entityClass);
         CursorFactory<T> factory = entityInfo.getCursorFactory();
         long cursorHandle = nativeCreateCursor(transaction, entityInfo.getDbName(), entityClass);
         return factory.createCursor(this, cursorHandle, store);

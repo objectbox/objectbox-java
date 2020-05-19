@@ -38,22 +38,22 @@ public class RelationInfo<SOURCE, TARGET> implements Serializable {
     public final EntityInfo<TARGET> targetInfo;
 
     /** For relations based on a target ID property (null otherwise). */
-    public final Property targetIdProperty;
+    public final Property<?> targetIdProperty;
 
     /** For ToMany relations based on ToMany backlinks (0 otherwise). */
     public final int targetRelationId;
 
     /** Only set for ToOne relations */
-    public final ToOneGetter<TARGET> toOneGetter;
+    public final ToOneGetter<SOURCE> toOneGetter;
 
     /** Only set for ToMany relations */
-    public final ToManyGetter<TARGET> toManyGetter;
+    public final ToManyGetter<SOURCE> toManyGetter;
 
     /** For ToMany relations based on ToOne backlinks (null otherwise). */
-    public final ToOneGetter<SOURCE> backlinkToOneGetter;
+    public final ToOneGetter<TARGET> backlinkToOneGetter;
 
     /** For ToMany relations based on ToMany backlinks (null otherwise). */
-    public final ToManyGetter<SOURCE> backlinkToManyGetter;
+    public final ToManyGetter<TARGET> backlinkToManyGetter;
 
     /** For stand-alone to-many relations (0 otherwise). */
     public final int relationId;
@@ -61,8 +61,8 @@ public class RelationInfo<SOURCE, TARGET> implements Serializable {
     /**
      * ToOne
      */
-    public RelationInfo(EntityInfo<SOURCE> sourceInfo, EntityInfo<TARGET> targetInfo, Property targetIdProperty,
-                        ToOneGetter toOneGetter) {
+    public RelationInfo(EntityInfo<SOURCE> sourceInfo, EntityInfo<TARGET> targetInfo, Property<SOURCE> targetIdProperty,
+                        ToOneGetter<SOURCE> toOneGetter) {
         this.sourceInfo = sourceInfo;
         this.targetInfo = targetInfo;
         this.targetIdProperty = targetIdProperty;
@@ -77,8 +77,8 @@ public class RelationInfo<SOURCE, TARGET> implements Serializable {
     /**
      * ToMany as a ToOne backlink
      */
-    public RelationInfo(EntityInfo<SOURCE> sourceInfo, EntityInfo<TARGET> targetInfo, ToManyGetter toManyGetter,
-                        Property targetIdProperty, ToOneGetter backlinkToOneGetter) {
+    public RelationInfo(EntityInfo<SOURCE> sourceInfo, EntityInfo<TARGET> targetInfo, ToManyGetter<SOURCE> toManyGetter,
+                        Property<TARGET> targetIdProperty, ToOneGetter<TARGET> backlinkToOneGetter) {
         this.sourceInfo = sourceInfo;
         this.targetInfo = targetInfo;
         this.targetIdProperty = targetIdProperty;
@@ -93,8 +93,8 @@ public class RelationInfo<SOURCE, TARGET> implements Serializable {
     /**
      * ToMany as a ToMany backlink
      */
-    public RelationInfo(EntityInfo<SOURCE> sourceInfo, EntityInfo<TARGET> targetInfo, ToManyGetter toManyGetter,
-            ToManyGetter backlinkToManyGetter, int targetRelationId) {
+    public RelationInfo(EntityInfo<SOURCE> sourceInfo, EntityInfo<TARGET> targetInfo, ToManyGetter<SOURCE> toManyGetter,
+            ToManyGetter<TARGET> backlinkToManyGetter, int targetRelationId) {
         this.sourceInfo = sourceInfo;
         this.targetInfo = targetInfo;
         this.toManyGetter = toManyGetter;
@@ -109,7 +109,7 @@ public class RelationInfo<SOURCE, TARGET> implements Serializable {
     /**
      * Stand-alone ToMany.
      */
-    public RelationInfo(EntityInfo<SOURCE> sourceInfo, EntityInfo<TARGET> targetInfo, ToManyGetter toManyGetter,
+    public RelationInfo(EntityInfo<SOURCE> sourceInfo, EntityInfo<TARGET> targetInfo, ToManyGetter<SOURCE> toManyGetter,
                         int relationId) {
         this.sourceInfo = sourceInfo;
         this.targetInfo = targetInfo;

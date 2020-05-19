@@ -61,7 +61,6 @@ import static java.lang.Boolean.TRUE;
  *
  * @param <TARGET> Object type (entity).
  */
-@SuppressWarnings("unchecked")
 public class ToMany<TARGET> implements List<TARGET>, Serializable {
     private static final long serialVersionUID = 2367317778240689006L;
     private final static Integer ONE = Integer.valueOf(1);
@@ -85,15 +84,18 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     List<TARGET> entitiesToRemoveFromDb;
 
     transient private BoxStore boxStore;
-    transient private Box entityBox;
+    transient private Box<Object> entityBox;
     transient private volatile Box<TARGET> targetBox;
     transient private boolean removeFromTargetBox;
     transient private Comparator<TARGET> comparator;
 
-    public ToMany(Object sourceEntity, RelationInfo<? extends Object, TARGET> relationInfo) {
+    @SuppressWarnings("unchecked") // RelationInfo cast: ? is at least Object.
+    public ToMany(Object sourceEntity, RelationInfo<?, TARGET> relationInfo) {
+        //noinspection ConstantConditions Annotation does not enforce non-null.
         if (sourceEntity == null) {
             throw new IllegalArgumentException("No source entity given (null)");
         }
+        //noinspection ConstantConditions Annotation does not enforce non-null.
         if (relationInfo == null) {
             throw new IllegalArgumentException("No relation info given (null)");
         }
@@ -104,6 +106,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     /** Currently only used for non-persisted entities (id == 0). */
     @Experimental
     public void setListFactory(ListFactory listFactory) {
+        //noinspection ConstantConditions Annotation does not enforce non-null.
         if (listFactory == null) {
             throw new IllegalArgumentException("ListFactory is null");
         }
@@ -292,12 +295,12 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             entitiesToClear.clear();
         }
 
-        Map setToClear = entitiesAdded;
+        Map<TARGET, Boolean> setToClear = entitiesAdded;
         if (setToClear != null) {
             setToClear.clear();
         }
 
-        Map entityCountsToClear = this.entityCounts;
+        Map<TARGET, Integer> entityCountsToClear = this.entityCounts;
         if (entityCountsToClear != null) {
             entityCountsToClear.clear();
         }
@@ -376,6 +379,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         return removed;
     }
 
+    @SuppressWarnings("unchecked") // Cast to TARGET: If removed, must be of type TARGET.
     @Override
     public synchronized boolean remove(Object object) {
         ensureEntitiesWithTrackingLists();
@@ -471,6 +475,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     @Nonnull
     public <T> T[] toArray(T[] array) {
         ensureEntities();
+        //noinspection SuspiciousToArrayCall Caller must pass T that is supertype of TARGET.
         return entities.toArray(array);
     }
 
@@ -553,13 +558,10 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         }
         if (internalCheckApplyToDbRequired()) {
             // We need a TX because we use two writers and both must use same TX (without: unchecked, SIGSEGV)
-            boxStore.runInTx(new Runnable() {
-                @Override
-                public void run() {
-                    Cursor sourceCursor = InternalAccess.getActiveTxCursor(entityBox);
-                    Cursor<TARGET> targetCursor = InternalAccess.getActiveTxCursor(targetBox);
-                    internalApplyToDb(sourceCursor, targetCursor);
-                }
+            boxStore.runInTx(() -> {
+                Cursor<Object> sourceCursor = InternalAccess.getActiveTxCursor(entityBox);
+                Cursor<TARGET> targetCursor = InternalAccess.getActiveTxCursor(targetBox);
+                internalApplyToDb(sourceCursor, targetCursor);
             });
         }
     }
@@ -572,9 +574,10 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
      */
     @Beta
     public boolean hasA(QueryFilter<TARGET> filter) {
-        Object[] objects = toArray();
-        for (Object target : objects) {
-            if (filter.keep((TARGET) target)) {
+        @SuppressWarnings("unchecked") // Can't toArray(new TARGET[0]).
+        TARGET[] objects = (TARGET[]) toArray();
+        for (TARGET target : objects) {
+            if (filter.keep(target)) {
                 return true;
             }
         }
@@ -589,12 +592,13 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
      */
     @Beta
     public boolean hasAll(QueryFilter<TARGET> filter) {
-        Object[] objects = toArray();
+        @SuppressWarnings("unchecked") // Can't toArray(new TARGET[0]).
+        TARGET[] objects = (TARGET[]) toArray();
         if (objects.length == 0) {
             return false;
         }
-        for (Object target : objects) {
-            if (!filter.keep((TARGET) target)) {
+        for (TARGET target : objects) {
+            if (!filter.keep(target)) {
                 return false;
             }
         }
@@ -605,12 +609,12 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     @Beta
     public TARGET getById(long id) {
         ensureEntities();
-        Object[] objects = entities.toArray();
+        @SuppressWarnings("unchecked") // Can't toArray(new TARGET[0]).
+        TARGET[] objects = (TARGET[]) entities.toArray();
         IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
-        for (Object target : objects) {
-            TARGET candidate = (TARGET) target;
-            if (idGetter.getId(candidate) == id) {
-                return candidate;
+        for (TARGET target : objects) {
+            if (idGetter.getId(target) == id) {
+                return target;
             }
         }
         return null;
@@ -620,12 +624,12 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     @Beta
     public int indexOfId(long id) {
         ensureEntities();
-        Object[] objects = entities.toArray();
+        @SuppressWarnings("unchecked") // Can't toArray(new TARGET[0]).
+        TARGET[] objects = (TARGET[]) entities.toArray();
         IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
         int index = 0;
-        for (Object target : objects) {
-            TARGET candidate = (TARGET) target;
-            if (idGetter.getId(candidate) == id) {
+        for (TARGET target : objects) {
+            if (idGetter.getId(target) == id) {
                 return index;
             }
             index++;
@@ -690,7 +694,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     private boolean prepareToManyBacklinkEntitiesForDb(long entityId, IdGetter<TARGET> idGetter,
             @Nullable Map<TARGET, Boolean> setAdded, @Nullable Map<TARGET, Boolean> setRemoved) {
-        ToManyGetter backlinkToManyGetter = relationInfo.backlinkToManyGetter;
+        ToManyGetter<TARGET> backlinkToManyGetter = relationInfo.backlinkToManyGetter;
 
         synchronized (this) {
             if (setAdded != null && !setAdded.isEmpty()) {
@@ -734,7 +738,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     private boolean prepareToOneBacklinkEntitiesForDb(long entityId, IdGetter<TARGET> idGetter,
             @Nullable Map<TARGET, Boolean> setAdded, @Nullable Map<TARGET, Boolean> setRemoved) {
-        ToOneGetter backlinkToOneGetter = relationInfo.backlinkToOneGetter;
+        ToOneGetter<TARGET> backlinkToOneGetter = relationInfo.backlinkToOneGetter;
 
         synchronized (this) {
             if (setAdded != null && !setAdded.isEmpty()) {
@@ -781,8 +785,9 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
      * For internal use only; do not use in your app.
      * Convention: {@link #internalCheckApplyToDbRequired()} must be called before this call as it prepares .
      */
+    @SuppressWarnings("unchecked") // Can't toArray(new TARGET[0]).
     @Internal
-    public void internalApplyToDb(Cursor sourceCursor, Cursor<TARGET> targetCursor) {
+    public void internalApplyToDb(Cursor<?> sourceCursor, Cursor<TARGET> targetCursor) {
         TARGET[] toRemoveFromDb;
         TARGET[] toPut;
         TARGET[] addedStandalone = null;
@@ -840,7 +845,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
                 removeStandaloneRelations(sourceCursor, entityId, removedStandalone, targetIdGetter);
             }
             if (addedStandalone != null) {
-                addStandaloneRelations(sourceCursor, entityId, addedStandalone, targetIdGetter, false);
+                addStandaloneRelations(sourceCursor, entityId, addedStandalone, targetIdGetter);
             }
         }
     }
@@ -848,7 +853,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     /**
      * The list of removed entities may contain non-persisted entities, which will be ignored (removed from the list).
      */
-    private void removeStandaloneRelations(Cursor cursor, long sourceEntityId, List<TARGET> removed,
+    private void removeStandaloneRelations(Cursor<?> cursor, long sourceEntityId, List<TARGET> removed,
                                            IdGetter<TARGET> targetIdGetter) {
         Iterator<TARGET> iterator = removed.iterator();
         while (iterator.hasNext()) {
@@ -868,8 +873,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     /** The target array may not contain non-persisted entities. */
-    private void addStandaloneRelations(Cursor cursor, long sourceEntityId, @Nullable TARGET[] added,
-                                        IdGetter<TARGET> targetIdGetter, boolean remove) {
+    private void addStandaloneRelations(Cursor<?> cursor, long sourceEntityId, TARGET[] added,
+                                        IdGetter<TARGET> targetIdGetter) {
         int length = added.length;
         long[] targetIds = new long[length];
         for (int i = 0; i < length; i++) {
@@ -880,7 +885,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             }
             targetIds[i] = targetId;
         }
-        cursor.modifyRelations(relationInfo.relationId, sourceEntityId, targetIds, remove);
+        cursor.modifyRelations(relationInfo.relationId, sourceEntityId, targetIds, false);
     }
 
     /** For tests */
