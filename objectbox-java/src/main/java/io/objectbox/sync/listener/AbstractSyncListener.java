@@ -27,6 +27,10 @@ public abstract class AbstractSyncListener implements SyncListener {
     }
 
     @Override
+    public void onServerTimeUpdate(long serverTimeNanos) {
+    }
+
+    @Override
     public void onDisconnected() {
     }
 }

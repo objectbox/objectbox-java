@@ -1,5 +1,6 @@
 package io.objectbox.sync;
 
+import io.objectbox.sync.listener.SyncTimeListener;
 import org.junit.Test;
 
 
@@ -114,6 +115,16 @@ public class ConnectivityMonitorTest {
         }
 
         @Override
+        public long getServerTimeNanos() {
+            return 0;
+        }
+
+        @Override
+        public long getServerTimeDiffNanos() {
+            return 0;
+        }
+
+        @Override
         public void setSyncLoginListener(@Nullable SyncLoginListener listener) {
         }
 
@@ -131,6 +142,10 @@ public class ConnectivityMonitorTest {
 
         @Override
         public void setSyncChangeListener(@Nullable SyncChangeListener listener) {
+        }
+
+        @Override
+        public void setSyncTimeListener(@Nullable SyncTimeListener timeListener) {
         }
 
         @Override
