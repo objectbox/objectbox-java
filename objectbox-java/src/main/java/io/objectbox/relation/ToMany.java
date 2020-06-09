@@ -68,14 +68,14 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     private final Object entity;
     private final RelationInfo<Object, TARGET> relationInfo;
 
-    private ListFactory listFactory;
+    private volatile ListFactory listFactory;
     private List<TARGET> entities;
 
     /** Counts of all entities in the list ({@link #entities}). */
     private Map<TARGET, Integer> entityCounts;
 
     /** Entities added since last put/sync. Map is used as a set (value is always Boolean.TRUE). */
-    private Map<TARGET, Boolean> entitiesAdded;
+    private volatile Map<TARGET, Boolean> entitiesAdded;
 
     /** Entities removed since last put/sync. Map is used as a set (value is always Boolean.TRUE). */
     private Map<TARGET, Boolean> entitiesRemoved;
@@ -129,14 +129,16 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     public ListFactory getListFactory() {
-        if (listFactory == null) {
+        ListFactory result = listFactory;
+        if (result == null) {
             synchronized (this) {
-                if (listFactory == null) {
-                    listFactory = new CopyOnWriteArrayListFactory();
+                result = listFactory;
+                if (result == null) {
+                    listFactory = result = new CopyOnWriteArrayListFactory();
                 }
             }
         }
-        return listFactory;
+        return result;
     }
 
     private void ensureBoxes() {

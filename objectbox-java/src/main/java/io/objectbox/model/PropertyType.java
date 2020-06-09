@@ -69,7 +69,8 @@ public final class PropertyType {
   public static final short DateVector = 31;
   public static final short DateNanoVector = 32;
 
-  public static final String[] names = { "Unknown", "Bool", "Byte", "Short", "Char", "Int", "Long", "Float", "Double", "String", "Date", "Relation", "DateNano", "Reserved2", "Reserved3", "Reserved4", "Reserved5", "Reserved6", "Reserved7", "Reserved8", "Reserved9", "Reserved10", "BoolVector", "ByteVector", "ShortVector", "CharVector", "IntVector", "LongVector", "FloatVector", "DoubleVector", "StringVector", "DateVector", "DateNanoVector", };
+  // Private to protect contents from getting modified.
+  private static final String[] names = { "Unknown", "Bool", "Byte", "Short", "Char", "Int", "Long", "Float", "Double", "String", "Date", "Relation", "DateNano", "Reserved2", "Reserved3", "Reserved4", "Reserved5", "Reserved6", "Reserved7", "Reserved8", "Reserved9", "Reserved10", "BoolVector", "ByteVector", "ShortVector", "CharVector", "IntVector", "LongVector", "FloatVector", "DoubleVector", "StringVector", "DateVector", "DateNanoVector", };
 
   public static String name(int e) { return names[e]; }
 }
