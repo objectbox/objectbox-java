@@ -15,7 +15,7 @@ public class Platform {
 
     public static Platform findPlatform() {
         // Android
-        Object contextInstance = BoxStore.context;
+        Object contextInstance = BoxStore.getContext();
         if (contextInstance != null) {
             Throwable throwable = null;
 
