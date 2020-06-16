@@ -16,6 +16,8 @@
 
 package io.objectbox.ideasonly;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class ModelModifier {
     public class EntityModifier {
         final String schemaName;
@@ -37,6 +39,7 @@ public class ModelModifier {
         }
     }
 
+    @SuppressFBWarnings // Class may be static, ignore as this is an idea only.
     public class PropertyModifier {
         final String name;
         final EntityModifier entityModifier;
