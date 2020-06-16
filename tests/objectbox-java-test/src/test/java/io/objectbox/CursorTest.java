@@ -261,6 +261,23 @@ public class CursorTest extends AbstractObjectBoxTest {
         transaction.close();
     }
 
+    @Test
+    public void testThrowInEntityConstructor() {
+        insertTestEntities(TestEntity.STRING_VALUE_THROW_IN_CONSTRUCTOR);
+
+        Transaction transaction = store.beginReadTx();
+        Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> cursor.get(1)
+        );
+        assertEquals(TestEntity.EXCEPTION_IN_CONSTRUCTOR_MESSAGE, exception.getMessage());
+
+        cursor.close();
+        transaction.close();
+    }
+
     private TestEntity putEntity(Cursor<TestEntity> cursor, String text, int number) {
         TestEntity entity = new TestEntity();
         entity.setSimpleString(text);

@@ -1,25 +1,24 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
-    compile project(':objectbox-java')
-    compile 'io.reactivex.rxjava2:rxjava:2.2.18'
+    api project(':objectbox-java')
+    api 'io.reactivex.rxjava2:rxjava:2.2.18'
 
-    testCompile "junit:junit:$junit_version"
-    // Mockito 3.x requires Java 8.
-    testCompile 'org.mockito:mockito-core:2.28.2'
+    testImplementation "junit:junit:$junit_version"
+    testImplementation "org.mockito:mockito-core:$mockito_version"
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier.set('javadoc')
     from 'build/docs/javadoc'
 }
 
 task sourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
     from sourceSets.main.allSource
-    classifier = 'sources'
 }
 
 artifacts {

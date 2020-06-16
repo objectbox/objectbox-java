@@ -19,6 +19,12 @@ package io.objectbox;
 /** In "real" entity would be annotated with @Entity. */
 public class TestEntity {
 
+    public static final String STRING_VALUE_THROW_IN_CONSTRUCTOR =
+            "Hey constructor, please throw an exception. Thank you!";
+
+    public static final String EXCEPTION_IN_CONSTRUCTOR_MESSAGE =
+            "Hello, this is an exception from TestEntity constructor";
+
     /** In "real" entity would be annotated with @Id. */
     private long id;
     private boolean simpleBoolean;
@@ -63,6 +69,9 @@ public class TestEntity {
         this.simpleShortU = simpleShortU;
         this.simpleIntU = simpleIntU;
         this.simpleLongU = simpleLongU;
+        if (STRING_VALUE_THROW_IN_CONSTRUCTOR.equals(simpleString)) {
+            throw new RuntimeException(EXCEPTION_IN_CONSTRUCTOR_MESSAGE);
+        }
     }
 
     public long getId() {

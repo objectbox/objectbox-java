@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ObjectBox Ltd. All rights reserved.
+ * Copyright 2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ public final class EntityFlags {
    */
   public static final int USE_NO_ARG_CONSTRUCTOR = 1;
 
-  public static final String[] names = { "USE_NO_ARG_CONSTRUCTOR", };
+  // Private to protect contents from getting modified.
+  private static final String[] names = { "USE_NO_ARG_CONSTRUCTOR", };
 
   public static String name(int e) { return names[e - USE_NO_ARG_CONSTRUCTOR]; }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ObjectBox Ltd. All rights reserved.
+ * Copyright 2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,14 @@ import com.google.flatbuffers.*;
 
 @SuppressWarnings("unused")
 public final class ModelProperty extends Table {
+  public static void ValidateVersion() { Constants.FLATBUFFERS_1_12_0(); }
   public static ModelProperty getRootAsModelProperty(ByteBuffer _bb) { return getRootAsModelProperty(_bb, new ModelProperty()); }
-  public static ModelProperty getRootAsModelProperty(ByteBuffer _bb, ModelProperty obj) { Constants.FLATBUFFERS_1_11_1(); _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
-  public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; vtable_start = bb_pos - bb.getInt(bb_pos); vtable_size = bb.getShort(vtable_start); }
+  public static ModelProperty getRootAsModelProperty(ByteBuffer _bb, ModelProperty obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+  public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }
   public ModelProperty __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public IdUid id() { return id(new IdUid()); }
-  public IdUid id(IdUid obj) { int o = __offset(4); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
+  public io.objectbox.model.IdUid id() { return id(new io.objectbox.model.IdUid()); }
+  public io.objectbox.model.IdUid id(io.objectbox.model.IdUid obj) { int o = __offset(4); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
   public String name() { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
   public ByteBuffer nameInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 6, 1); }
@@ -40,8 +41,8 @@ public final class ModelProperty extends Table {
    * bit flags: e.g. indexed, not-nullable
    */
   public long flags() { int o = __offset(10); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
-  public IdUid indexId() { return indexId(new IdUid()); }
-  public IdUid indexId(IdUid obj) { int o = __offset(12); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
+  public io.objectbox.model.IdUid indexId() { return indexId(new io.objectbox.model.IdUid()); }
+  public io.objectbox.model.IdUid indexId(io.objectbox.model.IdUid obj) { int o = __offset(12); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
   /**
    * For relations only: name of the target entity
    */
@@ -78,6 +79,13 @@ public final class ModelProperty extends Table {
   public static int endModelProperty(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
+  }
+
+  public static final class Vector extends BaseVector {
+    public Vector __assign(int _vector, int _element_size, ByteBuffer _bb) { __reset(_vector, _element_size, _bb); return this; }
+
+    public ModelProperty get(int j) { return get(new ModelProperty(), j); }
+    public ModelProperty get(ModelProperty obj, int j) {  return obj.__assign(__indirect(__element(j), bb), bb); }
   }
 }
 

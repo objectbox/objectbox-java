@@ -1,7 +1,7 @@
 buildscript {
     ext {
         // Typically, only edit those two:
-        def objectboxVersionNumber = '2.5.2' // without "-SNAPSHOT", e.g. '2.5.0' or '2.4.0-RC'
+        def objectboxVersionNumber = '2.6.0' // without "-SNAPSHOT", e.g. '2.5.0' or '2.4.0-RC'
         def objectboxVersionRelease = false  // set to true for releasing to ignore versionPostFix to avoid e.g. "-dev" versions
 
         // version post fix: '-<value>' or '' if not defined; e.g. used by CI to pass in branch name
@@ -20,6 +20,9 @@ buildscript {
         ob_native_dep = "io.objectbox:objectbox-$objectboxPlatform:$nativeVersion"
 
         junit_version = '4.13'
+        mockito_version = '3.3.3'
+        kotlin_version = '1.3.72'
+        dokka_version = '0.10.1'
 
         println "version=$ob_version"
         println "objectboxNativeDependency=$ob_native_dep"
@@ -34,6 +37,8 @@ buildscript {
     }
 
     dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
         classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.0.5"
     }
 }
@@ -64,8 +69,15 @@ def projectNamesToPublish = [
         'objectbox-java-api',
         'objectbox-java',
         'objectbox-kotlin',
-        'objectbox-rxjava'
+        'objectbox-rxjava',
+        'objectbox-rxjava3'
 ]
+
+def hasSigningProperties() {
+    return (project.hasProperty('signingKeyId')
+            && project.hasProperty('signingKeyFile')
+            && project.hasProperty('signingPassword'))
+}
 
 configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
     apply plugin: 'maven'
@@ -82,8 +94,9 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
     }
 
     signing {
-        if (project.hasProperty('signing.keyId') && project.hasProperty('signing.password') &&
-                project.hasProperty('signing.secretKeyRingFile')) {
+        if (hasSigningProperties()) {
+            String signingKey = new File(signingKeyFile).text
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
             sign configurations.archives
         } else {
             println "Signing information missing/incomplete for ${project.name}"
@@ -104,6 +117,10 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                     } else if (preferredRepo != null
                             && project.hasProperty('preferredUsername') 
                             && project.hasProperty('preferredPassword')) {
+                        if (!hasSigningProperties()) {
+                            throw new InvalidUserDataException("To upload to repo signing is required.")
+                        }
+
                         configuration = configurations.deployerJars
 
                         // replace placeholders
@@ -129,7 +146,7 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
 
                         println "Uploading archives to $sonatypeRepositoryUrl."
                     } else {
-                        println "WARNING: preferredRepo NOT set, can not upload archives."
+                        println "WARNING: preferredRepo or credentials NOT set, can not upload archives."
                     }
 
                     pom.project {

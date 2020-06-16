@@ -62,18 +62,30 @@ import io.objectbox.reactive.SubscriptionBuilder;
 public class BoxStore implements Closeable {
 
     /** On Android used for native library loading. */
-    @Nullable public static Object context;
-    @Nullable public static Object relinker;
+    @Nullable private static Object context;
+    @Nullable private static Object relinker;
 
     /** Change so ReLinker will update native library when using workaround loading. */
-    public static final String JNI_VERSION = "2.5.1";
+    public static final String JNI_VERSION = "2.6.0-RC";
 
-    private static final String VERSION = "2.5.2-2020-02-10";
+    private static final String VERSION = "2.6.0-2020-04-30";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
     private static final Set<String> openFiles = new HashSet<>();
     private static volatile Thread openFilesCheckerThread;
+
+    @Nullable
+    @Internal
+    public static synchronized Object getContext() {
+        return context;
+    }
+
+    @Nullable
+    @Internal
+    public static synchronized Object getRelinker() {
+        return relinker;
+    }
 
     /**
      * Convenience singleton instance which gets set up using {@link BoxStoreBuilder#buildDefault()}.
@@ -304,16 +316,19 @@ public class BoxStore implements Closeable {
         synchronized (openFiles) {
             if (!openFiles.contains(canonicalPath)) return false;
         }
-        if (openFilesCheckerThread == null || !openFilesCheckerThread.isAlive()) {
+        Thread checkerThread = BoxStore.openFilesCheckerThread;
+        if (checkerThread == null || !checkerThread.isAlive()) {
             // Use a thread to avoid finalizers that block us
-            openFilesCheckerThread = new Thread(() -> {
+            checkerThread = new Thread(() -> {
                 isFileOpenSync(canonicalPath, true);
-                openFilesCheckerThread = null; // Clean ref to itself
+                BoxStore.openFilesCheckerThread = null; // Clean ref to itself
             });
-            openFilesCheckerThread.setDaemon(true);
-            openFilesCheckerThread.start();
+            checkerThread.setDaemon(true);
+
+            BoxStore.openFilesCheckerThread = checkerThread;
+            checkerThread.start();
             try {
-                openFilesCheckerThread.join(500);
+                checkerThread.join(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
