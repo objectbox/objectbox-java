@@ -4,6 +4,7 @@ import io.objectbox.flatbuffers.ArrayReadWriteBuf;
 import io.objectbox.flatbuffers.FlexBuffers;
 import io.objectbox.flatbuffers.FlexBuffersBuilder;
 
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,9 +14,12 @@ import java.util.Map.Entry;
 
 /**
  * Converts between {@link Map} properties and byte arrays using FlexBuffers.
- *
+ * <p>
  * All keys must have the same type (see {@link #convertToKey(String)}),
  * value types are limited to those supported by FlexBuffers.
+ * <p>
+ * If any item requires 64 bits for storage in the FlexBuffers Map/Vector (a large Long, a Double)
+ * all integers are restored as Long, otherwise Integer.
  */
 public abstract class FlexMapConverter implements PropertyConverter<Map<Object, Object>, byte[]> {
 
@@ -57,12 +61,11 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
                 builder.putString(key, (String) value);
             } else if (value instanceof Boolean) {
                 builder.putBoolean(key, (Boolean) value);
-            // FIXME When restoring, can't know if Integer or Long.
-//            } else if (value instanceof Integer) {
-//                builder.putInt(key, (Integer) value);
+            } else if (value instanceof Integer) {
+                builder.putInt(key, (Integer) value);
             } else if (value instanceof Long) {
                 builder.putInt(key, (Long) value);
-            // FIXME When restoring, can't know if Float or Double.
+                // FIXME When restoring, can't know if Float or Double.
 //            } else if (value instanceof Float) {
 //                builder.putFloat(key, (Float) value);
             } else if (value instanceof Double) {
@@ -92,12 +95,11 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
                 builder.putString((String) item);
             } else if (item instanceof Boolean) {
                 builder.putBoolean((Boolean) item);
-            // FIXME When restoring, can't know if Integer or Long.
-//            } else if (item instanceof Integer) {
-//                builder.putInt((Integer) item);
+            } else if (item instanceof Integer) {
+                builder.putInt((Integer) item);
             } else if (item instanceof Long) {
                 builder.putInt((Long) item);
-            // FIXME When restoring, can't know if Float or Double.
+                // FIXME When restoring, can't know if Float or Double.
 //            } else if (item instanceof Float) {
 //                builder.putFloat((Float) item);
             } else if (item instanceof Double) {
@@ -124,10 +126,27 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
 
     /**
      * Converts a FlexBuffers string map key to the Java map key (e.g. String to Integer).
-     *
+     * <p>
      * This required conversion restricts all keys (root and embedded maps) to the same type.
      */
     abstract Object convertToKey(String keyValue);
+
+    /**
+     * Returns the width in bytes stored in the private parentWidth field of FlexBuffers.Reference.
+     * Note: FlexBuffers stores all items in a map/vector using the size of the widest item. However,
+     * an item's size is only as wide as needed, e.g. a 64-bit integer (Java Long, 8 bytes) will be
+     * reduced to 1 byte if it does not exceed its value range.
+     */
+    private int getParentWidthInBytesOf(FlexBuffers.Reference reference) {
+        try {
+            Field parentWidthF = reference.getClass().getDeclaredField("parentWidth");
+            parentWidthF.setAccessible(true);
+            return (int) parentWidthF.get(reference);
+        } catch (Exception e) {
+            // If thrown, it is likely the FlexBuffers API has changed and the above should be updated.
+            throw new RuntimeException("FlexMapConverter could not determine FlexBuffers integer bit width.", e);
+        }
+    }
 
     private Map<Object, Object> buildMap(FlexBuffers.Map map) {
         // As recommended by docs, iterate keys and values vectors in parallel to avoid binary search of key vector.
@@ -148,9 +167,12 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
             } else if (value.isBoolean()) {
                 resultMap.put(key, value.asBoolean());
             } else if (value.isInt()) {
-                // FIXME Integer or Long?
-//                resultMap.put(key, value.asInt());
-                resultMap.put(key, value.asLong());
+                int parentWidthInBytes = getParentWidthInBytesOf(value);
+                if (parentWidthInBytes == 8) {
+                    resultMap.put(key, value.asLong());
+                } else {
+                    resultMap.put(key, value.asInt());
+                }
             } else if (value.isFloat()) {
                 // FIXME Float or Double? Reading Float as Double is destructive.
                 resultMap.put(key, value.asFloat());
@@ -169,6 +191,9 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
         int itemCount = vector.size();
         List<Object> list = new ArrayList<>(itemCount);
 
+        // FlexBuffers uses the byte width of the biggest item to size all items, so only need to check the first.
+        Integer parentWidthInBytes = null;
+
         for (int i = 0; i < itemCount; i++) {
             FlexBuffers.Reference item = vector.get(i);
             if (item.isMap()) {
@@ -180,9 +205,14 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
             } else if (item.isBoolean()) {
                 list.add(item.asBoolean());
             } else if (item.isInt()) {
-                // FIXME Integer or Long?
-//                list.add(item.asInt());
-                list.add(item.asLong());
+                if (parentWidthInBytes == null) {
+                    parentWidthInBytes = getParentWidthInBytesOf(item);
+                }
+                if (parentWidthInBytes == 8) {
+                    list.add(item.asLong());
+                } else {
+                    list.add(item.asInt());
+                }
             } else if (item.isFloat()) {
                 // FIXME Float or Double? Reading Float as Double is destructive.
                 list.add(item.asFloat());

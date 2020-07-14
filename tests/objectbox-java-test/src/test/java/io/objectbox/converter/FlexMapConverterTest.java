@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class FlexMapConverterTest {
 
@@ -42,11 +43,53 @@ public class FlexMapConverterTest {
 
         map.put("string", "Grüezi");
         map.put("boolean", true);
-//        map.put("integer", 1);
-        map.put("long", -2L);
+        map.put("long", 1L);
 //        map.put("float", 1.3f);
         map.put("double", -1.4d);
         convertAndBackThenAssert(map, converter);
+    }
+
+    /**
+     * If no item is wider than 32 bits, all integers are restored as Integer.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void keysString_valsIntegersBiggest32Bit_works() {
+        FlexMapConverter converter = new StringFlexMapConverter();
+        Map<String, Object> expected = new HashMap<>();
+
+        expected.put("integer-8bit", -1);
+        expected.put("integer-32bit", Integer.MAX_VALUE);
+        expected.put("long-8bit", -2L);
+        expected.put("long-32bit", (long) Integer.MIN_VALUE);
+
+        Map<String, Object> actual = convertAndBack(expected, converter);
+        
+        assertEquals(expected.size(), actual.size());
+        for (Object value : actual.values()) {
+            assertTrue(value instanceof Integer);
+        }
+    }
+
+    /**
+     * If at least one item is 64 bit wide, all integers are restored as Long.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void keysString_valsIntegersBiggest64Bit_works() {
+        FlexMapConverter converter = new StringFlexMapConverter();
+        Map<String, Object> expected = new HashMap<>();
+
+        expected.put("integer-8bit", -1);
+        expected.put("integer-32bit", Integer.MAX_VALUE);
+        expected.put("long-64bit", Integer.MAX_VALUE + 1L);
+
+        Map<String, Object> actual = convertAndBack(expected, converter);
+
+        assertEquals(expected.size(), actual.size());
+        for (Object value : actual.values()) {
+            assertTrue(value instanceof Long);
+        }
     }
 
     // Note: can't use assertEquals(map, map) as byte[] does not implement equals(obj).
@@ -124,7 +167,6 @@ public class FlexMapConverterTest {
         List<Object> embeddedList1 = new LinkedList<>();
         embeddedList1.add("Grüezi");
         embeddedList1.add(true);
-//        embeddedList1.add(1);
         embeddedList1.add(-2L);
 //        embeddedList1.add(1.3f);
         embeddedList1.add(-1.4d);
@@ -132,7 +174,6 @@ public class FlexMapConverterTest {
         List<Object> embeddedList2 = new LinkedList<>();
         embeddedList2.add("Grüezi");
         embeddedList2.add(true);
-//        embeddedList2.add(21);
         embeddedList2.add(-22L);
 //        embeddedList2.add(2.3f);
         embeddedList2.add(-2.4d);
