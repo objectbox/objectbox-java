@@ -67,31 +67,65 @@ public class QueryTest2 extends AbstractQueryTest {
         assertEquals(12, newResults.get(1).getSimpleInt());
     }
 
+    /**
+     * Combining conditions using and(cond) and or(cond) implicitly adds parentheses.
+     */
     @Test
-    public void parenthesesMatter() {
+    public void combiningAddsImplicitParentheses() {
         putTestEntity("Fry", 14);
         putTestEntity("Fry", 12);
         putTestEntity("Fry", 10);
 
         // Nested OR
-        // (EQ OR EQ) AND LESS
+        // (Sarah OR Fry) AND <12
+        List<TestEntity> resultsOr = box.query(
+                TestEntity_.simpleString.equal("Sarah")
+                        .or(
+                                TestEntity_.simpleString.equal("Fry")
+                        )
+                        .and(
+                                TestEntity_.simpleInt.less(12)
+                        )
+        ).build().find();
+        // <12 AND (Fry OR Sarah)
         List<TestEntity> resultsNestedOr = box.query(
-                TestEntity_.simpleString.equal("Fry")
-                        .or(TestEntity_.simpleString.equal("Sarah"))
-                        .and(TestEntity_.simpleInt.less(12))
+                TestEntity_.simpleInt.less(12)
+                        .and(
+                                TestEntity_.simpleString.equal("Fry")
+                                        .or(
+                                                TestEntity_.simpleString.equal("Sarah")
+                                        )
+                        )
         ).build().find();
         // Only the Fry age 10.
+        assertEquals(1, resultsOr.size());
         assertEquals(1, resultsNestedOr.size());
+        assertEquals(10, resultsOr.get(0).getSimpleInt());
         assertEquals(10, resultsNestedOr.get(0).getSimpleInt());
 
         // Nested AND
-        // EQ OR (EQ AND LESS)
+        // (<12 AND Sarah) OR Fry
+        List<TestEntity> resultsAnd = box.query(
+                TestEntity_.simpleInt.less(12)
+                        .and(
+                                TestEntity_.simpleString.equal("Sarah")
+                        )
+                        .or(
+                                TestEntity_.simpleString.equal("Fry")
+                        )
+        ).build().find();
+        // Fry OR (Sarah AND <12)
         List<TestEntity> resultsNestedAnd = box.query(
                 TestEntity_.simpleString.equal("Fry")
-                        .or(TestEntity_.simpleString.equal("Sarah")
-                                .and(TestEntity_.simpleInt.less(12)))
+                        .or(
+                                TestEntity_.simpleString.equal("Sarah")
+                                        .and(
+                                                TestEntity_.simpleInt.less(12)
+                                        )
+                        )
         ).build().find();
         // All three Fry's.
+        assertEquals(3, resultsAnd.size());
         assertEquals(3, resultsNestedAnd.size());
     }
 
