@@ -86,11 +86,10 @@ public final class PropertyFlags {
    */
   public static final int UNSIGNED = 8192;
   /**
-   * By defining an ID companion property, the entity type uses a special ID encoding scheme involving this property
-   * in addition to the ID.
+   * By defining an ID companion property, a special ID encoding scheme is activated involving this property.
    *
    * For Time Series IDs, a companion property of type Date or DateNano represents the exact timestamp.
-   * (Future idea: string hash IDs, with a String companion property to store the full string ID).
+   * (In the future, ID companion string properties may be added as another supported type).
    */
   public static final int ID_COMPANION = 16384;
 }

@@ -28,8 +28,7 @@ public final class EntityFlags {
    */
   public static final int USE_NO_ARG_CONSTRUCTOR = 1;
 
-  // Private to protect contents from getting modified.
-  private static final String[] names = { "USE_NO_ARG_CONSTRUCTOR", };
+  public static final String[] names = { "USE_NO_ARG_CONSTRUCTOR", };
 
   public static String name(int e) { return names[e - USE_NO_ARG_CONSTRUCTOR]; }
 }
