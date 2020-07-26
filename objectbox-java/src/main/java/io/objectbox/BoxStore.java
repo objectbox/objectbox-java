@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,12 @@ public class BoxStore implements Closeable {
      */
     public static native void testUnalignedMemoryAccess();
 
+    @Deprecated
     static native long nativeCreate(String directory, long maxDbSizeInKByte, int maxReaders, byte[] model);
+
+    static native long nativeCreateWithFlatOptions(byte[] options, byte[] model);
+
+    static native boolean nativeIsReadOnly(long store);
 
     static native void nativeDelete(long store);
 
@@ -165,6 +170,8 @@ public class BoxStore implements Closeable {
     static native String nativeStartObjectBrowser(long store, @Nullable String urlPath, int port);
 
     static native boolean nativeIsObjectBrowserAvailable();
+
+    native long nativeValidate(long store, long pageLimit, boolean checkLeafLevel);
 
     public static boolean isObjectBrowserAvailable() {
         NativeLibraryLoader.ensureLoaded();
