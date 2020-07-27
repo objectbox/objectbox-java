@@ -107,12 +107,13 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
     @Test
     public void readOnly() {
         // Create a database first.
-        builder = createBoxStoreBuilder(false);
+        byte[] model = createTestModel(false);
+        builder = new BoxStoreBuilder(model).directory(boxStoreDir);
         store = builder.build();
         store.close();
 
-        // Then open existing database as read-only.
-        builder = createBoxStoreBuilder(false);
+        // Then open database with same model as read-only.
+        builder = new BoxStoreBuilder(model).directory(boxStoreDir);
         builder.readOnly();
         store = builder.build();
 
