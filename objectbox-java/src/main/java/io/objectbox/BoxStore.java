@@ -281,6 +281,7 @@ public class BoxStore implements Closeable {
         // ...then build options.
         FlatStoreOptions.addDirectoryPath(fbb, directoryPathOffset);
         FlatStoreOptions.addMaxDbSizeInKByte(fbb, builder.maxSizeInKByte);
+        FlatStoreOptions.addFileMode(fbb, builder.fileMode);
         FlatStoreOptions.addMaxReaders(fbb, builder.maxReaders);
         int validateOnOpenMode = builder.validateOnOpenMode;
         if (validateOnOpenMode != 0) {

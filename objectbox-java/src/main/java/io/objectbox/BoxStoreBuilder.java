@@ -88,6 +88,8 @@ public class BoxStoreBuilder {
 
     boolean debugRelations;
 
+    long fileMode;
+
     int maxReaders;
 
     int queryAttempts;
@@ -264,6 +266,12 @@ public class BoxStoreBuilder {
             throw new IllegalStateException("Android files dir does not exist");
         }
         return filesDir;
+    }
+
+    // TODO Docs, validation.
+    public BoxStoreBuilder fileMode(long mode) {
+        this.fileMode = mode;
+        return this;
     }
 
     /**
