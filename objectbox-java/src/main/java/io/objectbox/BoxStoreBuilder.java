@@ -284,7 +284,6 @@ public class BoxStoreBuilder {
      * For highly concurrent setups (e.g. you are using ObjectBox on the server side) it may make sense to increase the
      * number.
      */
-
     public BoxStoreBuilder maxReaders(int maxReaders) {
         this.maxReaders = maxReaders;
         return this;
