@@ -215,4 +215,10 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         };
     }
 
+    @Test
+    public void validate() {
+        putTestEntities(10);
+        long validated = store.validate(0, true);
+        assertEquals(validated, 2);
+    }
 }

@@ -181,11 +181,6 @@ public class BoxStore implements Closeable {
 
     static native boolean nativeIsObjectBrowserAvailable();
 
-    /**
-     * Validates up to {@code pageLimit} pages of the store. Set {@code checkLeafLevel} to check leafs, too.
-     * Throws StorageException if validation fails.
-     * Throws DbFileCorruptException or DbPagesCorruptException if the DB is actually inconsistent (corrupt).
-     */
     native long nativeValidate(long store, long pageLimit, boolean checkLeafLevel);
 
     public static boolean isObjectBrowserAvailable() {
@@ -949,6 +944,19 @@ public class BoxStore implements Closeable {
      */
     public String diagnose() {
         return nativeDiagnose(handle);
+    }
+
+    /**
+     * Validates up to {@code pageLimit} pages of the store. Set {@code checkLeafLevel} to check leafs, too.
+     * Returns the number of pages validated.
+     * Throws StorageException if validation fails.
+     * Throws DbFileCorruptException or DbPagesCorruptException if the DB is actually inconsistent (corrupt).
+     */
+    public long validate(long pageLimit, boolean checkLeafLevel) {
+        if (pageLimit < 0) {
+            throw new IllegalArgumentException("pageLimit must be zero or positive");
+        }
+        return nativeValidate(handle, pageLimit, checkLeafLevel);
     }
 
     public int cleanStaleReadTransactions() {
