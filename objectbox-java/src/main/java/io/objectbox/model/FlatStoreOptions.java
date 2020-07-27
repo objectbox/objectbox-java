@@ -23,11 +23,11 @@ import java.lang.*;
 import java.util.*;
 import com.google.flatbuffers.*;
 
-@SuppressWarnings("unused")
 /**
  * Options to open a store with. Set only the values you want; defaults are used otherwise.
  * Reminder: enable "force defaults" in the FlatBuffers builder, e.g. to pass in booleans with value "false".
  */
+@SuppressWarnings("unused")
 public final class FlatStoreOptions extends Table {
   public static void ValidateVersion() { Constants.FLATBUFFERS_1_12_0(); }
   public static FlatStoreOptions getRootAsFlatStoreOptions(ByteBuffer _bb) { return getRootAsFlatStoreOptions(_bb, new FlatStoreOptions()); }
