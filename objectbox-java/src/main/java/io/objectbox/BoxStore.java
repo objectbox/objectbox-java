@@ -16,6 +16,8 @@
 
 package io.objectbox;
 
+import com.google.flatbuffers.FlatBufferBuilder;
+
 import org.greenrobot.essentials.collections.LongHashMap;
 
 import java.io.Closeable;
@@ -47,6 +49,7 @@ import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.DbSchemaException;
 import io.objectbox.internal.NativeLibraryLoader;
 import io.objectbox.internal.ObjectBoxThreadPool;
+import io.objectbox.model.FlatStoreOptions;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.SubscriptionBuilder;
@@ -237,7 +240,7 @@ public class BoxStore implements Closeable {
         canonicalPath = getCanonicalPath(directory);
         verifyNotAlreadyOpen(canonicalPath);
 
-        handle = nativeCreate(canonicalPath, builder.maxSizeInKByte, builder.maxReaders, builder.model);
+        handle = nativeCreateWithFlatOptions(buildFlatStoreOptions(builder, canonicalPath), builder.model);
         int debugFlags = builder.debugFlags;
         if (debugFlags != 0) {
             nativeSetDebugFlags(handle, debugFlags);
@@ -279,6 +282,27 @@ public class BoxStore implements Closeable {
 
         failedReadTxAttemptCallback = builder.failedReadTxAttemptCallback;
         queryAttempts = Math.max(builder.queryAttempts, 1);
+    }
+
+    private byte[] buildFlatStoreOptions(BoxStoreBuilder builder, String canonicalPath) {
+        FlatBufferBuilder fbb = new FlatBufferBuilder();
+
+        // Add non-integer values first...
+        int directoryPathOffset = fbb.createString(canonicalPath);
+
+        FlatStoreOptions.startFlatStoreOptions(fbb);
+
+        // ...then build options.
+        FlatStoreOptions.addDirectoryPath(fbb, directoryPathOffset);
+        // FlatStoreOptions.addModelBytes(fbb, modelBytesOffset); // TODO Use this instead of model param on JNI method?
+        FlatStoreOptions.addMaxDbSizeInKByte(fbb, builder.maxSizeInKByte);
+        FlatStoreOptions.addMaxReaders(fbb, builder.maxReaders);
+        // FlatStoreOptions.addDebugFlags(fbb, builder.debugFlags); // TODO Use this instead of nativeSetDebugFlags?
+        // TODO Add new values.
+
+        int offset = FlatStoreOptions.endFlatStoreOptions(fbb);
+        fbb.finish(offset);
+        return fbb.sizedByteArray();
     }
 
     static String getCanonicalPath(File directory) {
