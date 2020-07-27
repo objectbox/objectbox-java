@@ -94,6 +94,9 @@ public class BoxStoreBuilder {
 
     int queryAttempts;
 
+    /** For DebugCursor. */
+    boolean doNotReadSchema;
+
     boolean readOnly;
     boolean usePreviousCommit;
 
@@ -105,9 +108,12 @@ public class BoxStoreBuilder {
     final List<EntityInfo<?>> entityInfoList = new ArrayList<>();
     private Factory<InputStream> initialDbFileFactory;
 
-    /** Not for application use. */
+    /** Not for application use, for DebugCursor. */
+    @Internal
     public static BoxStoreBuilder createDebugWithoutModel() {
-        return new BoxStoreBuilder();
+        BoxStoreBuilder builder = new BoxStoreBuilder();
+        builder.doNotReadSchema = true;
+        return builder;
     }
 
     private BoxStoreBuilder() {

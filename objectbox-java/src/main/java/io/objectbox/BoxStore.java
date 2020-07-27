@@ -291,6 +291,7 @@ public class BoxStore implements Closeable {
                 FlatStoreOptions.addValidateOnOpenPageLimit(fbb, validateOnOpenPageLimit);
             }
         }
+        FlatStoreOptions.addReadSchema(fbb, !builder.doNotReadSchema);
         FlatStoreOptions.addUsePreviousCommit(fbb, builder.usePreviousCommit);
         FlatStoreOptions.addReadOnly(fbb, builder.readOnly);
         int debugFlags = builder.debugFlags;
