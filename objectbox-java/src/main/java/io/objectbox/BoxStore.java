@@ -136,11 +136,22 @@ public class BoxStore implements Closeable {
      */
     public static native void testUnalignedMemoryAccess();
 
+    /**
+     * @deprecated Use {@link #nativeCreateWithFlatOptions(byte[], byte[])} instead.
+     */
     @Deprecated
     static native long nativeCreate(String directory, long maxDbSizeInKByte, int maxReaders, byte[] model);
 
+    /**
+     * Creates a native BoxStore instance with FlatBuffer {@link io.objectbox.model.FlatStoreOptions} {@code options}
+     * and a {@link ModelBuilder} {@code model}. Returns the handle of the native store instance.
+     */
     static native long nativeCreateWithFlatOptions(byte[] options, byte[] model);
 
+    /**
+     * Returns whether the store was created using read-only mode.
+     * If true the schema is not updated and write transactions are not possible.
+     */
     static native boolean nativeIsReadOnly(long store);
 
     static native void nativeDelete(long store);
@@ -171,6 +182,11 @@ public class BoxStore implements Closeable {
 
     static native boolean nativeIsObjectBrowserAvailable();
 
+    /**
+     * Validates up to {@code pageLimit} pages of the store. Set {@code checkLeafLevel} to check leafs, too.
+     * Throws StorageException if validation fails.
+     * Throws DbFileCorruptException or DbPagesCorruptException if the DB is actually inconsistent (corrupt).
+     */
     native long nativeValidate(long store, long pageLimit, boolean checkLeafLevel);
 
     public static boolean isObjectBrowserAvailable() {
