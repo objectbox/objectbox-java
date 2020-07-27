@@ -151,10 +151,6 @@ public class BoxStore implements Closeable {
      */
     static native long nativeCreateWithFlatOptions(byte[] options, byte[] model);
 
-    /**
-     * Returns whether the store was created using read-only mode.
-     * If true the schema is not updated and write transactions are not possible.
-     */
     static native boolean nativeIsReadOnly(long store);
 
     static native void nativeDelete(long store);
@@ -286,6 +282,8 @@ public class BoxStore implements Closeable {
 
     private byte[] buildFlatStoreOptions(BoxStoreBuilder builder, String canonicalPath) {
         FlatBufferBuilder fbb = new FlatBufferBuilder();
+        // TODO Is forceDefaults required by JNI or not?
+        fbb.forceDefaults(true);
 
         // Add non-integer values first...
         int directoryPathOffset = fbb.createString(canonicalPath);
@@ -294,11 +292,19 @@ public class BoxStore implements Closeable {
 
         // ...then build options.
         FlatStoreOptions.addDirectoryPath(fbb, directoryPathOffset);
-        // FlatStoreOptions.addModelBytes(fbb, modelBytesOffset); // TODO Use this instead of model param on JNI method?
         FlatStoreOptions.addMaxDbSizeInKByte(fbb, builder.maxSizeInKByte);
         FlatStoreOptions.addMaxReaders(fbb, builder.maxReaders);
         // FlatStoreOptions.addDebugFlags(fbb, builder.debugFlags); // TODO Use this instead of nativeSetDebugFlags?
         // TODO Add new values.
+        FlatStoreOptions.addReadOnly(fbb, builder.readOnly);
+        FlatStoreOptions.addUsePreviousCommit(fbb, builder.usePreviousCommit);
+        FlatStoreOptions.addUsePreviousCommitOnValidationFailure(fbb, builder.usePreviousCommitOnValidationFailure);
+        if (builder.validateOnOpenMode != 0) {
+            FlatStoreOptions.addValidateOnOpen(fbb, builder.validateOnOpenMode);
+            if (builder.validateOnOpenPageLimit != 0) {
+                FlatStoreOptions.addValidateOnOpenPageLimit(fbb, builder.validateOnOpenPageLimit);
+            }
+        }
 
         int offset = FlatStoreOptions.endFlatStoreOptions(fbb);
         fbb.finish(offset);
@@ -481,6 +487,14 @@ public class BoxStore implements Closeable {
 
     public boolean isClosed() {
         return closed;
+    }
+
+    /**
+     * Whether the store was created using read-only mode.
+     * If true the schema is not updated and write transactions are not possible.
+     */
+    public boolean isReadOnly() {
+        return nativeIsReadOnly(handle);
     }
 
     /**

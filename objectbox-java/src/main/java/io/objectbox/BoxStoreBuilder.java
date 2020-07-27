@@ -37,6 +37,7 @@ import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 import io.objectbox.ideasonly.ModelUpdate;
+import io.objectbox.model.ValidateOnOpenMode;
 
 /**
  * Builds a {@link BoxStore} with optional configurations. The class is not initiated directly; use
@@ -90,6 +91,13 @@ public class BoxStoreBuilder {
     int maxReaders;
 
     int queryAttempts;
+
+    boolean readOnly;
+    boolean usePreviousCommit;
+    boolean usePreviousCommitOnValidationFailure;
+
+    int validateOnOpenMode;
+    long validateOnOpenPageLimit;
 
     TxCallback<?> failedReadTxAttemptCallback;
 
@@ -296,6 +304,85 @@ public class BoxStoreBuilder {
      */
     public BoxStoreBuilder maxSizeInKByte(long maxSizeInKByte) {
         this.maxSizeInKByte = maxSizeInKByte;
+        return this;
+    }
+
+    /**
+     * Open the store in read-only mode: no schema update, no write transactions.
+     * <p>
+     * It is recommended to use this with {@link #usePreviousCommit()} to ensure no data is lost.
+     */
+    public BoxStoreBuilder readOnly() {
+        this.readOnly = true;
+        return this;
+    }
+
+    /**
+     * Ignores the latest data snapshot (committed transaction state) and uses the previous snapshot instead.
+     * When used with care (e.g. backup the DB files first), this option may also recover data removed by the latest
+     * transaction.
+     * <p>
+     * It is recommended to use this with {@link #readOnly()} to ensure no data is lost.
+     */
+    public BoxStoreBuilder usePreviousCommit() {
+        if (usePreviousCommitOnValidationFailure) {
+            throw new IllegalStateException("Can not use together with usePreviousCommitOnValidationFailure()");
+        }
+        this.usePreviousCommit = true;
+        return this;
+    }
+
+    /**
+     * If consistency checks fail during opening the DB, ObjectBox
+     * automatically switches to the previous commit. This way, this constitutes
+     * an auto-recover mode from severe failures.
+     * <p>
+     * However, keep in mind that any consistency failure
+     * is an indication that something is very wrong with OS/hardware and thus you may possibly alert your users.
+     *
+     * @see #usePreviousCommit()
+     * @see #validateOnOpen(int)
+     */
+    public BoxStoreBuilder usePreviousCommitOnValidationFailure() {
+        if (usePreviousCommit) {
+            throw new IllegalStateException("Can not use together with usePreviousCommit()");
+        }
+        this.usePreviousCommitOnValidationFailure = true;
+        return this;
+    }
+
+    /**
+     * When a database is opened, ObjectBox can perform additional consistency checks on its database structure.
+     * Reliable file systems already guarantee consistency, so this is primarily meant to deal with unreliable
+     * OSes, file systems, or hardware.
+     * <p>
+     * Note: ObjectBox builds upon ACID storage, which already has strong consistency mechanisms in place.
+     *
+     * @param validateOnOpenMode One of {@link ValidateOnOpenMode}.
+     */
+    public BoxStoreBuilder validateOnOpen(int validateOnOpenMode) {
+        if (validateOnOpenMode < ValidateOnOpenMode.None || validateOnOpenMode > ValidateOnOpenMode.Full) {
+            throw new IllegalArgumentException("Must be one of ValidateOnOpenMode");
+        }
+        this.validateOnOpenMode = validateOnOpenMode;
+        return this;
+    }
+
+    /**
+     * To fine-tune {@link #validateOnOpen(int)}, you can specify a limit on how much data is looked at.
+     * This is measured in "pages" with a page typically holding 4000.
+     * Usually a low number (e.g. 1-20) is sufficient and does not impact startup performance significantly.
+     * <p>
+     * This can only be used with {@link ValidateOnOpenMode#Regular} and {@link ValidateOnOpenMode#WithLeaves}.
+     */
+    public BoxStoreBuilder validateOnOpenPageLimit(long limit) {
+        if (validateOnOpenMode != ValidateOnOpenMode.Regular && validateOnOpenMode != ValidateOnOpenMode.WithLeaves) {
+            throw new IllegalStateException("Must call validateOnOpen(mode) with mode Regular or WithLeaves first");
+        }
+        if (limit < 1) {
+            throw new IllegalArgumentException("limit must be positive");
+        }
+        this.validateOnOpenPageLimit = limit;
         return this;
     }
 

@@ -19,12 +19,9 @@ package io.objectbox;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.objectbox.exception.DbMaxReadersExceededException;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
@@ -107,4 +104,18 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
 //        assertEquals(DbMaxReadersExceededException.class, exHolder[0].getClass());
     }
 
+    @Test
+    public void readOnly() {
+        // Create a database first.
+        builder = createBoxStoreBuilder(false);
+        store = builder.build();
+        store.close();
+
+        // Then open existing database as read-only.
+        builder = createBoxStoreBuilder(false);
+        builder.readOnly();
+        store = builder.build();
+
+        assertTrue(store.isReadOnly());
+    }
 }
