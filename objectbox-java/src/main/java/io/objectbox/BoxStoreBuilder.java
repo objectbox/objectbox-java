@@ -94,7 +94,6 @@ public class BoxStoreBuilder {
 
     boolean readOnly;
     boolean usePreviousCommit;
-    boolean usePreviousCommitOnValidationFailure;
 
     int validateOnOpenMode;
     long validateOnOpenPageLimit;
@@ -325,29 +324,7 @@ public class BoxStoreBuilder {
      * It is recommended to use this with {@link #readOnly()} to ensure no data is lost.
      */
     public BoxStoreBuilder usePreviousCommit() {
-        if (usePreviousCommitOnValidationFailure) {
-            throw new IllegalStateException("Can not use together with usePreviousCommitOnValidationFailure()");
-        }
         this.usePreviousCommit = true;
-        return this;
-    }
-
-    /**
-     * If consistency checks fail during opening the DB, ObjectBox
-     * automatically switches to the previous commit. This way, this constitutes
-     * an auto-recover mode from severe failures.
-     * <p>
-     * However, keep in mind that any consistency failure
-     * is an indication that something is very wrong with OS/hardware and thus you may possibly alert your users.
-     *
-     * @see #usePreviousCommit()
-     * @see #validateOnOpen(int)
-     */
-    public BoxStoreBuilder usePreviousCommitOnValidationFailure() {
-        if (usePreviousCommit) {
-            throw new IllegalStateException("Can not use together with usePreviousCommit()");
-        }
-        this.usePreviousCommitOnValidationFailure = true;
         return this;
     }
 

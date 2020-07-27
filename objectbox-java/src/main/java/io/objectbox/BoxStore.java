@@ -140,12 +140,6 @@ public class BoxStore implements Closeable {
     public static native void testUnalignedMemoryAccess();
 
     /**
-     * @deprecated Use {@link #nativeCreateWithFlatOptions(byte[], byte[])} instead.
-     */
-    @Deprecated
-    static native long nativeCreate(String directory, long maxDbSizeInKByte, int maxReaders, byte[] model);
-
-    /**
      * Creates a native BoxStore instance with FlatBuffer {@link io.objectbox.model.FlatStoreOptions} {@code options}
      * and a {@link ModelBuilder} {@code model}. Returns the handle of the native store instance.
      */
@@ -234,7 +228,6 @@ public class BoxStore implements Closeable {
         handle = nativeCreateWithFlatOptions(buildFlatStoreOptions(builder, canonicalPath), builder.model);
         int debugFlags = builder.debugFlags;
         if (debugFlags != 0) {
-            nativeSetDebugFlags(handle, debugFlags);
             debugTxRead = (debugFlags & DebugFlags.LOG_TRANSACTIONS_READ) != 0;
             debugTxWrite = (debugFlags & DebugFlags.LOG_TRANSACTIONS_WRITE) != 0;
         } else {
@@ -289,16 +282,19 @@ public class BoxStore implements Closeable {
         FlatStoreOptions.addDirectoryPath(fbb, directoryPathOffset);
         FlatStoreOptions.addMaxDbSizeInKByte(fbb, builder.maxSizeInKByte);
         FlatStoreOptions.addMaxReaders(fbb, builder.maxReaders);
-        // FlatStoreOptions.addDebugFlags(fbb, builder.debugFlags); // TODO Use this instead of nativeSetDebugFlags?
-        // TODO Add new values.
-        FlatStoreOptions.addReadOnly(fbb, builder.readOnly);
-        FlatStoreOptions.addUsePreviousCommit(fbb, builder.usePreviousCommit);
-        FlatStoreOptions.addUsePreviousCommitOnValidationFailure(fbb, builder.usePreviousCommitOnValidationFailure);
-        if (builder.validateOnOpenMode != 0) {
-            FlatStoreOptions.addValidateOnOpen(fbb, builder.validateOnOpenMode);
-            if (builder.validateOnOpenPageLimit != 0) {
-                FlatStoreOptions.addValidateOnOpenPageLimit(fbb, builder.validateOnOpenPageLimit);
+        int validateOnOpenMode = builder.validateOnOpenMode;
+        if (validateOnOpenMode != 0) {
+            FlatStoreOptions.addValidateOnOpen(fbb, validateOnOpenMode);
+            long validateOnOpenPageLimit = builder.validateOnOpenPageLimit;
+            if (validateOnOpenPageLimit != 0) {
+                FlatStoreOptions.addValidateOnOpenPageLimit(fbb, validateOnOpenPageLimit);
             }
+        }
+        FlatStoreOptions.addUsePreviousCommit(fbb, builder.usePreviousCommit);
+        FlatStoreOptions.addReadOnly(fbb, builder.readOnly);
+        int debugFlags = builder.debugFlags;
+        if (debugFlags != 0) {
+            FlatStoreOptions.addDebugFlags(fbb, debugFlags);
         }
 
         int offset = FlatStoreOptions.endFlatStoreOptions(fbb);
