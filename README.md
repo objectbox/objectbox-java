@@ -72,7 +72,7 @@ Box<Playlist> box = boxStore.boxFor(Playlist.class);
 
 The `Box` object gives you access to all major functions, like `put`, `get`, `remove`, and `query`.
 
-For details please check the [docs](http://objectbox.io/documentation/).     
+For details please check the [docs](https://docs.objectbox.io).     
 
 Links
 -----
