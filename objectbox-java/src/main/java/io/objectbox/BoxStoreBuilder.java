@@ -274,7 +274,12 @@ public class BoxStoreBuilder {
         return filesDir;
     }
 
-    // TODO Docs, validation.
+    /**
+     * Specify
+     * <a href="https://en.wikipedia.org/wiki/File_system_permissions#Numeric_notation">unix-style file permissions</a>
+     * to use for the database directory and files.
+     * E.g. for {@code rw-rw-rw-} (owner, group, other) pass the octal code {@code 666}.
+     */
     public BoxStoreBuilder fileMode(long mode) {
         this.fileMode = mode;
         return this;
