@@ -217,8 +217,15 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void validate() {
-        putTestEntities(10);
+        putTestEntities(100);
+
+        // No limit.
         long validated = store.validate(0, true);
+        assertEquals(validated, 7);
+
+        // With limit.
+        validated = store.validate(1, true);
+        // 2 because the first page doesn't contain any actual data?
         assertEquals(validated, 2);
     }
 }
