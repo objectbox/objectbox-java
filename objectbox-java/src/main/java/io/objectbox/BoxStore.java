@@ -270,7 +270,7 @@ public class BoxStore implements Closeable {
 
     private byte[] buildFlatStoreOptions(BoxStoreBuilder builder, String canonicalPath) {
         FlatBufferBuilder fbb = new FlatBufferBuilder();
-        // TODO Is forceDefaults required by JNI or not?
+        // FlatBuffer default values are set in generated code, e.g. may be different from here, so always store value.
         fbb.forceDefaults(true);
 
         // Add non-integer values first...
