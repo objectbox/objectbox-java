@@ -333,6 +333,16 @@ public class BoxStore implements Closeable {
     }
 
     /**
+     * The size in bytes occupied by the data file on disk.
+     *
+     * @return 0 if the size could not be determined (does not throw unless this store was already closed)
+     */
+    public long sizeOnDisk() {
+        checkOpen();
+        return nativeSizeOnDisk(handle);
+    }
+
+    /**
      * Explicitly call {@link #close()} instead to avoid expensive finalization.
      */
     @SuppressWarnings("deprecation") // finalize()

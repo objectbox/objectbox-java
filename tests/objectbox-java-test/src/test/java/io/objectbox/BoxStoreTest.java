@@ -215,4 +215,10 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         };
     }
 
+    @Test
+    public void testSizeOnDisk() {
+        long size = store.sizeOnDisk();
+        assertTrue(size >= 8192);
+    }
+
 }
