@@ -102,7 +102,7 @@ public class BoxStoreBuilder {
     boolean readOnly;
     boolean usePreviousCommit;
 
-    int validateOnOpenMode;
+    short validateOnOpenMode;
     long validateOnOpenPageLimit;
 
     TxCallback<?> failedReadTxAttemptCallback;
@@ -357,7 +357,7 @@ public class BoxStoreBuilder {
      *
      * @param validateOnOpenMode One of {@link ValidateOnOpenMode}.
      */
-    public BoxStoreBuilder validateOnOpen(int validateOnOpenMode) {
+    public BoxStoreBuilder validateOnOpen(short validateOnOpenMode) {
         if (validateOnOpenMode < ValidateOnOpenMode.None || validateOnOpenMode > ValidateOnOpenMode.Full) {
             throw new IllegalArgumentException("Must be one of ValidateOnOpenMode");
         }
@@ -366,7 +366,7 @@ public class BoxStoreBuilder {
     }
 
     /**
-     * To fine-tune {@link #validateOnOpen(int)}, you can specify a limit on how much data is looked at.
+     * To fine-tune {@link #validateOnOpen(short)}, you can specify a limit on how much data is looked at.
      * This is measured in "pages" with a page typically holding 4000.
      * Usually a low number (e.g. 1-20) is sufficient and does not impact startup performance significantly.
      * <p>

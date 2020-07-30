@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package io.objectbox;
 
+import io.objectbox.model.ValidateOnOpenMode;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -23,6 +24,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNotNull;
 
 public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
 
@@ -35,7 +37,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
     }
 
     @Before
-    public void setUpBox() {
+    public void setUpBuilder() {
         BoxStore.clearDefaultStore();
         builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir);
     }
@@ -106,17 +108,39 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
 
     @Test
     public void readOnly() {
-        // Create a database first.
+        // Create a database first; we must create the model only once (ID/UID sequences would be different 2nd time)
         byte[] model = createTestModel(false);
         builder = new BoxStoreBuilder(model).directory(boxStoreDir);
         store = builder.build();
         store.close();
 
-        // Then open database with same model as read-only.
+        // Then re-open database with same model as read-only.
         builder = new BoxStoreBuilder(model).directory(boxStoreDir);
         builder.readOnly();
         store = builder.build();
 
         assertTrue(store.isReadOnly());
+    }
+
+    @Test
+    public void validateOnOpen() {
+        // Create a database first; we must create the model only once (ID/UID sequences would be different 2nd time)
+        byte[] model = createTestModel(false);
+        builder = new BoxStoreBuilder(model).directory(boxStoreDir);
+        builder.entity(new TestEntity_());
+        store = builder.build();
+
+        TestEntity object = new TestEntity(0);
+        object.setSimpleString("hello hello");
+        long id = getTestEntityBox().put(object);
+        store.close();
+
+        // Then re-open database with validation and ensure db is operational
+        builder = new BoxStoreBuilder(model).directory(boxStoreDir);
+        builder.entity(new TestEntity_());
+        builder.validateOnOpen(ValidateOnOpenMode.Full);
+        store = builder.build();
+        assertNotNull(getTestEntityBox().get(id));
+        getTestEntityBox().put(new TestEntity(0));
     }
 }

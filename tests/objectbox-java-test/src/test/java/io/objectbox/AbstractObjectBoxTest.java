@@ -58,6 +58,7 @@ public abstract class AbstractObjectBoxTest {
 
         // This works with Android without needing any context
         File tempFile = File.createTempFile("object-store-test", "");
+        //noinspection ResultOfMethodCallIgnored
         tempFile.delete();
         boxStoreDir = tempFile;
 
