@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class BoxStore implements Closeable {
     /** Change so ReLinker will update native library when using workaround loading. */
     public static final String JNI_VERSION = "2.6.0";
 
-    private static final String VERSION = "2.6.1-2020-06-09";
+    private static final String VERSION = "2.7.0-2020-07-30";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
@@ -136,7 +136,13 @@ public class BoxStore implements Closeable {
      */
     public static native void testUnalignedMemoryAccess();
 
-    static native long nativeCreate(String directory, long maxDbSizeInKByte, int maxReaders, byte[] model);
+    /**
+     * Creates a native BoxStore instance with FlatBuffer {@link io.objectbox.model.FlatStoreOptions} {@code options}
+     * and a {@link ModelBuilder} {@code model}. Returns the handle of the native store instance.
+     */
+    static native long nativeCreateWithFlatOptions(byte[] options, byte[] model);
+
+    static native boolean nativeIsReadOnly(long store);
 
     static native void nativeDelete(long store);
 
@@ -165,6 +171,10 @@ public class BoxStore implements Closeable {
     static native String nativeStartObjectBrowser(long store, @Nullable String urlPath, int port);
 
     static native boolean nativeIsObjectBrowserAvailable();
+
+    native long nativeSizeOnDisk(long store);
+
+    native long nativeValidate(long store, long pageLimit, boolean checkLeafLevel);
 
     public static boolean isObjectBrowserAvailable() {
         NativeLibraryLoader.ensureLoaded();
@@ -214,10 +224,9 @@ public class BoxStore implements Closeable {
         canonicalPath = getCanonicalPath(directory);
         verifyNotAlreadyOpen(canonicalPath);
 
-        handle = nativeCreate(canonicalPath, builder.maxSizeInKByte, builder.maxReaders, builder.model);
+        handle = nativeCreateWithFlatOptions(builder.buildFlatStoreOptions(canonicalPath), builder.model);
         int debugFlags = builder.debugFlags;
         if (debugFlags != 0) {
-            nativeSetDebugFlags(handle, debugFlags);
             debugTxRead = (debugFlags & DebugFlags.LOG_TRANSACTIONS_READ) != 0;
             debugTxWrite = (debugFlags & DebugFlags.LOG_TRANSACTIONS_WRITE) != 0;
         } else {
@@ -444,6 +453,14 @@ public class BoxStore implements Closeable {
 
     public boolean isClosed() {
         return closed;
+    }
+
+    /**
+     * Whether the store was created using read-only mode.
+     * If true the schema is not updated and write transactions are not possible.
+     */
+    public boolean isReadOnly() {
+        return nativeIsReadOnly(handle);
     }
 
     /**
@@ -898,6 +915,19 @@ public class BoxStore implements Closeable {
      */
     public String diagnose() {
         return nativeDiagnose(handle);
+    }
+
+    /**
+     * Validates up to {@code pageLimit} pages of the store. Set {@code checkLeafLevel} to check leafs, too.
+     * Returns the number of pages validated.
+     * Throws StorageException if validation fails.
+     * Throws DbFileCorruptException or DbPagesCorruptException if the DB is actually inconsistent (corrupt).
+     */
+    public long validate(long pageLimit, boolean checkLeafLevel) {
+        if (pageLimit < 0) {
+            throw new IllegalArgumentException("pageLimit must be zero or positive");
+        }
+        return nativeValidate(handle, pageLimit, checkLeafLevel);
     }
 
     public int cleanStaleReadTransactions() {

@@ -16,6 +16,8 @@
 
 package io.objectbox;
 
+import com.google.flatbuffers.FlatBufferBuilder;
+import io.objectbox.model.FlatStoreOptions;
 import org.greenrobot.essentials.io.IoUtils;
 
 import java.io.BufferedInputStream;
@@ -37,6 +39,7 @@ import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 import io.objectbox.ideasonly.ModelUpdate;
+import io.objectbox.model.ValidateOnOpenMode;
 
 /**
  * Builds a {@link BoxStore} with optional configurations. The class is not initiated directly; use
@@ -87,18 +90,32 @@ public class BoxStoreBuilder {
 
     boolean debugRelations;
 
+    long fileMode;
+
     int maxReaders;
 
     int queryAttempts;
+
+    /** For DebugCursor. */
+    boolean skipReadSchema;
+
+    boolean readOnly;
+    boolean usePreviousCommit;
+
+    short validateOnOpenMode;
+    long validateOnOpenPageLimit;
 
     TxCallback<?> failedReadTxAttemptCallback;
 
     final List<EntityInfo<?>> entityInfoList = new ArrayList<>();
     private Factory<InputStream> initialDbFileFactory;
 
-    /** Not for application use. */
+    /** Not for application use, for DebugCursor. */
+    @Internal
     public static BoxStoreBuilder createDebugWithoutModel() {
-        return new BoxStoreBuilder();
+        BoxStoreBuilder builder = new BoxStoreBuilder();
+        builder.skipReadSchema = true;
+        return builder;
     }
 
     private BoxStoreBuilder() {
@@ -260,6 +277,17 @@ public class BoxStoreBuilder {
     }
 
     /**
+     * Specify
+     * <a href="https://en.wikipedia.org/wiki/File_system_permissions#Numeric_notation">unix-style file permissions</a>
+     * to use for the database directory and files.
+     * E.g. for {@code rw-rw-rw-} (owner, group, other) pass the octal code {@code 666}.
+     */
+    public BoxStoreBuilder fileMode(long mode) {
+        this.fileMode = mode;
+        return this;
+    }
+
+    /**
      * Sets the maximum number of concurrent readers. For most applications, the default is fine (&gt; 100 readers).
      * <p>
      * A "reader" is short for a thread involved in a read transaction.
@@ -269,7 +297,6 @@ public class BoxStoreBuilder {
      * For highly concurrent setups (e.g. you are using ObjectBox on the server side) it may make sense to increase the
      * number.
      */
-
     public BoxStoreBuilder maxReaders(int maxReaders) {
         this.maxReaders = maxReaders;
         return this;
@@ -296,6 +323,63 @@ public class BoxStoreBuilder {
      */
     public BoxStoreBuilder maxSizeInKByte(long maxSizeInKByte) {
         this.maxSizeInKByte = maxSizeInKByte;
+        return this;
+    }
+
+    /**
+     * Open the store in read-only mode: no schema update, no write transactions.
+     * <p>
+     * It is recommended to use this with {@link #usePreviousCommit()} to ensure no data is lost.
+     */
+    public BoxStoreBuilder readOnly() {
+        this.readOnly = true;
+        return this;
+    }
+
+    /**
+     * Ignores the latest data snapshot (committed transaction state) and uses the previous snapshot instead.
+     * When used with care (e.g. backup the DB files first), this option may also recover data removed by the latest
+     * transaction.
+     * <p>
+     * It is recommended to use this with {@link #readOnly()} to ensure no data is lost.
+     */
+    public BoxStoreBuilder usePreviousCommit() {
+        this.usePreviousCommit = true;
+        return this;
+    }
+
+    /**
+     * When a database is opened, ObjectBox can perform additional consistency checks on its database structure.
+     * Reliable file systems already guarantee consistency, so this is primarily meant to deal with unreliable
+     * OSes, file systems, or hardware.
+     * <p>
+     * Note: ObjectBox builds upon ACID storage, which already has strong consistency mechanisms in place.
+     *
+     * @param validateOnOpenMode One of {@link ValidateOnOpenMode}.
+     */
+    public BoxStoreBuilder validateOnOpen(short validateOnOpenMode) {
+        if (validateOnOpenMode < ValidateOnOpenMode.None || validateOnOpenMode > ValidateOnOpenMode.Full) {
+            throw new IllegalArgumentException("Must be one of ValidateOnOpenMode");
+        }
+        this.validateOnOpenMode = validateOnOpenMode;
+        return this;
+    }
+
+    /**
+     * To fine-tune {@link #validateOnOpen(short)}, you can specify a limit on how much data is looked at.
+     * This is measured in "pages" with a page typically holding 4000.
+     * Usually a low number (e.g. 1-20) is sufficient and does not impact startup performance significantly.
+     * <p>
+     * This can only be used with {@link ValidateOnOpenMode#Regular} and {@link ValidateOnOpenMode#WithLeaves}.
+     */
+    public BoxStoreBuilder validateOnOpenPageLimit(long limit) {
+        if (validateOnOpenMode != ValidateOnOpenMode.Regular && validateOnOpenMode != ValidateOnOpenMode.WithLeaves) {
+            throw new IllegalStateException("Must call validateOnOpen(mode) with mode Regular or WithLeaves first");
+        }
+        if (limit < 1) {
+            throw new IllegalArgumentException("limit must be positive");
+        }
+        this.validateOnOpenPageLimit = limit;
         return this;
     }
 
@@ -369,6 +453,39 @@ public class BoxStoreBuilder {
         this.initialDbFileFactory = initialDbFileFactory;
         return this;
     }
+
+    byte[] buildFlatStoreOptions(String canonicalPath) {
+        FlatBufferBuilder fbb = new FlatBufferBuilder();
+        // FlatBuffer default values are set in generated code, e.g. may be different from here, so always store value.
+        fbb.forceDefaults(true);
+
+        // Add non-integer values first...
+        int directoryPathOffset = fbb.createString(canonicalPath);
+
+        FlatStoreOptions.startFlatStoreOptions(fbb);
+
+        // ...then build options.
+        FlatStoreOptions.addDirectoryPath(fbb, directoryPathOffset);
+        FlatStoreOptions.addMaxDbSizeInKByte(fbb, maxSizeInKByte);
+        FlatStoreOptions.addFileMode(fbb, fileMode);
+        FlatStoreOptions.addMaxReaders(fbb, maxReaders);
+        if (validateOnOpenMode != 0) {
+            FlatStoreOptions.addValidateOnOpen(fbb, validateOnOpenMode);
+            if (validateOnOpenPageLimit != 0) {
+                FlatStoreOptions.addValidateOnOpenPageLimit(fbb, validateOnOpenPageLimit);
+            }
+        }
+        if(skipReadSchema) FlatStoreOptions.addSkipReadSchema(fbb, skipReadSchema);
+        if(usePreviousCommit) FlatStoreOptions.addUsePreviousCommit(fbb, usePreviousCommit);
+        if(readOnly) FlatStoreOptions.addReadOnly(fbb, readOnly);
+        if (debugFlags != 0) {
+            FlatStoreOptions.addDebugFlags(fbb, debugFlags);
+        }
+
+        int offset = FlatStoreOptions.endFlatStoreOptions(fbb);
+        fbb.finish(offset);
+        return fbb.sizedByteArray();
+    }    
 
     /**
      * Builds a {@link BoxStore} using any given configuration.
