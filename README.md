@@ -1,16 +1,12 @@
 <img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png">
 
-# Do you ♥️ using ObjectBox?
 [![Follow ObjectBox on Twitter](https://img.shields.io/twitter/follow/ObjectBox_io.svg?style=flat-square&logo=twitter&color=fff)](https://twitter.com/ObjectBox_io)
-
-We want to [hear about your app](https://docs.google.com/forms/d/e/1FAIpQLScIYiOIThcq-AnDVoCvnZOMgxO4S-fBtDSFPQfWldJnhi2c7Q/viewform)!
-It will - literally - take just a minute, but help us a lot. Thank you!​ 🙏​
 
 # ObjectBox Java (Kotlin, Android)
 ObjectBox is a superfast object-oriented database with strong relation support.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
-**Latest version: [2.6.0 (2020/06/09)](https://docs.objectbox.io/#objectbox-changelog)**
+**Latest version: [2.7.0 (2020/07/30)](https://docs.objectbox.io/#objectbox-changelog)**
 
 Demo code using ObjectBox:
 
@@ -29,7 +25,7 @@ Besides JVM based languages like Java and Kotlin, ObjectBox also offers:
 * [ObjectBox Swift](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
 * [ObjectBox Dart/Flutter](https://github.com/objectbox/objectbox-dart): cross-plattform for mobile and desktop apps (beta) 
 * [ObjectBox Go](https://github.com/objectbox/objectbox-go): great for data-driven tools and small server applications 
-* [ObjectBox C API](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
+* [ObjectBox C and C++](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
 
 Gradle setup
 ------------
@@ -37,7 +33,7 @@ Add this to your root build.gradle (project level):
 
 ```groovy
 buildscript {
-    ext.objectboxVersion = '2.6.0'
+    ext.objectboxVersion = '2.7.0'
     dependencies {
         classpath "io.objectbox:objectbox-gradle-plugin:$objectboxVersion"
     }
@@ -88,6 +84,8 @@ We love to get your feedback
 Let us know how we are doing: [2 minute questionnaire](https://docs.google.com/forms/d/e/1FAIpQLSe_fq-FlBThK_96bkHv1oEDizoHwEu_b6M4FJkMv9V5q_Or9g/viewform?usp=sf_link).
 Thanks!
 
+Also, we want to [hear about your app](https://docs.google.com/forms/d/e/1FAIpQLScIYiOIThcq-AnDVoCvnZOMgxO4S-fBtDSFPQfWldJnhi2c7Q/viewform)!
+It will - literally - take just a minute, but help us a lot. Thank you!​ 🙏​
 
 License
 -------
