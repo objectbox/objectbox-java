@@ -16,10 +16,17 @@
 
 package io.objectbox;
 
+import io.objectbox.exception.FileCorruptException;
 import io.objectbox.model.ValidateOnOpenMode;
+import org.greenrobot.essentials.io.IoUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -142,5 +149,28 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         store = builder.build();
         assertNotNull(getTestEntityBox().get(id));
         getTestEntityBox().put(new TestEntity(0));
+    }
+
+
+    @Test(expected = FileCorruptException.class)
+    public void validateOnOpenCorruptFile() throws IOException {
+        File dir = prepareTempDir("object-store-test-corrupted");
+        assertTrue(dir.mkdir());
+        File badDataFile = new File(dir, "data.mdb");
+        try (InputStream badIn = getClass().getResourceAsStream("corrupt-pageno-in-branch-data.mdb")) {
+            try (FileOutputStream badOut = new FileOutputStream(badDataFile)) {
+                IoUtils.copyAllBytes(badIn, badOut);
+            }
+        }
+        builder = BoxStoreBuilder.createDebugWithoutModel().directory(dir);
+        builder.validateOnOpen(ValidateOnOpenMode.AllBranches);
+        try {
+            store = builder.build();
+        } finally {
+            boolean delOk = badDataFile.delete();
+            delOk &= new File(dir, "lock.mdb").delete();
+            delOk &= dir.delete();
+            assertTrue(delOk);  // Try to delete all before asserting
+        }
     }
 }
