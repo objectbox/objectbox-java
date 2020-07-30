@@ -268,7 +268,7 @@ public class BoxStore implements Closeable {
         queryAttempts = Math.max(builder.queryAttempts, 1);
     }
 
-    private byte[] buildFlatStoreOptions(BoxStoreBuilder builder, String canonicalPath) {
+    private static byte[] buildFlatStoreOptions(BoxStoreBuilder builder, String canonicalPath) {
         FlatBufferBuilder fbb = new FlatBufferBuilder();
         // FlatBuffer default values are set in generated code, e.g. may be different from here, so always store value.
         fbb.forceDefaults(true);
@@ -291,9 +291,9 @@ public class BoxStore implements Closeable {
                 FlatStoreOptions.addValidateOnOpenPageLimit(fbb, validateOnOpenPageLimit);
             }
         }
-        FlatStoreOptions.addReadSchema(fbb, !builder.doNotReadSchema);
-        FlatStoreOptions.addUsePreviousCommit(fbb, builder.usePreviousCommit);
-        FlatStoreOptions.addReadOnly(fbb, builder.readOnly);
+        if(builder.skipReadSchema) FlatStoreOptions.addSkipReadSchema(fbb, builder.skipReadSchema);
+        if(builder.usePreviousCommit) FlatStoreOptions.addUsePreviousCommit(fbb, builder.usePreviousCommit);
+        if(builder.readOnly) FlatStoreOptions.addReadOnly(fbb, builder.readOnly);
         int debugFlags = builder.debugFlags;
         if (debugFlags != 0) {
             FlatStoreOptions.addDebugFlags(fbb, debugFlags);

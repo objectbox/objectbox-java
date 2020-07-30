@@ -95,7 +95,7 @@ public class BoxStoreBuilder {
     int queryAttempts;
 
     /** For DebugCursor. */
-    boolean doNotReadSchema;
+    boolean skipReadSchema;
 
     boolean readOnly;
     boolean usePreviousCommit;
@@ -112,7 +112,7 @@ public class BoxStoreBuilder {
     @Internal
     public static BoxStoreBuilder createDebugWithoutModel() {
         BoxStoreBuilder builder = new BoxStoreBuilder();
-        builder.doNotReadSchema = true;
+        builder.skipReadSchema = true;
         return builder;
     }
 

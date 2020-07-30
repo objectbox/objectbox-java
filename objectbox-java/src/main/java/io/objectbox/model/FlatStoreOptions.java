@@ -26,6 +26,8 @@ import com.google.flatbuffers.*;
 /**
  * Options to open a store with. Set only the values you want; defaults are used otherwise.
  * Reminder: enable "force defaults" in the FlatBuffers builder, e.g. to pass in booleans with value "false".
+ * NOTE: some setting are for "advanced" purposes that you can typically ignore for regular usage.
+ *       When using advanced setting, you should know exactly what you are doing.
  */
 @SuppressWarnings("unused")
 public final class FlatStoreOptions extends Table {
@@ -35,16 +37,31 @@ public final class FlatStoreOptions extends Table {
   public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }
   public FlatStoreOptions __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  /**
+   * Location of the database on disk; this will be a directory containing files.
+   */
   public String directoryPath() { int o = __offset(4); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer directoryPathAsByteBuffer() { return __vector_as_bytebuffer(4, 1); }
   public ByteBuffer directoryPathInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 4, 1); }
+  /**
+   * Provide a data model, e.g. to initialize or update the schema.
+   */
   public int modelBytes(int j) { int o = __offset(6); return o != 0 ? bb.get(__vector(o) + j * 1) & 0xFF : 0; }
   public int modelBytesLength() { int o = __offset(6); return o != 0 ? __vector_len(o) : 0; }
   public ByteVector modelBytesVector() { return modelBytesVector(new ByteVector()); }
   public ByteVector modelBytesVector(ByteVector obj) { int o = __offset(6); return o != 0 ? obj.__assign(__vector(o), bb) : null; }
   public ByteBuffer modelBytesAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
   public ByteBuffer modelBytesInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 6, 1); }
+  /**
+   * This maximum size setting is meant to prevent your database from growing to unexpected sizes,
+   * e.g. caused by programming error.
+   * If your app runs into errors like "db full", you may consider to raise the limit.
+   */
   public long maxDbSizeInKByte() { int o = __offset(8); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
+  /**
+   * File permissions given in Unix style octal bit flags (e.g. 0644). Ignored on Windows.
+   * Note: directories become searchable if the "read" or "write" permission is set (e.g. 0640 becomes 0750).
+   */
   public long fileMode() { int o = __offset(10); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
   /**
    * The maximum number of readers.
@@ -72,16 +89,25 @@ public final class FlatStoreOptions extends Table {
    * This is only to be used with ValidateOnOpenMode "Regular" and "WithLeaves".
    */
   public long validateOnOpenPageLimit() { int o = __offset(16); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
-  public int putPaddingMode() { int o = __offset(18); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
-  public boolean readSchema() { int o = __offset(20); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
   /**
-   * Recommended to be used together with read-only mode to ensure no data is lost.
+   * Don't touch unless you know exactly what you are doing:
+   * Advanced setting typically meant for language bindings (not end users). See PutPaddingMode description.
+   */
+  public int putPaddingMode() { int o = __offset(18); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
+  /**
+   * Advanced setting meant only for special scenarios: opens the database in a limited, schema-less mode.
+   * If you don't know what this means exactly: ignore this flag.
+   */
+  public boolean skipReadSchema() { int o = __offset(20); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
+  /**
+   * Advanced setting recommended to be used together with read-only mode to ensure no data is lost.
    * Ignores the latest data snapshot (committed transaction state) and uses the previous snapshot instead.
    * When used with care (e.g. backup the DB files first), this option may also recover data removed by the latest
    * transaction.
    */
   public boolean usePreviousCommit() { int o = __offset(22); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
   /**
+   * NOT IMPLEMENTED YET. Placeholder for a future version only.
    * If consistency checks fail during opening the DB (see also the pagesToValidateOnOpen setting), ObjectBox
    * automatically switches to the previous commit (see also usePreviousCommit). This way, this constitutes
    * an auto-recover mode from severe failures. HOWEVER, keep in mind that any consistency failure
@@ -93,6 +119,9 @@ public final class FlatStoreOptions extends Table {
    * Open store in read-only mode: no schema update, no write transactions.
    */
   public boolean readOnly() { int o = __offset(26); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
+  /**
+   * For debugging purposes you may want enable specific logging.
+   */
   public long debugFlags() { int o = __offset(28); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
 
   public static int createFlatStoreOptions(FlatBufferBuilder builder,
@@ -104,7 +133,7 @@ public final class FlatStoreOptions extends Table {
       int validateOnOpen,
       long validateOnOpenPageLimit,
       int putPaddingMode,
-      boolean readSchema,
+      boolean skipReadSchema,
       boolean usePreviousCommit,
       boolean usePreviousCommitOnValidationFailure,
       boolean readOnly,
@@ -122,7 +151,7 @@ public final class FlatStoreOptions extends Table {
     FlatStoreOptions.addReadOnly(builder, readOnly);
     FlatStoreOptions.addUsePreviousCommitOnValidationFailure(builder, usePreviousCommitOnValidationFailure);
     FlatStoreOptions.addUsePreviousCommit(builder, usePreviousCommit);
-    FlatStoreOptions.addReadSchema(builder, readSchema);
+    FlatStoreOptions.addSkipReadSchema(builder, skipReadSchema);
     return FlatStoreOptions.endFlatStoreOptions(builder);
   }
 
@@ -138,7 +167,7 @@ public final class FlatStoreOptions extends Table {
   public static void addValidateOnOpen(FlatBufferBuilder builder, int validateOnOpen) { builder.addShort(5, (short)validateOnOpen, (short)0); }
   public static void addValidateOnOpenPageLimit(FlatBufferBuilder builder, long validateOnOpenPageLimit) { builder.addLong(6, validateOnOpenPageLimit, 0L); }
   public static void addPutPaddingMode(FlatBufferBuilder builder, int putPaddingMode) { builder.addShort(7, (short)putPaddingMode, (short)0); }
-  public static void addReadSchema(FlatBufferBuilder builder, boolean readSchema) { builder.addBoolean(8, readSchema, false); }
+  public static void addSkipReadSchema(FlatBufferBuilder builder, boolean skipReadSchema) { builder.addBoolean(8, skipReadSchema, false); }
   public static void addUsePreviousCommit(FlatBufferBuilder builder, boolean usePreviousCommit) { builder.addBoolean(9, usePreviousCommit, false); }
   public static void addUsePreviousCommitOnValidationFailure(FlatBufferBuilder builder, boolean usePreviousCommitOnValidationFailure) { builder.addBoolean(10, usePreviousCommitOnValidationFailure, false); }
   public static void addReadOnly(FlatBufferBuilder builder, boolean readOnly) { builder.addBoolean(11, readOnly, false); }
