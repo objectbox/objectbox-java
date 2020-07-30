@@ -16,6 +16,8 @@
 
 package io.objectbox;
 
+import com.google.flatbuffers.FlatBufferBuilder;
+import io.objectbox.model.FlatStoreOptions;
 import org.greenrobot.essentials.io.IoUtils;
 
 import java.io.BufferedInputStream;
@@ -451,6 +453,39 @@ public class BoxStoreBuilder {
         this.initialDbFileFactory = initialDbFileFactory;
         return this;
     }
+
+    byte[] buildFlatStoreOptions(String canonicalPath) {
+        FlatBufferBuilder fbb = new FlatBufferBuilder();
+        // FlatBuffer default values are set in generated code, e.g. may be different from here, so always store value.
+        fbb.forceDefaults(true);
+
+        // Add non-integer values first...
+        int directoryPathOffset = fbb.createString(canonicalPath);
+
+        FlatStoreOptions.startFlatStoreOptions(fbb);
+
+        // ...then build options.
+        FlatStoreOptions.addDirectoryPath(fbb, directoryPathOffset);
+        FlatStoreOptions.addMaxDbSizeInKByte(fbb, maxSizeInKByte);
+        FlatStoreOptions.addFileMode(fbb, fileMode);
+        FlatStoreOptions.addMaxReaders(fbb, maxReaders);
+        if (validateOnOpenMode != 0) {
+            FlatStoreOptions.addValidateOnOpen(fbb, validateOnOpenMode);
+            if (validateOnOpenPageLimit != 0) {
+                FlatStoreOptions.addValidateOnOpenPageLimit(fbb, validateOnOpenPageLimit);
+            }
+        }
+        if(skipReadSchema) FlatStoreOptions.addSkipReadSchema(fbb, skipReadSchema);
+        if(usePreviousCommit) FlatStoreOptions.addUsePreviousCommit(fbb, usePreviousCommit);
+        if(readOnly) FlatStoreOptions.addReadOnly(fbb, readOnly);
+        if (debugFlags != 0) {
+            FlatStoreOptions.addDebugFlags(fbb, debugFlags);
+        }
+
+        int offset = FlatStoreOptions.endFlatStoreOptions(fbb);
+        fbb.finish(offset);
+        return fbb.sizedByteArray();
+    }    
 
     /**
      * Builds a {@link BoxStore} using any given configuration.

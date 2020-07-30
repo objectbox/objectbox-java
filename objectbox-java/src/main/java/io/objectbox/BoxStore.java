@@ -16,8 +16,6 @@
 
 package io.objectbox;
 
-import com.google.flatbuffers.FlatBufferBuilder;
-
 import org.greenrobot.essentials.collections.LongHashMap;
 
 import java.io.Closeable;
@@ -49,7 +47,6 @@ import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.DbSchemaException;
 import io.objectbox.internal.NativeLibraryLoader;
 import io.objectbox.internal.ObjectBoxThreadPool;
-import io.objectbox.model.FlatStoreOptions;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.SubscriptionBuilder;
@@ -225,7 +222,7 @@ public class BoxStore implements Closeable {
         canonicalPath = getCanonicalPath(directory);
         verifyNotAlreadyOpen(canonicalPath);
 
-        handle = nativeCreateWithFlatOptions(buildFlatStoreOptions(builder, canonicalPath), builder.model);
+        handle = nativeCreateWithFlatOptions(builder.buildFlatStoreOptions(canonicalPath), builder.model);
         int debugFlags = builder.debugFlags;
         if (debugFlags != 0) {
             debugTxRead = (debugFlags & DebugFlags.LOG_TRANSACTIONS_READ) != 0;
@@ -266,42 +263,6 @@ public class BoxStore implements Closeable {
 
         failedReadTxAttemptCallback = builder.failedReadTxAttemptCallback;
         queryAttempts = Math.max(builder.queryAttempts, 1);
-    }
-
-    private static byte[] buildFlatStoreOptions(BoxStoreBuilder builder, String canonicalPath) {
-        FlatBufferBuilder fbb = new FlatBufferBuilder();
-        // FlatBuffer default values are set in generated code, e.g. may be different from here, so always store value.
-        fbb.forceDefaults(true);
-
-        // Add non-integer values first...
-        int directoryPathOffset = fbb.createString(canonicalPath);
-
-        FlatStoreOptions.startFlatStoreOptions(fbb);
-
-        // ...then build options.
-        FlatStoreOptions.addDirectoryPath(fbb, directoryPathOffset);
-        FlatStoreOptions.addMaxDbSizeInKByte(fbb, builder.maxSizeInKByte);
-        FlatStoreOptions.addFileMode(fbb, builder.fileMode);
-        FlatStoreOptions.addMaxReaders(fbb, builder.maxReaders);
-        int validateOnOpenMode = builder.validateOnOpenMode;
-        if (validateOnOpenMode != 0) {
-            FlatStoreOptions.addValidateOnOpen(fbb, validateOnOpenMode);
-            long validateOnOpenPageLimit = builder.validateOnOpenPageLimit;
-            if (validateOnOpenPageLimit != 0) {
-                FlatStoreOptions.addValidateOnOpenPageLimit(fbb, validateOnOpenPageLimit);
-            }
-        }
-        if(builder.skipReadSchema) FlatStoreOptions.addSkipReadSchema(fbb, builder.skipReadSchema);
-        if(builder.usePreviousCommit) FlatStoreOptions.addUsePreviousCommit(fbb, builder.usePreviousCommit);
-        if(builder.readOnly) FlatStoreOptions.addReadOnly(fbb, builder.readOnly);
-        int debugFlags = builder.debugFlags;
-        if (debugFlags != 0) {
-            FlatStoreOptions.addDebugFlags(fbb, debugFlags);
-        }
-
-        int offset = FlatStoreOptions.endFlatStoreOptions(fbb);
-        fbb.finish(offset);
-        return fbb.sizedByteArray();
     }
 
     static String getCanonicalPath(File directory) {
