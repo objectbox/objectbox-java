@@ -16,6 +16,7 @@
 
 package io.objectbox;
 
+import io.objectbox.annotation.apihint.Beta;
 import org.greenrobot.essentials.collections.LongHashMap;
 
 import java.io.Closeable;
@@ -918,11 +919,16 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * Validates up to {@code pageLimit} pages of the store. Set {@code checkLeafLevel} to check leafs, too.
-     * Returns the number of pages validated.
-     * Throws StorageException if validation fails.
-     * Throws DbFileCorruptException or DbPagesCorruptException if the DB is actually inconsistent (corrupt).
+     * Validate database pages, a lower level storage unit (integrity check).
+     * Do not call this inside a transaction (currently unsupported).
+     * @param pageLimit the maximum of pages to validate (e.g. to limit time spent on validation).
+     *        Pass zero set no limit and thus validate all pages.
+     * @param checkLeafLevel Flag to validate leaf pages. These do not point to other pages but contain data.
+     * @return Number of pages validated, which may be twice the given pageLimit as internally there are "two DBs".
+     * @throws DbException if validation failed to run (does not tell anything about DB file consistency).
+     * @throws io.objectbox.exception.FileCorruptException if the DB file is actually inconsistent (corrupt).
      */
+    @Beta
     public long validate(long pageLimit, boolean checkLeafLevel) {
         if (pageLimit < 0) {
             throw new IllegalArgumentException("pageLimit must be zero or positive");
