@@ -66,12 +66,8 @@ public class BoxStoreBuilder {
 
     final byte[] model;
 
-    /** BoxStore uses this */
+    /** BoxStore uses this (not baseDirectory/name) */
     File directory;
-
-    /** On Android used for native library loading. */
-    @Nullable Object context;
-    @Nullable Object relinker;
 
     /** Ignored by BoxStore */
     private File baseDirectory;
@@ -82,6 +78,10 @@ public class BoxStoreBuilder {
     /** Defaults to {@link #DEFAULT_MAX_DB_SIZE_KBYTE}. */
     long maxSizeInKByte = DEFAULT_MAX_DB_SIZE_KBYTE;
 
+    /** On Android used for native library loading. */
+    @Nullable Object context;
+    @Nullable Object relinker;
+
     ModelUpdate modelUpdate;
 
     int debugFlags;
@@ -90,7 +90,7 @@ public class BoxStoreBuilder {
 
     boolean debugRelations;
 
-    long fileMode;
+    int fileMode;
 
     int maxReaders;
 
@@ -279,10 +279,11 @@ public class BoxStoreBuilder {
     /**
      * Specify
      * <a href="https://en.wikipedia.org/wiki/File_system_permissions#Numeric_notation">unix-style file permissions</a>
-     * to use for the database directory and files.
-     * E.g. for {@code rw-rw-rw-} (owner, group, other) pass the octal code {@code 666}.
+     * for database files. E.g. for {@code -rw-r----} (owner, group, other) pass the octal code {@code 0640}.
+     * Any newly generated directory additionally gets searchable (01) for groups with read or write permissions.
+     * It's not allowed to pass in an executable flag.
      */
-    public BoxStoreBuilder fileMode(long mode) {
+    public BoxStoreBuilder fileMode(int mode) {
         this.fileMode = mode;
         return this;
     }
@@ -327,9 +328,7 @@ public class BoxStoreBuilder {
     }
 
     /**
-     * Open the store in read-only mode: no schema update, no write transactions.
-     * <p>
-     * It is recommended to use this with {@link #usePreviousCommit()} to ensure no data is lost.
+     * Open the store in read-only mode: no schema update, no write transactions are allowed (would throw).
      */
     public BoxStoreBuilder readOnly() {
         this.readOnly = true;
@@ -341,7 +340,8 @@ public class BoxStoreBuilder {
      * When used with care (e.g. backup the DB files first), this option may also recover data removed by the latest
      * transaction.
      * <p>
-     * It is recommended to use this with {@link #readOnly()} to ensure no data is lost.
+     * To ensure no data is lost accidentally, it is recommended to use this in combination with {@link #readOnly()}
+     * to examine and validate the database first.
      */
     public BoxStoreBuilder usePreviousCommit() {
         this.usePreviousCommit = true;
