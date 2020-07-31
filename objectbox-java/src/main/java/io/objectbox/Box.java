@@ -319,6 +319,7 @@ public class Box<T> {
 
     /**
      * Check if an object with the given ID exists in the database.
+     * This is more efficient than a {@link #get(long)} and comparing against null.
      * @since 2.7
      * @return true if a object with the given ID was found, false otherwise
      */
