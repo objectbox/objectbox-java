@@ -2,37 +2,48 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: ''
+labels: 'bug'
 assignees: ''
 
 ---
 
+:rotating_light: First, please check:
+ - existing issues,
+ - Docs https://docs.objectbox.io/
+ - Troubleshooting page https://docs.objectbox.io/troubleshooting
+ - FAQ page https://docs.objectbox.io/faq
+
 **Describe the bug**
-A clear and concise description of what the bug is.
+A clear and concise description in English of what the bug is.
+
+**Basic info (please complete the following information):**
+ - ObjectBox version (are you using the latest version?): [e.g. 2.7.0]
+ - Reproducibility: [e.g. occurred once only | occasionally without visible pattern | always]
+ - Device: [e.g. Galaxy S20]
+ - OS: [e.g. Android 10]
 
 **To Reproduce**
 Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1. Put '...'
+2. Make changes to '....'
+3. See error
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Code**
+If applicable, add code to help explain your problem.
+ - Include affected entity classes.
+ - Please remove any unnecessary or confidential parts.
+ - At best, link to or attach a project with a failing test.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
-
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+**Logs, stack traces**
+If applicable, add relevant logs, or a stack trace.
+ - For __build issues__, use `--stacktrace` for the Gradle build (`./gradlew build --stacktrace`).
+ - For __runtime errors__, check Android's Logcat (also check logs before the issue!).
 
 **Additional context**
 Add any other context about the problem here.
+ - Is there anything special about your app?
+ - May transactions or multi-threading play a role?
+ - Did you find any workarounds to prevent the issue?
