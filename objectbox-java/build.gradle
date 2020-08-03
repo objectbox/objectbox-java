@@ -63,6 +63,7 @@ task javadocForWeb(type: Javadoc) {
     destinationDir = file(javadocForWebDir)
 
     title = "ObjectBox Java ${version} API"
+    options.overview = "$projectDir/src/web/overview.html"
     options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017-2020 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
 
     doLast {
