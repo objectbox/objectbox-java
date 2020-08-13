@@ -4,6 +4,10 @@ apply plugin: "com.github.spotbugs"
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
+ext {
+    javadocForWebDir = "$buildDir/docs/web-api-docs"
+}
+
 dependencies {
     api project(':objectbox-java-api')
     implementation 'org.greenrobot:essentials:3.0.0-RC1'
@@ -56,9 +60,10 @@ task javadocForWeb(type: Javadoc) {
     source = filteredSources + srcApi
 
     classpath = sourceSets.main.output + sourceSets.main.compileClasspath
-    destinationDir = reporting.file("web-api-docs")
+    destinationDir = file(javadocForWebDir)
 
     title = "ObjectBox Java ${version} API"
+    options.overview = "$projectDir/src/web/overview.html"
     options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017-2020 <a href="http://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
 
     doLast {
@@ -86,6 +91,8 @@ task javadocForWeb(type: Javadoc) {
                 "    color:#474747;\n" +
                 "    overflow:auto;\n" +
                 "}")
+
+        println "Javadoc for web created at $destinationDir"
     }
 }
 
@@ -96,7 +103,7 @@ task packageJavadocForWeb(type: Zip, dependsOn: javadocForWeb) {
     archiveFileName = "objectbox-java-web-api-docs.zip"
     destinationDirectory = file("$buildDir/dist")
 
-    from reporting.file("web-api-docs")
+    from file(javadocForWebDir)
 
     doLast {
         println "Javadoc for web packaged to ${file("$buildDir/dist/objectbox-java-web-api-docs.zip")}"
