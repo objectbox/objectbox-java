@@ -15,8 +15,8 @@
  */
 
 /**
- * ObjectBox Sync allows to automatically synchronize local data with a sync destination (e.g. a sync server) and vice
- * versa. This is the sync client package.
+ * <a href="https://objectbox.io/sync/">ObjectBox Sync</a> allows to automatically synchronize local data with a sync
+ * destination (e.g. a sync server) and vice versa. This is the sync <b>client</b> package.
  * <p>
  * These are the typical steps to setup a sync client:
  * <ol>
