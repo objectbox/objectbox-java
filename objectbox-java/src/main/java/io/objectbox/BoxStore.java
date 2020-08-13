@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2020 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package io.objectbox;
 
+import io.objectbox.annotation.apihint.Beta;
 import org.greenrobot.essentials.collections.LongHashMap;
 
 import java.io.Closeable;
@@ -66,9 +67,9 @@ public class BoxStore implements Closeable {
     @Nullable private static Object relinker;
 
     /** Change so ReLinker will update native library when using workaround loading. */
-    public static final String JNI_VERSION = "2.6.0-RC";
+    public static final String JNI_VERSION = "2.7.0";
 
-    private static final String VERSION = "2.6.0-2020-04-30";
+    private static final String VERSION = "2.7.0-2020-07-30";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
@@ -138,7 +139,13 @@ public class BoxStore implements Closeable {
      */
     public static native void testUnalignedMemoryAccess();
 
-    static native long nativeCreate(String directory, long maxDbSizeInKByte, int maxReaders, byte[] model);
+    /**
+     * Creates a native BoxStore instance with FlatBuffer {@link io.objectbox.model.FlatStoreOptions} {@code options}
+     * and a {@link ModelBuilder} {@code model}. Returns the handle of the native store instance.
+     */
+    static native long nativeCreateWithFlatOptions(byte[] options, byte[] model);
+
+    static native boolean nativeIsReadOnly(long store);
 
     static native void nativeDelete(long store);
 
@@ -169,6 +176,10 @@ public class BoxStore implements Closeable {
     private native boolean nativeStopObjectBrowser(long store);
 
     static native boolean nativeIsObjectBrowserAvailable();
+
+    native long nativeSizeOnDisk(long store);
+
+    native long nativeValidate(long store, long pageLimit, boolean checkLeafLevel);
 
     static native int nativeGetSupportedSync();
 
@@ -242,10 +253,9 @@ public class BoxStore implements Closeable {
         canonicalPath = getCanonicalPath(directory);
         verifyNotAlreadyOpen(canonicalPath);
 
-        handle = nativeCreate(canonicalPath, builder.maxSizeInKByte, builder.maxReaders, builder.model);
+        handle = nativeCreateWithFlatOptions(builder.buildFlatStoreOptions(canonicalPath), builder.model);
         int debugFlags = builder.debugFlags;
         if (debugFlags != 0) {
-            nativeSetDebugFlags(handle, debugFlags);
             debugTxRead = (debugFlags & DebugFlags.LOG_TRANSACTIONS_READ) != 0;
             debugTxWrite = (debugFlags & DebugFlags.LOG_TRANSACTIONS_WRITE) != 0;
         } else {
@@ -361,6 +371,16 @@ public class BoxStore implements Closeable {
     }
 
     /**
+     * The size in bytes occupied by the data file on disk.
+     *
+     * @return 0 if the size could not be determined (does not throw unless this store was already closed)
+     */
+    public long sizeOnDisk() {
+        checkOpen();
+        return nativeSizeOnDisk(handle);
+    }
+
+    /**
      * Explicitly call {@link #close()} instead to avoid expensive finalization.
      */
     @SuppressWarnings("deprecation") // finalize()
@@ -462,6 +482,14 @@ public class BoxStore implements Closeable {
 
     public boolean isClosed() {
         return closed;
+    }
+
+    /**
+     * Whether the store was created using read-only mode.
+     * If true the schema is not updated and write transactions are not possible.
+     */
+    public boolean isReadOnly() {
+        return nativeIsReadOnly(handle);
     }
 
     /**
@@ -924,6 +952,24 @@ public class BoxStore implements Closeable {
      */
     public String diagnose() {
         return nativeDiagnose(handle);
+    }
+
+    /**
+     * Validate database pages, a lower level storage unit (integrity check).
+     * Do not call this inside a transaction (currently unsupported).
+     * @param pageLimit the maximum of pages to validate (e.g. to limit time spent on validation).
+     *        Pass zero set no limit and thus validate all pages.
+     * @param checkLeafLevel Flag to validate leaf pages. These do not point to other pages but contain data.
+     * @return Number of pages validated, which may be twice the given pageLimit as internally there are "two DBs".
+     * @throws DbException if validation failed to run (does not tell anything about DB file consistency).
+     * @throws io.objectbox.exception.FileCorruptException if the DB file is actually inconsistent (corrupt).
+     */
+    @Beta
+    public long validate(long pageLimit, boolean checkLeafLevel) {
+        if (pageLimit < 0) {
+            throw new IllegalArgumentException("pageLimit must be zero or positive");
+        }
+        return nativeValidate(handle, pageLimit, checkLeafLevel);
     }
 
     public int cleanStaleReadTransactions() {

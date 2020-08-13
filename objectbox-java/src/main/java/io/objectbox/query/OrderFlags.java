@@ -46,8 +46,7 @@ public final class OrderFlags {
    */
   public static final int NULLS_ZERO = 16;
 
-  // Private to protect contents from getting modified.
-  private static final String[] names = { "DESCENDING", "CASE_SENSITIVE", "", "UNSIGNED", "", "", "", "NULLS_LAST", "", "", "", "", "", "", "", "NULLS_ZERO", };
+  public static final String[] names = { "DESCENDING", "CASE_SENSITIVE", "", "UNSIGNED", "", "", "", "NULLS_LAST", "", "", "", "", "", "", "", "NULLS_ZERO", };
 
   public static String name(int e) { return names[e - DESCENDING]; }
 }

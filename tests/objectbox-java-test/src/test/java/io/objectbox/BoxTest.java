@@ -79,9 +79,11 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertEquals(value2, entityRead.getSimpleString());
 
         // and remove it
+        assertTrue(box.contains(id));
         assertTrue(box.remove(id));
         assertNull(box.get(id));
         assertFalse(box.remove(id));
+        assertFalse(box.contains(id));
     }
 
     @Test

@@ -56,11 +56,6 @@ public abstract class AbstractObjectBoxTest {
         Cursor.TRACK_CREATION_STACK = true;
         Transaction.TRACK_CREATION_STACK = true;
 
-        // This works with Android without needing any context
-        File tempFile = File.createTempFile("object-store-test", "");
-        tempFile.delete();
-        boxStoreDir = tempFile;
-
         if (!printedVersionsOnce) {
             System.out.println("ObjectBox Java version: " + BoxStore.getVersion());
             System.out.println("ObjectBox Core version: " + BoxStore.getVersionNative());
@@ -68,8 +63,18 @@ public abstract class AbstractObjectBoxTest {
             printedVersionsOnce = true;
         }
 
+        boxStoreDir = prepareTempDir("object-store-test");
         store = createBoxStore();
         runExtensiveTests = System.getProperty("extensive-tests") != null;
+    }
+
+    /** This works with Android without needing any context. */
+    protected File prepareTempDir(String prefix) throws IOException {
+        File tempFile = File.createTempFile(prefix, "");
+        if (!tempFile.delete()) {
+            throw new IOException("Could not prep temp dir; file delete failed for " + tempFile.getAbsolutePath());
+        }
+        return tempFile;
     }
 
     protected BoxStore createBoxStore() {
