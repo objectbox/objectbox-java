@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FindBugsFilter>
     <Match>
+        <!-- Hint: to use regex, prefix with ~. https://spotbugs.readthedocs.io/en/stable/filter.html -->
         <!-- Exclude FlatBuffers generated code. -->
-        <Class name="~io\.objectbox\.model\.Model.*" />
+        <Package name="io.objectbox.model" />
     </Match>
 </FindBugsFilter>
