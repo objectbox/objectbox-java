@@ -132,16 +132,16 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
     abstract Object convertToKey(String keyValue);
 
     /**
-     * Returns the width in bytes stored in the private parentWidth field of FlexBuffers.Reference.
+     * Returns true if the width in bytes stored in the private parentWidth field of FlexBuffers.Reference is 8.
      * Note: FlexBuffers stores all items in a map/vector using the size of the widest item. However,
      * an item's size is only as wide as needed, e.g. a 64-bit integer (Java Long, 8 bytes) will be
      * reduced to 1 byte if it does not exceed its value range.
      */
-    private int getParentWidthInBytesOf(FlexBuffers.Reference reference) {
+    protected boolean shouldRestoreAsLong(FlexBuffers.Reference reference) {
         try {
             Field parentWidthF = reference.getClass().getDeclaredField("parentWidth");
             parentWidthF.setAccessible(true);
-            return (int) parentWidthF.get(reference);
+            return (int) parentWidthF.get(reference) == 8;
         } catch (Exception e) {
             // If thrown, it is likely the FlexBuffers API has changed and the above should be updated.
             throw new RuntimeException("FlexMapConverter could not determine FlexBuffers integer bit width.", e);
@@ -167,8 +167,7 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
             } else if (value.isBoolean()) {
                 resultMap.put(key, value.asBoolean());
             } else if (value.isInt()) {
-                int parentWidthInBytes = getParentWidthInBytesOf(value);
-                if (parentWidthInBytes == 8) {
+                if (shouldRestoreAsLong(value)) {
                     resultMap.put(key, value.asLong());
                 } else {
                     resultMap.put(key, value.asInt());
@@ -192,7 +191,7 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
         List<Object> list = new ArrayList<>(itemCount);
 
         // FlexBuffers uses the byte width of the biggest item to size all items, so only need to check the first.
-        Integer parentWidthInBytes = null;
+        Boolean shouldRestoreAsLong = null;
 
         for (int i = 0; i < itemCount; i++) {
             FlexBuffers.Reference item = vector.get(i);
@@ -205,10 +204,10 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
             } else if (item.isBoolean()) {
                 list.add(item.asBoolean());
             } else if (item.isInt()) {
-                if (parentWidthInBytes == null) {
-                    parentWidthInBytes = getParentWidthInBytesOf(item);
+                if (shouldRestoreAsLong == null) {
+                    shouldRestoreAsLong = shouldRestoreAsLong(item);
                 }
-                if (parentWidthInBytes == 8) {
+                if (shouldRestoreAsLong) {
                     list.add(item.asLong());
                 } else {
                     list.add(item.asInt());

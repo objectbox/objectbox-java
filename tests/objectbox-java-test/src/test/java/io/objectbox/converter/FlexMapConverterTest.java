@@ -72,6 +72,22 @@ public class FlexMapConverterTest {
     }
 
     /**
+     * Using Long value converter, even if no item is wider than 32 bits, all integers are restored as Long.
+     */
+    @Test
+    public void keysString_valsLongBiggest32Bit_works() {
+        FlexMapConverter converter = new StringLongMapConverter();
+        Map<String, Long> expected = new HashMap<>();
+
+        expected.put("long-8bit-neg", -1L);
+        expected.put("long-8bit", 2L);
+        expected.put("long-32bit-neg", (long) Integer.MIN_VALUE);
+        expected.put("long-32bit", (long) Integer.MAX_VALUE);
+
+        convertAndBackThenAssert(expected, converter);
+    }
+
+    /**
      * If at least one item is 64 bit wide, all integers are restored as Long.
      */
     @SuppressWarnings("unchecked")
