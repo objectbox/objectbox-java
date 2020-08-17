@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FindBugsFilter>
+    <!-- Hint: to use regex, prefix with ~. https://spotbugs.readthedocs.io/en/stable/filter.html -->
+    <!-- Exclude FlatBuffers generated code, compare with /scripts/flatc-idls.sh of core project. -->
     <Match>
-        <!-- Hint: to use regex, prefix with ~. https://spotbugs.readthedocs.io/en/stable/filter.html -->
-        <!-- Exclude FlatBuffers generated code. -->
+        <Class name="io.objectbox.DebugFlags" />
+    </Match>
+    <Match>
         <Package name="io.objectbox.model" />
+    </Match>
+    <Match>
+        <Class name="io.objectbox.query.OrderFlags" />
     </Match>
 </FindBugsFilter>
