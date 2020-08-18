@@ -155,15 +155,10 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
     @Test(expected = FileCorruptException.class)
     public void validateOnOpenCorruptFile() throws IOException {
         File dir = prepareTempDir("object-store-test-corrupted");
-        assertTrue(dir.mkdir());
-        File badDataFile = new File(dir, "data.mdb");
-        try (InputStream badIn = getClass().getResourceAsStream("corrupt-pageno-in-branch-data.mdb")) {
-            try (FileOutputStream badOut = new FileOutputStream(badDataFile)) {
-                IoUtils.copyAllBytes(badIn, badOut);
-            }
-        }
+        File badDataFile = prepareBadDataFile(dir);
+
         builder = BoxStoreBuilder.createDebugWithoutModel().directory(dir);
-        builder.validateOnOpen(ValidateOnOpenMode.AllBranches);
+        builder.validateOnOpen(ValidateOnOpenMode.Full).usePreviousCommit();
         try {
             store = builder.build();
         } finally {
@@ -172,5 +167,30 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
             delOk &= dir.delete();
             assertTrue(delOk);  // Try to delete all before asserting
         }
+    }
+
+    @Test
+    public void usePreviousCommitWithCorruptFile() throws IOException {
+        File dir = prepareTempDir("object-store-test-corrupted");
+        prepareBadDataFile(dir);
+        builder = BoxStoreBuilder.createDebugWithoutModel().directory(dir);
+        builder.validateOnOpen(ValidateOnOpenMode.Full).usePreviousCommit();
+        store = builder.build();
+        String diagnoseString = store.diagnose();
+        assertTrue(diagnoseString.contains("entries=2"));
+        store.validate(0, true);
+        store.close();
+        assertTrue(store.deleteAllFiles());
+    }
+
+    private File prepareBadDataFile(File dir) throws IOException {
+        assertTrue(dir.mkdir());
+        File badDataFile = new File(dir, "data.mdb");
+        try (InputStream badIn = getClass().getResourceAsStream("corrupt-pageno-in-branch-data.mdb")) {
+            try (FileOutputStream badOut = new FileOutputStream(badDataFile)) {
+                IoUtils.copyAllBytes(badIn, badOut);
+            }
+        }
+        return badDataFile;
     }
 }
