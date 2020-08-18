@@ -183,6 +183,27 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         assertTrue(store.deleteAllFiles());
     }
 
+    @Test
+    public void usePreviousCommitAfterFileCorruptException() throws IOException {
+        File dir = prepareTempDir("object-store-test-corrupted");
+        prepareBadDataFile(dir);
+        builder = BoxStoreBuilder.createDebugWithoutModel().directory(dir);
+        builder.validateOnOpen(ValidateOnOpenMode.Full);
+        try {
+            store = builder.build();
+            fail("Should have thrown");
+        } catch (FileCorruptException e) {
+            builder.usePreviousCommit();
+            store = builder.build();
+        }
+
+        String diagnoseString = store.diagnose();
+        assertTrue(diagnoseString.contains("entries=2"));
+        store.validate(0, true);
+        store.close();
+        assertTrue(store.deleteAllFiles());
+    }
+
     private File prepareBadDataFile(File dir) throws IOException {
         assertTrue(dir.mkdir());
         File badDataFile = new File(dir, "data.mdb");

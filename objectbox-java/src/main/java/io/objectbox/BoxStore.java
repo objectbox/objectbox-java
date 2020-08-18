@@ -225,47 +225,52 @@ public class BoxStore implements Closeable {
         canonicalPath = getCanonicalPath(directory);
         verifyNotAlreadyOpen(canonicalPath);
 
-        handle = nativeCreateWithFlatOptions(builder.buildFlatStoreOptions(canonicalPath), builder.model);
-        int debugFlags = builder.debugFlags;
-        if (debugFlags != 0) {
-            debugTxRead = (debugFlags & DebugFlags.LOG_TRANSACTIONS_READ) != 0;
-            debugTxWrite = (debugFlags & DebugFlags.LOG_TRANSACTIONS_WRITE) != 0;
-        } else {
-            debugTxRead = debugTxWrite = false;
-        }
-        debugRelations = builder.debugRelations;
-
-        for (EntityInfo<?> entityInfo : builder.entityInfoList) {
-            try {
-                dbNameByClass.put(entityInfo.getEntityClass(), entityInfo.getDbName());
-                int entityId = nativeRegisterEntityClass(handle, entityInfo.getDbName(), entityInfo.getEntityClass());
-                entityTypeIdByClass.put(entityInfo.getEntityClass(), entityId);
-                classByEntityTypeId.put(entityId, entityInfo.getEntityClass());
-                propertiesByClass.put(entityInfo.getEntityClass(), entityInfo);
-                for (Property<?> property : entityInfo.getAllProperties()) {
-                    if (property.customType != null) {
-                        if (property.converterClass == null) {
-                            throw new RuntimeException("No converter class for custom type of " + property);
-                        }
-                        nativeRegisterCustomType(handle, entityId, 0, property.dbName, property.converterClass,
-                                property.customType);
-                    }
-                }
-            } catch (RuntimeException e) {
-                throw new RuntimeException("Could not setup up entity " + entityInfo.getEntityClass(), e);
+        try {
+            handle = nativeCreateWithFlatOptions(builder.buildFlatStoreOptions(canonicalPath), builder.model);
+            int debugFlags = builder.debugFlags;
+            if (debugFlags != 0) {
+                debugTxRead = (debugFlags & DebugFlags.LOG_TRANSACTIONS_READ) != 0;
+                debugTxWrite = (debugFlags & DebugFlags.LOG_TRANSACTIONS_WRITE) != 0;
+            } else {
+                debugTxRead = debugTxWrite = false;
             }
-        }
-        int size = classByEntityTypeId.size();
-        allEntityTypeIds = new int[size];
-        long[] entityIdsLong = classByEntityTypeId.keys();
-        for (int i = 0; i < size; i++) {
-            allEntityTypeIds[i] = (int) entityIdsLong[i];
-        }
+            debugRelations = builder.debugRelations;
 
-        objectClassPublisher = new ObjectClassPublisher(this);
+            for (EntityInfo<?> entityInfo : builder.entityInfoList) {
+                try {
+                    dbNameByClass.put(entityInfo.getEntityClass(), entityInfo.getDbName());
+                    int entityId = nativeRegisterEntityClass(handle, entityInfo.getDbName(), entityInfo.getEntityClass());
+                    entityTypeIdByClass.put(entityInfo.getEntityClass(), entityId);
+                    classByEntityTypeId.put(entityId, entityInfo.getEntityClass());
+                    propertiesByClass.put(entityInfo.getEntityClass(), entityInfo);
+                    for (Property<?> property : entityInfo.getAllProperties()) {
+                        if (property.customType != null) {
+                            if (property.converterClass == null) {
+                                throw new RuntimeException("No converter class for custom type of " + property);
+                            }
+                            nativeRegisterCustomType(handle, entityId, 0, property.dbName, property.converterClass,
+                                    property.customType);
+                        }
+                    }
+                } catch (RuntimeException e) {
+                    throw new RuntimeException("Could not setup up entity " + entityInfo.getEntityClass(), e);
+                }
+            }
+            int size = classByEntityTypeId.size();
+            allEntityTypeIds = new int[size];
+            long[] entityIdsLong = classByEntityTypeId.keys();
+            for (int i = 0; i < size; i++) {
+                allEntityTypeIds[i] = (int) entityIdsLong[i];
+            }
 
-        failedReadTxAttemptCallback = builder.failedReadTxAttemptCallback;
-        queryAttempts = Math.max(builder.queryAttempts, 1);
+            objectClassPublisher = new ObjectClassPublisher(this);
+
+            failedReadTxAttemptCallback = builder.failedReadTxAttemptCallback;
+            queryAttempts = Math.max(builder.queryAttempts, 1);
+        } catch (RuntimeException runtimeException) {
+            close();  // Proper clean up, e.g. delete native handle, remove this path from openFiles
+            throw runtimeException;
+        }
     }
 
     static String getCanonicalPath(File directory) {
