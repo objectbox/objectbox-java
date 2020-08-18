@@ -16,7 +16,7 @@
 
 package io.objectbox;
 
-import io.objectbox.exception.FileCorruptException;
+import io.objectbox.exception.PagesCorruptException;
 import io.objectbox.model.ValidateOnOpenMode;
 import org.greenrobot.essentials.io.IoUtils;
 import org.junit.Before;
@@ -152,7 +152,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
     }
 
 
-    @Test(expected = FileCorruptException.class)
+    @Test(expected = PagesCorruptException.class)
     public void validateOnOpenCorruptFile() throws IOException {
         File dir = prepareTempDir("object-store-test-corrupted");
         File badDataFile = prepareBadDataFile(dir);
@@ -192,7 +192,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         try {
             store = builder.build();
             fail("Should have thrown");
-        } catch (FileCorruptException e) {
+        } catch (PagesCorruptException e) {
             builder.usePreviousCommit();
             store = builder.build();
         }
