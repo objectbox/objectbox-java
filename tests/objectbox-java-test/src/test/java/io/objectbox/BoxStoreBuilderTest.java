@@ -158,7 +158,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         File badDataFile = prepareBadDataFile(dir);
 
         builder = BoxStoreBuilder.createDebugWithoutModel().directory(dir);
-        builder.validateOnOpen(ValidateOnOpenMode.Full).usePreviousCommit();
+        builder.validateOnOpen(ValidateOnOpenMode.Full);
         try {
             store = builder.build();
         } finally {
