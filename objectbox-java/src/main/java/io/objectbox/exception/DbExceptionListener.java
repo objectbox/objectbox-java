@@ -54,4 +54,6 @@ public interface DbExceptionListener {
  */
 class DbExceptionListenerJni {
     native static void nativeCancelCurrentException();
+
+    native static void nativeThrowException(long nativeStore, int exNo);
 }
