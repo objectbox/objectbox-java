@@ -192,6 +192,26 @@ public class TransactionTest extends AbstractObjectBoxTest {
         }
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testCancelExceptionOutsideDbExceptionListener() {
+        DbExceptionListener.cancelCurrentException();
+    }
+
+    @Test
+    public void testCommitReadTxException_cancelException() {
+        final Exception[] exs = {null};
+        DbExceptionListener exceptionListener = e -> {
+            if (exs[0] != null) throw new RuntimeException("Called more than once");
+            exs[0] = e;
+            DbExceptionListener.cancelCurrentException();
+        };
+        Transaction tx = store.beginReadTx();
+        store.setDbExceptionListener(exceptionListener);
+        tx.commit();
+        tx.abort();
+        assertNotNull(exs[0]);
+    }
+
     /*
     @Test
     public void testTransactionUsingAfterStoreClosed() {
