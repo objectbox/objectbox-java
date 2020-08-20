@@ -703,6 +703,24 @@ public class QueryTest extends AbstractQueryTest {
     }
 
     @Test
+    public void testFailedUnique_cancelException() {
+        final Exception[] exs = {null};
+        DbExceptionListener exceptionListener = e -> {
+            if (exs[0] != null) throw new RuntimeException("Called more than once");
+            exs[0] = e;
+            DbExceptionListener.cancelCurrentException();
+        };
+        putTestEntitiesStrings();
+        Query<TestEntity> query = box.query().build();
+        store.setDbExceptionListener(exceptionListener);
+
+        TestEntity object = query.findUnique();
+        assertNull(object);
+        assertNotNull(exs[0]);
+        assertEquals(exs[0].getClass(), NonUniqueResultException.class);
+    }
+
+    @Test
     public void testDescribe() {
         // Note: description string correctness is fully asserted in core library.
 
