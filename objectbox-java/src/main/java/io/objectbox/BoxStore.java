@@ -227,6 +227,8 @@ public class BoxStore implements Closeable {
 
         try {
             handle = nativeCreateWithFlatOptions(builder.buildFlatStoreOptions(canonicalPath), builder.model);
+            if(handle == 0) throw new DbException("Could not create native store");
+
             int debugFlags = builder.debugFlags;
             if (debugFlags != 0) {
                 debugTxRead = (debugFlags & DebugFlags.LOG_TRANSACTIONS_READ) != 0;
@@ -426,6 +428,8 @@ public class BoxStore implements Closeable {
             System.out.println("Begin TX with commit count " + initialCommitCount);
         }
         long nativeTx = nativeBeginTx(handle);
+        if(nativeTx == 0) throw new DbException("Could not create native transaction");
+
         Transaction tx = new Transaction(this, nativeTx, initialCommitCount);
         synchronized (transactions) {
             transactions.add(tx);
@@ -450,6 +454,8 @@ public class BoxStore implements Closeable {
             System.out.println("Begin read TX with commit count " + initialCommitCount);
         }
         long nativeTx = nativeBeginReadTx(handle);
+        if(nativeTx == 0) throw new DbException("Could not create native read transaction");
+
         Transaction tx = new Transaction(this, nativeTx, initialCommitCount);
         synchronized (transactions) {
             transactions.add(tx);

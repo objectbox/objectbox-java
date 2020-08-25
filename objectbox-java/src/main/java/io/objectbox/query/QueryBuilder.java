@@ -29,6 +29,7 @@ import io.objectbox.EntityInfo;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.exception.DbException;
 import io.objectbox.relation.RelationInfo;
 
 /**
@@ -191,6 +192,7 @@ public class QueryBuilder<T> implements Closeable {
         this.box = box;
         this.storeHandle = storeHandle;
         handle = nativeCreate(storeHandle, entityName);
+        if(handle == 0) throw new DbException("Could not create native query builder");
         isSubQuery = false;
     }
 
@@ -232,6 +234,7 @@ public class QueryBuilder<T> implements Closeable {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
         long queryHandle = nativeBuild(handle);
+        if(queryHandle == 0) throw new DbException("Could not create native query");
         Query<T> query = new Query<>(box, queryHandle, eagerRelations, filter, comparator);
         close();
         return query;
