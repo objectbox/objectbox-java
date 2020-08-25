@@ -33,6 +33,8 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Tests related to {@link DbExceptionListener}.
+ *
+ * Note: this test has an equivalent in test-java-android integration tests.
  */
 public class ExceptionTest extends AbstractObjectBoxTest {
 
