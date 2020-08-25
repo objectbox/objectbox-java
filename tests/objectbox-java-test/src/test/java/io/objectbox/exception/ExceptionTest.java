@@ -16,15 +16,135 @@
 
 package io.objectbox.exception;
 
-import io.objectbox.AbstractObjectBoxTest;
 import org.junit.Test;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import io.objectbox.AbstractObjectBoxTest;
+
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * Tests related to {@link DbExceptionListener}.
+ *
+ * Note: this test has an equivalent in test-java-android integration tests.
+ */
 public class ExceptionTest extends AbstractObjectBoxTest {
+
+    @Test
+    public void exceptionListener_null_works() {
+        store.setDbExceptionListener(null);
+    }
+
+    @Test
+    public void exceptionListener_closedStore_works() {
+        store.close();
+        store.setDbExceptionListener(e -> System.out.println("This is never called"));
+    }
+
+    private static boolean weakRefListenerCalled = false;
+
+    @Test
+    public void exceptionListener_noLocalRef_works() throws InterruptedException {
+        // Note: do not use lambda, it would keep a reference to this class
+        // and prevent garbage collection of the listener.
+        //noinspection Convert2Lambda
+        DbExceptionListener listenerNoRef = new DbExceptionListener() {
+            @Override
+            public void onDbException(Exception e) {
+                System.out.println("Listener without strong reference is called");
+                weakRefListenerCalled = true;
+            }
+        };
+        WeakReference<DbExceptionListener> weakReference = new WeakReference<>(listenerNoRef);
+
+        // Set and clear local reference.
+        store.setDbExceptionListener(listenerNoRef);
+        //noinspection UnusedAssignment
+        listenerNoRef = null;
+
+        // Try and fail to release weak reference.
+        int triesClearWeakRef = 5;
+        while (weakReference.get() != null) {
+            if (--triesClearWeakRef == 0) break;
+            System.out.println("Suggesting GC");
+            System.gc();
+            //noinspection BusyWait
+            Thread.sleep(300);
+        }
+        assertEquals("Failed to keep weak reference to listener", 0, triesClearWeakRef);
+
+        // Throw, listener should be called.
+        weakRefListenerCalled = false;
+        assertThrows(
+                DbException.class,
+                () -> DbExceptionListenerJni.nativeThrowException(store.getNativeStore(), 0)
+        );
+        assertTrue(weakRefListenerCalled);
+
+        // Remove reference from native side.
+        store.setDbExceptionListener(null);
+
+        // Try and succeed to release weak reference.
+        triesClearWeakRef = 5;
+        while (weakReference.get() != null) {
+            if (--triesClearWeakRef == 0) break;
+            System.out.println("Suggesting GC");
+            System.gc();
+            //noinspection BusyWait
+            Thread.sleep(300);
+        }
+        assertTrue("Failed to release weak reference to listener", triesClearWeakRef > 0);
+
+        // Throw, listener should not be called.
+        weakRefListenerCalled = false;
+        assertThrows(
+                DbException.class,
+                () -> DbExceptionListenerJni.nativeThrowException(store.getNativeStore(), 0)
+        );
+        assertFalse(weakRefListenerCalled);
+    }
+
+    @Test
+    public void exceptionListener_removing_works() {
+        AtomicBoolean replacedListenerCalled = new AtomicBoolean(false);
+        DbExceptionListener listenerRemoved = e -> replacedListenerCalled.set(true);
+
+        store.setDbExceptionListener(listenerRemoved);
+        store.setDbExceptionListener(null);
+
+        assertThrows(
+                DbException.class,
+                () -> DbExceptionListenerJni.nativeThrowException(store.getNativeStore(), 0)
+        );
+        assertFalse("Should not have called removed DbExceptionListener.", replacedListenerCalled.get());
+    }
+
+    @Test
+    public void exceptionListener_replacing_works() {
+        AtomicBoolean replacedListenerCalled = new AtomicBoolean(false);
+        DbExceptionListener listenerReplaced = e -> replacedListenerCalled.set(true);
+
+        AtomicBoolean newListenerCalled = new AtomicBoolean(false);
+        DbExceptionListener listenerNew = e -> newListenerCalled.set(true);
+
+        store.setDbExceptionListener(listenerReplaced);
+        store.setDbExceptionListener(listenerNew);
+
+        assertThrows(
+                DbException.class,
+                () -> DbExceptionListenerJni.nativeThrowException(store.getNativeStore(), 0)
+        );
+        assertFalse("Should not have called replaced DbExceptionListener.", replacedListenerCalled.get());
+        assertTrue("Failed to call new DbExceptionListener.", newListenerCalled.get());
+    }
 
     @Test
     public void testThrowExceptions() {
