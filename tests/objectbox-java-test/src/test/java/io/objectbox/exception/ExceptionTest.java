@@ -16,15 +16,63 @@
 
 package io.objectbox.exception;
 
-import io.objectbox.AbstractObjectBoxTest;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import io.objectbox.AbstractObjectBoxTest;
+
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * Tests related to {@link DbExceptionListener}.
+ */
 public class ExceptionTest extends AbstractObjectBoxTest {
+
+    @Test
+    public void exceptionListener_null_works() {
+        store.setDbExceptionListener(null);
+    }
+
+    @Test
+    public void exceptionListener_removing_works() {
+        AtomicBoolean replacedListenerCalled = new AtomicBoolean(false);
+        DbExceptionListener listenerRemoved = e -> replacedListenerCalled.set(true);
+
+        store.setDbExceptionListener(listenerRemoved);
+        store.setDbExceptionListener(null);
+
+        assertThrows(
+                DbException.class,
+                () -> DbExceptionListenerJni.nativeThrowException(store.getNativeStore(), 0)
+        );
+        assertFalse("Replaced DbExceptionListener was called.", replacedListenerCalled.get());
+    }
+
+    @Test
+    public void exceptionListener_replacing_works() {
+        AtomicBoolean replacedListenerCalled = new AtomicBoolean(false);
+        DbExceptionListener listenerReplaced = e -> replacedListenerCalled.set(true);
+
+        AtomicBoolean newListenerCalled = new AtomicBoolean(false);
+        DbExceptionListener listenerNew = e -> newListenerCalled.set(true);
+
+        store.setDbExceptionListener(listenerReplaced);
+        store.setDbExceptionListener(listenerNew);
+
+        assertThrows(
+                DbException.class,
+                () -> DbExceptionListenerJni.nativeThrowException(store.getNativeStore(), 0)
+        );
+        assertFalse("Replaced DbExceptionListener was called.", replacedListenerCalled.get());
+        assertTrue("New DbExceptionListener was NOT called.", newListenerCalled.get());
+    }
 
     @Test
     public void testThrowExceptions() {

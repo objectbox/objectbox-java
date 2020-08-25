@@ -16,7 +16,6 @@
 
 package io.objectbox;
 
-import io.objectbox.annotation.apihint.Beta;
 import org.greenrobot.essentials.collections.LongHashMap;
 
 import java.io.Closeable;
@@ -40,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
+import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
@@ -165,7 +165,7 @@ public class BoxStore implements Closeable {
 
     static native int nativeCleanStaleReadTransactions(long store);
 
-    static native void nativeSetDbExceptionListener(long store, DbExceptionListener dbExceptionListener);
+    static native void nativeSetDbExceptionListener(long store, @Nullable DbExceptionListener dbExceptionListener);
 
     static native void nativeSetDebugFlags(long store, int debugFlags);
 
@@ -1027,10 +1027,12 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * The given listener will be called when an exception is thrown.
-     * This for example allows a central error handling, e.g. a special logging for DB related exceptions.
+     * Sets a listener that will be called when an exception is thrown. Replaces a previously set listener.
+     * Set to {@code null} to remove the listener.
+     * <p>
+     * This for example allows central error handling or special logging for database-related exceptions.
      */
-    public void setDbExceptionListener(DbExceptionListener dbExceptionListener) {
+    public void setDbExceptionListener(@Nullable DbExceptionListener dbExceptionListener) {
         nativeSetDbExceptionListener(handle, dbExceptionListener);
     }
 
