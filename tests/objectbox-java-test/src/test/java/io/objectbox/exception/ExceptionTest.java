@@ -77,7 +77,7 @@ public class ExceptionTest extends AbstractObjectBoxTest {
             //noinspection BusyWait
             Thread.sleep(300);
         }
-        assertEquals("Listener weak reference was released", 0, triesClearWeakRef);
+        assertEquals("Failed to keep weak reference to listener", 0, triesClearWeakRef);
 
         // Throw, listener should be called.
         weakRefListenerCalled = false;
@@ -99,7 +99,7 @@ public class ExceptionTest extends AbstractObjectBoxTest {
             //noinspection BusyWait
             Thread.sleep(300);
         }
-        assertTrue("Listener weak reference was NOT released", triesClearWeakRef > 0);
+        assertTrue("Failed to release weak reference to listener", triesClearWeakRef > 0);
 
         // Throw, listener should not be called.
         weakRefListenerCalled = false;
@@ -122,7 +122,7 @@ public class ExceptionTest extends AbstractObjectBoxTest {
                 DbException.class,
                 () -> DbExceptionListenerJni.nativeThrowException(store.getNativeStore(), 0)
         );
-        assertFalse("Replaced DbExceptionListener was called.", replacedListenerCalled.get());
+        assertFalse("Should not have called removed DbExceptionListener.", replacedListenerCalled.get());
     }
 
     @Test
@@ -140,8 +140,8 @@ public class ExceptionTest extends AbstractObjectBoxTest {
                 DbException.class,
                 () -> DbExceptionListenerJni.nativeThrowException(store.getNativeStore(), 0)
         );
-        assertFalse("Replaced DbExceptionListener was called.", replacedListenerCalled.get());
-        assertTrue("New DbExceptionListener was NOT called.", newListenerCalled.get());
+        assertFalse("Should not have called replaced DbExceptionListener.", replacedListenerCalled.get());
+        assertTrue("Failed to call new DbExceptionListener.", newListenerCalled.get());
     }
 
     @Test
