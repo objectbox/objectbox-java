@@ -18,6 +18,7 @@ package io.objectbox.exception;
 
 import org.junit.Test;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,6 +45,69 @@ public class ExceptionTest extends AbstractObjectBoxTest {
     public void exceptionListener_closedStore_works() {
         store.close();
         store.setDbExceptionListener(e -> System.out.println("This is never called"));
+    }
+
+    private static boolean weakRefListenerCalled = false;
+
+    @Test
+    public void exceptionListener_noLocalRef_works() throws InterruptedException {
+        // Note: do not use lambda, it would keep a reference to this class
+        // and prevent garbage collection of the listener.
+        //noinspection Convert2Lambda
+        DbExceptionListener listenerNoRef = new DbExceptionListener() {
+            @Override
+            public void onDbException(Exception e) {
+                System.out.println("Listener without strong reference is called");
+                weakRefListenerCalled = true;
+            }
+        };
+        WeakReference<DbExceptionListener> weakReference = new WeakReference<>(listenerNoRef);
+
+        // Set and clear local reference.
+        store.setDbExceptionListener(listenerNoRef);
+        //noinspection UnusedAssignment
+        listenerNoRef = null;
+
+        // Try and fail to release weak reference.
+        int triesClearWeakRef = 5;
+        while (weakReference.get() != null) {
+            if (--triesClearWeakRef == 0) break;
+            System.out.println("Suggesting GC");
+            System.gc();
+            //noinspection BusyWait
+            Thread.sleep(300);
+        }
+        assertEquals("Listener weak reference was released", 0, triesClearWeakRef);
+
+        // Throw, listener should be called.
+        weakRefListenerCalled = false;
+        assertThrows(
+                DbException.class,
+                () -> DbExceptionListenerJni.nativeThrowException(store.getNativeStore(), 0)
+        );
+        assertTrue(weakRefListenerCalled);
+
+        // Remove reference from native side.
+        store.setDbExceptionListener(null);
+
+        // Try and succeed to release weak reference.
+        triesClearWeakRef = 5;
+        while (weakReference.get() != null) {
+            if (--triesClearWeakRef == 0) break;
+            System.out.println("Suggesting GC");
+            System.gc();
+            //noinspection BusyWait
+            Thread.sleep(300);
+        }
+        assertTrue("Listener weak reference was NOT released", triesClearWeakRef > 0);
+
+        // Throw, listener should not be called.
+        weakRefListenerCalled = false;
+        assertThrows(
+                DbException.class,
+                () -> DbExceptionListenerJni.nativeThrowException(store.getNativeStore(), 0)
+        );
+        assertFalse(weakRefListenerCalled);
     }
 
     @Test
