@@ -41,6 +41,12 @@ public class ExceptionTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void exceptionListener_closedStore_works() {
+        store.close();
+        store.setDbExceptionListener(e -> System.out.println("This is never called"));
+    }
+
+    @Test
     public void exceptionListener_removing_works() {
         AtomicBoolean replacedListenerCalled = new AtomicBoolean(false);
         DbExceptionListener listenerRemoved = e -> replacedListenerCalled.set(true);
