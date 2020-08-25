@@ -51,18 +51,27 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
         Query<TestEntity> query = box.query().in(simpleInt, valuesInt).build();
         assertEquals(0, query.count());
 
+        // Initial data on subscription.
         query.subscribe().observer(this);
         assertLatchCountedDown(latch, 5);
         assertEquals(1, receivedChanges.size());
         assertEquals(0, receivedChanges.get(0).size());
 
+        // On put.
         receivedChanges.clear();
         latch = new CountDownLatch(1);
         putTestEntitiesScalars();
         assertLatchCountedDown(latch, 5);
-
         assertEquals(1, receivedChanges.size());
         assertEquals(3, receivedChanges.get(0).size());
+
+        // On remove all.
+        receivedChanges.clear();
+        latch = new CountDownLatch(1);
+        box.removeAll();
+        assertLatchCountedDown(latch, 5);
+        assertEquals(1, receivedChanges.size());
+        assertEquals(0, receivedChanges.get(0).size());
     }
 
     @Test
