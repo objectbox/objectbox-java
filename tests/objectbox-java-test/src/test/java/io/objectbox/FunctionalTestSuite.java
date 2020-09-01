@@ -29,6 +29,7 @@ import io.objectbox.relation.ToManyTest;
 import io.objectbox.relation.ToOneTest;
 import io.objectbox.sync.ConnectivityMonitorTest;
 import io.objectbox.sync.PlatformTest;
+import io.objectbox.sync.SyncTest;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -55,6 +56,7 @@ import org.junit.runners.Suite.SuiteClasses;
         QueryTest.class,
         RelationTest.class,
         RelationEagerTest.class,
+        SyncTest.class,
         ToManyStandaloneTest.class,
         ToManyTest.class,
         ToOneTest.class,
