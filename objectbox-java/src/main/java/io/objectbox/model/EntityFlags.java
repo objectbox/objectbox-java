@@ -27,8 +27,13 @@ public final class EntityFlags {
    * Use the default (no arguments) constructor to create entities
    */
   public static final int USE_NO_ARG_CONSTRUCTOR = 1;
+  /**
+   * Enable "data synchronization" for this entity type: objects will be synced with other stores over the network.
+   * It's possible to have local-only (non-synced) types and synced types in the same store (schema/data model).
+   */
+  public static final int SYNC_ENABLED = 2;
 
-  public static final String[] names = { "USE_NO_ARG_CONSTRUCTOR", };
+  public static final String[] names = { "USE_NO_ARG_CONSTRUCTOR", "SYNC_ENABLED", };
 
   public static String name(int e) { return names[e - USE_NO_ARG_CONSTRUCTOR]; }
 }
