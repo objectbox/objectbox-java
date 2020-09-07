@@ -57,10 +57,6 @@ public class SyncClientImpl implements SyncClient {
         }
 
         setLoginCredentials(builder.credentials);
-
-        if (!builder.manualStart) {
-            start();
-        }
     }
 
     @Override

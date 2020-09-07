@@ -25,7 +25,6 @@ public class SyncBuilder {
     @Nullable
     String[] trustedCertPaths;
     boolean uncommittedAcks;
-    boolean manualStart;
 
     RequestUpdatesMode requestUpdatesMode = RequestUpdatesMode.AUTO;
 
@@ -103,18 +102,6 @@ public class SyncBuilder {
         return this;
     }
 
-
-    /**
-     * Prevents the client from starting (connecting, logging in, syncing) automatically.
-     * It will need to be started manually later.
-     *
-     * @see SyncClient#start()
-     */
-    public SyncBuilder manualStart() {
-        manualStart = true;
-        return this;
-    }
-
     /**
      * Sets a listener to observe sync events like login or sync completion.
      * This listener can also be set (or removed) on the sync client directly.
@@ -137,11 +124,20 @@ public class SyncBuilder {
         return this;
     }
 
+    /**
+     * Builds and returns a Sync client ready to {@link SyncClient#start()}.
+     */
     public SyncClient build() {
-        if (credentials == null) {
-            throw new IllegalStateException("Credentials are required.");
-        }
         return new SyncClientImpl(this);
+    }
+
+    /**
+     * Builds, {@link SyncClient#start() starts} and returns a Sync client.
+     */
+    public SyncClient buildAndStart() {
+        SyncClient syncClient = build();
+        syncClient.start();
+        return syncClient;
     }
 
     private void checkNotNull(Object object, String message) {
