@@ -3,26 +3,26 @@ package io.objectbox.sync;
 import io.objectbox.annotation.apihint.Experimental;
 
 /**
- * Use the static helper methods to build sync credentials, for example {@link #apiKey SyncCredentials.apiKey("key")}.
+ * Use the static helper methods to build Sync credentials,
+ * for example {@link #sharedSecret(String) SyncCredentials.sharedSecret("secret")}.
  */
 @SuppressWarnings("unused")
 @Experimental
 public class SyncCredentials {
 
     /**
-     * Authenticate with a pre-shared key.
-     *
-     * @param apiKey will be UTF-8 encoded
+     * Authenticate with a shared secret. This could be a passphrase, big number or randomly chosen bytes.
+     * The string is expected to use UTF-8 characters.
      */
-    public static SyncCredentials apiKey(String apiKey) {
-        return new SyncCredentialsToken(CredentialsType.API_KEY, apiKey);
+    public static SyncCredentials sharedSecret(String secret) {
+        return new SyncCredentialsToken(CredentialsType.SHARED_SECRET, secret);
     }
 
     /**
-     * Authenticate with a pre-shared key.
+     * Authenticate with a shared secret. This could be a passphrase, big number or randomly chosen bytes.
      */
-    public static SyncCredentials apiKey(byte[] apiKey) {
-        return new SyncCredentialsToken(CredentialsType.API_KEY, apiKey);
+    public static SyncCredentials sharedSecret(byte[] secret) {
+        return new SyncCredentialsToken(CredentialsType.SHARED_SECRET, secret);
     }
 
     /**
@@ -34,7 +34,7 @@ public class SyncCredentials {
     }
 
     /**
-     * No authentication, insecure. Use only for development and testing purposes.
+     * No authentication, unsecured. Use only for development and testing purposes.
      */
     public static SyncCredentials none() {
         return new SyncCredentialsToken(CredentialsType.NONE);
@@ -45,7 +45,7 @@ public class SyncCredentials {
 
         NONE(0),
 
-        API_KEY(1),
+        SHARED_SECRET(1),
 
         GOOGLE(2);
 
