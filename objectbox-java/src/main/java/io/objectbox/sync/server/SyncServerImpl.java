@@ -2,7 +2,7 @@ package io.objectbox.sync.server;
 
 import io.objectbox.InternalAccess;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.sync.SyncChangesListener;
+import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.SyncCredentials;
 import io.objectbox.sync.SyncCredentialsToken;
 
@@ -19,7 +19,7 @@ public class SyncServerImpl implements SyncServer {
     private volatile long handle;
 
     @Nullable
-    private volatile SyncChangesListener syncChangesListener;
+    private volatile SyncChangeListener syncChangeListener;
 
     SyncServerImpl(SyncServerBuilder builder) {
         this.url = builder.url;
@@ -71,15 +71,15 @@ public class SyncServerImpl implements SyncServer {
     }
 
     @Override
-    public void setSyncChangesListener(SyncChangesListener changesListener) {
+    public void setSyncChangesListener(SyncChangeListener changesListener) {
         checkNotNull(changesListener, "Listener must not be null. Use removeSyncChangesListener to remove existing listener.");
-        this.syncChangesListener = changesListener;
+        this.syncChangeListener = changesListener;
         nativeSetSyncChangesListener(handle, changesListener);
     }
 
     @Override
     public void removeSyncChangesListener() {
-        this.syncChangesListener = null;
+        this.syncChangeListener = null;
         nativeSetSyncChangesListener(handle, null);
     }
 
@@ -136,6 +136,6 @@ public class SyncServerImpl implements SyncServer {
 
     private native String nativeGetStatsString(long handle);
 
-    private native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangesListener changesListener);
+    private native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangeListener changesListener);
 
 }

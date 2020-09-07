@@ -2,7 +2,7 @@ package io.objectbox.sync.server;
 
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.Sync;
-import io.objectbox.sync.SyncChangesListener;
+import io.objectbox.sync.listener.SyncChangeListener;
 
 import java.io.Closeable;
 
@@ -34,12 +34,12 @@ public interface SyncServer extends Closeable {
     String getStatsString();
 
     /**
-     * Sets a {@link SyncChangesListener}. Replaces a previously set listener.
+     * Sets a {@link SyncChangeListener}. Replaces a previously set listener.
      */
-    void setSyncChangesListener(SyncChangesListener listener);
+    void setSyncChangesListener(SyncChangeListener listener);
 
     /**
-     * Removes a previously set {@link SyncChangesListener}. Does nothing if no listener was set.
+     * Removes a previously set {@link SyncChangeListener}. Does nothing if no listener was set.
      */
     void removeSyncChangesListener();
 

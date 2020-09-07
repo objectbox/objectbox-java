@@ -1,9 +1,10 @@
 package io.objectbox.sync;
 
 import io.objectbox.annotation.apihint.Experimental;
+import io.objectbox.sync.listener.SyncListener;
 
 /**
- * Codes used by {@link SyncClientListener#onLoginFailure(long)}.
+ * Codes used by {@link SyncListener#onLoginFailed(long)}.
  */
 @Experimental
 public class SyncLoginCodes {

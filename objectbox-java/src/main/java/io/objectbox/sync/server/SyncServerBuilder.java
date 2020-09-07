@@ -2,7 +2,7 @@ package io.objectbox.sync.server;
 
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Experimental;
-import io.objectbox.sync.SyncChangesListener;
+import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.SyncCredentials;
 
 import javax.annotation.Nullable;
@@ -22,7 +22,7 @@ public class SyncServerBuilder {
     final List<PeerInfo> peers = new ArrayList<>();
 
     @Nullable String certificatePath;
-    SyncChangesListener changesListener;
+    SyncChangeListener changesListener;
     boolean manualStart;
 
     public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
@@ -67,9 +67,9 @@ public class SyncServerBuilder {
      * Sets a listener to observe fine granular changes happening during sync.
      * This listener can also be set (or removed) on the sync client directly.
      *
-     * @see SyncServer#setSyncChangesListener(SyncChangesListener)
+     * @see SyncServer#setSyncChangesListener(SyncChangeListener)
      */
-    public SyncServerBuilder changesListener(SyncChangesListener changesListener) {
+    public SyncServerBuilder changesListener(SyncChangeListener changesListener) {
         this.changesListener = changesListener;
         return this;
     }

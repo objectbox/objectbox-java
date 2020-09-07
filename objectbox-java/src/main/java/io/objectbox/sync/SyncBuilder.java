@@ -5,6 +5,11 @@ import javax.annotation.Nullable;
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.internal.Platform;
+import io.objectbox.sync.listener.SyncChangeListener;
+import io.objectbox.sync.listener.SyncCompletedListener;
+import io.objectbox.sync.listener.SyncConnectionListener;
+import io.objectbox.sync.listener.SyncListener;
+import io.objectbox.sync.listener.SyncLoginListener;
 
 /**
  * A builder to create a {@link SyncClient}; the builder itself should be created via
@@ -19,8 +24,11 @@ public class SyncBuilder {
     final String url;
     final SyncCredentials credentials;
 
-    SyncClientListener listener;
-    SyncChangesListener changesListener;
+    @Nullable SyncLoginListener loginListener;
+    @Nullable SyncCompletedListener completedListener;
+    @Nullable SyncChangeListener changeListener;
+    @Nullable SyncConnectionListener connectionListener;
+    @Nullable SyncListener listener;
 
     @Nullable
     String[] trustedCertPaths;
@@ -103,24 +111,59 @@ public class SyncBuilder {
     }
 
     /**
-     * Sets a listener to observe sync events like login or sync completion.
-     * This listener can also be set (or removed) on the sync client directly.
-     *
-     * @see SyncClient#setSyncListener(SyncClientListener)
+     * Sets a listener to only observe Sync login events.
+     * <p>
+     * This listener can also be {@link SyncClient#setSyncLoginListener(SyncLoginListener) set or removed}
+     * on the Sync client directly.
      */
-    public SyncBuilder listener(SyncClientListener listener) {
-        this.listener = listener;
+    public SyncBuilder loginListener(SyncLoginListener loginListener) {
+        this.loginListener = loginListener;
+        return this;
+    }
+
+    /**
+     * Sets a listener to only observe Sync completed events.
+     * <p>
+     * This listener can also be {@link SyncClient#setSyncCompletedListener(SyncCompletedListener) set or removed}
+     * on the Sync client directly.
+     */
+    public SyncBuilder completedListener(SyncCompletedListener completedListener) {
+        this.completedListener = completedListener;
         return this;
     }
 
     /**
      * Sets a listener to observe fine granular changes happening during sync.
-     * This listener can also be set (or removed) on the sync client directly.
-     *
-     * @see SyncClient#setSyncChangesListener(SyncChangesListener)
+     * <p>
+     * This listener can also be {@link SyncClient#setSyncChangeListener(SyncChangeListener) set or removed}
+     * on the Sync client directly.
      */
-    public SyncBuilder changesListener(SyncChangesListener changesListener) {
-        this.changesListener = changesListener;
+    public SyncBuilder changeListener(SyncChangeListener changeListener) {
+        this.changeListener = changeListener;
+        return this;
+    }
+
+    /**
+     * Sets a listener to only observe Sync connection events.
+     * <p>
+     * This listener can also be {@link SyncClient#setSyncConnectionListener(SyncConnectionListener) set or removed}
+     * on the Sync client directly.
+     */
+    public SyncBuilder connectionListener(SyncConnectionListener connectionListener) {
+        this.connectionListener = connectionListener;
+        return this;
+    }
+
+    /**
+     * Sets a listener to observe all Sync events like login or sync completion.
+     * <p>
+     * Note: this will replace any login, completed or connection listener.
+     * <p>
+     * This listener can also be {@link SyncClient#setSyncListener(SyncListener) set or removed}
+     * on the Sync client directly.
+     */
+    public SyncBuilder listener(SyncListener listener) {
+        this.listener = listener;
         return this;
     }
 
