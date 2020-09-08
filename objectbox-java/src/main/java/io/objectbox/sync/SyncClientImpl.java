@@ -1,5 +1,6 @@
 package io.objectbox.sync;
 
+import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
@@ -16,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 @Internal
 public class SyncClientImpl implements SyncClient {
 
+    @Nullable
+    private BoxStore boxStore;
     private final String serverUrl;
     private final InternalListener internalListener;
     @Nullable
@@ -28,6 +31,7 @@ public class SyncClientImpl implements SyncClient {
     private volatile boolean started;
 
     SyncClientImpl(SyncBuilder builder) {
+        this.boxStore = builder.boxStore;
         this.serverUrl = builder.url;
         this.connectivityMonitor = builder.platform.getConnectivityMonitor();
 
@@ -57,6 +61,9 @@ public class SyncClientImpl implements SyncClient {
         }
 
         setLoginCredentials(builder.credentials);
+
+        // If created successfully, let store keep a reference so the caller does not have to.
+        builder.boxStore.setSyncClient(this);
 
         if (!builder.manualStart) {
             start();
@@ -151,12 +158,22 @@ public class SyncClientImpl implements SyncClient {
 
     @Override
     public void close() {
-        if (connectivityMonitor != null) {
-            connectivityMonitor.removeObserver();
-        }
-
         long handleToDelete;
         synchronized (this) {
+            if (connectivityMonitor != null) {
+                connectivityMonitor.removeObserver();
+            }
+
+            // Remove instance reference from store, release store reference.
+            BoxStore boxStore = this.boxStore;
+            if (boxStore != null) {
+                SyncClient syncClient = boxStore.getSyncClient();
+                if (syncClient == this) {
+                    boxStore.setSyncClient(null);
+                }
+                this.boxStore = null;
+            }
+
             handleToDelete = this.handle;
             handle = 0;
         }

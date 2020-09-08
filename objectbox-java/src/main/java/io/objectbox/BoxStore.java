@@ -53,6 +53,7 @@ import io.objectbox.internal.ObjectBoxThreadPool;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.SubscriptionBuilder;
+import io.objectbox.sync.SyncClient;
 
 /**
  * Represents an ObjectBox database and gives you {@link Box}es to get and put Objects of a specific type
@@ -243,6 +244,12 @@ public class BoxStore implements Closeable {
     private final int queryAttempts;
 
     private final TxCallback<?> failedReadTxAttemptCallback;
+
+    /**
+     * Keeps a reference so the library user does not have to.
+     */
+    @Nullable
+    private SyncClient syncClient;
 
     BoxStore(BoxStoreBuilder builder) {
         context = builder.context;
@@ -1163,4 +1170,15 @@ public class BoxStore implements Closeable {
         return handle;
     }
 
+    /**
+     * Returns the {@link SyncClient} associated with this store. To create one see {@link io.objectbox.sync.Sync Sync}.
+     */
+    @Nullable
+    public SyncClient getSyncClient() {
+        return syncClient;
+    }
+
+    public void setSyncClient(@Nullable SyncClient syncClient) {
+        this.syncClient = syncClient;
+    }
 }

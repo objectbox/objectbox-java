@@ -141,6 +141,9 @@ public class SyncBuilder {
         if (credentials == null) {
             throw new IllegalStateException("Credentials are required.");
         }
+        if (boxStore.getSyncClient() != null) {
+            throw new IllegalStateException("The given store is already associated with a Sync client, close it first.");
+        }
         return new SyncClientImpl(this);
     }
 
