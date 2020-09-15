@@ -38,11 +38,15 @@ import io.objectbox.relation.RelationInfo;
 import io.objectbox.relation.ToOne;
 
 /**
- * A repeatable query returning entities.
+ * A repeatable Query returning the latest matching Objects.
+ * <p>
+ * Use {@link #find()} or related methods to fetch the latest results from the BoxStore.
+ * <p>
+ * Use {@link #property(Property)} to only return values or an aggregate of a single Property.
+ * <p>
+ * See the <a href="https://docs.objectbox.io/queries">Queries documentation</a> for details.
  *
- * @param <T> The entity class the query will return results for.
- * @author Markus
- * @see QueryBuilder
+ * @param <T> Entity class for which results are returned.
  */
 @SuppressWarnings({"SameParameterValue", "UnusedReturnValue", "WeakerAccess"})
 public class Query<T> implements Closeable {
