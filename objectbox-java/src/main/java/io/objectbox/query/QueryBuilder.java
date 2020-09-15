@@ -47,7 +47,6 @@ import io.objectbox.relation.RelationInfo;
  * @param <T> Entity class associated with this query builder.
  */
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
-@Experimental
 public class QueryBuilder<T> implements Closeable {
 
     public enum StringOrder {
