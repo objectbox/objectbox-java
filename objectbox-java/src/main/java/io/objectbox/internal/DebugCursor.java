@@ -21,6 +21,7 @@ import java.io.Closeable;
 import io.objectbox.InternalAccess;
 import io.objectbox.Transaction;
 import io.objectbox.annotation.apihint.Beta;
+import io.objectbox.exception.DbException;
 
 /** Not intended for normal use. */
 @Beta
@@ -40,7 +41,9 @@ public class DebugCursor implements Closeable {
 
     public static DebugCursor create(Transaction tx) {
         long txHandle = InternalAccess.getHandle(tx);
-        return new DebugCursor(tx, nativeCreate(txHandle));
+        long handle = nativeCreate(txHandle);
+        if(handle == 0) throw new DbException("Could not create native debug cursor");
+        return new DebugCursor(tx, handle);
     }
 
     public DebugCursor(Transaction tx, long handle) {

@@ -19,26 +19,25 @@ package io.objectbox.query;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.TestEntity;
 import io.objectbox.reactive.DataObserver;
-import io.objectbox.reactive.DataTransformer;
 
 
 import static io.objectbox.TestEntity_.simpleInt;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-public class QueryObserverTest extends AbstractObjectBoxTest implements DataObserver<List<TestEntity>> {
+public class QueryObserverTest extends AbstractObjectBoxTest {
 
     private Box<TestEntity> box;
-    private List<List<TestEntity>> receivedChanges = new CopyOnWriteArrayList<>();
-    private CountDownLatch latch = new CountDownLatch(1);
 
     @Before
     public void setUpBox() {
@@ -51,18 +50,28 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
         Query<TestEntity> query = box.query().in(simpleInt, valuesInt).build();
         assertEquals(0, query.count());
 
-        query.subscribe().observer(this);
-        assertLatchCountedDown(latch, 5);
-        assertEquals(1, receivedChanges.size());
-        assertEquals(0, receivedChanges.get(0).size());
+        // Initial data on subscription.
+        TestObserver<List<TestEntity>> testObserver = new TestObserver<>();
+        query.subscribe().observer(testObserver);
+        testObserver.assertLatchCountedDown();
+        assertEquals(1, testObserver.receivedChanges.size());
+        assertEquals(0, testObserver.receivedChanges.get(0).size());
 
-        receivedChanges.clear();
-        latch = new CountDownLatch(1);
+        // On put.
+        testObserver.receivedChanges.clear();
+        testObserver.resetLatch();
         putTestEntitiesScalars();
-        assertLatchCountedDown(latch, 5);
+        testObserver.assertLatchCountedDown();
+        assertEquals(1, testObserver.receivedChanges.size());
+        assertEquals(3, testObserver.receivedChanges.get(0).size());
 
-        assertEquals(1, receivedChanges.size());
-        assertEquals(3, receivedChanges.get(0).size());
+        // On remove all.
+        testObserver.receivedChanges.clear();
+        testObserver.resetLatch();
+        box.removeAll();
+        testObserver.assertLatchCountedDown();
+        assertEquals(1, testObserver.receivedChanges.size());
+        assertEquals(0, testObserver.receivedChanges.get(0).size());
     }
 
     @Test
@@ -70,15 +79,17 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
         putTestEntitiesScalars();
         int[] valuesInt = {2003, 2007, 2002};
         Query<TestEntity> query = box.query().in(simpleInt, valuesInt).build();
-        query.subscribe().single().observer(this);
-        assertLatchCountedDown(latch, 5);
-        assertEquals(1, receivedChanges.size());
-        assertEquals(3, receivedChanges.get(0).size());
 
-        receivedChanges.clear();
+        TestObserver<List<TestEntity>> testObserver = new TestObserver<>();
+        query.subscribe().single().observer(testObserver);
+        testObserver.assertLatchCountedDown();
+        assertEquals(1, testObserver.receivedChanges.size());
+        assertEquals(3, testObserver.receivedChanges.get(0).size());
+
+        testObserver.receivedChanges.clear();
         putTestEntities(1);
         Thread.sleep(20);
-        assertEquals(0, receivedChanges.size());
+        assertEquals(0, testObserver.receivedChanges.size());
     }
 
     @Test
@@ -86,7 +97,7 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
         int[] valuesInt = {2003, 2007, 2002};
         Query<TestEntity> query = box.query().in(simpleInt, valuesInt).build();
         assertEquals(0, query.count());
-        final List<Integer> receivedSums = new ArrayList<>();
+        TestObserver<Integer> testObserver = new TestObserver<>();
 
         query.subscribe().transform(source -> {
             int sum = 0;
@@ -94,29 +105,63 @@ public class QueryObserverTest extends AbstractObjectBoxTest implements DataObse
                 sum += entity.getSimpleInt();
             }
             return sum;
-        }).observer(data -> {
-            receivedSums.add(data);
-            latch.countDown();
-        });
-        assertLatchCountedDown(latch, 5);
+        }).observer(testObserver);
+        testObserver.assertLatchCountedDown();
 
-        latch = new CountDownLatch(1);
+        testObserver.resetLatch();
         putTestEntitiesScalars();
-        assertLatchCountedDown(latch, 5);
+        testObserver.assertLatchCountedDown();
         Thread.sleep(20);
 
-        assertEquals(2, receivedSums.size());
-        assertEquals(0, (int) receivedSums.get(0));
-        assertEquals(2003 + 2007 + 2002, (int) receivedSums.get(1));
+        assertEquals(2, testObserver.receivedChanges.size());
+        assertEquals(0, (int) testObserver.receivedChanges.get(0));
+        assertEquals(2003 + 2007 + 2002, (int) testObserver.receivedChanges.get(1));
     }
 
     private void putTestEntitiesScalars() {
         putTestEntities(10, null, 2000);
     }
 
-    @Override
-    public void onData(List<TestEntity> queryResult) {
-        receivedChanges.add(queryResult);
-        latch.countDown();
+    public static class TestObserver<T> implements DataObserver<T> {
+
+        List<T> receivedChanges = new CopyOnWriteArrayList<>();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        private void log(String message) {
+            System.out.println("TestObserver: " + message);
+        }
+
+        void printEvents() {
+            int count = receivedChanges.size();
+            log("Received " + count + " event(s):");
+            for (int i = 0; i < count; i++) {
+                T receivedChange = receivedChanges.get(i);
+                if (receivedChange instanceof List) {
+                    List<?> list = (List<?>) receivedChange;
+                    log((i + 1) + "/" + count + ": size=" + list.size()
+                            + "; items=" + Arrays.toString(list.toArray()));
+                }
+            }
+        }
+
+        void resetLatch() {
+            latch = new CountDownLatch(1);
+        }
+
+        void assertLatchCountedDown() {
+            try {
+                assertTrue(latch.await(5, TimeUnit.SECONDS));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            printEvents();
+        }
+
+        @Override
+        public void onData(T data) {
+            receivedChanges.add(data);
+            latch.countDown();
+        }
+
     }
 }
