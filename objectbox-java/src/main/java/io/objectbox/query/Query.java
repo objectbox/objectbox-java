@@ -257,8 +257,6 @@ public class Query<T> implements Closeable {
         return new LazyList<>(box, findIds(), false);
     }
 
-    // TODO we might move all those property find methods in a "PropertyQuery" class for divide & conquer.
-
     /**
      * Creates a {@link PropertyQuery} for the given property.
      * <p>
