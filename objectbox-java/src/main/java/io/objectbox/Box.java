@@ -43,7 +43,6 @@ import io.objectbox.relation.RelationInfo;
  * <p>
  * Thread-safe.
  */
-@Beta
 @ThreadSafe
 @SuppressWarnings("WeakerAccess,UnusedReturnValue,unused")
 public class Box<T> {
