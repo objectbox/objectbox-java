@@ -16,7 +16,7 @@
 
 /**
  * Classes to {@link io.objectbox.reactive.SubscriptionBuilder configure}
- * a {@link io.objectbox.reactive.DataSubscription} for observing box or query changes.
+ * a {@link io.objectbox.reactive.DataSubscription} for observing Box or Query changes.
  * <p>
  * For more details look at the documentation of individual classes and
  * <a href="https://docs.objectbox.io/data-observers-and-rx">docs.objectbox.io/data-observers-and-rx</a>.

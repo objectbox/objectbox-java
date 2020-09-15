@@ -16,9 +16,9 @@
 
 /**
  * Annotations to mark a class as an {@link io.objectbox.annotation.Entity @Entity},
- * to specify the {@link io.objectbox.annotation.Id @Id} property,
+ * to specify the {@link io.objectbox.annotation.Id @Id} Property,
  * to create an {@link io.objectbox.annotation.Index @Index} or
- * a {@link io.objectbox.annotation.Transient @Transient} property.
+ * a {@link io.objectbox.annotation.Transient @Transient} Property.
  * <p>
  * For more details look at the documentation of individual classes and
  * <a href="https://docs.objectbox.io/entity-annotations">docs.objectbox.io/entity-annotations</a>.
