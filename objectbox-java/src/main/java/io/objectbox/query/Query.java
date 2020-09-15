@@ -250,11 +250,25 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Find all Objects matching the query without actually loading the Objects. See @{@link LazyList} for details.
+     * Like {@link #findIds()}, but wraps the Object IDs in an unmodifiable {@link LazyList}
+     * so Objects can be retrieved on demand. The LazyList does not cache retrieved Objects, so only basic
+     * {@link List} operations like getting or iterating list items are supported. See {@link LazyList} for details.
      */
+    @Nonnull
     public LazyList<T> findLazy() {
         ensureNoFilterNoComparator();
         return new LazyList<>(box, findIds(), false);
+    }
+
+    /**
+     * Like {@link #findIds()}, but wraps the Object IDs in an unmodifiable, caching {@link LazyList}
+     * so Objects can be retrieved on demand. The LazyList caches retrieved Objects supporting almost
+     * all {@link List} operations, at the expense of used memory. See {@link LazyList} for details.
+     */
+    @Nonnull
+    public LazyList<T> findLazyCached() {
+        ensureNoFilterNoComparator();
+        return new LazyList<>(box, findIds(), true);
     }
 
     /**
@@ -307,15 +321,6 @@ public class Query<T> implements Closeable {
                 }
             }
         });
-    }
-
-    /**
-     * Find all Objects matching the query without actually loading the Objects. See @{@link LazyList} for details.
-     */
-    @Nonnull
-    public LazyList<T> findLazyCached() {
-        ensureNoFilterNoComparator();
-        return new LazyList<>(box, findIds(), true);
     }
 
     void resolveEagerRelations(List<T> entities) {
