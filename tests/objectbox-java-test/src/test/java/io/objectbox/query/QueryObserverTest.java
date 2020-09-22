@@ -29,10 +29,12 @@ import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.TestEntity;
 import io.objectbox.reactive.DataObserver;
+import io.objectbox.reactive.DataSubscription;
 
 
 import static io.objectbox.TestEntity_.simpleInt;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class QueryObserverTest extends AbstractObjectBoxTest {
@@ -42,6 +44,44 @@ public class QueryObserverTest extends AbstractObjectBoxTest {
     @Before
     public void setUpBox() {
         box = getTestEntityBox();
+    }
+
+    @Test
+    public void observer_removeDuringCallback_works() throws InterruptedException {
+        SelfRemovingObserver testObserver = new SelfRemovingObserver();
+        // Note: use onlyChanges to not trigger observer on subscribing.
+        testObserver.dataSubscription = box.query().build()
+                .subscribe()
+                .onlyChanges()
+                .observer(testObserver);
+
+        // Trigger event.
+        putTestEntitiesScalars();
+
+        // Should have gotten past dataSubscription.cancel() without crashing.
+        assertTrue(testObserver.latch.await(5, TimeUnit.SECONDS));
+
+        // Just to make sure: trigger another event, should not be received.
+        testObserver.latch = new CountDownLatch(1);
+        putTestEntitiesScalars();
+        assertFalse(testObserver.latch.await(5, TimeUnit.SECONDS));
+    }
+
+    private static class SelfRemovingObserver implements DataObserver<List<TestEntity>> {
+
+        CountDownLatch latch = new CountDownLatch(1);
+        DataSubscription dataSubscription;
+
+        @Override
+        public void onData(List<TestEntity> data) {
+            if (dataSubscription != null) {
+                System.out.println("Cancelling subscription");
+                dataSubscription.cancel();
+                dataSubscription = null;
+            }
+            // Once here, cancel did not crash.
+            latch.countDown();
+        }
     }
 
     @Test
