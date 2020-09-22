@@ -102,6 +102,10 @@ public class SyncServerImpl implements SyncServer {
         }
     }
 
+    /**
+     * Users of this class should explicitly call {@link #close()} instead to avoid expensive finalization.
+     */
+    @SuppressWarnings("deprecation") // finalize()
     @Override
     protected void finalize() throws Throwable {
         close();
