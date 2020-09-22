@@ -1,10 +1,12 @@
 package io.objectbox.sync.server;
 
+import java.io.Closeable;
+
+import javax.annotation.Nullable;
+
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.Sync;
 import io.objectbox.sync.listener.SyncChangeListener;
-
-import java.io.Closeable;
 
 /**
  * ObjectBox sync server. Build a server with {@link Sync#server}.
@@ -35,13 +37,9 @@ public interface SyncServer extends Closeable {
 
     /**
      * Sets a {@link SyncChangeListener}. Replaces a previously set listener.
+     * Set to {@code null} to remove the listener.
      */
-    void setSyncChangesListener(SyncChangeListener listener);
-
-    /**
-     * Removes a previously set {@link SyncChangeListener}. Does nothing if no listener was set.
-     */
-    void removeSyncChangesListener();
+    void setSyncChangeListener(@Nullable SyncChangeListener listener);
 
     /**
      * Starts the server (e.g. bind to port) and gets everything operational.

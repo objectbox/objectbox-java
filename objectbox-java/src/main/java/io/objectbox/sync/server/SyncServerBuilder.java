@@ -22,7 +22,7 @@ public class SyncServerBuilder {
     final List<PeerInfo> peers = new ArrayList<>();
 
     @Nullable String certificatePath;
-    SyncChangeListener changesListener;
+    SyncChangeListener changeListener;
 
     public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         checkNotNull(boxStore, "BoxStore is required.");
@@ -53,12 +53,12 @@ public class SyncServerBuilder {
 
     /**
      * Sets a listener to observe fine granular changes happening during sync.
-     * This listener can also be set (or removed) on the sync client directly.
-     *
-     * @see SyncServer#setSyncChangesListener(SyncChangeListener)
+     * <p>
+     * This listener can also be {@link SyncServer#setSyncChangeListener(SyncChangeListener) set or removed}
+     * on the Sync server directly.
      */
-    public SyncServerBuilder changesListener(SyncChangeListener changesListener) {
-        this.changesListener = changesListener;
+    public SyncServerBuilder changeListener(SyncChangeListener changeListener) {
+        this.changeListener = changeListener;
         return this;
     }
 

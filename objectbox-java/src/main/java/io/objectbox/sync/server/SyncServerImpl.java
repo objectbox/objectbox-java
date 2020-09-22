@@ -41,8 +41,8 @@ public class SyncServerImpl implements SyncServer {
             nativeAddPeer(handle, peer.url, credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
         }
 
-        if (builder.changesListener != null) {
-            setSyncChangesListener(builder.changesListener);
+        if (builder.changeListener != null) {
+            setSyncChangeListener(builder.changeListener);
         }
     }
 
@@ -67,16 +67,9 @@ public class SyncServerImpl implements SyncServer {
     }
 
     @Override
-    public void setSyncChangesListener(SyncChangeListener changesListener) {
-        checkNotNull(changesListener, "Listener must not be null. Use removeSyncChangesListener to remove existing listener.");
+    public void setSyncChangeListener(@Nullable SyncChangeListener changesListener) {
         this.syncChangeListener = changesListener;
         nativeSetSyncChangesListener(handle, changesListener);
-    }
-
-    @Override
-    public void removeSyncChangesListener() {
-        this.syncChangeListener = null;
-        nativeSetSyncChangesListener(handle, null);
     }
 
     @Override
@@ -106,12 +99,6 @@ public class SyncServerImpl implements SyncServer {
     protected void finalize() throws Throwable {
         close();
         super.finalize();
-    }
-
-    private void checkNotNull(Object object, String message) {
-        if (object == null) {
-            throw new IllegalArgumentException(message);
-        }
     }
 
     private static native long nativeCreate(long storeHandle, String uri, @Nullable String certificatePath);
