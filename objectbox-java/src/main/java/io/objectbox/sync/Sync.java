@@ -13,6 +13,13 @@ import io.objectbox.sync.server.SyncServerBuilder;
 public final class Sync {
 
     /**
+     * Returns true if the included native (JNI) ObjectBox library supports sync.
+     */
+    public static boolean isAvailable() {
+        return BoxStore.isSyncAvailable();
+    }
+
+    /**
      * Start building a sync client. Requires the BoxStore that should be synced with the server,
      * the URL and port of the server to connect to and credentials to authenticate against the server.
      */
