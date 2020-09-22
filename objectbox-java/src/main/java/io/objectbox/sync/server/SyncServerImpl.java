@@ -44,10 +44,6 @@ public class SyncServerImpl implements SyncServer {
         if (builder.changesListener != null) {
             setSyncChangesListener(builder.changesListener);
         }
-
-        if (!builder.manualStart) {
-            start();
-        }
     }
 
     @Override

@@ -23,7 +23,6 @@ public class SyncServerBuilder {
 
     @Nullable String certificatePath;
     SyncChangeListener changesListener;
-    boolean manualStart;
 
     public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         checkNotNull(boxStore, "BoxStore is required.");
@@ -49,17 +48,6 @@ public class SyncServerBuilder {
     public SyncServerBuilder authenticatorCredentials(SyncCredentials authenticatorCredentials) {
         checkNotNull(authenticatorCredentials, "Authenticator credentials must not be null.");
         credentials.add(authenticatorCredentials);
-        return this;
-    }
-
-    /**
-     * Prevents the server from starting automatically.
-     * It will need to be started manually later.
-     *
-     * @see SyncServer#start()
-     */
-    public SyncServerBuilder manualStart() {
-        manualStart = true;
         return this;
     }
 
@@ -90,6 +78,8 @@ public class SyncServerBuilder {
     }
 
     /**
+     * Builds and returns a Sync server ready to {@link SyncServer#start()}.
+     *
      * Note: this clears all previously set authenticator credentials.
      */
     public SyncServer build() {
@@ -97,6 +87,15 @@ public class SyncServerBuilder {
             throw new IllegalStateException("At least one authenticator is required.");
         }
         return new SyncServerImpl(this);
+    }
+
+    /**
+     * Builds, {@link SyncServer#start() starts} and returns a Sync server.
+     */
+    public SyncServer buildAndStart() {
+        SyncServer syncServer = build();
+        syncServer.start();
+        return syncServer;
     }
 
     private void checkNotNull(Object object, String message) {
