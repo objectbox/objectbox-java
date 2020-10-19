@@ -263,8 +263,11 @@ public class SyncClientImpl implements SyncClient {
     /** (Optional) Pause sync updates. */
     private native void nativeCancelUpdates(long handle);
 
-    /** Hints to the native client that an active network connection is available. */
-    private native void nativeTriggerReconnect(long handle);
+    /**
+     *  Hints to the native client that an active network connection is available.
+     *  Returns true if the native client was disconnected (and will try to re-connect).
+     */
+    private native boolean nativeTriggerReconnect(long handle);
 
     /**
      * Methods on this class must match those expected by JNI implementation.
