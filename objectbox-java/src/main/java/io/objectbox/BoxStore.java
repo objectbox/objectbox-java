@@ -1178,7 +1178,7 @@ public class BoxStore implements Closeable {
         return syncClient;
     }
 
-    public void setSyncClient(@Nullable SyncClient syncClient) {
+    void setSyncClient(@Nullable SyncClient syncClient) {
         this.syncClient = syncClient;
     }
 }

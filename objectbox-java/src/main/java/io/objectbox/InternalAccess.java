@@ -17,6 +17,7 @@
 package io.objectbox;
 
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.sync.SyncClient;
 
 @Internal
 public class InternalAccess {
@@ -34,6 +35,10 @@ public class InternalAccess {
 
     public static long getHandle(Transaction tx) {
         return tx.internalHandle();
+    }
+
+    public static void setSyncClient(BoxStore boxStore, SyncClient syncClient) {
+        boxStore.setSyncClient(syncClient);
     }
 
     public static <T> void releaseReader(Box<T> box, Cursor<T> reader) {

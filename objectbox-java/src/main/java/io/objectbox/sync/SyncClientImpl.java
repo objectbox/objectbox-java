@@ -63,7 +63,7 @@ public class SyncClientImpl implements SyncClient {
         setLoginCredentials(builder.credentials);
 
         // If created successfully, let store keep a reference so the caller does not have to.
-        builder.boxStore.setSyncClient(this);
+        InternalAccess.setSyncClient(builder.boxStore, this);
 
         if (!builder.manualStart) {
             start();
@@ -169,7 +169,7 @@ public class SyncClientImpl implements SyncClient {
             if (boxStore != null) {
                 SyncClient syncClient = boxStore.getSyncClient();
                 if (syncClient == this) {
-                    boxStore.setSyncClient(null);
+                    InternalAccess.setSyncClient(boxStore, null);
                 }
                 this.boxStore = null;
             }
