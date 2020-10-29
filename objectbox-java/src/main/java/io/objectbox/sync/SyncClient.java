@@ -2,8 +2,15 @@ package io.objectbox.sync;
 
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.SyncBuilder.RequestUpdatesMode;
+import io.objectbox.sync.listener.SyncChangeListener;
+import io.objectbox.sync.listener.SyncCompletedListener;
+import io.objectbox.sync.listener.SyncConnectionListener;
+import io.objectbox.sync.listener.SyncListener;
+import io.objectbox.sync.listener.SyncLoginListener;
 
 import java.io.Closeable;
+
+import javax.annotation.Nullable;
 
 /**
  * ObjectBox sync client. Build a client with {@link Sync#client}.
@@ -40,24 +47,35 @@ public interface SyncClient extends Closeable {
     long getLastLoginCode();
 
     /**
-     * Sets a {@link SyncClientListener}. Replaces a previously set listener.
+     * Sets a listener to observe login events. Replaces a previously set listener.
+     * Set to {@code null} to remove the listener.
      */
-    void setSyncListener(SyncClientListener listener);
+    void setSyncLoginListener(@Nullable SyncLoginListener listener);
 
     /**
-     * Removes a previously set {@link SyncClientListener}. Does nothing if no listener was set.
+     * Sets a listener to observe Sync completed events. Replaces a previously set listener.
+     * Set to {@code null} to remove the listener.
      */
-    void removeSyncListener();
+    void setSyncCompletedListener(@Nullable SyncCompletedListener listener);
 
     /**
-     * Sets a {@link SyncChangesListener}. Replaces a previously set listener.
+     * Sets a listener to observe Sync connection events. Replaces a previously set listener.
+     * Set to {@code null} to remove the listener.
      */
-    void setSyncChangesListener(SyncChangesListener listener);
+    void setSyncConnectionListener(@Nullable SyncConnectionListener listener);
 
     /**
-     * Removes a previously set {@link SyncChangesListener}. Does nothing if no listener was set.
+     * Sets a listener to observe all Sync events.
+     * Replaces all other previously set listeners, except a {@link SyncChangeListener}.
+     * Set to {@code null} to remove the listener.
      */
-    void removeSyncChangesListener();
+    void setSyncListener(@Nullable SyncListener listener);
+
+    /**
+     * Sets a {@link SyncChangeListener}. Replaces a previously set listener.
+     * Set to {@code null} to remove the listener.
+     */
+    void setSyncChangeListener(@Nullable SyncChangeListener listener);
 
     /**
      * Updates the login credentials. This should not be required during regular use.

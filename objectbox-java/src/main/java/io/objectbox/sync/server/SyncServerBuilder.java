@@ -2,7 +2,7 @@ package io.objectbox.sync.server;
 
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Experimental;
-import io.objectbox.sync.SyncChangesListener;
+import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.SyncCredentials;
 
 import javax.annotation.Nullable;
@@ -22,8 +22,7 @@ public class SyncServerBuilder {
     final List<PeerInfo> peers = new ArrayList<>();
 
     @Nullable String certificatePath;
-    SyncChangesListener changesListener;
-    boolean manualStart;
+    SyncChangeListener changeListener;
 
     public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         checkNotNull(boxStore, "BoxStore is required.");
@@ -53,24 +52,13 @@ public class SyncServerBuilder {
     }
 
     /**
-     * Prevents the server from starting automatically.
-     * It will need to be started manually later.
-     *
-     * @see SyncServer#start()
-     */
-    public SyncServerBuilder manualStart() {
-        manualStart = true;
-        return this;
-    }
-
-    /**
      * Sets a listener to observe fine granular changes happening during sync.
-     * This listener can also be set (or removed) on the sync client directly.
-     *
-     * @see SyncServer#setSyncChangesListener(SyncChangesListener)
+     * <p>
+     * This listener can also be {@link SyncServer#setSyncChangeListener(SyncChangeListener) set or removed}
+     * on the Sync server directly.
      */
-    public SyncServerBuilder changesListener(SyncChangesListener changesListener) {
-        this.changesListener = changesListener;
+    public SyncServerBuilder changeListener(SyncChangeListener changeListener) {
+        this.changeListener = changeListener;
         return this;
     }
 
@@ -90,6 +78,8 @@ public class SyncServerBuilder {
     }
 
     /**
+     * Builds and returns a Sync server ready to {@link SyncServer#start()}.
+     *
      * Note: this clears all previously set authenticator credentials.
      */
     public SyncServer build() {
@@ -97,6 +87,15 @@ public class SyncServerBuilder {
             throw new IllegalStateException("At least one authenticator is required.");
         }
         return new SyncServerImpl(this);
+    }
+
+    /**
+     * Builds, {@link SyncServer#start() starts} and returns a Sync server.
+     */
+    public SyncServer buildAndStart() {
+        SyncServer syncServer = build();
+        syncServer.start();
+        return syncServer;
     }
 
     private void checkNotNull(Object object, String message) {

@@ -3,6 +3,15 @@ package io.objectbox.sync;
 import org.junit.Test;
 
 
+import javax.annotation.Nullable;
+
+import io.objectbox.sync.listener.SyncChangeListener;
+import io.objectbox.sync.listener.SyncCompletedListener;
+import io.objectbox.sync.listener.SyncConnectionListener;
+import io.objectbox.sync.listener.SyncListener;
+import io.objectbox.sync.listener.SyncLoginListener;
+
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
@@ -105,23 +114,23 @@ public class ConnectivityMonitorTest {
         }
 
         @Override
-        public void setSyncListener(SyncClientListener listener) {
-
+        public void setSyncLoginListener(@Nullable SyncLoginListener listener) {
         }
 
         @Override
-        public void removeSyncListener() {
-
+        public void setSyncCompletedListener(@Nullable SyncCompletedListener listener) {
         }
 
         @Override
-        public void setSyncChangesListener(SyncChangesListener listener) {
-
+        public void setSyncConnectionListener(@Nullable SyncConnectionListener listener) {
         }
 
         @Override
-        public void removeSyncChangesListener() {
+        public void setSyncListener(@Nullable SyncListener listener) {
+        }
 
+        @Override
+        public void setSyncChangeListener(@Nullable SyncChangeListener listener) {
         }
 
         @Override

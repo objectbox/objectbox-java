@@ -1,10 +1,12 @@
 package io.objectbox.sync;
 
 import io.objectbox.annotation.apihint.Experimental;
+import io.objectbox.sync.listener.SyncChangeListener;
 
+// Note: this class is expected to be in this package by JNI, check before modifying/removing it.
 /**
  * A collection of changes made to one entity type during a sync transaction.
- * Delivered via {@link SyncChangesListener}.
+ * Delivered via {@link SyncChangeListener}.
  * IDs of changed objects are available via {@link #getChangedIds()} and those of removed objects via
  * {@link #getRemovedIds()}.
  */

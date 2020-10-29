@@ -5,6 +5,11 @@ import io.objectbox.InternalAccess;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.sync.SyncBuilder.RequestUpdatesMode;
+import io.objectbox.sync.listener.SyncChangeListener;
+import io.objectbox.sync.listener.SyncCompletedListener;
+import io.objectbox.sync.listener.SyncConnectionListener;
+import io.objectbox.sync.listener.SyncListener;
+import io.objectbox.sync.listener.SyncLoginListener;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.CountDownLatch;
@@ -20,13 +25,17 @@ public class SyncClientImpl implements SyncClient {
     @Nullable
     private BoxStore boxStore;
     private final String serverUrl;
-    private final InternalListener internalListener;
+    private final InternalSyncClientListener internalListener;
     @Nullable
     private final ConnectivityMonitor connectivityMonitor;
 
     private volatile long handle;
     @Nullable
-    private volatile SyncClientListener listener;
+    private volatile SyncLoginListener loginListener;
+    @Nullable
+    private volatile SyncCompletedListener completedListener;
+    @Nullable
+    private volatile SyncConnectionListener connectionListener;
     private volatile long lastLoginCode;
     private volatile boolean started;
 
@@ -51,23 +60,24 @@ public class SyncClientImpl implements SyncClient {
             nativeSetUncommittedAcks(handle, true);
         }
 
-        this.listener = builder.listener;
-
-        this.internalListener = new InternalListener();
-        nativeSetListener(handle, internalListener);
-
-        if (builder.changesListener != null) {
-            setSyncChangesListener(builder.changesListener);
+        if (builder.listener != null) {
+            setSyncListener(builder.listener);
+        } else {
+            this.loginListener = builder.loginListener;
+            this.completedListener = builder.completedListener;
+            if (builder.changeListener != null) {
+                setSyncChangeListener(builder.changeListener);
+            }
+            this.connectionListener = builder.connectionListener;
         }
+
+        this.internalListener = new InternalSyncClientListener();
+        nativeSetListener(handle, internalListener);
 
         setLoginCredentials(builder.credentials);
 
         // If created successfully, let store keep a reference so the caller does not have to.
         InternalAccess.setSyncClient(builder.boxStore, this);
-
-        if (!builder.manualStart) {
-            start();
-        }
     }
 
     @Override
@@ -93,25 +103,31 @@ public class SyncClientImpl implements SyncClient {
     }
 
     @Override
-    public void setSyncListener(SyncClientListener listener) {
-        checkNotNull(listener, "Listener must not be null. Use removeSyncListener to remove existing listener.");
-        this.listener = listener;
+    public void setSyncLoginListener(@Nullable SyncLoginListener listener) {
+        this.loginListener = listener;
     }
 
     @Override
-    public void removeSyncListener() {
-        this.listener = null;
+    public void setSyncCompletedListener(@Nullable SyncCompletedListener listener) {
+        this.completedListener = listener;
     }
 
     @Override
-    public void setSyncChangesListener(SyncChangesListener changesListener) {
-        checkNotNull(changesListener, "Listener must not be null. Use removeSyncChangesListener to remove existing listener.");
+    public void setSyncChangeListener(@Nullable SyncChangeListener changesListener) {
         nativeSetSyncChangesListener(handle, changesListener);
     }
 
     @Override
-    public void removeSyncChangesListener() {
-        nativeSetSyncChangesListener(handle, null);
+    public void setSyncConnectionListener(@Nullable SyncConnectionListener listener) {
+        this.connectionListener = listener;
+    }
+
+    @Override
+    public void setSyncListener(@Nullable SyncListener listener) {
+        this.loginListener = listener;
+        this.completedListener = listener;
+        this.connectionListener = listener;
+        setSyncChangeListener(listener);
     }
 
     @Override
@@ -224,13 +240,6 @@ public class SyncClientImpl implements SyncClient {
         nativeTriggerReconnect(handle);
     }
 
-    private void checkNotNull(Object object, String message) {
-        //noinspection ConstantConditions Non-null annotation does not enforce, so check for null.
-        if (object == null) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
     /**
      * Creates a native sync client for the given store handle ready to connect to the server at the given URI.
      * Uses certificate authorities trusted by the host if no trusted certificate paths are passed.
@@ -245,9 +254,9 @@ public class SyncClientImpl implements SyncClient {
 
     private native void nativeSetLoginInfo(long handle, long credentialsType, @Nullable byte[] credentials);
 
-    private native void nativeSetListener(long handle, @Nullable SyncClientListener listener);
+    private native void nativeSetListener(long handle, @Nullable InternalSyncClientListener listener);
 
-    private native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangesListener advancedListener);
+    private native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangeListener advancedListener);
 
     /** @param subscribeForPushes Pass true to automatically receive updates for future changes. */
     private native void nativeSetRequestUpdatesMode(long handle, boolean autoRequestUpdates, boolean subscribeForPushes);
@@ -271,47 +280,50 @@ public class SyncClientImpl implements SyncClient {
     /** (Optional) Pause sync updates. */
     private native void nativeCancelUpdates(long handle);
 
-    /** Hints to the native client that an active network connection is available. */
-    private native void nativeTriggerReconnect(long handle);
+    /**
+     *  Hints to the native client that an active network connection is available.
+     *  Returns true if the native client was disconnected (and will try to re-connect).
+     */
+    private native boolean nativeTriggerReconnect(long handle);
 
-    private class InternalListener implements SyncClientListener {
+    /**
+     * Methods on this class must match those expected by JNI implementation.
+     */
+    @SuppressWarnings("unused") // Methods called from native code.
+    private class InternalSyncClientListener {
         private final CountDownLatch firstLoginLatch = new CountDownLatch(1);
 
-        @Override
         public void onLogin() {
             lastLoginCode = SyncLoginCodes.OK;
             firstLoginLatch.countDown();
 
-            SyncClientListener listenerToFire = listener;
+            SyncLoginListener listenerToFire = loginListener;
             if (listenerToFire != null) {
-                listenerToFire.onLogin();
+                listenerToFire.onLoggedIn();
             }
         }
 
-        @Override
         public void onLoginFailure(long errorCode) {
             lastLoginCode = errorCode;
             firstLoginLatch.countDown();
 
-            SyncClientListener listenerToFire = listener;
+            SyncLoginListener listenerToFire = loginListener;
             if (listenerToFire != null) {
-                listenerToFire.onLoginFailure(errorCode);
+                listenerToFire.onLoginFailed(errorCode);
             }
         }
 
-        @Override
         public void onSyncComplete() {
-            SyncClientListener listenerToFire = listener;
+            SyncCompletedListener listenerToFire = completedListener;
             if (listenerToFire != null) {
-                listenerToFire.onSyncComplete();
+                listenerToFire.onUpdatesCompleted();
             }
         }
 
-        @Override
         public void onDisconnect() {
-            SyncClientListener listenerToFire = listener;
+            SyncConnectionListener listenerToFire = connectionListener;
             if (listenerToFire != null) {
-                listenerToFire.onDisconnect();
+                listenerToFire.onDisconnected();
             }
         }
 
