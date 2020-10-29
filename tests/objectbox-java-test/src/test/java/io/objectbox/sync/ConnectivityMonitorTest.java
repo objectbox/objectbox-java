@@ -159,23 +159,23 @@ public class ConnectivityMonitorTest {
         }
 
         @Override
-        public void requestUpdates() {
-
+        public boolean requestUpdates() {
+            return false;
         }
 
         @Override
-        public void requestUpdatesOnce() {
-
+        public boolean requestUpdatesOnce() {
+            return false;
         }
 
         @Override
-        public void cancelUpdates() {
-
+        public boolean cancelUpdates() {
+            return false;
         }
 
         @Override
-        public void requestFullSync() {
-
+        public boolean requestFullSync() {
+            return false;
         }
 
         @Override

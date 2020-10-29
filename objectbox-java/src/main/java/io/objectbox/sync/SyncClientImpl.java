@@ -2,8 +2,8 @@ package io.objectbox.sync;
 
 import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
-import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.annotation.apihint.Temporary;
 import io.objectbox.sync.SyncBuilder.RequestUpdatesMode;
 import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.listener.SyncCompletedListener;
@@ -210,29 +210,30 @@ public class SyncClientImpl implements SyncClient {
     }
 
     @Override
-    public void requestFullSync() {
-        nativeRequestFullSync(handle, false);
+    @Temporary
+    public boolean requestFullSync() {
+        return nativeRequestFullSync(handle, false);
     }
 
     // TODO: broken?
-    @Experimental
-    public void requestFullSyncAndUpdates() {
-        nativeRequestFullSync(handle, true);
+    @Temporary
+    public boolean requestFullSyncAndUpdates() {
+        return nativeRequestFullSync(handle, true);
     }
 
     @Override
-    public void requestUpdates() {
-        nativeRequestUpdates(handle, true);
+    public boolean requestUpdates() {
+        return nativeRequestUpdates(handle, true);
     }
 
     @Override
-    public void requestUpdatesOnce() {
-        nativeRequestUpdates(handle, false);
+    public boolean requestUpdatesOnce() {
+        return nativeRequestUpdates(handle, false);
     }
 
     @Override
-    public void cancelUpdates() {
-        nativeCancelUpdates(handle);
+    public boolean cancelUpdates() {
+        return nativeCancelUpdates(handle);
     }
 
     @Override
@@ -272,13 +273,13 @@ public class SyncClientImpl implements SyncClient {
     private native int nativeGetState(long handle);
 
     /** @param subscribeForPushes Pass true to automatically receive updates for future changes. */
-    private native void nativeRequestUpdates(long handle, boolean subscribeForPushes);
+    private native boolean nativeRequestUpdates(long handle, boolean subscribeForPushes);
 
     /** @param subscribeForPushes Pass true to automatically receive updates for future changes. */
-    private native void nativeRequestFullSync(long handle, boolean subscribeForPushes);
+    private native boolean nativeRequestFullSync(long handle, boolean subscribeForPushes);
 
     /** (Optional) Pause sync updates. */
-    private native void nativeCancelUpdates(long handle);
+    private native boolean nativeCancelUpdates(long handle);
 
     /**
      *  Hints to the native client that an active network connection is available.

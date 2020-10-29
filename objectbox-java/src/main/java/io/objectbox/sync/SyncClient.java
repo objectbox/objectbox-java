@@ -1,6 +1,7 @@
 package io.objectbox.sync;
 
 import io.objectbox.annotation.apihint.Experimental;
+import io.objectbox.annotation.apihint.Temporary;
 import io.objectbox.sync.SyncBuilder.RequestUpdatesMode;
 import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.listener.SyncCompletedListener;
@@ -116,30 +117,38 @@ public interface SyncClient extends Closeable {
      * {@link SyncBuilder#requestUpdatesMode(RequestUpdatesMode) requestUpdatesMode(MANUAL)}.
      *
      * @see #cancelUpdates()
+     * @return 'true' if the request was likely sent (e.g. the sync client is in "logged in" state)
+     * or 'false' if the request was not sent (and will not be sent in the future)
      */
-    void requestUpdates();
+    boolean requestUpdates();
 
     /**
      * Asks the server to send sync updates until this sync client is up-to-date, then pauses sync updates again.
      * This is useful if sync updates were turned off with
      * {@link SyncBuilder#requestUpdatesMode(RequestUpdatesMode) requestUpdatesMode(MANUAL)}.
+     * @return 'true' if the request was likely sent (e.g. the sync client is in "logged in" state)
+     * or 'false' if the request was not sent (and will not be sent in the future)
      */
-    void requestUpdatesOnce();
+    boolean requestUpdatesOnce();
 
     /**
      * Asks the server to pause sync updates.
      *
+     * @return 'true' if the request was likely sent (e.g. the sync client is in "logged in" state)
+     * or 'false' if the request was not sent (and will not be sent in the future)
      * @see #requestUpdates()
      */
-    void cancelUpdates();
+    boolean cancelUpdates();
 
     /**
      * Experimental. This API might change or be removed in the future.
      * <p>
      * Request a sync of all previous changes from the server.
+     * @return 'true' if the request was likely sent (e.g. the sync client is in "logged in" state)
+     * or 'false' if the request was not sent (and will not be sent in the future)
      */
-    @Experimental
-    void requestFullSync();
+    @Temporary
+    boolean requestFullSync();
 
     /**
      * Lets the sync client know that a working network connection
