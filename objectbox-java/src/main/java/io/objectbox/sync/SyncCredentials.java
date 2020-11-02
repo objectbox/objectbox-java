@@ -49,7 +49,7 @@ public class SyncCredentials {
 
         GOOGLE(2);
 
-        public long id;
+        public final long id;
 
         CredentialsType(long id) {
             this.id = id;
