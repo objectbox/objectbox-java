@@ -1,5 +1,7 @@
 package io.objectbox.sync;
 
+import java.util.Arrays;
+
 import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
@@ -86,7 +88,8 @@ public class SyncBuilder {
      * the certificate authorities trusted by the host platform.
      */
     public SyncBuilder trustedCertificates(String[] paths) {
-        this.trustedCertPaths = paths;
+        // Copy to prevent external modification.
+        this.trustedCertPaths = Arrays.copyOf(paths, paths.length);
         return this;
     }
 
