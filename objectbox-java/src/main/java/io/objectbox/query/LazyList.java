@@ -22,24 +22,33 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.Box;
 import io.objectbox.exception.DbException;
 
 /**
- * A thread-safe, unmodifiable list that reads entities lazily once they are accessed.
- * A lazy list can be cached or not.
- * Cached lazy lists store the previously accessed objects to avoid loading entities more than once.
- * Some features of the list are limited to cached lists (e.g. features that require the entire list).
+ * A thread-safe, unmodifiable {@link List} that gets Objects from their Box not until they are accessed.
+ * Internally the list is backed by an array of Object IDs.
  * <p>
- * Note: this list gives an semiconsitent view on the data at the moment it was created.
- * If you remove objects from their object box after this list was created, this list will null instead of an object.
- * However, if you add objects to their object box after this list was created, this list will not be extended.
+ * If the list is set to not cache retrieved Objects, each operation will get the latest version of an Object
+ * from its Box. However, in this mode only a limited set of {@link List} operations,
+ * like get or iterator are supported.
+ * <p>
+ * If the list is set to cache retrieved Objects, operations will return a previously fetched version of an Object,
+ * which might not equal the latest version in its Box. However, in this mode almost all {@link List}
+ * operations are supported. Note that operations that require the whole list, like contains, will fetch all
+ * Objects in this list from the Box at once.
+ * <p>
+ * Note: as Objects are fetched on demand, this list returns a null Object if the Object was removed from its Box
+ * after this list was created.
  *
  * @param <E> Object type (entity).
- * @author Markus
  */
-// Threading note: locking is tailored to ArrayList assuming that concurrent positional gets/sets are OK.
-// To enable this, the internal ArrayList is prepopulated with null.
+/*
+ Threading note: locking is tailored to ArrayList assuming that concurrent positional gets/sets are OK.
+ To enable this, the internal ArrayList is prepopulated with null.
+*/
 public class LazyList<E> implements List<E> {
     protected class LazyIterator implements ListIterator<E> {
         private int index;
@@ -206,9 +215,11 @@ public class LazyList<E> implements List<E> {
     }
 
     /**
-     * @return An object for the given ID, or null if the object was already removed from its box
-     * (and was not cached before).
+     * Gets and returns the Object at the specified position in this list from its Box. Returns null if the
+     * Object was removed from its Box. If this list is caching retrieved Objects, returns the previously
+     * fetched version.
      */
+    @Nullable
     @Override
     public E get(int location) {
         if (location < 0 || location > size) {

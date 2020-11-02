@@ -39,11 +39,10 @@ import io.objectbox.query.QueryBuilder;
 import io.objectbox.relation.RelationInfo;
 
 /**
- * A box to store objects of a particular class.
+ * A Box to put and get Objects of a specific Entity class.
  * <p>
  * Thread-safe.
  */
-@Beta
 @ThreadSafe
 @SuppressWarnings("WeakerAccess,UnusedReturnValue,unused")
 public class Box<T> {

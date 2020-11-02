@@ -38,11 +38,15 @@ import io.objectbox.relation.RelationInfo;
 import io.objectbox.relation.ToOne;
 
 /**
- * A repeatable query returning entities.
+ * A repeatable Query returning the latest matching Objects.
+ * <p>
+ * Use {@link #find()} or related methods to fetch the latest results from the BoxStore.
+ * <p>
+ * Use {@link #property(Property)} to only return values or an aggregate of a single Property.
+ * <p>
+ * See the <a href="https://docs.objectbox.io/queries">Queries documentation</a> for details.
  *
- * @param <T> The entity class the query will return results for.
- * @author Markus
- * @see QueryBuilder
+ * @param <T> Entity class for which results are returned.
  */
 @SuppressWarnings({"SameParameterValue", "UnusedReturnValue", "WeakerAccess"})
 public class Query<T> implements Closeable {
@@ -250,14 +254,26 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Find all Objects matching the query without actually loading the Objects. See @{@link LazyList} for details.
+     * Like {@link #findIds()}, but wraps the Object IDs in an unmodifiable {@link LazyList}
+     * so Objects can be retrieved on demand. The LazyList does not cache retrieved Objects, so only basic
+     * {@link List} operations like getting or iterating list items are supported. See {@link LazyList} for details.
      */
+    @Nonnull
     public LazyList<T> findLazy() {
         ensureNoFilterNoComparator();
         return new LazyList<>(box, findIds(), false);
     }
 
-    // TODO we might move all those property find methods in a "PropertyQuery" class for divide & conquer.
+    /**
+     * Like {@link #findIds()}, but wraps the Object IDs in an unmodifiable, caching {@link LazyList}
+     * so Objects can be retrieved on demand. The LazyList caches retrieved Objects supporting almost
+     * all {@link List} operations, at the expense of used memory. See {@link LazyList} for details.
+     */
+    @Nonnull
+    public LazyList<T> findLazyCached() {
+        ensureNoFilterNoComparator();
+        return new LazyList<>(box, findIds(), true);
+    }
 
     /**
      * Creates a {@link PropertyQuery} for the given property.
@@ -309,15 +325,6 @@ public class Query<T> implements Closeable {
                 }
             }
         });
-    }
-
-    /**
-     * Find all Objects matching the query without actually loading the Objects. See @{@link LazyList} for details.
-     */
-    @Nonnull
-    public LazyList<T> findLazyCached() {
-        ensureNoFilterNoComparator();
-        return new LazyList<>(box, findIds(), true);
     }
 
     void resolveEagerRelations(List<T> entities) {

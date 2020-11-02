@@ -56,8 +56,8 @@ import io.objectbox.reactive.SubscriptionBuilder;
 import io.objectbox.sync.SyncClient;
 
 /**
- * Represents an ObjectBox database and gives you {@link Box}es to get and put Objects of a specific type
- * (see {@link #boxFor(Class)}).
+ * An ObjectBox database that provides {@link Box Boxes} to put and get Objects of a specific Entity class
+ * (see {@link #boxFor(Class)}). To get an instance of this class use {@code MyObjectBox.builder()}.
  */
 @SuppressWarnings({"unused", "UnusedReturnValue", "SameParameterValue", "WeakerAccess"})
 @ThreadSafe

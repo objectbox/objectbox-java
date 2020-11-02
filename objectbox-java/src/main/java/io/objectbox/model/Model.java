@@ -64,8 +64,19 @@ public final class Model extends Table {
   public io.objectbox.model.IdUid lastSequenceId(io.objectbox.model.IdUid obj) { int o = __offset(16); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
   public io.objectbox.model.IdUid lastRelationId() { return lastRelationId(new io.objectbox.model.IdUid()); }
   public io.objectbox.model.IdUid lastRelationId(io.objectbox.model.IdUid obj) { int o = __offset(18); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
+  /**
+   * Hash of the model/schema; usually want to check hashes before even creating a model and thus avoiding creating
+   * the model altogether. But, at least for now, let language bindings provide it via the model optionally.
+   * We use SipHash 128 (16 bytes).
+   */
+  public int hash(int j) { int o = __offset(20); return o != 0 ? bb.get(__vector(o) + j * 1) & 0xFF : 0; }
+  public int hashLength() { int o = __offset(20); return o != 0 ? __vector_len(o) : 0; }
+  public ByteVector hashVector() { return hashVector(new ByteVector()); }
+  public ByteVector hashVector(ByteVector obj) { int o = __offset(20); return o != 0 ? obj.__assign(__vector(o), bb) : null; }
+  public ByteBuffer hashAsByteBuffer() { return __vector_as_bytebuffer(20, 1); }
+  public ByteBuffer hashInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 20, 1); }
 
-  public static void startModel(FlatBufferBuilder builder) { builder.startTable(8); }
+  public static void startModel(FlatBufferBuilder builder) { builder.startTable(9); }
   public static void addModelVersion(FlatBufferBuilder builder, long modelVersion) { builder.addInt(0, (int)modelVersion, (int)0L); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addVersion(FlatBufferBuilder builder, long version) { builder.addLong(2, version, 0L); }
@@ -76,6 +87,10 @@ public final class Model extends Table {
   public static void addLastIndexId(FlatBufferBuilder builder, int lastIndexIdOffset) { builder.addStruct(5, lastIndexIdOffset, 0); }
   public static void addLastSequenceId(FlatBufferBuilder builder, int lastSequenceIdOffset) { builder.addStruct(6, lastSequenceIdOffset, 0); }
   public static void addLastRelationId(FlatBufferBuilder builder, int lastRelationIdOffset) { builder.addStruct(7, lastRelationIdOffset, 0); }
+  public static void addHash(FlatBufferBuilder builder, int hashOffset) { builder.addOffset(8, hashOffset, 0); }
+  public static int createHashVector(FlatBufferBuilder builder, byte[] data) { return builder.createByteVector(data); }
+  public static int createHashVector(FlatBufferBuilder builder, ByteBuffer data) { return builder.createByteVector(data); }
+  public static void startHashVector(FlatBufferBuilder builder, int numElems) { builder.startVector(1, numElems, 1); }
   public static int endModel(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;

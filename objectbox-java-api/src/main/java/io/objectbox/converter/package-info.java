@@ -16,7 +16,7 @@
 
 /**
  * For use with {@link io.objectbox.annotation.Convert @Convert}: {@link io.objectbox.converter.PropertyConverter}
- * to convert custom property types.
+ * to convert custom Property types.
  * <p>
  * For more details look at the documentation of individual classes and
  * <a href="https://docs.objectbox.io/advanced/custom-types">docs.objectbox.io/advanced/custom-types</a>.
