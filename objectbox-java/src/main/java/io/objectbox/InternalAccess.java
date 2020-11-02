@@ -16,6 +16,8 @@
 
 package io.objectbox;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.sync.SyncClient;
 
@@ -37,7 +39,7 @@ public class InternalAccess {
         return tx.internalHandle();
     }
 
-    public static void setSyncClient(BoxStore boxStore, SyncClient syncClient) {
+    public static void setSyncClient(BoxStore boxStore, @Nullable SyncClient syncClient) {
         boxStore.setSyncClient(syncClient);
     }
 
