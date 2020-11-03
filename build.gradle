@@ -20,7 +20,7 @@ buildscript {
         ob_native_dep = "io.objectbox:objectbox-$objectboxPlatform:$nativeVersion"
 
         essentials_version = '3.0.0'
-        junit_version = '4.13'
+        junit_version = '4.13.1'
         mockito_version = '3.3.3'
         kotlin_version = '1.4.0'
         dokka_version = '0.10.1'
