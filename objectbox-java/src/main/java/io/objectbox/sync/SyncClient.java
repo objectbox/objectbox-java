@@ -1,17 +1,16 @@
 package io.objectbox.sync;
 
+import java.io.Closeable;
+
+import javax.annotation.Nullable;
+
 import io.objectbox.annotation.apihint.Experimental;
-import io.objectbox.annotation.apihint.Temporary;
 import io.objectbox.sync.SyncBuilder.RequestUpdatesMode;
 import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.listener.SyncCompletedListener;
 import io.objectbox.sync.listener.SyncConnectionListener;
 import io.objectbox.sync.listener.SyncListener;
 import io.objectbox.sync.listener.SyncLoginListener;
-
-import java.io.Closeable;
-
-import javax.annotation.Nullable;
 
 /**
  * ObjectBox sync client. Build a client with {@link Sync#client}.
@@ -143,11 +142,14 @@ public interface SyncClient extends Closeable {
     /**
      * Experimental. This API might change or be removed in the future.
      * <p>
+     * Temporary only, try not to use it.
+     * <p>
      * Request a sync of all previous changes from the server.
+     *
      * @return 'true' if the request was likely sent (e.g. the sync client is in "logged in" state)
-     * or 'false' if the request was not sent (and will not be sent in the future)
+     * or 'false' if the request was not sent (and will not be sent in the future).
      */
-    @Temporary
+    @Experimental
     boolean requestFullSync();
 
     /**

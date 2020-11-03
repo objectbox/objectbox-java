@@ -1,19 +1,20 @@
 package io.objectbox.sync;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
+
 import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
+import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.annotation.apihint.Temporary;
 import io.objectbox.sync.SyncBuilder.RequestUpdatesMode;
 import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.listener.SyncCompletedListener;
 import io.objectbox.sync.listener.SyncConnectionListener;
 import io.objectbox.sync.listener.SyncListener;
 import io.objectbox.sync.listener.SyncLoginListener;
-
-import javax.annotation.Nullable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Internal sync client implementation. Use {@link SyncClient} to access functionality,
@@ -209,14 +210,19 @@ public class SyncClientImpl implements SyncClient {
         super.finalize();
     }
 
+    /**
+     * Temporary only, try not to use it.
+     */
     @Override
-    @Temporary
+    @Experimental
     public boolean requestFullSync() {
         return nativeRequestFullSync(handle, false);
     }
 
-    // TODO: broken?
-    @Temporary
+    /**
+     * Temporary only, try not to use it.
+     */
+    @Experimental
     public boolean requestFullSyncAndUpdates() {
         return nativeRequestFullSync(handle, true);
     }
