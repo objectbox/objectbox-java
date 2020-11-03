@@ -30,7 +30,8 @@ public class SyncServerBuilder {
         checkNotNull(authenticatorCredentials, "Authenticator credentials are required.");
         if (!BoxStore.isSyncServerAvailable()) {
             throw new IllegalStateException(
-                    "This ObjectBox library (JNI) does not include sync server. Check your dependencies.");
+                    "This library does not include ObjectBox Sync Server. " +
+                            "Please visit https://objectbox.io/sync/ for options.");
         }
         this.boxStore = boxStore;
         this.url = url;

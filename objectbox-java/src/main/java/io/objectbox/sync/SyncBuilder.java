@@ -72,7 +72,8 @@ public class SyncBuilder {
         checkNotNull(credentials, "Sync credentials are required.");
         if (!BoxStore.isSyncAvailable()) {
             throw new IllegalStateException(
-                    "This ObjectBox library (JNI) does not include sync. Please update your dependencies.");
+                    "This library does not include ObjectBox Sync. " +
+                            "Please visit https://objectbox.io/sync/ for options.");
         }
         this.platform = Platform.findPlatform();
         this.boxStore = boxStore;

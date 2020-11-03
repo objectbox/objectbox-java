@@ -5,15 +5,15 @@ import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.server.SyncServerBuilder;
 
 /**
+ * <a href="https://objectbox.io/sync/">ObjectBox Sync</a> makes data available on other devices.
  * Start building a sync client using Sync.{@link #client(BoxStore, String, SyncCredentials)}
- * or a server using Sync.{@link #server(BoxStore, String, SyncCredentials)}.
+ * or an embedded server using Sync.{@link #server(BoxStore, String, SyncCredentials)}.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-@Experimental
 public final class Sync {
 
     /**
-     * Returns true if the included native (JNI) ObjectBox library supports sync.
+     * Returns true if the included native (JNI) ObjectBox library supports Sync.
      */
     public static boolean isAvailable() {
         return BoxStore.isSyncAvailable();
