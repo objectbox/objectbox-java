@@ -114,7 +114,7 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                     
                     if (preferredRepo == 'local') {
                         repository url: repositories.mavenLocal().url
-                        println "Uploading archives to mavenLocal()."
+                        println "uploadArchives repo is mavenLocal()."
                     } else if (preferredRepo != null
                             && project.hasProperty('preferredUsername') 
                             && project.hasProperty('preferredPassword')) {
@@ -132,7 +132,7 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                             authentication(userName: preferredUsername, password: preferredPassword)
                         }
 
-                        println "Uploading archives to $repositoryUrl."
+                        println "uploadArchives repo is $repositoryUrl."
                     } else if (project.hasProperty('sonatypeUsername')
                             && project.hasProperty('sonatypePassword')) {
                         beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
@@ -145,9 +145,9 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                             authentication(userName: sonatypeUsername, password: sonatypePassword)
                         }
 
-                        println "Uploading archives to $sonatypeRepositoryUrl."
+                        println "uploadArchives repo is $sonatypeRepositoryUrl."
                     } else {
-                        println "WARNING: preferredRepo or credentials NOT set, can not upload archives."
+                        println "WARNING: uploadArchives settings incomplete, can not upload archives."
                     }
 
                     pom.project {
