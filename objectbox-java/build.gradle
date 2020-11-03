@@ -10,7 +10,7 @@ ext {
 
 dependencies {
     api project(':objectbox-java-api')
-    implementation 'org.greenrobot:essentials:3.0.0-RC1'
+    implementation "org.greenrobot:essentials:$essentials_version"
     implementation 'com.google.flatbuffers:flatbuffers-java:1.12.0'
     api 'com.google.code.findbugs:jsr305:3.0.2'
 
