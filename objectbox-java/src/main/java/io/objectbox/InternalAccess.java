@@ -16,12 +16,19 @@
 
 package io.objectbox;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.sync.SyncClient;
 
 @Internal
 public class InternalAccess {
     public static <T> Cursor<T> getReader(Box<T> box) {
         return box.getReader();
+    }
+
+    public static long getHandle(BoxStore boxStore) {
+        return boxStore.internalHandle();
     }
 
     public static long getHandle(Cursor reader) {
@@ -30,6 +37,10 @@ public class InternalAccess {
 
     public static long getHandle(Transaction tx) {
         return tx.internalHandle();
+    }
+
+    public static void setSyncClient(BoxStore boxStore, @Nullable SyncClient syncClient) {
+        boxStore.setSyncClient(syncClient);
     }
 
     public static <T> void releaseReader(Box<T> box, Cursor<T> reader) {

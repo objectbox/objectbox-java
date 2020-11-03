@@ -234,4 +234,10 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         // 2 because the first page doesn't contain any actual data?
         assertEquals(validated, 2);
     }
+
+    @Test
+    public void testIsObjectBrowserAvailable() {
+        assertFalse(BoxStore.isObjectBrowserAvailable());
+    }
+
 }

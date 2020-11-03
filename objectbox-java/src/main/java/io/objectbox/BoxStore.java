@@ -21,6 +21,8 @@ import org.greenrobot.essentials.collections.LongHashMap;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -51,6 +53,7 @@ import io.objectbox.internal.ObjectBoxThreadPool;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.SubscriptionBuilder;
+import io.objectbox.sync.SyncClient;
 
 /**
  * An ObjectBox database that provides {@link Box Boxes} to put and get Objects of a specific Entity class
@@ -169,7 +172,9 @@ public class BoxStore implements Closeable {
 
     static native void nativeSetDebugFlags(long store, int debugFlags);
 
-    static native String nativeStartObjectBrowser(long store, @Nullable String urlPath, int port);
+    private native String nativeStartObjectBrowser(long store, @Nullable String urlPath, int port);
+
+    private native boolean nativeStopObjectBrowser(long store);
 
     static native boolean nativeIsObjectBrowserAvailable();
 
@@ -177,9 +182,33 @@ public class BoxStore implements Closeable {
 
     native long nativeValidate(long store, long pageLimit, boolean checkLeafLevel);
 
+    static native int nativeGetSupportedSync();
+
     public static boolean isObjectBrowserAvailable() {
         NativeLibraryLoader.ensureLoaded();
         return nativeIsObjectBrowserAvailable();
+    }
+
+    private static int getSupportedSync() {
+        NativeLibraryLoader.ensureLoaded();
+        try {
+            int supportedSync = nativeGetSupportedSync();
+            if (supportedSync < 0 || supportedSync > 2) {
+                throw new IllegalStateException("Unexpected sync support: " + supportedSync);
+            }
+            return supportedSync;
+        } catch (UnsatisfiedLinkError e) {
+            System.err.println("Old JNI lib? " + e);  // No stack
+            return 0;
+        }
+    }
+
+    public static boolean isSyncAvailable() {
+        return getSupportedSync() != 0;
+    }
+
+    public static boolean isSyncServerAvailable() {
+        return getSupportedSync() == 2;
     }
 
     native long nativePanicModeRemoveAllObjects(long store, int entityId);
@@ -215,6 +244,12 @@ public class BoxStore implements Closeable {
     private final int queryAttempts;
 
     private final TxCallback<?> failedReadTxAttemptCallback;
+
+    /**
+     * Keeps a reference so the library user does not have to.
+     */
+    @Nullable
+    private SyncClient syncClient;
 
     BoxStore(BoxStoreBuilder builder) {
         context = builder.context;
@@ -489,6 +524,14 @@ public class BoxStore implements Closeable {
         synchronized (this) {
             oldClosedState = closed;
             if (!closed) {
+                if(objectBrowserPort != 0) { // not linked natively (yet), so clean up here
+                    try {
+                        stopObjectBrowser();
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 // Closeable recommendation: mark as closed before any code that might throw.
                 closed = true;
                 List<Transaction> transactionsToClose;
@@ -1016,8 +1059,38 @@ public class BoxStore implements Closeable {
     }
 
     @Experimental
+    @Nullable
+    public String startObjectBrowser(String urlToBindTo) {
+        verifyObjectBrowserNotRunning();
+        int port;
+        try {
+            port = new URL(urlToBindTo).getPort(); // Gives -1 if not available
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Can not start Object Browser at " + urlToBindTo, e);
+        }
+        String url = nativeStartObjectBrowser(handle, urlToBindTo, 0);
+        if (url != null) {
+            objectBrowserPort = port;
+        }
+        return url;
+    }
+
+    @Experimental
+    public synchronized boolean stopObjectBrowser() {
+        if(objectBrowserPort == 0) {
+            throw new IllegalStateException("ObjectBrowser has not been started before");
+        }
+        objectBrowserPort = 0;
+        return nativeStopObjectBrowser(handle);
+    }
+
+    @Experimental
     public int getObjectBrowserPort() {
         return objectBrowserPort;
+    }
+
+    public boolean isObjectBrowserRunning() {
+        return objectBrowserPort != 0;
     }
 
     private void verifyObjectBrowserNotRunning() {
@@ -1097,4 +1170,15 @@ public class BoxStore implements Closeable {
         return handle;
     }
 
+    /**
+     * Returns the {@link SyncClient} associated with this store. To create one see {@link io.objectbox.sync.Sync Sync}.
+     */
+    @Nullable
+    public SyncClient getSyncClient() {
+        return syncClient;
+    }
+
+    void setSyncClient(@Nullable SyncClient syncClient) {
+        this.syncClient = syncClient;
+    }
 }
