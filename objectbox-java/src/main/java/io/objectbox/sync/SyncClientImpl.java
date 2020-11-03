@@ -98,8 +98,8 @@ public class SyncClientImpl implements SyncClient {
     /**
      * Gets the current state of this sync client. Throws if {@link #close()} was called.
      */
-    public SyncClientState getSyncState() {
-        return SyncClientState.fromId(nativeGetState(handle));
+    public SyncState getSyncState() {
+        return SyncState.fromId(nativeGetState(handle));
     }
 
     @Override
@@ -268,7 +268,7 @@ public class SyncClientImpl implements SyncClient {
     private native void nativeSetUncommittedAcks(long handle, boolean uncommittedAcks);
 
     /**
-     * Returns the current {@link SyncClientState} value.
+     * Returns the current {@link SyncState} value.
      */
     private native int nativeGetState(long handle);
 

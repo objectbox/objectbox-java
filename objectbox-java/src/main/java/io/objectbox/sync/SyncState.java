@@ -3,7 +3,7 @@ package io.objectbox.sync;
 /**
  * Returned by {@link io.objectbox.sync.SyncClientImpl#getSyncState()}.
  */
-public enum SyncClientState {
+public enum SyncState {
 
     UNKNOWN(0),
     CREATED(1),
@@ -16,12 +16,12 @@ public enum SyncClientState {
 
     public final int id;
 
-    SyncClientState(int id) {
+    SyncState(int id) {
         this.id = id;
     }
 
-    public static SyncClientState fromId(int id) {
-        for (SyncClientState value : values()) {
+    public static SyncState fromId(int id) {
+        for (SyncState value : values()) {
             if (value.id == id) return value;
         }
         return UNKNOWN;
