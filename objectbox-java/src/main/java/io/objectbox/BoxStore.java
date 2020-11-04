@@ -68,9 +68,9 @@ public class BoxStore implements Closeable {
     @Nullable private static Object relinker;
 
     /** Change so ReLinker will update native library when using workaround loading. */
-    public static final String JNI_VERSION = "2.7.1";
+    public static final String JNI_VERSION = "2.8.0";
 
-    private static final String VERSION = "2.7.2-2020-08-19";
+    private static final String VERSION = "2.8.0-2020-11-04";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
