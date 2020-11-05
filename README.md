@@ -6,12 +6,12 @@
 ObjectBox is a superfast object-oriented database with strong relation support.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
-**Latest version: [2.8.0 (2020/11/04)](https://docs.objectbox.io/#objectbox-changelog)**
+**Latest version: [2.8.0 (2020/11/05)](https://docs.objectbox.io/#objectbox-changelog)**
 
 Demo code using ObjectBox:
 
 ```java
-Playlist playlist = new Playlist("My Favorties");
+Playlist playlist = new Playlist("My Favorites");
 playlist.songs.add(new Song("Lalala"));
 playlist.songs.add(new Song("Lololo"));
 box.put(playlist);
@@ -23,7 +23,7 @@ ObjectBox supports multiple platforms and languages.
 Besides JVM based languages like Java and Kotlin, ObjectBox also offers: 
 
 * [ObjectBox Swift](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
-* [ObjectBox Dart/Flutter](https://github.com/objectbox/objectbox-dart): cross-plattform for mobile and desktop apps (beta) 
+* [ObjectBox Dart/Flutter](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps (beta) 
 * [ObjectBox Go](https://github.com/objectbox/objectbox-go): great for data-driven tools and small server applications 
 * [ObjectBox C and C++](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
 
