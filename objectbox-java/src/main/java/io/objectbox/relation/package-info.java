@@ -16,7 +16,7 @@
 
 /**
  * Classes to manage {@link io.objectbox.relation.ToOne} and {@link io.objectbox.relation.ToMany}
- * relations between entities.
+ * relations between Entities.
  * <p>
  * For more details look at the documentation of individual classes and
  * <a href="https://docs.objectbox.io/relations">docs.objectbox.io/relations</a>.

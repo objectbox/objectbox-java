@@ -23,7 +23,7 @@ repositories {
 
 dependencies {
     implementation project(':objectbox-java')
-    implementation 'org.greenrobot:essentials:3.0.0-RC1'
+    implementation "org.greenrobot:essentials:$essentials_version"
 
     // Check flag to use locally compiled version to avoid dependency cycles
     if (!project.hasProperty('noObjectBoxTestDepencies') || !noObjectBoxTestDepencies) {

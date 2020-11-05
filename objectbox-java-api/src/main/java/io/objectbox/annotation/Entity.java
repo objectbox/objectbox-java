@@ -22,8 +22,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for entities
- * ObjectBox only persist objects of classes which are marked with this annotation
+ * Marks a class as an ObjectBox Entity.
+ * Allows to obtain a Box for this Entity from BoxStore to persist Objects of this class.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)

@@ -1,7 +1,7 @@
 buildscript {
     ext {
         // Typically, only edit those two:
-        def objectboxVersionNumber = '2.7.1' // without "-SNAPSHOT", e.g. '2.5.0' or '2.4.0-RC'
+        def objectboxVersionNumber = '2.8.0' // without "-SNAPSHOT", e.g. '2.5.0' or '2.4.0-RC'
         def objectboxVersionRelease = true  // set to true for releasing to ignore versionPostFix to avoid e.g. "-dev" versions
 
         // version post fix: '-<value>' or '' if not defined; e.g. used by CI to pass in branch name
@@ -19,9 +19,10 @@ buildscript {
                 : 'unsupported'
         ob_native_dep = "io.objectbox:objectbox-$objectboxPlatform:$nativeVersion"
 
-        junit_version = '4.13'
+        essentials_version = '3.1.0'
+        junit_version = '4.13.1'
         mockito_version = '3.3.3'
-        kotlin_version = '1.3.72'
+        kotlin_version = '1.4.10'
         dokka_version = '0.10.1'
 
         println "version=$ob_version"
@@ -39,7 +40,8 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
-        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.0.5"
+        // https://github.com/spotbugs/spotbugs-gradle-plugin/releases
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.5.1"
     }
 }
 
@@ -113,7 +115,7 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                     
                     if (preferredRepo == 'local') {
                         repository url: repositories.mavenLocal().url
-                        println "Uploading archives to mavenLocal()."
+                        println "uploadArchives repo is mavenLocal()."
                     } else if (preferredRepo != null
                             && project.hasProperty('preferredUsername') 
                             && project.hasProperty('preferredPassword')) {
@@ -131,7 +133,7 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                             authentication(userName: preferredUsername, password: preferredPassword)
                         }
 
-                        println "Uploading archives to $repositoryUrl."
+                        println "uploadArchives repo is $repositoryUrl."
                     } else if (project.hasProperty('sonatypeUsername')
                             && project.hasProperty('sonatypePassword')) {
                         beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
@@ -144,9 +146,9 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                             authentication(userName: sonatypeUsername, password: sonatypePassword)
                         }
 
-                        println "Uploading archives to $sonatypeRepositoryUrl."
+                        println "uploadArchives repo is $sonatypeRepositoryUrl."
                     } else {
-                        println "WARNING: preferredRepo or credentials NOT set, can not upload archives."
+                        println "WARNING: uploadArchives settings incomplete, can not upload archives."
                     }
 
                     pom.project {

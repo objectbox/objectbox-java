@@ -17,7 +17,7 @@
 package io.objectbox;
 
 import com.google.flatbuffers.FlatBufferBuilder;
-import io.objectbox.model.FlatStoreOptions;
+
 import org.greenrobot.essentials.io.IoUtils;
 
 import java.io.BufferedInputStream;
@@ -39,21 +39,20 @@ import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 import io.objectbox.ideasonly.ModelUpdate;
+import io.objectbox.model.FlatStoreOptions;
 import io.objectbox.model.ValidateOnOpenMode;
 
 /**
- * Builds a {@link BoxStore} with optional configurations. The class is not initiated directly; use
- * MyObjectBox.builder() to get an instance.
+ * Configures and builds a {@link BoxStore} with reasonable defaults. To get an instance use {@code MyObjectBox.builder()}.
  * <p>
- * Each configuration has reasonable defaults, which you can adjust.
- * For Android, you must pass a Context using {@link #androidContext(Object)}.
+ * On Android, make sure to provide a Context to {@link #androidContext(Object) androidContext(context)}.
  * <p>
- * Configurations you can override:
+ * Some common defaults to override are:
  * <ol>
- * <li>Name/location of DB: use {@link #name(String)}/{@link #baseDirectory}/{@link #androidContext(Object)}
- * OR {@link #directory(File)}(default: name "objectbox)</li>
- * <li>Max DB size: see {@link #maxSizeInKByte} (default: 1 GB)</li>
- * <li>Max readers: see {@link #maxReaders(int)} (default: 126)</li>
+ * <li>Name/location of Store: use either {@link #name(String)}, {@link #baseDirectory(File)},
+ * {@link #androidContext(Object)} or {@link #directory(File)} (default: name "objectbox),</li>
+ * <li>Max DB size: see {@link #maxSizeInKByte(long)} (default: 1024 * 1024 KB = 1 GB),</li>
+ * <li>Max readers: see {@link #maxReaders(int)} (default: 126),</li>
  * </ol>
  */
 public class BoxStoreBuilder {

@@ -16,12 +16,13 @@
 
 package io.objectbox;
 
-import io.objectbox.annotation.apihint.Beta;
 import org.greenrobot.essentials.collections.LongHashMap;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
+import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
@@ -51,10 +53,11 @@ import io.objectbox.internal.ObjectBoxThreadPool;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.SubscriptionBuilder;
+import io.objectbox.sync.SyncClient;
 
 /**
- * Represents an ObjectBox database and gives you {@link Box}es to get and put Objects of a specific type
- * (see {@link #boxFor(Class)}).
+ * An ObjectBox database that provides {@link Box Boxes} to put and get Objects of a specific Entity class
+ * (see {@link #boxFor(Class)}). To get an instance of this class use {@code MyObjectBox.builder()}.
  */
 @SuppressWarnings({"unused", "UnusedReturnValue", "SameParameterValue", "WeakerAccess"})
 @ThreadSafe
@@ -65,9 +68,9 @@ public class BoxStore implements Closeable {
     @Nullable private static Object relinker;
 
     /** Change so ReLinker will update native library when using workaround loading. */
-    public static final String JNI_VERSION = "2.7.1";
+    public static final String JNI_VERSION = "2.8.0";
 
-    private static final String VERSION = "2.7.1-2020-08-19";
+    private static final String VERSION = "2.8.0-2020-11-04";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
@@ -165,11 +168,13 @@ public class BoxStore implements Closeable {
 
     static native int nativeCleanStaleReadTransactions(long store);
 
-    static native void nativeSetDbExceptionListener(long store, DbExceptionListener dbExceptionListener);
+    static native void nativeSetDbExceptionListener(long store, @Nullable DbExceptionListener dbExceptionListener);
 
     static native void nativeSetDebugFlags(long store, int debugFlags);
 
-    static native String nativeStartObjectBrowser(long store, @Nullable String urlPath, int port);
+    private native String nativeStartObjectBrowser(long store, @Nullable String urlPath, int port);
+
+    private native boolean nativeStopObjectBrowser(long store);
 
     static native boolean nativeIsObjectBrowserAvailable();
 
@@ -177,9 +182,33 @@ public class BoxStore implements Closeable {
 
     native long nativeValidate(long store, long pageLimit, boolean checkLeafLevel);
 
+    static native int nativeGetSupportedSync();
+
     public static boolean isObjectBrowserAvailable() {
         NativeLibraryLoader.ensureLoaded();
         return nativeIsObjectBrowserAvailable();
+    }
+
+    private static int getSupportedSync() {
+        NativeLibraryLoader.ensureLoaded();
+        try {
+            int supportedSync = nativeGetSupportedSync();
+            if (supportedSync < 0 || supportedSync > 2) {
+                throw new IllegalStateException("Unexpected sync support: " + supportedSync);
+            }
+            return supportedSync;
+        } catch (UnsatisfiedLinkError e) {
+            System.err.println("Old JNI lib? " + e);  // No stack
+            return 0;
+        }
+    }
+
+    public static boolean isSyncAvailable() {
+        return getSupportedSync() != 0;
+    }
+
+    public static boolean isSyncServerAvailable() {
+        return getSupportedSync() == 2;
     }
 
     native long nativePanicModeRemoveAllObjects(long store, int entityId);
@@ -216,6 +245,12 @@ public class BoxStore implements Closeable {
 
     private final TxCallback<?> failedReadTxAttemptCallback;
 
+    /**
+     * Keeps a reference so the library user does not have to.
+     */
+    @Nullable
+    private SyncClient syncClient;
+
     BoxStore(BoxStoreBuilder builder) {
         context = builder.context;
         relinker = builder.relinker;
@@ -227,6 +262,8 @@ public class BoxStore implements Closeable {
 
         try {
             handle = nativeCreateWithFlatOptions(builder.buildFlatStoreOptions(canonicalPath), builder.model);
+            if(handle == 0) throw new DbException("Could not create native store");
+
             int debugFlags = builder.debugFlags;
             if (debugFlags != 0) {
                 debugTxRead = (debugFlags & DebugFlags.LOG_TRANSACTIONS_READ) != 0;
@@ -426,6 +463,8 @@ public class BoxStore implements Closeable {
             System.out.println("Begin TX with commit count " + initialCommitCount);
         }
         long nativeTx = nativeBeginTx(handle);
+        if(nativeTx == 0) throw new DbException("Could not create native transaction");
+
         Transaction tx = new Transaction(this, nativeTx, initialCommitCount);
         synchronized (transactions) {
             transactions.add(tx);
@@ -450,6 +489,8 @@ public class BoxStore implements Closeable {
             System.out.println("Begin read TX with commit count " + initialCommitCount);
         }
         long nativeTx = nativeBeginReadTx(handle);
+        if(nativeTx == 0) throw new DbException("Could not create native read transaction");
+
         Transaction tx = new Transaction(this, nativeTx, initialCommitCount);
         synchronized (transactions) {
             transactions.add(tx);
@@ -483,6 +524,14 @@ public class BoxStore implements Closeable {
         synchronized (this) {
             oldClosedState = closed;
             if (!closed) {
+                if(objectBrowserPort != 0) { // not linked natively (yet), so clean up here
+                    try {
+                        stopObjectBrowser();
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 // Closeable recommendation: mark as closed before any code that might throw.
                 closed = true;
                 List<Transaction> transactionsToClose;
@@ -1010,8 +1059,38 @@ public class BoxStore implements Closeable {
     }
 
     @Experimental
+    @Nullable
+    public String startObjectBrowser(String urlToBindTo) {
+        verifyObjectBrowserNotRunning();
+        int port;
+        try {
+            port = new URL(urlToBindTo).getPort(); // Gives -1 if not available
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Can not start Object Browser at " + urlToBindTo, e);
+        }
+        String url = nativeStartObjectBrowser(handle, urlToBindTo, 0);
+        if (url != null) {
+            objectBrowserPort = port;
+        }
+        return url;
+    }
+
+    @Experimental
+    public synchronized boolean stopObjectBrowser() {
+        if(objectBrowserPort == 0) {
+            throw new IllegalStateException("ObjectBrowser has not been started before");
+        }
+        objectBrowserPort = 0;
+        return nativeStopObjectBrowser(handle);
+    }
+
+    @Experimental
     public int getObjectBrowserPort() {
         return objectBrowserPort;
+    }
+
+    public boolean isObjectBrowserRunning() {
+        return objectBrowserPort != 0;
     }
 
     private void verifyObjectBrowserNotRunning() {
@@ -1021,10 +1100,12 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * The given listener will be called when an exception is thrown.
-     * This for example allows a central error handling, e.g. a special logging for DB related exceptions.
+     * Sets a listener that will be called when an exception is thrown. Replaces a previously set listener.
+     * Set to {@code null} to remove the listener.
+     * <p>
+     * This for example allows central error handling or special logging for database-related exceptions.
      */
-    public void setDbExceptionListener(DbExceptionListener dbExceptionListener) {
+    public void setDbExceptionListener(@Nullable DbExceptionListener dbExceptionListener) {
         nativeSetDbExceptionListener(handle, dbExceptionListener);
     }
 
@@ -1089,4 +1170,15 @@ public class BoxStore implements Closeable {
         return handle;
     }
 
+    /**
+     * Returns the {@link SyncClient} associated with this store. To create one see {@link io.objectbox.sync.Sync Sync}.
+     */
+    @Nullable
+    public SyncClient getSyncClient() {
+        return syncClient;
+    }
+
+    void setSyncClient(@Nullable SyncClient syncClient) {
+        this.syncClient = syncClient;
+    }
 }

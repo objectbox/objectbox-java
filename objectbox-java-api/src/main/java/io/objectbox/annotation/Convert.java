@@ -16,25 +16,29 @@
 
 package io.objectbox.annotation;
 
-import io.objectbox.converter.PropertyConverter;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import io.objectbox.converter.PropertyConverter;
+
 /**
- * Specifies {@link PropertyConverter} for the field to support custom types
+ * Supplies a {@link PropertyConverter converter} to store custom Property types as a supported {@link #dbType()}.
+ * See the <a href="https://docs.objectbox.io/advanced/custom-types">Custom Types documentation</a> for details.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 public @interface Convert {
-    /** Converter class */
+    /**
+     * The converter class that ObjectBox should use. See {@link PropertyConverter} for implementation guidelines.
+     */
     Class<? extends PropertyConverter> converter();
 
     /**
-     * Class of the DB type the Java property is converted to/from.
-     * This is limited to all java classes which are supported natively by ObjectBox.
+     * The Property type the Java field value is converted to/from.
+     * See the <a href="https://docs.objectbox.io/advanced/custom-types">Custom Types documentation</a> for a list
+     * of supported types.
      */
     Class dbType();
 }

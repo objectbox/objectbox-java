@@ -27,26 +27,37 @@ import javax.annotation.Nullable;
 import io.objectbox.Box;
 import io.objectbox.EntityInfo;
 import io.objectbox.Property;
-import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.exception.DbException;
 import io.objectbox.relation.RelationInfo;
 
 /**
- * With QueryBuilder you define custom queries returning matching entities. Using the methods of this class you can
- * select (filter) results for specific data (for example #{@link #equal(Property, String)} and
- * {@link #isNull(Property)}) and select an sort order for the resulting list (see {@link #order(Property)} and its
- * overloads).
+ * Builds a {@link Query Query} using conditions which can then be used to return a list of matching Objects.
  * <p>
- * Use {@link #build()} to conclude your query definitions and to get a {@link Query} object, which is used to actually
- * get results.
- * <p>
- * Note: Currently you can only query for complete entities. Returning individual property values or aggregates are
- * currently not available. Keep in mind that ObjectBox is very fast and the overhead to create an entity is very low.
+ * A simple example:
  *
- * @param <T> Entity class associated with this query builder.
+ * <pre>
+ * userBox.query()
+ *     .equal(User_.firstName, "Joe")
+ *     .order(User_.lastName)
+ *     .build()
+ *     .find()
+ * </pre>
+ *
+ * <p>
+ * To add a condition use the appropriate method, for example {@link #equal(Property, String)} or
+ * {@link #isNull(Property)}. To order results use {@link #order(Property)} and its related methods.
+ * <p>
+ * Use {@link #build()} to create a {@link Query} object, which is used to actually get the results.
+ * <p>
+ * Note: by default Query returns full Objects. To return only values or an aggregate value for a single Property,
+ * use {@link Query#property(Property)}.
+ * <p>
+ * See the <a href="https://docs.objectbox.io/queries">Queries documentation</a> for details.
+ *
+ * @param <T> Entity class for which the Query is built.
  */
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
-@Experimental
 public class QueryBuilder<T> implements Closeable {
 
     public enum StringOrder {
@@ -191,6 +202,7 @@ public class QueryBuilder<T> implements Closeable {
         this.box = box;
         this.storeHandle = storeHandle;
         handle = nativeCreate(storeHandle, entityName);
+        if(handle == 0) throw new DbException("Could not create native query builder");
         isSubQuery = false;
     }
 
@@ -232,6 +244,7 @@ public class QueryBuilder<T> implements Closeable {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
         long queryHandle = nativeBuild(handle);
+        if(queryHandle == 0) throw new DbException("Could not create native query");
         Query<T> query = new Query<>(box, queryHandle, eagerRelations, filter, comparator);
         close();
         return query;

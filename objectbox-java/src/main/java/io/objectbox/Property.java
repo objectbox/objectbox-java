@@ -29,8 +29,10 @@ import io.objectbox.query.QueryCondition.PropertyCondition;
 import io.objectbox.query.QueryCondition.PropertyCondition.Operation;
 
 /**
- * Meta data describing a property of an ObjectBox entity.
- * Properties are typically used to define query criteria using {@link io.objectbox.query.QueryBuilder}.
+ * Meta data describing a Property of an ObjectBox Entity.
+ * Properties are typically used when defining {@link io.objectbox.query.Query Query} conditions
+ * using {@link io.objectbox.query.QueryBuilder QueryBuilder}.
+ * Access properties using the generated underscore class of an entity (e.g. {@code Example_.id}).
  */
 @SuppressWarnings("WeakerAccess,UnusedReturnValue, unused")
 public class Property<ENTITY> implements Serializable {
