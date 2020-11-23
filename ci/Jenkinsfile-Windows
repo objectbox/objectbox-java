@@ -11,9 +11,9 @@ pipeline {
         MVN_REPO_URL = credentials('objectbox_internal_mvn_repo_http')
         MVN_REPO_LOGIN = credentials('objectbox_internal_mvn_user')
         // Warning: use single quotes to avoid Groovy String interpolation leaking secrets.
-        MVN_REPO_ARGS = '-PinternalObjectBoxRepo=$MVN_REPO_URL ' +
-                        '-PinternalObjectBoxRepoUser=$MVN_REPO_LOGIN_USR ' +
-                        '-PinternalObjectBoxRepoPassword=$MVN_REPO_LOGIN_PSW'
+        MVN_REPO_ARGS = '-PinternalObjectBoxRepo=%MVN_REPO_URL% ' +
+                        '-PinternalObjectBoxRepoUser=%MVN_REPO_LOGIN_USR% ' +
+                        '-PinternalObjectBoxRepoPassword=%MVN_REPO_LOGIN_PSW%'
     }
 
     options {
