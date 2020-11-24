@@ -30,27 +30,46 @@ pipeline {
         stage('init') {
             steps {
                 bat 'gradlew -version'
-
-                // "cmd /c" for an OK exit code if no file is found
-                bat 'cmd /c del tests\\objectbox-java-test\\hs_err_pid*.log'
             }
         }
 
-        stage('build-java') {
+        stage('build-java-x64') {
             steps {
+                // Remove files to avoid archiving them again.
+                bat 'del /q /s hs_err_pid*.log'
+
                 bat "gradlew $gradleArgs $MVN_REPO_ARGS cleanTest build test"
+            }
+            post {
+                always {
+                    junit '**/build/test-results/**/TEST-*.xml'
+                    archiveArtifacts artifacts: '**/hs_err_pid*.log', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('build-java-x86') {
+            steps {
+                // Remove files to avoid archiving them again.
+                bat 'del /q /s hs_err_pid*.log'
+
+                // TEST_WITH_JAVA_X86 makes objectbox-java-test use 32-bit java executable and therefore
+                // 32-bit ObjectBox to run tests (see build.gradle file).
+                // Note: assumes JAVA_HOME_X86 is set to 32-bit JDK path.
+                // Note: no space before && or value has space as well.
+                bat "set TEST_WITH_JAVA_X86=true&& gradlew $gradleArgs $MVN_REPO_ARGS cleanTest build test"
+            }
+            post {
+                always {
+                    junit '**/build/test-results/**/TEST-*.xml'
+                    archiveArtifacts artifacts: '**/hs_err_pid*.log', allowEmptyArchive: true
+                }
             }
         }
     }
 
     // For global vars see /jenkins/pipeline-syntax/globals
     post {
-        always {
-            junit '**/build/test-results/**/TEST-*.xml'
-            archiveArtifacts artifacts: 'tests/*/hs_err_pid*.log', allowEmptyArchive: true  // Only on JVM crash.
-            // currently unused: archiveArtifacts '**/build/reports/findbugs/*'
-        }
-
         failure {
             updateGitlabCommitStatus name: 'build-windows', state: 'failed'
         }

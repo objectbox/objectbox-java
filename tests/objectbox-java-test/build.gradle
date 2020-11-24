@@ -37,6 +37,13 @@ dependencies {
 }
 
 test {
+    // to run tests with 32-bit ObjectBox
+    if (System.getenv('TEST_WITH_JAVA_X86') == 'true') {
+        def javaExecutablePath = System.getenv("JAVA_HOME_X86") + "\\bin\\java"
+        println "Running tests with ${javaExecutablePath}"
+        executable = javaExecutablePath
+    }
+
     // This is pretty useless now because it floods console with warnings about internal Java classes
     // However we might check from time to time, also with Java 9.
     // jvmArgs '-Xcheck:jni'
