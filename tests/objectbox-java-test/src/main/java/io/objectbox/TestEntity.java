@@ -16,6 +16,8 @@
 
 package io.objectbox;
 
+import java.util.Arrays;
+
 /** In "real" entity would be annotated with @Entity. */
 public class TestEntity {
 
@@ -183,5 +185,25 @@ public class TestEntity {
     public TestEntity setSimpleLongU(long simpleLongU) {
         this.simpleLongU = simpleLongU;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "TestEntity{" +
+                "id=" + id +
+                ", simpleBoolean=" + simpleBoolean +
+                ", simpleByte=" + simpleByte +
+                ", simpleShort=" + simpleShort +
+                ", simpleInt=" + simpleInt +
+                ", simpleLong=" + simpleLong +
+                ", simpleFloat=" + simpleFloat +
+                ", simpleDouble=" + simpleDouble +
+                ", simpleString='" + simpleString + '\'' +
+                ", simpleByteArray=" + Arrays.toString(simpleByteArray) +
+                ", simpleShortU=" + simpleShortU +
+                ", simpleIntU=" + simpleIntU +
+                ", simpleLongU=" + simpleLongU +
+                ", noArgsConstructorCalled=" + noArgsConstructorCalled +
+                '}';
     }
 }
