@@ -44,13 +44,20 @@ public final class ModelProperty extends Table {
   public io.objectbox.model.IdUid indexId() { return indexId(new io.objectbox.model.IdUid()); }
   public io.objectbox.model.IdUid indexId(io.objectbox.model.IdUid obj) { int o = __offset(12); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
   /**
-   * For relations only: name of the target entity
+   * For relations only: name of the target entity (will be replaced by "target entity ID" at the schema level)
    */
   public String targetEntity() { int o = __offset(14); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer targetEntityAsByteBuffer() { return __vector_as_bytebuffer(14, 1); }
   public ByteBuffer targetEntityInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 14, 1); }
   /**
-   * E.g. for virtual to-one target ID properties, this references the ToOne object
+   * This will probably move out of the core model into something binding specific.
+   * A virtual property's "target name" typically references an existing field in the entity at the language level
+   * of the binding. In contrast to this, the virtual property (via model "name") does not exist in the entity at
+   * the language level (thus virtual), but in ObjectBox's core DB.
+   * Example: consider a Java entity which has a ToOne (a Java specific relation wrapper) member called "parent".
+   * ObjectBox core is unaware of that ToOne, but works with the "parentId" relation property,
+   * which in turn does not exist in the Java entity.
+   * The mapping between "parentId" and "parent" is done by our JNI binding.
    */
   public String virtualTarget() { int o = __offset(16); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer virtualTargetAsByteBuffer() { return __vector_as_bytebuffer(16, 1); }

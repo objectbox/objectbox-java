@@ -32,8 +32,18 @@ public final class EntityFlags {
    * It's possible to have local-only (non-synced) types and synced types in the same store (schema/data model).
    */
   public static final int SYNC_ENABLED = 2;
+  /**
+   * Makes object IDs for a synced types (SYNC_ENABLED is set) global.
+   * By default (not using this flag), the 64 bit object IDs have a local scope and are not unique globally.
+   * This flag tells ObjectBox to treat object IDs globally and thus no ID mapping (local <-> global) is performed.
+   * Often this is used with assignable IDs (ID_SELF_ASSIGNABLE property flag is set) and some special ID scheme.
+   * Note: typically you won't do this with automatically assigned IDs, set by the local ObjectBox store.
+   *       Two devices would likely overwrite each other's object during sync as object IDs are prone to collide.
+   *       It might be OK if you can somehow ensure that only a single device will create new IDs.
+   */
+  public static final int SHARED_GLOBAL_IDS = 4;
 
-  public static final String[] names = { "USE_NO_ARG_CONSTRUCTOR", "SYNC_ENABLED", };
+  public static final String[] names = { "USE_NO_ARG_CONSTRUCTOR", "SYNC_ENABLED", "", "SHARED_GLOBAL_IDS", };
 
   public static String name(int e) { return names[e - USE_NO_ARG_CONSTRUCTOR]; }
 }
