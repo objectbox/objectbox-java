@@ -523,35 +523,9 @@ public class QueryBuilder<T> implements Closeable {
         return this;
     }
 
-    public QueryBuilder<T> equal(Property<T> property, boolean value) {
-        verifyHandle();
-        checkCombineCondition(nativeEqual(handle, property.getId(), value ? 1 : 0));
-        return this;
-    }
-
-    /** @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead. */
-    public QueryBuilder<T> equal(Property<T> property, Date value) {
-        verifyHandle();
-        checkCombineCondition(nativeEqual(handle, property.getId(), value.getTime()));
-        return this;
-    }
-
     public QueryBuilder<T> notEqual(Property<T> property, long value) {
         verifyHandle();
         checkCombineCondition(nativeNotEqual(handle, property.getId(), value));
-        return this;
-    }
-
-    public QueryBuilder<T> notEqual(Property<T> property, boolean value) {
-        verifyHandle();
-        checkCombineCondition(nativeNotEqual(handle, property.getId(), value ? 1 : 0));
-        return this;
-    }
-
-    /** @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead. */
-    public QueryBuilder<T> notEqual(Property<T> property, Date value) {
-        verifyHandle();
-        checkCombineCondition(nativeNotEqual(handle, property.getId(), value.getTime()));
         return this;
     }
 
@@ -567,40 +541,14 @@ public class QueryBuilder<T> implements Closeable {
         return this;
     }
 
-    public QueryBuilder<T> less(Property<T> property, Date value) {
-        verifyHandle();
-        checkCombineCondition(nativeLess(handle, property.getId(), value.getTime()));
-        return this;
-    }
-
-    /** @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead. */
-    public QueryBuilder<T> greater(Property<T> property, Date value) {
-        verifyHandle();
-        checkCombineCondition(nativeGreater(handle, property.getId(), value.getTime()));
-        return this;
-    }
-
     public QueryBuilder<T> between(Property<T> property, long value1, long value2) {
         verifyHandle();
         checkCombineCondition(nativeBetween(handle, property.getId(), value1, value2));
         return this;
     }
 
-    /** @throws NullPointerException if one of the given values is null. */
-    public QueryBuilder<T> between(Property<T> property, Date value1, Date value2) {
-        verifyHandle();
-        checkCombineCondition(nativeBetween(handle, property.getId(), value1.getTime(), value2.getTime()));
-        return this;
-    }
-
     // FIXME DbException: invalid unordered_map<K, T> key
     public QueryBuilder<T> in(Property<T> property, long[] values) {
-        verifyHandle();
-        checkCombineCondition(nativeIn(handle, property.getId(), values, false));
-        return this;
-    }
-
-    public QueryBuilder<T> in(Property<T> property, int[] values) {
         verifyHandle();
         checkCombineCondition(nativeIn(handle, property.getId(), values, false));
         return this;
@@ -612,9 +560,81 @@ public class QueryBuilder<T> implements Closeable {
         return this;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Integers -> int[]
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public QueryBuilder<T> in(Property<T> property, int[] values) {
+        verifyHandle();
+        checkCombineCondition(nativeIn(handle, property.getId(), values, false));
+        return this;
+    }
+
     public QueryBuilder<T> notIn(Property<T> property, int[] values) {
         verifyHandle();
         checkCombineCondition(nativeIn(handle, property.getId(), values, true));
+        return this;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Integers -> boolean
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public QueryBuilder<T> equal(Property<T> property, boolean value) {
+        verifyHandle();
+        checkCombineCondition(nativeEqual(handle, property.getId(), value ? 1 : 0));
+        return this;
+    }
+
+    public QueryBuilder<T> notEqual(Property<T> property, boolean value) {
+        verifyHandle();
+        checkCombineCondition(nativeNotEqual(handle, property.getId(), value ? 1 : 0));
+        return this;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Integers -> Date
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead.
+     */
+    public QueryBuilder<T> equal(Property<T> property, Date value) {
+        verifyHandle();
+        checkCombineCondition(nativeEqual(handle, property.getId(), value.getTime()));
+        return this;
+    }
+
+    /**
+     * @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead.
+     */
+    public QueryBuilder<T> notEqual(Property<T> property, Date value) {
+        verifyHandle();
+        checkCombineCondition(nativeNotEqual(handle, property.getId(), value.getTime()));
+        return this;
+    }
+
+    public QueryBuilder<T> less(Property<T> property, Date value) {
+        verifyHandle();
+        checkCombineCondition(nativeLess(handle, property.getId(), value.getTime()));
+        return this;
+    }
+
+    /**
+     * @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead.
+     */
+    public QueryBuilder<T> greater(Property<T> property, Date value) {
+        verifyHandle();
+        checkCombineCondition(nativeGreater(handle, property.getId(), value.getTime()));
+        return this;
+    }
+
+    /**
+     * @throws NullPointerException if one of the given values is null.
+     */
+    public QueryBuilder<T> between(Property<T> property, Date value1, Date value2) {
+        verifyHandle();
+        checkCombineCondition(nativeBetween(handle, property.getId(), value1.getTime(), value2.getTime()));
         return this;
     }
 
