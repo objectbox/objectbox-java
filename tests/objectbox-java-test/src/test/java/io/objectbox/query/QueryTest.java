@@ -476,6 +476,48 @@ public class QueryTest extends AbstractQueryTest {
     }
 
     @Test
+    public void double_lessAndGreater_works() {
+        putTestEntitiesScalars();
+        // Note: calculation matches putTestEntitiesScalars.
+        double value = 2000 + 2005 / 100f;
+
+        buildFindAndAssert(
+                box.query().less(TestEntity_.simpleDouble, value),
+                5,
+                (index, item) -> assertTrue(item.getSimpleDouble() < value)
+        );
+
+        buildFindAndAssert(
+                box.query().lessOrEqual(TestEntity_.simpleDouble, value),
+                6,
+                (index, item) -> assertTrue(item.getSimpleDouble() <= value)
+        );
+
+        buildFindAndAssert(
+                box.query().greater(TestEntity_.simpleDouble, value),
+                4,
+                (index, item) -> assertTrue(item.getSimpleDouble() > value)
+        );
+
+        buildFindAndAssert(
+                box.query().greaterOrEqual(TestEntity_.simpleDouble, value),
+                5,
+                (index, item) -> assertTrue(item.getSimpleDouble() >= value)
+        );
+
+        double valueLess = 2020.051;
+        double valueGreater = 2020.029;
+        buildFindAndAssert(
+                box.query().greater(TestEntity_.simpleDouble, valueGreater).less(TestEntity_.simpleDouble, valueLess),
+                3,
+                (index, item) -> {
+                    assertTrue(item.getSimpleDouble() < valueLess);
+                    assertTrue(item.getSimpleDouble() > valueGreater);
+                }
+        );
+    }
+
+    @Test
     // Android JNI seems to have a limit of 512 local jobject references. Internally, we must delete those temporary
     // references when processing lists. This is the test for that.
     public void testBigResultList() {
