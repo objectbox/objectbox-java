@@ -299,6 +299,33 @@ public class QueryTest extends AbstractQueryTest {
     }
 
     @Test
+    public void string_lessOrEqual_works() {
+        putTestEntitiesStrings();
+
+        ListItemAsserter<TestEntity> lessOrEqualAsserter = (index, item) -> {
+            if (index == 0) assertEquals("apple", item.getSimpleString());
+            if (index == 1) assertEquals("banana", item.getSimpleString());
+            if (index == 2) assertEquals("banana milk shake", item.getSimpleString());
+        };
+
+        buildFindAndAssert(
+                box.query()
+                        .lessOrEqual(TestEntity_.simpleString, "BANANA MILK SHAKE", StringOrder.CASE_INSENSITIVE)
+                        .order(TestEntity_.simpleString),
+                3,
+                lessOrEqualAsserter
+        );
+
+        buildFindAndAssert(
+                box.query()
+                        .lessOrEqual(TestEntity_.simpleString, "banana milk shake", StringOrder.CASE_SENSITIVE)
+                        .order(TestEntity_.simpleString),
+                3,
+                lessOrEqualAsserter
+        );
+    }
+
+    @Test
     public void testStringGreater() {
         putTestEntitiesStrings();
         putTestEntity("FOO", 100);
@@ -323,6 +350,33 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals("banana milk shake", entities.get(0).getSimpleString());
         assertEquals("bar", entities.get(1).getSimpleString());
         assertEquals("foo bar", entities.get(2).getSimpleString());
+    }
+
+    @Test
+    public void string_greaterOrEqual_works() {
+        putTestEntitiesStrings();
+
+        ListItemAsserter<TestEntity> greaterOrEqualAsserter = (index, item) -> {
+            if (index == 0) assertEquals("banana milk shake", item.getSimpleString());
+            if (index == 1) assertEquals("bar", item.getSimpleString());
+            if (index == 2) assertEquals("foo bar", item.getSimpleString());
+        };
+
+        buildFindAndAssert(
+                box.query()
+                        .greaterOrEqual(TestEntity_.simpleString, "BANANA MILK SHAKE", StringOrder.CASE_INSENSITIVE)
+                        .order(TestEntity_.simpleString),
+                3,
+                greaterOrEqualAsserter
+        );
+
+        buildFindAndAssert(
+                box.query()
+                        .greaterOrEqual(TestEntity_.simpleString, "banana milk shake", StringOrder.CASE_SENSITIVE)
+                        .order(TestEntity_.simpleString),
+                3,
+                greaterOrEqualAsserter
+        );
     }
 
     @Test
