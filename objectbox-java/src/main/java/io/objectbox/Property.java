@@ -16,11 +16,6 @@
 
 package io.objectbox;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import javax.annotation.Nullable;
-
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbException;
@@ -37,6 +32,10 @@ import io.objectbox.query.PropertyQueryConditionImpl.StringArrayCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.StringCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.StringCondition.Operation;
 import io.objectbox.query.QueryBuilder.StringOrder;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Meta data describing a Property of an ObjectBox Entity.
@@ -138,9 +137,19 @@ public class Property<ENTITY> implements Serializable {
         return greater((long) value);
     }
 
+    /** Creates a "greater or equal ('&gt;=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(short value) {
+        return greaterOrEqual((long) value);
+    }
+
     /** Creates a "less than ('&lt;')" condition for this property. */
     public PropertyQueryCondition<ENTITY> less(short value) {
         return less((long) value);
+    }
+
+    /** Creates a "less or equal ('&lt;=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> lessOrEqual(short value) {
+        return lessOrEqual((long) value);
     }
 
     /** Creates an "BETWEEN ... AND ..." condition for this property. */
@@ -163,9 +172,19 @@ public class Property<ENTITY> implements Serializable {
         return greater((long) value);
     }
 
+    /** Creates a "greater or equal ('&gt;=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(int value) {
+        return greaterOrEqual((long) value);
+    }
+
     /** Creates a "less than ('&lt;')" condition for this property. */
     public PropertyQueryCondition<ENTITY> less(int value) {
         return less((long) value);
+    }
+
+    /** Creates a "less or equal ('&lt;=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> lessOrEqual(int value) {
+        return lessOrEqual((long) value);
     }
 
     /** Creates an "BETWEEN ... AND ..." condition for this property. */
@@ -198,9 +217,19 @@ public class Property<ENTITY> implements Serializable {
         return new LongCondition<>(this, LongCondition.Operation.GREATER, value);
     }
 
+    /** Creates a "greater or equal ('&gt;=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(long value) {
+        return new LongCondition<>(this, LongCondition.Operation.GREATER_OR_EQUAL, value);
+    }
+
     /** Creates a "less than ('&lt;')" condition for this property. */
     public PropertyQueryCondition<ENTITY> less(long value) {
         return new LongCondition<>(this, LongCondition.Operation.LESS, value);
+    }
+
+    /** Creates a "less or equal ('&lt;=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> lessOrEqual(long value) {
+        return new LongCondition<>(this, LongCondition.Operation.LESS_OR_EQUAL, value);
     }
 
     /** Creates an "BETWEEN ... AND ..." condition for this property. */
@@ -232,9 +261,19 @@ public class Property<ENTITY> implements Serializable {
         return new DoubleCondition<>(this, DoubleCondition.Operation.GREATER, value);
     }
 
+    /** Creates a "greater or equal ('&gt;=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(double value) {
+        return new DoubleCondition<>(this, DoubleCondition.Operation.GREATER_OR_EQUAL, value);
+    }
+
     /** Creates a "less than ('&lt;')" condition for this property. */
     public PropertyQueryCondition<ENTITY> less(double value) {
         return new DoubleCondition<>(this, DoubleCondition.Operation.LESS, value);
+    }
+
+    /** Creates a "less or equal ('&lt;=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> lessOrEqual(double value) {
+        return new DoubleCondition<>(this, DoubleCondition.Operation.LESS_OR_EQUAL, value);
     }
 
     /** Creates an "BETWEEN ... AND ..." condition for this property. */
@@ -258,9 +297,19 @@ public class Property<ENTITY> implements Serializable {
         return new LongCondition<>(this, LongCondition.Operation.GREATER, value);
     }
 
+    /** Creates a "greater or equal ('&gt;=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(Date value) {
+        return new LongCondition<>(this, LongCondition.Operation.GREATER_OR_EQUAL, value);
+    }
+
     /** Creates a "less than ('&lt;')" condition for this property. */
     public PropertyQueryCondition<ENTITY> less(Date value) {
         return new LongCondition<>(this, LongCondition.Operation.LESS, value);
+    }
+
+    /** Creates a "less or equal ('&lt;=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> lessOrEqual(Date value) {
+        return new LongCondition<>(this, LongCondition.Operation.LESS_OR_EQUAL, value);
     }
 
     /** Creates an "BETWEEN ... AND ..." condition for this property. */
@@ -349,6 +398,13 @@ public class Property<ENTITY> implements Serializable {
     }
 
     /**
+     * Creates a "greater or equal ('&gt;=')" condition for this property.
+     */
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(String value, StringOrder order) {
+        return new StringCondition<>(this, StringCondition.Operation.GREATER_OR_EQUAL, value, order);
+    }
+
+    /**
      * Creates a "less than ('&lt;')" condition for this property.
      * <p>
      * Ignores case when matching results. Use the overload and pass
@@ -365,6 +421,13 @@ public class Property<ENTITY> implements Serializable {
      */
     public PropertyQueryCondition<ENTITY> less(String value, StringOrder order) {
         return new StringCondition<>(this, StringCondition.Operation.LESS, value, order);
+    }
+
+    /**
+     * Creates a "less or equal ('&lt;=')" condition for this property.
+     */
+    public PropertyQueryCondition<ENTITY> lessOrEqual(String value, StringOrder order) {
+        return new StringCondition<>(this, StringCondition.Operation.LESS_OR_EQUAL, value, order);
     }
 
     /**
@@ -438,9 +501,19 @@ public class Property<ENTITY> implements Serializable {
         return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.GREATER, value);
     }
 
+    /** Creates a "greater or equal ('&gt;=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(byte[] value) {
+        return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.GREATER_OR_EQUAL, value);
+    }
+
     /** Creates a "less than ('&lt;')" condition for this property. */
     public PropertyQueryCondition<ENTITY> less(byte[] value) {
         return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.LESS, value);
+    }
+
+    /** Creates a "less or equal ('&lt;=')" condition for this property. */
+    public PropertyQueryCondition<ENTITY> lessOrEqual(byte[] value) {
+        return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.LESS_OR_EQUAL, value);
     }
 
     @Internal

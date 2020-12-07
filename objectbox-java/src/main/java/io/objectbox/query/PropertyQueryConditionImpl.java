@@ -103,7 +103,9 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
             EQUAL,
             NOT_EQUAL,
             GREATER,
-            LESS
+            GREATER_OR_EQUAL,
+            LESS,
+            LESS_OR_EQUAL
         }
 
         public LongCondition(Property<T> property, Operation op, long value) {
@@ -132,8 +134,14 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
                 case GREATER:
                     builder.greater(property, value);
                     break;
+                case GREATER_OR_EQUAL:
+                    builder.greaterOrEqual(property, value);
+                    break;
                 case LESS:
                     builder.less(property, value);
+                    break;
+                case LESS_OR_EQUAL:
+                    builder.lessOrEqual(property, value);
                     break;
                 default:
                     throw new UnsupportedOperationException(op + " is not supported for String");
@@ -207,7 +215,9 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
 
         public enum Operation {
             GREATER,
-            LESS
+            GREATER_OR_EQUAL,
+            LESS,
+            LESS_OR_EQUAL
         }
 
         public DoubleCondition(Property<T> property, Operation op, double value) {
@@ -222,8 +232,14 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
                 case GREATER:
                     builder.greater(property, value);
                     break;
+                case GREATER_OR_EQUAL:
+                    builder.greaterOrEqual(property, value);
+                    break;
                 case LESS:
                     builder.less(property, value);
+                    break;
+                case LESS_OR_EQUAL:
+                    builder.lessOrEqual(property, value);
                     break;
                 default:
                     throw new UnsupportedOperationException(op + " is not supported for double");
@@ -266,7 +282,9 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
             EQUAL,
             NOT_EQUAL,
             GREATER,
+            GREATER_OR_EQUAL,
             LESS,
+            LESS_OR_EQUAL,
             CONTAINS,
             STARTS_WITH,
             ENDS_WITH
@@ -295,8 +313,14 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
                 case GREATER:
                     builder.greater(property, value, order);
                     break;
+                case GREATER_OR_EQUAL:
+                    builder.greaterOrEqual(property, value, order);
+                    break;
                 case LESS:
                     builder.less(property, value, order);
+                    break;
+                case LESS_OR_EQUAL:
+                    builder.lessOrEqual(property, value, order);
                     break;
                 case CONTAINS:
                     builder.contains(property, value, order);
@@ -350,7 +374,9 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
         public enum Operation {
             EQUAL,
             GREATER,
-            LESS
+            GREATER_OR_EQUAL,
+            LESS,
+            LESS_OR_EQUAL
         }
 
         public ByteArrayCondition(Property<T> property, Operation op, byte[] value) {
@@ -368,8 +394,14 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
                 case GREATER:
                     builder.greater(property, value);
                     break;
+                case GREATER_OR_EQUAL:
+                    builder.greaterOrEqual(property, value);
+                    break;
                 case LESS:
                     builder.less(property, value);
+                    break;
+                case LESS_OR_EQUAL:
+                    builder.lessOrEqual(property, value);
                     break;
                 default:
                     throw new UnsupportedOperationException(op + " is not supported for byte[]");
