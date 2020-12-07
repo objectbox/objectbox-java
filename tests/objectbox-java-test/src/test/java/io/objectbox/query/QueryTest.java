@@ -16,29 +16,24 @@
 
 package io.objectbox.query;
 
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
 import io.objectbox.DebugFlags;
 import io.objectbox.TestEntity;
 import io.objectbox.TestEntity_;
-import io.objectbox.TxCallback;
 import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.NonUniqueResultException;
 import io.objectbox.query.QueryBuilder.StringOrder;
 import io.objectbox.relation.MyObjectBox;
 import io.objectbox.relation.Order;
 import io.objectbox.relation.Order_;
+import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import static io.objectbox.TestEntity_.simpleBoolean;
 import static io.objectbox.TestEntity_.simpleByteArray;
@@ -726,7 +721,7 @@ public class QueryTest extends AbstractQueryTest {
 
         // No conditions.
         Query<TestEntity> queryNoConditions = box.query().build();
-        assertEquals("Query for entity TestEntity with 1 conditions",queryNoConditions.describe());
+        assertEquals("Query for entity TestEntity with 1 conditions", queryNoConditions.describe());
         assertEquals("TRUE", queryNoConditions.describeParameters());
 
         // Some conditions.
