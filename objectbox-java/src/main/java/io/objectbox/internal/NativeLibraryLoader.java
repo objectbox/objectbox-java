@@ -16,21 +16,23 @@
 
 package io.objectbox.internal;
 
+import io.objectbox.BoxStore;
 import org.greenrobot.essentials.io.IoUtils;
 
+import javax.annotation.Nullable;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
-
-import io.objectbox.BoxStore;
 
 /**
  * Separate class, so we can mock BoxStore.
@@ -110,7 +112,16 @@ public class NativeLibraryLoader {
         }
     }
 
+    /**
+     * Get CPU architecture of the JVM (Note: this can not be used for Android, Android decides arch on its own
+     * and looks for library in appropriately named folder).
+     * <p>
+     * Note that this may not be the architecture of the actual hardware
+     * (e.g. when running a x86 JVM on an amd64 machine).
+     */
     private static String getCpuArch() {
+        // See https://github.com/openjdk/jdk/blob/master/make/autoconf/platform.m4 for possible values.
+        // Note: any CPU architecture starting with "arm" is reported as "arm", aarch64 is reported as "aarch64".
         String osArch = System.getProperty("os.arch");
         String cpuArch = null;
         if (osArch != null) {
@@ -119,23 +130,22 @@ public class NativeLibraryLoader {
                 cpuArch = "x64";
             } else if (osArch.equalsIgnoreCase("x86")) {
                 cpuArch = "x86";
-            } else if (osArch.startsWith("arm")) {
-                switch (osArch) {
-                    case "armv7":
-                    case "armv7l":
-                    case "armeabi-v7a": // os.arch "armeabi-v7a" might be Android only, but let's try anyway...
-                        cpuArch = "armv7";
-                        break;
-                    case "arm64-v8a":
-                        cpuArch = "arm64";
-                        break;
-                    case "armv6":
+            } else if (osArch.equals("aarch64")) {
+                cpuArch = "arm64";
+            } else if (osArch.equals("arm")) {
+                // Decide if ARMv6 or ARMv7 library should be used, need to get actual architecture from OS.
+                String cpuArchOSOrNull = getCpuArchOSOrNull();
+                if (cpuArchOSOrNull != null) {
+                    String cpuArchOSlower = cpuArchOSOrNull.toLowerCase();
+                    if (cpuArchOSlower.startsWith("armv6")) {
                         cpuArch = "armv6";
-                        break;
-                    default:
-                        cpuArch = "armv6";  // Lowest version we support
-                        System.err.println("Unknown os.arch \"" + osArch + "\" - ObjectBox is defaulting to " + cpuArch);
-                        break;
+                    } else {
+                        // ARMv7 or 32-bit ARMv8
+                        cpuArch = "armv7";
+                    }
+                } else {
+                    cpuArch = "armv7";
+                    System.err.println("Failed to get arch from OS - ObjectBox is defaulting to " + cpuArch);
                 }
             }
         }
@@ -145,6 +155,23 @@ public class NativeLibraryLoader {
             System.err.println("Unknown os.arch \"" + osArch + "\" - ObjectBox is defaulting to " + cpuArch);
         }
         return cpuArch;
+    }
+
+    /**
+     * Get architecture using operating system tools. Currently only Linux is supported (using uname).
+     */
+    @Nullable
+    private static String getCpuArchOSOrNull() {
+        String archOrNull = null;
+        try {
+            // Linux
+            Process exec = Runtime.getRuntime().exec("uname -m");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
+            archOrNull = reader.readLine();
+            reader.close();
+        } catch (Exception ignored) {
+        }
+        return archOrNull;
     }
 
     private static void checkUnpackLib(String filename) {
