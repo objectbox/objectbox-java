@@ -22,7 +22,7 @@ buildscript {
         essentials_version = '3.1.0'
         junit_version = '4.13.1'
         mockito_version = '3.3.3'
-        kotlin_version = '1.4.10'
+        kotlin_version = '1.4.21'
         dokka_version = '0.10.1'
 
         println "version=$ob_version"
