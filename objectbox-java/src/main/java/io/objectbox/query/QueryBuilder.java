@@ -16,20 +16,19 @@
 
 package io.objectbox.query;
 
-import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import io.objectbox.Box;
 import io.objectbox.EntityInfo;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 import io.objectbox.relation.RelationInfo;
+
+import javax.annotation.Nullable;
+import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Builds a {@link Query Query} using conditions which can then be used to return a list of matching Objects.
@@ -153,9 +152,9 @@ public class QueryBuilder<T> implements Closeable {
 
     private native long nativeNotEqual(long handle, int propertyId, long value);
 
-    private native long nativeLess(long handle, int propertyId, long value);
+    private native long nativeLess(long handle, int propertyId, long value, boolean withEqual);
 
-    private native long nativeGreater(long handle, int propertyId, long value);
+    private native long nativeGreater(long handle, int propertyId, long value, boolean withEqual);
 
     private native long nativeBetween(long handle, int propertyId, long value1, long value2);
 
@@ -175,17 +174,17 @@ public class QueryBuilder<T> implements Closeable {
 
     private native long nativeEndsWith(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private native long nativeLess(long handle, int propertyId, String value, boolean caseSensitive);
+    private native long nativeLess(long handle, int propertyId, String value, boolean caseSensitive, boolean withEqual);
 
-    private native long nativeGreater(long handle, int propertyId, String value, boolean caseSensitive);
+    private native long nativeGreater(long handle, int propertyId, String value, boolean caseSensitive, boolean withEqual);
 
     private native long nativeIn(long handle, int propertyId, String[] value, boolean caseSensitive);
 
     // ------------------------------ FPs ------------------------------
 
-    private native long nativeLess(long handle, int propertyId, double value);
+    private native long nativeLess(long handle, int propertyId, double value, boolean withEqual);
 
-    private native long nativeGreater(long handle, int propertyId, double value);
+    private native long nativeGreater(long handle, int propertyId, double value, boolean withEqual);
 
     private native long nativeBetween(long handle, int propertyId, double value1, double value2);
 
@@ -193,9 +192,9 @@ public class QueryBuilder<T> implements Closeable {
 
     private native long nativeEqual(long handle, int propertyId, byte[] value);
 
-    private native long nativeLess(long handle, int propertyId, byte[] value);
+    private native long nativeLess(long handle, int propertyId, byte[] value, boolean withEqual);
 
-    private native long nativeGreater(long handle, int propertyId, byte[] value);
+    private native long nativeGreater(long handle, int propertyId, byte[] value, boolean withEqual);
 
     @Internal
     public QueryBuilder(Box<T> box, long storeHandle, String entityName) {
@@ -531,13 +530,25 @@ public class QueryBuilder<T> implements Closeable {
 
     public QueryBuilder<T> less(Property<T> property, long value) {
         verifyHandle();
-        checkCombineCondition(nativeLess(handle, property.getId(), value));
+        checkCombineCondition(nativeLess(handle, property.getId(), value, false));
+        return this;
+    }
+
+    public QueryBuilder<T> lessOrEqual(Property<T> property, long value) {
+        verifyHandle();
+        checkCombineCondition(nativeLess(handle, property.getId(), value, true));
         return this;
     }
 
     public QueryBuilder<T> greater(Property<T> property, long value) {
         verifyHandle();
-        checkCombineCondition(nativeGreater(handle, property.getId(), value));
+        checkCombineCondition(nativeGreater(handle, property.getId(), value, false));
+        return this;
+    }
+
+    public QueryBuilder<T> greaterOrEqual(Property<T> property, long value) {
+        verifyHandle();
+        checkCombineCondition(nativeGreater(handle, property.getId(), value, true));
         return this;
     }
 
@@ -614,9 +625,21 @@ public class QueryBuilder<T> implements Closeable {
         return this;
     }
 
+    /**
+     * @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead.
+     */
     public QueryBuilder<T> less(Property<T> property, Date value) {
         verifyHandle();
-        checkCombineCondition(nativeLess(handle, property.getId(), value.getTime()));
+        checkCombineCondition(nativeLess(handle, property.getId(), value.getTime(), false));
+        return this;
+    }
+
+    /**
+     * @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead.
+     */
+    public QueryBuilder<T> lessOrEqual(Property<T> property, Date value) {
+        verifyHandle();
+        checkCombineCondition(nativeLess(handle, property.getId(), value.getTime(), true));
         return this;
     }
 
@@ -625,7 +648,16 @@ public class QueryBuilder<T> implements Closeable {
      */
     public QueryBuilder<T> greater(Property<T> property, Date value) {
         verifyHandle();
-        checkCombineCondition(nativeGreater(handle, property.getId(), value.getTime()));
+        checkCombineCondition(nativeGreater(handle, property.getId(), value.getTime(), false));
+        return this;
+    }
+
+    /**
+     * @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead.
+     */
+    public QueryBuilder<T> greaterOrEqual(Property<T> property, Date value) {
+        verifyHandle();
+        checkCombineCondition(nativeGreater(handle, property.getId(), value.getTime(), true));
         return this;
     }
 
@@ -766,7 +798,13 @@ public class QueryBuilder<T> implements Closeable {
 
     public QueryBuilder<T> less(Property<T> property, String value, StringOrder order) {
         verifyHandle();
-        checkCombineCondition(nativeLess(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
+        checkCombineCondition(nativeLess(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE, false));
+        return this;
+    }
+
+    public QueryBuilder<T> lessOrEqual(Property<T> property, String value, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeLess(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE, true));
         return this;
     }
 
@@ -780,7 +818,13 @@ public class QueryBuilder<T> implements Closeable {
 
     public QueryBuilder<T> greater(Property<T> property, String value, StringOrder order) {
         verifyHandle();
-        checkCombineCondition(nativeGreater(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
+        checkCombineCondition(nativeGreater(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE, false));
+        return this;
+    }
+
+    public QueryBuilder<T> greaterOrEqual(Property<T> property, String value, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeGreater(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE, true));
         return this;
     }
 
@@ -817,13 +861,25 @@ public class QueryBuilder<T> implements Closeable {
 
     public QueryBuilder<T> less(Property<T> property, double value) {
         verifyHandle();
-        checkCombineCondition(nativeLess(handle, property.getId(), value));
+        checkCombineCondition(nativeLess(handle, property.getId(), value, false));
+        return this;
+    }
+
+    public QueryBuilder<T> lessOrEqual(Property<T> property, double value) {
+        verifyHandle();
+        checkCombineCondition(nativeLess(handle, property.getId(), value, true));
         return this;
     }
 
     public QueryBuilder<T> greater(Property<T> property, double value) {
         verifyHandle();
-        checkCombineCondition(nativeGreater(handle, property.getId(), value));
+        checkCombineCondition(nativeGreater(handle, property.getId(), value, false));
+        return this;
+    }
+
+    public QueryBuilder<T> greaterOrEqual(Property<T> property, double value) {
+        verifyHandle();
+        checkCombineCondition(nativeGreater(handle, property.getId(), value, true));
         return this;
     }
 
@@ -845,13 +901,25 @@ public class QueryBuilder<T> implements Closeable {
 
     public QueryBuilder<T> less(Property<T> property, byte[] value) {
         verifyHandle();
-        checkCombineCondition(nativeLess(handle, property.getId(), value));
+        checkCombineCondition(nativeLess(handle, property.getId(), value, false));
+        return this;
+    }
+
+    public QueryBuilder<T> lessOrEqual(Property<T> property, byte[] value) {
+        verifyHandle();
+        checkCombineCondition(nativeLess(handle, property.getId(), value, true));
         return this;
     }
 
     public QueryBuilder<T> greater(Property<T> property, byte[] value) {
         verifyHandle();
-        checkCombineCondition(nativeGreater(handle, property.getId(), value));
+        checkCombineCondition(nativeGreater(handle, property.getId(), value, false));
+        return this;
+    }
+
+    public QueryBuilder<T> greaterOrEqual(Property<T> property, byte[] value) {
+        verifyHandle();
+        checkCombineCondition(nativeGreater(handle, property.getId(), value, true));
         return this;
     }
 

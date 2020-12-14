@@ -42,6 +42,7 @@ import static io.objectbox.TestEntity_.simpleInt;
 import static io.objectbox.TestEntity_.simpleLong;
 import static io.objectbox.TestEntity_.simpleShort;
 import static io.objectbox.TestEntity_.simpleString;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -136,6 +137,36 @@ public class QueryTest extends AbstractQueryTest {
         putTestEntitiesScalars();
         Query<TestEntity> query = box.query().greater(simpleInt, 2003).less(simpleShort, 2107).build();
         assertEquals(3, query.count());
+    }
+
+    @Test
+    public void integer_lessAndGreater_works() {
+        putTestEntitiesScalars();
+        int value = 2004;
+
+        buildFindAndAssert(
+                box.query().less(TestEntity_.simpleInt, value),
+                4,
+                (index, item) -> assertTrue(item.getSimpleInt() < value)
+        );
+
+        buildFindAndAssert(
+                box.query().greater(TestEntity_.simpleInt, value),
+                5,
+                (index, item) -> assertTrue(item.getSimpleInt() > value)
+        );
+
+        buildFindAndAssert(
+                box.query().lessOrEqual(TestEntity_.simpleInt, value),
+                5,
+                (index, item) -> assertTrue(item.getSimpleInt() <= value)
+        );
+
+        buildFindAndAssert(
+                box.query().greaterOrEqual(TestEntity_.simpleInt, value),
+                6,
+                (index, item) -> assertTrue(item.getSimpleInt() >= value)
+        );
     }
 
     @Test
@@ -268,6 +299,33 @@ public class QueryTest extends AbstractQueryTest {
     }
 
     @Test
+    public void string_lessOrEqual_works() {
+        putTestEntitiesStrings();
+
+        ListItemAsserter<TestEntity> lessOrEqualAsserter = (index, item) -> {
+            if (index == 0) assertEquals("apple", item.getSimpleString());
+            if (index == 1) assertEquals("banana", item.getSimpleString());
+            if (index == 2) assertEquals("banana milk shake", item.getSimpleString());
+        };
+
+        buildFindAndAssert(
+                box.query()
+                        .lessOrEqual(TestEntity_.simpleString, "BANANA MILK SHAKE", StringOrder.CASE_INSENSITIVE)
+                        .order(TestEntity_.simpleString),
+                3,
+                lessOrEqualAsserter
+        );
+
+        buildFindAndAssert(
+                box.query()
+                        .lessOrEqual(TestEntity_.simpleString, "banana milk shake", StringOrder.CASE_SENSITIVE)
+                        .order(TestEntity_.simpleString),
+                3,
+                lessOrEqualAsserter
+        );
+    }
+
+    @Test
     public void testStringGreater() {
         putTestEntitiesStrings();
         putTestEntity("FOO", 100);
@@ -292,6 +350,33 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals("banana milk shake", entities.get(0).getSimpleString());
         assertEquals("bar", entities.get(1).getSimpleString());
         assertEquals("foo bar", entities.get(2).getSimpleString());
+    }
+
+    @Test
+    public void string_greaterOrEqual_works() {
+        putTestEntitiesStrings();
+
+        ListItemAsserter<TestEntity> greaterOrEqualAsserter = (index, item) -> {
+            if (index == 0) assertEquals("banana milk shake", item.getSimpleString());
+            if (index == 1) assertEquals("bar", item.getSimpleString());
+            if (index == 2) assertEquals("foo bar", item.getSimpleString());
+        };
+
+        buildFindAndAssert(
+                box.query()
+                        .greaterOrEqual(TestEntity_.simpleString, "BANANA MILK SHAKE", StringOrder.CASE_INSENSITIVE)
+                        .order(TestEntity_.simpleString),
+                3,
+                greaterOrEqualAsserter
+        );
+
+        buildFindAndAssert(
+                box.query()
+                        .greaterOrEqual(TestEntity_.simpleString, "banana milk shake", StringOrder.CASE_SENSITIVE)
+                        .order(TestEntity_.simpleString),
+                3,
+                greaterOrEqualAsserter
+        );
     }
 
     @Test
@@ -352,40 +437,138 @@ public class QueryTest extends AbstractQueryTest {
     }
 
     @Test
-    public void testByteArrayLess() {
+    public void byteArray_lessAndGreater_works() {
         putTestEntitiesScalars();
-
         byte[] value = {1, 2, (byte) 2005};
-        Query<TestEntity> query = box.query().less(simpleByteArray, value).build();
-        List<TestEntity> results = query.find();
 
-        assertEquals(5, results.size());
-        // Java does not have compareTo for arrays, so just make sure its not equal to the value
-        for (TestEntity result : results) {
-            assertFalse(Arrays.equals(value, result.getSimpleByteArray()));
-        }
+        // Java does not have compareTo for arrays, so just make sure its not equal to the value.
+        ListItemAsserter<TestEntity> resultsNotEqual = (index, item) -> assertFalse(Arrays.equals(value, item.getSimpleByteArray()));
+
+        buildFindAndAssert(
+                box.query().less(TestEntity_.simpleByteArray, value), 5, resultsNotEqual
+        );
+
+        buildFindAndAssert(
+                box.query().greater(TestEntity_.simpleByteArray, value), 4, resultsNotEqual
+        );
+
+        buildFindAndAssert(
+                box.query().lessOrEqual(TestEntity_.simpleByteArray, value),
+                6,
+                (index, item) -> {
+                    if (index == 5) {
+                        assertArrayEquals(value, item.getSimpleByteArray());
+                    } else {
+                        assertFalse(Arrays.equals(value, item.getSimpleByteArray()));
+                    }
+                }
+        );
+
+        buildFindAndAssert(
+                box.query().greaterOrEqual(TestEntity_.simpleByteArray, value),
+                5,
+                (index, item) -> {
+                    if (index == 0) {
+                        assertArrayEquals(value, item.getSimpleByteArray());
+                    } else {
+                        assertFalse(Arrays.equals(value, item.getSimpleByteArray()));
+                    }
+                }
+        );
+
+        // greater and less
+        byte[] valueGreater = {1, 2, (byte) 2002};
+        buildFindAndAssert(
+                box.query().greater(TestEntity_.simpleByteArray, valueGreater).less(TestEntity_.simpleByteArray, value),
+                2,
+                (index, item) -> {
+                    assertFalse(Arrays.equals(value, item.getSimpleByteArray()));
+                    assertFalse(Arrays.equals(valueGreater, item.getSimpleByteArray()));
+                }
+        );
     }
 
     @Test
-    public void testByteArrayGreater() {
+    public void float_lessAndGreater_works() {
         putTestEntitiesScalars();
+        float value = 400.5f;
 
-        byte[] value = {1, 2, (byte) 2005};
-        Query<TestEntity> query = box.query().greater(simpleByteArray, value).build();
-        List<TestEntity> results = query.find();
+        buildFindAndAssert(
+                box.query().less(TestEntity_.simpleFloat, value),
+                5,
+                (index, item) -> assertTrue(item.getSimpleFloat() < value)
+        );
 
-        assertEquals(4, results.size());
-        // Java does not have compareTo for arrays, so just make sure its not equal to the value
-        for (TestEntity result : results) {
-            assertFalse(Arrays.equals(value, result.getSimpleByteArray()));
-        }
+        buildFindAndAssert(
+                box.query().lessOrEqual(TestEntity_.simpleFloat, value),
+                6,
+                (index, item) -> assertTrue(item.getSimpleFloat() <= value)
+        );
+
+        buildFindAndAssert(
+                box.query().greater(TestEntity_.simpleFloat, value),
+                4,
+                (index, item) -> assertTrue(item.getSimpleFloat() > value)
+        );
+
+        buildFindAndAssert(
+                box.query().greaterOrEqual(TestEntity_.simpleFloat, value),
+                5,
+                (index, item) -> assertTrue(item.getSimpleFloat() >= value)
+        );
+
+        float valueLess = 400.51f;
+        float valueGreater = 400.29f;
+        buildFindAndAssert(
+                box.query().greater(TestEntity_.simpleFloat, valueGreater).less(TestEntity_.simpleFloat, valueLess),
+                3,
+                (index, item) -> {
+                    assertTrue(item.getSimpleFloat() < valueLess);
+                    assertTrue(item.getSimpleFloat() > valueGreater);
+                }
+        );
     }
 
     @Test
-    public void testScalarFloatLessAndGreater() {
+    public void double_lessAndGreater_works() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query().greater(simpleFloat, 400.29f).less(simpleFloat, 400.51f).build();
-        assertEquals(3, query.count());
+        // Note: calculation matches putTestEntitiesScalars.
+        double value = 2000 + 2005 / 100f;
+
+        buildFindAndAssert(
+                box.query().less(TestEntity_.simpleDouble, value),
+                5,
+                (index, item) -> assertTrue(item.getSimpleDouble() < value)
+        );
+
+        buildFindAndAssert(
+                box.query().lessOrEqual(TestEntity_.simpleDouble, value),
+                6,
+                (index, item) -> assertTrue(item.getSimpleDouble() <= value)
+        );
+
+        buildFindAndAssert(
+                box.query().greater(TestEntity_.simpleDouble, value),
+                4,
+                (index, item) -> assertTrue(item.getSimpleDouble() > value)
+        );
+
+        buildFindAndAssert(
+                box.query().greaterOrEqual(TestEntity_.simpleDouble, value),
+                5,
+                (index, item) -> assertTrue(item.getSimpleDouble() >= value)
+        );
+
+        double valueLess = 2020.051;
+        double valueGreater = 2020.029;
+        buildFindAndAssert(
+                box.query().greater(TestEntity_.simpleDouble, valueGreater).less(TestEntity_.simpleDouble, valueLess),
+                3,
+                (index, item) -> {
+                    assertTrue(item.getSimpleDouble() < valueLess);
+                    assertTrue(item.getSimpleDouble() > valueGreater);
+                }
+        );
     }
 
     @Test
@@ -735,5 +918,17 @@ public class QueryTest extends AbstractQueryTest {
         assertTrue(describeActual.contains(TestEntity_.simpleString.name));
         assertTrue(describeActual.contains(TestEntity_.simpleInt.name));
         assertEquals("(simpleString ==(i) \"Hello\"\n OR simpleInt > 42)", query.describeParameters());
+    }
+
+    private <T> void buildFindAndAssert(QueryBuilder<T> builder, int expectedCount, ListItemAsserter<T> asserter) {
+        List<T> results = builder.build().find();
+        assertEquals(expectedCount, results.size());
+        for (int i = 0; i < results.size(); i++) {
+            asserter.assertListItem(i, results.get(i));
+        }
+    }
+
+    private interface ListItemAsserter<T> {
+        void assertListItem(int index, T item);
     }
 }

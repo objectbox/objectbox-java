@@ -67,9 +67,19 @@ inline fun <reified T> QueryBuilder<T>.less(property: Property<T>, value: Short)
     return less(property, value.toLong())
 }
 
+/** Shortcut for [lessOrEqual(property, value.toLong())][QueryBuilder.lessOrEqual] */
+inline fun <reified T> QueryBuilder<T>.lessOrEqual(property: Property<T>, value: Short): QueryBuilder<T> {
+    return lessOrEqual(property, value.toLong())
+}
+
 /** Shortcut for [greater(property, value.toLong())][QueryBuilder.greater] */
 inline fun <reified T> QueryBuilder<T>.greater(property: Property<T>, value: Short): QueryBuilder<T> {
     return greater(property, value.toLong())
+}
+
+/** Shortcut for [greaterOrEqual(property, value.toLong())][QueryBuilder.greaterOrEqual] */
+inline fun <reified T> QueryBuilder<T>.greaterOrEqual(property: Property<T>, value: Short): QueryBuilder<T> {
+    return greaterOrEqual(property, value.toLong())
 }
 
 /** Shortcut for [between(property, value1.toLong(), value2.toLong())][QueryBuilder.between] */
@@ -94,9 +104,19 @@ inline fun <reified T> QueryBuilder<T>.less(property: Property<T>, value: Int): 
     return less(property, value.toLong())
 }
 
+/** Shortcut for [lessOrEqual(property, value.toLong())][QueryBuilder.lessOrEqual] */
+inline fun <reified T> QueryBuilder<T>.lessOrEqual(property: Property<T>, value: Int): QueryBuilder<T> {
+    return lessOrEqual(property, value.toLong())
+}
+
 /** Shortcut for [greater(property, value.toLong())][QueryBuilder.greater] */
 inline fun <reified T> QueryBuilder<T>.greater(property: Property<T>, value: Int): QueryBuilder<T> {
     return greater(property, value.toLong())
+}
+
+/** Shortcut for [greaterOrEqual(property, value.toLong())][QueryBuilder.greaterOrEqual] */
+inline fun <reified T> QueryBuilder<T>.greaterOrEqual(property: Property<T>, value: Int): QueryBuilder<T> {
+    return greaterOrEqual(property, value.toLong())
 }
 
 /** Shortcut for [between(property, value1.toLong(), value2.toLong())][QueryBuilder.between] */
@@ -116,9 +136,19 @@ inline fun <reified T> QueryBuilder<T>.less(property: Property<T>, value: Float)
     return less(property, value.toDouble())
 }
 
+/** Shortcut for [lessOrEqual(property, value.toDouble())][QueryBuilder.lessOrEqual] */
+inline fun <reified T> QueryBuilder<T>.lessOrEqual(property: Property<T>, value: Float): QueryBuilder<T> {
+    return lessOrEqual(property, value.toDouble())
+}
+
 /** Shortcut for [greater(property, value.toDouble())][QueryBuilder.greater] */
 inline fun <reified T> QueryBuilder<T>.greater(property: Property<T>, value: Float): QueryBuilder<T> {
     return greater(property, value.toDouble())
+}
+
+/** Shortcut for [greaterOrEqual(property, value.toDouble())][QueryBuilder.greaterOrEqual] */
+inline fun <reified T> QueryBuilder<T>.greaterOrEqual(property: Property<T>, value: Float): QueryBuilder<T> {
+    return greaterOrEqual(property, value.toDouble())
 }
 
 /** Shortcut for [between(property, value1.toDouble(), value2.toDouble())][QueryBuilder.between] */
