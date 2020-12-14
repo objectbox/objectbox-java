@@ -1,6 +1,9 @@
+#!/usr/bin/env groovy
+
 String buildsToKeep = '500'
 
 String gradleArgs = '-Dorg.gradle.daemon=false --stacktrace'
+boolean isPublish = BRANCH_NAME == 'publish'
 
 // Note: using single quotes to avoid Groovy String interpolation leaking secrets.
 def internalRepoArgsBat = '-PinternalObjectBoxRepo=%MVN_REPO_URL% ' +
@@ -64,6 +67,18 @@ pipeline {
                 always {
                     junit '**/build/test-results/**/TEST-*.xml'
                     archiveArtifacts artifacts: '**/hs_err_pid*.log', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('package-javadoc-for-web') {
+            when { expression { return isPublish } }
+            steps {
+                bat "gradlew $gradleArgs $internalRepoArgsBat :objectbox-java:packageJavadocForWeb"
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'objectbox-java/build/dist/objectbox-java-web-api-docs.zip'
                 }
             }
         }

@@ -38,10 +38,14 @@ javadoc {
 }
 
 // Note: use packageJavadocForWeb to get as ZIP.
-// Note: the style changes only work if using JDK 10+.
 task javadocForWeb(type: Javadoc) {
     group = 'documentation'
     description = 'Builds Javadoc incl. objectbox-java-api classes with web tweaks.'
+
+    javadocTool = javaToolchains.javadocToolFor {
+        // Note: the style changes only work if using JDK 10+, 11 is latest LTS.
+        languageVersion = JavaLanguageVersion.of(11)
+    }
 
     def srcApi = project(':objectbox-java-api').file('src/main/java/')
     if (!srcApi.directory) throw new GradleScriptException("Not a directory: ${srcApi}", null)
