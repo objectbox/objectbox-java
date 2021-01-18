@@ -23,7 +23,6 @@ pipeline {
     agent { label 'java' }
     
     environment {
-        GITLAB_URL = credentials('gitlab_url')
         MVN_REPO_LOGIN = credentials('objectbox_internal_mvn_user')
         MVN_REPO_URL = credentials('objectbox_internal_mvn_repo_http')
         MVN_REPO_UPLOAD_URL = credentials('objectbox_internal_mvn_repo')
@@ -36,7 +35,7 @@ pipeline {
     options {
         buildDiscarder(logRotator(numToKeepStr: buildsToKeep, artifactNumToKeepStr: buildsToKeep))
         timeout(time: 1, unit: 'HOURS') // If build hangs (regular build should be much quicker)
-        gitLabConnection("${env.GITLAB_URL}")
+        gitLabConnection('objectbox-gitlab-connection')
     }
 
     triggers {
