@@ -120,8 +120,6 @@ public class NativeLibraryLoader {
      * (e.g. when running a x86 JVM on an amd64 machine).
      */
     private static String getCpuArch() {
-        // See https://github.com/openjdk/jdk/blob/master/make/autoconf/platform.m4 for possible values.
-        // Note: any CPU architecture starting with "arm" is reported as "arm", aarch64 is reported as "aarch64".
         String osArch = System.getProperty("os.arch");
         String cpuArch = null;
         if (osArch != null) {
@@ -130,29 +128,52 @@ public class NativeLibraryLoader {
                 cpuArch = "x64";
             } else if (osArch.equalsIgnoreCase("x86")) {
                 cpuArch = "x86";
-            } else if (osArch.equals("aarch64")) {
-                cpuArch = "arm64";
-            } else if (osArch.equals("arm")) {
-                // Decide if ARMv6 or ARMv7 library should be used, need to get actual architecture from OS.
-                String cpuArchOSOrNull = getCpuArchOSOrNull();
-                if (cpuArchOSOrNull != null) {
-                    String cpuArchOSlower = cpuArchOSOrNull.toLowerCase();
-                    if (cpuArchOSlower.startsWith("armv6")) {
-                        cpuArch = "armv6";
-                    } else {
-                        // ARMv7 or 32-bit ARMv8
-                        cpuArch = "armv7";
-                    }
-                } else {
+            } else if ("aarch64".equals(osArch) || osArch.startsWith("armv8") || osArch.startsWith("arm64")) {
+                // 64-bit ARM version of ObjectBox not built, yet. Fall back to 32-bit armv7 version and warn.
+                //cpuArch = "arm64";
+                cpuArch = "armv7";
+                System.err.printf("[ObjectBox] 64-bit ARM os.arch %s currently not supported, will use %s%n",
+                        osArch, cpuArch);
+            } else if (osArch.startsWith("arm")) {
+                // 32-bit ARM
+                if (osArch.startsWith("armv7") || osArch.startsWith("armeabi-v7")) {
                     cpuArch = "armv7";
-                    System.err.println("Failed to get arch from OS - ObjectBox is defaulting to " + cpuArch);
+                } else if (osArch.startsWith("armv6")) {
+                    cpuArch = "armv6";
+                } else if ("arm".equals(osArch)) {
+                    // JVM may just report "arm" for any 32-bit ARM, so try to check with OS.
+                    String cpuArchOSOrNull = getCpuArchOSOrNull();
+                    if (cpuArchOSOrNull != null) {
+                        String cpuArchOS = cpuArchOSOrNull.toLowerCase();
+                        if (cpuArchOS.startsWith("armv7")) {
+                            cpuArch = "armv7";
+                        } else if (cpuArchOS.startsWith("armv6")){
+                            cpuArch = "armv6";
+                        } // else use fall back below.
+                    } // else use fall back below.
+                }
+                if (cpuArch == null) {
+                    // Fall back to lowest supported 32-bit ARM version.
+                    cpuArch = "armv6";
+                    System.err.printf("[ObjectBox] 32-bit ARM os.arch unknown (will use %s), " +
+                                    "please report this to us: os.arch=%s, machine=%s%n",
+                            cpuArch, osArch, getCpuArchOSOrNull());
                 }
             }
         }
+        // If os.arch is not covered above try a x86 version based on JVM bit-ness.
         if (cpuArch == null) {
             String sunArch = System.getProperty("sun.arch.data.model");
-            cpuArch = "32".equals(sunArch) ? "x86" : "x64";
-            System.err.println("Unknown os.arch \"" + osArch + "\" - ObjectBox is defaulting to " + cpuArch);
+            if ("64".equals(sunArch)) {
+                cpuArch = "x64";
+            } else if ("32".equals(sunArch)) {
+                cpuArch = "x86";
+            } else {
+                cpuArch = "unknown";
+            }
+            System.err.printf("[ObjectBox] os.arch unknown (will use %s), " +
+                            "please report this to us: os.arch=%s, model=%s, machine=%s%n",
+                    cpuArch, osArch, sunArch, getCpuArchOSOrNull());
         }
         return cpuArch;
     }
