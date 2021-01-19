@@ -105,8 +105,9 @@ public class NativeLibraryLoader {
             String osArch = System.getProperty("os.arch");
             String sunArch = System.getProperty("sun.arch.data.model");
             String message = String.format(
-                    "Loading ObjectBox native library failed: vendor=%s,os=%s,os.arch=%s,sun.arch=%s,android=%s,linux=%s",
-                    vendor, osName, osArch, sunArch, android, isLinux
+                    "[ObjectBox] Loading native library failed, please report this to us: " +
+                            "vendor=%s,os=%s,os.arch=%s,model=%s,android=%s,linux=%s,machine=%s",
+                    vendor, osName, osArch, sunArch, android, isLinux, getCpuArchOSOrNull()
             );
             throw new LinkageError(message, e); // UnsatisfiedLinkError does not allow a cause; use its super class
         }
