@@ -16,6 +16,13 @@
 
 package io.objectbox;
 
+import io.objectbox.query.QueryObserverTest;
+import io.objectbox.reactive.DataObserver;
+import io.objectbox.reactive.DataSubscription;
+import io.objectbox.reactive.DataTransformer;
+import io.objectbox.reactive.RunWithParam;
+import io.objectbox.reactive.Scheduler;
+import io.objectbox.reactive.SubscriptionBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -23,18 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import io.objectbox.query.QueryObserverTest;
-import io.objectbox.reactive.DataObserver;
-import io.objectbox.reactive.DataSubscription;
-import io.objectbox.reactive.DataTransformer;
-import io.objectbox.reactive.ErrorObserver;
-import io.objectbox.reactive.RunWithParam;
-import io.objectbox.reactive.Scheduler;
-import io.objectbox.reactive.SubscriptionBuilder;
-
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
@@ -153,6 +151,53 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         subscription.cancel();
         store.runInTx(txRunnable);
         assertNoStaleObservers();
+    }
+
+    @Test
+    public void observer_transactionInCallback_completesAndTriggersObserver() throws InterruptedException {
+        RecursiveTestObserver testObserver = new RecursiveTestObserver(store);
+        DataSubscription subscription = store.subscribe(TestEntityMinimal.class)
+                .onlyChanges() // Do not publish on subscribing.
+                .observer(testObserver);
+
+        // Put data to so observer is called.
+        Box<TestEntityMinimal> box = store.boxFor(TestEntityMinimal.class);
+        box.put(new TestEntityMinimal(0, "Written by test"));
+
+        // Observer is called, puts data, is called again, puts data again.
+        assertTrue(testObserver.latch.await(100, TimeUnit.MILLISECONDS));
+
+        assertEquals(3, box.count());
+        assertEquals("Written by test", box.get(1).getText());
+        assertEquals("Written by observer 1", box.get(2).getText());
+        assertEquals("Written by observer 2", box.get(3).getText());
+
+        // Clean up.
+        subscription.cancel();
+    }
+
+    private static class RecursiveTestObserver implements DataObserver<Class<TestEntityMinimal>> {
+
+        private final BoxStore store;
+        private int count = 0;
+        CountDownLatch latch = new CountDownLatch(2);
+
+        RecursiveTestObserver(BoxStore store) {
+            this.store = store;
+        }
+
+        @Override
+        public void onData(Class<TestEntityMinimal> data) {
+            if (latch.getCount() == 0) {
+                System.out.println("RecursiveTestObserver: DONE");
+                return;
+            }
+            count++;
+            System.out.println("RecursiveTestObserver: writing " + count);
+            store.runInTx(() -> store.boxFor(TestEntityMinimal.class)
+                    .put(new TestEntityMinimal(0, "Written by observer " + count)));
+            latch.countDown();
+        }
     }
 
     @Test
