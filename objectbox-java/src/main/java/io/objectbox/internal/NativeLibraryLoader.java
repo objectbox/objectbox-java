@@ -130,11 +130,8 @@ public class NativeLibraryLoader {
             } else if (osArch.equalsIgnoreCase("x86")) {
                 cpuArch = "x86";
             } else if ("aarch64".equals(osArch) || osArch.startsWith("armv8") || osArch.startsWith("arm64")) {
-                // 64-bit ARM version of ObjectBox not built, yet. Fall back to 32-bit armv7 version and warn.
-                //cpuArch = "arm64";
-                cpuArch = "armv7";
-                System.err.printf("[ObjectBox] 64-bit ARM os.arch %s currently not supported, will use %s%n",
-                        osArch, cpuArch);
+                // 64-bit ARM
+                cpuArch = "arm64";
             } else if (osArch.startsWith("arm")) {
                 // 32-bit ARM
                 if (osArch.startsWith("armv7") || osArch.startsWith("armeabi-v7")) {
