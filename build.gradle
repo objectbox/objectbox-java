@@ -42,6 +42,7 @@ buildscript {
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
         // https://github.com/spotbugs/spotbugs-gradle-plugin/releases
         classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.5.1"
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0"
     }
 }
 
@@ -186,4 +187,16 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
+}
+
+// Plugin to close and promote staging repository to Central.
+apply plugin: 'io.codearte.nexus-staging'
+nexusStaging {
+    if (project.hasProperty("sonatypeUsername") && project.hasProperty("sonatypePassword")) {
+        println('nexusStaging credentials supplied.')
+        username = sonatypeUsername
+        password = sonatypePassword
+    } else {
+        println('nexusStaging credentials NOT supplied.')
+    }
 }
