@@ -385,6 +385,41 @@ public class BoxStore implements Closeable {
     }
 
     /**
+     * Using an Android Context and an optional database name, as configured with {@link BoxStoreBuilder#name(String)},
+     * checks if the associated database files are in use by a BoxStore instance.
+     * <p>
+     * Use this to check that database files are not open before copying or deleting them.
+     */
+    public static boolean isDatabaseOpen(Object context, @Nullable String dbNameOrNull) throws IOException {
+        File dbDir = BoxStoreBuilder.getAndroidDbDir(context, dbNameOrNull);
+        return isFileOpen(dbDir.getCanonicalPath());
+    }
+
+    /**
+     * Using an optional base directory, as configured with {@link BoxStoreBuilder#baseDirectory(File)},
+     * and an optional database name, as configured with {@link BoxStoreBuilder#name(String)},
+     * checks if the associated database files are in use by a BoxStore instance.
+     * <p>
+     * Use this to check that database files are not open before copying or deleting them.
+     */
+    public static boolean isDatabaseOpen(@Nullable File baseDirectoryOrNull,
+                                         @Nullable String dbNameOrNull) throws IOException {
+        
+        File dbDir = BoxStoreBuilder.getDbDir(baseDirectoryOrNull, dbNameOrNull);
+        return isFileOpen(dbDir.getCanonicalPath());
+    }
+
+    /**
+     * Using a directory, as configured with {@link BoxStoreBuilder#directory(File)},
+     * checks if the associated database files are in use by a BoxStore instance.
+     * <p>
+     * Use this to check that database files are not open before copying or deleting them.
+     */
+    public static boolean isDatabaseOpen(File directory) throws IOException {
+        return isFileOpen(directory.getCanonicalPath());
+    }
+
+    /**
      * The size in bytes occupied by the data file on disk.
      *
      * @return 0 if the size could not be determined (does not throw unless this store was already closed)
