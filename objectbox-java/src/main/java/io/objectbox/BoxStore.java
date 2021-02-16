@@ -68,9 +68,9 @@ public class BoxStore implements Closeable {
     @Nullable private static Object relinker;
 
     /** Change so ReLinker will update native library when using workaround loading. */
-    public static final String JNI_VERSION = "2.8.0";
+    public static final String JNI_VERSION = "2.9.0";
 
-    private static final String VERSION = "2.8.0-2020-11-05";
+    private static final String VERSION = "2.9.0-2021-02-16";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
@@ -382,6 +382,41 @@ public class BoxStore implements Closeable {
             }
             return openFiles.contains(canonicalPath);
         }
+    }
+
+    /**
+     * Using an Android Context and an optional database name, as configured with {@link BoxStoreBuilder#name(String)},
+     * checks if the associated database files are in use by a BoxStore instance.
+     * <p>
+     * Use this to check that database files are not open before copying or deleting them.
+     */
+    public static boolean isDatabaseOpen(Object context, @Nullable String dbNameOrNull) throws IOException {
+        File dbDir = BoxStoreBuilder.getAndroidDbDir(context, dbNameOrNull);
+        return isFileOpen(dbDir.getCanonicalPath());
+    }
+
+    /**
+     * Using an optional base directory, as configured with {@link BoxStoreBuilder#baseDirectory(File)},
+     * and an optional database name, as configured with {@link BoxStoreBuilder#name(String)},
+     * checks if the associated database files are in use by a BoxStore instance.
+     * <p>
+     * Use this to check that database files are not open before copying or deleting them.
+     */
+    public static boolean isDatabaseOpen(@Nullable File baseDirectoryOrNull,
+                                         @Nullable String dbNameOrNull) throws IOException {
+        
+        File dbDir = BoxStoreBuilder.getDbDir(baseDirectoryOrNull, dbNameOrNull);
+        return isFileOpen(dbDir.getCanonicalPath());
+    }
+
+    /**
+     * Using a directory, as configured with {@link BoxStoreBuilder#directory(File)},
+     * checks if the associated database files are in use by a BoxStore instance.
+     * <p>
+     * Use this to check that database files are not open before copying or deleting them.
+     */
+    public static boolean isDatabaseOpen(File directory) throws IOException {
+        return isFileOpen(directory.getCanonicalPath());
     }
 
     /**

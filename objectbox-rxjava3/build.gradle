@@ -1,5 +1,5 @@
 buildscript {
-    ext.javadocDir = "$buildDir/docs/javadoc"
+    ext.javadocDir = file("$buildDir/docs/javadoc")
 }
 
 apply plugin: 'java-library'
@@ -16,18 +16,19 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     }
 }
 
-dokka {
-    outputFormat = 'html'
-    outputDirectory = javadocDir
+tasks.named("dokkaHtml") {
+    outputDirectory.set(javadocDir)
 
-    // Fix "Can't find node by signature": have to manually point to dependencies.
-    // https://github.com/Kotlin/dokka/wiki/faq#dokka-complains-about-cant-find-node-by-signature-
-    configuration{
-        externalDocumentationLink {
-            // Point to web javadoc for objectbox-java packages.
-            url = new URL("https://objectbox.io/docfiles/java/current/")
-            // Note: Using JDK 9+ package-list is now called element-list.
-            packageListUrl = new URL(url, "element-list")
+    dokkaSourceSets {
+        configureEach {
+            // Fix "Can't find node by signature": have to manually point to dependencies.
+            // https://github.com/Kotlin/dokka/wiki/faq#dokka-complains-about-cant-find-node-by-signature-
+            externalDocumentationLink {
+                // Point to web javadoc for objectbox-java packages.
+                url.set(new URL("https://objectbox.io/docfiles/java/current/"))
+                // Note: Using JDK 9+ package-list is now called element-list.
+                packageListUrl.set(new URL(url, "element-list"))
+            }
         }
     }
 }
@@ -42,12 +43,15 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockito_version"
 }
 
-task javadocJar(type: Jar, dependsOn: dokka) {
+task javadocJar(type: Jar) {
+    dependsOn tasks.named("dokkaHtml")
+    group = 'build'
     archiveClassifier.set('javadoc')
     from "$javadocDir"
 }
 
 task sourcesJar(type: Jar) {
+    group = 'build'
     archiveClassifier.set('sources')
     from sourceSets.main.allSource
 }

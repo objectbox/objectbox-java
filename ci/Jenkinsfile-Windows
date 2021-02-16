@@ -1,23 +1,27 @@
+#!/usr/bin/env groovy
+
 String buildsToKeep = '500'
 
 String gradleArgs = '-Dorg.gradle.daemon=false --stacktrace'
+boolean isPublish = BRANCH_NAME == 'publish'
+
+// Note: using single quotes to avoid Groovy String interpolation leaking secrets.
+def internalRepoArgsBat = '-PinternalObjectBoxRepo=%MVN_REPO_URL% ' +
+                '-PinternalObjectBoxRepoUser=%MVN_REPO_LOGIN_USR% ' +
+                '-PinternalObjectBoxRepoPassword=%MVN_REPO_LOGIN_PSW%'
 
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
     agent { label 'windows' }
     
     environment {
-        GITLAB_URL = credentials('gitlab_url')
         MVN_REPO_URL = credentials('objectbox_internal_mvn_repo_http')
         MVN_REPO_LOGIN = credentials('objectbox_internal_mvn_user')
-        MVN_REPO_ARGS = "-PinternalObjectBoxRepo=$MVN_REPO_URL " +
-                        "-PinternalObjectBoxRepoUser=$MVN_REPO_LOGIN_USR " +
-                        "-PinternalObjectBoxRepoPassword=$MVN_REPO_LOGIN_PSW"
     }
 
     options {
         buildDiscarder(logRotator(numToKeepStr: buildsToKeep, artifactNumToKeepStr: buildsToKeep))
-        gitLabConnection("${env.GITLAB_URL}")
+        gitLabConnection('objectbox-gitlab-connection')
     }
 
     triggers {
@@ -29,27 +33,58 @@ pipeline {
         stage('init') {
             steps {
                 bat 'gradlew -version'
-
-                // "cmd /c" for an OK exit code if no file is found
-                bat 'cmd /c del tests\\objectbox-java-test\\hs_err_pid*.log'
             }
         }
 
-        stage('build-java') {
+        stage('build-java-x64') {
             steps {
-                bat "gradlew $gradleArgs $MVN_REPO_ARGS cleanTest build test"
+                // Remove files to avoid archiving them again.
+                bat 'del /q /s hs_err_pid*.log'
+
+                bat "gradlew $gradleArgs $internalRepoArgsBat cleanTest build test"
+            }
+            post {
+                always {
+                    junit '**/build/test-results/**/TEST-*.xml'
+                    archiveArtifacts artifacts: '**/hs_err_pid*.log', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('build-java-x86') {
+            steps {
+                // Remove files to avoid archiving them again.
+                bat 'del /q /s hs_err_pid*.log'
+
+                // TEST_WITH_JAVA_X86 makes objectbox-java-test use 32-bit java executable and therefore
+                // 32-bit ObjectBox to run tests (see build.gradle file).
+                // Note: assumes JAVA_HOME_X86 is set to 32-bit JDK path.
+                // Note: no space before && or value has space as well.
+                bat "set TEST_WITH_JAVA_X86=true&& gradlew $gradleArgs $internalRepoArgsBat cleanTest build test"
+            }
+            post {
+                always {
+                    junit '**/build/test-results/**/TEST-*.xml'
+                    archiveArtifacts artifacts: '**/hs_err_pid*.log', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('package-javadoc-for-web') {
+            when { expression { return isPublish } }
+            steps {
+                bat "gradlew $gradleArgs $internalRepoArgsBat :objectbox-java:packageJavadocForWeb"
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'objectbox-java/build/dist/objectbox-java-web-api-docs.zip'
+                }
             }
         }
     }
 
     // For global vars see /jenkins/pipeline-syntax/globals
     post {
-        always {
-            junit '**/build/test-results/**/TEST-*.xml'
-            archiveArtifacts artifacts: 'tests/*/hs_err_pid*.log', allowEmptyArchive: true  // Only on JVM crash.
-            // currently unused: archiveArtifacts '**/build/reports/findbugs/*'
-        }
-
         failure {
             updateGitlabCommitStatus name: 'build-windows', state: 'failed'
         }

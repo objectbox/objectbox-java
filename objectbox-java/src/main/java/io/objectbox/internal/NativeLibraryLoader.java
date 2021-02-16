@@ -16,21 +16,23 @@
 
 package io.objectbox.internal;
 
+import io.objectbox.BoxStore;
 import org.greenrobot.essentials.io.IoUtils;
 
+import javax.annotation.Nullable;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
-
-import io.objectbox.BoxStore;
 
 /**
  * Separate class, so we can mock BoxStore.
@@ -103,13 +105,21 @@ public class NativeLibraryLoader {
             String osArch = System.getProperty("os.arch");
             String sunArch = System.getProperty("sun.arch.data.model");
             String message = String.format(
-                    "Loading ObjectBox native library failed: vendor=%s,os=%s,os.arch=%s,sun.arch=%s,android=%s,linux=%s",
-                    vendor, osName, osArch, sunArch, android, isLinux
+                    "[ObjectBox] Loading native library failed, please report this to us: " +
+                            "vendor=%s,os=%s,os.arch=%s,model=%s,android=%s,linux=%s,machine=%s",
+                    vendor, osName, osArch, sunArch, android, isLinux, getCpuArchOSOrNull()
             );
             throw new LinkageError(message, e); // UnsatisfiedLinkError does not allow a cause; use its super class
         }
     }
 
+    /**
+     * Get CPU architecture of the JVM (Note: this can not be used for Android, Android decides arch on its own
+     * and looks for library in appropriately named folder).
+     * <p>
+     * Note that this may not be the architecture of the actual hardware
+     * (e.g. when running a x86 JVM on an amd64 machine).
+     */
     private static String getCpuArch() {
         String osArch = System.getProperty("os.arch");
         String cpuArch = null;
@@ -119,32 +129,68 @@ public class NativeLibraryLoader {
                 cpuArch = "x64";
             } else if (osArch.equalsIgnoreCase("x86")) {
                 cpuArch = "x86";
+            } else if ("aarch64".equals(osArch) || osArch.startsWith("armv8") || osArch.startsWith("arm64")) {
+                // 64-bit ARM
+                cpuArch = "arm64";
             } else if (osArch.startsWith("arm")) {
-                switch (osArch) {
-                    case "armv7":
-                    case "armv7l":
-                    case "armeabi-v7a": // os.arch "armeabi-v7a" might be Android only, but let's try anyway...
-                        cpuArch = "armv7";
-                        break;
-                    case "arm64-v8a":
-                        cpuArch = "arm64";
-                        break;
-                    case "armv6":
-                        cpuArch = "armv6";
-                        break;
-                    default:
-                        cpuArch = "armv6";  // Lowest version we support
-                        System.err.println("Unknown os.arch \"" + osArch + "\" - ObjectBox is defaulting to " + cpuArch);
-                        break;
+                // 32-bit ARM
+                if (osArch.startsWith("armv7") || osArch.startsWith("armeabi-v7")) {
+                    cpuArch = "armv7";
+                } else if (osArch.startsWith("armv6")) {
+                    cpuArch = "armv6";
+                } else if ("arm".equals(osArch)) {
+                    // JVM may just report "arm" for any 32-bit ARM, so try to check with OS.
+                    String cpuArchOSOrNull = getCpuArchOSOrNull();
+                    if (cpuArchOSOrNull != null) {
+                        String cpuArchOS = cpuArchOSOrNull.toLowerCase();
+                        if (cpuArchOS.startsWith("armv7")) {
+                            cpuArch = "armv7";
+                        } else if (cpuArchOS.startsWith("armv6")){
+                            cpuArch = "armv6";
+                        } // else use fall back below.
+                    } // else use fall back below.
+                }
+                if (cpuArch == null) {
+                    // Fall back to lowest supported 32-bit ARM version.
+                    cpuArch = "armv6";
+                    System.err.printf("[ObjectBox] 32-bit ARM os.arch unknown (will use %s), " +
+                                    "please report this to us: os.arch=%s, machine=%s%n",
+                            cpuArch, osArch, getCpuArchOSOrNull());
                 }
             }
         }
+        // If os.arch is not covered above try a x86 version based on JVM bit-ness.
         if (cpuArch == null) {
             String sunArch = System.getProperty("sun.arch.data.model");
-            cpuArch = "32".equals(sunArch) ? "x86" : "x64";
-            System.err.println("Unknown os.arch \"" + osArch + "\" - ObjectBox is defaulting to " + cpuArch);
+            if ("64".equals(sunArch)) {
+                cpuArch = "x64";
+            } else if ("32".equals(sunArch)) {
+                cpuArch = "x86";
+            } else {
+                cpuArch = "unknown";
+            }
+            System.err.printf("[ObjectBox] os.arch unknown (will use %s), " +
+                            "please report this to us: os.arch=%s, model=%s, machine=%s%n",
+                    cpuArch, osArch, sunArch, getCpuArchOSOrNull());
         }
         return cpuArch;
+    }
+
+    /**
+     * Get architecture using operating system tools. Currently only Linux is supported (using uname).
+     */
+    @Nullable
+    private static String getCpuArchOSOrNull() {
+        String archOrNull = null;
+        try {
+            // Linux
+            Process exec = Runtime.getRuntime().exec("uname -m");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
+            archOrNull = reader.readLine();
+            reader.close();
+        } catch (Exception ignored) {
+        }
+        return archOrNull;
     }
 
     private static void checkUnpackLib(String filename) {

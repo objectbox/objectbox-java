@@ -6,22 +6,26 @@ String gradleArgs = '-Dorg.gradle.daemon=false --stacktrace'
 boolean isPublish = BRANCH_NAME == 'publish'
 String versionPostfix = isPublish ? '' : BRANCH_NAME // Build script detects empty string as not set.
 
+// Note: using single quotes to avoid Groovy String interpolation leaking secrets.
+def internalRepoArgs = '-PinternalObjectBoxRepo=$MVN_REPO_URL ' +
+                '-PinternalObjectBoxRepoUser=$MVN_REPO_LOGIN_USR ' +
+                '-PinternalObjectBoxRepoPassword=$MVN_REPO_LOGIN_PSW'
+def uploadRepoArgs = '-PpreferredRepo=$MVN_REPO_UPLOAD_URL ' +
+                '-PpreferredUsername=$MVN_REPO_LOGIN_USR ' +
+                '-PpreferredPassword=$MVN_REPO_LOGIN_PSW '
+// Note: add quotes around URL parameter to avoid line breaks due to semicolon in URL.
+def uploadRepoArgsBintray = '\"-PpreferredRepo=$BINTRAY_URL\" ' +
+                '-PpreferredUsername=$BINTRAY_LOGIN_USR ' +
+                '-PpreferredPassword=$BINTRAY_LOGIN_PSW'
+
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
     agent { label 'java' }
     
     environment {
-        GITLAB_URL = credentials('gitlab_url')
         MVN_REPO_LOGIN = credentials('objectbox_internal_mvn_user')
         MVN_REPO_URL = credentials('objectbox_internal_mvn_repo_http')
-        MVN_REPO_ARGS = "-PinternalObjectBoxRepo=$MVN_REPO_URL " +
-                        "-PinternalObjectBoxRepoUser=$MVN_REPO_LOGIN_USR " +
-                        "-PinternalObjectBoxRepoPassword=$MVN_REPO_LOGIN_PSW"
         MVN_REPO_UPLOAD_URL = credentials('objectbox_internal_mvn_repo')
-        MVN_REPO_UPLOAD_ARGS = "-PpreferredRepo=$MVN_REPO_UPLOAD_URL " +
-                        "-PpreferredUsername=$MVN_REPO_LOGIN_USR " +
-                        "-PpreferredPassword=$MVN_REPO_LOGIN_PSW " +
-                        "-PversionPostFix=$versionPostfix"
         // Note: for key use Jenkins secret file with PGP key as text in ASCII-armored format.
         ORG_GRADLE_PROJECT_signingKeyFile = credentials('objectbox_signing_key')
         ORG_GRADLE_PROJECT_signingKeyId = credentials('objectbox_signing_key_id')
@@ -31,7 +35,7 @@ pipeline {
     options {
         buildDiscarder(logRotator(numToKeepStr: buildsToKeep, artifactNumToKeepStr: buildsToKeep))
         timeout(time: 1, unit: 'HOURS') // If build hangs (regular build should be much quicker)
-        gitLabConnection("${env.GITLAB_URL}")
+        gitLabConnection('objectbox-gitlab-connection')
     }
 
     triggers {
@@ -54,7 +58,7 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh "./ci/test-with-asan.sh $gradleArgs $MVN_REPO_ARGS -Dextensive-tests=true clean test " +
+                sh "./ci/test-with-asan.sh $gradleArgs $internalRepoArgs -Dextensive-tests=true clean test " +
                         "--tests io.objectbox.FunctionalTestSuite " +
                         "--tests io.objectbox.test.proguard.ObfuscatedEntityTest " +
                         "--tests io.objectbox.rx.QueryObserverTest " +
@@ -65,7 +69,7 @@ pipeline {
 
         stage('upload-to-internal') {
             steps {
-                sh "./gradlew $gradleArgs $MVN_REPO_ARGS $MVN_REPO_UPLOAD_ARGS uploadArchives"
+                sh "./gradlew $gradleArgs $internalRepoArgs $uploadRepoArgs -PversionPostFix=$versionPostfix uploadArchives"
             }
         }
 
@@ -79,11 +83,8 @@ pipeline {
                 googlechatnotification url: 'id:gchat_java',
                     message: "*Publishing* ${currentBuild.fullDisplayName} to Bintray...\n${env.BUILD_URL}"
 
-                // Note: supply internal Maven repo as tests use native dependencies (can't publish those without the Java libraries).
-                // Note: add quotes around URL parameter to avoid line breaks due to semicolon in URL.
-                sh "./gradlew $gradleArgs $MVN_REPO_ARGS " +
-                   "\"-PpreferredRepo=${BINTRAY_URL}\" -PpreferredUsername=${BINTRAY_LOGIN_USR} -PpreferredPassword=${BINTRAY_LOGIN_PSW} " +
-                   "uploadArchives"
+                // Note: supply internal repo as tests use native dependencies that might not be published, yet.
+                sh "./gradlew $gradleArgs $internalRepoArgs $uploadRepoArgsBintray uploadArchives"
 
                 googlechatnotification url: 'id:gchat_java',
                     message: "Published ${currentBuild.fullDisplayName} successfully to Bintray - check https://bintray.com/objectbox/objectbox\n${env.BUILD_URL}"
