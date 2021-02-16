@@ -320,6 +320,10 @@ public class SyncClientImpl implements SyncClient {
             }
         }
 
+        public void onServerTimeUpdate(long serverTimeNanos) {
+            // Not implemented, yet.
+        }
+
         public void onSyncComplete() {
             SyncCompletedListener listenerToFire = completedListener;
             if (listenerToFire != null) {
