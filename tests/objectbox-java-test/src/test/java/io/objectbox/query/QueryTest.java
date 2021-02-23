@@ -110,10 +110,18 @@ public class QueryTest extends AbstractQueryTest {
 
         Query<TestEntity> query = box.query().equal(simpleBoolean, true).build();
         assertEquals(5, query.count());
-        assertEquals(1, query.findFirst().getId());
+        assertEquals(1, getFirstNotNull(query).getId());
         query.setParameter(simpleBoolean, false);
         assertEquals(5, query.count());
-        assertEquals(2, query.findFirst().getId());
+        assertEquals(2, getFirstNotNull(query).getId());
+
+        // Again, but using alias
+        Query<TestEntity> aliasQuery = box.query().equal(simpleBoolean, true).parameterAlias("bool").build();
+        assertEquals(5, aliasQuery.count());
+        assertEquals(1, getFirstNotNull(aliasQuery).getId());
+        aliasQuery.setParameter("bool", false);
+        assertEquals(5, aliasQuery.count());
+        assertEquals(2, getFirstNotNull(aliasQuery).getId());
     }
 
     @Test
@@ -938,5 +946,11 @@ public class QueryTest extends AbstractQueryTest {
 
     private interface ListItemAsserter<T> {
         void assertListItem(int index, T item);
+    }
+
+    private <T> T getFirstNotNull(Query<T> query) {
+        T first = query.findFirst();
+        assertNotNull(first);
+        return first;
     }
 }
