@@ -220,7 +220,8 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Find all Objects matching the query between the given offset and limit. This helps with pagination.
+     * Find all Objects matching the query, skipping the first offset results and returning at most limit results.
+     * Use this for pagination.
      */
     @Nonnull
     public List<T> find(final long offset, final long limit) {
