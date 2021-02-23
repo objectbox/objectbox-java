@@ -863,6 +863,14 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(0, query.count());
 
         query.setParameter(Order_.date, now);
+        assertEquals(1, query.count());
+
+        // Again, but using alias
+        Query<Order> aliasQuery = box.query().equal(Order_.date, 0).parameterAlias("date").build();
+        assertEquals(0, aliasQuery.count());
+
+        aliasQuery.setParameter("date", now);
+        assertEquals(1, aliasQuery.count());
     }
 
     @Test
