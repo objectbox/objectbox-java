@@ -29,7 +29,7 @@ public class SyncTest extends AbstractObjectBoxTest {
      */
     @Test
     public void serverIsNotAvailable() {
-        assertFalse(BoxStore.isSyncServerAvailable());
+        assertFalse(Sync.isServerAvailable());
     }
 
     @Test
