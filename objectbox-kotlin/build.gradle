@@ -45,35 +45,21 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-artifacts {
-    // java plugin adds jar.
-    archives javadocJar
-    archives sourcesJar
-}
-
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     api project(':objectbox-java')
 }
 
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            // Basic definitions are defined in root project
-            pom.project {
-                name 'ObjectBox Kotlin'
-                description 'ObjectBox is a fast NoSQL database for Objects'
-
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution 'repo'
-                    }
-                }
-            }
+// Set project-specific properties.
+publishing.publications {
+    mavenJava(MavenPublication) {
+        from components.java
+        artifact sourcesJar
+        artifact javadocJar
+        pom {
+            name = 'ObjectBox Kotlin'
+            description = 'ObjectBox is a fast NoSQL database for Objects'
         }
     }
 }
