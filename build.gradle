@@ -90,7 +90,7 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
         if (hasSigningProperties()) {
             String signingKey = new File(signingKeyFile).text
             useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
-            sign configurations.archives
+            sign publishing.publications.mavenJava
         } else {
             println "Signing information missing/incomplete for ${project.name}"
         }
