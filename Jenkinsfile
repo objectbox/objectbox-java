@@ -78,12 +78,8 @@ pipeline {
                 googlechatnotification url: 'id:gchat_java',
                     message: "*Publishing* ${currentBuild.fullDisplayName} to Central...\n${env.BUILD_URL}"
 
-                // Step 1: upload files to staging repository.
                 // Note: supply internal repo as tests use native dependencies that might not be published, yet.
-                sh "./gradlew $gradleArgs $internalRepoArgs $uploadRepoArgsCentral publishMavenJavaPublicationToSonatypeRepository"
-
-                // Step 2: close and release staging repository.
-                sh "./gradlew $gradleArgs $uploadRepoArgsCentral closeAndReleaseRepository"
+                sh "./gradlew $gradleArgs $internalRepoArgs $uploadRepoArgsCentral publishMavenJavaPublicationToSonatypeRepository closeAndReleaseStagingRepository"
 
                 googlechatnotification url: 'id:gchat_java',
                     message: "Published ${currentBuild.fullDisplayName} successfully to Central - check https://repo1.maven.org/maven2/io/objectbox/ in a few minutes.\n${env.BUILD_URL}"

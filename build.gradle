@@ -42,7 +42,7 @@ buildscript {
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
         // https://github.com/spotbugs/spotbugs-gradle-plugin/releases
         classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.5.1"
-        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0"
+        classpath "io.github.gradle-nexus:publish-plugin:1.0.0"
     }
 }
 
@@ -116,24 +116,7 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                     println "WARNING: Can not publish to GitLab: gitlabUrl or gitlabPrivateToken not set."
                 }
             }
-            maven {
-                name = 'Sonatype'
-                url = version.endsWith('SNAPSHOT') ?
-                        "https://oss.sonatype.org/content/repositories/snapshots/" :
-                        "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-                if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
-                    if (!hasSigningProperties()) {
-                        throw new InvalidUserDataException("To upload to repo signing is required.")
-                    }
-
-                    credentials {
-                        username = sonatypeUsername
-                        password = sonatypePassword
-                    }
-                } else {
-                    println "WARNING: Can not publish to Sonatype OSSRH: sonatypeUsername or sonatypePassword not set."
-                }
-            }
+            // Note: Sonatype repo created by publish-plugin.
         }
 
         publications {
@@ -178,14 +161,19 @@ wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-// Plugin to close and promote staging repository to Central.
-apply plugin: 'io.codearte.nexus-staging'
-nexusStaging {
-    if (project.hasProperty("sonatypeUsername") && project.hasProperty("sonatypePassword")) {
-        println('nexusStaging credentials supplied.')
-        username = sonatypeUsername
-        password = sonatypePassword
-    } else {
-        println('nexusStaging credentials NOT supplied.')
+// Plugin to publish to Central https://github.com/gradle-nexus/publish-plugin/
+// This plugin ensures a separate, named staging repo is created for each build when publishing.
+apply plugin: "io.github.gradle-nexus.publish-plugin"
+nexusPublishing {
+    repositories {
+        sonatype {
+            if (project.hasProperty("sonatypeUsername") && project.hasProperty("sonatypePassword")) {
+                println('nexusPublishing credentials supplied.')
+                username = sonatypeUsername
+                password = sonatypePassword
+            } else {
+                println('nexusPublishing credentials NOT supplied.')
+            }
+        }
     }
 }
