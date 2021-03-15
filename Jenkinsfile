@@ -7,9 +7,6 @@ boolean isPublish = BRANCH_NAME == 'publish'
 String versionPostfix = isPublish ? '' : BRANCH_NAME // Build script detects empty string as not set.
 
 // Note: using single quotes to avoid Groovy String interpolation leaking secrets.
-def internalRepoArgs = '-PinternalObjectBoxRepo=$MVN_REPO_URL ' +
-                '-PinternalObjectBoxRepoUser=$MVN_REPO_LOGIN_USR ' +
-                '-PinternalObjectBoxRepoPassword=$MVN_REPO_LOGIN_PSW'
 def gitlabRepoArgs = '-PgitlabUrl=$GITLAB_URL -PgitlabPrivateToken=$GITLAB_TOKEN'
 def uploadRepoArgsCentral = '-PsonatypeUsername=$OSSRH_LOGIN_USR -PsonatypePassword=$OSSRH_LOGIN_PSW'
 
@@ -18,8 +15,6 @@ pipeline {
     agent { label 'java' }
     
     environment {
-        MVN_REPO_LOGIN = credentials('objectbox_internal_mvn_user')
-        MVN_REPO_URL = credentials('objectbox_internal_mvn_repo_http')
         GITLAB_URL = credentials('gitlab_url')
         GITLAB_TOKEN = credentials('GITLAB_TOKEN_ALL')
         // Note: for key use Jenkins secret file with PGP key as text in ASCII-armored format.
@@ -54,7 +49,7 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh "./ci/test-with-asan.sh $gradleArgs $internalRepoArgs -Dextensive-tests=true clean test " +
+                sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs -Dextensive-tests=true clean test " +
                         "--tests io.objectbox.FunctionalTestSuite " +
                         "--tests io.objectbox.test.proguard.ObfuscatedEntityTest " +
                         "--tests io.objectbox.rx.QueryObserverTest " +
@@ -65,7 +60,7 @@ pipeline {
 
         stage('upload-to-internal') {
             steps {
-                sh "./gradlew $gradleArgs $internalRepoArgs $gitlabRepoArgs -PversionPostFix=$versionPostfix publishMavenJavaPublicationToGitLabRepository"
+                sh "./gradlew $gradleArgs $gitlabRepoArgs -PversionPostFix=$versionPostfix publishMavenJavaPublicationToGitLabRepository"
             }
         }
 
@@ -79,7 +74,7 @@ pipeline {
                     message: "*Publishing* ${currentBuild.fullDisplayName} to Central...\n${env.BUILD_URL}"
 
                 // Note: supply internal repo as tests use native dependencies that might not be published, yet.
-                sh "./gradlew $gradleArgs $internalRepoArgs $uploadRepoArgsCentral publishMavenJavaPublicationToSonatypeRepository closeAndReleaseStagingRepository"
+                sh "./gradlew $gradleArgs $gitlabRepoArgs $uploadRepoArgsCentral publishMavenJavaPublicationToSonatypeRepository closeAndReleaseStagingRepository"
 
                 googlechatnotification url: 'id:gchat_java',
                     message: "Published ${currentBuild.fullDisplayName} successfully to Central - check https://repo1.maven.org/maven2/io/objectbox/ in a few minutes.\n${env.BUILD_URL}"
