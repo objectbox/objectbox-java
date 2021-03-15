@@ -86,16 +86,6 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
 
-    signing {
-        if (hasSigningProperties()) {
-            String signingKey = new File(signingKeyFile).text
-            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
-            sign publishing.publications.mavenJava
-        } else {
-            println "Signing information missing/incomplete for ${project.name}"
-        }
-    }
-
     publishing {
         repositories {
             maven {
@@ -153,6 +143,16 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                     }
                 }
             }
+        }
+    }
+
+    signing {
+        if (hasSigningProperties()) {
+            String signingKey = new File(signingKeyFile).text
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+            sign publishing.publications.mavenJava
+        } else {
+            println "Signing information missing/incomplete for ${project.name}"
         }
     }
 }
