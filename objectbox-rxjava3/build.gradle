@@ -35,7 +35,7 @@ tasks.named("dokkaHtml") {
 
 dependencies {
     api project(':objectbox-java')
-    api 'io.reactivex.rxjava3:rxjava:3.0.1'
+    api 'io.reactivex.rxjava3:rxjava:3.0.11'
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"

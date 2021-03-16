@@ -20,9 +20,9 @@ buildscript {
         ob_native_dep = "io.objectbox:objectbox-$objectboxPlatform:$nativeVersion"
 
         essentials_version = '3.1.0'
-        junit_version = '4.13.1'
-        mockito_version = '3.3.3'
-        kotlin_version = '1.4.21'
+        junit_version = '4.13.2'
+        mockito_version = '3.8.0'
+        kotlin_version = '1.4.31'
         dokka_version = '1.4.20'
 
         println "version=$ob_version"
@@ -41,7 +41,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
         // https://github.com/spotbugs/spotbugs-gradle-plugin/releases
-        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.5.1"
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.7.0"
         classpath "io.github.gradle-nexus:publish-plugin:1.0.0"
     }
 }

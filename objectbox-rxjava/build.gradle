@@ -5,7 +5,7 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
     api project(':objectbox-java')
-    api 'io.reactivex.rxjava2:rxjava:2.2.18'
+    api 'io.reactivex.rxjava2:rxjava:2.2.21'
 
     testImplementation "junit:junit:$junit_version"
     testImplementation "org.mockito:mockito-core:$mockito_version"
