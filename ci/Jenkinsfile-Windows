@@ -2,7 +2,7 @@
 
 String buildsToKeep = '500'
 
-String gradleArgs = '-Dorg.gradle.daemon=false --stacktrace'
+String gradleArgs = '--stacktrace'
 boolean isPublish = BRANCH_NAME == 'publish'
 
 // Note: using single quotes to avoid Groovy String interpolation leaking secrets.

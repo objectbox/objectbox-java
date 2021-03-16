@@ -2,7 +2,7 @@
 String cronSchedule = BRANCH_NAME == 'dev' ? '*/30 1-5 * * *' : ''
 String buildsToKeep = '500'
 
-String gradleArgs = '-Dorg.gradle.daemon=false --stacktrace'
+String gradleArgs = '--stacktrace'
 boolean isPublish = BRANCH_NAME == 'publish'
 String versionPostfix = isPublish ? '' : BRANCH_NAME // Build script detects empty string as not set.
 
