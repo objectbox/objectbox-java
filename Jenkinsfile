@@ -7,25 +7,16 @@ boolean isPublish = BRANCH_NAME == 'publish'
 String versionPostfix = isPublish ? '' : BRANCH_NAME // Build script detects empty string as not set.
 
 // Note: using single quotes to avoid Groovy String interpolation leaking secrets.
-def internalRepoArgs = '-PinternalObjectBoxRepo=$MVN_REPO_URL ' +
-                '-PinternalObjectBoxRepoUser=$MVN_REPO_LOGIN_USR ' +
-                '-PinternalObjectBoxRepoPassword=$MVN_REPO_LOGIN_PSW'
-def uploadRepoArgs = '-PpreferredRepo=$MVN_REPO_UPLOAD_URL ' +
-                '-PpreferredUsername=$MVN_REPO_LOGIN_USR ' +
-                '-PpreferredPassword=$MVN_REPO_LOGIN_PSW '
-// Note: add quotes around URL parameter to avoid line breaks due to semicolon in URL.
-def uploadRepoArgsBintray = '\"-PpreferredRepo=$BINTRAY_URL\" ' +
-                '-PpreferredUsername=$BINTRAY_LOGIN_USR ' +
-                '-PpreferredPassword=$BINTRAY_LOGIN_PSW'
+def gitlabRepoArgs = '-PgitlabUrl=$GITLAB_URL -PgitlabPrivateToken=$GITLAB_TOKEN'
+def uploadRepoArgsCentral = '-PsonatypeUsername=$OSSRH_LOGIN_USR -PsonatypePassword=$OSSRH_LOGIN_PSW'
 
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
     agent { label 'java' }
     
     environment {
-        MVN_REPO_LOGIN = credentials('objectbox_internal_mvn_user')
-        MVN_REPO_URL = credentials('objectbox_internal_mvn_repo_http')
-        MVN_REPO_UPLOAD_URL = credentials('objectbox_internal_mvn_repo')
+        GITLAB_URL = credentials('gitlab_url')
+        GITLAB_TOKEN = credentials('GITLAB_TOKEN_ALL')
         // Note: for key use Jenkins secret file with PGP key as text in ASCII-armored format.
         ORG_GRADLE_PROJECT_signingKeyFile = credentials('objectbox_signing_key')
         ORG_GRADLE_PROJECT_signingKeyId = credentials('objectbox_signing_key_id')
@@ -58,7 +49,7 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh "./ci/test-with-asan.sh $gradleArgs $internalRepoArgs -Dextensive-tests=true clean test " +
+                sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs -Dextensive-tests=true clean test " +
                         "--tests io.objectbox.FunctionalTestSuite " +
                         "--tests io.objectbox.test.proguard.ObfuscatedEntityTest " +
                         "--tests io.objectbox.rx.QueryObserverTest " +
@@ -69,25 +60,24 @@ pipeline {
 
         stage('upload-to-internal') {
             steps {
-                sh "./gradlew $gradleArgs $internalRepoArgs $uploadRepoArgs -PversionPostFix=$versionPostfix uploadArchives"
+                sh "./gradlew $gradleArgs $gitlabRepoArgs -PversionPostFix=$versionPostfix publishMavenJavaPublicationToGitLabRepository"
             }
         }
 
-        stage('upload-to-bintray') {
+        stage('upload-to-central') {
             when { expression { return isPublish } }
             environment {
-                BINTRAY_URL = credentials('bintray_url')
-                BINTRAY_LOGIN = credentials('bintray_login')
+                OSSRH_LOGIN = credentials('ossrh-login')
             }
             steps {
                 googlechatnotification url: 'id:gchat_java',
-                    message: "*Publishing* ${currentBuild.fullDisplayName} to Bintray...\n${env.BUILD_URL}"
+                    message: "*Publishing* ${currentBuild.fullDisplayName} to Central...\n${env.BUILD_URL}"
 
                 // Note: supply internal repo as tests use native dependencies that might not be published, yet.
-                sh "./gradlew $gradleArgs $internalRepoArgs $uploadRepoArgsBintray uploadArchives"
+                sh "./gradlew $gradleArgs $gitlabRepoArgs $uploadRepoArgsCentral publishMavenJavaPublicationToSonatypeRepository closeAndReleaseStagingRepository"
 
                 googlechatnotification url: 'id:gchat_java',
-                    message: "Published ${currentBuild.fullDisplayName} successfully to Bintray - check https://bintray.com/objectbox/objectbox\n${env.BUILD_URL}"
+                    message: "Published ${currentBuild.fullDisplayName} successfully to Central - check https://repo1.maven.org/maven2/io/objectbox/ in a few minutes.\n${env.BUILD_URL}"
             }
         }
 

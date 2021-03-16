@@ -97,8 +97,8 @@ public class QueryTest extends AbstractQueryTest {
 
         Query<TestEntity> query = box.query().equal(simpleInt, 2007).build();
         assertEquals(1, query.count());
-        assertEquals(8, query.findFirst().getId());
-        assertEquals(8, query.findUnique().getId());
+        assertEquals(8, getFirstNotNull(query).getId());
+        assertEquals(8, getUniqueNotNull(query).getId());
         List<TestEntity> all = query.find();
         assertEquals(1, all.size());
         assertEquals(8, all.get(0).getId());
@@ -110,10 +110,18 @@ public class QueryTest extends AbstractQueryTest {
 
         Query<TestEntity> query = box.query().equal(simpleBoolean, true).build();
         assertEquals(5, query.count());
-        assertEquals(1, query.findFirst().getId());
+        assertEquals(1, getFirstNotNull(query).getId());
         query.setParameter(simpleBoolean, false);
         assertEquals(5, query.count());
-        assertEquals(2, query.findFirst().getId());
+        assertEquals(2, getFirstNotNull(query).getId());
+
+        // Again, but using alias
+        Query<TestEntity> aliasQuery = box.query().equal(simpleBoolean, true).parameterAlias("bool").build();
+        assertEquals(5, aliasQuery.count());
+        assertEquals(1, getFirstNotNull(aliasQuery).getId());
+        aliasQuery.setParameter("bool", false);
+        assertEquals(5, aliasQuery.count());
+        assertEquals(2, getFirstNotNull(aliasQuery).getId());
     }
 
     @Test
@@ -262,9 +270,9 @@ public class QueryTest extends AbstractQueryTest {
     public void testString() {
         List<TestEntity> entities = putTestEntitiesStrings();
         int count = entities.size();
-        assertEquals(1, box.query().equal(simpleString, "banana").build().findUnique().getId());
+        assertEquals(1, getUniqueNotNull(box.query().equal(simpleString, "banana").build()).getId());
         assertEquals(count - 1, box.query().notEqual(simpleString, "banana").build().count());
-        assertEquals(4, box.query().startsWith(simpleString, "ba").endsWith(simpleString, "shake").build().findUnique()
+        assertEquals(4, getUniqueNotNull(box.query().startsWith(simpleString, "ba").endsWith(simpleString, "shake").build())
                 .getId());
         assertEquals(2, box.query().contains(simpleString, "nana").build().count());
     }
@@ -417,7 +425,7 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(1, query.count());
         TestEntity first = query.findFirst();
         assertNotNull(first);
-        assertTrue(Arrays.equals(value, first.getSimpleByteArray()));
+        assertArrayEquals(value, first.getSimpleByteArray());
 
         byte[] value2 = {1, 2, (byte) 2001};
         query.setParameter(simpleByteArray, value2);
@@ -425,7 +433,7 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(1, query.count());
         TestEntity first2 = query.findFirst();
         assertNotNull(first2);
-        assertTrue(Arrays.equals(value2, first2.getSimpleByteArray()));
+        assertArrayEquals(value2, first2.getSimpleByteArray());
 
         byte[] value3 = {1, 2, (byte) 2002};
         query.setParameter("bytes", value3);
@@ -433,7 +441,7 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(1, query.count());
         TestEntity first3 = query.findFirst();
         assertNotNull(first3);
-        assertTrue(Arrays.equals(value3, first3.getSimpleByteArray()));
+        assertArrayEquals(value3, first3.getSimpleByteArray());
     }
 
     @Test
@@ -721,12 +729,12 @@ public class QueryTest extends AbstractQueryTest {
 
         putTestEntitiesScalars();
         Query<TestEntity> query = box.query().equal(simpleInt, 2007).parameterAlias("foo").build();
-        assertEquals(8, query.findUnique().getId());
+        assertEquals(8, getUniqueNotNull(query).getId());
         query.setParameter(simpleInt, 2004);
-        assertEquals(5, query.findUnique().getId());
+        assertEquals(5, getUniqueNotNull(query).getId());
 
         query.setParameter("foo", 2002);
-        assertEquals(3, query.findUnique().getId());
+        assertEquals(3, getUniqueNotNull(query).getId());
     }
 
     @Test
@@ -741,7 +749,7 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(4, entities.get(1).getId());
 
         query.setParameters("foo", 2007, 2007);
-        assertEquals(8, query.findUnique().getId());
+        assertEquals(8, getUniqueNotNull(query).getId());
     }
 
     @Test
@@ -768,21 +776,21 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(9, entities.get(1).getId());
 
         query.setParameters("foo", 400.45, 400.55);
-        assertEquals(6, query.findUnique().getId());
+        assertEquals(6, getUniqueNotNull(query).getId());
     }
 
     @Test
     public void testSetParameterString() {
         putTestEntitiesStrings();
         Query<TestEntity> query = box.query().equal(simpleString, "banana").parameterAlias("foo").build();
-        assertEquals(1, query.findUnique().getId());
+        assertEquals(1, getUniqueNotNull(query).getId());
         query.setParameter(simpleString, "bar");
-        assertEquals(3, query.findUnique().getId());
+        assertEquals(3, getUniqueNotNull(query).getId());
 
         assertNull(query.setParameter(simpleString, "not here!").findUnique());
 
         query.setParameter("foo", "apple");
-        assertEquals(2, query.findUnique().getId());
+        assertEquals(2, getUniqueNotNull(query).getId());
     }
 
     /**
@@ -837,14 +845,18 @@ public class QueryTest extends AbstractQueryTest {
         store.close();
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir)
                 .queryAttempts(5)
-                .failedReadTxAttemptCallback((result, error) -> error.printStackTrace());
+                .failedReadTxAttemptCallback((result, error) -> {
+                    if (error != null) {
+                        error.printStackTrace();
+                    }
+                });
         builder.entity(new TestEntity_());
 
         store = builder.build();
         putTestEntitiesScalars();
 
         Query<TestEntity> query = store.boxFor(TestEntity.class).query().equal(simpleInt, 2007).build();
-        assertEquals(2007, query.findFirst().getSimpleInt());
+        assertEquals(2007, getFirstNotNull(query).getSimpleInt());
     }
 
     @Test
@@ -863,6 +875,14 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(0, query.count());
 
         query.setParameter(Order_.date, now);
+        assertEquals(1, query.count());
+
+        // Again, but using alias
+        Query<Order> aliasQuery = box.query().equal(Order_.date, 0).parameterAlias("date").build();
+        assertEquals(0, aliasQuery.count());
+
+        aliasQuery.setParameter("date", now);
+        assertEquals(1, aliasQuery.count());
     }
 
     @Test
@@ -930,5 +950,17 @@ public class QueryTest extends AbstractQueryTest {
 
     private interface ListItemAsserter<T> {
         void assertListItem(int index, T item);
+    }
+
+    private <T> T getFirstNotNull(Query<T> query) {
+        T first = query.findFirst();
+        assertNotNull(first);
+        return first;
+    }
+
+    private <T> T getUniqueNotNull(Query<T> query) {
+        T first = query.findUnique();
+        assertNotNull(first);
+        return first;
     }
 }

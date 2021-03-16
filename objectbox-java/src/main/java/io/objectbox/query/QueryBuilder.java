@@ -552,6 +552,9 @@ public class QueryBuilder<T> implements Closeable {
         return this;
     }
 
+    /**
+     * Finds objects with property value between and including the first and second value.
+     */
     public QueryBuilder<T> between(Property<T> property, long value1, long value2) {
         verifyHandle();
         checkCombineCondition(nativeBetween(handle, property.getId(), value1, value2));
@@ -662,6 +665,8 @@ public class QueryBuilder<T> implements Closeable {
     }
 
     /**
+     * Finds objects with property value between and including the first and second value.
+     *
      * @throws NullPointerException if one of the given values is null.
      */
     public QueryBuilder<T> between(Property<T> property, Date value1, Date value2) {
@@ -883,6 +888,9 @@ public class QueryBuilder<T> implements Closeable {
         return this;
     }
 
+    /**
+     * Finds objects with property value between and including the first and second value.
+     */
     public QueryBuilder<T> between(Property<T> property, double value1, double value2) {
         verifyHandle();
         checkCombineCondition(nativeBetween(handle, property.getId(), value1, value2));
