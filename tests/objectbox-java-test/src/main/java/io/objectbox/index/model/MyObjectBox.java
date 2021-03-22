@@ -43,7 +43,7 @@ public class MyObjectBox {
     private static byte[] getModel() {
         ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.lastEntityId(8, 602677774947261949L);
-        modelBuilder.lastIndexId(4, 4720210528670921467L);
+        modelBuilder.lastIndexId(4, 3512264863194799103L);
 
         EntityBuilder entityBuilder;
 
