@@ -51,6 +51,7 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
     private final static int __ID_simpleDouble = TestEntity_.simpleDouble.id;
     private final static int __ID_simpleString = TestEntity_.simpleString.id;
     private final static int __ID_simpleByteArray = TestEntity_.simpleByteArray.id;
+    private final static int __ID_simpleStringArray = TestEntity_.simpleStringArray.id;
     private final static int __ID_simpleShortU = TestEntity_.simpleShortU.id;
     private final static int __ID_simpleIntU = TestEntity_.simpleIntU.id;
     private final static int __ID_simpleLongU = TestEntity_.simpleLongU.id;
@@ -71,12 +72,18 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
      */
     @Override
     public final long put(TestEntity entity) {
+        String[] simpleStringArray = entity.getSimpleStringArray();
+        int __id10 = simpleStringArray != null ? __ID_simpleStringArray : 0;
+
+        collectStringArray(cursor, 0, PUT_FLAG_FIRST,
+                __id10, simpleStringArray);
+
         String simpleString = entity.getSimpleString();
         int __id8 = simpleString != null ? __ID_simpleString : 0;
         byte[] simpleByteArray = entity.getSimpleByteArray();
         int __id9 = simpleByteArray != null ? __ID_simpleByteArray : 0;
 
-        collect313311(cursor, 0, PUT_FLAG_FIRST,
+        collect313311(cursor, 0, 0,
                 __id8, simpleString, 0, null,
                 0, null, __id9, simpleByteArray,
                 __ID_simpleLong, entity.getSimpleLong(), __ID_simpleLongU, entity.getSimpleLongU(),

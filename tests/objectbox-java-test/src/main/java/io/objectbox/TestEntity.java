@@ -40,6 +40,8 @@ public class TestEntity {
     private String simpleString;
     /** Not-null value. */
     private byte[] simpleByteArray;
+    /** Not-null value. */
+    private String[] simpleStringArray;
     /** In "real" entity would be annotated with @Unsigned. */
     private short simpleShortU;
     /** In "real" entity would be annotated with @Unsigned. */
@@ -57,7 +59,7 @@ public class TestEntity {
         this.id = id;
     }
 
-    public TestEntity(long id, boolean simpleBoolean, byte simpleByte, short simpleShort, int simpleInt, long simpleLong, float simpleFloat, double simpleDouble, String simpleString, byte[] simpleByteArray, short simpleShortU, int simpleIntU, long simpleLongU) {
+    public TestEntity(long id, boolean simpleBoolean, byte simpleByte, short simpleShort, int simpleInt, long simpleLong, float simpleFloat, double simpleDouble, String simpleString, byte[] simpleByteArray, String[] simpleStringArray, short simpleShortU, int simpleIntU, long simpleLongU) {
         this.id = id;
         this.simpleBoolean = simpleBoolean;
         this.simpleByte = simpleByte;
@@ -68,6 +70,7 @@ public class TestEntity {
         this.simpleDouble = simpleDouble;
         this.simpleString = simpleString;
         this.simpleByteArray = simpleByteArray;
+        this.simpleStringArray = simpleStringArray;
         this.simpleShortU = simpleShortU;
         this.simpleIntU = simpleIntU;
         this.simpleLongU = simpleLongU;
@@ -160,6 +163,15 @@ public class TestEntity {
         this.simpleByteArray = simpleByteArray;
     }
 
+    /** Not-null value. */
+    public String[] getSimpleStringArray() {
+        return simpleStringArray;
+    }
+
+    /** Not-null value; ensure this value is available before it is saved to the database. */
+    public void setSimpleStringArray(String[] simpleStringArray) {
+        this.simpleStringArray = simpleStringArray;
+    }
     public short getSimpleShortU() {
         return simpleShortU;
     }

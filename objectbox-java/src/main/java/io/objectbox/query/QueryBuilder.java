@@ -748,8 +748,25 @@ public class QueryBuilder<T> implements Closeable {
     /**
      * Ignores case when matching results. Use the overload and pass
      * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     * <p>
+     * Note: for a String array property, use {@link #containsElement} instead.
      */
     public QueryBuilder<T> contains(Property<T> property, String value) {
+        if (String[].class == property.type) {
+            throw new UnsupportedOperationException("For String[] only containsElement() is supported at this time.");
+        }
+        verifyHandle();
+        checkCombineCondition(nativeContains(handle, property.getId(), value, false));
+        return this;
+    }
+
+    /**
+     * For a String array property, matches if at least one element equals the given value.
+     */
+    public QueryBuilder<T> containsElement(Property<T> property, String value) {
+        if (String[].class != property.type) {
+            throw new IllegalArgumentException("containsElement is only supported for String[] properties.");
+        }
         verifyHandle();
         checkCombineCondition(nativeContains(handle, property.getId(), value, false));
         return this;

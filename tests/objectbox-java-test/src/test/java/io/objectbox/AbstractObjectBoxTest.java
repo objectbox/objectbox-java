@@ -34,6 +34,8 @@ import io.objectbox.ModelBuilder.PropertyBuilder;
 import io.objectbox.model.PropertyFlags;
 import io.objectbox.model.PropertyType;
 
+
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -202,6 +204,7 @@ public abstract class AbstractObjectBoxTest {
             pb.flags(PropertyFlags.INDEXED).indexId(++lastIndexId, lastIndexUid);
         }
         entityBuilder.property("simpleByteArray", PropertyType.ByteVector).id(TestEntity_.simpleByteArray.id, ++lastUid);
+        entityBuilder.property("simpleStringArray", PropertyType.StringVector).id(TestEntity_.simpleStringArray.id, ++lastUid);
 
         // Unsigned integers.
         entityBuilder.property("simpleShortU", PropertyType.Short).id(TestEntity_.simpleShortU.id, ++lastUid)
@@ -246,10 +249,32 @@ public abstract class AbstractObjectBoxTest {
         entity.setSimpleFloat(200 + nr / 10f);
         entity.setSimpleDouble(2000 + nr / 100f);
         entity.setSimpleByteArray(new byte[]{1, 2, (byte) nr});
+        entity.setSimpleStringArray(new String[]{simpleString});
         entity.setSimpleShortU((short) (100 + nr));
         entity.setSimpleIntU(nr);
         entity.setSimpleLongU(1000 + nr);
         return entity;
+    }
+
+    /**
+     * Asserts all properties, excluding id. Assumes entity was created with {@link #createTestEntity(String, int)}.
+     */
+    protected void assertTestEntity(TestEntity actual, @Nullable String simpleString, int nr) {
+        assertEquals(simpleString, actual.getSimpleString());
+        assertEquals(nr, actual.getSimpleInt());
+        assertEquals((byte) (10 + nr), actual.getSimpleByte());
+        assertEquals(nr % 2 == 0, actual.getSimpleBoolean());
+        assertEquals((short) (100 + nr), actual.getSimpleShort());
+        assertEquals(1000 + nr, actual.getSimpleLong());
+        assertEquals(200 + nr / 10f, actual.getSimpleFloat(), 0);
+        assertEquals(2000 + nr / 100f, actual.getSimpleDouble(), 0);
+        assertArrayEquals(new byte[]{1, 2, (byte) nr}, actual.getSimpleByteArray());
+        // null array items are ignored, so array will be empty
+        String[] expectedStringArray = simpleString == null ? new String[]{} : new String[]{simpleString};
+        assertArrayEquals(expectedStringArray, actual.getSimpleStringArray());
+        assertEquals((short) (100 + nr), actual.getSimpleShortU());
+        assertEquals(nr, actual.getSimpleIntU());
+        assertEquals(1000 + nr, actual.getSimpleLongU());
     }
 
     protected TestEntity putTestEntity(@Nullable String simpleString, int nr) {

@@ -106,6 +106,10 @@ public abstract class Cursor<T> implements Closeable {
                                                int idLong3, long valueLong3, int idLong4, long valueLong4
     );
 
+    protected static native long collectStringArray(long cursor, long keyIfComplete, int flags,
+                                                    int idStringArray, String[] stringArray
+    );
+
     native int nativePropertyId(long cursor, String propertyValue);
 
     native List<T> nativeGetBacklinkEntities(long cursor, int entityId, int propertyId, long key);
