@@ -753,7 +753,7 @@ public class QueryBuilder<T> implements Closeable {
      */
     public QueryBuilder<T> contains(Property<T> property, String value) {
         if (String[].class == property.type) {
-            throw new IllegalArgumentException("For a String[] property use containsElement() instead.");
+            throw new UnsupportedOperationException("For String[] only containsElement() is supported at this time.");
         }
         verifyHandle();
         checkCombineCondition(nativeContains(handle, property.getId(), value, false));

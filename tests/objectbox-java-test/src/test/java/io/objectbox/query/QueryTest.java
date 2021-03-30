@@ -284,9 +284,9 @@ public class QueryTest extends AbstractQueryTest {
         putTestEntitiesStrings();
 
         // Using contains should not work on String array.
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        Exception exception = assertThrows(UnsupportedOperationException.class,
                 () -> box.query().contains(simpleStringArray, "banana"));
-        assertEquals("For a String[] property use containsElement() instead.", exception.getMessage());
+        assertEquals("For String[] only containsElement() is supported at this time.", exception.getMessage());
 
         // containsElement(prop, value) matches if value is equal to one of the array items.
         // Verify by not matching entity where 'banana' is only a substring of an array item ('banana milk shake').
