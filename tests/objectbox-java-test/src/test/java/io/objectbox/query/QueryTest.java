@@ -49,6 +49,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -281,9 +282,15 @@ public class QueryTest extends AbstractQueryTest {
     @Test
     public void testStringArray() {
         putTestEntitiesStrings();
-        // contains(prop, value) matches if value is equal to one of the array items.
+
+        // Using contains should not work on String array.
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> box.query().contains(simpleStringArray, "banana"));
+        assertEquals("For a String[] property use containsElement() instead.", exception.getMessage());
+
+        // containsElement(prop, value) matches if value is equal to one of the array items.
         // Verify by not matching entity where 'banana' is only a substring of an array item ('banana milk shake').
-        List<TestEntity> results = box.query().contains(simpleStringArray, "banana").build().find();
+        List<TestEntity> results = box.query().containsElement(simpleStringArray, "banana").build().find();
         assertEquals(1, results.size());
         assertEquals("banana", results.get(0).getSimpleStringArray()[0]);
     }
