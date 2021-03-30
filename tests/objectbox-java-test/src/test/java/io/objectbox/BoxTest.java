@@ -80,6 +80,16 @@ public class BoxTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testPutStringArray_null_isNull() {
+        TestEntity entity = new TestEntity();
+        box.put(entity);
+
+        TestEntity entityRead = box.get(entity.getId());
+        assertNotNull(entityRead);
+        assertNull(entityRead.getSimpleStringArray());
+    }
+
+    @Test
     public void testPutGetUpdateGetRemove() {
         // create an entity
         TestEntity entity = new TestEntity();
