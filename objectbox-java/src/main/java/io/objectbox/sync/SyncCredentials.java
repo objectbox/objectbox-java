@@ -43,11 +43,11 @@ public class SyncCredentials {
     public enum CredentialsType {
         // Note: this needs to match with CredentialsType in Core.
 
-        NONE(0),
+        NONE(1),
 
-        SHARED_SECRET(1),
+        SHARED_SECRET(2),
 
-        GOOGLE(2);
+        GOOGLE(3);
 
         public final long id;
 
