@@ -20,7 +20,15 @@ public class Tree {
             throw new UnsupportedOperationException();
         }
 
+        public Branch branch(String name) {
+            throw new UnsupportedOperationException();
+        }
+
         public Leaf leaf(String[] path) {
+            throw new UnsupportedOperationException();
+        }
+
+        public Leaf leaf(String name) {
             throw new UnsupportedOperationException();
         }
 

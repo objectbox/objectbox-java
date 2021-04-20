@@ -14,8 +14,8 @@ public class TreeTest {
         Tree.Branch book = tree.branch("Book", "uid-4sdf6a4sdf6a4sdf64as6fd4");
 
         // branch
-        Tree.Branch author = book.branch(new String[]{"Author"});
-        Tree.Leaf nameIndirect = author.leaf(new String[]{"Name"});
+        Tree.Branch author = book.branch("Author");
+        Tree.Leaf nameIndirect = author.leaf("Name");
 
         // attribute
         Tree.Leaf name = book.leaf(new String[]{"Author", "Name"});
