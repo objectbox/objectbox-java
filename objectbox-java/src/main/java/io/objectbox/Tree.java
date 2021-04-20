@@ -2,31 +2,31 @@ package io.objectbox;
 
 import javax.annotation.Nullable;
 
-public class Trees {
+public class Tree {
 
     private BoxStore store;
 
-    public Trees(BoxStore store) {
+    public Tree(BoxStore store) {
         this.store = store;
     }
 
-    public DataBranch branch(String branchName, String branchUid) {
+    public Branch branch(String branchName, String branchUid) {
         throw new UnsupportedOperationException();
     }
 
-    public static class DataBranch {
+    public static class Branch {
 
-        public DataBranch branch(String[] path) {
+        public Branch branch(String[] path) {
             throw new UnsupportedOperationException();
         }
 
-        public DataAttribute attribute(String[] path) {
+        public Leaf leaf(String[] path) {
             throw new UnsupportedOperationException();
         }
 
     }
 
-    public static class DataAttribute {
+    public static class Leaf {
 
         // TODO Add all supported types.
 

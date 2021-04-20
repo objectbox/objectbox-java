@@ -3,22 +3,22 @@ package io.objectbox;
 import org.junit.Test;
 
 // TODO Add to FunctionalTestSuite.
-public class TreesTest {
+public class TreeTest {
 
     @Test
     public void trees_work() {
         BoxStore store = null;
-        Trees trees = new Trees(store);
+        Tree tree = new Tree(store);
 
         // sub-tree
-        Trees.DataBranch book = trees.branch("Book", "uid-4sdf6a4sdf6a4sdf64as6fd4");
+        Tree.Branch book = tree.branch("Book", "uid-4sdf6a4sdf6a4sdf64as6fd4");
 
         // branch
-        Trees.DataBranch author = book.branch(new String[]{"Author"});
-        Trees.DataAttribute nameIndirect = author.attribute(new String[]{"Name"});
+        Tree.Branch author = book.branch(new String[]{"Author"});
+        Tree.Leaf nameIndirect = author.leaf(new String[]{"Name"});
 
         // attribute
-        Trees.DataAttribute name = book.attribute(new String[]{"Author", "Name"});
+        Tree.Leaf name = book.leaf(new String[]{"Author", "Name"});
 
         boolean isInt = name.isInt();
         boolean isString = name.isString();
