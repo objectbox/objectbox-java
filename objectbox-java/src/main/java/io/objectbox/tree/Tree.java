@@ -4,6 +4,9 @@ import io.objectbox.BoxStore;
 
 import javax.annotation.Nullable;
 
+/**
+ * Points to a root branch, can traverse child branches and read and write data in leafs.
+ */
 public class Tree {
 
     private final BoxStore store;
@@ -20,7 +23,14 @@ public class Tree {
         throw new UnsupportedOperationException();
     }
 
+    public void close() {
+        long handle = this.handle;
+        nativeDelete(handle);
+        this.handle = 0;
+    }
+
     private static native long nativeCreate(@Nullable String uid);
+    private static native void nativeDelete(long handle);
 
     public static class Branch {
 
