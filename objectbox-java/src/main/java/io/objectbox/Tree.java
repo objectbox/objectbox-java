@@ -4,15 +4,21 @@ import javax.annotation.Nullable;
 
 public class Tree {
 
-    private BoxStore store;
+    private final BoxStore store;
+    @Nullable private final String uid;
+    private long handle;
 
-    public Tree(BoxStore store) {
+    public Tree(BoxStore store, @Nullable String uid) {
         this.store = store;
+        this.uid = uid;
+        this.handle = nativeCreate(uid);
     }
 
-    public Branch branch(String branchName, String branchUid) {
+    public Branch root() {
         throw new UnsupportedOperationException();
     }
+
+    private static native long nativeCreate(@Nullable String uid);
 
     public static class Branch {
 

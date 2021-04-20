@@ -8,10 +8,10 @@ public class TreeTest {
     @Test
     public void trees_work() {
         BoxStore store = null;
-        Tree tree = new Tree(store);
+        Tree tree = new Tree(store, "uid-4sdf6a4sdf6a4sdf64as6fd4");
 
         // get tree root
-        Tree.Branch book = tree.branch("Book", "uid-4sdf6a4sdf6a4sdf64as6fd4");
+        Tree.Branch book = tree.root();
 
         // get leaf indirectly by traversing branches
         Tree.Branch author = book.branch("Author");
