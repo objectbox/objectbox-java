@@ -10,22 +10,29 @@ public class TreeTest {
         BoxStore store = null;
         Tree tree = new Tree(store);
 
-        // sub-tree
+        // get tree root
         Tree.Branch book = tree.branch("Book", "uid-4sdf6a4sdf6a4sdf64as6fd4");
 
-        // branch
+        // get leaf indirectly by traversing branches
         Tree.Branch author = book.branch("Author");
         Tree.Leaf nameIndirect = author.leaf("Name");
 
-        // attribute
+        // get leaf directly
         Tree.Leaf name = book.leaf(new String[]{"Author", "Name"});
 
         boolean isInt = name.isInt();
+        boolean isDouble = name.isDouble();
         boolean isString = name.isString();
+        boolean isStringArray = name.isStringArray();
 
-        name.asInt();
+        Long aLong = name.asInt();
+        Double aDouble = name.asDouble();
+        String string = name.asString();
+        String[] strings = name.asStringArray();
+
         name.setInt(42L);
-        String nameValue = name.asString();
+        name.setDouble(21.0);
         name.setString("Amy Blair");
+        name.setStringArray(new String[]{"Amy", "Blair"});
     }
 }

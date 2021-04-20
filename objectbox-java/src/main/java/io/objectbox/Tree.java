@@ -36,9 +36,11 @@ public class Tree {
 
     public static class Leaf {
 
-        // TODO Add all supported types.
-
         public boolean isInt() {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean isDouble() {
             throw new UnsupportedOperationException();
         }
 
@@ -46,13 +48,31 @@ public class Tree {
             throw new UnsupportedOperationException();
         }
 
+        public boolean isStringArray() {
+            throw new UnsupportedOperationException();
+        }
+
+        // valueInt
         @Nullable
         public Long asInt() {
             throw new UnsupportedOperationException();
         }
 
+        // valueDouble
+        @Nullable
+        public Double asDouble() {
+            throw new UnsupportedOperationException();
+        }
+
+        // valueString
         @Nullable
         public String asString() {
+            throw new UnsupportedOperationException();
+        }
+
+        // valueStrings
+        @Nullable
+        public String[] asStringArray() {
             throw new UnsupportedOperationException();
         }
 
@@ -60,7 +80,15 @@ public class Tree {
             throw new UnsupportedOperationException();
         }
 
+        public void setDouble(@Nullable Double value) {
+            throw new UnsupportedOperationException();
+        }
+
         public void setString(@Nullable String value) {
+            throw new UnsupportedOperationException();
+        }
+
+        public void setStringArray(@Nullable String[] value) {
             throw new UnsupportedOperationException();
         }
 
