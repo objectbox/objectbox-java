@@ -1,5 +1,6 @@
-package io.objectbox;
+package io.objectbox.tree;
 
+import io.objectbox.BoxStore;
 import org.junit.Test;
 
 // TODO Add to FunctionalTestSuite.

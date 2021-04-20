@@ -1,4 +1,6 @@
-package io.objectbox;
+package io.objectbox.tree;
+
+import io.objectbox.BoxStore;
 
 import javax.annotation.Nullable;
 
