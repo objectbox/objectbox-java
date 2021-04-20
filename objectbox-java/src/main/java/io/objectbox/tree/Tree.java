@@ -10,7 +10,8 @@ import javax.annotation.Nullable;
 public class Tree {
 
     private final BoxStore store;
-    @Nullable private final String uid;
+    @Nullable
+    private final String uid;
     private long handle;
 
     public Tree(BoxStore store, @Nullable String uid) {
@@ -30,6 +31,7 @@ public class Tree {
     }
 
     private static native long nativeCreate(@Nullable String uid);
+
     private static native void nativeDelete(long handle);
 
     public static class Branch {
@@ -39,7 +41,7 @@ public class Tree {
         }
 
         public Branch branch(String name) {
-            throw new UnsupportedOperationException();
+            return branch(new String[]{name});
         }
 
         public Leaf leaf(String[] path) {
@@ -47,7 +49,7 @@ public class Tree {
         }
 
         public Leaf leaf(String name) {
-            throw new UnsupportedOperationException();
+            return leaf(new String[]{name});
         }
 
     }
