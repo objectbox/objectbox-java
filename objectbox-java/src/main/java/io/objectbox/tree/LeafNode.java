@@ -12,9 +12,8 @@ public class LeafNode {
     // Value properties; only one is actually set.
     public long integerValue;
     public double floatingValue;
-    public String stringValue;
-    public byte[] bytesValue;
-    public String[] stringArrayValue;
+    /** One of String, byte[], String[] */
+    public Object objectValue;
 
     // Note: If we need the metaId only to figure out the type, we could also provide a value type property instead.
     // E.g. public int valueType;
@@ -23,15 +22,12 @@ public class LeafNode {
     /**
      * All-args constructor used by JNI (don't change, it's actually used).
      */
-    public LeafNode(long id, long branchId, long metaId, long integerValue, double floatingValue, String stringValue,
-                    byte[] bytesValue, String[] stringArrayValue) {
+    public LeafNode(long id, long branchId, long metaId, long integerValue, double floatingValue, Object objectValue) {
         this.id = id;
         this.branchId = branchId;
         this.metaId = metaId;
         this.integerValue = integerValue;
         this.floatingValue = floatingValue;
-        this.stringValue = stringValue;
-        this.bytesValue = bytesValue;
-        this.stringArrayValue = stringArrayValue;
+        this.objectValue = objectValue;
     }
 }
