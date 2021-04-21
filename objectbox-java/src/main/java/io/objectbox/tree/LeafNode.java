@@ -1,0 +1,37 @@
+package io.objectbox.tree;
+
+/**
+ * (Potentially internal) value object created in our JNI layer to represent a leaf with all stored data.
+ */
+// TODO ensure that this class is left alone by obfuscators.
+public class LeafNode {
+    public long id;
+    public long branchId;
+    public long metaId;
+
+    // Value properties; only one is actually set.
+    public long integerValue;
+    public double floatingValue;
+    public String stringValue;
+    public byte[] bytesValue;
+    public String[] stringArrayValue;
+
+    // Note: If we need the metaId only to figure out the type, we could also provide a value type property instead.
+    // E.g. public int valueType;
+
+
+    /**
+     * All-args constructor used by JNI (don't change, it's actually used).
+     */
+    public LeafNode(long id, long branchId, long metaId, long integerValue, double floatingValue, String stringValue,
+                    byte[] bytesValue, String[] stringArrayValue) {
+        this.id = id;
+        this.branchId = branchId;
+        this.metaId = metaId;
+        this.integerValue = integerValue;
+        this.floatingValue = floatingValue;
+        this.stringValue = stringValue;
+        this.bytesValue = bytesValue;
+        this.stringArrayValue = stringArrayValue;
+    }
+}
