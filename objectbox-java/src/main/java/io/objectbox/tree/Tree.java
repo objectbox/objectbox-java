@@ -9,19 +9,26 @@ import javax.annotation.Nullable;
  */
 public class Tree {
 
-    private final BoxStore store;
-    @Nullable
-    private final String uid;
     private long handle;
 
-    public Tree(BoxStore store, @Nullable String uid) {
-        this.store = store;
-        this.uid = uid;
-        this.handle = nativeCreate(uid);
+    /**
+     * Create a tree instance for the given meta-branch root {@code uid}, or find a singular root if 0 is given.
+     */
+    public Tree(BoxStore store, String uid) {
+        //noinspection ConstantConditions Nullability annotations are not enforced.
+        if (store == null) {
+            throw new IllegalArgumentException("store must not be null");
+        }
+        //noinspection ConstantConditions Nullability annotations are not enforced.
+        if (uid == null || uid.length() == 0) {
+            throw new IllegalArgumentException("uid must be 0 or not empty");
+        }
+        this.handle = nativeCreate(store.getNativeStore(), uid);
     }
 
     public Branch root() {
-        throw new UnsupportedOperationException();
+        long dataBranchId = nativeRoot(handle);
+        return new Branch(dataBranchId);
     }
 
     public void close() {
@@ -30,11 +37,25 @@ public class Tree {
         this.handle = 0;
     }
 
-    private static native long nativeCreate(@Nullable String uid);
+    /**
+     * Create a (Data)Tree instance for the given meta-branch root, or find a singular root if 0 is given.
+     */
+    private static native long nativeCreate(long store, String uid);
 
     private static native void nativeDelete(long handle);
 
+    /**
+     * Get the root data branch ID.
+     */
+    private native long nativeRoot(long handle);
+
     public static class Branch {
+
+        private final long id;
+
+        Branch(long id) {
+            this.id = id;
+        }
 
         public Branch branch(String[] path) {
             throw new UnsupportedOperationException();
