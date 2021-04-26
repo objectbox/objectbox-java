@@ -93,5 +93,10 @@ public final class PropertyFlags {
    * (In the future, ID companion string properties may be added as another supported type).
    */
   public static final int ID_COMPANION = 16384;
+  /**
+   * Unique on-conflict strategy: the object being put replaces any existing conflicting object (deletes it).
+   */
+  public static final int UNIQUE_ON_CONFLICT_REPLACE = 32768;
+
 }
 
