@@ -2,8 +2,6 @@ package io.objectbox.tree;
 
 import io.objectbox.BoxStore;
 
-import javax.annotation.Nullable;
-
 /**
  * Points to a root branch, can traverse child branches and read and write data in leafs.
  */
@@ -26,9 +24,13 @@ public class Tree {
         this.handle = nativeCreate(store.getNativeStore(), uid);
     }
 
+    long getHandle() {
+        return handle;
+    }
+
     public Branch root() {
         long dataBranchId = nativeRoot(handle);
-        return new Branch(dataBranchId);
+        return new Branch(this, dataBranchId);
     }
 
     public void close() {
@@ -48,91 +50,5 @@ public class Tree {
      * Get the root data branch ID.
      */
     private native long nativeRoot(long handle);
-
-    public static class Branch {
-
-        private final long id;
-
-        Branch(long id) {
-            this.id = id;
-        }
-
-        public Branch branch(String[] path) {
-            throw new UnsupportedOperationException();
-        }
-
-        public Branch branch(String name) {
-            return branch(new String[]{name});
-        }
-
-        public Leaf leaf(String[] path) {
-            throw new UnsupportedOperationException();
-        }
-
-        public Leaf leaf(String name) {
-            return leaf(new String[]{name});
-        }
-
-    }
-
-    public static class Leaf {
-
-        public boolean isInt() {
-            throw new UnsupportedOperationException();
-        }
-
-        public boolean isDouble() {
-            throw new UnsupportedOperationException();
-        }
-
-        public boolean isString() {
-            throw new UnsupportedOperationException();
-        }
-
-        public boolean isStringArray() {
-            throw new UnsupportedOperationException();
-        }
-
-        // valueInt
-        @Nullable
-        public Long asInt() {
-            throw new UnsupportedOperationException();
-        }
-
-        // valueDouble
-        @Nullable
-        public Double asDouble() {
-            throw new UnsupportedOperationException();
-        }
-
-        // valueString
-        @Nullable
-        public String asString() {
-            throw new UnsupportedOperationException();
-        }
-
-        // valueStrings
-        @Nullable
-        public String[] asStringArray() {
-            throw new UnsupportedOperationException();
-        }
-
-        public void setInt(@Nullable Long value) {
-            throw new UnsupportedOperationException();
-        }
-
-        public void setDouble(@Nullable Double value) {
-            throw new UnsupportedOperationException();
-        }
-
-        public void setString(@Nullable String value) {
-            throw new UnsupportedOperationException();
-        }
-
-        public void setStringArray(@Nullable String[] value) {
-            throw new UnsupportedOperationException();
-        }
-
-    }
 
 }

@@ -12,14 +12,14 @@ public class TreeTest {
         Tree tree = new Tree(store, "uid-4sdf6a4sdf6a4sdf64as6fd4");
 
         // get tree root
-        Tree.Branch book = tree.root();
+        Branch book = tree.root();
 
         // get leaf indirectly by traversing branches
-        Tree.Branch author = book.branch("Author");
-        Tree.Leaf nameIndirect = author.leaf("Name");
+        Branch author = book.branch("Author");
+        Leaf nameIndirect = author.leaf("Name");
 
         // get leaf directly
-        Tree.Leaf name = book.leaf(new String[]{"Author", "Name"});
+        Leaf name = book.leaf(new String[]{"Author", "Name"});
 
         boolean isInt = name.isInt();
         boolean isDouble = name.isDouble();
