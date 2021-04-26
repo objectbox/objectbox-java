@@ -3,7 +3,6 @@ package io.objectbox.tree;
 /**
  * (Potentially internal) value object created in our JNI layer to represent a leaf with all stored data.
  */
-// TODO ensure that this class is left alone by obfuscators.
 public class LeafNode {
     public long id;
     public long branchId;
