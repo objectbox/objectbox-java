@@ -152,7 +152,10 @@ public class Property<ENTITY> implements Serializable {
         return lessOrEqual((long) value);
     }
 
-    /** Creates an "BETWEEN ... AND ..." condition for this property. */
+    /**
+     * Creates a "BETWEEN ... AND ..." condition for this property.
+     * Finds objects with property value between and including the first and second value.
+     */
     public PropertyQueryCondition<ENTITY> between(short lowerBoundary, short upperBoundary) {
         return between((long) lowerBoundary, upperBoundary);
     }
@@ -187,7 +190,10 @@ public class Property<ENTITY> implements Serializable {
         return lessOrEqual((long) value);
     }
 
-    /** Creates an "BETWEEN ... AND ..." condition for this property. */
+    /**
+     * Creates a "BETWEEN ... AND ..." condition for this property.
+     * Finds objects with property value between and including the first and second value.
+     */
     public PropertyQueryCondition<ENTITY> between(int lowerBoundary, int upperBoundary) {
         return between((long) lowerBoundary, upperBoundary);
     }
@@ -232,7 +238,10 @@ public class Property<ENTITY> implements Serializable {
         return new LongCondition<>(this, LongCondition.Operation.LESS_OR_EQUAL, value);
     }
 
-    /** Creates an "BETWEEN ... AND ..." condition for this property. */
+    /**
+     * Creates a "BETWEEN ... AND ..." condition for this property.
+     * Finds objects with property value between and including the first and second value.
+     */
     public PropertyQueryCondition<ENTITY> between(long lowerBoundary, long upperBoundary) {
         return new LongLongCondition<>(this, LongLongCondition.Operation.BETWEEN, lowerBoundary, upperBoundary);
     }
@@ -276,7 +285,10 @@ public class Property<ENTITY> implements Serializable {
         return new DoubleCondition<>(this, DoubleCondition.Operation.LESS_OR_EQUAL, value);
     }
 
-    /** Creates an "BETWEEN ... AND ..." condition for this property. */
+    /**
+     * Creates a "BETWEEN ... AND ..." condition for this property.
+     * Finds objects with property value between and including the first and second value.
+     */
     public PropertyQueryCondition<ENTITY> between(double lowerBoundary, double upperBoundary) {
         return new DoubleDoubleCondition<>(this, DoubleDoubleCondition.Operation.BETWEEN,
                 lowerBoundary, upperBoundary);
@@ -312,7 +324,10 @@ public class Property<ENTITY> implements Serializable {
         return new LongCondition<>(this, LongCondition.Operation.LESS_OR_EQUAL, value);
     }
 
-    /** Creates an "BETWEEN ... AND ..." condition for this property. */
+    /**
+     * Creates a "BETWEEN ... AND ..." condition for this property.
+     * Finds objects with property value between and including the first and second value.
+     */
     public PropertyQueryCondition<ENTITY> between(Date lowerBoundary, Date upperBoundary) {
         return new LongLongCondition<>(this, LongLongCondition.Operation.BETWEEN, lowerBoundary, upperBoundary);
     }
