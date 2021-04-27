@@ -298,7 +298,7 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
         }
 
         public StringCondition(Property<T> property, Operation op, String value) {
-            this(property, op, value, StringOrder.CASE_INSENSITIVE);
+            this(property, op, value, StringOrder.CASE_SENSITIVE);
         }
 
         @Override
@@ -354,7 +354,7 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
         }
 
         public StringArrayCondition(Property<T> property, Operation op, String[] value) {
-            this(property, op, value, StringOrder.CASE_INSENSITIVE);
+            this(property, op, value, StringOrder.CASE_SENSITIVE);
         }
 
         @Override

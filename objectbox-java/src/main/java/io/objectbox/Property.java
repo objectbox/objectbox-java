@@ -335,9 +335,10 @@ public class Property<ENTITY> implements Serializable {
     /**
      * Creates an "equal ('=')" condition for this property.
      * <p>
-     * Ignores case when matching results, e.g. {@code equal("example")} matches both "Example" and "example".
+     * Case sensitive when matching results, e.g. {@code equal("example")} only matches "example", but not "Example".
      * <p>
-     * Use {@link #equal(String, StringOrder) equal(value, StringOrder.CASE_SENSITIVE)} to only match if case is equal.
+     * Use {@link #equal(String, StringOrder) equal(value, StringOrder.CASE_INSENSITIVE)} to also match
+     * if case is different.
      * <p>
      * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
      * on {@code property}, dramatically speeding up look-up of results.
@@ -351,9 +352,9 @@ public class Property<ENTITY> implements Serializable {
     /**
      * Creates an "equal ('=')" condition for this property.
      * <p>
-     * Set {@code order} to {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to only match
-     * if case is equal. E.g. {@code equal("example", StringOrder.CASE_SENSITIVE)} only matches "example",
-     * but not "Example".
+     * Set {@code order} to {@link StringOrder#CASE_INSENSITIVE StringOrder.CASE_INSENSITIVE} to also match
+     * if case is not equal. E.g. {@code equal("example", StringOrder.CASE_INSENSITIVE)}
+     * matches "example" and "Example".
      * <p>
      * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
      * on {@code property}, dramatically speeding up look-up of results.
@@ -365,10 +366,10 @@ public class Property<ENTITY> implements Serializable {
     /**
      * Creates a "not equal ('&lt;&gt;')" condition for this property.
      * <p>
-     * Ignores case when matching results, e.g. {@code notEqual("example")} excludes both "Example" and "example".
+     * Case sensitive when matching results, e.g. {@code notEqual("example")} excludes only "example", but not "Example".
      * <p>
-     * Use {@link #notEqual(String, StringOrder) notEqual(value, StringOrder.CASE_SENSITIVE)} to only exclude
-     * if case is equal.
+     * Use {@link #notEqual(String, StringOrder) notEqual(value, StringOrder.CASE_INSENSITIVE)} to also exclude
+     * if case is different.
      * <p>
      * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
      * on {@code property}, dramatically speeding up look-up of results.
@@ -382,9 +383,9 @@ public class Property<ENTITY> implements Serializable {
     /**
      * Creates a "not equal ('&lt;&gt;')" condition for this property.
      * <p>
-     * Set {@code order} to {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to only exclude
-     * if case is equal. E.g. {@code notEqual("example", StringOrder.CASE_SENSITIVE)} only excludes "example",
-     * but not "Example".
+     * Set {@code order} to {@link StringOrder#CASE_INSENSITIVE StringOrder.CASE_INSENSITIVE} to also exclude
+     * if case is different. E.g. {@code notEqual("example", StringOrder.CASE_INSENSITIVE)}
+     * excludes both "example" and "Example".
      * <p>
      * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
      * on {@code property}, dramatically speeding up look-up of results.
@@ -396,8 +397,8 @@ public class Property<ENTITY> implements Serializable {
     /**
      * Creates a "greater than ('&gt;')" condition for this property.
      * <p>
-     * Ignores case when matching results. Use the overload and pass
-     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     * Case sensitive when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_INSENSITIVE StringOrder.CASE_INSENSITIVE} to specify that case should be ignored.
      *
      * @see #greater(String, StringOrder)
      */
@@ -422,8 +423,8 @@ public class Property<ENTITY> implements Serializable {
     /**
      * Creates a "less than ('&lt;')" condition for this property.
      * <p>
-     * Ignores case when matching results. Use the overload and pass
-     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     * Case sensitive when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_INSENSITIVE StringOrder.CASE_INSENSITIVE} to specify that case should be ignored.
      *
      * @see #less(String, StringOrder)
      */
@@ -446,8 +447,8 @@ public class Property<ENTITY> implements Serializable {
     }
 
     /**
-     * Ignores case when matching results. Use the overload and pass
-     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     * Case sensitive when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_INSENSITIVE StringOrder.CASE_INSENSITIVE} to specify that case should be ignored.
      * <p>
      * Note: for a String array property, use {@link #containsElement} instead.
      *
@@ -471,6 +472,9 @@ public class Property<ENTITY> implements Serializable {
 
     /**
      * For a String array property, matches if at least one element equals the given value.
+     * <p>
+     * Case sensitive when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_INSENSITIVE StringOrder.CASE_INSENSITIVE} to specify that case should be ignored.
      */
     public PropertyQueryCondition<ENTITY> containsElement(String value) {
         checkIsStringArray();
@@ -489,8 +493,8 @@ public class Property<ENTITY> implements Serializable {
     }
 
     /**
-     * Ignores case when matching results. Use the overload and pass
-     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     * Case sensitive when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_INSENSITIVE StringOrder.CASE_INSENSITIVE} to specify that case should be ignored.
      *
      * @see #startsWith(String, StringOrder)
      */
@@ -503,8 +507,8 @@ public class Property<ENTITY> implements Serializable {
     }
 
     /**
-     * Ignores case when matching results. Use the overload and pass
-     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     * Case sensitive when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_INSENSITIVE StringOrder.CASE_INSENSITIVE} to specify that case should be ignored.
      *
      * @see #endsWith(String, StringOrder)
      */
@@ -519,8 +523,8 @@ public class Property<ENTITY> implements Serializable {
     /**
      * Creates an "IN (..., ..., ...)" condition for this property.
      * <p>
-     * Ignores case when matching results. Use the overload and pass
-     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     * Case sensitive when matching results. Use the overload and pass
+     * {@link StringOrder#CASE_INSENSITIVE StringOrder.CASE_INSENSITIVE} to specify that case should be ignored.
      *
      * @see #oneOf(String[], StringOrder)
      */
