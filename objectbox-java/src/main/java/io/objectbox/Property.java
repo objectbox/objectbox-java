@@ -448,15 +448,44 @@ public class Property<ENTITY> implements Serializable {
     /**
      * Ignores case when matching results. Use the overload and pass
      * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     * <p>
+     * Note: for a String array property, use {@link #containsElement} instead.
      *
      * @see #contains(String, StringOrder)
      */
     public PropertyQueryCondition<ENTITY> contains(String value) {
+        checkNotStringArray();
         return new StringCondition<>(this, StringCondition.Operation.CONTAINS, value);
     }
 
     public PropertyQueryCondition<ENTITY> contains(String value, StringOrder order) {
+        checkNotStringArray();
         return new StringCondition<>(this, StringCondition.Operation.CONTAINS, value, order);
+    }
+
+    private void checkNotStringArray() {
+        if (String[].class == type) {
+            throw new IllegalArgumentException("For a String[] property use containsElement() instead.");
+        }
+    }
+
+    /**
+     * For a String array property, matches if at least one element equals the given value.
+     */
+    public PropertyQueryCondition<ENTITY> containsElement(String value) {
+        checkIsStringArray();
+        return new StringCondition<>(this, Operation.CONTAINS, value);
+    }
+
+    public PropertyQueryCondition<ENTITY> containsElement(String value, StringOrder order) {
+        checkIsStringArray();
+        return new StringCondition<>(this, Operation.CONTAINS, value, order);
+    }
+
+    private void checkIsStringArray() {
+        if (String[].class != type) {
+            throw new IllegalArgumentException("containsElement is only supported for String[] properties.");
+        }
     }
 
     /**
