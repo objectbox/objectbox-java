@@ -1,5 +1,7 @@
 package io.objectbox.tree;
 
+import io.objectbox.annotation.apihint.Internal;
+
 import javax.annotation.Nullable;
 
 public class Leaf {
@@ -8,6 +10,15 @@ public class Leaf {
 
     public Leaf(LeafNode node) {
         this.node = node;
+    }
+
+    // FIXME Remove for final API once it is clear how to get value type.
+    /**
+     * For testing purposes only.
+     */
+    @Internal
+    public LeafNode getNode() {
+        return node;
     }
 
     public boolean isInt() {
