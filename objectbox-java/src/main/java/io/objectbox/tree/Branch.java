@@ -23,11 +23,26 @@ public class Branch {
     }
 
     /**
+     * Get the branch attached to this branch with the given name or
+     * if {@code isDotSeparatedPath} the branch when following the path
+     * (e.g. {@code Branch1.Branch2}) starting from this branch.
+     */
+    public Branch branch(String nameOrDotPath, boolean isDotSeparatedPath) {
+        checkNameOrDotPath(nameOrDotPath);
+        String[] path;
+        if (isDotSeparatedPath) {
+            path = nameOrDotPath.split("\\.");
+        } else {
+            path = new String[]{nameOrDotPath};
+        }
+        return branch(path);
+    }
+
+    /**
      * Get the branch attached to this branch with the given name.
      */
     public Branch branch(String name) {
-        checkName(name);
-        return branch(new String[]{name});
+        return branch(name, false);
     }
 
     /**
@@ -40,17 +55,32 @@ public class Branch {
     }
 
     /**
+     * Get the leaf attached to this branch with the given name or
+     * if {@code isDotSeparatedPath} the leaf when following the path
+     * (e.g. {@code Branch1.Leaf1}) starting from this branch.
+     */
+    public Leaf leaf(String nameOrDotPath, boolean isDotSeparatedPath) {
+        checkNameOrDotPath(nameOrDotPath);
+        String[] path;
+        if (isDotSeparatedPath) {
+            path = nameOrDotPath.split("\\.");
+        } else {
+            path = new String[]{nameOrDotPath};
+        }
+        return leaf(path);
+    }
+
+    /**
      * Get the leaf attached to this branch with the given name.
      */
     public Leaf leaf(String name) {
-        checkName(name);
-        return leaf(new String[]{name});
+        return leaf(name, false);
     }
 
-    private void checkName(String name) {
+    private void checkNameOrDotPath(String name) {
         //noinspection ConstantConditions Nullability annotations are not enforced.
         if (name == null || name.length() == 0) {
-            throw new IllegalArgumentException("name must not be null or empty");
+            throw new IllegalArgumentException("nameOrDotPath must not be null or empty");
         }
     }
 
