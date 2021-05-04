@@ -57,21 +57,24 @@ public class NativeLibraryLoader {
         // may provide them on non-Android devices
         final boolean android = vendor.contains("Android");
         if (!android) {
-            String cpuArchPostfix = "-" + getCpuArch();
-            if (osName.contains("windows")) {
+            if (osName.contains("mac")) {
                 isLinux = false;
-                libname += "-windows" + cpuArchPostfix;
-                filename = libname + ".dll";
-                checkUnpackLib(filename);
-            } else if (osName.contains("linux")) {
-                libname += "-linux" + cpuArchPostfix;
-                filename = "lib" + libname + ".so";
-                checkUnpackLib(filename);
-            } else if (osName.contains("mac")) {
-                isLinux = false;
-                libname += "-macos" + cpuArchPostfix;
+                // Note: for macOS using universal library supporting x64 and arm64
+                libname += "-macos";
                 filename = "lib" + libname + ".dylib";
                 checkUnpackLib(filename);
+            } else {
+                String cpuArchPostfix = "-" + getCpuArch();
+                if (osName.contains("windows")) {
+                    isLinux = false;
+                    libname += "-windows" + cpuArchPostfix;
+                    filename = libname + ".dll";
+                    checkUnpackLib(filename);
+                } else if (osName.contains("linux")) {
+                    libname += "-linux" + cpuArchPostfix;
+                    filename = "lib" + libname + ".so";
+                    checkUnpackLib(filename);
+                }
             }
         }
         try {
