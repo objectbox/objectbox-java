@@ -44,6 +44,8 @@ import io.objectbox.relation.ToOne;
  * <p>
  * Use {@link #property(Property)} to only return values or an aggregate of a single Property.
  * <p>
+ * Make sure to {@link #close()} this query once done with it to reclaim resources immediately.
+ * <p>
  * See the <a href="https://docs.objectbox.io/queries">Queries documentation</a> for details.
  *
  * @param <T> Entity class for which results are returned.
