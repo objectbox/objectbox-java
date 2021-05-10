@@ -22,8 +22,8 @@ buildscript {
         essentials_version = '3.1.0'
         junit_version = '4.13.2'
         mockito_version = '3.8.0'
-        kotlin_version = '1.4.31'
-        dokka_version = '1.4.20'
+        kotlin_version = '1.4.32'
+        dokka_version = '1.4.32'
 
         println "version=$ob_version"
         println "objectboxNativeDependency=$ob_native_dep"
