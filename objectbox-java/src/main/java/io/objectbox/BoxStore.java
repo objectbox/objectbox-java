@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2021 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -542,6 +542,7 @@ public class BoxStore implements Closeable {
      * If true the schema is not updated and write transactions are not possible.
      */
     public boolean isReadOnly() {
+        checkOpen();
         return nativeIsReadOnly(handle);
     }
 
@@ -578,6 +579,7 @@ public class BoxStore implements Closeable {
                 }
                 if (handle != 0) { // failed before native handle was created?
                     nativeDelete(handle);
+                    // TODO set handle to 0 and check in native methods
                 }
 
                 // When running the full unit test suite, we had 100+ threads before, hope this helps:
@@ -721,6 +723,7 @@ public class BoxStore implements Closeable {
      * </ul>
      */
     public void removeAllObjects() {
+        checkOpen();
         nativeDropAllData(handle);
     }
 
@@ -1004,6 +1007,7 @@ public class BoxStore implements Closeable {
      * @return String that is typically logged by the application.
      */
     public String diagnose() {
+        checkOpen();
         return nativeDiagnose(handle);
     }
 
@@ -1022,6 +1026,7 @@ public class BoxStore implements Closeable {
         if (pageLimit < 0) {
             throw new IllegalArgumentException("pageLimit must be zero or positive");
         }
+        checkOpen();
         return nativeValidate(handle, pageLimit, checkLeafLevel);
     }
 
@@ -1086,6 +1091,7 @@ public class BoxStore implements Closeable {
     @Nullable
     public String startObjectBrowser(int port) {
         verifyObjectBrowserNotRunning();
+        checkOpen();
         String url = nativeStartObjectBrowser(handle, null, port);
         if (url != null) {
             objectBrowserPort = port;
@@ -1097,6 +1103,7 @@ public class BoxStore implements Closeable {
     @Nullable
     public String startObjectBrowser(String urlToBindTo) {
         verifyObjectBrowserNotRunning();
+        checkOpen();
         int port;
         try {
             port = new URL(urlToBindTo).getPort(); // Gives -1 if not available
@@ -1116,6 +1123,7 @@ public class BoxStore implements Closeable {
             throw new IllegalStateException("ObjectBrowser has not been started before");
         }
         objectBrowserPort = 0;
+        checkOpen();
         return nativeStopObjectBrowser(handle);
     }
 
@@ -1141,6 +1149,7 @@ public class BoxStore implements Closeable {
      * This for example allows central error handling or special logging for database-related exceptions.
      */
     public void setDbExceptionListener(@Nullable DbExceptionListener dbExceptionListener) {
+        checkOpen();
         nativeSetDbExceptionListener(handle, dbExceptionListener);
     }
 
@@ -1179,10 +1188,12 @@ public class BoxStore implements Closeable {
     }
 
     void setDebugFlags(int debugFlags) {
+        checkOpen();
         nativeSetDebugFlags(handle, debugFlags);
     }
 
     long panicModeRemoveAllObjects(int entityId) {
+        checkOpen();
         return nativePanicModeRemoveAllObjects(handle, entityId);
     }
 

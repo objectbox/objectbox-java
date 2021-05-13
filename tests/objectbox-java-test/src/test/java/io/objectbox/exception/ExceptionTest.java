@@ -45,13 +45,13 @@ public class ExceptionTest extends AbstractObjectBoxTest {
         store.setDbExceptionListener(null);
     }
 
-    @Test
-    public void exceptionListener_closedStore_works() {
+    @Test(expected = IllegalStateException.class)
+    public void exceptionListener_closedStore_throws() {
         store.close();
         store.setDbExceptionListener(e -> System.out.println("This is never called"));
     }
 
-    private static AtomicInteger weakRefListenerCalled = new AtomicInteger(0);
+    private static final AtomicInteger weakRefListenerCalled = new AtomicInteger(0);
 
     @Test
     public void exceptionListener_noLocalRef_works() throws InterruptedException {
