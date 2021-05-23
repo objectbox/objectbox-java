@@ -1,15 +1,15 @@
 package io.objectbox.tree;
 
+import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.BoxStore;
 import org.junit.Test;
 
 // TODO Add to FunctionalTestSuite.
-public class TreeTest {
+public class TreeTest extends AbstractObjectBoxTest {
 
     @Test
     public void trees_work() {
-        BoxStore store = null;
-        Tree tree = new Tree(store, "uid-4sdf6a4sdf6a4sdf64as6fd4");
+        Tree tree = new Tree(store, 0);
 
         // get tree root
         Branch book = tree.root();
@@ -35,5 +35,10 @@ public class TreeTest {
         name.setDouble(21.0);
         name.setString("Amy Blair");
         name.setStringArray(new String[]{"Amy", "Blair"});
+    }
+
+    @Override
+    protected BoxStore createBoxStore() {
+        return MyTreeModel.builder().build();
     }
 }

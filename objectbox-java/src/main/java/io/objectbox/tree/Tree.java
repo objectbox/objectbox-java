@@ -21,7 +21,18 @@ public class Tree {
         if (uid == null || uid.length() == 0) {
             throw new IllegalArgumentException("uid must be 0 or not empty");
         }
-        this.handle = nativeCreate(store.getNativeStore(), uid);
+        this.handle = nativeCreateWithUid(store.getNativeStore(), uid);
+    }
+
+    /**
+     * Create a tree instance for the given meta-branch root {@code uid}, or find a singular root if 0 is given.
+     */
+    public Tree(BoxStore store, long rootId) {
+        //noinspection ConstantConditions Nullability annotations are not enforced.
+        if (store == null) {
+            throw new IllegalArgumentException("store must not be null");
+        }
+        this.handle = nativeCreate(store.getNativeStore(), rootId);
     }
 
     long getHandle() {
@@ -42,7 +53,10 @@ public class Tree {
     /**
      * Create a (Data)Tree instance for the given meta-branch root, or find a singular root if 0 is given.
      */
-    private static native long nativeCreate(long store, String uid);
+    private static native long nativeCreate(long store, long rootId);
+
+    /** Not usable yet; TX is not aligned */
+    private static native long nativeCreateWithUid(long store, String uid);
 
     private static native void nativeDelete(long handle);
 
