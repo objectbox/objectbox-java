@@ -1,9 +1,12 @@
 package io.objectbox.tree;
 
+import io.objectbox.annotation.apihint.Experimental;
+
 /**
  * (Potentially internal) value object created in our JNI layer to represent a leaf with all stored data.
  * Note that only one of the value properties is actually set for any node.
  */
+@Experimental
 public class LeafNode {
     public long id;
     public long branchId;

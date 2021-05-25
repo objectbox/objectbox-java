@@ -15,6 +15,14 @@ public class Branch {
         this.id = id;
     }
 
+    public Tree getTree() {
+        return tree;
+    }
+
+    public long getId() {
+        return id;
+    }
+
     /**
      * Get the branch when following the given path starting from this branch.
      */

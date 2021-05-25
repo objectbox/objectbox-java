@@ -1,26 +1,18 @@
 package io.objectbox.tree;
 
-import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.model.PropertyType;
 
 import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 
+@Experimental
 public class Leaf {
 
     private final LeafNode node;
 
     public Leaf(LeafNode node) {
         this.node = node;
-    }
-
-    // FIXME Remove for final API once it is clear how to get value type.
-    /**
-     * For testing purposes only.
-     */
-    @Internal
-    public LeafNode getNode() {
-        return node;
     }
 
     public boolean isInt() {
@@ -46,21 +38,21 @@ public class Leaf {
     // valueInt
     @Nullable
     public Long getInt() {
-        if (!isInt()) throw new IllegalStateException("value is not integer");
+        if (!isInt()) throw new IllegalStateException("value is not integer (" + node.valueType + ")");
         return node.integerValue;
     }
 
     // valueDouble
     @Nullable
     public Double getDouble() {
-        if (!isDouble()) throw new IllegalStateException("value is not floating point");
+        if (!isDouble()) throw new IllegalStateException("value is not floating point (" + node.valueType + ")");
         return node.floatingValue;
     }
 
     // valueString
     @Nullable
     public String getString() {
-        if (!isString()) throw new IllegalStateException("value is not string");
+        if (!isString()) throw new IllegalStateException("value is not string (" + node.valueType + ")");
         if (node.objectValue instanceof String) {
             return (String) node.objectValue;
         } else {
@@ -121,9 +113,9 @@ public class Leaf {
             return value != null ? String.valueOf(value) : null;
         }
         if (isStringArray()) {
-            // Return first item.
             String[] value = getStringArray();
-            return value != null && value.length > 0 ? value[0] : null;
+            if (value == null) return null;
+            return String.join(", ", value);
         }
 
         return null;

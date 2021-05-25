@@ -3,16 +3,19 @@ package io.objectbox.tree;
 import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
 import io.objectbox.Transaction;
+import io.objectbox.annotation.apihint.Experimental;
 
+import javax.annotation.Nullable;
 import java.util.concurrent.Callable;
 
 /**
  * Points to a root branch, can traverse child branches and read and write data in leafs.
  */
+@Experimental
 public class Tree {
 
     private long handle;
-    private BoxStore store;
+    private final BoxStore store;
 
     /**
      * Create a tree instance for the given meta-branch root {@code uid}, or find a singular root if 0 is given.
@@ -69,7 +72,18 @@ public class Tree {
         return store.callInTx(createTxCallable(callable));
     }
 
-    public <T> T callInReadTx(Callable<T> callable) throws Exception {
+    /**
+     * Wraps any Exception thrown by the callable into a RuntimeException.
+     */
+    public <T> T callInTxNoThrow(Callable<T> callable) {
+        try {
+            return store.callInTx(createTxCallable(callable));
+        } catch (Exception e) {
+            throw new RuntimeException("Callable threw exception", e);
+        }
+    }
+
+    public <T> T callInReadTx(Callable<T> callable) {
         return store.callInReadTx(createTxCallable(callable));
     }
 
@@ -98,22 +112,87 @@ public class Tree {
     }
 
     /**
+     * Get the leaf for the given ID or null if no leaf exists with that ID.
+     */
+    @Nullable
+    public Leaf getLeaf(long id) {
+        LeafNode leafNode = nativeGetLeafById(handle, id);
+        if (leafNode == null) return null;
+        return new Leaf(leafNode);
+    }
+
+    /**
+     * Get data value for the given ID or null if no data leaf exists with that ID.
+     */
+    @Nullable
+    public String getString(long id) {
+        Leaf leaf = getLeaf(id);
+        return leaf != null ? leaf.asString() : null;
+    }
+
+    /**
+     * Get data value for the given ID or null if no data leaf exists with that ID.
+     */
+    @Nullable
+    public Long getInteger(long id) {
+        Leaf leaf = getLeaf(id);
+        return leaf != null ? leaf.asInt() : null;
+    }
+
+    /**
+     * Get data value for the given ID or null if no data leaf exists with that ID.
+     */
+    @Nullable
+    public Double getDouble(long id) {
+        Leaf leaf = getLeaf(id);
+        return leaf != null ? leaf.asDouble() : null;
+    }
+
+    long putBranch(long id, long parentBranchId, long metaId, @Nullable String uid) {
+        return nativePutBranch(handle, id, parentBranchId, metaId, uid);
+    }
+
+    long putValue(long id, long parentBranchId, long metaId, long value) {
+        return nativePutValueInteger(handle, id, parentBranchId, metaId, value);
+    }
+
+    long putValue(long id, long parentBranchId, long metaId, double value) {
+        return nativePutValueFP(handle, id, parentBranchId, metaId, value);
+    }
+
+    long putValue(long id, long parentBranchId, long metaId, String value) {
+        return nativePutValueString(handle, id, parentBranchId, metaId, value);
+    }
+
+    /**
      * Create a (Data)Tree instance for the given meta-branch root, or find a singular root if 0 is given.
      */
-    private static native long nativeCreate(long store, long rootId);
+    static native long nativeCreate(long store, long rootId);
 
-    /** Not usable yet; TX is not aligned */
-    private static native long nativeCreateWithUid(long store, String uid);
+    /**
+     * Not usable yet; TX is not aligned
+     */
+    static native long nativeCreateWithUid(long store, String uid);
 
-    private static native void nativeDelete(long handle);
+    static native void nativeDelete(long handle);
 
-    private native boolean nativeSetTransaction(long handle, long txHandle);
+    native boolean nativeSetTransaction(long handle, long txHandle);
 
-    private native void nativeClearTransaction(long handle);
+    native void nativeClearTransaction(long handle);
 
     /**
      * Get the root data branch ID.
      */
-    private native long nativeGetRootId(long handle);
+    native long nativeGetRootId(long handle);
+
+    native LeafNode nativeGetLeafById(long treeHandle, long leafId);
+
+    native long nativePutValueInteger(long treeHandle, long id, long parentBranchId, long metaId, long value);
+
+    native long nativePutBranch(long treeHandle, long id, long parentBranchId, long metaId, String uid);
+
+    native long nativePutValueFP(long treeHandle, long id, long parentBranchId, long metaId, double value);
+
+    native long nativePutValueString(long treeHandle, long id, long parentBranchId, long metaId, String value);
 
 }
