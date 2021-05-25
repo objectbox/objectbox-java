@@ -60,11 +60,14 @@ public abstract class AbstractObjectBoxTest {
 
     static void printProcessId() {
         try {
-            long pid = ProcessHandle.current().pid();  // Requires Java 9; e.g. helps to attach native debugger
+            // Only if Java 9 is available; e.g. helps to attach native debugger
+            Class<?> processHandleClass = Class.forName("java.lang.ProcessHandle");
+            Object processHandle = processHandleClass.getMethod("current").invoke(null);
+            long pid = (Long) processHandleClass.getMethod("pid").invoke(processHandle);
             System.out.println("ObjectBox test process ID (pid): " + pid);
             System.out.flush();
         } catch (Throwable th) {
-            th.printStackTrace();
+            System.out.println("Could not get process ID (" + th.getMessage() + ")");
         }
     }
 
@@ -86,7 +89,9 @@ public abstract class AbstractObjectBoxTest {
         runExtensiveTests = System.getProperty("extensive-tests") != null;
     }
 
-    /** This works with Android without needing any context. */
+    /**
+     * This works with Android without needing any context.
+     */
     protected File prepareTempDir(String prefix) throws IOException {
         File tempFile = File.createTempFile(prefix, "");
         if (!tempFile.delete()) {
