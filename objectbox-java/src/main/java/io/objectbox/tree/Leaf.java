@@ -1,8 +1,10 @@
 package io.objectbox.tree;
 
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.model.PropertyType;
 
 import javax.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
 
 public class Leaf {
 
@@ -22,19 +24,23 @@ public class Leaf {
     }
 
     public boolean isInt() {
-        throw new UnsupportedOperationException();
+        return node.valueType == PropertyType.Long;
     }
 
     public boolean isDouble() {
-        throw new UnsupportedOperationException();
+        return node.valueType == PropertyType.Double;
     }
 
     public boolean isString() {
-        throw new UnsupportedOperationException();
+        return node.valueType == PropertyType.ByteVector;
+    }
+
+    public boolean isBytes() {
+        return node.valueType == PropertyType.ByteVector;
     }
 
     public boolean isStringArray() {
-        throw new UnsupportedOperationException();
+        return node.valueType == PropertyType.ShortVector;
     }
 
     // valueInt
@@ -55,7 +61,12 @@ public class Leaf {
     @Nullable
     public String getString() {
         if (!isString()) throw new IllegalStateException("value is not string");
-        return (String) node.objectValue;
+        if (node.objectValue instanceof String) {
+            return (String) node.objectValue;
+        } else {
+            byte[] bytes = (byte[]) node.objectValue;
+            return new String(bytes, StandardCharsets.UTF_8);
+        }
     }
 
     // valueStrings

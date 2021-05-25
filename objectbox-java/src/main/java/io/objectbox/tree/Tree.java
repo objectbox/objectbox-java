@@ -47,7 +47,7 @@ public class Tree {
     }
 
     public Branch root() {
-        long dataBranchId = nativeRoot(handle);
+        long dataBranchId = nativeGetRootId(handle);
         return new Branch(this, dataBranchId);
     }
 
@@ -114,6 +114,6 @@ public class Tree {
     /**
      * Get the root data branch ID.
      */
-    private native long nativeRoot(long handle);
+    private native long nativeGetRootId(long handle);
 
 }
