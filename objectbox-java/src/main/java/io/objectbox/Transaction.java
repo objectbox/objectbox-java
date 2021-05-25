@@ -88,7 +88,7 @@ public class Transaction implements Closeable {
         super.finalize();
     }
 
-    private void checkOpen() {
+    void checkOpen() {
         if (closed) {
             throw new IllegalStateException("Transaction is closed");
         }
