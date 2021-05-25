@@ -58,16 +58,27 @@ public abstract class AbstractObjectBoxTest {
     long lastEntityUid;
     long lastIndexUid;
 
+    static void printProcessId() {
+        try {
+            long pid = ProcessHandle.current().pid();  // Requires Java 9; e.g. helps to attach native debugger
+            System.out.println("ObjectBox test process ID (pid): " + pid);
+            System.out.flush();
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+    }
+
     @Before
     public void setUp() throws IOException {
         Cursor.TRACK_CREATION_STACK = true;
         Transaction.TRACK_CREATION_STACK = true;
 
         if (!printedVersionsOnce) {
+            printedVersionsOnce = true;
+            printProcessId();
             System.out.println("ObjectBox Java version: " + BoxStore.getVersion());
             System.out.println("ObjectBox Core version: " + BoxStore.getVersionNative());
             System.out.println("First DB dir: " + boxStoreDir);
-            printedVersionsOnce = true;
         }
 
         boxStoreDir = prepareTempDir("object-store-test");
