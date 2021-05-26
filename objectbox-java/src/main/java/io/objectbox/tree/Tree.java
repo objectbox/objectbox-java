@@ -148,12 +148,67 @@ public class Tree {
         return leaf != null ? leaf.asDouble() : null;
     }
 
+    long putMetaBranch(long id, long parentBranchId, String name) {
+        return nativePutMetaBranch(handle, id, parentBranchId, name, null);
+    }
+
+    long putMetaBranch(long id, long parentBranchId, String name, @Nullable String uid) {
+        return nativePutMetaBranch(handle, id, parentBranchId, name, uid);
+    }
+
+    long[] putMetaBranches(String[] path) {
+        return nativePutMetaBranches(handle, 0, path);
+    }
+
+    long[] putMetaBranches(long parentBranchId, String[] path) {
+        return nativePutMetaBranches(handle, parentBranchId, path);
+    }
+
+    long putMetaLeaf(long id, long parentBranchId, String name, short valueType) {
+        return nativePutMetaLeaf(handle, id, parentBranchId, name, valueType, false, null);
+    }
+
+    long putMetaLeaf(long id, long parentBranchId, String name, short valueType,
+                     boolean isUnsigned) {
+        return nativePutMetaLeaf(handle, id, parentBranchId, name, valueType, isUnsigned, null);
+    }
+
+    long putMetaLeaf(long id, long parentBranchId, String name, short valueType,
+                     boolean isUnsigned, @Nullable String description) {
+        return nativePutMetaLeaf(handle, id, parentBranchId, name, valueType, isUnsigned, description);
+    }
+
+    /**
+     * Put a new or existing data branch
+     */
     long putBranch(long id, long parentBranchId, long metaId, @Nullable String uid) {
         return nativePutBranch(handle, id, parentBranchId, metaId, uid);
     }
 
+    /**
+     * Put a new (inserts) data branch
+     */
+    long putBranch(long parentBranchId, long metaId, @Nullable String uid) {
+        return nativePutBranch(handle, 0, parentBranchId, metaId, uid);
+    }
+
+    /**
+     * Put a new (inserts) data branch
+     */
+    long putBranch(long parentBranchId, long metaId) {
+        return nativePutBranch(handle, 0, parentBranchId, metaId, null);
+    }
+
     long putValue(long id, long parentBranchId, long metaId, long value) {
         return nativePutValueInteger(handle, id, parentBranchId, metaId, value);
+    }
+
+    long putValue(long parentBranchId, long metaId, long value) {
+        return nativePutValueInteger(handle, 0, parentBranchId, metaId, value);
+    }
+
+    long putValue(long parentBranchId, long metaId, double value) {
+        return nativePutValueFP(handle, 0, parentBranchId, metaId, value);
     }
 
     long putValue(long id, long parentBranchId, long metaId, double value) {
@@ -162,6 +217,10 @@ public class Tree {
 
     long putValue(long id, long parentBranchId, long metaId, String value) {
         return nativePutValueString(handle, id, parentBranchId, metaId, value);
+    }
+
+    long putValue(long parentBranchId, long metaId, String value) {
+        return nativePutValueString(handle, 0, parentBranchId, metaId, value);
     }
 
     /**
@@ -188,6 +247,14 @@ public class Tree {
     native LeafNode nativeGetLeafById(long treeHandle, long leafId);
 
     native long nativePutValueInteger(long treeHandle, long id, long parentBranchId, long metaId, long value);
+
+    native long nativePutMetaBranch(long treeHandle, long id, long parentBranchId, String name,
+                                    @Nullable String description);
+
+    native long[] nativePutMetaBranches(long treeHandle, long parentBranchId, String[] path);
+
+    native long nativePutMetaLeaf(long treeHandle, long id, long parentBranchId, String name, short valueType,
+                                  boolean isUnsigned, @Nullable String description);
 
     native long nativePutBranch(long treeHandle, long id, long parentBranchId, long metaId, String uid);
 

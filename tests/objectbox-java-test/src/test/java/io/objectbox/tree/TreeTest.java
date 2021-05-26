@@ -2,6 +2,7 @@ package io.objectbox.tree;
 
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.BoxStore;
+import io.objectbox.model.PropertyType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,6 +14,7 @@ public class TreeTest extends AbstractObjectBoxTest {
     private Tree tree;
     private Branch root;
     private long rootId;
+    long[] metaBranchIds;
 
     @Override
     protected BoxStore createBoxStore() {
@@ -21,12 +23,16 @@ public class TreeTest extends AbstractObjectBoxTest {
 
     @Before
     public void createTree() {
-        Tree emptyTree = new Tree(store, 0);
-        long rootId = emptyTree.callInTxNoThrow(() -> emptyTree.putBranch(0, 0, 0, null));
+        Tree prepTree = new Tree(store, 0);
+        long rootId = prepTree.callInTxNoThrow(() -> {
+            metaBranchIds = prepTree.putMetaBranches(new String[]{"Library", "Book", "Author"});
+            return prepTree.putBranch( 0, metaBranchIds[0]);
+        });
         tree = new Tree(store, rootId);
         root = tree.root();
         this.rootId = root.getId();
         assertNotEquals(0, this.rootId);
+        assertEquals(3, metaBranchIds.length);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -72,9 +78,27 @@ public class TreeTest extends AbstractObjectBoxTest {
 
     @Test
     public void treePath() {
-        Branch book = root;
-
         tree.runInTx(() -> {
+            // Meta
+            long metaNameId = tree.putMetaLeaf(0, metaBranchIds[2], "Name", PropertyType.Short);
+            assertNotEquals(0, metaNameId);
+
+            // Data
+            long libraryId = tree.putBranch(rootId, metaBranchIds[0]);
+            assertNotEquals(0, libraryId);
+            long bookId = tree.putBranch(libraryId, metaBranchIds[1]);
+            assertNotEquals(0, bookId);
+            long authorId = tree.putBranch(bookId, metaBranchIds[1]);
+            assertNotEquals(0, authorId);
+            tree.putValue(authorId, metaNameId, "Tolkien");
+
+            // 2nd meta branch off from "Book"
+            long[] metaBranchIds2 = tree.putMetaBranches(metaBranchIds[1], new String[]{"Publisher", "Company"});
+            assertEquals(2, metaBranchIds2.length);
+        });
+
+        tree.runInReadTx(() -> {
+            Branch book = root.branch("Book", true);
             // get leaf indirectly by traversing branches
             Branch author = book.branch("Author");
             Leaf nameIndirect = author.leaf("Name");
