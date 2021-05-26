@@ -15,6 +15,18 @@ public class Leaf {
         this.node = node;
     }
 
+    public long getId() {
+        return node.id;
+    }
+
+    public long getParentBranchId() {
+        return node.branchId;
+    }
+
+    public long getMetaId() {
+        return node.metaId;
+    }
+
     public boolean isInt() {
         return node.valueType == PropertyType.Long;
     }
@@ -125,20 +137,8 @@ public class Leaf {
     public String[] asStringArray() {
         if (isStringArray()) return getStringArray();
 
-        if (isInt()) {
-            Long value = getInt();
-            return value != null ? new String[]{String.valueOf(value)} : null;
-        }
-        if (isDouble()) {
-            Double value = getDouble();
-            return value != null ? new String[]{String.valueOf(value)} : null;
-        }
-        if (isString()) {
-            String value = getString();
-            return value != null ? new String[]{value} : null;
-        }
-
-        return null;
+        String value = asString();
+        return value != null ? new String[]{value} : null;
     }
 
     public void setInt(@Nullable Long value) {

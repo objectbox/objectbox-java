@@ -26,7 +26,7 @@ public class TreeTest extends AbstractObjectBoxTest {
         Tree prepTree = new Tree(store, 0);
         long rootId = prepTree.callInTxNoThrow(() -> {
             metaBranchIds = prepTree.putMetaBranches(new String[]{"Library", "Book", "Author"});
-            return prepTree.putBranch( 0, metaBranchIds[0]);
+            return prepTree.putBranch(0, metaBranchIds[0]);  // Library data branch (data tree root)
         });
         tree = new Tree(store, rootId);
         root = tree.root();
@@ -54,6 +54,7 @@ public class TreeTest extends AbstractObjectBoxTest {
     public void putAndGetValue() {
         long[] intId = {0}, doubleId = {0}, stringId = {0};  // Use arrays to allow assigning inside lambda
 
+        // Note: this is somewhat in the gray zone as we do not set up corresponding a meta tree
         tree.runInTx(() -> {
             intId[0] = tree.putValue(0, rootId, 0, 42);
             doubleId[0] = tree.putValue(0, rootId, 0, 3.141);
@@ -65,7 +66,18 @@ public class TreeTest extends AbstractObjectBoxTest {
         assertNotEquals(0, stringId[0]);
 
         tree.runInReadTx(() -> {
-            assertEquals(Long.valueOf(42), requireNonNull(tree.getLeaf(intId[0])).getInt());
+            Leaf intLeaf = tree.getLeaf(intId[0]);
+            assertNotNull(intLeaf);
+            assertEquals(Long.valueOf(42), intLeaf.getInt());
+            assertTrue(intLeaf.isInt());
+            assertFalse(intLeaf.isDouble());
+            assertFalse(intLeaf.isString());
+            assertFalse(intLeaf.isStringArray());
+
+            assertEquals("42", intLeaf.asString());
+            assertEquals(42.0, requireNonNull(intLeaf.asDouble()), 0.0);
+            assertArrayEquals(new String[]{"42"}, intLeaf.asStringArray());
+
             assertEquals(Long.valueOf(42), tree.getInteger(intId[0]));
 
             assertEquals(Double.valueOf(3.141), requireNonNull(tree.getLeaf(doubleId[0])).getDouble());
@@ -78,17 +90,20 @@ public class TreeTest extends AbstractObjectBoxTest {
 
     @Test
     public void treePath() {
+        long[] metaLeafIds = {0};
+
         tree.runInTx(() -> {
             // Meta
             long metaNameId = tree.putMetaLeaf(0, metaBranchIds[2], "Name", PropertyType.Short);
             assertNotEquals(0, metaNameId);
+            metaLeafIds[0] = metaNameId;
 
             // Data
-            long libraryId = tree.putBranch(rootId, metaBranchIds[0]);
+            long libraryId = rootId;
             assertNotEquals(0, libraryId);
             long bookId = tree.putBranch(libraryId, metaBranchIds[1]);
             assertNotEquals(0, bookId);
-            long authorId = tree.putBranch(bookId, metaBranchIds[1]);
+            long authorId = tree.putBranch(bookId, metaBranchIds[2]);
             assertNotEquals(0, authorId);
             tree.putValue(authorId, metaNameId, "Tolkien");
 
@@ -99,27 +114,29 @@ public class TreeTest extends AbstractObjectBoxTest {
 
         tree.runInReadTx(() -> {
             Branch book = root.branch("Book", true);
+            assertNotNull(book);
             // get leaf indirectly by traversing branches
             Branch author = book.branch("Author");
-            Leaf nameIndirect = author.leaf("Name");
+            assertNotNull(author);
+            assertEquals("Tolkien", requireNonNull(author.leaf("Name")).getString());
 
             // get leaf directly
             Leaf name = book.leaf(new String[]{"Author", "Name"});
+            assertNotNull(name);
+            assertEquals("Tolkien", name.getString());
+            assertNotEquals(0, name.getId());
+            assertEquals(author.getId(), name.getParentBranchId());
+            assertEquals(metaLeafIds[0], name.getMetaId());
 
-            boolean isInt = name.isInt();
-            boolean isDouble = name.isDouble();
-            boolean isString = name.isString();
-            boolean isStringArray = name.isStringArray();
+            assertFalse(name.isInt());
+            assertFalse(name.isDouble());
+            assertTrue(name.isString());
+            assertFalse(name.isStringArray());
 
-            Long aLong = name.asInt();
-            Double aDouble = name.asDouble();
-            String string = name.asString();
-            String[] strings = name.asStringArray();
-
-            name.setInt(42L);
-            name.setDouble(21.0);
-            name.setString("Amy Blair");
-            name.setStringArray(new String[]{"Amy", "Blair"});
+//            name.setInt(42L);
+//            name.setDouble(21.0);
+//            name.setString("Amy Blair");
+//            name.setStringArray(new String[]{"Amy", "Blair"});
         });
     }
 

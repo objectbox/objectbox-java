@@ -25,6 +25,7 @@ public class Branch {
 
     /**
      * Get the branch when following the given path starting from this branch.
+     * @return null if no matching tree node was found
      */
     @Nullable
     public Branch branch(String[] path) {
@@ -38,7 +39,9 @@ public class Branch {
      * Get the branch attached to this branch with the given name or
      * if {@code isDotSeparatedPath} the branch when following the path
      * (e.g. {@code Branch1.Branch2}) starting from this branch.
+     * @return null if no matching tree node was found
      */
+    @Nullable
     public Branch branch(String nameOrDotPath, boolean isDotSeparatedPath) {
         checkNameOrDotPath(nameOrDotPath);
         String[] path;
@@ -52,13 +55,16 @@ public class Branch {
 
     /**
      * Get the branch attached to this branch with the given name.
+     * @return null if no matching tree node was found
      */
+    @Nullable
     public Branch branch(String name) {
         return branch(name, false);
     }
 
     /**
      * Get the leaf when following the given path starting from this branch.
+     * @return null if no matching tree node was found
      */
     @Nullable
     public Leaf leaf(String[] path) {
@@ -72,7 +78,9 @@ public class Branch {
      * Get the leaf attached to this branch with the given name or
      * if {@code isDotSeparatedPath} the leaf when following the path
      * (e.g. {@code Branch1.Leaf1}) starting from this branch.
+     * @return null if no matching tree node was found
      */
+    @Nullable
     public Leaf leaf(String nameOrDotPath, boolean isDotSeparatedPath) {
         checkNameOrDotPath(nameOrDotPath);
         String[] path;
@@ -86,7 +94,9 @@ public class Branch {
 
     /**
      * Get the leaf attached to this branch with the given name.
+     * @return null if no matching tree node was found
      */
+    @Nullable
     public Leaf leaf(String name) {
         return leaf(name, false);
     }
