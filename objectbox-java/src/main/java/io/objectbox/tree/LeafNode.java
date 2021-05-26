@@ -8,9 +8,9 @@ import io.objectbox.annotation.apihint.Experimental;
  */
 @Experimental
 public class LeafNode {
-    public long id;
-    public long branchId;
-    public long metaId;
+    final public long id;
+    final public long branchId;
+    final public long metaId;
 
     public long integerValue;
     public double floatingValue;

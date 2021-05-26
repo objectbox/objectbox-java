@@ -27,6 +27,10 @@ public class Leaf {
         return node.metaId;
     }
 
+    public short getValueType() {
+        return node.valueType;
+    }
+
     public boolean isInt() {
         return node.valueType == PropertyType.Long;
     }
@@ -50,21 +54,29 @@ public class Leaf {
     // valueInt
     @Nullable
     public Long getInt() {
-        if (!isInt()) throw new IllegalStateException("value is not integer (" + node.valueType + ")");
+        verifyIsInt();
         return node.integerValue;
+    }
+
+    public void verifyIsInt() {
+        if (!isInt()) throw new IllegalStateException("value is not integer (" + node.valueType + ")");
     }
 
     // valueDouble
     @Nullable
     public Double getDouble() {
-        if (!isDouble()) throw new IllegalStateException("value is not floating point (" + node.valueType + ")");
+        verifyIsDouble();
         return node.floatingValue;
+    }
+
+    public void verifyIsDouble() {
+        if (!isDouble()) throw new IllegalStateException("value is not floating point (" + node.valueType + ")");
     }
 
     // valueString
     @Nullable
     public String getString() {
-        if (!isString()) throw new IllegalStateException("value is not string (" + node.valueType + ")");
+        verifyIsString();
         if (node.objectValue instanceof String) {
             return (String) node.objectValue;
         } else {
@@ -73,11 +85,19 @@ public class Leaf {
         }
     }
 
+    public void verifyIsString() {
+        if (!isString()) throw new IllegalStateException("value is not string (" + node.valueType + ")");
+    }
+
     // valueStrings
     @Nullable
     public String[] getStringArray() {
-        if (!isStringArray()) throw new IllegalStateException("value is not string array");
+        verifyIsStringArray();
         return (String[]) node.objectValue;
+    }
+
+    public void verifyIsStringArray() {
+        if (!isStringArray()) throw new IllegalStateException("value is not string array");
     }
 
     @Nullable
@@ -141,20 +161,24 @@ public class Leaf {
         return value != null ? new String[]{value} : null;
     }
 
-    public void setInt(@Nullable Long value) {
-        throw new UnsupportedOperationException();
+    public void setInt(long value) {
+        verifyIsInt();
+        node.integerValue = value;
     }
 
-    public void setDouble(@Nullable Double value) {
-        throw new UnsupportedOperationException();
+    public void setDouble(double value) {
+        verifyIsDouble();
+        node.floatingValue = value;
     }
 
     public void setString(@Nullable String value) {
-        throw new UnsupportedOperationException();
+        verifyIsString();
+        node.objectValue = value;
     }
 
     public void setStringArray(@Nullable String[] value) {
-        throw new UnsupportedOperationException();
+        verifyIsStringArray();
+        node.objectValue = value;
     }
 
 }

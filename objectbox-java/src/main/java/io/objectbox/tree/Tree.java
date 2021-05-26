@@ -4,6 +4,7 @@ import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
 import io.objectbox.Transaction;
 import io.objectbox.annotation.apihint.Experimental;
+import io.objectbox.model.PropertyType;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.Callable;
@@ -221,6 +222,30 @@ public class Tree {
 
     long putValue(long parentBranchId, long metaId, String value) {
         return nativePutValueString(handle, 0, parentBranchId, metaId, value);
+    }
+
+    public long put(Leaf leaf) {
+        long id = leaf.getId();
+        long parentId = leaf.getParentBranchId();
+        long metaId = leaf.getMetaId();
+
+        switch (leaf.getValueType()) {
+            case PropertyType.Byte:
+            case PropertyType.Char:
+            case PropertyType.Short:
+            case PropertyType.Int:
+            case PropertyType.Long:
+                return nativePutValueInteger(handle, id, parentId, metaId, leaf.getInt());
+            case PropertyType.Float:
+            case PropertyType.Double:
+                return nativePutValueFP(handle, id, parentId, metaId, leaf.getDouble());
+            case PropertyType.ByteVector:
+            case PropertyType.String:
+                // Note: using getString() as it also converts byte[]
+                return nativePutValueString(handle, id, parentId, metaId, leaf.getString());
+            default:
+                throw new UnsupportedOperationException("Unsupported value type: " + leaf.getValueType());
+        }
     }
 
     /**

@@ -94,7 +94,7 @@ public class TreeTest extends AbstractObjectBoxTest {
 
         tree.runInTx(() -> {
             // Meta
-            long metaNameId = tree.putMetaLeaf(0, metaBranchIds[2], "Name", PropertyType.Short);
+            long metaNameId = tree.putMetaLeaf(0, metaBranchIds[2], "Name", PropertyType.String);
             assertNotEquals(0, metaNameId);
             metaLeafIds[0] = metaNameId;
 
@@ -132,11 +132,58 @@ public class TreeTest extends AbstractObjectBoxTest {
             assertFalse(name.isDouble());
             assertTrue(name.isString());
             assertFalse(name.isStringArray());
+        });
+    }
 
-//            name.setInt(42L);
-//            name.setDouble(21.0);
-//            name.setString("Amy Blair");
-//            name.setStringArray(new String[]{"Amy", "Blair"});
+    @Test
+    public void putValueForExistingLeaf_String() {
+        tree.runInTx(() -> {
+            long metaNameId = tree.putMetaLeaf(0, metaBranchIds[0], "Name", PropertyType.String);
+            assertNotEquals(0, metaNameId);
+            tree.putValue(rootId, metaNameId, "Bookery");
+            Leaf leaf = root.leaf("Name");
+            assertNotNull(leaf);
+            assertEquals("Bookery", leaf.getString());
+
+            assertThrows(IllegalStateException.class, () -> leaf.setInt(42));
+            assertThrows(IllegalStateException.class, () -> leaf.setDouble(3.141));
+            assertThrows(IllegalStateException.class, () -> leaf.setStringArray(new String[]{}));
+
+            leaf.setString("Unseen Library");
+            long idPut = tree.put(leaf);
+            assertEquals(leaf.getId(), idPut); // Unchanged
+        });
+
+        tree.runInReadTx(() -> {
+            Leaf name = root.leaf("Name");
+            assertNotNull(name);
+            assertEquals("Unseen Library", name.getString());
+        });
+    }
+
+    @Test
+    public void putValueForExistingLeaf_Int() {
+        tree.runInTx(() -> {
+            long metaYearId = tree.putMetaLeaf(0, metaBranchIds[0], "Year", PropertyType.Int);
+            assertNotEquals(0, metaYearId);
+            tree.putValue(rootId, metaYearId, 1982);
+            Leaf leaf = root.leaf("Year");
+            assertNotNull(leaf);
+            assertEquals(Long.valueOf(1982), leaf.getInt());
+
+            assertThrows(IllegalStateException.class, () -> leaf.setString("foo"));
+            assertThrows(IllegalStateException.class, () -> leaf.setDouble(3.141));
+            assertThrows(IllegalStateException.class, () -> leaf.setStringArray(new String[]{}));
+
+            leaf.setInt(1977);
+            long idPut = tree.put(leaf);
+            assertEquals(leaf.getId(), idPut); // Unchanged
+        });
+
+        tree.runInReadTx(() -> {
+            Leaf year = root.leaf("Year");
+            assertNotNull(year);
+            assertEquals(Long.valueOf(1977), year.getInt());
         });
     }
 
