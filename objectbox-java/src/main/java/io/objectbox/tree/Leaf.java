@@ -43,12 +43,24 @@ public class Leaf {
         return node.valueType == PropertyType.ByteVector;
     }
 
-    public boolean isBytes() {
-        return node.valueType == PropertyType.ByteVector;
-    }
-
     public boolean isStringArray() {
         return node.valueType == PropertyType.ShortVector;
+    }
+
+    private void verifyIsInt() {
+        if (!isInt()) throw new IllegalStateException("value is not integer (" + node.valueType + ")");
+    }
+
+    private void verifyIsDouble() {
+        if (!isDouble()) throw new IllegalStateException("value is not floating point (" + node.valueType + ")");
+    }
+
+    private void verifyIsString() {
+        if (!isString()) throw new IllegalStateException("value is not string (" + node.valueType + ")");
+    }
+
+    private void verifyIsStringArray() {
+        if (!isStringArray()) throw new IllegalStateException("value is not string array");
     }
 
     // valueInt
@@ -57,18 +69,10 @@ public class Leaf {
         return node.integerValue;
     }
 
-    public void verifyIsInt() {
-        if (!isInt()) throw new IllegalStateException("value is not integer (" + node.valueType + ")");
-    }
-
     // valueDouble
     public double getDouble() {
         verifyIsDouble();
         return node.floatingValue;
-    }
-
-    public void verifyIsDouble() {
-        if (!isDouble()) throw new IllegalStateException("value is not floating point (" + node.valueType + ")");
     }
 
     // valueString
@@ -83,19 +87,11 @@ public class Leaf {
         }
     }
 
-    public void verifyIsString() {
-        if (!isString()) throw new IllegalStateException("value is not string (" + node.valueType + ")");
-    }
-
     // valueStrings
     @Nullable
     public String[] getStringArray() {
         verifyIsStringArray();
         return (String[]) node.objectValue;
-    }
-
-    public void verifyIsStringArray() {
-        if (!isStringArray()) throw new IllegalStateException("value is not string array");
     }
 
     @Nullable
