@@ -45,6 +45,7 @@ public class ToManyStandaloneTest extends AbstractRelationTest {
         int sourceEntityId = info.sourceInfo.getEntityId();
         Cursor<Order> targetCursor = cursorSource.getTx().createCursor(Order.class);
         List<Order> related = targetCursor.getRelationEntities(sourceEntityId, info.relationId, customerId, false);
+        targetCursor.close();
         assertEquals(2, related.size());
         assertEquals(order1.getId(), related.get(0).getId());
         assertEquals(order2.getId(), related.get(1).getId());
