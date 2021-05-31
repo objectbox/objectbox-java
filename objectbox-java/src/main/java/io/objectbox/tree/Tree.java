@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 /**
  * Points to a root branch, can traverse child branches and read and write data in leafs.
  */
+@SuppressWarnings("SameParameterValue")
 @Experimental
 public class Tree {
 
@@ -281,7 +282,7 @@ public class Tree {
     native long nativePutMetaLeaf(long treeHandle, long id, long parentBranchId, String name, short valueType,
                                   boolean isUnsigned, @Nullable String description);
 
-    native long nativePutBranch(long treeHandle, long id, long parentBranchId, long metaId, String uid);
+    native long nativePutBranch(long treeHandle, long id, long parentBranchId, long metaId, @Nullable String uid);
 
     native long nativePutValueFP(long treeHandle, long id, long parentBranchId, long metaId, double value);
 
