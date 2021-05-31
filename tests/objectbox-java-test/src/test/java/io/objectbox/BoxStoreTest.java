@@ -209,7 +209,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         return () -> {
             int count = ++countHolder[0];
             if (count < 5) {
-                throw new DbException("Count: " + count);
+                throw new DbException("This exception IS expected. Count: " + count);
             }
             return "42";
         };
