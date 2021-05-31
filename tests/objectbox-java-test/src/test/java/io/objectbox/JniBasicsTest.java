@@ -44,8 +44,7 @@ public class JniBasicsTest {
     public void testCreateAndDeleteIntArray() {
         // Lower Android versions have a ReferenceTable with 1024 entries only
         for (int i = 0; i < 2000; i++) {
-            assertTrue(JniTest.createAndDeleteIntArray());
-            System.out.print(i);
+            assertTrue("Failed at iteration " + i, JniTest.createAndDeleteIntArray());
         }
     }
 }
