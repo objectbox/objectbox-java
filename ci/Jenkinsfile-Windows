@@ -39,7 +39,7 @@ pipeline {
                 // Remove files to avoid archiving them again.
                 bat 'del /q /s hs_err_pid*.log'
 
-                bat "gradlew $gradleArgs $gitlabRepoArgsBat cleanTest build test"
+                bat "gradlew $gradleArgs $gitlabRepoArgsBat cleanTest build"
             }
             post {
                 always {
@@ -58,7 +58,7 @@ pipeline {
                 // 32-bit ObjectBox to run tests (see build.gradle file).
                 // Note: assumes JAVA_HOME_X86 is set to 32-bit JDK path.
                 // Note: no space before && or value has space as well.
-                bat "set TEST_WITH_JAVA_X86=true&& gradlew $gradleArgs $gitlabRepoArgsBat cleanTest build test"
+                bat "set TEST_WITH_JAVA_X86=true&& gradlew $gradleArgs $gitlabRepoArgsBat cleanTest build"
             }
             post {
                 always {
