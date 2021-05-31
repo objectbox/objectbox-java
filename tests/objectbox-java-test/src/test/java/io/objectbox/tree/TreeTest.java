@@ -9,7 +9,6 @@ import org.junit.Test;
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.*;
 
-// TODO Add to FunctionalTestSuite.
 public class TreeTest extends AbstractObjectBoxTest {
     private Tree tree;
     private Branch root;
