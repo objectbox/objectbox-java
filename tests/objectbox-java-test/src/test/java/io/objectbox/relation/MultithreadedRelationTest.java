@@ -16,6 +16,7 @@
 
 package io.objectbox.relation;
 
+import io.objectbox.BoxStore;
 import org.junit.Test;
 
 import java.util.List;
@@ -42,7 +43,6 @@ public class MultithreadedRelationTest extends AbstractRelationTest {
             threads[i].start();
         }
         int millis = runExtensiveTests ? 60 * 1000 : 50;
-        millis = 60 * 1000;
         boolean hasError = errorLatch.await(millis, TimeUnit.MILLISECONDS);
         running = false;
         assertNull(error);
@@ -77,8 +77,10 @@ public class MultithreadedRelationTest extends AbstractRelationTest {
                         Customer customer2 = all.get(random.nextInt(all.size()));
                         final List<Order> orders = customer2.getOrders();
                         if (all.size() > 100 + random.nextInt(100)) {
-                            System.out.println(">>" + all.size());
-                            System.out.println(">>>>" + orders.size());
+                            if (DEBUG_LOG) {
+                                System.out.println(">>" + all.size());
+                                System.out.println(">>>>" + orders.size());
+                            }
                             orderBox.remove(orders);
                             customerBox.remove(customer);
                         } else if (orders.size() > 1) {
@@ -92,6 +94,7 @@ public class MultithreadedRelationTest extends AbstractRelationTest {
                 }
                 errorLatch.countDown();
             }
+            store.closeThreadResources();
         }
     }
 }

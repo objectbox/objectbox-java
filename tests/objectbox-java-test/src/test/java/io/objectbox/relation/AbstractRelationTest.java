@@ -36,9 +36,9 @@ public abstract class AbstractRelationTest extends AbstractObjectBoxTest {
 
     @Override
     protected BoxStore createBoxStore() {
-        return MyObjectBox.builder().baseDirectory(boxStoreDir)
-                .debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE)
-                .build();
+        BoxStoreBuilder builder = MyObjectBox.builder().baseDirectory(boxStoreDir);
+        if (DEBUG_LOG) builder.debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE);
+        return builder.build();
     }
 
     @After

@@ -40,6 +40,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractObjectBoxTest {
+
+    /**
+     * Turns on additional log output, including logging of transactions or query parameters.
+     */
+    protected static final boolean DEBUG_LOG = false;
     private static boolean printedVersionsOnce;
 
     protected File boxStoreDir;
@@ -89,7 +94,7 @@ public abstract class AbstractObjectBoxTest {
 
     protected BoxStoreBuilder createBoxStoreBuilderWithTwoEntities(boolean withIndex) {
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModelWithTwoEntities(withIndex)).directory(boxStoreDir);
-        builder.debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE);
+        if (DEBUG_LOG) builder.debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE);
         builder.entity(new TestEntity_());
         builder.entity(new TestEntityMinimal_());
         return builder;
@@ -97,7 +102,7 @@ public abstract class AbstractObjectBoxTest {
 
     protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(withIndex)).directory(boxStoreDir);
-        builder.debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE);
+        if (DEBUG_LOG) builder.debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE);
         builder.entity(new TestEntity_());
         return builder;
     }

@@ -32,7 +32,9 @@ public class AbstractQueryTest extends AbstractObjectBoxTest {
 
     @Override
     protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
-        return super.createBoxStoreBuilder(withIndex).debugFlags(DebugFlags.LOG_QUERY_PARAMETERS);
+        BoxStoreBuilder builder = super.createBoxStoreBuilder(withIndex);
+        if (DEBUG_LOG) builder.debugFlags(DebugFlags.LOG_QUERY_PARAMETERS);
+        return builder;
     }
 
     @Before
