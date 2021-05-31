@@ -49,12 +49,7 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs -Dextensive-tests=true clean test " +
-                        "--tests io.objectbox.FunctionalTestSuite " +
-                        "--tests io.objectbox.test.proguard.ObfuscatedEntityTest " +
-                        "--tests io.objectbox.rx.QueryObserverTest " +
-                        "--tests io.objectbox.rx3.QueryObserverTest " +
-                        "spotbugsMain assemble"
+                sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs -Dextensive-tests=true clean test spotbugsMain assemble"
             }
         }
 
