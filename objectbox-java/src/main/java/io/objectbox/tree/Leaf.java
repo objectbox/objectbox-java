@@ -52,8 +52,7 @@ public class Leaf {
     }
 
     // valueInt
-    @Nullable
-    public Long getInt() {
+    public long getInt() {
         verifyIsInt();
         return node.integerValue;
     }
@@ -63,8 +62,7 @@ public class Leaf {
     }
 
     // valueDouble
-    @Nullable
-    public Double getDouble() {
+    public double getDouble() {
         verifyIsDouble();
         return node.floatingValue;
     }
@@ -105,8 +103,7 @@ public class Leaf {
         if (isInt()) return getInt();
 
         if (isDouble()) {
-            Double value = getDouble();
-            return value != null ? value.longValue() : null;
+            return (long) getDouble();
         }
         if (isString()) {
             String value = getString();
@@ -121,8 +118,7 @@ public class Leaf {
         if (isDouble()) return getDouble();
 
         if (isInt()) {
-            Long value = getInt();
-            return value != null ? value.doubleValue() : null;
+            return (double) getInt();
         }
         if (isString()) {
             String value = getString();
@@ -137,12 +133,10 @@ public class Leaf {
         if (isString()) return getString();
 
         if (isInt()) {
-            Long value = getInt();
-            return value != null ? String.valueOf(value) : null;
+            return String.valueOf(getInt());
         }
         if (isDouble()) {
-            Double value = getDouble();
-            return value != null ? String.valueOf(value) : null;
+            return String.valueOf(getDouble());
         }
         if (isStringArray()) {
             String[] value = getStringArray();

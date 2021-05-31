@@ -272,8 +272,6 @@ public class Tree {
 
     native LeafNode nativeGetLeafById(long treeHandle, long leafId);
 
-    native long nativePutValueInteger(long treeHandle, long id, long parentBranchId, long metaId, long value);
-
     native long nativePutMetaBranch(long treeHandle, long id, long parentBranchId, String name,
                                     @Nullable String description);
 
@@ -284,8 +282,10 @@ public class Tree {
 
     native long nativePutBranch(long treeHandle, long id, long parentBranchId, long metaId, @Nullable String uid);
 
+    native long nativePutValueInteger(long treeHandle, long id, long parentBranchId, long metaId, long value);
+
     native long nativePutValueFP(long treeHandle, long id, long parentBranchId, long metaId, double value);
 
-    native long nativePutValueString(long treeHandle, long id, long parentBranchId, long metaId, String value);
+    native long nativePutValueString(long treeHandle, long id, long parentBranchId, long metaId, @Nullable String value);
 
 }

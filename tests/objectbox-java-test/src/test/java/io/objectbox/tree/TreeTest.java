@@ -13,7 +13,7 @@ public class TreeTest extends AbstractObjectBoxTest {
     private Tree tree;
     private Branch root;
     private long rootId;
-    long[] metaBranchIds;
+    private long[] metaBranchIds;
 
     @Override
     protected BoxStore createBoxStore() {
@@ -67,7 +67,7 @@ public class TreeTest extends AbstractObjectBoxTest {
         tree.runInReadTx(() -> {
             Leaf intLeaf = tree.getLeaf(intId[0]);
             assertNotNull(intLeaf);
-            assertEquals(Long.valueOf(42), intLeaf.getInt());
+            assertEquals(42, intLeaf.getInt());
             assertTrue(intLeaf.isInt());
             assertFalse(intLeaf.isDouble());
             assertFalse(intLeaf.isString());
@@ -79,7 +79,7 @@ public class TreeTest extends AbstractObjectBoxTest {
 
             assertEquals(Long.valueOf(42), tree.getInteger(intId[0]));
 
-            assertEquals(Double.valueOf(3.141), requireNonNull(tree.getLeaf(doubleId[0])).getDouble());
+            assertEquals(3.141, requireNonNull(tree.getLeaf(doubleId[0])).getDouble(), 0.0);
             assertEquals(Double.valueOf(3.141), tree.getDouble(doubleId[0]));
 
             assertEquals("foo-tree", requireNonNull(tree.getLeaf(stringId[0])).getString());
@@ -168,7 +168,7 @@ public class TreeTest extends AbstractObjectBoxTest {
             tree.putValue(rootId, metaYearId, 1982);
             Leaf leaf = root.leaf("Year");
             assertNotNull(leaf);
-            assertEquals(Long.valueOf(1982), leaf.getInt());
+            assertEquals(1982, leaf.getInt());
 
             assertThrows(IllegalStateException.class, () -> leaf.setString("foo"));
             assertThrows(IllegalStateException.class, () -> leaf.setDouble(3.141));
@@ -182,7 +182,7 @@ public class TreeTest extends AbstractObjectBoxTest {
         tree.runInReadTx(() -> {
             Leaf year = root.leaf("Year");
             assertNotNull(year);
-            assertEquals(Long.valueOf(1977), year.getInt());
+            assertEquals(1977, year.getInt());
         });
     }
 
