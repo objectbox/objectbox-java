@@ -94,7 +94,11 @@ public class TreeTest extends AbstractObjectBoxTest {
         tree.runInTx(() -> {
             // Meta
             long metaNameId = tree.putMetaLeaf(0, metaBranchIds[2], "Name", PropertyType.String);
+            long metaYearId = tree.putMetaLeaf(0, metaBranchIds[2], "Year", PropertyType.Int);
+            long metaPriceId = tree.putMetaLeaf(0, metaBranchIds[2], "Height", PropertyType.Double);
             assertNotEquals(0, metaNameId);
+            assertNotEquals(0, metaYearId);
+            assertNotEquals(0, metaPriceId);
             metaLeafIds[0] = metaNameId;
 
             // Data
@@ -105,6 +109,8 @@ public class TreeTest extends AbstractObjectBoxTest {
             long authorId = tree.putBranch(bookId, metaBranchIds[2]);
             assertNotEquals(0, authorId);
             tree.putValue(authorId, metaNameId, "Tolkien");
+            tree.putValue(authorId, metaYearId, 2021);
+            tree.putValue(authorId, metaPriceId, 12.34);
 
             // 2nd meta branch off from "Book"
             long[] metaBranchIds2 = tree.putMetaBranches(metaBranchIds[1], new String[]{"Publisher", "Company"});
@@ -117,20 +123,30 @@ public class TreeTest extends AbstractObjectBoxTest {
             // get leaf indirectly by traversing branches
             Branch author = book.branch("Author");
             assertNotNull(author);
-            assertEquals("Tolkien", requireNonNull(author.leaf("Name")).getString());
 
-            // get leaf directly
-            Leaf name = book.leaf(new String[]{"Author", "Name"});
+            Leaf name = author.leaf("Name");
             assertNotNull(name);
             assertEquals("Tolkien", name.getString());
-            assertNotEquals(0, name.getId());
-            assertEquals(author.getId(), name.getParentBranchId());
-            assertEquals(metaLeafIds[0], name.getMetaId());
-
             assertFalse(name.isInt());
             assertFalse(name.isDouble());
             assertTrue(name.isString());
             assertFalse(name.isStringArray());
+            assertNotEquals(0, name.getId());
+            assertEquals(author.getId(), name.getParentBranchId());
+            assertEquals(metaLeafIds[0], name.getMetaId());
+
+            Leaf year = author.leaf("Year");
+            assertNotNull(year);
+            assertEquals(2021, year.getInt());
+
+            Leaf height = author.leaf("Height");
+            assertNotNull(height);
+            assertEquals(12.34, height.getDouble(), 0.0);
+
+            // get leaf directly
+            Leaf name2 = book.leaf(new String[]{"Author", "Name"});
+            assertNotNull(name2);
+            assertEquals("Tolkien", name2.getString());
         });
     }
 
