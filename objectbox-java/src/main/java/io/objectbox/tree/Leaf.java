@@ -103,7 +103,11 @@ public class Leaf {
         }
         if (isString()) {
             String value = getString();
-            return value != null ? Long.valueOf(value) : null;
+            try {
+                return value != null ? Long.valueOf(value) : null;
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
         }
 
         return null;
@@ -118,7 +122,11 @@ public class Leaf {
         }
         if (isString()) {
             String value = getString();
-            return value != null ? Double.valueOf(value) : null;
+            try {
+                return value != null ? Double.valueOf(value) : null;
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
         }
 
         return null;
