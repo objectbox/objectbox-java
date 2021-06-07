@@ -16,12 +16,11 @@ class FlowTest : AbstractObjectBoxTest() {
     @ExperimentalCoroutinesApi
     @Test
     fun flow_box() {
-        putTestEntities(1)
-
         runBlocking {
             store.flow(TestEntity::class.java).test {
                 assertEquals(TestEntity::class.java, expectItem())
                 putTestEntities(1)
+                // Note: expectItem suspends until event, so no need to wait on OBX publisher thread.
                 assertEquals(TestEntity::class.java, expectItem())
                 cancel() // expect no more events
             }
@@ -32,13 +31,12 @@ class FlowTest : AbstractObjectBoxTest() {
     @ExperimentalCoroutinesApi
     @Test
     fun flow_query() {
-        putTestEntities(1)
-
         runBlocking {
             testEntityBox.query {}.flow().test {
-                assertEquals(1, expectItem().size)
+                assertEquals(0, expectItem().size)
                 putTestEntities(1)
-                assertEquals(2, expectItem().size)
+                // Note: expectItem suspends until event, so no need to wait on OBX publisher thread.
+                assertEquals(1, expectItem().size)
                 cancel() // expect no more events
             }
         }
