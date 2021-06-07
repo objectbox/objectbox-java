@@ -51,6 +51,10 @@ public class Tree {
         return handle;
     }
 
+    public BoxStore getStore() {
+        return store;
+    }
+
     public Branch root() {
         long dataBranchId = nativeGetRootId(handle);
         return new Branch(this, dataBranchId);
@@ -63,11 +67,11 @@ public class Tree {
     }
 
     public void runInTx(Runnable runnable) {
-        store.runInTx(createTxCallable(runnable));
+        store.runInTx(createTxRunnable(runnable));
     }
 
     public void runInReadTx(Runnable runnable) {
-        store.runInReadTx(createTxCallable(runnable));
+        store.runInReadTx(createTxRunnable(runnable));
     }
 
     public <T> T callInTx(Callable<T> callable) throws Exception {
@@ -89,7 +93,7 @@ public class Tree {
         return store.callInReadTx(createTxCallable(callable));
     }
 
-    private Runnable createTxCallable(Runnable runnable) {
+    private Runnable createTxRunnable(Runnable runnable) {
         return () -> {
             Transaction tx = InternalAccess.getActiveTx(store);
             boolean topLevel = nativeSetTransaction(handle, InternalAccess.getHandle(tx));
