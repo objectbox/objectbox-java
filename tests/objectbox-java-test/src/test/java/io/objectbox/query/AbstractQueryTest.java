@@ -53,7 +53,7 @@ public class AbstractQueryTest extends AbstractObjectBoxTest {
      * <li>simpleDouble = [2020.00..2020.09] (approximately)</li>
      * <li>simpleByteArray = [{1,2,2000}..{1,2,2009}]</li>
      */
-    List<TestEntity> putTestEntitiesScalars() {
+    public List<TestEntity> putTestEntitiesScalars() {
         return putTestEntities(10, null, 2000);
     }
 
