@@ -34,7 +34,6 @@ buildscript {
         maven {
             url "https://plugins.gradle.org/m2/"
         }
-        jcenter() // dokka dependencies are still on jcenter
     }
 
     dependencies {
@@ -52,7 +51,6 @@ allprojects {
 
     repositories {
         mavenCentral()
-        jcenter() // dokka dependencies are still on jcenter
     }
     
     configurations.all {
