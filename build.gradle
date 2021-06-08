@@ -10,8 +10,9 @@ buildscript {
         ob_version = objectboxVersionNumber + (objectboxVersionRelease? "" : "$versionPostFix-SNAPSHOT")
 
         // Native library version for tests
-        // Be careful to diverge here; easy to forget and hard to find JNI problems
-        def nativeVersion = objectboxVersionNumber + (objectboxVersionRelease? "": "-dev-SNAPSHOT")
+        // FIXME Revert version before merging.
+//        def nativeVersion = objectboxVersionNumber + (objectboxVersionRelease? "": "-dev-SNAPSHOT")
+        def nativeVersion = '2.9.2-dev-trees-SNAPSHOT'
         def osName = System.getProperty("os.name").toLowerCase()
         def objectboxPlatform = osName.contains('linux') ? 'linux'
                 : osName.contains("windows")? 'windows'

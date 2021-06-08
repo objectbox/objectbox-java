@@ -31,6 +31,15 @@ public class InternalAccess {
         return boxStore.internalHandle();
     }
 
+    public static Transaction getActiveTx(BoxStore boxStore) {
+        Transaction tx = boxStore.activeTx.get();
+        if (tx == null) {
+            throw new IllegalStateException("No active transaction");
+        }
+        tx.checkOpen();
+        return tx;
+    }
+
     public static long getHandle(Cursor reader) {
         return reader.internalHandle();
     }

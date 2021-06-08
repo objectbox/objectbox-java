@@ -19,6 +19,7 @@
     void setTargetId(long);
 }
 -keep class io.objectbox.relation.ToMany
+-keep class io.objectbox.tree.LeafNode
 
 -keep @interface io.objectbox.annotation.Entity
 

@@ -58,16 +58,30 @@ public abstract class AbstractObjectBoxTest {
     long lastEntityUid;
     long lastIndexUid;
 
+    static void printProcessId() {
+        try {
+            // Only if Java 9 is available; e.g. helps to attach native debugger
+            Class<?> processHandleClass = Class.forName("java.lang.ProcessHandle");
+            Object processHandle = processHandleClass.getMethod("current").invoke(null);
+            long pid = (Long) processHandleClass.getMethod("pid").invoke(processHandle);
+            System.out.println("ObjectBox test process ID (pid): " + pid);
+            System.out.flush();
+        } catch (Throwable th) {
+            System.out.println("Could not get process ID (" + th.getMessage() + ")");
+        }
+    }
+
     @Before
     public void setUp() throws IOException {
         Cursor.TRACK_CREATION_STACK = true;
         Transaction.TRACK_CREATION_STACK = true;
 
         if (!printedVersionsOnce) {
+            printedVersionsOnce = true;
+            printProcessId();
             System.out.println("ObjectBox Java version: " + BoxStore.getVersion());
             System.out.println("ObjectBox Core version: " + BoxStore.getVersionNative());
             System.out.println("First DB dir: " + boxStoreDir);
-            printedVersionsOnce = true;
         }
 
         boxStoreDir = prepareTempDir("object-store-test");
@@ -75,7 +89,9 @@ public abstract class AbstractObjectBoxTest {
         runExtensiveTests = System.getProperty("extensive-tests") != null;
     }
 
-    /** This works with Android without needing any context. */
+    /**
+     * This works with Android without needing any context.
+     */
     protected File prepareTempDir(String prefix) throws IOException {
         File tempFile = File.createTempFile(prefix, "");
         if (!tempFile.delete()) {

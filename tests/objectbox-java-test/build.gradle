@@ -62,6 +62,13 @@ test {
     // However we might check from time to time, also with Java 9.
     // jvmArgs '-Xcheck:jni'
 
+    filter {
+        // Note: Tree API currently incubating on Linux only.
+        if (!System.getProperty("os.name").toLowerCase().contains('linux')) {
+            excludeTestsMatching "io.objectbox.tree.*"
+        }
+    }
+
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
