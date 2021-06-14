@@ -11,6 +11,7 @@ import io.objectbox.sync.listener.SyncCompletedListener;
 import io.objectbox.sync.listener.SyncConnectionListener;
 import io.objectbox.sync.listener.SyncListener;
 import io.objectbox.sync.listener.SyncLoginListener;
+import io.objectbox.sync.listener.SyncTimeListener;
 
 /**
  * ObjectBox sync client. Build a client with {@link Sync#client}.
@@ -47,6 +48,18 @@ public interface SyncClient extends Closeable {
     long getLastLoginCode();
 
     /**
+     * Returns an approximation of the current server time in nanoseconds since epoch
+     * based on the last server timestamp received by this client.
+     */
+    long getServerTimeNanos();
+
+    /**
+     * Returns the difference in nanoseconds between the current local time of this client
+     * and {@link #getServerTimeNanos()}.
+     */
+    long getServerTimeDiffNanos();
+
+    /**
      * Sets a listener to observe login events. Replaces a previously set listener.
      * Set to {@code null} to remove the listener.
      */
@@ -76,6 +89,12 @@ public interface SyncClient extends Closeable {
      * Set to {@code null} to remove the listener.
      */
     void setSyncChangeListener(@Nullable SyncChangeListener listener);
+
+    /**
+     * Sets a {@link SyncTimeListener}. Replaces a previously set listener.
+     * Set to {@code null} to remove the listener.
+     */
+    void setSyncTimeListener(@Nullable SyncTimeListener timeListener);
 
     /**
      * Updates the login credentials. This should not be required during regular use.

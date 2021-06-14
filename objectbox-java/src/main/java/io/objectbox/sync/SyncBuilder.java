@@ -12,6 +12,7 @@ import io.objectbox.sync.listener.SyncCompletedListener;
 import io.objectbox.sync.listener.SyncConnectionListener;
 import io.objectbox.sync.listener.SyncListener;
 import io.objectbox.sync.listener.SyncLoginListener;
+import io.objectbox.sync.listener.SyncTimeListener;
 
 /**
  * A builder to create a {@link SyncClient}; the builder itself should be created via
@@ -30,6 +31,7 @@ public class SyncBuilder {
     @Nullable SyncCompletedListener completedListener;
     @Nullable SyncChangeListener changeListener;
     @Nullable SyncConnectionListener connectionListener;
+    @Nullable SyncTimeListener timeListener;
     @Nullable SyncListener listener;
 
     @Nullable
@@ -144,6 +146,17 @@ public class SyncBuilder {
      */
     public SyncBuilder changeListener(SyncChangeListener changeListener) {
         this.changeListener = changeListener;
+        return this;
+    }
+
+    /**
+     * Sets a listener to only observe Sync time events.
+     * <p>
+     * This listener can also be {@link SyncClient#setSyncTimeListener(SyncTimeListener) set or removed}
+     * on the Sync client directly.
+     */
+    public SyncBuilder timeListener(SyncTimeListener timeListener) {
+        this.timeListener = timeListener;
         return this;
     }
 

@@ -15,6 +15,7 @@ import io.objectbox.sync.listener.SyncCompletedListener;
 import io.objectbox.sync.listener.SyncConnectionListener;
 import io.objectbox.sync.listener.SyncListener;
 import io.objectbox.sync.listener.SyncLoginListener;
+import io.objectbox.sync.listener.SyncTimeListener;
 
 /**
  * Internal sync client implementation. Use {@link SyncClient} to access functionality,
@@ -37,6 +38,8 @@ public class SyncClientImpl implements SyncClient {
     private volatile SyncCompletedListener completedListener;
     @Nullable
     private volatile SyncConnectionListener connectionListener;
+    @Nullable
+    private volatile SyncTimeListener timeListener;
     private volatile long lastLoginCode;
     private volatile boolean started;
 
@@ -70,6 +73,7 @@ public class SyncClientImpl implements SyncClient {
                 setSyncChangeListener(builder.changeListener);
             }
             this.connectionListener = builder.connectionListener;
+            this.timeListener = builder.timeListener;
         }
 
         this.internalListener = new InternalSyncClientListener();
@@ -96,6 +100,16 @@ public class SyncClientImpl implements SyncClient {
         return lastLoginCode == SyncLoginCodes.OK;
     }
 
+    @Override
+    public long getServerTimeNanos() {
+        return nativeServerTime(handle);
+    }
+
+    @Override
+    public long getServerTimeDiffNanos() {
+        return nativeServerTimeDiff(handle);
+    }
+
     /**
      * Gets the current state of this sync client. Throws if {@link #close()} was called.
      */
@@ -119,6 +133,11 @@ public class SyncClientImpl implements SyncClient {
     }
 
     @Override
+    public void setSyncTimeListener(@Nullable SyncTimeListener timeListener) {
+        this.timeListener = timeListener;
+    }
+
+    @Override
     public void setSyncConnectionListener(@Nullable SyncConnectionListener listener) {
         this.connectionListener = listener;
     }
@@ -127,6 +146,7 @@ public class SyncClientImpl implements SyncClient {
     public void setSyncListener(@Nullable SyncListener listener) {
         this.loginListener = listener;
         this.completedListener = listener;
+        this.timeListener = listener;
         this.connectionListener = listener;
         setSyncChangeListener(listener);
     }
@@ -294,6 +314,23 @@ public class SyncClientImpl implements SyncClient {
     private native boolean nativeTriggerReconnect(long handle);
 
     /**
+     * The current server timestamp approximation based on the last server time
+     * we've received and local steady clock.
+     *
+     * @return unix timestamp in nanoseconds
+     */
+    private native long nativeServerTime(long handle);
+
+    /**
+     * Returns the difference between the current local timestamp and the current
+     * server timestamp approximation as given by nativeServerTime().
+     * Equivalent to calculating: nanosSinceEpoch - nativeServerTime().
+     *
+     * @return unix timestamp difference in nanoseconds
+     */
+    private native long nativeServerTimeDiff(long handle);
+
+    /**
      * Methods on this class must match those expected by JNI implementation.
      */
     @SuppressWarnings("unused") // Methods called from native code.
@@ -320,14 +357,17 @@ public class SyncClientImpl implements SyncClient {
             }
         }
 
-        public void onServerTimeUpdate(long serverTimeNanos) {
-            // Not implemented, yet.
-        }
-
         public void onSyncComplete() {
             SyncCompletedListener listenerToFire = completedListener;
             if (listenerToFire != null) {
                 listenerToFire.onUpdatesCompleted();
+            }
+        }
+
+        public void onServerTimeUpdate(long serverTimeNanos) {
+            SyncTimeListener listenerToFire = timeListener;
+            if (listenerToFire != null) {
+                listenerToFire.onServerTimeUpdate(serverTimeNanos);
             }
         }
 

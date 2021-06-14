@@ -13,5 +13,5 @@ import io.objectbox.sync.SyncClient;
  * Use more specific listeners, like {@link SyncLoginListener}, to only receive a sub-set of events.
  */
 @Experimental
-public interface SyncListener extends SyncLoginListener, SyncCompletedListener, SyncChangeListener, SyncConnectionListener {
+public interface SyncListener extends SyncLoginListener, SyncCompletedListener, SyncChangeListener, SyncConnectionListener, SyncTimeListener {
 }
