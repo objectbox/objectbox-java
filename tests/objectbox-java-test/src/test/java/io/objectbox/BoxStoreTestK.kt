@@ -1,13 +1,11 @@
-package io.objectbox.ktx
+package io.objectbox
 
-import io.objectbox.AbstractObjectBoxTest
-import io.objectbox.TestEntity
 import io.objectbox.kotlin.boxFor
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 
-class BoxStoreKt: AbstractObjectBoxTest() {
+class BoxStoreTestK: AbstractObjectBoxTest() {
 
     /**
      * This is mostly to test the expected syntax works without errors or warnings.

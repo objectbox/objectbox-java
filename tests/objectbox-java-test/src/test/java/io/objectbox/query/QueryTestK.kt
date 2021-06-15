@@ -11,6 +11,22 @@ import org.junit.Test
 class QueryTestK : AbstractQueryTest() {
 
     @Test
+    fun queryBlock_and_inValues() {
+        putTestEntitiesScalars()
+        val valuesLong = longArrayOf(3000)
+
+        val resultJava = box.query().`in`(TestEntity_.simpleLong, valuesLong).build().use {
+            it.findFirst()
+        }
+        val result = box.query {
+            inValues(TestEntity_.simpleLong, valuesLong)
+        }.use {
+            it.findFirst()
+        }
+        assertEquals(resultJava!!.id, result!!.id)
+    }
+
+    @Test
     fun newQueryApi() {
         putTestEntity("Fry", 14)
         putTestEntity("Fry", 12)
