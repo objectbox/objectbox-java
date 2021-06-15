@@ -19,6 +19,7 @@ package io.objectbox.query;
 import io.objectbox.Box;
 import io.objectbox.EntityInfo;
 import io.objectbox.Property;
+import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 import io.objectbox.relation.RelationInfo;
@@ -262,6 +263,8 @@ public class QueryBuilder<T> implements Closeable {
     }
 
     /**
+     * Experimental. This API might change or be removed in the future based on user feedback.
+     * <p>
      * Applies the given query conditions and returns the builder for further customization, such as result order.
      * Build the condition using the properties from your entity underscore classes.
      * <p>
@@ -279,6 +282,7 @@ public class QueryBuilder<T> implements Closeable {
      * </pre>
      * Use {@link Box#query(QueryCondition)} as a shortcut for this method.
      */
+    @Experimental
     public QueryBuilder<T> apply(QueryCondition<T> queryCondition) {
         ((QueryConditionImpl<T>) queryCondition).apply(this);
         return this;

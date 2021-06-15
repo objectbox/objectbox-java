@@ -574,6 +574,8 @@ public class Box<T> {
     }
 
     /**
+     * Experimental. This API might change or be removed in the future based on user feedback.
+     * <p>
      * Applies the given query conditions and returns the builder for further customization, such as result order.
      * Build the condition using the properties from your entity underscore classes.
      * <p>
@@ -593,6 +595,7 @@ public class Box<T> {
      *
      * @see QueryBuilder#apply(QueryCondition)
      */
+    @Experimental
     public QueryBuilder<T> query(QueryCondition<T> queryCondition) {
         return query().apply(queryCondition);
     }
