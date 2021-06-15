@@ -36,6 +36,7 @@ repositories {
 dependencies {
     implementation project(':objectbox-java')
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation project(':objectbox-kotlin')
     implementation "org.greenrobot:essentials:$essentials_version"
 
@@ -48,6 +49,8 @@ dependencies {
     }
 
     testImplementation "junit:junit:$junit_version"
+    // To test Kotlin Flow
+    testImplementation 'app.cash.turbine:turbine:0.5.2'
 }
 
 test {

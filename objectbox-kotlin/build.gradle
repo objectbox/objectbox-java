@@ -47,6 +47,8 @@ task sourcesJar(type: Jar) {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    // Note: compileOnly as we do not want to require library users to use coroutines.
+    compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
 
     api project(':objectbox-java')
 }
