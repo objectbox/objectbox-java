@@ -711,7 +711,7 @@ public class QueryTest extends AbstractQueryTest {
     @Test
     public void testAnd() {
         putTestEntitiesScalars();
-        // OR precedence (wrong): {}, AND precedence (expected): 2008
+        // Result if OR precedence (wrong): {}, AND precedence (expected): {2008}
         Query<TestEntity> query = box.query().equal(simpleInt, 2006).and().equal(simpleInt, 2007).or().equal(simpleInt, 2008).build();
         List<TestEntity> entities = query.find();
         assertEquals(1, entities.size());
