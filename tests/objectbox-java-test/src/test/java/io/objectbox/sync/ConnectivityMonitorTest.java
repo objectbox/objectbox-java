@@ -125,6 +125,11 @@ public class ConnectivityMonitorTest {
         }
 
         @Override
+        public long getRoundtripTimeNanos() {
+            return 0;
+        }
+
+        @Override
         public void setSyncLoginListener(@Nullable SyncLoginListener listener) {
         }
 

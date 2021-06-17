@@ -48,16 +48,31 @@ public interface SyncClient extends Closeable {
     long getLastLoginCode();
 
     /**
-     * Returns an approximation of the current server time in nanoseconds since epoch
-     * based on the last server timestamp received by this client.
+     * Estimates the current server timestamp in nanoseconds based on the last known server time.
+     * @return unix timestamp in nanoseconds (since epoch);
+     *         or 0 if there has not been a server contact yet and thus the server's time is unknown
      */
     long getServerTimeNanos();
 
     /**
-     * Returns the difference in nanoseconds between the current local time of this client
-     * and {@link #getServerTimeNanos()}.
+     * Returns the estimated difference in nanoseconds between the server time and the local timestamp.
+     * urns the difference in nanoseconds between the current local time of this client
+     * Equivalent to calculating {@link #getServerTimeNanos()} - "current time" (nanos since epoch),
+     * except for when the server time is unknown, then the result is zero.
+     *
+     * @return time difference in nanoseconds; e.g. positive if server time is ahead of local time;
+     *         or 0 if there has not been a server contact yet and thus the server's time is unknown
      */
     long getServerTimeDiffNanos();
+
+    /**
+     * Returns the estimated roundtrip time in nanoseconds to the server and back.
+     * This is measured during login.
+     *
+     * @return roundtrip time in nanoseconds;
+     *         or 0 if there has not been a server contact yet and thus the roundtrip time could not be estimated
+     */
+    long getRoundtripTimeNanos();
 
     /**
      * Sets a listener to observe login events. Replaces a previously set listener.

@@ -110,6 +110,11 @@ public class SyncClientImpl implements SyncClient {
         return nativeServerTimeDiff(handle);
     }
 
+    @Override
+    public long getRoundtripTimeNanos() {
+        return nativeRoundtripTime(handle);
+    }
+
     /**
      * Gets the current state of this sync client. Throws if {@link #close()} was called.
      */
@@ -329,6 +334,8 @@ public class SyncClientImpl implements SyncClient {
      * @return unix timestamp difference in nanoseconds
      */
     private native long nativeServerTimeDiff(long handle);
+
+    private native long nativeRoundtripTime(long handle);
 
     /**
      * Methods on this class must match those expected by JNI implementation.
