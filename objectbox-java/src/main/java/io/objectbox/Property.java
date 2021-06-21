@@ -35,6 +35,7 @@ import io.objectbox.query.QueryBuilder.StringOrder;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -562,6 +563,133 @@ public class Property<ENTITY> implements Serializable {
     /** Creates a "less or equal ('&lt;=')" condition for this property. */
     public PropertyQueryCondition<ENTITY> lessOrEqual(byte[] value) {
         return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.LESS_OR_EQUAL, value);
+    }
+
+    //////
+    // Note: The following are deprecated conditions used with DAOcompat only.
+    // They exist so library users need not update their code where new conditions are named differently.
+    //////
+
+    /**
+     * Creates an "equal ('=')" condition for this property.
+     *
+     * @deprecated Use {@link #equal} instead.
+     */
+    @Deprecated
+    public PropertyQueryCondition<ENTITY> eq(Object value) {
+        if (value instanceof Long) {
+            return equal((Long) value);
+        } else if (value instanceof Integer) {
+            return equal((Integer) value);
+        } else if (value instanceof String) {
+            return equal((String) value);
+        } else {
+            throw new IllegalArgumentException("Only LONG, INTEGER or STRING values are supported.");
+        }
+    }
+
+    /**
+     * Creates an "not equal ('&lt;&gt;')" condition for this property.
+     *
+     * @deprecated Use {@link #notEqual} instead.
+     */
+    @Deprecated
+    public PropertyQueryCondition<ENTITY> notEq(Object value) {
+        if (value instanceof Long) {
+            return notEqual((Long) value);
+        } else if (value instanceof Integer) {
+            return notEqual((Integer) value);
+        } else if (value instanceof String) {
+            return notEqual((String) value);
+        } else {
+            throw new IllegalArgumentException("Only LONG, INTEGER or STRING values are supported.");
+        }
+    }
+
+    /**
+     * Creates an "IN (..., ..., ...)" condition for this property.
+     *
+     * @deprecated Use {@link #oneOf} instead.
+     */
+    @Deprecated
+    public PropertyQueryCondition<ENTITY> in(Object... values) {
+        // just check the first value and assume all others are of the same type
+        // maybe this is too naive and we should properly check values earlier
+        if (values[0] instanceof Long) {
+            long[] inValues = new long[values.length];
+            for (int i = 0; i < values.length; i++) {
+                inValues[i] = (long) values[i];
+            }
+            return oneOf(inValues);
+        } else if (values[0] instanceof Integer) {
+            int[] inValues = new int[values.length];
+            for (int i = 0; i < values.length; i++) {
+                inValues[i] = (int) values[i];
+            }
+            return oneOf(inValues);
+        } else {
+            throw new IllegalArgumentException("The IN condition only supports LONG or INTEGER values.");
+        }
+    }
+
+    /**
+     * Creates an "IN (..., ..., ...)" condition for this property.
+     *
+     * @deprecated Use {@link #oneOf} instead.
+     */
+    @Deprecated
+    public PropertyQueryCondition<ENTITY> in(Collection<?> inValues) {
+        return in(inValues.toArray());
+    }
+
+    /**
+     * Creates an "greater than ('&gt;')" condition for this property.
+     *
+     * @deprecated Use {@link #greater} instead.
+     */
+    @Deprecated
+    public PropertyQueryCondition<ENTITY> gt(Object value) {
+        if (value instanceof Long) {
+            return greater((Long) value);
+        } else if (value instanceof Integer) {
+            return greater((Integer) value);
+        } else if (value instanceof Double) {
+            return greater((Double) value);
+        } else if (value instanceof Float) {
+            return greater((Float) value);
+        } else {
+            throw new IllegalArgumentException("Only LONG, INTEGER, DOUBLE or FLOAT values are supported.");
+        }
+    }
+
+    /**
+     * Creates an "less than ('&lt;')" condition for this property.
+     *
+     * @deprecated Use {@link #less} instead.
+     */
+    @Deprecated
+    public PropertyQueryCondition<ENTITY> lt(Object value) {
+        if (value instanceof Long) {
+            return less((Long) value);
+        } else if (value instanceof Integer) {
+            return less((Integer) value);
+        } else if (value instanceof Double) {
+            return less((Double) value);
+        } else if (value instanceof Float) {
+            return less((Float) value);
+        } else {
+            throw new IllegalArgumentException("Only LONG, INTEGER, DOUBLE or FLOAT values are supported.");
+        }
+    }
+
+    /**
+     * Creates an "IS NOT NULL" condition for this property.
+     *
+     * @deprecated Use {@link #notNull()} instead.
+     */
+    @Deprecated
+    public PropertyQueryCondition<ENTITY> isNotNull() {
+        return notNull();
     }
 
     @Internal
