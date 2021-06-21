@@ -108,48 +108,48 @@ public class Property<ENTITY> implements Serializable {
     }
 
     /** Creates an "IS NOT NULL" condition for this property. */
-    public PropertyQueryCondition<ENTITY> isNotNull() {
+    public PropertyQueryCondition<ENTITY> notNull() {
         return new NullCondition<>(this, NullCondition.Operation.NOT_NULL);
     }
 
     /** Creates an "equal ('=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> eq(boolean value) {
+    public PropertyQueryCondition<ENTITY> equal(boolean value) {
         return new LongCondition<>(this, LongCondition.Operation.EQUAL, value);
     }
 
     /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> notEq(boolean value) {
+    public PropertyQueryCondition<ENTITY> notEqual(boolean value) {
         return new LongCondition<>(this, LongCondition.Operation.NOT_EQUAL, value);
     }
 
     /** Creates an "equal ('=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> eq(short value) {
-        return eq((long) value);
+    public PropertyQueryCondition<ENTITY> equal(short value) {
+        return equal((long) value);
     }
 
     /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> notEq(short value) {
-        return notEq((long) value);
+    public PropertyQueryCondition<ENTITY> notEqual(short value) {
+        return notEqual((long) value);
     }
 
     /** Creates a "greater than ('&gt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> gt(short value) {
-        return gt((long) value);
+    public PropertyQueryCondition<ENTITY> greater(short value) {
+        return greater((long) value);
     }
 
     /** Creates a "greater or equal ('&gt;=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> gtOrEqual(short value) {
-        return gtOrEqual((long) value);
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(short value) {
+        return greaterOrEqual((long) value);
     }
 
     /** Creates a "less than ('&lt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> lt(short value) {
-        return lt((long) value);
+    public PropertyQueryCondition<ENTITY> less(short value) {
+        return less((long) value);
     }
 
     /** Creates a "less or equal ('&lt;=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> ltOrEqual(short value) {
-        return ltOrEqual((long) value);
+    public PropertyQueryCondition<ENTITY> lessOrEqual(short value) {
+        return lessOrEqual((long) value);
     }
 
     /**
@@ -161,33 +161,33 @@ public class Property<ENTITY> implements Serializable {
     }
 
     /** Creates an "equal ('=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> eq(int value) {
-        return eq((long) value);
+    public PropertyQueryCondition<ENTITY> equal(int value) {
+        return equal((long) value);
     }
 
     /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> notEq(int value) {
-        return notEq((long) value);
+    public PropertyQueryCondition<ENTITY> notEqual(int value) {
+        return notEqual((long) value);
     }
 
     /** Creates a "greater than ('&gt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> gt(int value) {
-        return gt((long) value);
+    public PropertyQueryCondition<ENTITY> greater(int value) {
+        return greater((long) value);
     }
 
     /** Creates a "greater or equal ('&gt;=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> gtOrEqual(int value) {
-        return gtOrEqual((long) value);
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(int value) {
+        return greaterOrEqual((long) value);
     }
 
     /** Creates a "less than ('&lt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> lt(int value) {
-        return lt((long) value);
+    public PropertyQueryCondition<ENTITY> less(int value) {
+        return less((long) value);
     }
 
     /** Creates a "less or equal ('&lt;=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> ltOrEqual(int value) {
-        return ltOrEqual((long) value);
+    public PropertyQueryCondition<ENTITY> lessOrEqual(int value) {
+        return lessOrEqual((long) value);
     }
 
     /**
@@ -209,32 +209,32 @@ public class Property<ENTITY> implements Serializable {
     }
 
     /** Creates an "equal ('=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> eq(long value) {
+    public PropertyQueryCondition<ENTITY> equal(long value) {
         return new LongCondition<>(this, LongCondition.Operation.EQUAL, value);
     }
 
     /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> notEq(long value) {
+    public PropertyQueryCondition<ENTITY> notEqual(long value) {
         return new LongCondition<>(this, LongCondition.Operation.NOT_EQUAL, value);
     }
 
     /** Creates a "greater than ('&gt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> gt(long value) {
+    public PropertyQueryCondition<ENTITY> greater(long value) {
         return new LongCondition<>(this, LongCondition.Operation.GREATER, value);
     }
 
     /** Creates a "greater or equal ('&gt;=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> gtOrEqual(long value) {
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(long value) {
         return new LongCondition<>(this, LongCondition.Operation.GREATER_OR_EQUAL, value);
     }
 
     /** Creates a "less than ('&lt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> lt(long value) {
+    public PropertyQueryCondition<ENTITY> less(long value) {
         return new LongCondition<>(this, LongCondition.Operation.LESS, value);
     }
 
     /** Creates a "less or equal ('&lt;=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> ltOrEqual(long value) {
+    public PropertyQueryCondition<ENTITY> lessOrEqual(long value) {
         return new LongCondition<>(this, LongCondition.Operation.LESS_OR_EQUAL, value);
     }
 
@@ -260,28 +260,28 @@ public class Property<ENTITY> implements Serializable {
      * Calls {@link #between(double, double)} with {@code value - tolerance} as lower bound and
      * {@code value + tolerance} as upper bound.
      */
-    public PropertyQueryCondition<ENTITY> eq(double value, double tolerance) {
+    public PropertyQueryCondition<ENTITY> equal(double value, double tolerance) {
         return new DoubleDoubleCondition<>(this, DoubleDoubleCondition.Operation.BETWEEN,
                 value - tolerance, value + tolerance);
     }
 
     /** Creates a "greater than ('&gt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> gt(double value) {
+    public PropertyQueryCondition<ENTITY> greater(double value) {
         return new DoubleCondition<>(this, DoubleCondition.Operation.GREATER, value);
     }
 
     /** Creates a "greater or equal ('&gt;=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> gtOrEqual(double value) {
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(double value) {
         return new DoubleCondition<>(this, DoubleCondition.Operation.GREATER_OR_EQUAL, value);
     }
 
     /** Creates a "less than ('&lt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> lt(double value) {
+    public PropertyQueryCondition<ENTITY> less(double value) {
         return new DoubleCondition<>(this, DoubleCondition.Operation.LESS, value);
     }
 
     /** Creates a "less or equal ('&lt;=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> ltOrEqual(double value) {
+    public PropertyQueryCondition<ENTITY> lessOrEqual(double value) {
         return new DoubleCondition<>(this, DoubleCondition.Operation.LESS_OR_EQUAL, value);
     }
 
@@ -295,32 +295,32 @@ public class Property<ENTITY> implements Serializable {
     }
 
     /** Creates an "equal ('=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> eq(Date value) {
+    public PropertyQueryCondition<ENTITY> equal(Date value) {
         return new LongCondition<>(this, LongCondition.Operation.EQUAL, value);
     }
 
     /** Creates a "not equal ('&lt;&gt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> notEq(Date value) {
+    public PropertyQueryCondition<ENTITY> notEqual(Date value) {
         return new LongCondition<>(this, LongCondition.Operation.NOT_EQUAL, value);
     }
 
     /** Creates a "greater than ('&gt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> gt(Date value) {
+    public PropertyQueryCondition<ENTITY> greater(Date value) {
         return new LongCondition<>(this, LongCondition.Operation.GREATER, value);
     }
 
     /** Creates a "greater or equal ('&gt;=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> gtOrEqual(Date value) {
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(Date value) {
         return new LongCondition<>(this, LongCondition.Operation.GREATER_OR_EQUAL, value);
     }
 
     /** Creates a "less than ('&lt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> lt(Date value) {
+    public PropertyQueryCondition<ENTITY> less(Date value) {
         return new LongCondition<>(this, LongCondition.Operation.LESS, value);
     }
 
     /** Creates a "less or equal ('&lt;=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> ltOrEqual(Date value) {
+    public PropertyQueryCondition<ENTITY> lessOrEqual(Date value) {
         return new LongCondition<>(this, LongCondition.Operation.LESS_OR_EQUAL, value);
     }
 
@@ -337,15 +337,15 @@ public class Property<ENTITY> implements Serializable {
      * <p>
      * Case sensitive when matching results, e.g. {@code equal("example")} only matches "example", but not "Example".
      * <p>
-     * Use {@link #eq(String, StringOrder) equal(value, StringOrder.CASE_INSENSITIVE)} to also match
+     * Use {@link #equal(String, StringOrder) equal(value, StringOrder.CASE_INSENSITIVE)} to also match
      * if case is different.
      * <p>
      * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
      * on {@code property}, dramatically speeding up look-up of results.
      *
-     * @see #eq(String, StringOrder)
+     * @see #equal(String, StringOrder)
      */
-    public PropertyQueryCondition<ENTITY> eq(String value) {
+    public PropertyQueryCondition<ENTITY> equal(String value) {
         return new StringCondition<>(this, StringCondition.Operation.EQUAL, value);
     }
 
@@ -359,7 +359,7 @@ public class Property<ENTITY> implements Serializable {
      * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
      * on {@code property}, dramatically speeding up look-up of results.
      */
-    public PropertyQueryCondition<ENTITY> eq(String value, StringOrder order) {
+    public PropertyQueryCondition<ENTITY> equal(String value, StringOrder order) {
         return new StringCondition<>(this, StringCondition.Operation.EQUAL, value, order);
     }
 
@@ -368,15 +368,15 @@ public class Property<ENTITY> implements Serializable {
      * <p>
      * Case sensitive when matching results, e.g. {@code notEqual("example")} excludes only "example", but not "Example".
      * <p>
-     * Use {@link #notEq(String, StringOrder) notEqual(value, StringOrder.CASE_INSENSITIVE)} to also exclude
+     * Use {@link #notEqual(String, StringOrder) notEqual(value, StringOrder.CASE_INSENSITIVE)} to also exclude
      * if case is different.
      * <p>
      * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
      * on {@code property}, dramatically speeding up look-up of results.
      *
-     * @see #notEq(String, StringOrder)
+     * @see #notEqual(String, StringOrder)
      */
-    public PropertyQueryCondition<ENTITY> notEq(String value) {
+    public PropertyQueryCondition<ENTITY> notEqual(String value) {
         return new StringCondition<>(this, StringCondition.Operation.NOT_EQUAL, value);
     }
 
@@ -390,7 +390,7 @@ public class Property<ENTITY> implements Serializable {
      * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
      * on {@code property}, dramatically speeding up look-up of results.
      */
-    public PropertyQueryCondition<ENTITY> notEq(String value, StringOrder order) {
+    public PropertyQueryCondition<ENTITY> notEqual(String value, StringOrder order) {
         return new StringCondition<>(this, StringCondition.Operation.NOT_EQUAL, value, order);
     }
 
@@ -400,23 +400,23 @@ public class Property<ENTITY> implements Serializable {
      * Case sensitive when matching results. Use the overload and pass
      * {@link StringOrder#CASE_INSENSITIVE StringOrder.CASE_INSENSITIVE} to specify that case should be ignored.
      *
-     * @see #gt(String, StringOrder)
+     * @see #greater(String, StringOrder)
      */
-    public PropertyQueryCondition<ENTITY> gt(String value) {
+    public PropertyQueryCondition<ENTITY> greater(String value) {
         return new StringCondition<>(this, StringCondition.Operation.GREATER, value);
     }
 
     /**
      * Creates a "greater than ('&gt;')" condition for this property.
      */
-    public PropertyQueryCondition<ENTITY> gt(String value, StringOrder order) {
+    public PropertyQueryCondition<ENTITY> greater(String value, StringOrder order) {
         return new StringCondition<>(this, StringCondition.Operation.GREATER, value, order);
     }
 
     /**
      * Creates a "greater or equal ('&gt;=')" condition for this property.
      */
-    public PropertyQueryCondition<ENTITY> gtOrEqual(String value, StringOrder order) {
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(String value, StringOrder order) {
         return new StringCondition<>(this, StringCondition.Operation.GREATER_OR_EQUAL, value, order);
     }
 
@@ -426,23 +426,23 @@ public class Property<ENTITY> implements Serializable {
      * Case sensitive when matching results. Use the overload and pass
      * {@link StringOrder#CASE_INSENSITIVE StringOrder.CASE_INSENSITIVE} to specify that case should be ignored.
      *
-     * @see #lt(String, StringOrder)
+     * @see #less(String, StringOrder)
      */
-    public PropertyQueryCondition<ENTITY> lt(String value) {
+    public PropertyQueryCondition<ENTITY> less(String value) {
         return new StringCondition<>(this, StringCondition.Operation.LESS, value);
     }
 
     /**
      * Creates a "less than ('&lt;')" condition for this property.
      */
-    public PropertyQueryCondition<ENTITY> lt(String value, StringOrder order) {
+    public PropertyQueryCondition<ENTITY> less(String value, StringOrder order) {
         return new StringCondition<>(this, StringCondition.Operation.LESS, value, order);
     }
 
     /**
      * Creates a "less or equal ('&lt;=')" condition for this property.
      */
-    public PropertyQueryCondition<ENTITY> ltOrEqual(String value, StringOrder order) {
+    public PropertyQueryCondition<ENTITY> lessOrEqual(String value, StringOrder order) {
         return new StringCondition<>(this, StringCondition.Operation.LESS_OR_EQUAL, value, order);
     }
 
@@ -540,27 +540,27 @@ public class Property<ENTITY> implements Serializable {
     }
 
     /** Creates an "equal ('=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> eq(byte[] value) {
+    public PropertyQueryCondition<ENTITY> equal(byte[] value) {
         return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.EQUAL, value);
     }
 
     /** Creates a "greater than ('&gt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> gt(byte[] value) {
+    public PropertyQueryCondition<ENTITY> greater(byte[] value) {
         return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.GREATER, value);
     }
 
     /** Creates a "greater or equal ('&gt;=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> gtOrEqual(byte[] value) {
+    public PropertyQueryCondition<ENTITY> greaterOrEqual(byte[] value) {
         return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.GREATER_OR_EQUAL, value);
     }
 
     /** Creates a "less than ('&lt;')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> lt(byte[] value) {
+    public PropertyQueryCondition<ENTITY> less(byte[] value) {
         return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.LESS, value);
     }
 
     /** Creates a "less or equal ('&lt;=')" condition for this property. */
-    public PropertyQueryCondition<ENTITY> ltOrEqual(byte[] value) {
+    public PropertyQueryCondition<ENTITY> lessOrEqual(byte[] value) {
         return new ByteArrayCondition<>(this, ByteArrayCondition.Operation.LESS_OR_EQUAL, value);
     }
 
