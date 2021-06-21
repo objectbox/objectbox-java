@@ -55,8 +55,8 @@ public class QueryTest2 extends AbstractQueryTest {
 
         // suggested query API
         Query<TestEntity> newQuery = box.query(
-                TestEntity_.simpleString.equal("Fry")
-                        .and(TestEntity_.simpleInt.less(12)
+                TestEntity_.simpleString.eq("Fry")
+                        .and(TestEntity_.simpleInt.lt(12)
                                 .or(TestEntity_.simpleLong.oneOf(new long[]{1012}))))
                 .order(TestEntity_.simpleInt)
                 .build();
@@ -79,21 +79,21 @@ public class QueryTest2 extends AbstractQueryTest {
         // Nested OR
         // (Sarah OR Fry) AND <12
         List<TestEntity> resultsOr = box.query(
-                TestEntity_.simpleString.equal("Sarah")
+                TestEntity_.simpleString.eq("Sarah")
                         .or(
-                                TestEntity_.simpleString.equal("Fry")
+                                TestEntity_.simpleString.eq("Fry")
                         )
                         .and(
-                                TestEntity_.simpleInt.less(12)
+                                TestEntity_.simpleInt.lt(12)
                         )
         ).build().find();
         // <12 AND (Fry OR Sarah)
         List<TestEntity> resultsNestedOr = box.query(
-                TestEntity_.simpleInt.less(12)
+                TestEntity_.simpleInt.lt(12)
                         .and(
-                                TestEntity_.simpleString.equal("Fry")
+                                TestEntity_.simpleString.eq("Fry")
                                         .or(
-                                                TestEntity_.simpleString.equal("Sarah")
+                                                TestEntity_.simpleString.eq("Sarah")
                                         )
                         )
         ).build().find();
@@ -106,21 +106,21 @@ public class QueryTest2 extends AbstractQueryTest {
         // Nested AND
         // (<12 AND Sarah) OR Fry
         List<TestEntity> resultsAnd = box.query(
-                TestEntity_.simpleInt.less(12)
+                TestEntity_.simpleInt.lt(12)
                         .and(
-                                TestEntity_.simpleString.equal("Sarah")
+                                TestEntity_.simpleString.eq("Sarah")
                         )
                         .or(
-                                TestEntity_.simpleString.equal("Fry")
+                                TestEntity_.simpleString.eq("Fry")
                         )
         ).build().find();
         // Fry OR (Sarah AND <12)
         List<TestEntity> resultsNestedAnd = box.query(
-                TestEntity_.simpleString.equal("Fry")
+                TestEntity_.simpleString.eq("Fry")
                         .or(
-                                TestEntity_.simpleString.equal("Sarah")
+                                TestEntity_.simpleString.eq("Sarah")
                                         .and(
-                                                TestEntity_.simpleInt.less(12)
+                                                TestEntity_.simpleInt.lt(12)
                                         )
                         )
         ).build().find();
@@ -132,7 +132,7 @@ public class QueryTest2 extends AbstractQueryTest {
     @Test
     public void or() {
         putTestEntitiesScalars();
-        Query<TestEntity> query = box.query(simpleInt.equal(2007).or(simpleLong.equal(3002))).build();
+        Query<TestEntity> query = box.query(simpleInt.eq(2007).or(simpleLong.eq(3002))).build();
         List<TestEntity> entities = query.find();
         assertEquals(2, entities.size());
         assertEquals(3002, entities.get(0).getSimpleLong());
@@ -143,9 +143,9 @@ public class QueryTest2 extends AbstractQueryTest {
     public void and() {
         putTestEntitiesScalars();
         // Result if OR precedence (wrong): {}, AND precedence (expected): {2008}
-        Query<TestEntity> query = box.query(TestEntity_.simpleInt.equal(2006)
-                .and(TestEntity_.simpleInt.equal(2007))
-                .or(TestEntity_.simpleInt.equal(2008)))
+        Query<TestEntity> query = box.query(TestEntity_.simpleInt.eq(2006)
+                .and(TestEntity_.simpleInt.eq(2007))
+                .or(TestEntity_.simpleInt.eq(2008)))
                 .build();
         List<TestEntity> entities = query.find();
         assertEquals(1, entities.size());
@@ -160,8 +160,8 @@ public class QueryTest2 extends AbstractQueryTest {
         putTestEntitiesScalars();
 
         Query<TestEntity> query = box.query(
-                simpleInt.greater(0).alias("greater")
-                        .or(simpleInt.less(0).alias("less"))
+                simpleInt.gt(0).alias("greater")
+                        .or(simpleInt.lt(0).alias("less"))
         ).order(simpleInt).build();
         List<TestEntity> results = query
                 .setParameter("greater", 2008)
