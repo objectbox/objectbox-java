@@ -14,7 +14,8 @@ import io.objectbox.query.QueryBuilder.StringOrder;
  * query condition passed to the native query builder.
  */
 public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T> implements PropertyQueryCondition<T> {
-    protected final Property<T> property;
+    // Note: Expose for DAOcompat
+    public final Property<T> property;
     private String alias;
 
     PropertyQueryConditionImpl(Property<T> property) {
@@ -27,8 +28,9 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
         return this;
     }
 
+    // Note: Expose for DAOcompat
     @Override
-    void apply(QueryBuilder<T> builder) {
+    public void apply(QueryBuilder<T> builder) {
         applyCondition(builder);
         if (alias != null && alias.length() != 0) {
             builder.parameterAlias(alias);
