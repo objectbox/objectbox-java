@@ -148,16 +148,13 @@ public class SubscriptionBuilder<T> {
     }
 
     /**
-     * Sets the observer for this subscription and requests the latest data to be delivered immediately
-     * and subscribes to the publisher for data updates, unless configured differently
-     * using {@link #single()} or {@link #onlyChanges()}.
+     * Sets the observer for this subscription and requests the latest data to be delivered immediately.
+     * Subscribes to receive data updates. This can be changed by using {@link #single()} or {@link #onlyChanges()}.
      * <p>
-     * Results are delivered on a background thread owned by the publisher,
+     * Results are delivered on a background thread owned by the internal data publisher,
      * unless a scheduler was set using {@link #on(Scheduler)}.
      * <p>
-     * The returned {@link DataSubscription} must be canceled once the observer should no longer receive notifications.
-     *
-     * @return A {@link DataSubscription} to cancel further notifications to the observer.
+     * The returned {@link DataSubscription} must be canceled once the observer should no longer receive data.
      */
     public DataSubscription observer(DataObserver<T> observer) {
         WeakDataObserver<T> weakObserver = null;
