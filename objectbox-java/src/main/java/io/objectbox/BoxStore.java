@@ -182,6 +182,7 @@ public class BoxStore implements Closeable {
 
     native long nativeValidate(long store, long pageLimit, boolean checkLeafLevel);
 
+    /** @return sync availability (0: none; 1: client; 2: server) */
     static native int nativeGetSupportedSync();
 
     public static boolean isObjectBrowserAvailable() {
