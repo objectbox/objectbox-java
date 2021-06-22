@@ -1065,7 +1065,7 @@ public class BoxStore implements Closeable {
      * Note that failed or aborted transaction do not trigger observers.
      */
     public SubscriptionBuilder<Class> subscribe() {
-        return new SubscriptionBuilder<>(objectClassPublisher, null, threadPool);
+        return new SubscriptionBuilder<>(objectClassPublisher, null);
     }
 
     @Experimental
@@ -1160,7 +1160,7 @@ public class BoxStore implements Closeable {
      */
     @SuppressWarnings("unchecked")
     public <T> SubscriptionBuilder<Class<T>> subscribe(Class<T> forClass) {
-        return new SubscriptionBuilder<>((DataPublisher) objectClassPublisher, forClass, threadPool);
+        return new SubscriptionBuilder<>((DataPublisher) objectClassPublisher, forClass);
     }
 
     @Internal

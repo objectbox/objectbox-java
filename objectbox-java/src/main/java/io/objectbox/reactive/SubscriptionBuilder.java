@@ -16,18 +16,17 @@
 
 package io.objectbox.reactive;
 
-import java.util.concurrent.ExecutorService;
-
 import javax.annotation.Nullable;
 
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.query.Query;
 
 /**
  * Builds a {@link DataSubscription} for a {@link DataObserver} passed via {@link #observer(DataObserver)}.
  * Note that the call to {@link #observer(DataObserver)} is mandatory to create the subscription -
  * if you forget it, nothing will happen.
  * <p>
- * When subscribing to a data source such as {@link io.objectbox.query.Query}, this builder allows to configure:
+ * When subscribing to a data source such as {@link Query}, this builder allows to configure:
  * <ul>
  * <li>weakly referenced observer via {@link #weak()}</li>
  * <li>a data transform operation via {@link #transform(DataTransformer)}</li>
@@ -44,7 +43,6 @@ import io.objectbox.annotation.apihint.Internal;
 public class SubscriptionBuilder<T> {
     private final DataPublisher<T> publisher;
     private final Object publisherParam;
-    private final ExecutorService threadPool;
     private DataObserver<T> observer;
     //    private Runnable firstRunnable;
     private boolean weak;
@@ -58,10 +56,9 @@ public class SubscriptionBuilder<T> {
 
 
     @Internal
-    public SubscriptionBuilder(DataPublisher<T> publisher, @Nullable Object param, ExecutorService threadPool) {
+    public SubscriptionBuilder(DataPublisher<T> publisher, @Nullable Object param) {
         this.publisher = publisher;
         publisherParam = param;
-        this.threadPool = threadPool;
     }
 
     //    public Observable<T> runFirst(Runnable firstRunnable) {
@@ -82,11 +79,21 @@ public class SubscriptionBuilder<T> {
         return this;
     }
 
+    /**
+     * Only deliver the latest data once, do not subscribe for data changes.
+     *
+     * @see #onlyChanges()
+     */
     public SubscriptionBuilder<T> single() {
         single = true;
         return this;
     }
 
+    /**
+     * Upon subscribing do not deliver the latest data, only once there are changes.
+     *
+     * @see #single()
+     */
     public SubscriptionBuilder<T> onlyChanges() {
         onlyChanges = true;
         return this;
@@ -98,14 +105,12 @@ public class SubscriptionBuilder<T> {
     //    }
 
     /**
-     * Transforms the original data from the publisher to something that is more helpful to your application.
-     * The transformation is done in an asynchronous thread.
-     * The observer will be called in the same asynchronous thread unless a Scheduler is defined using
-     * {@link #on(Scheduler)}.
+     * Transforms the original data from the publisher to some other type.
+     * All transformations run sequentially in an asynchronous thread owned by the publisher.
      * <p>
-     * This is roughly equivalent to the map operator as known in Rx and Kotlin.
+     * This is similar to the map operator of Rx and Kotlin.
      *
-     * @param <TO> The class the data is transformed to
+     * @param <TO> The type data is transformed to.
      */
     public <TO> SubscriptionBuilder<TO> transform(final DataTransformer<T, TO> transformer) {
         if (this.transformer != null) {
@@ -143,11 +148,13 @@ public class SubscriptionBuilder<T> {
     }
 
     /**
-     * The given observer is subscribed to the publisher. This method MUST be called to complete a subscription.
+     * Sets the observer for this subscription and requests the latest data to be delivered immediately.
+     * Subscribes to receive data updates. This can be changed by using {@link #single()} or {@link #onlyChanges()}.
      * <p>
-     * Note: you must keep the returned {@link DataSubscription} to cancel it.
-     *
-     * @return an subscription object used for canceling further notifications to the observer
+     * Results are delivered on a background thread owned by the internal data publisher,
+     * unless a scheduler was set using {@link #on(Scheduler)}.
+     * <p>
+     * The returned {@link DataSubscription} must be canceled once the observer should no longer receive data.
      */
     public DataSubscription observer(DataObserver<T> observer) {
         WeakDataObserver<T> weakObserver = null;
@@ -190,6 +197,10 @@ public class SubscriptionBuilder<T> {
         return this;
     }
 
+    /**
+     * Wraps a {@link DataObserver} supplied to {@link #observer(DataObserver)} to support result
+     * transformation, an error observer or scheduler for result delivery.
+     */
     class ActionObserver implements DataObserver<T>, DelegatingObserver<T> {
         private final DataSubscriptionImpl subscription;
         private SchedulerRunOnError schedulerRunOnError;
@@ -214,19 +225,27 @@ public class SubscriptionBuilder<T> {
             }
         }
 
+        /**
+         * Runs on the thread of the {@link #onData(Object)} caller to ensure data is delivered
+         * in the same order as {@link #onData(Object)} was called, to prevent delivering stale data.
+         * <p>
+         * For both ObjectClassPublisher and QueryPublisher this is the asynchronous
+         * thread publish requests are processed on.
+         * <p>
+         * This could be optimized in the future to allow parallel execution,
+         * but this would require an ordering mechanism for the transformed data.
+         */
         private void transformAndContinue(final T data) {
-            threadPool.submit(() -> {
-                if (subscription.isCanceled()) {
-                    return;
-                }
-                try {
-                    // Type erasure FTW
-                    T result = (T) transformer.transform(data);
-                    callOnData(result);
-                } catch (Throwable th) {
-                    callOnError(th, "Transformer failed without an ErrorObserver set");
-                }
-            });
+            if (subscription.isCanceled()) {
+                return;
+            }
+            try {
+                // Type erasure FTW
+                T result = (T) transformer.transform(data);
+                callOnData(result);
+            } catch (Throwable th) {
+                callOnError(th, "Transformer failed without an ErrorObserver set");
+            }
         }
 
         private void callOnError(Throwable th, String msgNoErrorObserver) {
