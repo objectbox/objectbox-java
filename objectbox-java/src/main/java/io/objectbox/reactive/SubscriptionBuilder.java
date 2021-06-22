@@ -200,6 +200,10 @@ public class SubscriptionBuilder<T> {
         return this;
     }
 
+    /**
+     * Wraps a {@link DataObserver} supplied to {@link #observer(DataObserver)} to support result
+     * transformation, an error observer or scheduler for result delivery.
+     */
     class ActionObserver implements DataObserver<T>, DelegatingObserver<T> {
         private final DataSubscriptionImpl subscription;
         private SchedulerRunOnError schedulerRunOnError;
