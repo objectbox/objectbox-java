@@ -96,32 +96,19 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
         int[] entityTypeIds = forClass != null
                 ? new int[]{boxStore.getEntityTypeIdOrThrow((Class) forClass)}
                 : boxStore.getAllEntityTypeIds();
-
-        synchronized (changesQueue) {
-            changesQueue.add(new PublishRequest(observer, entityTypeIds));
-            // Only one thread at a time.
-            if (!changePublisherRunning) {
-                changePublisherRunning = true;
-                boxStore.internalScheduleThread(this);
-            }
-        }
+        queuePublishRequestAndScheduleRun(observer, entityTypeIds);
     }
 
-    private void handleObserverException(Class objectClass) {
-        RuntimeException newEx = new RuntimeException(
-                "Observer failed while processing data for " + objectClass +
-                        ". Consider using an ErrorObserver");
-        // So it won't be swallowed by thread pool
-        newEx.printStackTrace();
-        throw newEx;
+    void publish(int[] entityTypeIdsAffected) {
+        queuePublishRequestAndScheduleRun(null, entityTypeIdsAffected);
     }
 
     /**
      * Non-blocking: will just enqueue the changes for a separate thread.
      */
-    void publish(int[] entityTypeIdsAffected) {
+    private void queuePublishRequestAndScheduleRun(@Nullable DataObserver<Class> observer, int[] entityTypeIds) {
         synchronized (changesQueue) {
-            changesQueue.add(new PublishRequest(null, entityTypeIdsAffected));
+            changesQueue.add(new PublishRequest(observer, entityTypeIds));
             // Only one thread at a time.
             if (!changePublisherRunning) {
                 changePublisherRunning = true;
@@ -172,5 +159,14 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
             // Just in Case of exceptions; it's better done within synchronized for regular cases
             changePublisherRunning = false;
         }
+    }
+
+    private void handleObserverException(Class objectClass) {
+        RuntimeException newEx = new RuntimeException(
+                "Observer failed while processing data for " + objectClass +
+                        ". Consider using an ErrorObserver");
+        // So it won't be swallowed by thread pool
+        newEx.printStackTrace();
+        throw newEx;
     }
 }

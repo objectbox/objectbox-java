@@ -55,7 +55,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
         public void onData(List<T> data) {
         }
     }
-    /** Placeholder observer if subscribed observers should be notified. */
+    /** Placeholder observer to use if all subscribed observers should be notified. */
     private final SubscribedObservers<T> SUBSCRIBED_OBSERVERS = new SubscribedObservers<>();
 
     private DataObserver<Class<T>> objectClassObserver;
@@ -93,18 +93,19 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
 
     @Override
     public void publishSingle(DataObserver<List<T>> observer, @Nullable Object param) {
-        synchronized (publishQueue) {
-            publishQueue.add(observer);
-            if (!publisherRunning) {
-                publisherRunning = true;
-                box.getStore().internalScheduleThread(this);
-            }
-        }
+        queueObserverAndScheduleRun(observer);
     }
 
     void publish() {
+        queueObserverAndScheduleRun(SUBSCRIBED_OBSERVERS);
+    }
+
+    /**
+     * Non-blocking: will just enqueue the changes for a separate thread.
+     */
+    private void queueObserverAndScheduleRun(DataObserver<List<T>> observer) {
         synchronized (publishQueue) {
-            publishQueue.add(SUBSCRIBED_OBSERVERS);
+            publishQueue.add(observer);
             if (!publisherRunning) {
                 publisherRunning = true;
                 box.getStore().internalScheduleThread(this);
