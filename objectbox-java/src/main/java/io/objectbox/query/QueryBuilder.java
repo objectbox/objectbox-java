@@ -61,10 +61,20 @@ import java.util.List;
 public class QueryBuilder<T> implements Closeable {
 
     public enum StringOrder {
-        /** The default: case insensitive ASCII characters */
+        /**
+         * Ignores case of ASCII characters when matching results,
+         * e.g. the condition "= example" matches both "Example" and "example".
+         * <p>
+         * Note: To utilize an index on a property use {@link #CASE_SENSITIVE} instead.
+         */
         CASE_INSENSITIVE,
 
-        /** Case matters ('a' != 'A'). */
+        /**
+         * Checks case of ASCII characters when macthing results,
+         * e.g. the condition "= example" only matches "example", but not "Example".
+         * <p>
+         * Use this if the property has an index.
+         */
         CASE_SENSITIVE
     }
 

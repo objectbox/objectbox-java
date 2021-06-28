@@ -25,10 +25,11 @@ import java.lang.annotation.Target;
  * Specifies that the property should be indexed.
  * <p>
  * It is highly recommended to index properties that are used in a query to improve query performance.
+ * When building a query, make sure to use case sensitive String conditions to utilize the index.
  * <p>
  * To fine tune indexing of a property you can override the default index {@link #type()}.
  * <p>
- * Note: indexes are currently not supported for byte array, float or double properties.
+ * Note: indexes are currently not supported for string array, byte array, float or double properties.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
