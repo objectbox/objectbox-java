@@ -78,8 +78,8 @@ public class QueryTest extends AbstractQueryTest {
             queryBuilder.between(TestEntity_.simpleInt, 42, 43);
             queryBuilder.in(TestEntity_.simpleInt, new int[]{42});
             queryBuilder.notIn(TestEntity_.simpleInt, new int[]{42});
-            queryBuilder.contains(TestEntity_.simpleString, "42");
-            queryBuilder.startsWith(TestEntity_.simpleString, "42");
+            queryBuilder.contains(TestEntity_.simpleString, "42", StringOrder.CASE_INSENSITIVE);
+            queryBuilder.startsWith(TestEntity_.simpleString, "42", StringOrder.CASE_SENSITIVE);
             queryBuilder.order(TestEntity_.simpleInt);
             queryBuilder.build().find();
         }
@@ -272,11 +272,11 @@ public class QueryTest extends AbstractQueryTest {
     public void testString() {
         List<TestEntity> entities = putTestEntitiesStrings();
         int count = entities.size();
-        assertEquals(1, getUniqueNotNull(box.query().equal(simpleString, "banana").build()).getId());
-        assertEquals(count - 1, box.query().notEqual(simpleString, "banana").build().count());
-        assertEquals(4, getUniqueNotNull(box.query().startsWith(simpleString, "ba").endsWith(simpleString, "shake").build())
+        assertEquals(1, getUniqueNotNull(box.query().equal(simpleString, "banana", StringOrder.CASE_INSENSITIVE).build()).getId());
+        assertEquals(count - 1, box.query().notEqual(simpleString, "banana", StringOrder.CASE_INSENSITIVE).build().count());
+        assertEquals(4, getUniqueNotNull(box.query().startsWith(simpleString, "ba", StringOrder.CASE_INSENSITIVE).endsWith(simpleString, "shake", StringOrder.CASE_INSENSITIVE).build())
                 .getId());
-        assertEquals(2, box.query().contains(simpleString, "nana").build().count());
+        assertEquals(2, box.query().contains(simpleString, "nana", StringOrder.CASE_INSENSITIVE).build().count());
     }
 
     @Test
@@ -285,12 +285,12 @@ public class QueryTest extends AbstractQueryTest {
 
         // Using contains should not work on String array.
         Exception exception = assertThrows(UnsupportedOperationException.class,
-                () -> box.query().contains(simpleStringArray, "banana"));
+                () -> box.query().contains(simpleStringArray, "banana", StringOrder.CASE_INSENSITIVE));
         assertEquals("For String[] only containsElement() is supported at this time.", exception.getMessage());
 
         // containsElement(prop, value) matches if value is equal to one of the array items.
         // Verify by not matching entity where 'banana' is only a substring of an array item ('banana milk shake').
-        List<TestEntity> results = box.query().containsElement(simpleStringArray, "banana").build().find();
+        List<TestEntity> results = box.query().containsElement(simpleStringArray, "banana", StringOrder.CASE_INSENSITIVE).build().find();
         assertEquals(1, results.size());
         assertEquals("banana", results.get(0).getSimpleStringArray()[0]);
     }
@@ -299,7 +299,7 @@ public class QueryTest extends AbstractQueryTest {
     public void testStringLess() {
         putTestEntitiesStrings();
         putTestEntity("BaNaNa Split", 100);
-        Query<TestEntity> query = box.query().less(simpleString, "banana juice").order(simpleString).build();
+        Query<TestEntity> query = box.query().less(simpleString, "banana juice", StringOrder.CASE_INSENSITIVE).order(simpleString).build();
         List<TestEntity> entities = query.find();
         assertEquals(2, entities.size());
         assertEquals("apple", entities.get(0).getSimpleString());
@@ -355,7 +355,7 @@ public class QueryTest extends AbstractQueryTest {
     public void testStringGreater() {
         putTestEntitiesStrings();
         putTestEntity("FOO", 100);
-        Query<TestEntity> query = box.query().greater(simpleString, "banana juice").order(simpleString).build();
+        Query<TestEntity> query = box.query().greater(simpleString, "banana juice", StringOrder.CASE_INSENSITIVE).order(simpleString).build();
         List<TestEntity> entities = query.find();
         assertEquals(4, entities.size());
         assertEquals("banana milk shake", entities.get(0).getSimpleString());
@@ -410,7 +410,7 @@ public class QueryTest extends AbstractQueryTest {
         putTestEntitiesStrings();
         putTestEntity("BAR", 100);
         String[] values = {"bar", "foo bar"};
-        Query<TestEntity> query = box.query().in(simpleString, values).order(simpleString, OrderFlags.CASE_SENSITIVE)
+        Query<TestEntity> query = box.query().in(simpleString, values, StringOrder.CASE_INSENSITIVE).order(simpleString, OrderFlags.CASE_SENSITIVE)
                 .build();
         List<TestEntity> entities = query.find();
         assertEquals(3, entities.size());
@@ -609,7 +609,7 @@ public class QueryTest extends AbstractQueryTest {
         }
         box.put(entities);
         int count = entities.size();
-        List<TestEntity> entitiesQueried = box.query().equal(simpleString, sameValueForAll).build().find();
+        List<TestEntity> entitiesQueried = box.query().equal(simpleString, sameValueForAll, StringOrder.CASE_INSENSITIVE).build().find();
         assertEquals(count, entitiesQueried.size());
     }
 
@@ -617,7 +617,7 @@ public class QueryTest extends AbstractQueryTest {
     public void testEqualStringOrder() {
         putTestEntitiesStrings();
         putTestEntity("BAR", 100);
-        assertEquals(2, box.query().equal(simpleString, "bar").build().count());
+        assertEquals(2, box.query().equal(simpleString, "bar", StringOrder.CASE_INSENSITIVE).build().count());
         assertEquals(1, box.query().equal(simpleString, "bar", StringOrder.CASE_SENSITIVE).build().count());
     }
 
@@ -800,7 +800,7 @@ public class QueryTest extends AbstractQueryTest {
     @Test
     public void testSetParameterString() {
         putTestEntitiesStrings();
-        Query<TestEntity> query = box.query().equal(simpleString, "banana").parameterAlias("foo").build();
+        Query<TestEntity> query = box.query().equal(simpleString, "banana", StringOrder.CASE_INSENSITIVE).parameterAlias("foo").build();
         assertEquals(1, getUniqueNotNull(query).getId());
         query.setParameter(simpleString, "bar");
         assertEquals(3, getUniqueNotNull(query).getId());
@@ -836,7 +836,7 @@ public class QueryTest extends AbstractQueryTest {
     public void testForEach() {
         List<TestEntity> testEntities = putTestEntitiesStrings();
         final StringBuilder stringBuilder = new StringBuilder();
-        box.query().startsWith(simpleString, "banana").build()
+        box.query().startsWith(simpleString, "banana", StringOrder.CASE_INSENSITIVE).build()
                 .forEach(data -> stringBuilder.append(data.getSimpleString()).append('#'));
         assertEquals("banana#banana milk shake#", stringBuilder.toString());
 
@@ -849,7 +849,7 @@ public class QueryTest extends AbstractQueryTest {
     public void testForEachBreak() {
         putTestEntitiesStrings();
         final StringBuilder stringBuilder = new StringBuilder();
-        box.query().startsWith(simpleString, "banana").build()
+        box.query().startsWith(simpleString, "banana", StringOrder.CASE_INSENSITIVE).build()
                 .forEach(data -> {
                     stringBuilder.append(data.getSimpleString());
                     throw new BreakForEach();
@@ -947,7 +947,7 @@ public class QueryTest extends AbstractQueryTest {
 
         // Some conditions.
         Query<TestEntity> query = box.query()
-                .equal(TestEntity_.simpleString, "Hello")
+                .equal(TestEntity_.simpleString, "Hello", StringOrder.CASE_INSENSITIVE)
                 .or().greater(TestEntity_.simpleInt, 42)
                 .build();
         String describeActual = query.describe();

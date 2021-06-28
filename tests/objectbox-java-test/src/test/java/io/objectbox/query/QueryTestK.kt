@@ -2,6 +2,7 @@ package io.objectbox.query
 
 import io.objectbox.TestEntity_
 import io.objectbox.kotlin.*
+import io.objectbox.query.QueryBuilder.StringOrder
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -37,7 +38,7 @@ class QueryTestK : AbstractQueryTest() {
             less(TestEntity_.simpleInt, 12)
             or()
             inValues(TestEntity_.simpleLong, longArrayOf(1012))
-            equal(TestEntity_.simpleString, "Fry")
+            equal(TestEntity_.simpleString, "Fry", StringOrder.CASE_INSENSITIVE)
             order(TestEntity_.simpleInt)
         }
         val results = query.find()

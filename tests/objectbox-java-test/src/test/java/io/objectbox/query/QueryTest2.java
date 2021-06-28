@@ -16,6 +16,7 @@
 
 package io.objectbox.query;
 
+import io.objectbox.query.QueryBuilder.StringOrder;
 import org.junit.Test;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public class QueryTest2 extends AbstractQueryTest {
 
         // current query API
         Query<TestEntity> query = box.query()
-                .equal(TestEntity_.simpleString, "Fry")
+                .equal(TestEntity_.simpleString, "Fry", StringOrder.CASE_INSENSITIVE)
                 .less(TestEntity_.simpleInt, 12)
                 .or()
                 .in(TestEntity_.simpleLong, new long[]{1012})
