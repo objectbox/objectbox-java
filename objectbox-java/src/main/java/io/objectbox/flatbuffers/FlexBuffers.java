@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.flatbuffers;
+package io.objectbox.flatbuffers;
 
 
-import static com.google.flatbuffers.FlexBuffers.Unsigned.byteToUnsignedInt;
-import static com.google.flatbuffers.FlexBuffers.Unsigned.intToUnsignedLong;
-import static com.google.flatbuffers.FlexBuffers.Unsigned.shortToUnsignedInt;
+import static io.objectbox.flatbuffers.FlexBuffers.Unsigned.byteToUnsignedInt;
+import static io.objectbox.flatbuffers.FlexBuffers.Unsigned.intToUnsignedLong;
+import static io.objectbox.flatbuffers.FlexBuffers.Unsigned.shortToUnsignedInt;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;

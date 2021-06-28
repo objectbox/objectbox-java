@@ -1,4 +1,4 @@
-package com.google.flatbuffers;
+package io.objectbox.flatbuffers;
 
 import java.util.Arrays;
 

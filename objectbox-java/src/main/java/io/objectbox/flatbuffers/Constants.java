@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.flatbuffers;
+package io.objectbox.flatbuffers;
 
 /// @cond FLATBUFFERS_INTERNAL
 

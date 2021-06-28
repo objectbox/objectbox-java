@@ -1,4 +1,4 @@
-package com.google.flatbuffers;
+package io.objectbox.flatbuffers;
 
 /**
  * Interface to represent a read-write buffer. This interface will be used to access and write

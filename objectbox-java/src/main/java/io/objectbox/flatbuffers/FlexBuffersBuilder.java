@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.flatbuffers;
+package io.objectbox.flatbuffers;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -25,10 +25,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
-import static com.google.flatbuffers.FlexBuffers.*;
-import static com.google.flatbuffers.FlexBuffers.Unsigned.byteToUnsignedInt;
-import static com.google.flatbuffers.FlexBuffers.Unsigned.intToUnsignedLong;
-import static com.google.flatbuffers.FlexBuffers.Unsigned.shortToUnsignedInt;
+import static io.objectbox.flatbuffers.FlexBuffers.*;
+import static io.objectbox.flatbuffers.FlexBuffers.Unsigned.byteToUnsignedInt;
+import static io.objectbox.flatbuffers.FlexBuffers.Unsigned.intToUnsignedLong;
+import static io.objectbox.flatbuffers.FlexBuffers.Unsigned.shortToUnsignedInt;
 
 /// @file
 /// @addtogroup flatbuffers_java_api

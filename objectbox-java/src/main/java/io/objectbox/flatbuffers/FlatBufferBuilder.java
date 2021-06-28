@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.flatbuffers;
+package io.objectbox.flatbuffers;
 
-import static com.google.flatbuffers.Constants.*;
+import static io.objectbox.flatbuffers.Constants.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -269,7 +269,7 @@ public class FlatBufferBuilder {
    /**
     * Prepare to write an element of `size` after `additional_bytes`
     * have been written, e.g. if you write a string, you need to align such
-    * the int length field is aligned to {@link com.google.flatbuffers.Constants#SIZEOF_INT}, and
+    * the int length field is aligned to {@link io.objectbox.flatbuffers.Constants#SIZEOF_INT}, and
     * the string data follows it directly.  If all you need to do is alignment, `additional_bytes`
     * will be 0.
     *
