@@ -98,7 +98,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     @Test
     public void testOpenTwoBoxStoreTwoFiles() {
         File boxStoreDir2 = new File(boxStoreDir.getAbsolutePath() + "-2");
-        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir2);
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(null)).directory(boxStoreDir2);
         builder.entity(new TestEntity_());
     }
 
@@ -111,7 +111,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     public void testDeleteAllFiles_staticDir() {
         closeStoreForTest();
         File boxStoreDir2 = new File(boxStoreDir.getAbsolutePath() + "-2");
-        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir2);
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(null)).directory(boxStoreDir2);
         BoxStore store2 = builder.build();
         store2.close();
 
@@ -130,7 +130,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         File dbDir = new File(basedir, name);
         assertFalse(dbDir.exists());
 
-        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).baseDirectory(basedir).name(name);
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(null)).baseDirectory(basedir).name(name);
         BoxStore store2 = builder.build();
         store2.close();
 
@@ -193,7 +193,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         final int[] countHolder = {0};
         final int[] countHolderCallback = {0};
 
-        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir)
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(null)).directory(boxStoreDir)
                 .failedReadTxAttemptCallback((result, error) -> {
                     assertNotNull(error);
                     countHolderCallback[0]++;

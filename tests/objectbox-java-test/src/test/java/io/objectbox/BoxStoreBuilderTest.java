@@ -46,7 +46,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
     @Before
     public void setUpBuilder() {
         BoxStore.clearDefaultStore();
-        builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir);
+        builder = new BoxStoreBuilder(createTestModel(null)).directory(boxStoreDir);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
 
     @Test
     public void testMaxReaders() {
-        builder = createBoxStoreBuilder(false);
+        builder = createBoxStoreBuilder(null);
         store = builder.maxReaders(1).build();
         final Exception[] exHolder = {null};
         final Thread thread = new Thread(() -> {
@@ -116,7 +116,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
     @Test
     public void readOnly() {
         // Create a database first; we must create the model only once (ID/UID sequences would be different 2nd time)
-        byte[] model = createTestModel(false);
+        byte[] model = createTestModel(null);
         builder = new BoxStoreBuilder(model).directory(boxStoreDir);
         store = builder.build();
         store.close();
@@ -132,7 +132,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
     @Test
     public void validateOnOpen() {
         // Create a database first; we must create the model only once (ID/UID sequences would be different 2nd time)
-        byte[] model = createTestModel(false);
+        byte[] model = createTestModel(null);
         builder = new BoxStoreBuilder(model).directory(boxStoreDir);
         builder.entity(new TestEntity_());
         store = builder.build();

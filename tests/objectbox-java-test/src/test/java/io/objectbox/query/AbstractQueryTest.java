@@ -16,6 +16,7 @@
 
 package io.objectbox.query;
 
+import io.objectbox.annotation.IndexType;
 import org.junit.Before;
 
 import java.util.ArrayList;
@@ -27,12 +28,14 @@ import io.objectbox.BoxStoreBuilder;
 import io.objectbox.DebugFlags;
 import io.objectbox.TestEntity;
 
+import javax.annotation.Nullable;
+
 public class AbstractQueryTest extends AbstractObjectBoxTest {
     protected Box<TestEntity> box;
 
     @Override
-    protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
-        BoxStoreBuilder builder = super.createBoxStoreBuilder(withIndex);
+    protected BoxStoreBuilder createBoxStoreBuilder(@Nullable IndexType simpleStringIndexType) {
+        BoxStoreBuilder builder = super.createBoxStoreBuilder(simpleStringIndexType);
         if (DEBUG_LOG) builder.debugFlags(DebugFlags.LOG_QUERY_PARAMETERS);
         return builder;
     }

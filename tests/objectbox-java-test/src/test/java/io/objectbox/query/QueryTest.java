@@ -861,7 +861,7 @@ public class QueryTest extends AbstractQueryTest {
     // TODO can we improve? More than just "still works"?
     public void testQueryAttempts() {
         store.close();
-        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(false)).directory(boxStoreDir)
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(null)).directory(boxStoreDir)
                 .queryAttempts(5)
                 .failedReadTxAttemptCallback((result, error) -> {
                     if (error != null) {

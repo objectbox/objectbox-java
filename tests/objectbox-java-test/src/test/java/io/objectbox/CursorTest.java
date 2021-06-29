@@ -16,6 +16,7 @@
 
 package io.objectbox;
 
+import io.objectbox.annotation.IndexType;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
@@ -27,7 +28,9 @@ public class CursorTest extends AbstractObjectBoxTest {
 
     @Override
     protected BoxStore createBoxStore() {
-        return createBoxStore(true);
+        // Note: can not use DEFAULT as tests use deprecated cursor.lookupKeyUsingIndex method
+        // which expects a value based index.
+        return createBoxStore(IndexType.VALUE);
     }
 
     @Test

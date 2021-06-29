@@ -16,6 +16,7 @@
 
 package io.objectbox;
 
+import io.objectbox.annotation.IndexType;
 import org.junit.After;
 import org.junit.Before;
 
@@ -101,11 +102,18 @@ public abstract class AbstractObjectBoxTest {
     }
 
     protected BoxStore createBoxStore() {
-        return createBoxStore(false);
+        return createBoxStore(null);
     }
 
-    protected BoxStore createBoxStore(boolean withIndex) {
-        return createBoxStoreBuilder(withIndex).build();
+    protected BoxStore createBoxStore(@Nullable IndexType simpleStringIndexType) {
+        return createBoxStoreBuilder(simpleStringIndexType).build();
+    }
+
+    protected BoxStoreBuilder createBoxStoreBuilder(@Nullable IndexType simpleStringIndexType) {
+        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(simpleStringIndexType)).directory(boxStoreDir);
+        if (DEBUG_LOG) builder.debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE);
+        builder.entity(new TestEntity_());
+        return builder;
     }
 
     protected BoxStoreBuilder createBoxStoreBuilderWithTwoEntities(boolean withIndex) {
@@ -113,13 +121,6 @@ public abstract class AbstractObjectBoxTest {
         if (DEBUG_LOG) builder.debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE);
         builder.entity(new TestEntity_());
         builder.entity(new TestEntityMinimal_());
-        return builder;
-    }
-
-    protected BoxStoreBuilder createBoxStoreBuilder(boolean withIndex) {
-        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(withIndex)).directory(boxStoreDir);
-        if (DEBUG_LOG) builder.debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE);
-        builder.entity(new TestEntity_());
         return builder;
     }
 
@@ -189,9 +190,9 @@ public abstract class AbstractObjectBoxTest {
         return System.currentTimeMillis();
     }
 
-    protected byte[] createTestModel(boolean withIndex) {
+    protected byte[] createTestModel(@Nullable IndexType simpleStringIndexType) {
         ModelBuilder modelBuilder = new ModelBuilder();
-        addTestEntity(modelBuilder, withIndex);
+        addTestEntity(modelBuilder, simpleStringIndexType);
         modelBuilder.lastEntityId(lastEntityId, lastEntityUid);
         modelBuilder.lastIndexId(lastIndexId, lastIndexUid);
         return modelBuilder.build();
@@ -199,14 +200,14 @@ public abstract class AbstractObjectBoxTest {
 
     byte[] createTestModelWithTwoEntities(boolean withIndex) {
         ModelBuilder modelBuilder = new ModelBuilder();
-        addTestEntity(modelBuilder, withIndex);
+        addTestEntity(modelBuilder, withIndex ? IndexType.DEFAULT : null);
         addTestEntityMinimal(modelBuilder, withIndex);
         modelBuilder.lastEntityId(lastEntityId, lastEntityUid);
         modelBuilder.lastIndexId(lastIndexId, lastIndexUid);
         return modelBuilder.build();
     }
 
-    private void addTestEntity(ModelBuilder modelBuilder, boolean withIndex) {
+    private void addTestEntity(ModelBuilder modelBuilder, @Nullable IndexType simpleStringIndexType) {
         lastEntityUid = ++lastUid;
         EntityBuilder entityBuilder = modelBuilder.entity("TestEntity").id(++lastEntityId, lastEntityUid);
         entityBuilder.property("id", PropertyType.Long).id(TestEntity_.id.id, ++lastUid)
@@ -220,9 +221,19 @@ public abstract class AbstractObjectBoxTest {
         entityBuilder.property("simpleDouble", PropertyType.Double).id(TestEntity_.simpleDouble.id, ++lastUid);
         PropertyBuilder pb =
                 entityBuilder.property("simpleString", PropertyType.String).id(TestEntity_.simpleString.id, ++lastUid);
-        if (withIndex) {
+        if (simpleStringIndexType != null) {
             lastIndexUid = ++lastUid;
-            pb.flags(PropertyFlags.INDEXED).indexId(++lastIndexId, lastIndexUid);
+            // Since 2.0: default for Strings has changed from INDEXED to INDEX_HASH.
+            int indexFlag;
+            if (simpleStringIndexType == IndexType.VALUE) {
+                indexFlag = PropertyFlags.INDEXED;
+            } else if (simpleStringIndexType == IndexType.HASH64) {
+                indexFlag = PropertyFlags.INDEX_HASH64;
+            } else {
+                indexFlag = PropertyFlags.INDEX_HASH;
+            }
+            log(String.format("Using %s index on TestEntity.simpleString", simpleStringIndexType));
+            pb.flags(indexFlag).indexId(++lastIndexId, lastIndexUid);
         }
         entityBuilder.property("simpleByteArray", PropertyType.ByteVector).id(TestEntity_.simpleByteArray.id, ++lastUid);
         entityBuilder.property("simpleStringArray", PropertyType.StringVector).id(TestEntity_.simpleStringArray.id, ++lastUid);
