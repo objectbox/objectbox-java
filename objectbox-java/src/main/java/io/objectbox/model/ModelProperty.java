@@ -21,7 +21,7 @@ package io.objectbox.model;
 import java.nio.*;
 import java.lang.*;
 import java.util.*;
-import com.google.flatbuffers.*;
+import io.objectbox.flatbuffers.*;
 
 @SuppressWarnings("unused")
 public final class ModelProperty extends Table {

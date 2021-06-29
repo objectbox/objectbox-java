@@ -16,7 +16,7 @@
 
 package io.objectbox;
 
-import com.google.flatbuffers.FlatBufferBuilder;
+import io.objectbox.flatbuffers.FlatBufferBuilder;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -11,4 +11,8 @@
     <Match>
         <Class name="io.objectbox.query.OrderFlags" />
     </Match>
+    <!-- Exclude FlatBuffers source code. -->
+    <Match>
+        <Package name="io.objectbox.flatbuffers" />
+    </Match>
 </FindBugsFilter>
