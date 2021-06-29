@@ -259,7 +259,7 @@ public class ObjectClassObserverTest extends AbstractObjectBoxTest {
         }
 
         @Override
-        public <T> void run(RunWithParam runnable, T param) {
+        public <T> void run(RunWithParam<T> runnable, T param) {
             counter.incrementAndGet();
             runnable.run(param);
         }
