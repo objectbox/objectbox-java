@@ -3,10 +3,12 @@ apply plugin: 'kotlin'
 
 uploadArchives.enabled = false
 
-// Note: use release flag instead of sourceCompatibility and targetCompatibility to ensure only JDK 8 API is used.
-// https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation
 tasks.withType(JavaCompile) {
+    // Note: use release flag instead of sourceCompatibility and targetCompatibility to ensure only JDK 8 API is used.
+    // https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation
     options.release.set(8)
+    // Note: Gradle defaults to the platform default encoding, make sure to always use UTF-8 for UTF-8 tests.
+    options.encoding = "UTF-8"
 }
 
 // Produce Java 8 byte code, would default to Java 6.
