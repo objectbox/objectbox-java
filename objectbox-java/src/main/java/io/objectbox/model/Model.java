@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2021 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@ import java.lang.*;
 import java.util.*;
 import io.objectbox.flatbuffers.*;
 
-@SuppressWarnings("unused")
 /**
  * A model describes all entities and other meta data.
  * The current model of an app is synced against ObjectBox's persisted schema.
  * The model itself is not persisted, and thus may change as long as both ends are consistent (Java and native).
  * There could be multiple models/schemas (one dbi per schema) in the future.
  */
+@SuppressWarnings("unused")
 public final class Model extends Table {
-  public static void ValidateVersion() { Constants.FLATBUFFERS_1_12_0(); }
+  public static void ValidateVersion() { Constants.FLATBUFFERS_2_0_0(); }
   public static Model getRootAsModel(ByteBuffer _bb) { return getRootAsModel(_bb, new Model()); }
   public static Model getRootAsModel(ByteBuffer _bb, Model obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }
@@ -77,7 +77,7 @@ public final class Model extends Table {
   public ByteBuffer hashInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 20, 1); }
 
   public static void startModel(FlatBufferBuilder builder) { builder.startTable(9); }
-  public static void addModelVersion(FlatBufferBuilder builder, long modelVersion) { builder.addInt(0, (int)modelVersion, (int)0L); }
+  public static void addModelVersion(FlatBufferBuilder builder, long modelVersion) { builder.addInt(0, (int) modelVersion, (int) 0L); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addVersion(FlatBufferBuilder builder, long version) { builder.addLong(2, version, 0L); }
   public static void addEntities(FlatBufferBuilder builder, int entitiesOffset) { builder.addOffset(3, entitiesOffset, 0); }

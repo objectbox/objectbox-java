@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2021 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package io.objectbox.model;
  * Bit-flags defining the behavior of properties.
  * Note: Numbers indicate the bit position
  */
+@SuppressWarnings("unused")
 public final class PropertyFlags {
   private PropertyFlags() { }
   /**
@@ -81,9 +82,8 @@ public final class PropertyFlags {
    */
   public static final int INDEX_HASH64 = 4096;
   /**
-   * In Java (and Kotlin) integers are stored as signed by default,
-   * but queries and indexes may choose to treat them as unsigned when using this flag.
-   * Note: Don't combine with ID, they are always unsigned internally.
+   * Unused yet: While our default are signed ints, queries and indexes need do know signing info.
+   * Note: Don't combine with ID (IDs are always unsigned internally).
    */
   public static final int UNSIGNED = 8192;
   /**
@@ -97,6 +97,5 @@ public final class PropertyFlags {
    * Unique on-conflict strategy: the object being put replaces any existing conflicting object (deletes it).
    */
   public static final int UNIQUE_ON_CONFLICT_REPLACE = 32768;
-
 }
 

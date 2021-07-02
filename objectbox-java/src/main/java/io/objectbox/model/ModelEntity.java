@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2021 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import io.objectbox.flatbuffers.*;
 
 @SuppressWarnings("unused")
 public final class ModelEntity extends Table {
-  public static void ValidateVersion() { Constants.FLATBUFFERS_1_12_0(); }
+  public static void ValidateVersion() { Constants.FLATBUFFERS_2_0_0(); }
   public static ModelEntity getRootAsModelEntity(ByteBuffer _bb) { return getRootAsModelEntity(_bb, new ModelEntity()); }
   public static ModelEntity getRootAsModelEntity(ByteBuffer _bb, ModelEntity obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }
@@ -69,7 +69,7 @@ public final class ModelEntity extends Table {
   public static void addRelations(FlatBufferBuilder builder, int relationsOffset) { builder.addOffset(4, relationsOffset, 0); }
   public static int createRelationsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
   public static void startRelationsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(5, (int)flags, (int)0L); }
+  public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(5, (int) flags, (int) 0L); }
   public static void addNameSecondary(FlatBufferBuilder builder, int nameSecondaryOffset) { builder.addOffset(6, nameSecondaryOffset, 0); }
   public static int endModelEntity(FlatBufferBuilder builder) {
     int o = builder.endTable();

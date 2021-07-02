@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2021 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import io.objectbox.flatbuffers.*;
 
 @SuppressWarnings("unused")
 public final class ModelProperty extends Table {
-  public static void ValidateVersion() { Constants.FLATBUFFERS_1_12_0(); }
+  public static void ValidateVersion() { Constants.FLATBUFFERS_2_0_0(); }
   public static ModelProperty getRootAsModelProperty(ByteBuffer _bb) { return getRootAsModelProperty(_bb, new ModelProperty()); }
   public static ModelProperty getRootAsModelProperty(ByteBuffer _bb, ModelProperty obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }
@@ -76,13 +76,13 @@ public final class ModelProperty extends Table {
   public static void startModelProperty(FlatBufferBuilder builder) { builder.startTable(9); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addStruct(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
-  public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(2, (short)type, (short)0); }
-  public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(3, (int)flags, (int)0L); }
+  public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(2, (short) type, (short) 0); }
+  public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(3, (int) flags, (int) 0L); }
   public static void addIndexId(FlatBufferBuilder builder, int indexIdOffset) { builder.addStruct(4, indexIdOffset, 0); }
   public static void addTargetEntity(FlatBufferBuilder builder, int targetEntityOffset) { builder.addOffset(5, targetEntityOffset, 0); }
   public static void addVirtualTarget(FlatBufferBuilder builder, int virtualTargetOffset) { builder.addOffset(6, virtualTargetOffset, 0); }
   public static void addNameSecondary(FlatBufferBuilder builder, int nameSecondaryOffset) { builder.addOffset(7, nameSecondaryOffset, 0); }
-  public static void addMaxIndexValueLength(FlatBufferBuilder builder, long maxIndexValueLength) { builder.addInt(8, (int)maxIndexValueLength, (int)0L); }
+  public static void addMaxIndexValueLength(FlatBufferBuilder builder, long maxIndexValueLength) { builder.addInt(8, (int) maxIndexValueLength, (int) 0L); }
   public static int endModelProperty(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;

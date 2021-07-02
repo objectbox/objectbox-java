@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2021 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import io.objectbox.flatbuffers.*;
  */
 @SuppressWarnings("unused")
 public final class FlatStoreOptions extends Table {
-  public static void ValidateVersion() { Constants.FLATBUFFERS_1_12_0(); }
+  public static void ValidateVersion() { Constants.FLATBUFFERS_2_0_0(); }
   public static FlatStoreOptions getRootAsFlatStoreOptions(ByteBuffer _bb) { return getRootAsFlatStoreOptions(_bb, new FlatStoreOptions()); }
   public static FlatStoreOptions getRootAsFlatStoreOptions(ByteBuffer _bb, FlatStoreOptions obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }
@@ -162,16 +162,16 @@ public final class FlatStoreOptions extends Table {
   public static int createModelBytesVector(FlatBufferBuilder builder, ByteBuffer data) { return builder.createByteVector(data); }
   public static void startModelBytesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(1, numElems, 1); }
   public static void addMaxDbSizeInKByte(FlatBufferBuilder builder, long maxDbSizeInKByte) { builder.addLong(2, maxDbSizeInKByte, 0L); }
-  public static void addFileMode(FlatBufferBuilder builder, long fileMode) { builder.addInt(3, (int)fileMode, (int)0L); }
-  public static void addMaxReaders(FlatBufferBuilder builder, long maxReaders) { builder.addInt(4, (int)maxReaders, (int)0L); }
-  public static void addValidateOnOpen(FlatBufferBuilder builder, int validateOnOpen) { builder.addShort(5, (short)validateOnOpen, (short)0); }
+  public static void addFileMode(FlatBufferBuilder builder, long fileMode) { builder.addInt(3, (int) fileMode, (int) 0L); }
+  public static void addMaxReaders(FlatBufferBuilder builder, long maxReaders) { builder.addInt(4, (int) maxReaders, (int) 0L); }
+  public static void addValidateOnOpen(FlatBufferBuilder builder, int validateOnOpen) { builder.addShort(5, (short) validateOnOpen, (short) 0); }
   public static void addValidateOnOpenPageLimit(FlatBufferBuilder builder, long validateOnOpenPageLimit) { builder.addLong(6, validateOnOpenPageLimit, 0L); }
-  public static void addPutPaddingMode(FlatBufferBuilder builder, int putPaddingMode) { builder.addShort(7, (short)putPaddingMode, (short)0); }
+  public static void addPutPaddingMode(FlatBufferBuilder builder, int putPaddingMode) { builder.addShort(7, (short) putPaddingMode, (short) 0); }
   public static void addSkipReadSchema(FlatBufferBuilder builder, boolean skipReadSchema) { builder.addBoolean(8, skipReadSchema, false); }
   public static void addUsePreviousCommit(FlatBufferBuilder builder, boolean usePreviousCommit) { builder.addBoolean(9, usePreviousCommit, false); }
   public static void addUsePreviousCommitOnValidationFailure(FlatBufferBuilder builder, boolean usePreviousCommitOnValidationFailure) { builder.addBoolean(10, usePreviousCommitOnValidationFailure, false); }
   public static void addReadOnly(FlatBufferBuilder builder, boolean readOnly) { builder.addBoolean(11, readOnly, false); }
-  public static void addDebugFlags(FlatBufferBuilder builder, long debugFlags) { builder.addInt(12, (int)debugFlags, (int)0L); }
+  public static void addDebugFlags(FlatBufferBuilder builder, long debugFlags) { builder.addInt(12, (int) debugFlags, (int) 0L); }
   public static int endFlatStoreOptions(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;

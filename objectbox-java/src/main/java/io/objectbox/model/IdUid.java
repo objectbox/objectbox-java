@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2021 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import java.lang.*;
 import java.util.*;
 import io.objectbox.flatbuffers.*;
 
-@SuppressWarnings("unused")
 /**
  * ID tuple: besides the main ID there is also a UID for verification
  */
+@SuppressWarnings("unused")
 public final class IdUid extends Struct {
   public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }
   public IdUid __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
@@ -42,7 +42,7 @@ public final class IdUid extends Struct {
     builder.prep(8, 16);
     builder.putLong(uid);
     builder.pad(4);
-    builder.putInt((int)id);
+    builder.putInt((int) id);
     return builder.offset();
   }
 

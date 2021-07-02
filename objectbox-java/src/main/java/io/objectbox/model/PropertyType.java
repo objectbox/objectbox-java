@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2021 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package io.objectbox.model;
 /**
  * Basic type of a property
  */
+@SuppressWarnings("unused")
 public final class PropertyType {
   private PropertyType() { }
   /**
