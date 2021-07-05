@@ -1,10 +1,5 @@
 package io.objectbox.sync;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nullable;
-
 import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
 import io.objectbox.annotation.apihint.Experimental;
@@ -16,6 +11,10 @@ import io.objectbox.sync.listener.SyncConnectionListener;
 import io.objectbox.sync.listener.SyncListener;
 import io.objectbox.sync.listener.SyncLoginListener;
 import io.objectbox.sync.listener.SyncTimeListener;
+
+import javax.annotation.Nullable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Internal sync client implementation. Use {@link SyncClient} to access functionality,
@@ -272,6 +271,11 @@ public class SyncClientImpl implements SyncClient {
         nativeTriggerReconnect(handle);
     }
 
+    @Internal
+    public ObjectsMessageBuilder startObjectsMessage(long flags, @Nullable String topic) {
+        return new ObjectsMessageBuilder(this, flags, topic);
+    }
+
     /**
      * Creates a native sync client for the given store handle ready to connect to the server at the given URI.
      * Uses certificate authorities trusted by the host if no trusted certificate paths are passed.
@@ -338,6 +342,29 @@ public class SyncClientImpl implements SyncClient {
     private native long nativeRoundtripTime(long handle);
 
     /**
+     * Returns a handle to the message builder.
+     *
+     * @see #nativeObjectsMessageAddBytes
+     * @see #nativeObjectsMessageAddString
+     */
+    private native long nativeObjectsMessageStart(long flags, @Nullable String topic);
+
+    /**
+     * @see #nativeObjectsMessageSend
+     */
+    private native void nativeObjectsMessageAddString(long builderHandle, long optionalId, String string);
+
+    /**
+     * @see #nativeObjectsMessageSend
+     */
+    private native void nativeObjectsMessageAddBytes(long builderHandle, long optionalId, byte[] bytes, boolean isFlatBuffer);
+
+    /**
+     * Do not use {@code builderHandle} afterwards.
+     */
+    private native boolean nativeObjectsMessageSend(long syncClientHandle, long builderHandle);
+
+    /**
      * Methods on this class must match those expected by JNI implementation.
      */
     @SuppressWarnings("unused") // Methods called from native code.
@@ -391,6 +418,39 @@ public class SyncClientImpl implements SyncClient {
             } catch (InterruptedException e) {
                 return false;
             }
+        }
+    }
+
+    public static class ObjectsMessageBuilder {
+        private boolean sent;
+        private final long builderHandle;
+        private final SyncClientImpl syncClient;
+
+        private ObjectsMessageBuilder(SyncClientImpl syncClient, long flags, @Nullable String topic) {
+            this.syncClient = syncClient;
+            this.builderHandle = syncClient.nativeObjectsMessageStart(flags, topic);
+        }
+
+        public ObjectsMessageBuilder addString(long optionalId, String value) {
+            checkNotSent();
+            syncClient.nativeObjectsMessageAddString(builderHandle, optionalId, value);
+            return this;
+        }
+
+        public ObjectsMessageBuilder addBytes(long optionalId, byte[] value, boolean isFlatBuffers) {
+            checkNotSent();
+            syncClient.nativeObjectsMessageAddBytes(builderHandle, optionalId, value, isFlatBuffers);
+            return this;
+        }
+
+        public boolean send() {
+            checkNotSent();
+            sent = true;
+            return syncClient.nativeObjectsMessageSend(syncClient.handle, builderHandle);
+        }
+
+        private void checkNotSent() {
+            if (sent) throw new IllegalStateException("Already sent this message, start a new one instead.");
         }
     }
 }
