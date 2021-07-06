@@ -1,9 +1,5 @@
 package io.objectbox.sync;
 
-import java.io.Closeable;
-
-import javax.annotation.Nullable;
-
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.SyncBuilder.RequestUpdatesMode;
 import io.objectbox.sync.listener.SyncChangeListener;
@@ -12,6 +8,9 @@ import io.objectbox.sync.listener.SyncConnectionListener;
 import io.objectbox.sync.listener.SyncListener;
 import io.objectbox.sync.listener.SyncLoginListener;
 import io.objectbox.sync.listener.SyncTimeListener;
+
+import javax.annotation.Nullable;
+import java.io.Closeable;
 
 /**
  * ObjectBox sync client. Build a client with {@link Sync#client}.
@@ -193,5 +192,21 @@ public interface SyncClient extends Closeable {
      * This can help speed up reconnecting to the sync server.
      */
     void notifyConnectionAvailable();
+
+    /**
+     * Experimental. This API might change or be removed in the future.
+     * <p>
+     * Start building a message of Objects with optional flags (set to 0) and topic (set to null).
+     * <p>
+     * Use like
+     * <pre>
+     * syncClient.startObjectsMessage(0, "some-topic")
+     *     .addString(1, "Hello!")
+     *     .addBytes(2, "Hello!".getBytes(StandardCharsets.UTF_8), false)
+     *     .send();
+     * </pre>
+     */
+    @Experimental
+    ObjectsMessageBuilder startObjectsMessage(long flags, @Nullable String topic);
 
 }
