@@ -57,11 +57,18 @@ dependencies {
 }
 
 test {
-    // to run tests with 32-bit ObjectBox
-    if (System.getenv('TEST_WITH_JAVA_X86') == 'true') {
+    if (System.getenv("TEST_WITH_JAVA_X86") == "true") {
+        // to run tests with 32-bit ObjectBox
         def javaExecutablePath = System.getenv("JAVA_HOME_X86") + "\\bin\\java"
-        println "Running tests with ${javaExecutablePath}"
+        println("Will run tests with $javaExecutablePath")
         executable = javaExecutablePath
+    } else if (System.getenv("TEST_JDK") != null) {
+        // to run tests on a different JDK
+        def sdkVersionInt = System.getenv("TEST_JDK") as Integer
+        println("Will run tests with JDK $sdkVersionInt")
+        javaLauncher.set(javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(sdkVersionInt))
+        })
     }
 
     // This is pretty useless now because it floods console with warnings about internal Java classes
