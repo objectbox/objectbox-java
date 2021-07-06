@@ -271,9 +271,9 @@ public class SyncClientImpl implements SyncClient {
         nativeTriggerReconnect(handle);
     }
 
-    @Internal
+    @Override
     public ObjectsMessageBuilder startObjectsMessage(long flags, @Nullable String topic) {
-        return new ObjectsMessageBuilder(this, flags, topic);
+        return new ObjectsMessageBuilderImpl(this, flags, topic);
     }
 
     /**
@@ -421,28 +421,31 @@ public class SyncClientImpl implements SyncClient {
         }
     }
 
-    public static class ObjectsMessageBuilder {
+    public static class ObjectsMessageBuilderImpl implements ObjectsMessageBuilder {
         private boolean sent;
         private final long builderHandle;
         private final SyncClientImpl syncClient;
 
-        private ObjectsMessageBuilder(SyncClientImpl syncClient, long flags, @Nullable String topic) {
+        private ObjectsMessageBuilderImpl(SyncClientImpl syncClient, long flags, @Nullable String topic) {
             this.syncClient = syncClient;
             this.builderHandle = syncClient.nativeObjectsMessageStart(flags, topic);
         }
 
-        public ObjectsMessageBuilder addString(long optionalId, String value) {
+        @Override
+        public ObjectsMessageBuilderImpl addString(long optionalId, String value) {
             checkNotSent();
             syncClient.nativeObjectsMessageAddString(builderHandle, optionalId, value);
             return this;
         }
 
-        public ObjectsMessageBuilder addBytes(long optionalId, byte[] value, boolean isFlatBuffers) {
+        @Override
+        public ObjectsMessageBuilderImpl addBytes(long optionalId, byte[] value, boolean isFlatBuffers) {
             checkNotSent();
             syncClient.nativeObjectsMessageAddBytes(builderHandle, optionalId, value, isFlatBuffers);
             return this;
         }
 
+        @Override
         public boolean send() {
             if (!syncClient.isStarted()) {
                 return false;

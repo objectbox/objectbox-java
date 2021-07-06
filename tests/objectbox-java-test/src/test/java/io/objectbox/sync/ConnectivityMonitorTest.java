@@ -202,6 +202,11 @@ public class ConnectivityMonitorTest {
         public void notifyConnectionAvailable() {
             notifyConnectionAvailableCalled += 1;
         }
+
+        @Override
+        public ObjectsMessageBuilder startObjectsMessage(long flags, @Nullable String topic) {
+            return null;
+        }
     }
 
 }
