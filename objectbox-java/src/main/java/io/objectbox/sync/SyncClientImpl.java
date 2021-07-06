@@ -444,6 +444,9 @@ public class SyncClientImpl implements SyncClient {
         }
 
         public boolean send() {
+            if (!syncClient.isStarted()) {
+                return false;
+            }
             checkNotSent();
             sent = true;
             return syncClient.nativeObjectsMessageSend(syncClient.handle, builderHandle);
