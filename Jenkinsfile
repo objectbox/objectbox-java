@@ -17,6 +17,7 @@ pipeline {
     environment {
         GITLAB_URL = credentials('gitlab_url')
         GITLAB_TOKEN = credentials('GITLAB_TOKEN_ALL')
+        GITLAB_INTEG_TESTS_TRIGGER_URL = credentials('gitlab-trigger-java-integ-tests')
         // Note: for key use Jenkins secret file with PGP key as text in ASCII-armored format.
         ORG_GRADLE_PROJECT_signingKeyFile = credentials('objectbox_signing_key')
         ORG_GRADLE_PROJECT_signingKeyId = credentials('objectbox_signing_key_id')
@@ -109,6 +110,11 @@ pipeline {
 
         success {
             updateGitlabCommitStatus name: 'build', state: 'success'
+            // Trigger integration tests in GitLab
+            // URL configured like <host>/api/v4/projects/<id>/trigger/pipeline?token=<token>
+            // Note: do not fail on error in case ref does not exist, only output response
+            // --silent --show-error disable progress output but still show errors
+            sh 'curl --silent --show-error -X POST "$GITLAB_INTEG_TESTS_TRIGGER_URL&ref=$GIT_BRANCH"'
         }
     }
 }
