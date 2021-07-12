@@ -77,6 +77,9 @@ public abstract class AbstractObjectBoxTest {
         Cursor.TRACK_CREATION_STACK = true;
         Transaction.TRACK_CREATION_STACK = true;
 
+        // Note: is logged, so create before logging.
+        boxStoreDir = prepareTempDir("object-store-test");
+
         if (!printedVersionsOnce) {
             printedVersionsOnce = true;
             printProcessId();
@@ -85,7 +88,6 @@ public abstract class AbstractObjectBoxTest {
             System.out.println("First DB dir: " + boxStoreDir);
         }
 
-        boxStoreDir = prepareTempDir("object-store-test");
         store = createBoxStore();
         runExtensiveTests = System.getProperty("extensive-tests") != null;
     }
