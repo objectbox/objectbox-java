@@ -70,12 +70,18 @@ pipeline {
                 }
                 stages {
                     stage("test") {
+                        // Set agent to start with new workspace to avoid Gradle compile issues on shared workspace
+                        agent {
+                            label 'java'
+                        }
                         environment {
                             TEST_JDK = "${TEST_JDK}"
                         }
                         steps {
+                            // "|| true" for an OK exit code if no file is found
+                            sh 'rm tests/objectbox-java-test/hs_err_pid*.log || true'
                             // Note: do not run check task as it includes SpotBugs.
-                            sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs cleanTest :tests:objectbox-java-test:test"
+                            sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs clean :tests:objectbox-java-test:test"
                         }
                         post {
                             always {
