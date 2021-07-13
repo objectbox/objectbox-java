@@ -38,8 +38,6 @@ pipeline {
     stages {
         stage('init') {
             steps {
-                sh 'chmod +x gradlew'
-                sh 'chmod +x ci/test-with-asan.sh'
                 sh './gradlew -version'
 
                 // "|| true" for an OK exit code if no file is found
