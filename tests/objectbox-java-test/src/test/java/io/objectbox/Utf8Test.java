@@ -13,15 +13,19 @@ import static org.junit.Assert.assertEquals;
  */
 public class Utf8Test extends AbstractObjectBoxTest {
 
-    // U+1F600
-    private static final String TEST_STRING = "😁";
+    // U+1F600, U+1F601, U+1F602
+    private static final String TEST_STRING = "😀😃😂";
 
     @Test
     public void putGetAndQuery_works() {
+        // Java stores UTF-16 internally (2 chars per emoji)
+        assertEquals(3 * 2, TEST_STRING.length());
+
         // Put
         TestEntity put = putTestEntity(TEST_STRING, 1);
-        putTestEntity("🚀", 2); // U+1F680
-        assertEquals(2, getTestEntityBox().count());
+        putTestEntity("🚀🚁🚄", 2); // U+1F680, U+1F681, U+1F684
+        putTestEntity("😀🚁🚄", 3); // U+1F600, U+1F681, U+1F684
+        assertEquals(3, getTestEntityBox().count());
 
         // Get
         TestEntity get = getTestEntityBox().get(put.getId());
@@ -33,6 +37,14 @@ public class Utf8Test extends AbstractObjectBoxTest {
         ).build().find();
         assertEquals(1, results.size());
         assertEquals(TEST_STRING, results.get(0).getSimpleString());
+
+        // Query String with starts with
+        List<TestEntity> resultsStartsWith = getTestEntityBox().query(
+                TestEntity_.simpleString.startsWith("😀") // U+1F600
+        ).build().find();
+        assertEquals(2, resultsStartsWith.size());
+        assertEquals(1, resultsStartsWith.get(0).getSimpleInt());
+        assertEquals(3, resultsStartsWith.get(1).getSimpleInt());
 
         // Query String array
         List<TestEntity> resultsArray = getTestEntityBox().query(
