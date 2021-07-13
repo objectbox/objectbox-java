@@ -7,6 +7,7 @@ boolean isPublish = BRANCH_NAME == 'publish'
 String versionPostfix = isPublish ? '' : BRANCH_NAME // Build script detects empty string as not set.
 
 // Note: using single quotes to avoid Groovy String interpolation leaking secrets.
+def signingArgs = '-PsigningKeyFile=$SIGNING_FILE -PsigningKeyId=$SIGNING_ID -PsigningPassword=$SIGNING_PWD'
 def gitlabRepoArgs = '-PgitlabUrl=$GITLAB_URL -PgitlabPrivateToken=$GITLAB_TOKEN'
 def uploadRepoArgsCentral = '-PsonatypeUsername=$OSSRH_LOGIN_USR -PsonatypePassword=$OSSRH_LOGIN_PSW'
 
@@ -18,9 +19,9 @@ pipeline {
         GITLAB_URL = credentials('gitlab_url')
         GITLAB_TOKEN = credentials('GITLAB_TOKEN_ALL')
         // Note: for key use Jenkins secret file with PGP key as text in ASCII-armored format.
-        ORG_GRADLE_PROJECT_signingKeyFile = credentials('objectbox_signing_key')
-        ORG_GRADLE_PROJECT_signingKeyId = credentials('objectbox_signing_key_id')
-        ORG_GRADLE_PROJECT_signingPassword = credentials('objectbox_signing_key_password')
+        SIGNING_FILE = credentials('objectbox_signing_key')
+        SIGNING_ID = credentials('objectbox_signing_key_id')
+        SIGNING_PWD = credentials('objectbox_signing_key_password')
     }
 
     options {
@@ -47,7 +48,7 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs clean build"
+                sh "./ci/test-with-asan.sh $gradleArgs $signingArgs $gitlabRepoArgs clean build"
             }
             post {
                 always {
@@ -94,7 +95,7 @@ pipeline {
 
         stage('upload-to-internal') {
             steps {
-                sh "./gradlew $gradleArgs $gitlabRepoArgs -PversionPostFix=$versionPostfix publishMavenJavaPublicationToGitLabRepository"
+                sh "./gradlew $gradleArgs $signingArgs $gitlabRepoArgs -PversionPostFix=$versionPostfix publishMavenJavaPublicationToGitLabRepository"
             }
         }
 
@@ -108,7 +109,7 @@ pipeline {
                     message: "*Publishing* ${currentBuild.fullDisplayName} to Central...\n${env.BUILD_URL}"
 
                 // Note: supply internal repo as tests use native dependencies that might not be published, yet.
-                sh "./gradlew $gradleArgs $gitlabRepoArgs $uploadRepoArgsCentral publishMavenJavaPublicationToSonatypeRepository closeAndReleaseStagingRepository"
+                sh "./gradlew $gradleArgs $signingArgs $gitlabRepoArgs $uploadRepoArgsCentral publishMavenJavaPublicationToSonatypeRepository closeAndReleaseStagingRepository"
 
                 googlechatnotification url: 'id:gchat_java',
                     message: "Published ${currentBuild.fullDisplayName} successfully to Central - check https://repo1.maven.org/maven2/io/objectbox/ in a few minutes.\n${env.BUILD_URL}"
