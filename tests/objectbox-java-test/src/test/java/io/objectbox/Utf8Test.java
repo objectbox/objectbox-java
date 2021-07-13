@@ -14,12 +14,12 @@ import static org.junit.Assert.assertEquals;
 public class Utf8Test extends AbstractObjectBoxTest {
 
     // U+1F600, U+1F601, U+1F602
-    private static final String TEST_STRING = "😀😃😂";
+    private static final String TEST_STRING = "😀😃😂 Hello";
 
     @Test
     public void putGetAndQuery_works() {
         // Java stores UTF-16 internally (2 chars per emoji)
-        assertEquals(3 * 2, TEST_STRING.length());
+        assertEquals(3 * 2 + 6, TEST_STRING.length());
 
         // Put
         TestEntity put = putTestEntity(TEST_STRING, 1);
