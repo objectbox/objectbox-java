@@ -132,7 +132,7 @@ public interface SyncClient extends Closeable {
     void start();
 
     /**
-     * Stops the client. Does nothing if the sync client is already stopped or closed.
+     * Stops the client. Does nothing if the sync client is already stopped.
      */
     void stop();
 
