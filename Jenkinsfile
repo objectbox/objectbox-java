@@ -7,6 +7,7 @@ boolean isPublish = BRANCH_NAME == 'publish'
 String versionPostfix = isPublish ? '' : BRANCH_NAME // Build script detects empty string as not set.
 
 // Note: using single quotes to avoid Groovy String interpolation leaking secrets.
+def signingArgs = '-PsigningKeyFile=$SIGNING_FILE -PsigningKeyId=$SIGNING_ID -PsigningPassword=$SIGNING_PWD'
 def gitlabRepoArgs = '-PgitlabUrl=$GITLAB_URL -PgitlabPrivateToken=$GITLAB_TOKEN'
 def uploadRepoArgsCentral = '-PsonatypeUsername=$OSSRH_LOGIN_USR -PsonatypePassword=$OSSRH_LOGIN_PSW'
 
@@ -19,9 +20,9 @@ pipeline {
         GITLAB_TOKEN = credentials('GITLAB_TOKEN_ALL')
         GITLAB_INTEG_TESTS_TRIGGER_URL = credentials('gitlab-trigger-java-integ-tests')
         // Note: for key use Jenkins secret file with PGP key as text in ASCII-armored format.
-        ORG_GRADLE_PROJECT_signingKeyFile = credentials('objectbox_signing_key')
-        ORG_GRADLE_PROJECT_signingKeyId = credentials('objectbox_signing_key_id')
-        ORG_GRADLE_PROJECT_signingPassword = credentials('objectbox_signing_key_password')
+        SIGNING_FILE = credentials('objectbox_signing_key')
+        SIGNING_ID = credentials('objectbox_signing_key_id')
+        SIGNING_PWD = credentials('objectbox_signing_key_password')
     }
 
     options {
@@ -39,8 +40,6 @@ pipeline {
     stages {
         stage('init') {
             steps {
-                sh 'chmod +x gradlew'
-                sh 'chmod +x ci/test-with-asan.sh'
                 sh './gradlew -version'
 
                 // "|| true" for an OK exit code if no file is found
@@ -50,13 +49,54 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs clean build"
+                sh "./ci/test-with-asan.sh $gradleArgs $signingArgs $gitlabRepoArgs clean build"
+            }
+            post {
+                always {
+                    junit '**/build/test-results/**/TEST-*.xml'
+                    archiveArtifacts artifacts: 'tests/*/hs_err_pid*.log', allowEmptyArchive: true  // Only on JVM crash.
+                    recordIssues(tool: spotBugs(pattern: '**/build/reports/spotbugs/*.xml', useRankAsPriority: true))
+                }
+            }
+        }
+
+        stage("test-jdks") {
+            matrix {
+                axes {
+                    axis {
+                        name "TEST_JDK"
+                        values "8", "16"
+                    }
+                }
+                stages {
+                    stage("test") {
+                        // Set agent to start with new workspace to avoid Gradle compile issues on shared workspace
+                        agent {
+                            label 'java'
+                        }
+                        environment {
+                            TEST_JDK = "${TEST_JDK}"
+                        }
+                        steps {
+                            // "|| true" for an OK exit code if no file is found
+                            sh 'rm tests/objectbox-java-test/hs_err_pid*.log || true'
+                            // Note: do not run check task as it includes SpotBugs.
+                            sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs clean :tests:objectbox-java-test:test"
+                        }
+                        post {
+                            always {
+                                junit '**/build/test-results/**/TEST-*.xml'
+                                archiveArtifacts artifacts: 'tests/*/hs_err_pid*.log', allowEmptyArchive: true  // Only on JVM crash.
+                            }
+                        }
+                    }
+                }
             }
         }
 
         stage('upload-to-internal') {
             steps {
-                sh "./gradlew $gradleArgs $gitlabRepoArgs -PversionPostFix=$versionPostfix publishMavenJavaPublicationToGitLabRepository"
+                sh "./gradlew $gradleArgs $signingArgs $gitlabRepoArgs -PversionPostFix=$versionPostfix publishMavenJavaPublicationToGitLabRepository"
             }
         }
 
@@ -70,7 +110,7 @@ pipeline {
                     message: "*Publishing* ${currentBuild.fullDisplayName} to Central...\n${env.BUILD_URL}"
 
                 // Note: supply internal repo as tests use native dependencies that might not be published, yet.
-                sh "./gradlew $gradleArgs $gitlabRepoArgs $uploadRepoArgsCentral publishMavenJavaPublicationToSonatypeRepository closeAndReleaseStagingRepository"
+                sh "./gradlew $gradleArgs $signingArgs $gitlabRepoArgs $uploadRepoArgsCentral publishMavenJavaPublicationToSonatypeRepository closeAndReleaseStagingRepository"
 
                 googlechatnotification url: 'id:gchat_java',
                     message: "Published ${currentBuild.fullDisplayName} successfully to Central - check https://repo1.maven.org/maven2/io/objectbox/ in a few minutes.\n${env.BUILD_URL}"
@@ -82,10 +122,6 @@ pipeline {
     // For global vars see /jenkins/pipeline-syntax/globals
     post {
         always {
-            junit '**/build/test-results/**/TEST-*.xml'
-            archiveArtifacts artifacts: 'tests/*/hs_err_pid*.log', allowEmptyArchive: true  // Only on JVM crash.
-            recordIssues(tool: spotBugs(pattern: '**/build/reports/spotbugs/*.xml', useRankAsPriority: true))
-
             googlechatnotification url: 'id:gchat_java', message: "${currentBuild.currentResult}: ${currentBuild.fullDisplayName}\n${env.BUILD_URL}",
                                    notifyFailure: 'true', notifyUnstable: 'true', notifyBackToNormal: 'true'
         }

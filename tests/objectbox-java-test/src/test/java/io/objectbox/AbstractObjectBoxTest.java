@@ -86,6 +86,7 @@ public abstract class AbstractObjectBoxTest {
             System.out.println("ObjectBox Java version: " + BoxStore.getVersion());
             System.out.println("ObjectBox Core version: " + BoxStore.getVersionNative());
             System.out.println("First DB dir: " + boxStoreDir);
+            System.out.println("java.version=" + System.getProperty("java.version"));
         }
 
         store = createBoxStore();
