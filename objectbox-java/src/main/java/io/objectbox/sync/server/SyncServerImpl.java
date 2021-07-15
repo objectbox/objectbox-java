@@ -25,10 +25,11 @@ public class SyncServerImpl implements SyncServer {
         this.url = builder.url;
 
         long storeHandle = InternalAccess.getHandle(builder.boxStore);
-        handle = nativeCreate(storeHandle, url, builder.certificatePath);
+        long handle = nativeCreate(storeHandle, url, builder.certificatePath);
         if (handle == 0) {
             throw new RuntimeException("Failed to create sync server: handle is zero.");
         }
+        this.handle = handle;
 
         for (SyncCredentials credentials : builder.credentials) {
             SyncCredentialsToken credentialsInternal = (SyncCredentialsToken) credentials;
@@ -46,6 +47,14 @@ public class SyncServerImpl implements SyncServer {
         }
     }
 
+    private long getHandle() {
+        long handle = this.handle;
+        if (handle == 0) {
+            throw new IllegalStateException("SyncServer already closed");
+        }
+        return handle;
+    }
+
     @Override
     public String getUrl() {
         return url;
@@ -53,33 +62,33 @@ public class SyncServerImpl implements SyncServer {
 
     @Override
     public int getPort() {
-        return nativeGetPort(handle);
+        return nativeGetPort(getHandle());
     }
 
     @Override
     public boolean isRunning() {
-        return nativeIsRunning(handle);
+        return nativeIsRunning(getHandle());
     }
 
     @Override
     public String getStatsString() {
-        return nativeGetStatsString(handle);
+        return nativeGetStatsString(getHandle());
     }
 
     @Override
     public void setSyncChangeListener(@Nullable SyncChangeListener changesListener) {
         this.syncChangeListener = changesListener;
-        nativeSetSyncChangesListener(handle, changesListener);
+        nativeSetSyncChangesListener(getHandle(), changesListener);
     }
 
     @Override
     public void start() {
-        nativeStart(handle);
+        nativeStart(getHandle());
     }
 
     @Override
     public void stop() {
-        nativeStop(handle);
+        nativeStop(getHandle());
     }
 
     @Override

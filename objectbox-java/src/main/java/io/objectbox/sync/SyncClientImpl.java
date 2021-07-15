@@ -48,10 +48,11 @@ public class SyncClientImpl implements SyncClient {
         this.connectivityMonitor = builder.platform.getConnectivityMonitor();
 
         long boxStoreHandle = InternalAccess.getHandle(builder.boxStore);
-        this.handle = nativeCreate(boxStoreHandle, serverUrl, builder.trustedCertPaths);
+        long handle = nativeCreate(boxStoreHandle, serverUrl, builder.trustedCertPaths);
         if (handle == 0) {
             throw new RuntimeException("Failed to create sync client: handle is zero.");
         }
+        this.handle = handle;
 
         // Only change setting if not default (automatic sync updates and push subscription enabled).
         if (builder.requestUpdatesMode != RequestUpdatesMode.AUTO) {
@@ -84,6 +85,14 @@ public class SyncClientImpl implements SyncClient {
         InternalAccess.setSyncClient(builder.boxStore, this);
     }
 
+    private long getHandle() {
+        long handle = this.handle;
+        if (handle == 0) {
+            throw new IllegalStateException("SyncClient already closed");
+        }
+        return handle;
+    }
+
     @Override
     public String getServerUrl() {
         return serverUrl;
@@ -101,24 +110,24 @@ public class SyncClientImpl implements SyncClient {
 
     @Override
     public long getServerTimeNanos() {
-        return nativeServerTime(handle);
+        return nativeServerTime(getHandle());
     }
 
     @Override
     public long getServerTimeDiffNanos() {
-        return nativeServerTimeDiff(handle);
+        return nativeServerTimeDiff(getHandle());
     }
 
     @Override
     public long getRoundtripTimeNanos() {
-        return nativeRoundtripTime(handle);
+        return nativeRoundtripTime(getHandle());
     }
 
     /**
      * Gets the current state of this sync client. Throws if {@link #close()} was called.
      */
     public SyncState getSyncState() {
-        return SyncState.fromId(nativeGetState(handle));
+        return SyncState.fromId(nativeGetState(getHandle()));
     }
 
     @Override
@@ -133,7 +142,7 @@ public class SyncClientImpl implements SyncClient {
 
     @Override
     public void setSyncChangeListener(@Nullable SyncChangeListener changesListener) {
-        nativeSetSyncChangesListener(handle, changesListener);
+        nativeSetSyncChangesListener(getHandle(), changesListener);
     }
 
     @Override
@@ -158,7 +167,7 @@ public class SyncClientImpl implements SyncClient {
     @Override
     public void setLoginCredentials(SyncCredentials credentials) {
         SyncCredentialsToken credentialsInternal = (SyncCredentialsToken) credentials;
-        nativeSetLoginInfo(handle, credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
+        nativeSetLoginInfo(getHandle(), credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
         credentialsInternal.clear(); // Clear immediately, not needed anymore.
     }
 
@@ -172,7 +181,7 @@ public class SyncClientImpl implements SyncClient {
 
     @Override
     public synchronized void start() {
-        nativeStart(handle);
+        nativeStart(getHandle());
         started = true;
         if (connectivityMonitor != null) {
             connectivityMonitor.setObserver(this);
@@ -189,11 +198,7 @@ public class SyncClientImpl implements SyncClient {
         if (connectivityMonitor != null) {
             connectivityMonitor.removeObserver();
         }
-
-        long handleToStop = this.handle;
-        if (handleToStop != 0) {
-            nativeStop(handleToStop);
-        }
+        nativeStop(getHandle());
         started = false;
     }
 
@@ -240,7 +245,7 @@ public class SyncClientImpl implements SyncClient {
     @Override
     @Experimental
     public boolean requestFullSync() {
-        return nativeRequestFullSync(handle, false);
+        return nativeRequestFullSync(getHandle(), false);
     }
 
     /**
@@ -248,27 +253,27 @@ public class SyncClientImpl implements SyncClient {
      */
     @Experimental
     public boolean requestFullSyncAndUpdates() {
-        return nativeRequestFullSync(handle, true);
+        return nativeRequestFullSync(getHandle(), true);
     }
 
     @Override
     public boolean requestUpdates() {
-        return nativeRequestUpdates(handle, true);
+        return nativeRequestUpdates(getHandle(), true);
     }
 
     @Override
     public boolean requestUpdatesOnce() {
-        return nativeRequestUpdates(handle, false);
+        return nativeRequestUpdates(getHandle(), false);
     }
 
     @Override
     public boolean cancelUpdates() {
-        return nativeCancelUpdates(handle);
+        return nativeCancelUpdates(getHandle());
     }
 
     @Override
     public void notifyConnectionAvailable() {
-        nativeTriggerReconnect(handle);
+        nativeTriggerReconnect(getHandle());
     }
 
     @Override
@@ -452,7 +457,7 @@ public class SyncClientImpl implements SyncClient {
             }
             checkNotSent();
             sent = true;
-            return syncClient.nativeObjectsMessageSend(syncClient.handle, builderHandle);
+            return syncClient.nativeObjectsMessageSend(syncClient.getHandle(), builderHandle);
         }
 
         private void checkNotSent() {
