@@ -19,6 +19,7 @@ package io.objectbox;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
@@ -238,6 +239,23 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     @Test
     public void testIsObjectBrowserAvailable() {
         assertFalse(BoxStore.isObjectBrowserAvailable());
+    }
+
+    @Test
+    public void testSysProc() {
+        long vmRss = BoxStore.sysProcStatusKb("VmRSS");
+        long memAvailable = BoxStore.sysProcMeminfoKb("MemAvailable");
+
+        final String osName = System.getProperty("os.name");
+        if (osName.toLowerCase().contains("linux")) {
+            System.out.println("VmRSS: " + vmRss);
+            System.out.println("MemAvailable: " + memAvailable);
+            assertTrue(vmRss > 0);
+            assertTrue(memAvailable > 0);
+        } else {
+            assertEquals(vmRss, 0);
+            assertEquals(memAvailable, 0);
+        }
     }
 
 }

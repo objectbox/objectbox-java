@@ -182,6 +182,10 @@ public class BoxStore implements Closeable {
 
     native long nativeValidate(long store, long pageLimit, boolean checkLeafLevel);
 
+    static native long nativeSysProcMeminfoKb(String key);
+
+    static native long nativeSysProcStatusKb(String key);
+
     /** @return sync availability (0: none; 1: client; 2: server) */
     static native int nativeGetSupportedSync();
 
@@ -405,7 +409,6 @@ public class BoxStore implements Closeable {
      */
     public static boolean isDatabaseOpen(@Nullable File baseDirectoryOrNull,
                                          @Nullable String dbNameOrNull) throws IOException {
-        
         File dbDir = BoxStoreBuilder.getDbDir(baseDirectoryOrNull, dbNameOrNull);
         return isFileOpen(dbDir.getCanonicalPath());
     }
@@ -418,6 +421,43 @@ public class BoxStore implements Closeable {
      */
     public static boolean isDatabaseOpen(File directory) throws IOException {
         return isFileOpen(directory.getCanonicalPath());
+    }
+
+    /**
+     * Linux only: extracts a kB value from /proc/meminfo (system wide memory information).
+     * A couple of interesting keys (from 'man proc'):
+     * - MemTotal: Total usable RAM (i.e., physical RAM minus a few reserved bits and the kernel binary code).
+     * - MemFree:  The sum of LowFree+HighFree.
+     * - MemAvailable: An estimate of how much memory is available for starting new applications, without swapping.
+     *
+     * @param key The string identifying the wanted line from /proc/meminfo to extract a Kb value from. E.g. "MemTotal".
+     * @return Kb value or 0 on failure
+     */
+    @Experimental
+    static long sysProcMeminfoKb(String key) {
+        return nativeSysProcMeminfoKb(key);
+    }
+
+    /**
+     * Linux only: extracts a kB value from /proc/self/status (process specific information).
+     * A couple of interesting keys (from 'man proc'):
+     * - VmPeak: Peak virtual memory size.
+     * - VmSize: Virtual memory size.
+     * - VmHWM: Peak resident set size ("high water mark").
+     * - VmRSS: Resident set size.  Note that the value here is the sum of RssAnon, RssFile, and RssShmem.
+     * - RssAnon: Size of resident anonymous memory.  (since Linux 4.5).
+     * - RssFile: Size of resident file mappings.  (since Linux 4.5).
+     * - RssShmem: Size of resident shared memory (includes System V shared  memory,  mappings  from  tmpfs(5),
+     * and shared anonymous mappings).  (since Linux 4.5).
+     * - VmData, VmStk, VmExe: Size of data, stack, and text segments.
+     * - VmLib: Shared library code size.
+     *
+     * @param key The string identifying the wanted line from /proc/self/status to extract a Kb value from. E.g. "VmSize".
+     * @return Kb value or 0 on failure
+     */
+    @Experimental
+    static long sysProcStatusKb(String key) {
+        return nativeSysProcStatusKb(key);
     }
 
     /**
