@@ -22,6 +22,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -441,9 +443,34 @@ public class TransactionTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void transactionsOnLargeThreadPool() throws Exception {
+    public void transactionsOnUnboundedThreadPool() throws Exception {
+        //Silence the unnecessary debug output and set the max readers
+        resetBoxStoreWithoutDebugFlags(100);
+
+        runThreadPoolTransactionTest(new ObjectBoxThreadPool(store));
+    }
+
+    @Test
+    public void transactionsOnBoundedThreadPool() throws Exception {
+        //Silence the unnecessary debug output and set the max readers
+        int maxReaders = 100;
+        resetBoxStoreWithoutDebugFlags(maxReaders);
+
+        runThreadPoolTransactionTest(Executors.newFixedThreadPool(maxReaders));
+    }
+
+    private void resetBoxStoreWithoutDebugFlags(int maxReaders) {
+        // Remove existing store
+        tearDown();
+
+        BoxStoreBuilder builder = createBoxStoreBuilder(false);
+        builder.maxReaders = maxReaders;
+        builder.debugFlags = 0;
+        store = builder.build();
+    }
+
+    private void runThreadPoolTransactionTest(ExecutorService pool) throws Exception {
         //Create a bunch of transactions on a thread pool. We can even run them synchronously.
-        ObjectBoxThreadPool pool = new ObjectBoxThreadPool(store);
         ArrayList<Future<Integer>> txTasks = new ArrayList<>(10000);
         for (int i = 0; i < 10000; i++) {
             final int txNumber = i;
