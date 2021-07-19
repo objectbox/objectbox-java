@@ -434,7 +434,7 @@ public class BoxStore implements Closeable {
      * @return Kb value or 0 on failure
      */
     @Experimental
-    static long sysProcMeminfoKb(String key) {
+    public static long sysProcMeminfoKb(String key) {
         return nativeSysProcMeminfoKb(key);
     }
 
@@ -456,7 +456,7 @@ public class BoxStore implements Closeable {
      * @return Kb value or 0 on failure
      */
     @Experimental
-    static long sysProcStatusKb(String key) {
+    public static long sysProcStatusKb(String key) {
         return nativeSysProcStatusKb(key);
     }
 
