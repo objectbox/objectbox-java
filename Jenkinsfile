@@ -11,6 +11,10 @@ def signingArgs = '-PsigningKeyFile=$SIGNING_FILE -PsigningKeyId=$SIGNING_ID -Ps
 def gitlabRepoArgs = '-PgitlabUrl=$GITLAB_URL -PgitlabPrivateToken=$GITLAB_TOKEN'
 def uploadRepoArgsCentral = '-PsonatypeUsername=$OSSRH_LOGIN_USR -PsonatypePassword=$OSSRH_LOGIN_PSW'
 
+boolean startedByTimer = currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause').size() > 0
+def buildCauses = currentBuild.getBuildCauses()
+echo "startedByTimer=$startedByTimer, build causes: $buildCauses"
+
 // https://jenkins.io/doc/book/pipeline/syntax/
 pipeline {
     agent { label 'java' }
@@ -146,11 +150,17 @@ pipeline {
 
         success {
             updateGitlabCommitStatus name: 'build', state: 'success'
-            // Trigger integration tests in GitLab
-            // URL configured like <host>/api/v4/projects/<id>/trigger/pipeline?token=<token>
-            // Note: do not fail on error in case ref does not exist, only output response
-            // --silent --show-error disable progress output but still show errors
-            sh 'curl --silent --show-error -X POST "$GITLAB_INTEG_TESTS_TRIGGER_URL&ref=$GIT_BRANCH"'
+            script {
+                if (startedByTimer) {
+                    echo "Started by timer, not triggering integration tests"
+                } else {
+                  // Trigger integration tests in GitLab
+                  // URL configured like <host>/api/v4/projects/<id>/trigger/pipeline?token=<token>
+                  // Note: do not fail on error in case ref does not exist, only output response
+                  // --silent --show-error disable progress output but still show errors
+                  sh 'curl --silent --show-error -X POST "$GITLAB_INTEG_TESTS_TRIGGER_URL&ref=$GIT_BRANCH"'
+                }
+            }
         }
     }
 }
