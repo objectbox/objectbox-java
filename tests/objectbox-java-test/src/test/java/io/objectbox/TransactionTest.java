@@ -456,7 +456,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
 
         //Iterate through all the txTasks and make sure all transactions succeeded.
         for (Future<Integer> txTask : txTasks) {
-            txTask.get(1, TimeUnit.MILLISECONDS);
+            txTask.get(1, TimeUnit.SECONDS);
         }
     }
 }
