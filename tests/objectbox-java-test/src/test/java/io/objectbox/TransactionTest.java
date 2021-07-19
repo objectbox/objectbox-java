@@ -19,17 +19,18 @@ package io.objectbox;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.Nullable;
-
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.DbMaxReadersExceededException;
+import io.objectbox.internal.ObjectBoxThreadPool;
 
 import static org.junit.Assert.*;
 
@@ -439,5 +440,23 @@ public class TransactionTest extends AbstractObjectBoxTest {
         assertNotNull(result);
     }
 
+    @Test
+    public void transactionsOnLargeThreadPool() throws Exception {
+        //Create a bunch of transactions on a thread pool. We can even run them synchronously.
+        ObjectBoxThreadPool pool = new ObjectBoxThreadPool(store);
+        ArrayList<Future<Integer>> txTasks = new ArrayList<>(10000);
+        for (int i = 0; i < 10000; i++) {
+            final int txNumber = i;
+            txTasks.add(pool.submit(() -> {
+                synchronized (store) {
+                    return store.callInReadTx(() -> txNumber);
+                }
+            }));
+        }
 
+        //Iterate through all the txTasks and make sure all transactions succeeded.
+        for (Future<Integer> txTask : txTasks) {
+            txTask.get(1, TimeUnit.MILLISECONDS);
+        }
+    }
 }
