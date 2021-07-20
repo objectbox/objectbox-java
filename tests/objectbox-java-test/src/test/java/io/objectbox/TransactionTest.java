@@ -16,6 +16,10 @@
 
 package io.objectbox;
 
+import io.objectbox.exception.DbException;
+import io.objectbox.exception.DbExceptionListener;
+import io.objectbox.exception.DbMaxReadersExceededException;
+import io.objectbox.internal.ObjectBoxThreadPool;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -23,18 +27,19 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.objectbox.exception.DbException;
-import io.objectbox.exception.DbExceptionListener;
-import io.objectbox.exception.DbMaxReadersExceededException;
-import io.objectbox.internal.ObjectBoxThreadPool;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class TransactionTest extends AbstractObjectBoxTest {
 
@@ -443,40 +448,55 @@ public class TransactionTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void transactionsOnUnboundedThreadPool() throws Exception {
-        //Silence the unnecessary debug output and set the max readers
-        resetBoxStoreWithoutDebugFlags(100);
-
-        runThreadPoolTransactionTest(new ObjectBoxThreadPool(store));
+    public void runInReadTx_unboundedThreadPool() throws Exception {
+        runThreadPoolReaderTest(
+                () -> store.runInReadTx(() -> {
+                })
+        );
     }
 
     @Test
-    public void transactionsOnBoundedThreadPool() throws Exception {
-        //Silence the unnecessary debug output and set the max readers
-        int maxReaders = 100;
-        resetBoxStoreWithoutDebugFlags(maxReaders);
-
-        runThreadPoolTransactionTest(Executors.newFixedThreadPool(maxReaders));
+    public void callInReadTx_unboundedThreadPool() throws Exception {
+        runThreadPoolReaderTest(
+                () -> store.callInReadTx(() -> 1)
+        );
     }
 
-    private void resetBoxStoreWithoutDebugFlags(int maxReaders) {
-        // Remove existing store
+    @Test
+    public void boxReader_unboundedThreadPool() throws Exception {
+        runThreadPoolReaderTest(
+                () -> {
+                    store.boxFor(TestEntity.class).count();
+                    store.closeThreadResources();
+                }
+        );
+    }
+
+    /**
+     * Tests that a reader is available again after a transaction is closed on a thread.
+     * To not exceed max readers this test simply does not allow any two threads
+     * to have an active transaction at the same time, e.g. there should always be only one active reader.
+     */
+    private void runThreadPoolReaderTest(Runnable runnable) throws Exception {
+        // Replace default store: transaction logging disabled and specific max readers.
         tearDown();
+        store = createBoxStoreBuilder(null)
+                .maxReaders(100)
+                .debugFlags(0)
+                .build();
 
-        BoxStoreBuilder builder = createBoxStoreBuilder(false);
-        builder.maxReaders = maxReaders;
-        builder.debugFlags = 0;
-        store = builder.build();
-    }
+        // Unbounded thread pool so number of threads run exceeds max readers.
+        ExecutorService pool = new ObjectBoxThreadPool(store);
 
-    private void runThreadPoolTransactionTest(ExecutorService pool) throws Exception {
-        //Create a bunch of transactions on a thread pool. We can even run them synchronously.
         ArrayList<Future<Integer>> txTasks = new ArrayList<>(10000);
+        final Object lock = new Object();
         for (int i = 0; i < 10000; i++) {
             final int txNumber = i;
             txTasks.add(pool.submit(() -> {
-                synchronized (store) {
-                    return store.callInReadTx(() -> txNumber);
+                // Lock to ensure no two threads have an active transaction at the same time.
+                synchronized (lock) {
+                    runnable.run();
+                    return txNumber;
                 }
             }));
         }
