@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -496,7 +497,8 @@ public class TransactionTest extends AbstractObjectBoxTest {
                 .noReaderThreadLocals()  // This is the essential flag to make this test work
                 .build();
 
-        // Unbounded thread pool so number of threads run exceeds max readers.
+        // Unbounded (but throttled) thread pool so number of threads run exceeds max readers.
+        int numThreads = TestUtils.isWindows() ? 300 : 1000; // Less on Windows; had some resource issues on Windows CI
         ExecutorService pool = Executors.newCachedThreadPool();
 
         ArrayList<Future<Integer>> txTasks = new ArrayList<>(10000);
@@ -510,6 +512,9 @@ public class TransactionTest extends AbstractObjectBoxTest {
                     return txNumber;
                 }
             }));
+            if (pool instanceof ThreadPoolExecutor && ((ThreadPoolExecutor) pool).getActiveCount() > numThreads) {
+                Thread.sleep(1); // Throttle processing to limit thread resources
+            }
         }
 
         //Iterate through all the txTasks and make sure all transactions succeeded.
