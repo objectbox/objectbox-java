@@ -92,6 +92,7 @@ public class BoxStoreBuilder {
     int fileMode;
 
     int maxReaders;
+    boolean noReaderThreadLocals;
 
     int queryAttempts;
 
@@ -288,7 +289,7 @@ public class BoxStoreBuilder {
     }
 
     /**
-     * Sets the maximum number of concurrent readers. For most applications, the default is fine (&gt; 100 readers).
+     * Sets the maximum number of concurrent readers. For most applications, the default is fine (~ 126 readers).
      * <p>
      * A "reader" is short for a thread involved in a read transaction.
      * <p>
@@ -296,9 +297,25 @@ public class BoxStoreBuilder {
      * amount of threads you are using.
      * For highly concurrent setups (e.g. you are using ObjectBox on the server side) it may make sense to increase the
      * number.
+     *
+     * Note: Each thread that performed a read transaction and is still alive holds on to a reader slot.
+     * These slots only get vacated when the thread ends. Thus, be mindful with the number of active threads.
+     * Alternatively, you can opt to try the experimental noReaderThreadLocals option flag.
      */
     public BoxStoreBuilder maxReaders(int maxReaders) {
         this.maxReaders = maxReaders;
+        return this;
+    }
+
+    /**
+     * Disables the usage of thread locals for "readers" related to read transactions.
+     * This can make sense if you are using a lot of threads that are kept alive.
+     *
+     * Note: This is still experimental, as it comes with subtle behavior changes at a low level and may affect
+     *       corner cases with e.g. transactions, which may not be fully tested at the moment.
+     */
+    public BoxStoreBuilder noReaderThreadLocals() {
+        this.noReaderThreadLocals = true;
         return this;
     }
 
@@ -477,6 +494,7 @@ public class BoxStoreBuilder {
         if(skipReadSchema) FlatStoreOptions.addSkipReadSchema(fbb, skipReadSchema);
         if(usePreviousCommit) FlatStoreOptions.addUsePreviousCommit(fbb, usePreviousCommit);
         if(readOnly) FlatStoreOptions.addReadOnly(fbb, readOnly);
+        if(noReaderThreadLocals) FlatStoreOptions.addNoReaderThreadLocals(fbb, noReaderThreadLocals);
         if (debugFlags != 0) {
             FlatStoreOptions.addDebugFlags(fbb, debugFlags);
         }

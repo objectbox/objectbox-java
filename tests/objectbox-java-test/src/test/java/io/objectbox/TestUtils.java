@@ -33,6 +33,11 @@ import java.io.Serializable;
 
 public class TestUtils {
 
+    public static boolean isWindows() {
+        final String osName = System.getProperty("os.name").toLowerCase();
+        return osName.contains("windows");
+    }
+
     public static String loadFile(String filename) {
         try {
             InputStream in = openInputStream("/" + filename);

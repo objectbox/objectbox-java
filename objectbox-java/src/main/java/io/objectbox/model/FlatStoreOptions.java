@@ -64,15 +64,19 @@ public final class FlatStoreOptions extends Table {
    */
   public long fileMode() { int o = __offset(10); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
   /**
-   * The maximum number of readers.
+   * The maximum number of readers (related to read transactions).
    * "Readers" are an finite resource for which we need to define a maximum number upfront.
    * The default value is enough for most apps and usually you can ignore it completely.
    * However, if you get the OBX_ERROR_MAX_READERS_EXCEEDED error, you should verify your
    * threading. For each thread, ObjectBox uses multiple readers. Their number (per thread) depends
    * on number of types, relations, and usage patterns. Thus, if you are working with many threads
    * (e.g. in a server-like scenario), it can make sense to increase the maximum number of readers.
-   * Note: The internal default is currently around 120.
-   *       So when hitting this limit, try values around 200-500.
+   *
+   * Note: The internal default is currently 126. So when hitting this limit, try value s around 200-500.
+   *
+   * Note: Each thread that performed a read transaction and is still alive holds on to a reader slot.
+   *       These slots only get vacated when the thread ends. Thus be mindful with the number of active threads.
+   *       Alternatively, you can opt to try the experimental noReaderThreadLocals option flag.
    */
   public long maxReaders() { int o = __offset(12); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
   /**
@@ -123,6 +127,14 @@ public final class FlatStoreOptions extends Table {
    * For debugging purposes you may want enable specific logging.
    */
   public long debugFlags() { int o = __offset(28); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  /**
+   * Disables the usage of thread locals for "readers" related to read transactions.
+   * This can make sense if you are using a lot of threads that are kept alive.
+   *
+   * Note: This is still experimental, as it comes with subtle behavior changes at a low level and may affect
+   *       corner cases with e.g. transactions, which may not be fully tested at the moment.
+   */
+  public boolean noReaderThreadLocals() { int o = __offset(30); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
 
   public static int createFlatStoreOptions(FlatBufferBuilder builder,
       int directoryPathOffset,
@@ -137,8 +149,9 @@ public final class FlatStoreOptions extends Table {
       boolean usePreviousCommit,
       boolean usePreviousCommitOnValidationFailure,
       boolean readOnly,
-      long debugFlags) {
-    builder.startTable(13);
+      long debugFlags,
+      boolean noReaderThreadLocals) {
+    builder.startTable(14);
     FlatStoreOptions.addValidateOnOpenPageLimit(builder, validateOnOpenPageLimit);
     FlatStoreOptions.addMaxDbSizeInKByte(builder, maxDbSizeInKByte);
     FlatStoreOptions.addDebugFlags(builder, debugFlags);
@@ -148,6 +161,7 @@ public final class FlatStoreOptions extends Table {
     FlatStoreOptions.addDirectoryPath(builder, directoryPathOffset);
     FlatStoreOptions.addPutPaddingMode(builder, putPaddingMode);
     FlatStoreOptions.addValidateOnOpen(builder, validateOnOpen);
+    FlatStoreOptions.addNoReaderThreadLocals(builder, noReaderThreadLocals);
     FlatStoreOptions.addReadOnly(builder, readOnly);
     FlatStoreOptions.addUsePreviousCommitOnValidationFailure(builder, usePreviousCommitOnValidationFailure);
     FlatStoreOptions.addUsePreviousCommit(builder, usePreviousCommit);
@@ -155,7 +169,7 @@ public final class FlatStoreOptions extends Table {
     return FlatStoreOptions.endFlatStoreOptions(builder);
   }
 
-  public static void startFlatStoreOptions(FlatBufferBuilder builder) { builder.startTable(13); }
+  public static void startFlatStoreOptions(FlatBufferBuilder builder) { builder.startTable(14); }
   public static void addDirectoryPath(FlatBufferBuilder builder, int directoryPathOffset) { builder.addOffset(0, directoryPathOffset, 0); }
   public static void addModelBytes(FlatBufferBuilder builder, int modelBytesOffset) { builder.addOffset(1, modelBytesOffset, 0); }
   public static int createModelBytesVector(FlatBufferBuilder builder, byte[] data) { return builder.createByteVector(data); }
@@ -172,6 +186,7 @@ public final class FlatStoreOptions extends Table {
   public static void addUsePreviousCommitOnValidationFailure(FlatBufferBuilder builder, boolean usePreviousCommitOnValidationFailure) { builder.addBoolean(10, usePreviousCommitOnValidationFailure, false); }
   public static void addReadOnly(FlatBufferBuilder builder, boolean readOnly) { builder.addBoolean(11, readOnly, false); }
   public static void addDebugFlags(FlatBufferBuilder builder, long debugFlags) { builder.addInt(12, (int) debugFlags, (int) 0L); }
+  public static void addNoReaderThreadLocals(FlatBufferBuilder builder, boolean noReaderThreadLocals) { builder.addBoolean(13, noReaderThreadLocals, false); }
   public static int endFlatStoreOptions(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
