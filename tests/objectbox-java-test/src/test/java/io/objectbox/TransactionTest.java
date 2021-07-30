@@ -19,7 +19,6 @@ package io.objectbox;
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.DbMaxReadersExceededException;
-import io.objectbox.internal.ObjectBoxThreadPool;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -27,6 +26,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -448,6 +448,16 @@ public class TransactionTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void transaction_unboundedThreadPool() throws Exception {
+        runThreadPoolReaderTest(
+                () -> {
+                    Transaction tx = store.beginReadTx();
+                    tx.close();
+                }
+        );
+    }
+
+    @Test
     public void runInReadTx_unboundedThreadPool() throws Exception {
         runThreadPoolReaderTest(
                 () -> store.runInReadTx(() -> {
@@ -483,10 +493,11 @@ public class TransactionTest extends AbstractObjectBoxTest {
         store = createBoxStoreBuilder(null)
                 .maxReaders(100)
                 .debugFlags(0)
+                .noReaderThreadLocals()  // This is the essential flag to make this test work
                 .build();
 
         // Unbounded thread pool so number of threads run exceeds max readers.
-        ExecutorService pool = new ObjectBoxThreadPool(store);
+        ExecutorService pool = Executors.newCachedThreadPool();
 
         ArrayList<Future<Integer>> txTasks = new ArrayList<>(10000);
         final Object lock = new Object();
@@ -503,7 +514,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
 
         //Iterate through all the txTasks and make sure all transactions succeeded.
         for (Future<Integer> txTask : txTasks) {
-            txTask.get(1, TimeUnit.SECONDS);
+            txTask.get(1, TimeUnit.MINUTES);  // 1s would be enough for normally, but use 1 min to allow debug sessions
         }
     }
 }
