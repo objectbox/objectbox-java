@@ -49,9 +49,9 @@ public class TransactionTest extends AbstractObjectBoxTest {
         KeyValueCursor cursor = transaction.createKeyValueCursor();
         cursor.put(123, new byte[]{1, 2, 3, 0});
         cursor.close();
-        assertEquals(true, transaction.isActive());
+        assertTrue(transaction.isActive());
         transaction.commit();
-        assertEquals(false, transaction.isActive());
+        assertFalse(transaction.isActive());
     }
 
     @Test
@@ -91,17 +91,17 @@ public class TransactionTest extends AbstractObjectBoxTest {
         cursorRead.close();
 
         // commit writing
-        assertEquals(true, txRead.isReadOnly());
-        assertEquals(false, txWrite.isReadOnly());
+        assertTrue(txRead.isReadOnly());
+        assertFalse(txWrite.isReadOnly());
 
-        assertEquals(true, txWrite.isActive());
+        assertTrue(txWrite.isActive());
         txWrite.commit();
-        assertEquals(false, txWrite.isActive());
+        assertFalse(txWrite.isActive());
 
         // commit reading
-        assertEquals(true, txRead.isActive());
+        assertTrue(txRead.isActive());
         txRead.abort();
-        assertEquals(false, txRead.isActive());
+        assertFalse(txRead.isActive());
 
         // start reading again and get the new value
         txRead = store.beginReadTx();
@@ -126,7 +126,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
         assertArrayEquals(new byte[]{3, 2, 1, 0}, cursor.get(123));
         cursor.close();
         transaction.reset();
-        assertEquals(true, transaction.isActive());
+        assertTrue(transaction.isActive());
 
         cursor = transaction.createKeyValueCursor();
         assertArrayEquals(new byte[]{1, 2, 3, 0}, cursor.get(123));
@@ -153,7 +153,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
         assertArrayEquals(new byte[]{3, 2, 1, 0}, cursor.get(123));
         cursor.close();
         transaction.reset();
-        assertEquals(true, transaction.isActive());
+        assertTrue(transaction.isActive());
 
         cursor = transaction.createKeyValueCursor();
         assertArrayEquals(new byte[]{3, 2, 1, 0}, cursor.get(123));
