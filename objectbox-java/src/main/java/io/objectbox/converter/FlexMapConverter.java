@@ -32,6 +32,8 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
 
         FlexBuffersBuilder builder = cachedBuilder.getAndSet(null);
         if (builder == null) {
+            // Note: BUILDER_FLAG_SHARE_KEYS_AND_STRINGS is as fast as no flags for small maps/strings
+            // and faster for larger maps/strings. BUILDER_FLAG_SHARE_STRINGS is always slower.
             builder = new FlexBuffersBuilder(
                     new ArrayReadWriteBuf(512),
                     FlexBuffersBuilder.BUILDER_FLAG_SHARE_KEYS_AND_STRINGS
