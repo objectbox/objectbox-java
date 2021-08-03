@@ -27,6 +27,7 @@ public class FlexMapConverterTest {
 
         map.put("Hello", "Grüezi");
         map.put("💡", "Idea");
+        map.put("", "Empty String Key");
         convertAndBackThenAssert(map, converter);
     }
 
