@@ -164,7 +164,11 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
         int entryCount = map.size();
         FlexBuffers.KeyVector keys = map.keys();
         FlexBuffers.Vector values = map.values();
-        Map<Object, Object> resultMap = new HashMap<>(entryCount);
+        // Note: avoid HashMap re-hashing by choosing large enough initial capacity.
+        // From docs: If the initial capacity is greater than the maximum number of entries divided by the load factor,
+        // no rehash operations will ever occur.
+        // So set initial capacity based on default load factor 0.75 accordingly.
+        Map<Object, Object> resultMap = new HashMap<>((int) (entryCount / 0.75 + 1));
         for (int i = 0; i < entryCount; i++) {
             String rawKey = keys.get(i).toString();
             Object key = convertToKey(rawKey);
