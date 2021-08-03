@@ -2,14 +2,12 @@ package io.objectbox.converter;
 
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Nullable;
-
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -44,15 +42,17 @@ public class FlexMapConverterTest {
         map.put("string", "Grüezi");
         map.put("boolean", true);
         map.put("long", 1L);
-//        map.put("float", 1.3f);
+        map.put("float", 1.3f);
         map.put("double", -1.4d);
-        convertAndBackThenAssert(map, converter);
+        Map<String, Object> restoredMap = convertAndBack(map, converter);
+        // Java float is returned as double, so expect double.
+        map.put("float", (double) 1.3f);
+        assertEquals(map, restoredMap);
     }
 
     /**
      * If no item is wider than 32 bits, all integers are restored as Integer.
      */
-    @SuppressWarnings("unchecked")
     @Test
     public void keysString_valsIntegersBiggest32Bit_works() {
         FlexMapConverter converter = new StringFlexMapConverter();
@@ -90,7 +90,6 @@ public class FlexMapConverterTest {
     /**
      * If at least one item is 64 bit wide, all integers are restored as Long.
      */
-    @SuppressWarnings("unchecked")
     @Test
     public void keysString_valsIntegersBiggest64Bit_works() {
         FlexMapConverter converter = new StringFlexMapConverter();
@@ -109,7 +108,6 @@ public class FlexMapConverterTest {
     }
 
     // Note: can't use assertEquals(map, map) as byte[] does not implement equals(obj).
-    @SuppressWarnings("unchecked")
     @Test
     public void keysString_valsByteArray_works() {
         FlexMapConverter converter = new StringFlexMapConverter();
@@ -184,21 +182,24 @@ public class FlexMapConverterTest {
         embeddedList1.add("Grüezi");
         embeddedList1.add(true);
         embeddedList1.add(-2L);
-//        embeddedList1.add(1.3f);
+        embeddedList1.add(1.3f);
         embeddedList1.add(-1.4d);
         map.put("Hello", embeddedList1);
         List<Object> embeddedList2 = new LinkedList<>();
         embeddedList2.add("Grüezi");
         embeddedList2.add(true);
         embeddedList2.add(-22L);
-//        embeddedList2.add(2.3f);
+        embeddedList2.add(2.3f);
         embeddedList2.add(-2.4d);
         map.put("💡", embeddedList2);
-        convertAndBackThenAssert(map, converter);
+        Map<String, List<Object>> restoredMap = convertAndBack(map, converter);
+        // Java float is returned as double, so expect double.
+        embeddedList1.set(3, (double) 1.3f);
+        embeddedList2.set(3, (double) 2.3f);
+        assertEquals(map, restoredMap);
     }
 
     // Note: can't use assertEquals(map, map) as byte[] does not implement equals(obj).
-    @SuppressWarnings("unchecked")
     @Test
     public void nestedListByteArray_works() {
         FlexMapConverter converter = new StringFlexMapConverter();
@@ -237,15 +238,14 @@ public class FlexMapConverterTest {
         convertThenAssertThrows(map, converter);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private Map convertAndBack(@Nullable Map expected, FlexMapConverter converter) {
-        byte[] converted = converter.convertToDatabaseValue(expected);
+    @SuppressWarnings("unchecked")
+    private <K, V> Map<K, V> convertAndBack(@Nullable Map<K, V> expected, FlexMapConverter converter) {
+        byte[] converted = converter.convertToDatabaseValue((Map<Object, Object>) expected);
 
-        return converter.convertToEntityProperty(converted);
+        return (Map<K, V>) converter.convertToEntityProperty(converted);
     }
 
-    @SuppressWarnings({"rawtypes"})
-    private void convertAndBackThenAssert(@Nullable Map expected, FlexMapConverter converter) {
+    private <K, V> void convertAndBackThenAssert(@Nullable Map<K, V> expected, FlexMapConverter converter) {
         assertEquals(expected, convertAndBack(expected, converter));
     }
 

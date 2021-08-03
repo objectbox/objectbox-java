@@ -78,9 +78,8 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
                 builder.putInt(key, (Integer) value);
             } else if (value instanceof Long) {
                 builder.putInt(key, (Long) value);
-                // FIXME When restoring, can't know if Float or Double.
-//            } else if (value instanceof Float) {
-//                builder.putFloat(key, (Float) value);
+            } else if (value instanceof Float) {
+                builder.putFloat(key, (Float) value);
             } else if (value instanceof Double) {
                 builder.putFloat(key, (Double) value);
             } else if (value instanceof byte[]) {
@@ -112,9 +111,8 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
                 builder.putInt((Integer) item);
             } else if (item instanceof Long) {
                 builder.putInt((Long) item);
-                // FIXME When restoring, can't know if Float or Double.
-//            } else if (item instanceof Float) {
-//                builder.putFloat((Float) item);
+            } else if (item instanceof Float) {
+                builder.putFloat((Float) item);
             } else if (item instanceof Double) {
                 builder.putFloat((Double) item);
             } else if (item instanceof byte[]) {
@@ -186,7 +184,7 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
                     resultMap.put(key, value.asInt());
                 }
             } else if (value.isFloat()) {
-                // FIXME Float or Double? Reading Float as Double is destructive.
+                // Always return as double; if original was float casting will give original value.
                 resultMap.put(key, value.asFloat());
             } else if (value.isBlob()) {
                 resultMap.put(key, value.asBlob().getBytes());
@@ -226,7 +224,7 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
                     list.add(item.asInt());
                 }
             } else if (item.isFloat()) {
-                // FIXME Float or Double? Reading Float as Double is destructive.
+                // Always return as double; if original was float casting will give original value.
                 list.add(item.asFloat());
             } else if (item.isBlob()) {
                 list.add(item.asBlob().getBytes());
