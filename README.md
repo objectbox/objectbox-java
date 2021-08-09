@@ -3,7 +3,7 @@
 [![Follow ObjectBox on Twitter](https://img.shields.io/twitter/follow/ObjectBox_io.svg?style=flat-square&logo=twitter)](https://twitter.com/intent/follow?screen_name=ObjectBox_io)
 
 # ObjectBox Java (Kotlin, Android)
-ObjectBox is a superfast object-oriented database with strong relation support.
+[ObjectBox](https://objectbox.io/) is a superfast object-oriented database with strong relation support.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
 **Latest version: [2.9.1 (2021/03/15)](https://docs.objectbox.io/#objectbox-changelog)**
