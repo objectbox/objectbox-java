@@ -21,6 +21,7 @@ public class StringMapConverterTest {
         Map<String, String> mapWithValues = new HashMap<>();
         mapWithValues.put("Hello", "Grüezi");
         mapWithValues.put("💡", "Idea");
+        mapWithValues.put("", "Empty String Key");
         convertAndBackThenAssert(mapWithValues);
     }
 
