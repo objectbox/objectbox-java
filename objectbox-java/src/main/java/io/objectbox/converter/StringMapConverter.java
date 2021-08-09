@@ -62,7 +62,11 @@ public class StringMapConverter implements PropertyConverter<Map<String, String>
         int entryCount = map.size();
         FlexBuffers.KeyVector keys = map.keys();
         FlexBuffers.Vector values = map.values();
-        Map<String, String> resultMap = new HashMap<>(entryCount);
+        // Note: avoid HashMap re-hashing by choosing large enough initial capacity.
+        // From docs: If the initial capacity is greater than the maximum number of entries divided by the load factor,
+        // no rehash operations will ever occur.
+        // So set initial capacity based on default load factor 0.75 accordingly.
+        Map<String, String> resultMap = new HashMap<>((int) (entryCount / 0.75 + 1));
         for (int i = 0; i < entryCount; i++) {
             String key = keys.get(i).toString();
             String value = values.get(i).asString();
