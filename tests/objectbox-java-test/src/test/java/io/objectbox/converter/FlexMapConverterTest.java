@@ -17,21 +17,6 @@ import static org.junit.Assert.assertTrue;
 public class FlexMapConverterTest {
 
     @Test
-    public void keysString_valsString_works() {
-        FlexMapConverter converter = new StringFlexMapConverter();
-        Map<String, String> map = new HashMap<>();
-
-        convertAndBackThenAssert(null, converter);
-
-        convertAndBackThenAssert(map, converter);
-
-        map.put("Hello", "Grüezi");
-        map.put("💡", "Idea");
-        map.put("", "Empty String Key");
-        convertAndBackThenAssert(map, converter);
-    }
-
-    @Test
     public void keysString_valsSupportedTypes_works() {
         FlexMapConverter converter = new StringFlexMapConverter();
         Map<String, Object> map = new HashMap<>();
