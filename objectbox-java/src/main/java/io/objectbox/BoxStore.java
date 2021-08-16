@@ -16,6 +16,7 @@
 
 package io.objectbox;
 
+import io.objectbox.internal.Feature;
 import org.greenrobot.essentials.collections.LongHashMap;
 
 import java.io.Closeable;
@@ -186,34 +187,28 @@ public class BoxStore implements Closeable {
 
     static native long nativeSysProcStatusKb(String key);
 
-    /** @return sync availability (0: none; 1: client; 2: server) */
-    static native int nativeGetSupportedSync();
+    private static native boolean nativeHasFeature(int feature);
 
-    public static boolean isObjectBrowserAvailable() {
-        NativeLibraryLoader.ensureLoaded();
-        return nativeIsObjectBrowserAvailable();
-    }
-
-    private static int getSupportedSync() {
-        NativeLibraryLoader.ensureLoaded();
+    public static boolean hasFeature(Feature feature) {
         try {
-            int supportedSync = nativeGetSupportedSync();
-            if (supportedSync < 0 || supportedSync > 2) {
-                throw new IllegalStateException("Unexpected sync support: " + supportedSync);
-            }
-            return supportedSync;
+            NativeLibraryLoader.ensureLoaded();
+            return nativeHasFeature(feature.id);
         } catch (UnsatisfiedLinkError e) {
             System.err.println("Old JNI lib? " + e);  // No stack
-            return 0;
+            return false;
         }
     }
 
+    public static boolean isObjectBrowserAvailable() {
+        return hasFeature(Feature.ADMIN);
+    }
+
     public static boolean isSyncAvailable() {
-        return getSupportedSync() != 0;
+        return hasFeature(Feature.SYNC);
     }
 
     public static boolean isSyncServerAvailable() {
-        return getSupportedSync() == 2;
+        return hasFeature(Feature.SYNC_SERVER);
     }
 
     native long nativePanicModeRemoveAllObjects(long store, int entityId);
