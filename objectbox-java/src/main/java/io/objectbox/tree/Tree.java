@@ -158,8 +158,8 @@ public class Tree {
         return nativePutMetaBranch(handle, id, parentBranchId, name, null);
     }
 
-    public long putMetaBranch(long id, long parentBranchId, String name, @Nullable String uid) {
-        return nativePutMetaBranch(handle, id, parentBranchId, name, uid);
+    public long putMetaBranch(long id, long parentBranchId, String name, @Nullable String description) {
+        return nativePutMetaBranch(handle, id, parentBranchId, name, description);
     }
 
     public long[] putMetaBranches(String[] path) {
