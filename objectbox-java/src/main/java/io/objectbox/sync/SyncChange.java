@@ -1,9 +1,10 @@
 package io.objectbox.sync;
 
-import io.objectbox.annotation.apihint.Experimental;
+import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.sync.listener.SyncChangeListener;
 
 // Note: this class is expected to be in this package by JNI, check before modifying/removing it.
+
 /**
  * A collection of changes made to one entity type during a sync transaction.
  * Delivered via {@link SyncChangeListener}.
@@ -11,16 +12,24 @@ import io.objectbox.sync.listener.SyncChangeListener;
  * {@link #getRemovedIds()}.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-@Experimental
+@Beta
 public class SyncChange {
-    final long entityTypeId;
+    final int entityTypeId;
 
     final long[] changedIds;
     final long[] removedIds;
 
     // Note: this constructor is called by JNI, check before modifying/removing it.
-    public SyncChange(long entityTypeId, long[] changedIds, long[] removedIds) {
+    public SyncChange(int entityTypeId, long[] changedIds, long[] removedIds) {
         this.entityTypeId = entityTypeId;
+        this.changedIds = changedIds;
+        this.removedIds = removedIds;
+    }
+
+    // Old version called by JNI, remove after some grace period.
+    @Deprecated
+    public SyncChange(long entityTypeId, long[] changedIds, long[] removedIds) {
+        this.entityTypeId = (int) entityTypeId;
         this.changedIds = changedIds;
         this.removedIds = removedIds;
     }
@@ -28,7 +37,7 @@ public class SyncChange {
     /**
      * The entity type ID; use methods like {@link io.objectbox.BoxStore#getEntityTypeIdOrThrow} to map with classes.
      */
-    public long getEntityTypeId() {
+    public int getEntityTypeId() {
         return entityTypeId;
     }
 
