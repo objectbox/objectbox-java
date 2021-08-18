@@ -57,7 +57,7 @@ import io.objectbox.reactive.SubscriptionBuilder;
 import io.objectbox.sync.SyncClient;
 
 /**
- * An ObjectBox database that provides {@link Box Boxes} to put and get Objects of a specific Entity class
+ * An ObjectBox database that provides {@link Box Boxes} to put and get objects of specific entity classes
  * (see {@link #boxFor(Class)}). To get an instance of this class use {@code MyObjectBox.builder()}.
  */
 @SuppressWarnings({"unused", "UnusedReturnValue", "SameParameterValue", "WeakerAccess"})
@@ -71,7 +71,7 @@ public class BoxStore implements Closeable {
     /** Change so ReLinker will update native library when using workaround loading. */
     public static final String JNI_VERSION = "2.9.2-RC3";
 
-    private static final String VERSION = "2.9.2-2021-06-29";
+    private static final String VERSION = "2.9.2-2021-08-18";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
