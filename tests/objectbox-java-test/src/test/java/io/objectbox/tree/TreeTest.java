@@ -6,6 +6,11 @@ import io.objectbox.model.PropertyType;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.*;
 
@@ -202,4 +207,60 @@ public class TreeTest extends AbstractObjectBoxTest {
         });
     }
 
+    @Test
+    public void concurrentTxs() throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(3);
+        final AtomicBoolean readThreadOK = new AtomicBoolean(false);
+        final AtomicLong bookBranchId = new AtomicLong(0);
+        Thread readThread = new Thread(() -> {
+            tree.runInReadTx(() -> {
+                System.out.println("Thread " + Thread.currentThread().getId() + " entered tree TX");
+                latch.countDown();
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                assertNull(tree.root().branch("Book"));
+                readThreadOK.set(true);
+            });
+        });
+        readThread.start();
+
+        Thread writeThread = new Thread(() -> {
+            tree.runInTx(() -> {
+                System.out.println("Thread " + Thread.currentThread().getId() + " entered tree TX (write)");
+                latch.countDown();
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                long id = tree.putBranch(tree.root().getId(), metaBranchIds[1]);
+                bookBranchId.set(id);
+            });
+        });
+        writeThread.start();
+
+        Callable<Branch> branchCallable = () -> {
+            System.out.println("Thread " + Thread.currentThread().getId() + " entered tree TX");
+            latch.countDown();
+            latch.await();
+            return tree.root().branch("Book");
+        };
+        Branch branch = tree.callInReadTx(branchCallable);
+        assertNull(branch);
+
+        // And once more to see that read TXs can still be started
+        tree.callInReadTx(branchCallable);
+
+        readThread.join();
+        assertTrue(readThreadOK.get());
+        writeThread.join();
+        assertNotEquals(0, bookBranchId.get());
+
+        branch = tree.callInReadTx(branchCallable);
+        assertNotNull(branch);
+        assertEquals(bookBranchId.get(), branch.getId());
+    }
 }
