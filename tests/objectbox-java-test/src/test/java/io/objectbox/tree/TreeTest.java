@@ -33,9 +33,10 @@ public class TreeTest extends AbstractObjectBoxTest {
             return prepTree.putBranch(0, metaBranchIds[0]);  // Library data branch (data tree root)
         });
         tree = new Tree(store, rootId);
-        root = tree.root();
+        root = tree.getRoot();
         this.rootId = root.getId();
         assertNotEquals(0, this.rootId);
+        assertEquals(rootId, tree.getRootId());
         assertEquals(3, metaBranchIds.length);
     }
 
@@ -221,7 +222,7 @@ public class TreeTest extends AbstractObjectBoxTest {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                assertNull(tree.root().branch("Book"));
+                assertNull(tree.getRoot().branch("Book"));
                 readThreadOK.set(true);
             });
         });
@@ -236,7 +237,7 @@ public class TreeTest extends AbstractObjectBoxTest {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                long id = tree.putBranch(tree.root().getId(), metaBranchIds[1]);
+                long id = tree.putBranch(tree.getRoot().getId(), metaBranchIds[1]);
                 bookBranchId.set(id);
             });
         });
@@ -246,7 +247,7 @@ public class TreeTest extends AbstractObjectBoxTest {
             System.out.println("Thread " + Thread.currentThread().getId() + " entered tree TX");
             latch.countDown();
             latch.await();
-            return tree.root().branch("Book");
+            return tree.getRoot().branch("Book");
         };
         Branch branch = tree.callInReadTx(branchCallable);
         assertNull(branch);
