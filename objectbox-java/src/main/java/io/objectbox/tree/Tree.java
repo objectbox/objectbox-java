@@ -32,6 +32,7 @@ public class Tree implements Closeable {
     private long handle;
     private final BoxStore store;
     private long rootId;
+    private String pathSeparatorRegex = "\\.";
 
     /**
      * Create a tree instance for the given meta-branch root {@code uid}, or find a singular root if 0 is given.
@@ -64,6 +65,19 @@ public class Tree implements Closeable {
 
     long getHandle() {
         return handle;
+    }
+
+    /**
+     * The path separator regex is used to split a string path into individual path names.
+     * Example: with the default separator, e.g. "Book.Author" becomes ["Book", "Author"].
+     */
+    public String getPathSeparatorRegex() {
+        return pathSeparatorRegex;
+    }
+
+    /** E.g. use "\\/" to change path strings to "Book/Author"; see {@link #getPathSeparatorRegex()} for details. */
+    public void setPathSeparatorRegex(String pathSeparatorRegex) {
+        this.pathSeparatorRegex = pathSeparatorRegex;
     }
 
     /**

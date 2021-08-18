@@ -6,6 +6,10 @@ import io.objectbox.model.PropertyType;
 import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * A data leaf represents a data value in a {@link Tree} as a child of a {@link Branch}.
+ * Each data value has a specific type, e.g. an int or a String.
+ */
 @Experimental
 public class Leaf {
 
@@ -27,6 +31,7 @@ public class Leaf {
         return node.metaId;
     }
 
+    /** See {@link PropertyType} for possible types (not all are used here). */
     public short getValueType() {
         return node.valueType;
     }

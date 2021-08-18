@@ -124,13 +124,13 @@ public class TreeTest extends AbstractObjectBoxTest {
         });
 
         tree.runInReadTx(() -> {
-            Branch book = root.branch("Book", true);
+            Branch book = root.branch("Book");
             assertNotNull(book);
             // get leaf indirectly by traversing branches
-            Branch author = book.branch("Author");
+            Branch author = book.branchChild("Author");
             assertNotNull(author);
 
-            Leaf name = author.leaf("Name");
+            Leaf name = author.leafChild("Name");
             assertNotNull(name);
             assertEquals("Tolkien", name.getString());
             assertFalse(name.isInt());
@@ -141,11 +141,11 @@ public class TreeTest extends AbstractObjectBoxTest {
             assertEquals(author.getId(), name.getParentBranchId());
             assertEquals(metaLeafIds[0], name.getMetaId());
 
-            Leaf year = author.leaf("Year");
+            Leaf year = author.leafChild("Year");
             assertNotNull(year);
             assertEquals(2021, year.getInt());
 
-            Leaf height = author.leaf("Height");
+            Leaf height = author.leafChild("Height");
             assertNotNull(height);
             assertEquals(12.34, height.getDouble(), 0.0);
 
@@ -153,6 +153,19 @@ public class TreeTest extends AbstractObjectBoxTest {
             Leaf name2 = book.leaf(new String[]{"Author", "Name"});
             assertNotNull(name2);
             assertEquals("Tolkien", name2.getString());
+
+            // get leaf directly via path string
+            name2 = book.leaf("Author.Name");
+            assertNotNull(name2);
+            assertEquals("Tolkien", name2.getString());
+
+            // get leaf directly via path string with another separator
+            assertNull(book.leaf("Author/Name"));
+            tree.setPathSeparatorRegex("\\/");
+            name2 = book.leaf("Author/Name");
+            assertNotNull(name2);
+            assertEquals("Tolkien", name2.getString());
+
         });
     }
 
@@ -162,7 +175,7 @@ public class TreeTest extends AbstractObjectBoxTest {
             long metaNameId = tree.putMetaLeaf(0, metaBranchIds[0], "Name", PropertyType.String);
             assertNotEquals(0, metaNameId);
             tree.putValue(rootId, metaNameId, "Bookery");
-            Leaf leaf = root.leaf("Name");
+            Leaf leaf = root.leafChild("Name");
             assertNotNull(leaf);
             assertEquals("Bookery", leaf.getString());
 
@@ -176,7 +189,7 @@ public class TreeTest extends AbstractObjectBoxTest {
         });
 
         tree.runInReadTx(() -> {
-            Leaf name = root.leaf("Name");
+            Leaf name = root.leafChild("Name");
             assertNotNull(name);
             assertEquals("Unseen Library", name.getString());
         });
@@ -188,7 +201,7 @@ public class TreeTest extends AbstractObjectBoxTest {
             long metaYearId = tree.putMetaLeaf(0, metaBranchIds[0], "Year", PropertyType.Int);
             assertNotEquals(0, metaYearId);
             tree.putValue(rootId, metaYearId, 1982);
-            Leaf leaf = root.leaf("Year");
+            Leaf leaf = root.leafChild("Year");
             assertNotNull(leaf);
             assertEquals(1982, leaf.getInt());
 
@@ -202,7 +215,7 @@ public class TreeTest extends AbstractObjectBoxTest {
         });
 
         tree.runInReadTx(() -> {
-            Leaf year = root.leaf("Year");
+            Leaf year = root.leafChild("Year");
             assertNotNull(year);
             assertEquals(1977, year.getInt());
         });
@@ -222,7 +235,7 @@ public class TreeTest extends AbstractObjectBoxTest {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                assertNull(tree.getRoot().branch("Book"));
+                assertNull(tree.getRoot().branchChild("Book"));
                 readThreadOK.set(true);
             });
         });
@@ -247,7 +260,7 @@ public class TreeTest extends AbstractObjectBoxTest {
             System.out.println("Thread " + Thread.currentThread().getId() + " entered tree TX");
             latch.countDown();
             latch.await();
-            return tree.getRoot().branch("Book");
+            return tree.getRoot().branchChild("Book");
         };
         Branch branch = tree.callInReadTx(branchCallable);
         assertNull(branch);
