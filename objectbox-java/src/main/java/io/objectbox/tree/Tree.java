@@ -11,7 +11,16 @@ import java.io.Closeable;
 import java.util.concurrent.Callable;
 
 /**
+ * A higher level tree API operating on branch and leaf nodes.
  * Points to a root branch, can traverse child branches and read and write data in leafs.
+ * <p>
+ * Depends on a compatible tree model (entity types), which is matched by type and property names.
+ * E.g. names like "DataLeaf.valueString" are fixed and may not be changed.
+ * Adding properties to tree types is allowed.
+ * <p>
+ * Note there are TWO ways to work with tree data (both ways can be mixed):
+ * - Standard ObjectBox entity types with e.g. Box<DataLeaf>
+ * - Higher level tree API via this Tree class
  * <p>
  * To navigate in the tree, you typically start with {@link #getRoot()}, which returns a {@link Branch}.
  * From one branch you can navigate to other branches and also {@link Leaf}s, which carry data attributes.
