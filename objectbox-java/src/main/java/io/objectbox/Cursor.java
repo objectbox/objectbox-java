@@ -16,16 +16,15 @@
 
 package io.objectbox;
 
-import java.io.Closeable;
-import java.util.List;
-
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.NotThreadSafe;
-
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.CursorFactory;
 import io.objectbox.relation.ToMany;
+
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.NotThreadSafe;
+import java.io.Closeable;
+import java.util.List;
 
 @SuppressWarnings({"unchecked", "SameParameterValue", "unused", "WeakerAccess", "UnusedReturnValue"})
 @Beta
@@ -108,6 +107,10 @@ public abstract class Cursor<T> implements Closeable {
 
     protected static native long collectStringArray(long cursor, long keyIfComplete, int flags,
                                                     int idStringArray, String[] stringArray
+    );
+
+    protected static native long collectStringList(long cursor, long keyIfComplete, int flags,
+                                                   int idStringList, List<String> stringList
     );
 
     native int nativePropertyId(long cursor, String propertyValue);
