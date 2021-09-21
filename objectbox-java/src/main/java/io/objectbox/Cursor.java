@@ -106,11 +106,11 @@ public abstract class Cursor<T> implements Closeable {
     );
 
     protected static native long collectStringArray(long cursor, long keyIfComplete, int flags,
-                                                    int idStringArray, String[] stringArray
+                                                    int idStringArray, @Nullable String[] stringArray
     );
 
     protected static native long collectStringList(long cursor, long keyIfComplete, int flags,
-                                                   int idStringList, List<String> stringList
+                                                   int idStringList, @Nullable List<String> stringList
     );
 
     native int nativePropertyId(long cursor, String propertyValue);
