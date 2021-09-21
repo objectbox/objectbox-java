@@ -52,6 +52,7 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
     private final static int __ID_simpleString = TestEntity_.simpleString.id;
     private final static int __ID_simpleByteArray = TestEntity_.simpleByteArray.id;
     private final static int __ID_simpleStringArray = TestEntity_.simpleStringArray.id;
+    private final static int __ID_simpleStringList = TestEntity_.simpleStringList.id;
     private final static int __ID_simpleShortU = TestEntity_.simpleShortU.id;
     private final static int __ID_simpleIntU = TestEntity_.simpleIntU.id;
     private final static int __ID_simpleLongU = TestEntity_.simpleLongU.id;
@@ -77,6 +78,12 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
 
         collectStringArray(cursor, 0, PUT_FLAG_FIRST,
                 __id10, simpleStringArray);
+
+        java.util.List<String> simpleStringList = entity.getSimpleStringList();
+        int __id11 = simpleStringList != null ? __ID_simpleStringList : 0;
+
+        collectStringList(cursor, 0, 0,
+                __id11, simpleStringList);
 
         String simpleString = entity.getSimpleString();
         int __id8 = simpleString != null ? __ID_simpleString : 0;

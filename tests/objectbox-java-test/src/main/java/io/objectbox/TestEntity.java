@@ -17,6 +17,7 @@
 package io.objectbox;
 
 import java.util.Arrays;
+import java.util.List;
 
 /** In "real" entity would be annotated with @Entity. */
 public class TestEntity {
@@ -42,6 +43,7 @@ public class TestEntity {
     private byte[] simpleByteArray;
     /** Not-null value. */
     private String[] simpleStringArray;
+    private List<String> simpleStringList;
     /** In "real" entity would be annotated with @Unsigned. */
     private short simpleShortU;
     /** In "real" entity would be annotated with @Unsigned. */
@@ -59,7 +61,7 @@ public class TestEntity {
         this.id = id;
     }
 
-    public TestEntity(long id, boolean simpleBoolean, byte simpleByte, short simpleShort, int simpleInt, long simpleLong, float simpleFloat, double simpleDouble, String simpleString, byte[] simpleByteArray, String[] simpleStringArray, short simpleShortU, int simpleIntU, long simpleLongU) {
+    public TestEntity(long id, boolean simpleBoolean, byte simpleByte, short simpleShort, int simpleInt, long simpleLong, float simpleFloat, double simpleDouble, String simpleString, byte[] simpleByteArray, String[] simpleStringArray, List<String> simpleStringList, short simpleShortU, int simpleIntU, long simpleLongU) {
         this.id = id;
         this.simpleBoolean = simpleBoolean;
         this.simpleByte = simpleByte;
@@ -71,6 +73,7 @@ public class TestEntity {
         this.simpleString = simpleString;
         this.simpleByteArray = simpleByteArray;
         this.simpleStringArray = simpleStringArray;
+        this.simpleStringList = simpleStringList;
         this.simpleShortU = simpleShortU;
         this.simpleIntU = simpleIntU;
         this.simpleLongU = simpleLongU;
@@ -172,6 +175,16 @@ public class TestEntity {
     public void setSimpleStringArray(String[] simpleStringArray) {
         this.simpleStringArray = simpleStringArray;
     }
+
+    public List<String> getSimpleStringList() {
+        return simpleStringList;
+    }
+
+    public TestEntity setSimpleStringList(List<String> simpleStringList) {
+        this.simpleStringList = simpleStringList;
+        return this;
+    }
+
     public short getSimpleShortU() {
         return simpleShortU;
     }
@@ -213,6 +226,7 @@ public class TestEntity {
                 ", simpleString='" + simpleString + '\'' +
                 ", simpleByteArray=" + Arrays.toString(simpleByteArray) +
                 ", simpleStringArray=" + Arrays.toString(simpleStringArray) +
+                ", simpleStringList=" + simpleStringList +
                 ", simpleShortU=" + simpleShortU +
                 ", simpleIntU=" + simpleIntU +
                 ", simpleLongU=" + simpleLongU +

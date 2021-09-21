@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -52,41 +53,45 @@ public class BoxTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testPutStringArray_withNull_ignoresNull() {
+    public void testPutStrings_withNull_ignoresNull() {
         final String[] stringArray = new String[]{"sunrise", null, "sunset"};
         final String[] expectedStringArray = new String[]{"sunrise", "sunset"};
 
         TestEntity entity = new TestEntity();
         entity.setSimpleStringArray(stringArray);
+        entity.setSimpleStringList(Arrays.asList(stringArray));
         box.put(entity);
 
         TestEntity entityRead = box.get(entity.getId());
         assertNotNull(entityRead);
         assertArrayEquals(expectedStringArray, entityRead.getSimpleStringArray());
+        assertEquals(Arrays.asList(expectedStringArray), entityRead.getSimpleStringList());
     }
 
     @Test
-    public void testPutStringArray_onlyNull_isEmpty() {
-        final String[] stringArray = new String[]{null};
-        final String[] expectedStringArray = new String[]{};
-
+    public void testPutStrings_onlyNull_isEmpty() {
         TestEntity entity = new TestEntity();
+        final String[] stringArray = new String[]{null};
         entity.setSimpleStringArray(stringArray);
+        entity.setSimpleStringList(Arrays.asList(stringArray));
         box.put(entity);
 
         TestEntity entityRead = box.get(entity.getId());
         assertNotNull(entityRead);
-        assertArrayEquals(expectedStringArray, entityRead.getSimpleStringArray());
+        assertArrayEquals(new String[]{}, entityRead.getSimpleStringArray());
+        assertEquals(new ArrayList<>(), entityRead.getSimpleStringList());
     }
 
     @Test
-    public void testPutStringArray_null_isNull() {
+    public void testPutStrings_null_isNull() {
+        // Null String array and list.
         TestEntity entity = new TestEntity();
         box.put(entity);
 
         TestEntity entityRead = box.get(entity.getId());
         assertNotNull(entityRead);
         assertNull(entityRead.getSimpleStringArray());
+        assertNull(entityRead.getSimpleStringList());
     }
 
     @Test

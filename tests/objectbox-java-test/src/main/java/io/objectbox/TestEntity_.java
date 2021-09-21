@@ -80,14 +80,17 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
     public final static io.objectbox.Property<TestEntity> simpleStringArray =
             new io.objectbox.Property<>(__INSTANCE, 10, 11, String[].class, "simpleStringArray", false, "simpleStringArray");
 
+    public final static io.objectbox.Property<TestEntity> simpleStringList =
+            new io.objectbox.Property<>(__INSTANCE, 11, 15, java.util.List.class, "simpleStringList");
+
     public final static io.objectbox.Property<TestEntity> simpleShortU =
-            new io.objectbox.Property<>(__INSTANCE, 11, 12, short.class, "simpleShortU");
+            new io.objectbox.Property<>(__INSTANCE, 12, 12, short.class, "simpleShortU");
 
     public final static io.objectbox.Property<TestEntity> simpleIntU =
-            new io.objectbox.Property<>(__INSTANCE, 12, 13, int.class, "simpleIntU");
+            new io.objectbox.Property<>(__INSTANCE, 13, 13, int.class, "simpleIntU");
 
     public final static io.objectbox.Property<TestEntity> simpleLongU =
-            new io.objectbox.Property<>(__INSTANCE, 13, 14, long.class, "simpleLongU");
+            new io.objectbox.Property<>(__INSTANCE, 14, 14, long.class, "simpleLongU");
 
     @SuppressWarnings("unchecked")
     public final static io.objectbox.Property<TestEntity>[] __ALL_PROPERTIES = new io.objectbox.Property[]{
@@ -102,6 +105,7 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
             simpleString,
             simpleByteArray,
             simpleStringArray,
+            simpleStringList,
             simpleShortU,
             simpleIntU,
             simpleLongU
