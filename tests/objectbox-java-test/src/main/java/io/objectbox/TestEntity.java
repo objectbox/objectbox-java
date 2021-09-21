@@ -212,6 +212,7 @@ public class TestEntity {
                 ", simpleDouble=" + simpleDouble +
                 ", simpleString='" + simpleString + '\'' +
                 ", simpleByteArray=" + Arrays.toString(simpleByteArray) +
+                ", simpleStringArray=" + Arrays.toString(simpleStringArray) +
                 ", simpleShortU=" + simpleShortU +
                 ", simpleIntU=" + simpleIntU +
                 ", simpleLongU=" + simpleLongU +
