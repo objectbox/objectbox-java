@@ -16,17 +16,19 @@
 
 package io.objectbox;
 
+import io.objectbox.exception.DbException;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Locale;
 import java.util.concurrent.Callable;
 
-import javax.annotation.Nullable;
-
-import io.objectbox.exception.DbException;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class BoxStoreTest extends AbstractObjectBoxTest {
 
@@ -126,7 +128,11 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         closeStoreForTest();
         File basedir = new File("test-base-dir");
         String name = "mydb";
-        basedir.mkdir();
+        if (!basedir.exists()) {
+            if (!basedir.mkdir()) {
+                fail("Failed to create test directory.");
+            }
+        }
         assertTrue(basedir.isDirectory());
         File dbDir = new File(basedir, name);
         assertFalse(dbDir.exists());
