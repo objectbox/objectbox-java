@@ -228,12 +228,12 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
         // No limit.
         long validated = store.validate(0, true);
-        assertEquals(validated, 7);
+        assertEquals(7, validated);
 
         // With limit.
         validated = store.validate(1, true);
         // 2 because the first page doesn't contain any actual data?
-        assertEquals(validated, 2);
+        assertEquals(2, validated);
     }
 
     @Test
@@ -253,8 +253,8 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
             assertTrue(vmRss > 0);
             assertTrue(memAvailable > 0);
         } else {
-            assertEquals(vmRss, 0);
-            assertEquals(memAvailable, 0);
+            assertEquals(0, vmRss);
+            assertEquals(0, memAvailable);
         }
     }
 
