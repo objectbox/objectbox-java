@@ -64,36 +64,80 @@ pipeline {
             }
         }
 
-        stage("test-jdks") {
-            matrix {
-                axes {
-                    axis {
-                        name "TEST_JDK"
-                        values "8", "16"
-                    }
+// Note: currently not using matrix build because if builds run in parallel they can block each other.
+// Maybe use throttle plugin?
+//         stage("test-jdks") {
+//             matrix {
+//                 axes {
+//                     axis {
+//                         name "TEST_JDK"
+//                         values "8", "16"
+//                     }
+//                 }
+//                 stages {
+//                     stage("test") {
+//                         // Set agent to start with new workspace to avoid Gradle compile issues on shared workspace
+//                         agent {
+//                             label 'java'
+//                         }
+//                         environment {
+//                             TEST_JDK = "${TEST_JDK}"
+//                         }
+//                         steps {
+//                             // "|| true" for an OK exit code if no file is found
+//                             sh 'rm tests/objectbox-java-test/hs_err_pid*.log || true'
+//                             // Note: do not run check task as it includes SpotBugs.
+//                             sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs clean :tests:objectbox-java-test:test"
+//                         }
+//                         post {
+//                             always {
+//                                 junit '**/build/test-results/**/TEST-*.xml'
+//                                 archiveArtifacts artifacts: 'tests/*/hs_err_pid*.log', allowEmptyArchive: true  // Only on JVM crash.
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+        stage("test-jdk-8") {
+            // Set agent to start with new workspace to avoid Gradle compile issues on shared workspace
+            agent {
+                label 'java'
+            }
+            environment {
+                TEST_JDK = "8"
+            }
+            steps {
+                // "|| true" for an OK exit code if no file is found
+                sh 'rm tests/objectbox-java-test/hs_err_pid*.log || true'
+                // Note: do not run check task as it includes SpotBugs.
+                sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs clean :tests:objectbox-java-test:test"
+            }
+            post {
+                always {
+                    junit '**/build/test-results/**/TEST-*.xml'
+                    archiveArtifacts artifacts: 'tests/*/hs_err_pid*.log', allowEmptyArchive: true  // Only on JVM crash.
                 }
-                stages {
-                    stage("test") {
-                        // Set agent to start with new workspace to avoid Gradle compile issues on shared workspace
-                        agent {
-                            label 'java'
-                        }
-                        environment {
-                            TEST_JDK = "${TEST_JDK}"
-                        }
-                        steps {
-                            // "|| true" for an OK exit code if no file is found
-                            sh 'rm tests/objectbox-java-test/hs_err_pid*.log || true'
-                            // Note: do not run check task as it includes SpotBugs.
-                            sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs clean :tests:objectbox-java-test:test"
-                        }
-                        post {
-                            always {
-                                junit '**/build/test-results/**/TEST-*.xml'
-                                archiveArtifacts artifacts: 'tests/*/hs_err_pid*.log', allowEmptyArchive: true  // Only on JVM crash.
-                            }
-                        }
-                    }
+            }
+        }
+        stage("test-jdk-16") {
+            // Set agent to start with new workspace to avoid Gradle compile issues on shared workspace
+            agent {
+                label 'java'
+            }
+            environment {
+                TEST_JDK = "16"
+            }
+            steps {
+                // "|| true" for an OK exit code if no file is found
+                sh 'rm tests/objectbox-java-test/hs_err_pid*.log || true'
+                // Note: do not run check task as it includes SpotBugs.
+                sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs clean :tests:objectbox-java-test:test"
+            }
+            post {
+                always {
+                    junit '**/build/test-results/**/TEST-*.xml'
+                    archiveArtifacts artifacts: 'tests/*/hs_err_pid*.log', allowEmptyArchive: true  // Only on JVM crash.
                 }
             }
         }
