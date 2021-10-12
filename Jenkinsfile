@@ -32,6 +32,7 @@ pipeline {
     options {
         buildDiscarder(logRotator(numToKeepStr: buildsToKeep, artifactNumToKeepStr: buildsToKeep))
         timeout(time: 1, unit: 'HOURS') // If build hangs (regular build should be much quicker)
+        disableConcurrentBuilds() // limit to 1 job per branch
         gitLabConnection('objectbox-gitlab-connection')
     }
 
