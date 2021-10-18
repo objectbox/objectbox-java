@@ -82,7 +82,7 @@ public class PropertyQueryTest extends AbstractQueryTest {
         putTestEntity("BAR", 100);
         putTestEntitiesStrings();
         putTestEntity("banana", 101);
-        Query<TestEntity> query = box.query().startsWith(simpleString, "b").build();
+        Query<TestEntity> query = box.query().startsWith(simpleString, "b", StringOrder.CASE_INSENSITIVE).build();
 
         String[] result = query.property(simpleString).findStrings();
         assertEquals(5, result.length);

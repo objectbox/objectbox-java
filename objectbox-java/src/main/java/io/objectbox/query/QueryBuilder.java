@@ -38,14 +38,14 @@ import java.util.List;
  *
  * <pre>
  * userBox.query()
- *     .equal(User_.firstName, "Joe")
+ *     .equal(User_.firstName, "Joe", StringOrder.CASE_SENSITIVE)
  *     .order(User_.lastName)
  *     .build()
  *     .find()
  * </pre>
  *
  * <p>
- * To add a condition use the appropriate method, for example {@link #equal(Property, String)} or
+ * To add a condition use the appropriate method, for example {@link #equal(Property, String, StringOrder)} or
  * {@link #isNull(Property)}. To order results use {@link #order(Property)} and its related methods.
  * <p>
  * Use {@link #build()} to create a {@link Query} object, which is used to actually get the results.
@@ -70,10 +70,11 @@ public class QueryBuilder<T> implements Closeable {
         CASE_INSENSITIVE,
 
         /**
-         * Checks case of ASCII characters when macthing results,
+         * Checks case of ASCII characters when matching results,
          * e.g. the condition "= example" only matches "example", but not "Example".
          * <p>
-         * Use this if the property has an index.
+         * Use this if the property has an {@link io.objectbox.annotation.Index @Index}
+         * to dramatically increase the speed of looking-up results.
          */
         CASE_SENSITIVE
     }
@@ -449,7 +450,7 @@ public class QueryBuilder<T> implements Closeable {
 
     /**
      * Sets a filter that executes on primary query results (returned from the db core) on a Java level.
-     * For efficiency reasons, you should always prefer primary criteria like {@link #equal(Property, String)} if
+     * For efficiency reasons, you should always prefer primary criteria like {@link #equal(Property, long)} if
      * possible.
      * A filter requires to instantiate full Java objects beforehand, which is less efficient.
      * <p>
@@ -733,30 +734,6 @@ public class QueryBuilder<T> implements Closeable {
 
     /**
      * Creates an "equal ('=')" condition for this property.
-     * <p>
-     * Ignores case when matching results, e.g. {@code equal(prop, "example")} matches both "Example" and "example".
-     * <p>
-     * Use {@link #equal(Property, String, StringOrder) equal(prop, value, StringOrder.CASE_SENSITIVE)} to only match
-     * if case is equal.
-     * <p>
-     * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
-     * on {@code property}, dramatically speeding up look-up of results.
-     */
-    public QueryBuilder<T> equal(Property<T> property, String value) {
-        verifyHandle();
-        checkCombineCondition(nativeEqual(handle, property.getId(), value, false));
-        return this;
-    }
-
-    /**
-     * Creates an "equal ('=')" condition for this property.
-     * <p>
-     * Set {@code order} to {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to only match
-     * if case is equal. E.g. {@code equal(prop, "example", StringOrder.CASE_SENSITIVE)} only matches "example",
-     * but not "Example".
-     * <p>
-     * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
-     * on {@code property}, dramatically speeding up look-up of results.
      */
     public QueryBuilder<T> equal(Property<T> property, String value, StringOrder order) {
         verifyHandle();
@@ -766,30 +743,6 @@ public class QueryBuilder<T> implements Closeable {
 
     /**
      * Creates a "not equal ('&lt;&gt;')" condition for this property.
-     * <p>
-     * Ignores case when matching results, e.g. {@code notEqual(prop, "example")} excludes both "Example" and "example".
-     * <p>
-     * Use {@link #notEqual(Property, String, StringOrder) notEqual(prop, value, StringOrder.CASE_SENSITIVE)} to only exclude
-     * if case is equal.
-     * <p>
-     * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
-     * on {@code property}, dramatically speeding up look-up of results.
-     */
-    public QueryBuilder<T> notEqual(Property<T> property, String value) {
-        verifyHandle();
-        checkCombineCondition(nativeNotEqual(handle, property.getId(), value, false));
-        return this;
-    }
-
-    /**
-     * Creates a "not equal ('&lt;&gt;')" condition for this property.
-     * <p>
-     * Set {@code order} to {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to only exclude
-     * if case is equal. E.g. {@code notEqual(prop, "example", StringOrder.CASE_SENSITIVE)} only excludes "example",
-     * but not "Example".
-     * <p>
-     * Note: Use a case sensitive condition to utilize an {@link io.objectbox.annotation.Index @Index}
-     * on {@code property}, dramatically speeding up look-up of results.
      */
     public QueryBuilder<T> notEqual(Property<T> property, String value, StringOrder order) {
         verifyHandle();
@@ -798,56 +751,32 @@ public class QueryBuilder<T> implements Closeable {
     }
 
     /**
-     * Ignores case when matching results. Use the overload and pass
-     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
+     * Creates an contains condition.
      * <p>
      * Note: for a String array property, use {@link #containsElement} instead.
      */
-    public QueryBuilder<T> contains(Property<T> property, String value) {
+    public QueryBuilder<T> contains(Property<T> property, String value, StringOrder order) {
         if (String[].class == property.type) {
             throw new UnsupportedOperationException("For String[] only containsElement() is supported at this time.");
         }
-        verifyHandle();
-        checkCombineCondition(nativeContains(handle, property.getId(), value, false));
+        containsNoTypeCheck(property, value, order);
         return this;
     }
 
     /**
      * For a String array property, matches if at least one element equals the given value.
      */
-    public QueryBuilder<T> containsElement(Property<T> property, String value) {
+    public QueryBuilder<T> containsElement(Property<T> property, String value, StringOrder order) {
         if (String[].class != property.type) {
             throw new IllegalArgumentException("containsElement is only supported for String[] properties.");
         }
-        verifyHandle();
-        checkCombineCondition(nativeContains(handle, property.getId(), value, false));
+        containsNoTypeCheck(property, value, order);
         return this;
     }
 
-    /**
-     * Ignores case when matching results. Use the overload and pass
-     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
-     */
-    public QueryBuilder<T> startsWith(Property<T> property, String value) {
-        verifyHandle();
-        checkCombineCondition(nativeStartsWith(handle, property.getId(), value, false));
-        return this;
-    }
-
-    /**
-     * Ignores case when matching results. Use the overload and pass
-     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
-     */
-    public QueryBuilder<T> endsWith(Property<T> property, String value) {
-        verifyHandle();
-        checkCombineCondition(nativeEndsWith(handle, property.getId(), value, false));
-        return this;
-    }
-
-    public QueryBuilder<T> contains(Property<T> property, String value, StringOrder order) {
+    void containsNoTypeCheck(Property<T> property, String value, StringOrder order) {
         verifyHandle();
         checkCombineCondition(nativeContains(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
-        return this;
     }
 
     public QueryBuilder<T> startsWith(Property<T> property, String value, StringOrder order) {
@@ -862,14 +791,6 @@ public class QueryBuilder<T> implements Closeable {
         return this;
     }
 
-    /**
-     * Ignores case when matching results. Use the overload and pass
-     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
-     */
-    public QueryBuilder<T> less(Property<T> property, String value) {
-        return less(property, value, StringOrder.CASE_INSENSITIVE);
-    }
-
     public QueryBuilder<T> less(Property<T> property, String value, StringOrder order) {
         verifyHandle();
         checkCombineCondition(nativeLess(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE, false));
@@ -882,14 +803,6 @@ public class QueryBuilder<T> implements Closeable {
         return this;
     }
 
-    /**
-     * Ignores case when matching results. Use the overload and pass
-     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
-     */
-    public QueryBuilder<T> greater(Property<T> property, String value) {
-        return greater(property, value, StringOrder.CASE_INSENSITIVE);
-    }
-
     public QueryBuilder<T> greater(Property<T> property, String value, StringOrder order) {
         verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE, false));
@@ -900,14 +813,6 @@ public class QueryBuilder<T> implements Closeable {
         verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE, true));
         return this;
-    }
-
-    /**
-     * Ignores case when matching results. Use the overload and pass
-     * {@link StringOrder#CASE_SENSITIVE StringOrder.CASE_SENSITIVE} to specify that case should not be ignored.
-     */
-    public QueryBuilder<T> in(Property<T> property, String[] values) {
-        return in(property, values, StringOrder.CASE_INSENSITIVE);
     }
 
     public QueryBuilder<T> in(Property<T> property, String[] values, StringOrder order) {

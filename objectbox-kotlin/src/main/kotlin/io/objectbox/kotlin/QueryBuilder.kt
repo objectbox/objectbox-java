@@ -29,10 +29,6 @@ inline fun <reified T> QueryBuilder<T>.inValues(property: Property<T>, values: I
     `in`(property, values)
 
 /** An alias for the "in" method, which is a reserved keyword in Kotlin. */
-inline fun <reified T> QueryBuilder<T>.inValues(property: Property<T>, values: Array<String>): QueryBuilder<T> =
-    `in`(property, values)
-
-/** An alias for the "in" method, which is a reserved keyword in Kotlin. */
 inline fun <reified T> QueryBuilder<T>.inValues(
     property: Property<T>, values: Array<String>,
     stringOrder: QueryBuilder.StringOrder
