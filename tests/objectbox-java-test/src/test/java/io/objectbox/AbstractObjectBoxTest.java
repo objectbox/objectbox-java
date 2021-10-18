@@ -23,6 +23,7 @@ import org.junit.Before;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -240,6 +241,8 @@ public abstract class AbstractObjectBoxTest {
         }
         entityBuilder.property("simpleByteArray", PropertyType.ByteVector).id(TestEntity_.simpleByteArray.id, ++lastUid);
         entityBuilder.property("simpleStringArray", PropertyType.StringVector).id(TestEntity_.simpleStringArray.id, ++lastUid);
+        entityBuilder.property("simpleStringList", PropertyType.StringVector).id(TestEntity_.simpleStringList.id, ++lastUid)
+                .flags(PropertyFlags.NON_PRIMITIVE_TYPE);
 
         // Unsigned integers.
         entityBuilder.property("simpleShortU", PropertyType.Short).id(TestEntity_.simpleShortU.id, ++lastUid)
@@ -284,7 +287,9 @@ public abstract class AbstractObjectBoxTest {
         entity.setSimpleFloat(200 + nr / 10f);
         entity.setSimpleDouble(2000 + nr / 100f);
         entity.setSimpleByteArray(new byte[]{1, 2, (byte) nr});
-        entity.setSimpleStringArray(new String[]{simpleString});
+        String[] stringArray = {simpleString};
+        entity.setSimpleStringArray(stringArray);
+        entity.setSimpleStringList(Arrays.asList(stringArray));
         entity.setSimpleShortU((short) (100 + nr));
         entity.setSimpleIntU(nr);
         entity.setSimpleLongU(1000 + nr);
@@ -304,9 +309,10 @@ public abstract class AbstractObjectBoxTest {
         assertEquals(200 + nr / 10f, actual.getSimpleFloat(), 0);
         assertEquals(2000 + nr / 100f, actual.getSimpleDouble(), 0);
         assertArrayEquals(new byte[]{1, 2, (byte) nr}, actual.getSimpleByteArray());
-        // null array items are ignored, so array will be empty
+        // null array items are ignored, so array/list will be empty
         String[] expectedStringArray = simpleString == null ? new String[]{} : new String[]{simpleString};
         assertArrayEquals(expectedStringArray, actual.getSimpleStringArray());
+        assertEquals(Arrays.asList(expectedStringArray), actual.getSimpleStringList());
         assertEquals((short) (100 + nr), actual.getSimpleShortU());
         assertEquals(nr, actual.getSimpleIntU());
         assertEquals(1000 + nr, actual.getSimpleLongU());
