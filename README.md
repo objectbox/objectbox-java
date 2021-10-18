@@ -6,11 +6,20 @@
 [ObjectBox](https://objectbox.io/) is a superfast object-oriented database with strong relation support.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
-**Latest version: [2.9.1 (2021/03/15)](https://docs.objectbox.io/#objectbox-changelog)**
+**Latest version: [3.0.0 (2021/10/19)](https://docs.objectbox.io/#objectbox-changelog)**
 
 Demo code using ObjectBox:
 
+```kotlin
+// Kotlin
+val playlist = Playlist("My Favorites")
+playlist.songs.add(Song("Lalala"))
+playlist.songs.add(Song("Lololo"))
+box.put(playlist)
+```
+
 ```java
+// Java
 Playlist playlist = new Playlist("My Favorites");
 playlist.songs.add(new Song("Lalala"));
 playlist.songs.add(new Song("Lololo"));
@@ -29,27 +38,40 @@ Besides JVM based languages like Java and Kotlin, ObjectBox also offers:
 
 Gradle setup
 ------------
-Add this to your root build.gradle (project level): 
+For Android projects, add the ObjectBox Gradle plugin to your root `build.gradle`: 
 
 ```groovy
 buildscript {
-    ext.objectboxVersion = '2.9.1'
+    ext.objectboxVersion = "3.0.0"
+    repositories {        
+        mavenCentral()    
+    }
     dependencies {
-        classpath "io.objectbox:objectbox-gradle-plugin:$objectboxVersion"
+        classpath("io.objectbox:objectbox-gradle-plugin:$objectboxVersion")
     }
 }
 ```
 
-And this to our app's build.gradle (module level):
+And in your app's `build.gradle` apply the plugin:
 
 ```groovy
-apply plugin: 'io.objectbox' // after applying Android plugin
+// Using plugins syntax:
+plugins {
+    id("io.objectbox") // Add after other plugins.
+}
+
+// Or using the old apply syntax:
+apply plugin: "io.objectbox" // Add after other plugins.
 ```
 
 First steps
 -----------
-Create data object class `@Entity`, for example "Playlist".
-```java
+Create a data object class `@Entity`, for example "Playlist".
+```
+// Kotlin
+@Entity data class Playlist( ... )
+
+// Java
 @Entity public class Playlist { ... }
 ```
 Now build the project to let ObjectBox generate the class `MyObjectBox` for you.
