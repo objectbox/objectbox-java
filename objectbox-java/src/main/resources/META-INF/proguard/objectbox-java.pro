@@ -42,3 +42,5 @@
 
 # for essentials
 -dontwarn sun.misc.Unsafe
+# SpotBugs annotations
+-dontwarn edu.umd.cs.findbugs.annotations.SuppressFBWarnings
