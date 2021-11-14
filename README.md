@@ -1,7 +1,5 @@
 <img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png">
 
-[![Follow ObjectBox on Twitter](https://img.shields.io/twitter/follow/ObjectBox_io.svg?style=flat-square&logo=twitter)](https://twitter.com/intent/follow?screen_name=ObjectBox_io)
-
 # ObjectBox Java (Kotlin, Android)
 [ObjectBox](https://objectbox.io/) is a superfast object-oriented database with strong relation support.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
@@ -32,8 +30,8 @@ ObjectBox supports multiple platforms and languages.
 Besides JVM based languages like Java and Kotlin, ObjectBox also offers: 
 
 * [ObjectBox Swift](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
-* [ObjectBox Dart/Flutter](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps (beta) 
-* [ObjectBox Go](https://github.com/objectbox/objectbox-go): great for data-driven tools and small server applications 
+* [ObjectBox Dart/Flutter](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps 
+* [ObjectBox Go](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications 
 * [ObjectBox C and C++](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
 
 Gradle setup
@@ -100,6 +98,7 @@ Links
 
 [Examples](https://github.com/objectbox/objectbox-examples)
 
+[![Follow ObjectBox on Twitter](https://img.shields.io/twitter/follow/ObjectBox_io.svg?style=flat-square&logo=twitter)](https://twitter.com/intent/follow?screen_name=ObjectBox_io)
 
 We love to get your feedback
 ----------------------------
@@ -111,7 +110,7 @@ It will - literally - take just a minute, but help us a lot. Thank you!​ 🙏�
 
 License
 -------
-    Copyright 2017-2020 ObjectBox Ltd. All rights reserved.
+    Copyright 2017-2021 ObjectBox Ltd. All rights reserved.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
