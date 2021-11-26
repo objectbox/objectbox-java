@@ -49,7 +49,10 @@ public final class PropertyType {
    * High precision date/time stored as a 64 bit long representing nanoseconds since 1970-01-01 (unix epoch)
    */
   public static final short DateNano = 12;
-  public static final short Reserved2 = 13;
+  /**
+   * A map containing flexible data with string keys
+   */
+  public static final short FlexMap = 13;
   public static final short Reserved3 = 14;
   public static final short Reserved4 = 15;
   public static final short Reserved5 = 16;
@@ -70,7 +73,7 @@ public final class PropertyType {
   public static final short DateVector = 31;
   public static final short DateNanoVector = 32;
 
-  public static final String[] names = { "Unknown", "Bool", "Byte", "Short", "Char", "Int", "Long", "Float", "Double", "String", "Date", "Relation", "DateNano", "Reserved2", "Reserved3", "Reserved4", "Reserved5", "Reserved6", "Reserved7", "Reserved8", "Reserved9", "Reserved10", "BoolVector", "ByteVector", "ShortVector", "CharVector", "IntVector", "LongVector", "FloatVector", "DoubleVector", "StringVector", "DateVector", "DateNanoVector", };
+  public static final String[] names = { "Unknown", "Bool", "Byte", "Short", "Char", "Int", "Long", "Float", "Double", "String", "Date", "Relation", "DateNano", "FlexMap", "Reserved3", "Reserved4", "Reserved5", "Reserved6", "Reserved7", "Reserved8", "Reserved9", "Reserved10", "BoolVector", "ByteVector", "ShortVector", "CharVector", "IntVector", "LongVector", "FloatVector", "DoubleVector", "StringVector", "DateVector", "DateNanoVector", };
 
   public static String name(int e) { return names[e]; }
 }
