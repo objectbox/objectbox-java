@@ -727,9 +727,9 @@ public class PropertyQueryTest extends AbstractQueryTest {
         putTestEntityInteger((byte) 0, (short) 0, 0, -1);
 
         Query<TestEntity> baseQuery = box.query().build();
-        assertEquals(Long.MIN_VALUE / 2, baseQuery.property(simpleLong).avgLong());
+        assertEquals(Long.MIN_VALUE / 2 - 1, baseQuery.property(simpleLong).avgLong());
         // Should not change if treated as unsigned.
-        assertEquals(Long.MIN_VALUE / 2, baseQuery.property(simpleLongU).avgLong());
+        assertEquals(Long.MIN_VALUE / 2 - 1, baseQuery.property(simpleLongU).avgLong());
     }
 
     @Test
