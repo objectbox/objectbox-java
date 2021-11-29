@@ -100,14 +100,6 @@ Links
 
 [![Follow ObjectBox on Twitter](https://img.shields.io/twitter/follow/ObjectBox_io.svg?style=flat-square&logo=twitter)](https://twitter.com/intent/follow?screen_name=ObjectBox_io)
 
-We love to get your feedback
-----------------------------
-Let us know how we are doing: [2 minute questionnaire](https://docs.google.com/forms/d/e/1FAIpQLSe_fq-FlBThK_96bkHv1oEDizoHwEu_b6M4FJkMv9V5q_Or9g/viewform?usp=sf_link).
-Thanks!
-
-Also, we want to [hear about your app](https://docs.google.com/forms/d/e/1FAIpQLScIYiOIThcq-AnDVoCvnZOMgxO4S-fBtDSFPQfWldJnhi2c7Q/viewform)!
-It will - literally - take just a minute, but help us a lot. Thank you!​ 🙏​
-
 License
 -------
     Copyright 2017-2021 ObjectBox Ltd. All rights reserved.
