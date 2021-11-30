@@ -19,6 +19,7 @@ package io.objectbox.internal;
 import io.objectbox.BoxStore;
 import org.greenrobot.essentials.io.IoUtils;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -29,10 +30,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 
 /**
  * Separate class, so we can mock BoxStore.
@@ -106,12 +109,22 @@ public class NativeLibraryLoader {
             }
         } catch (UnsatisfiedLinkError e) {
             String osArch = System.getProperty("os.arch");
-            String sunArch = System.getProperty("sun.arch.data.model");
-            String message = String.format(
-                    "[ObjectBox] Loading native library failed, please report this to us: " +
-                            "vendor=%s,os=%s,os.arch=%s,model=%s,android=%s,linux=%s,machine=%s",
-                    vendor, osName, osArch, sunArch, android, isLinux, getCpuArchOSOrNull()
-            );
+            String message;
+            if (android) {
+                message = String.format(
+                        "[ObjectBox] Android failed to load native library," +
+                                " check your APK/App Bundle includes a supported ABI or use ReLinker" +
+                                " (vendor=%s,os=%s,os.arch=%s,SUPPORTED_ABIS=%s)",
+                        vendor, osName, osArch, getSupportedABIsAndroid()
+                );
+            } else {
+                String sunArch = System.getProperty("sun.arch.data.model");
+                message = String.format(
+                        "[ObjectBox] Loading native library failed, please report this to us: " +
+                                "vendor=%s,os=%s,os.arch=%s,model=%s,linux=%s,machine=%s",
+                        vendor, osName, osArch, sunArch, isLinux, getCpuArchOSOrNull()
+                );
+            }
             throw new LinkageError(message, e); // UnsatisfiedLinkError does not allow a cause; use its super class
         }
     }
@@ -260,6 +273,32 @@ public class NativeLibraryLoader {
         // note: can't catch ReflectiveOperationException, is K+ (19+) on Android
 
         return true;
+    }
+
+    /**
+     * Return a string containing a list of ABIs that are supported by the current Android device.
+     * If the Android device is below API level 21 (Android 5) or if looking up the value fails,
+     * returns an empty string.
+     */
+    @Nonnull
+    private static String getSupportedABIsAndroid() {
+        String[] supportedAbis = null;
+        //noinspection TryWithIdenticalCatches
+        try {
+            Class<?> build = Class.forName("android.os.Build");
+            Field supportedAbisField = build.getField("SUPPORTED_ABIS");
+            supportedAbis = (String[]) supportedAbisField.get(null);
+        } catch (NoSuchFieldException ignored) {
+        } catch (IllegalAccessException ignored) {
+        } catch (ClassNotFoundException ignored) {
+        }
+        // note: can't use multi-catch (would compile to ReflectiveOperationException, is K+ (19+) on Android)
+
+        if (supportedAbis != null) {
+            return Arrays.toString(supportedAbis);
+        } else {
+            return "";
+        }
     }
 
     public static void ensureLoaded() {
