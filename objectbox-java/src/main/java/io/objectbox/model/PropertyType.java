@@ -50,9 +50,10 @@ public final class PropertyType {
    */
   public static final short DateNano = 12;
   /**
-   * A map containing flexible data with string keys
+   * "Flexible" type, which may contain scalars (integers, floating points), strings or containers (lists and maps).
+   * Note: a flex map must use string keys.
    */
-  public static final short FlexMap = 13;
+  public static final short Flex = 13;
   public static final short Reserved3 = 14;
   public static final short Reserved4 = 15;
   public static final short Reserved5 = 16;
@@ -73,7 +74,7 @@ public final class PropertyType {
   public static final short DateVector = 31;
   public static final short DateNanoVector = 32;
 
-  public static final String[] names = { "Unknown", "Bool", "Byte", "Short", "Char", "Int", "Long", "Float", "Double", "String", "Date", "Relation", "DateNano", "FlexMap", "Reserved3", "Reserved4", "Reserved5", "Reserved6", "Reserved7", "Reserved8", "Reserved9", "Reserved10", "BoolVector", "ByteVector", "ShortVector", "CharVector", "IntVector", "LongVector", "FloatVector", "DoubleVector", "StringVector", "DateVector", "DateNanoVector", };
+  public static final String[] names = { "Unknown", "Bool", "Byte", "Short", "Char", "Int", "Long", "Float", "Double", "String", "Date", "Relation", "DateNano", "Flex", "Reserved3", "Reserved4", "Reserved5", "Reserved6", "Reserved7", "Reserved8", "Reserved9", "Reserved10", "BoolVector", "ByteVector", "ShortVector", "CharVector", "IntVector", "LongVector", "FloatVector", "DoubleVector", "StringVector", "DateVector", "DateNanoVector", };
 
   public static String name(int e) { return names[e]; }
 }
