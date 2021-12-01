@@ -114,6 +114,7 @@ public class NativeLibraryLoader {
                 message = String.format(
                         "[ObjectBox] Android failed to load native library," +
                                 " check your APK/App Bundle includes a supported ABI or use ReLinker" +
+                                " https://docs.objectbox.io/android/app-bundle-and-split-apk" +
                                 " (vendor=%s,os=%s,os.arch=%s,SUPPORTED_ABIS=%s)",
                         vendor, osName, osArch, getSupportedABIsAndroid()
                 );
