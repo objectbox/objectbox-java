@@ -54,6 +54,8 @@ dependencies {
     }
 
     testImplementation "junit:junit:$junit_version"
+    // To test Coroutines
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version")
     // To test Kotlin Flow
     testImplementation 'app.cash.turbine:turbine:0.5.2'
 }

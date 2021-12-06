@@ -18,6 +18,10 @@ package io.objectbox.kotlin
 
 import io.objectbox.Box
 import io.objectbox.BoxStore
+import java.util.concurrent.Callable
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 import kotlin.reflect.KClass
 
 
@@ -27,3 +31,23 @@ inline fun <reified T> BoxStore.boxFor(): Box<T> = boxFor(T::class.java)
 /** Shortcut for `BoxStore.boxFor(Entity::class.java)`. */
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T : Any> BoxStore.boxFor(clazz: KClass<T>): Box<T> = boxFor(clazz.java)
+
+/**
+ * Wraps [BoxStore.callInTxAsync] in a coroutine that suspends until the transaction has completed.
+ * Likewise, on success the return value of the given [callable] is returned, on failure an exception is thrown.
+ *
+ * Note that even if the coroutine is cancelled the callable is always executed.
+ *
+ * The callable (and transaction) is submitted to the ObjectBox internal thread pool.
+ */
+suspend fun <V : Any> BoxStore.awaitCallInTx(callable: Callable<V?>): V? {
+    return suspendCoroutine { continuation ->
+        callInTxAsync(callable) { result, error ->
+            if (error != null) {
+                continuation.resumeWithException(error)
+            } else {
+                continuation.resume(result)
+            }
+        }
+    }
+}
