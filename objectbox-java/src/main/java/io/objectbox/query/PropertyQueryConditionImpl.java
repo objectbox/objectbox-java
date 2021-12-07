@@ -343,6 +343,34 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
         }
     }
 
+    public static class StringStringCondition<T> extends PropertyQueryConditionImpl<T> {
+        private final Operation op;
+        private final String leftValue;
+        private final String rightValue;
+        private final StringOrder order;
+
+        public enum Operation {
+            CONTAINS_KEY_VALUE
+        }
+
+        public StringStringCondition(Property<T> property, Operation op, String leftValue, String rightValue, StringOrder order) {
+            super(property);
+            this.op = op;
+            this.leftValue = leftValue;
+            this.rightValue = rightValue;
+            this.order = order;
+        }
+
+        @Override
+        void applyCondition(QueryBuilder<T> builder) {
+            if (op == Operation.CONTAINS_KEY_VALUE) {
+                builder.containsKeyValue(property, leftValue, rightValue, order);
+            } else {
+                throw new UnsupportedOperationException(op + " is not supported with two String values");
+            }
+        }
+    }
+
     public static class StringArrayCondition<T> extends PropertyQueryConditionImpl<T> {
         private final Operation op;
         private final String[] value;

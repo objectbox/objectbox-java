@@ -31,6 +31,7 @@ import io.objectbox.query.PropertyQueryConditionImpl.NullCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.StringArrayCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.StringCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.StringCondition.Operation;
+import io.objectbox.query.PropertyQueryConditionImpl.StringStringCondition;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
 import javax.annotation.Nullable;
@@ -461,6 +462,25 @@ public class Property<ENTITY> implements Serializable {
         if (String[].class != type) {
             throw new IllegalArgumentException("containsElement is only supported for String[] properties.");
         }
+    }
+
+    /**
+     * For a String-key map property, matches if at least one key and value combination equals the given values
+     * using {@link StringOrder#CASE_SENSITIVE StringOrder#CASE_SENSITIVE}.
+     *
+     * @see #containsKeyValue(String, String, StringOrder)
+     */
+    public PropertyQueryCondition<ENTITY> containsKeyValue(String key, String value) {
+        return new StringStringCondition<>(this, StringStringCondition.Operation.CONTAINS_KEY_VALUE,
+                key, value, StringOrder.CASE_SENSITIVE);
+    }
+
+    /**
+     * @see #containsKeyValue(String, String)
+     */
+    public PropertyQueryCondition<ENTITY> containsKeyValue(String key, String value, StringOrder order) {
+        return new StringStringCondition<>(this, StringStringCondition.Operation.CONTAINS_KEY_VALUE,
+                key, value, order);
     }
 
     /**
