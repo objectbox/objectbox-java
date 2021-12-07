@@ -443,25 +443,17 @@ public class Property<ENTITY> implements Serializable {
     }
 
     /**
-     * For a String array property, matches if at least one element equals the given value
+     * For a String array or String-key map property, matches if at least one element equals the given value
      * using {@link StringOrder#CASE_SENSITIVE StringOrder#CASE_SENSITIVE}.
      *
      * @see #containsElement(String, StringOrder)
      */
     public PropertyQueryCondition<ENTITY> containsElement(String value) {
-        checkIsStringArray();
         return new StringCondition<>(this, Operation.CONTAINS_ELEMENT, value);
     }
 
     public PropertyQueryCondition<ENTITY> containsElement(String value, StringOrder order) {
-        checkIsStringArray();
         return new StringCondition<>(this, Operation.CONTAINS_ELEMENT, value, order);
-    }
-
-    private void checkIsStringArray() {
-        if (String[].class != type) {
-            throw new IllegalArgumentException("containsElement is only supported for String[] properties.");
-        }
     }
 
     /**
