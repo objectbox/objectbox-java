@@ -425,6 +425,7 @@ public class QueryBuilder<T> implements Closeable {
      * @param relationInfo The relation as found in the generated meta info class ("EntityName_") of class T.
      * @param more         Supply further relations to be eagerly loaded.
      */
+    @SuppressWarnings("rawtypes")
     public QueryBuilder<T> eager(RelationInfo relationInfo, RelationInfo... more) {
         return eager(0, relationInfo, more);
     }
@@ -436,6 +437,7 @@ public class QueryBuilder<T> implements Closeable {
      * @param relationInfo The relation as found in the generated meta info class ("EntityName_") of class T.
      * @param more         Supply further relations to be eagerly loaded.
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public QueryBuilder<T> eager(int limit, RelationInfo relationInfo, @Nullable RelationInfo... more) {
         verifyNotSubQuery();
         if (eagerRelations == null) {
