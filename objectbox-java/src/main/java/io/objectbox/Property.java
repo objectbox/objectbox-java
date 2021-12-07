@@ -666,7 +666,7 @@ public class Property<ENTITY> implements Serializable {
     @Internal
     public int getId() {
         if (this.id <= 0) {
-            throw new IllegalStateException("Illegal property ID " + id + " for " + toString());
+            throw new IllegalStateException("Illegal property ID " + id + " for " + this);
         }
         return id;
     }
@@ -677,10 +677,10 @@ public class Property<ENTITY> implements Serializable {
 
     void verifyId(int idInDb) {
         if (this.id <= 0) {
-            throw new IllegalStateException("Illegal property ID " + id + " for " + toString());
+            throw new IllegalStateException("Illegal property ID " + id + " for " + this);
         }
         if (this.id != idInDb) {
-            throw new DbException(toString() + " does not match ID in DB: " + idInDb);
+            throw new DbException(this + " does not match ID in DB: " + idInDb);
         }
         idVerified = true;
     }
