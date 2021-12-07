@@ -16,26 +16,25 @@
 
 package io.objectbox;
 
+import io.objectbox.ModelBuilder.EntityBuilder;
+import io.objectbox.ModelBuilder.PropertyBuilder;
 import io.objectbox.annotation.IndexType;
+import io.objectbox.model.PropertyFlags;
+import io.objectbox.model.PropertyType;
 import org.junit.After;
 import org.junit.Before;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nullable;
-
-import io.objectbox.ModelBuilder.EntityBuilder;
-import io.objectbox.ModelBuilder.PropertyBuilder;
-import io.objectbox.model.PropertyFlags;
-import io.objectbox.model.PropertyType;
-
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -252,7 +251,11 @@ public abstract class AbstractObjectBoxTest {
         entityBuilder.property("simpleLongU", PropertyType.Long).id(TestEntity_.simpleLongU.id, ++lastUid)
                 .flags(PropertyFlags.UNSIGNED);
 
-        int lastId = TestEntity_.simpleLongU.id;
+        // Flexible map
+        entityBuilder.property("stringObjectMap", PropertyType.Flex)
+                .id(TestEntity_.stringObjectMap.id, ++lastUid);
+
+        int lastId = TestEntity_.stringObjectMap.id;
         entityBuilder.lastPropertyId(lastId, lastUid);
         addOptionalFlagsToTestEntity(entityBuilder);
         entityBuilder.entityDone();
@@ -293,6 +296,11 @@ public abstract class AbstractObjectBoxTest {
         entity.setSimpleShortU((short) (100 + nr));
         entity.setSimpleIntU(nr);
         entity.setSimpleLongU(1000 + nr);
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        if (simpleString != null) {
+            stringObjectMap.put(simpleString, simpleString);
+        }
+        entity.setStringObjectMap(stringObjectMap);
         return entity;
     }
 
@@ -316,6 +324,10 @@ public abstract class AbstractObjectBoxTest {
         assertEquals((short) (100 + nr), actual.getSimpleShortU());
         assertEquals(nr, actual.getSimpleIntU());
         assertEquals(1000 + nr, actual.getSimpleLongU());
+        if (simpleString != null) {
+            assertEquals(1, actual.getStringObjectMap().size());
+            assertEquals(simpleString, actual.getStringObjectMap().get(simpleString));
+        }
     }
 
     protected TestEntity putTestEntity(@Nullable String simpleString, int nr) {
