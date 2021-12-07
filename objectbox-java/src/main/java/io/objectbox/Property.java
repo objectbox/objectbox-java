@@ -449,12 +449,12 @@ public class Property<ENTITY> implements Serializable {
      */
     public PropertyQueryCondition<ENTITY> containsElement(String value) {
         checkIsStringArray();
-        return new StringCondition<>(this, Operation.CONTAINS, value);
+        return new StringCondition<>(this, Operation.CONTAINS_ELEMENT, value);
     }
 
     public PropertyQueryCondition<ENTITY> containsElement(String value, StringOrder order) {
         checkIsStringArray();
-        return new StringCondition<>(this, Operation.CONTAINS, value, order);
+        return new StringCondition<>(this, Operation.CONTAINS_ELEMENT, value, order);
     }
 
     private void checkIsStringArray() {

@@ -288,6 +288,7 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
             LESS,
             LESS_OR_EQUAL,
             CONTAINS,
+            CONTAINS_ELEMENT,
             STARTS_WITH,
             ENDS_WITH
         }
@@ -325,8 +326,10 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
                     builder.lessOrEqual(property, value, order);
                     break;
                 case CONTAINS:
-                    // Note: contains used for String[] as well, so do not enforce String type here.
-                    builder.containsNoTypeCheck(property, value, order);
+                    builder.contains(property, value, order);
+                    break;
+                case CONTAINS_ELEMENT:
+                    builder.containsElement(property, value, order);
                     break;
                 case STARTS_WITH:
                     builder.startsWith(property, value, order);

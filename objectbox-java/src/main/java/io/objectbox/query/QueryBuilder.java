@@ -182,6 +182,8 @@ public class QueryBuilder<T> implements Closeable {
 
     private native long nativeContains(long handle, int propertyId, String value, boolean caseSensitive);
 
+    private native long nativeContainsElement(long handle, int propertyId, String value, boolean caseSensitive);
+
     private native long nativeStartsWith(long handle, int propertyId, String value, boolean caseSensitive);
 
     private native long nativeEndsWith(long handle, int propertyId, String value, boolean caseSensitive);
@@ -759,7 +761,8 @@ public class QueryBuilder<T> implements Closeable {
         if (String[].class == property.type) {
             throw new UnsupportedOperationException("For String[] only containsElement() is supported at this time.");
         }
-        containsNoTypeCheck(property, value, order);
+        verifyHandle();
+        checkCombineCondition(nativeContains(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
         return this;
     }
 
@@ -770,13 +773,9 @@ public class QueryBuilder<T> implements Closeable {
         if (String[].class != property.type) {
             throw new IllegalArgumentException("containsElement is only supported for String[] properties.");
         }
-        containsNoTypeCheck(property, value, order);
-        return this;
-    }
-
-    void containsNoTypeCheck(Property<T> property, String value, StringOrder order) {
         verifyHandle();
-        checkCombineCondition(nativeContains(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
+        checkCombineCondition(nativeContainsElement(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
+        return this;
     }
 
     public QueryBuilder<T> startsWith(Property<T> property, String value, StringOrder order) {
