@@ -360,7 +360,7 @@ public class QueryBuilder<T> implements Closeable {
 
 
     /**
-     * Asigns the given alias to the previous condition.
+     * Assigns the given alias to the previous condition.
      *
      * @param alias The string alias for use with setParameter(s) methods.
      */
