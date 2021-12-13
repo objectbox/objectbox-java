@@ -52,6 +52,7 @@ public class TestEntity {
     /** In "real" entity would be annotated with @Unsigned. */
     private long simpleLongU;
     private Map<String, Object> stringObjectMap;
+    private Object flexProperty;
 
     transient boolean noArgsConstructorCalled;
 
@@ -66,7 +67,8 @@ public class TestEntity {
     public TestEntity(long id, boolean simpleBoolean, byte simpleByte, short simpleShort, int simpleInt,
                       long simpleLong, float simpleFloat, double simpleDouble, String simpleString,
                       byte[] simpleByteArray, String[] simpleStringArray, List<String> simpleStringList,
-                      short simpleShortU, int simpleIntU, long simpleLongU, Map<String, Object> stringObjectMap) {
+                      short simpleShortU, int simpleIntU, long simpleLongU, Map<String, Object> stringObjectMap,
+                      Object flexProperty) {
         this.id = id;
         this.simpleBoolean = simpleBoolean;
         this.simpleByte = simpleByte;
@@ -83,6 +85,7 @@ public class TestEntity {
         this.simpleIntU = simpleIntU;
         this.simpleLongU = simpleLongU;
         this.stringObjectMap = stringObjectMap;
+        this.flexProperty = flexProperty;
         if (STRING_VALUE_THROW_IN_CONSTRUCTOR.equals(simpleString)) {
             throw new RuntimeException(EXCEPTION_IN_CONSTRUCTOR_MESSAGE);
         }
@@ -226,6 +229,16 @@ public class TestEntity {
         return this;
     }
 
+    @Nullable
+    public Object getFlexProperty() {
+        return flexProperty;
+    }
+
+    public TestEntity setFlexProperty(@Nullable Object flexProperty) {
+        this.flexProperty = flexProperty;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "TestEntity{" +
@@ -245,6 +258,7 @@ public class TestEntity {
                 ", simpleIntU=" + simpleIntU +
                 ", simpleLongU=" + simpleLongU +
                 ", stringObjectMap=" + stringObjectMap +
+                ", flexProperty=" + flexProperty +
                 ", noArgsConstructorCalled=" + noArgsConstructorCalled +
                 '}';
     }

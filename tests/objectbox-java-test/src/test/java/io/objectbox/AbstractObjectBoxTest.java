@@ -251,11 +251,12 @@ public abstract class AbstractObjectBoxTest {
         entityBuilder.property("simpleLongU", PropertyType.Long).id(TestEntity_.simpleLongU.id, ++lastUid)
                 .flags(PropertyFlags.UNSIGNED);
 
-        // Flexible map
+        // Flexible properties
         entityBuilder.property("stringObjectMap", PropertyType.Flex)
                 .id(TestEntity_.stringObjectMap.id, ++lastUid);
+        entityBuilder.property("flexProperty", PropertyType.Flex).id(TestEntity_.flexProperty.id, ++lastUid);
 
-        int lastId = TestEntity_.stringObjectMap.id;
+        int lastId = TestEntity_.flexProperty.id;
         entityBuilder.lastPropertyId(lastId, lastUid);
         addOptionalFlagsToTestEntity(entityBuilder);
         entityBuilder.entityDone();
@@ -301,6 +302,7 @@ public abstract class AbstractObjectBoxTest {
             stringObjectMap.put(simpleString, simpleString);
             entity.setStringObjectMap(stringObjectMap);
         }
+        entity.setFlexProperty(simpleString);
         return entity;
     }
 
@@ -328,6 +330,7 @@ public abstract class AbstractObjectBoxTest {
             assertEquals(1, actual.getStringObjectMap().size());
             assertEquals(simpleString, actual.getStringObjectMap().get(simpleString));
         }
+        assertEquals(simpleString, actual.getFlexProperty());
     }
 
     protected TestEntity putTestEntity(@Nullable String simpleString, int nr) {
