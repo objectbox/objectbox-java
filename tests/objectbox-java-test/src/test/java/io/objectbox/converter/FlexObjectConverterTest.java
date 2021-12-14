@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 /**
  * Tests {@link FlexObjectConverter} basic types and flexible list conversion.
@@ -51,6 +52,14 @@ public class FlexObjectConverterTest {
         // Java Float is returned as Double, so expect Double.
         list.set(3, (double) 1.3f);
         assertEquals(list, restoredList);
+
+        // list with null element
+        list.add(null);
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> convertAndBack(list, converter)
+        );
+        assertEquals("List elements must not be null", exception.getMessage());
     }
 
     @SuppressWarnings("unchecked")

@@ -142,6 +142,9 @@ public class FlexObjectConverter implements PropertyConverter<Object, byte[]> {
         int vectorStart = builder.startVector();
 
         for (Object item : list) {
+            if (item == null) {
+                throw new IllegalArgumentException("List elements must not be null");
+            }
             if (item instanceof Map) {
                 //noinspection unchecked
                 addMap(builder, null, (Map<Object, Object>) item);
