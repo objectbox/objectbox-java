@@ -89,12 +89,15 @@ public class FlexObjectConverter implements PropertyConverter<Object, byte[]> {
         int mapStart = builder.startMap();
 
         for (Map.Entry<Object, Object> entry : map.entrySet()) {
+            Object rawKey = entry.getKey();
             Object value = entry.getValue();
-            if (entry.getKey() == null || value == null) {
+            if (rawKey == null || value == null) {
                 throw new IllegalArgumentException("Map keys or values must not be null");
             }
-
-            String key = entry.getKey().toString();
+            if (!(rawKey instanceof String)) {
+                throw new IllegalArgumentException("Map keys must be String");
+            }
+            String key = rawKey.toString();
             if (value instanceof Map) {
                 //noinspection unchecked
                 addMap(builder, key, (Map<Object, Object>) value);
