@@ -443,7 +443,7 @@ public class Property<ENTITY> implements Serializable {
     }
 
     /**
-     * For a String array or String-key map property, matches if at least one element equals the given value
+     * For a String array, list or String-key map property, matches if at least one element equals the given value
      * using {@link StringOrder#CASE_SENSITIVE StringOrder#CASE_SENSITIVE}.
      *
      * @see #containsElement(String, StringOrder)

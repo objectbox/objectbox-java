@@ -771,7 +771,7 @@ public class QueryBuilder<T> implements Closeable {
     }
 
     /**
-     * For a String array or String-key map property, matches if at least one element equals the given value.
+     * For a String array, list or String-key map property, matches if at least one element equals the given value.
      */
     public QueryBuilder<T> containsElement(Property<T> property, String value, StringOrder order) {
         verifyHandle();
