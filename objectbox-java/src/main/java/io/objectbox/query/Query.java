@@ -74,6 +74,9 @@ public class Query<T> implements Closeable {
     native void nativeSetParameter(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
                                    String value);
 
+    private native void nativeSetParameters(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
+                                            String value, String value2);
+
     native void nativeSetParameter(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
                                    long value);
 
@@ -561,6 +564,24 @@ public class Query<T> implements Closeable {
      */
     public Query<T> setParameters(String alias, String[] values) {
         nativeSetParameters(handle, 0, 0, alias, values);
+        return this;
+    }
+
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     */
+    public Query<T> setParameters(Property<?> property, String key, String value) {
+        nativeSetParameters(handle, property.getEntityId(), property.getId(), null, key, value);
+        return this;
+    }
+
+    /**
+     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     *
+     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     */
+    public Query<T> setParameters(String alias, String key, String value) {
+        nativeSetParameters(handle, 0, 0, alias, key, value);
         return this;
     }
 

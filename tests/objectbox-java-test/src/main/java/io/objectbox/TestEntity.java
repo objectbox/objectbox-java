@@ -16,8 +16,10 @@
 
 package io.objectbox;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /** In "real" entity would be annotated with @Entity. */
 public class TestEntity {
@@ -37,7 +39,6 @@ public class TestEntity {
     private long simpleLong;
     private float simpleFloat;
     private double simpleDouble;
-    /** Not-null value. */
     private String simpleString;
     /** Not-null value. */
     private byte[] simpleByteArray;
@@ -50,6 +51,7 @@ public class TestEntity {
     private int simpleIntU;
     /** In "real" entity would be annotated with @Unsigned. */
     private long simpleLongU;
+    private Map<String, Object> stringObjectMap;
 
     transient boolean noArgsConstructorCalled;
 
@@ -61,7 +63,10 @@ public class TestEntity {
         this.id = id;
     }
 
-    public TestEntity(long id, boolean simpleBoolean, byte simpleByte, short simpleShort, int simpleInt, long simpleLong, float simpleFloat, double simpleDouble, String simpleString, byte[] simpleByteArray, String[] simpleStringArray, List<String> simpleStringList, short simpleShortU, int simpleIntU, long simpleLongU) {
+    public TestEntity(long id, boolean simpleBoolean, byte simpleByte, short simpleShort, int simpleInt,
+                      long simpleLong, float simpleFloat, double simpleDouble, String simpleString,
+                      byte[] simpleByteArray, String[] simpleStringArray, List<String> simpleStringList,
+                      short simpleShortU, int simpleIntU, long simpleLongU, Map<String, Object> stringObjectMap) {
         this.id = id;
         this.simpleBoolean = simpleBoolean;
         this.simpleByte = simpleByte;
@@ -77,6 +82,7 @@ public class TestEntity {
         this.simpleShortU = simpleShortU;
         this.simpleIntU = simpleIntU;
         this.simpleLongU = simpleLongU;
+        this.stringObjectMap = stringObjectMap;
         if (STRING_VALUE_THROW_IN_CONSTRUCTOR.equals(simpleString)) {
             throw new RuntimeException(EXCEPTION_IN_CONSTRUCTOR_MESSAGE);
         }
@@ -146,13 +152,12 @@ public class TestEntity {
         this.simpleDouble = simpleDouble;
     }
 
-    /** Not-null value. */
+    @Nullable
     public String getSimpleString() {
         return simpleString;
     }
 
-    /** Not-null value; ensure this value is available before it is saved to the database. */
-    public void setSimpleString(String simpleString) {
+    public void setSimpleString(@Nullable String simpleString) {
         this.simpleString = simpleString;
     }
 
@@ -212,6 +217,15 @@ public class TestEntity {
         return this;
     }
 
+    public Map<String, Object> getStringObjectMap() {
+        return stringObjectMap;
+    }
+
+    public TestEntity setStringObjectMap(Map<String, Object> stringObjectMap) {
+        this.stringObjectMap = stringObjectMap;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "TestEntity{" +
@@ -230,6 +244,7 @@ public class TestEntity {
                 ", simpleShortU=" + simpleShortU +
                 ", simpleIntU=" + simpleIntU +
                 ", simpleLongU=" + simpleLongU +
+                ", stringObjectMap=" + stringObjectMap +
                 ", noArgsConstructorCalled=" + noArgsConstructorCalled +
                 '}';
     }

@@ -184,6 +184,8 @@ public class QueryBuilder<T> implements Closeable {
 
     private native long nativeContainsElement(long handle, int propertyId, String value, boolean caseSensitive);
 
+    private native long nativeContainsKeyValue(long handle, int propertyId, String key, String value, boolean caseSensitive);
+
     private native long nativeStartsWith(long handle, int propertyId, String value, boolean caseSensitive);
 
     private native long nativeEndsWith(long handle, int propertyId, String value, boolean caseSensitive);
@@ -769,14 +771,20 @@ public class QueryBuilder<T> implements Closeable {
     }
 
     /**
-     * For a String array property, matches if at least one element equals the given value.
+     * For a String array or String-key map property, matches if at least one element equals the given value.
      */
     public QueryBuilder<T> containsElement(Property<T> property, String value, StringOrder order) {
-        if (String[].class != property.type) {
-            throw new IllegalArgumentException("containsElement is only supported for String[] properties.");
-        }
         verifyHandle();
         checkCombineCondition(nativeContainsElement(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
+        return this;
+    }
+
+    /**
+     * For a String-key map property, matches if at least one key and value combination equals the given values.
+     */
+    public QueryBuilder<T> containsKeyValue(Property<T> property, String key, String value, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeContainsKeyValue(handle, property.getId(), key, value, order == StringOrder.CASE_SENSITIVE));
         return this;
     }
 
