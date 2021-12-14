@@ -16,10 +16,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * Converts between {@link Object} properties and byte arrays using FlexBuffers.
  * <p>
  * Types are limited to those supported by FlexBuffers, including that map keys must be {@link String}.
+ * (There are subclasses available that auto-convert {@link Integer} and {@link Long} key maps,
+ * see {@link #convertToKey}.)
  * <p>
- * Regardless of the stored type, integers are restored as {@link Long} if the value does not fit {@link Integer},
- * otherwise as {@link Integer}. So e.g. when storing a {@link Long} value of {@code 1L}, the value restored from the
+ * If any item requires 64 bits for storage in the FlexBuffers Map/Vector (a large Long, a Double)
+ * all integers are restored as {@link Long}, otherwise {@link Integer}.
+ * So e.g. when storing only a {@link Long} value of {@code 1L}, the value restored from the
  * database will be of type {@link Integer}.
+ * (There are subclasses available that always restore as {@link Long}, see {@link #shouldRestoreAsLong}.)
  * <p>
  * Values of type {@link Float} are always restored as {@link Double}.
  * Cast to {@link Float} to obtain the original value.
@@ -85,6 +89,15 @@ public class FlexObjectConverter implements PropertyConverter<Object, byte[]> {
         }
     }
 
+    /**
+     * Checks Java map key is of the expected type, otherwise throws.
+     */
+    protected void checkMapKeyType(Object rawKey) {
+        if (!(rawKey instanceof String)) {
+            throw new IllegalArgumentException("Map keys must be String");
+        }
+    }
+
     private void addMap(FlexBuffersBuilder builder, String mapKey, Map<Object, Object> map) {
         int mapStart = builder.startMap();
 
@@ -94,9 +107,7 @@ public class FlexObjectConverter implements PropertyConverter<Object, byte[]> {
             if (rawKey == null || value == null) {
                 throw new IllegalArgumentException("Map keys or values must not be null");
             }
-            if (!(rawKey instanceof String)) {
-                throw new IllegalArgumentException("Map keys must be String");
-            }
+            checkMapKeyType(rawKey);
             String key = rawKey.toString();
             if (value instanceof Map) {
                 //noinspection unchecked
@@ -190,12 +201,21 @@ public class FlexObjectConverter implements PropertyConverter<Object, byte[]> {
     }
 
     /**
+     * Converts a FlexBuffers string map key to the Java map key (e.g. String to Integer).
+     * <p>
+     * This required conversion restricts all keys (root and embedded maps) to the same type.
+     */
+    Object convertToKey(String keyValue) {
+        return keyValue;
+    }
+
+    /**
      * Returns true if the width in bytes stored in the private parentWidth field of FlexBuffers.Reference is 8.
      * Note: FlexBuffers stores all items in a map/vector using the size of the widest item. However,
      * an item's size is only as wide as needed, e.g. a 64-bit integer (Java Long, 8 bytes) will be
      * reduced to 1 byte if it does not exceed its value range.
      */
-    private boolean shouldRestoreAsLong(FlexBuffers.Reference reference) {
+    protected boolean shouldRestoreAsLong(FlexBuffers.Reference reference) {
         try {
             Field parentWidthF = reference.getClass().getDeclaredField("parentWidth");
             parentWidthF.setAccessible(true);
@@ -217,7 +237,8 @@ public class FlexObjectConverter implements PropertyConverter<Object, byte[]> {
         // So set initial capacity based on default load factor 0.75 accordingly.
         Map<Object, Object> resultMap = new HashMap<>((int) (entryCount / 0.75 + 1));
         for (int i = 0; i < entryCount; i++) {
-            String key = keys.get(i).toString();
+            String rawKey = keys.get(i).toString();
+            Object key = convertToKey(rawKey);
             FlexBuffers.Reference value = values.get(i);
             if (value.isMap()) {
                 resultMap.put(key, buildMap(value.asMap()));

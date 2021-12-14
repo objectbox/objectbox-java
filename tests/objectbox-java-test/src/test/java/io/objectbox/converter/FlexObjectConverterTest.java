@@ -10,6 +10,10 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Tests {@link FlexObjectConverter} basic types and flexible list conversion.
+ * Flexible maps conversion is tested by {@link FlexMapConverterTest}.
+ */
 public class FlexObjectConverterTest {
 
     @Test
@@ -27,26 +31,6 @@ public class FlexObjectConverterTest {
         Object restoredFloat = convertAndBack(1.3f, converter);
         assertEquals((double) 1.3f, restoredFloat);
         convertAndBackThenAssert(1.4d, converter);
-    }
-
-    @Test
-    public void map_works() {
-        FlexObjectConverter converter = new FlexObjectConverter();
-        Map<String, Object> map = new HashMap<>();
-
-        // empty map
-        convertAndBackThenAssert(map, converter);
-
-        // map with supported types
-        map.put("string", "Grüezi");
-        map.put("boolean", true);
-        map.put("long", 1L);
-        map.put("float", 1.3f);
-        map.put("double", -1.4d);
-        Map<String, Object> restoredMap = convertAndBack(map, converter);
-        // Java Float is returned as Double, so expect Double.
-        map.put("float", (double) 1.3f);
-        assertEquals(map, restoredMap);
     }
 
     @Test
@@ -68,8 +52,6 @@ public class FlexObjectConverterTest {
         list.set(3, (double) 1.3f);
         assertEquals(list, restoredList);
     }
-
-    // TODO Carry over remaining tests from FlexMapConverterTest.
 
     @SuppressWarnings("unchecked")
     private <T> T convertAndBack(@Nullable T expected, FlexObjectConverter converter) {

@@ -3,7 +3,7 @@ package io.objectbox.converter;
 import io.objectbox.flatbuffers.FlexBuffers;
 
 /**
- * Used to automatically convert {@code Map<String, Long>}.
+ * Used to automatically convert {@code Map&lt;String, Long&gt;}.
  */
 public class StringLongMapConverter extends StringFlexMapConverter {
     @Override

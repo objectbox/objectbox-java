@@ -14,11 +14,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Tests {@link FlexObjectConverter} and subclasses with flexible maps.
+ * For basic tests see {@link FlexObjectConverterTest}.
+ */
 public class FlexMapConverterTest {
 
     @Test
     public void keysString_valsSupportedTypes_works() {
-        FlexMapConverter converter = new StringFlexMapConverter();
+        FlexObjectConverter converter = new StringFlexMapConverter();
         Map<String, Object> map = new HashMap<>();
 
         convertAndBackThenAssert(null, converter);
@@ -41,7 +45,7 @@ public class FlexMapConverterTest {
      */
     @Test
     public void keysString_valsIntegersBiggest32Bit_works() {
-        FlexMapConverter converter = new StringFlexMapConverter();
+        FlexObjectConverter converter = new StringFlexMapConverter();
         Map<String, Object> expected = new HashMap<>();
 
         expected.put("integer-8bit", -1);
@@ -62,7 +66,7 @@ public class FlexMapConverterTest {
      */
     @Test
     public void keysString_valsLongBiggest32Bit_works() {
-        FlexMapConverter converter = new StringLongMapConverter();
+        FlexObjectConverter converter = new StringLongMapConverter();
         Map<String, Long> expected = new HashMap<>();
 
         expected.put("long-8bit-neg", -1L);
@@ -78,7 +82,7 @@ public class FlexMapConverterTest {
      */
     @Test
     public void keysString_valsIntegersBiggest64Bit_works() {
-        FlexMapConverter converter = new StringFlexMapConverter();
+        FlexObjectConverter converter = new StringFlexMapConverter();
         Map<String, Object> expected = new HashMap<>();
 
         expected.put("integer-8bit", -1);
@@ -96,7 +100,7 @@ public class FlexMapConverterTest {
     // Note: can't use assertEquals(map, map) as byte[] does not implement equals(obj).
     @Test
     public void keysString_valsByteArray_works() {
-        FlexMapConverter converter = new StringFlexMapConverter();
+        FlexObjectConverter converter = new StringFlexMapConverter();
         Map<String, byte[]> map = new HashMap<>();
 
         map.put("bytearr", new byte[]{1, 2, 3});
@@ -108,7 +112,7 @@ public class FlexMapConverterTest {
 
     @Test
     public void keysInteger_works() {
-        FlexMapConverter converter = new IntegerFlexMapConverter();
+        FlexObjectConverter converter = new IntegerFlexMapConverter();
         Map<Integer, String> map = new HashMap<>();
 
         convertAndBackThenAssert(null, converter);
@@ -122,7 +126,7 @@ public class FlexMapConverterTest {
 
     @Test
     public void keysLong_works() {
-        FlexMapConverter converter = new LongFlexMapConverter();
+        FlexObjectConverter converter = new LongFlexMapConverter();
         Map<Long, String> map = new HashMap<>();
 
         convertAndBackThenAssert(null, converter);
@@ -136,7 +140,7 @@ public class FlexMapConverterTest {
 
     @Test
     public void nestedMap_works() {
-        FlexMapConverter converter = new StringFlexMapConverter();
+        FlexObjectConverter converter = new StringFlexMapConverter();
         // Restriction: map keys must all have same type.
         Map<String, Map<String, String>> map = new HashMap<>();
 
@@ -157,7 +161,7 @@ public class FlexMapConverterTest {
 
     @Test
     public void nestedList_works() {
-        FlexMapConverter converter = new StringFlexMapConverter();
+        FlexObjectConverter converter = new StringFlexMapConverter();
         Map<String, List<Object>> map = new HashMap<>();
 
         convertAndBackThenAssert(null, converter);
@@ -188,7 +192,7 @@ public class FlexMapConverterTest {
     // Note: can't use assertEquals(map, map) as byte[] does not implement equals(obj).
     @Test
     public void nestedListByteArray_works() {
-        FlexMapConverter converter = new StringFlexMapConverter();
+        FlexObjectConverter converter = new StringFlexMapConverter();
         Map<String, List<byte[]>> map = new HashMap<>();
 
         List<byte[]> embeddedList = new LinkedList<>();
@@ -203,7 +207,7 @@ public class FlexMapConverterTest {
 
     @Test
     public void nullKeyOrValue_throws() {
-        FlexMapConverter converter = new StringFlexMapConverter();
+        FlexObjectConverter converter = new StringFlexMapConverter();
         Map<String, String> map = new HashMap<>();
 
         map.put("Hello", null);
@@ -217,7 +221,7 @@ public class FlexMapConverterTest {
 
     @Test
     public void unsupportedValue_throws() {
-        FlexMapConverter converter = new StringFlexMapConverter();
+        FlexObjectConverter converter = new StringFlexMapConverter();
         Map<String, Object> map = new HashMap<>();
 
         map.put("Hello", Instant.now());
@@ -225,18 +229,18 @@ public class FlexMapConverterTest {
     }
 
     @SuppressWarnings("unchecked")
-    private <K, V> Map<K, V> convertAndBack(@Nullable Map<K, V> expected, FlexMapConverter converter) {
-        byte[] converted = converter.convertToDatabaseValue((Map<Object, Object>) expected);
+    private <K, V> Map<K, V> convertAndBack(@Nullable Map<K, V> expected, FlexObjectConverter converter) {
+        byte[] converted = converter.convertToDatabaseValue(expected);
 
         return (Map<K, V>) converter.convertToEntityProperty(converted);
     }
 
-    private <K, V> void convertAndBackThenAssert(@Nullable Map<K, V> expected, FlexMapConverter converter) {
+    private <K, V> void convertAndBackThenAssert(@Nullable Map<K, V> expected, FlexObjectConverter converter) {
         assertEquals(expected, convertAndBack(expected, converter));
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private void convertThenAssertThrows(Map map, FlexMapConverter converter) {
+    @SuppressWarnings({"rawtypes"})
+    private void convertThenAssertThrows(Map map, FlexObjectConverter converter) {
         assertThrows(
                 IllegalArgumentException.class,
                 () -> converter.convertToDatabaseValue(map)

@@ -1,11 +1,7 @@
 package io.objectbox.converter;
 
 /**
- * Used to automatically convert {@code Map<String, V>}.
+ * Used to automatically convert {@code Map&lt;String, V&gt;}.
  */
-public class StringFlexMapConverter extends FlexMapConverter {
-    @Override
-    Object convertToKey(String keyValue) {
-        return keyValue;
-    }
+public class StringFlexMapConverter extends FlexObjectConverter {
 }
