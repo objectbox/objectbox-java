@@ -73,6 +73,12 @@ public class FlexObjectConverter implements PropertyConverter<Object, byte[]> {
             builder.putString((String) value);
         } else if (value instanceof Boolean) {
             builder.putBoolean((Boolean) value);
+        } else if (value instanceof Byte) {
+            // Will always be restored as Integer.
+            builder.putInt(((Byte) value).intValue());
+        } else if (value instanceof Short) {
+            // Will always be restored as Integer.
+            builder.putInt(((Short) value).intValue());
         } else if (value instanceof Integer) {
             builder.putInt((Integer) value);
         } else if (value instanceof Long) {
@@ -119,6 +125,12 @@ public class FlexObjectConverter implements PropertyConverter<Object, byte[]> {
                 builder.putString(key, (String) value);
             } else if (value instanceof Boolean) {
                 builder.putBoolean(key, (Boolean) value);
+            } else if (value instanceof Byte) {
+                // Will always be restored as Integer.
+                builder.putInt(key, ((Byte) value).intValue());
+            } else if (value instanceof Short) {
+                // Will always be restored as Integer.
+                builder.putInt(key, ((Short) value).intValue());
             } else if (value instanceof Integer) {
                 builder.putInt(key, (Integer) value);
             } else if (value instanceof Long) {
@@ -155,6 +167,12 @@ public class FlexObjectConverter implements PropertyConverter<Object, byte[]> {
                 builder.putString((String) item);
             } else if (item instanceof Boolean) {
                 builder.putBoolean((Boolean) item);
+            } else if (item instanceof Byte) {
+                // Will always be restored as Integer.
+                builder.putInt(((Byte) item).intValue());
+            } else if (item instanceof Short) {
+                // Will always be restored as Integer.
+                builder.putInt(((Short) item).intValue());
             } else if (item instanceof Integer) {
                 builder.putInt((Integer) item);
             } else if (item instanceof Long) {

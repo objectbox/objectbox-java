@@ -3,10 +3,8 @@ package io.objectbox.converter;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -25,9 +23,15 @@ public class FlexObjectConverterTest {
 
         convertAndBackThenAssert("Grüezi", converter);
         convertAndBackThenAssert(true, converter);
-        // Java Long is returned as Integer if it fits, so expect Integer.
+        // Java integers are returned as Integer if no value is larger than 32 bits, so expect Integer.
+        Object restoredByte = convertAndBack((byte) 1, converter);
+        assertEquals(1, restoredByte);
+        Object restoredShort = convertAndBack((short) 1, converter);
+        assertEquals(1, restoredShort);
+        Object restoredInteger = convertAndBack(1, converter);
+        assertEquals(1, restoredInteger);
         Object restoredLong = convertAndBack(1L, converter);
-        assertEquals((int) 1L, restoredLong);
+        assertEquals(1, restoredLong);
         // Java Float is returned as Double, so expect Double.
         Object restoredFloat = convertAndBack(1.3f, converter);
         assertEquals((double) 1.3f, restoredFloat);
@@ -45,12 +49,19 @@ public class FlexObjectConverterTest {
         // list with supported types
         list.add("Grüezi");
         list.add(true);
+        list.add((byte) 1);
+        list.add((short) 1);
+        list.add(1);
         list.add(-2L);
         list.add(1.3f);
         list.add(-1.4d);
         List<Object> restoredList = convertAndBack(list, converter);
+        // Java integers are returned as Long as one element is larger than 32 bits, so expect Long.
+        list.set(2, 1L);
+        list.set(3, 1L);
+        list.set(4, 1L);
         // Java Float is returned as Double, so expect Double.
-        list.set(3, (double) 1.3f);
+        list.set(6, (double) 1.3f);
         assertEquals(list, restoredList);
 
         // list with null element

@@ -31,10 +31,17 @@ public class FlexMapConverterTest {
 
         map.put("string", "Grüezi");
         map.put("boolean", true);
+        map.put("byte", (byte) 1);
+        map.put("short", (short) 1);
+        map.put("int", 1);
         map.put("long", 1L);
         map.put("float", 1.3f);
         map.put("double", -1.4d);
         Map<String, Object> restoredMap = convertAndBack(map, converter);
+        // Java integers are returned as Long if one value is larger than 32 bits, so expect Long.
+        map.put("byte", 1L);
+        map.put("short", 1L);
+        map.put("int", 1L);
         // Java float is returned as double, so expect double.
         map.put("float", (double) 1.3f);
         assertEquals(map, restoredMap);
