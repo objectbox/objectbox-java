@@ -10,25 +10,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Converts between {@link Map} properties and byte arrays using FlexBuffers.
+ * Converts between {@link Object} properties and byte arrays using FlexBuffers.
  * <p>
- * All keys must have the same type (see {@link #convertToKey(String)}),
- * value types are limited to those supported by FlexBuffers.
+ * Types are limited to those supported by FlexBuffers, including that map keys must be {@link String}.
+ * (There are subclasses available that auto-convert {@link Integer} and {@link Long} key maps,
+ * see {@link #convertToKey}.)
  * <p>
  * If any item requires 64 bits for storage in the FlexBuffers Map/Vector (a large Long, a Double)
- * all integers are restored as Long, otherwise Integer.
+ * all integers are restored as {@link Long}, otherwise {@link Integer}.
+ * So e.g. when storing only a {@link Long} value of {@code 1L}, the value restored from the
+ * database will be of type {@link Integer}.
+ * (There are subclasses available that always restore as {@link Long}, see {@link #shouldRestoreAsLong}.)
+ * <p>
+ * Values of type {@link Float} are always restored as {@link Double}.
+ * Cast to {@link Float} to obtain the original value.
  */
-public abstract class FlexMapConverter implements PropertyConverter<Map<Object, Object>, byte[]> {
+public class FlexObjectConverter implements PropertyConverter<Object, byte[]> {
 
     private static final AtomicReference<FlexBuffersBuilder> cachedBuilder = new AtomicReference<>();
 
     @Override
-    public byte[] convertToDatabaseValue(Map<Object, Object> map) {
-        if (map == null) return null;
+    public byte[] convertToDatabaseValue(Object value) {
+        if (value == null) return null;
 
         FlexBuffersBuilder builder = cachedBuilder.getAndSet(null);
         if (builder == null) {
@@ -40,7 +46,7 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
             );
         }
 
-        addMap(builder, null, map);
+        addValue(builder, value);
 
         ByteBuffer buffer = builder.finish();
 
@@ -56,16 +62,59 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
         return out;
     }
 
+    private void addValue(FlexBuffersBuilder builder, Object value) {
+        if (value instanceof Map) {
+            //noinspection unchecked
+            addMap(builder, null, (Map<Object, Object>) value);
+        } else if (value instanceof List) {
+            //noinspection unchecked
+            addVector(builder, null, (List<Object>) value);
+        } else if (value instanceof String) {
+            builder.putString((String) value);
+        } else if (value instanceof Boolean) {
+            builder.putBoolean((Boolean) value);
+        } else if (value instanceof Byte) {
+            // Will always be restored as Integer.
+            builder.putInt(((Byte) value).intValue());
+        } else if (value instanceof Short) {
+            // Will always be restored as Integer.
+            builder.putInt(((Short) value).intValue());
+        } else if (value instanceof Integer) {
+            builder.putInt((Integer) value);
+        } else if (value instanceof Long) {
+            builder.putInt((Long) value);
+        } else if (value instanceof Float) {
+            builder.putFloat((Float) value);
+        } else if (value instanceof Double) {
+            builder.putFloat((Double) value);
+        } else if (value instanceof byte[]) {
+            builder.putBlob((byte[]) value);
+        } else {
+            throw new IllegalArgumentException(
+                    "Values of this type are not supported: " + value.getClass().getSimpleName());
+        }
+    }
+
+    /**
+     * Checks Java map key is of the expected type, otherwise throws.
+     */
+    protected void checkMapKeyType(Object rawKey) {
+        if (!(rawKey instanceof String)) {
+            throw new IllegalArgumentException("Map keys must be String");
+        }
+    }
+
     private void addMap(FlexBuffersBuilder builder, String mapKey, Map<Object, Object> map) {
         int mapStart = builder.startMap();
 
-        for (Entry<Object, Object> entry : map.entrySet()) {
+        for (Map.Entry<Object, Object> entry : map.entrySet()) {
+            Object rawKey = entry.getKey();
             Object value = entry.getValue();
-            if (entry.getKey() == null || value == null) {
+            if (rawKey == null || value == null) {
                 throw new IllegalArgumentException("Map keys or values must not be null");
             }
-
-            String key = entry.getKey().toString();
+            checkMapKeyType(rawKey);
+            String key = rawKey.toString();
             if (value instanceof Map) {
                 //noinspection unchecked
                 addMap(builder, key, (Map<Object, Object>) value);
@@ -76,6 +125,12 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
                 builder.putString(key, (String) value);
             } else if (value instanceof Boolean) {
                 builder.putBoolean(key, (Boolean) value);
+            } else if (value instanceof Byte) {
+                // Will always be restored as Integer.
+                builder.putInt(key, ((Byte) value).intValue());
+            } else if (value instanceof Short) {
+                // Will always be restored as Integer.
+                builder.putInt(key, ((Short) value).intValue());
             } else if (value instanceof Integer) {
                 builder.putInt(key, (Integer) value);
             } else if (value instanceof Long) {
@@ -99,6 +154,9 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
         int vectorStart = builder.startVector();
 
         for (Object item : list) {
+            if (item == null) {
+                throw new IllegalArgumentException("List elements must not be null");
+            }
             if (item instanceof Map) {
                 //noinspection unchecked
                 addMap(builder, null, (Map<Object, Object>) item);
@@ -109,6 +167,12 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
                 builder.putString((String) item);
             } else if (item instanceof Boolean) {
                 builder.putBoolean((Boolean) item);
+            } else if (item instanceof Byte) {
+                // Will always be restored as Integer.
+                builder.putInt(((Byte) item).intValue());
+            } else if (item instanceof Short) {
+                // Will always be restored as Integer.
+                builder.putInt(((Short) item).intValue());
             } else if (item instanceof Integer) {
                 builder.putInt((Integer) item);
             } else if (item instanceof Long) {
@@ -129,12 +193,32 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
     }
 
     @Override
-    public Map<Object, Object> convertToEntityProperty(byte[] databaseValue) {
+    public Object convertToEntityProperty(byte[] databaseValue) {
         if (databaseValue == null) return null;
 
-        FlexBuffers.Map map = FlexBuffers.getRoot(new ArrayReadWriteBuf(databaseValue, databaseValue.length)).asMap();
-
-        return buildMap(map);
+        FlexBuffers.Reference value = FlexBuffers.getRoot(new ArrayReadWriteBuf(databaseValue, databaseValue.length));
+        if (value.isMap()) {
+            return buildMap(value.asMap());
+        } else if (value.isVector()) {
+            return buildList(value.asVector());
+        } else if (value.isString()) {
+            return value.asString();
+        } else if (value.isBoolean()) {
+            return value.asBoolean();
+        } else if (value.isInt()) {
+            if (shouldRestoreAsLong(value)) {
+                return value.asLong();
+            } else {
+                return value.asInt();
+            }
+        } else if (value.isFloat()) {
+            // Always return as double; if original was float consumer can cast to obtain original value.
+            return value.asFloat();
+        } else if (value.isBlob()) {
+            return value.asBlob().getBytes();
+        } else {
+            throw new IllegalArgumentException("FlexBuffers type is not supported: " + value.getType());
+        }
     }
 
     /**
@@ -142,7 +226,9 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
      * <p>
      * This required conversion restricts all keys (root and embedded maps) to the same type.
      */
-    abstract Object convertToKey(String keyValue);
+    Object convertToKey(String keyValue) {
+        return keyValue;
+    }
 
     /**
      * Returns true if the width in bytes stored in the private parentWidth field of FlexBuffers.Reference is 8.
@@ -190,7 +276,7 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
                     resultMap.put(key, value.asInt());
                 }
             } else if (value.isFloat()) {
-                // Always return as double; if original was float casting will give original value.
+                // Always return as double; if original was float consumer can cast to obtain original value.
                 resultMap.put(key, value.asFloat());
             } else if (value.isBlob()) {
                 resultMap.put(key, value.asBlob().getBytes());
@@ -230,7 +316,7 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
                     list.add(item.asInt());
                 }
             } else if (item.isFloat()) {
-                // Always return as double; if original was float casting will give original value.
+                // Always return as double; if original was float consumer can cast to obtain original value.
                 list.add(item.asFloat());
             } else if (item.isBlob()) {
                 list.add(item.asBlob().getBytes());
@@ -242,5 +328,4 @@ public abstract class FlexMapConverter implements PropertyConverter<Map<Object, 
 
         return list;
     }
-
 }

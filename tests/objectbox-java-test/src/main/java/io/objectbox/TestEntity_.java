@@ -19,6 +19,7 @@ package io.objectbox;
 
 import io.objectbox.TestEntityCursor.Factory;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.converter.FlexObjectConverter;
 import io.objectbox.converter.StringFlexMapConverter;
 import io.objectbox.internal.CursorFactory;
 import io.objectbox.internal.IdGetter;
@@ -98,6 +99,9 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
     public final static io.objectbox.Property<TestEntity> stringObjectMap =
             new io.objectbox.Property<>(__INSTANCE, 15, 16, byte[].class, "stringObjectMap", false, "stringObjectMap", StringFlexMapConverter.class, Map.class);
 
+    public final static io.objectbox.Property<TestEntity> flexProperty =
+            new io.objectbox.Property<>(__INSTANCE, 16, 17, byte[].class, "flexProperty", false, "flexProperty", FlexObjectConverter.class, Object.class);
+
     @SuppressWarnings("unchecked")
     public final static io.objectbox.Property<TestEntity>[] __ALL_PROPERTIES = new io.objectbox.Property[]{
             id,
@@ -115,7 +119,8 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
             simpleShortU,
             simpleIntU,
             simpleLongU,
-            stringObjectMap
+            stringObjectMap,
+            flexProperty
     };
 
     public final static io.objectbox.Property<TestEntity> __ID_PROPERTY = id;

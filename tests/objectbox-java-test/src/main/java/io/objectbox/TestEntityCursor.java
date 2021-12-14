@@ -17,6 +17,7 @@
 package io.objectbox;
 
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.converter.FlexObjectConverter;
 import io.objectbox.converter.StringFlexMapConverter;
 import io.objectbox.internal.CursorFactory;
 
@@ -45,6 +46,7 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
     private static final TestEntity_.TestEntityIdGetter ID_GETTER = TestEntity_.__ID_GETTER;
 
     private final StringFlexMapConverter stringObjectMapConverter = new StringFlexMapConverter();
+    private final FlexObjectConverter flexPropertyConverter = new FlexObjectConverter();
 
     private final static int __ID_simpleBoolean = TestEntity_.simpleBoolean.id;
     private final static int __ID_simpleByte = TestEntity_.simpleByte.id;
@@ -61,6 +63,7 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
     private final static int __ID_simpleIntU = TestEntity_.simpleIntU.id;
     private final static int __ID_simpleLongU = TestEntity_.simpleLongU.id;
     private final static int __ID_stringObjectMap = TestEntity_.stringObjectMap.id;
+    private final static int __ID_flexProperty = TestEntity_.flexProperty.id;
 
     public TestEntityCursor(io.objectbox.Transaction tx, long cursor, BoxStore boxStore) {
         super(tx, cursor, TestEntity_.__INSTANCE, boxStore);
@@ -96,12 +99,14 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
         int __id9 = simpleByteArray != null ? __ID_simpleByteArray : 0;
         Map stringObjectMap = entity.getStringObjectMap();
         int __id15 = stringObjectMap != null ? __ID_stringObjectMap : 0;
+        Object flexProperty = entity.getFlexProperty();
+        int __id16 = flexProperty != null ? __ID_flexProperty : 0;
 
         collect430000(cursor, 0, 0,
                 __id8, simpleString, 0, null,
                 0, null, 0, null,
                 __id9, simpleByteArray, __id15, __id15 != 0 ? stringObjectMapConverter.convertToDatabaseValue(stringObjectMap) : null,
-                0, null);
+                __id16, __id16 != 0 ? flexPropertyConverter.convertToDatabaseValue(flexProperty) : null);
 
         collect313311(cursor, 0, 0,
                 0, null, 0, null,

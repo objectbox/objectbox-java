@@ -3,7 +3,9 @@ package io.objectbox.converter;
 import io.objectbox.flatbuffers.FlexBuffers;
 
 /**
- * Used to automatically convert {@code Map<Integer, Long>}.
+ * Used to automatically convert {@code Map&lt;Integer, Long&gt;}.
+ * <p>
+ * Unlike {@link FlexObjectConverter} always restores integer map values as {@link Long}.
  */
 public class IntegerLongMapConverter extends IntegerFlexMapConverter {
     @Override
