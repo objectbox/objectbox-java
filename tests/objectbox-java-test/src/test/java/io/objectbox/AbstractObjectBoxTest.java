@@ -296,11 +296,11 @@ public abstract class AbstractObjectBoxTest {
         entity.setSimpleShortU((short) (100 + nr));
         entity.setSimpleIntU(nr);
         entity.setSimpleLongU(1000 + nr);
-        Map<String, Object> stringObjectMap = new HashMap<>();
         if (simpleString != null) {
+            Map<String, Object> stringObjectMap = new HashMap<>();
             stringObjectMap.put(simpleString, simpleString);
+            entity.setStringObjectMap(stringObjectMap);
         }
-        entity.setStringObjectMap(stringObjectMap);
         return entity;
     }
 
