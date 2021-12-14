@@ -211,12 +211,25 @@ public class FlexMapConverterTest {
         Map<String, String> map = new HashMap<>();
 
         map.put("Hello", null);
-        convertThenAssertThrows(map, converter);
+        convertThenAssertThrows(map, converter, "Map keys or values must not be null");
 
         map.clear();
 
         map.put(null, "Idea");
-        convertThenAssertThrows(map, converter);
+        convertThenAssertThrows(map, converter, "Map keys or values must not be null");
+    }
+
+    @Test
+    public void unsupportedKey_throws() {
+        Map<Object, Object> map = new HashMap<>();
+        map.put(false, "supported");
+
+        convertThenAssertThrows(map, new FlexObjectConverter(), "Map keys must be String");
+        convertThenAssertThrows(map, new StringLongMapConverter(), "Map keys must be String");
+        convertThenAssertThrows(map, new IntegerFlexMapConverter(), "Map keys must be Integer");
+        convertThenAssertThrows(map, new IntegerLongMapConverter(), "Map keys must be Integer");
+        convertThenAssertThrows(map, new LongFlexMapConverter(), "Map keys must be Long");
+        convertThenAssertThrows(map, new LongLongMapConverter(), "Map keys must be Long");
     }
 
     @Test
@@ -225,7 +238,7 @@ public class FlexMapConverterTest {
         Map<String, Object> map = new HashMap<>();
 
         map.put("Hello", Instant.now());
-        convertThenAssertThrows(map, converter);
+        convertThenAssertThrows(map, converter, "Map values of this type are not supported: Instant");
     }
 
     @SuppressWarnings("unchecked")
@@ -240,10 +253,11 @@ public class FlexMapConverterTest {
     }
 
     @SuppressWarnings({"rawtypes"})
-    private void convertThenAssertThrows(Map map, FlexObjectConverter converter) {
-        assertThrows(
+    private void convertThenAssertThrows(Map map, FlexObjectConverter converter, String expectedMessage) {
+        IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> converter.convertToDatabaseValue(map)
         );
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }
