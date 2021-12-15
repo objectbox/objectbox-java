@@ -71,7 +71,7 @@ task javadocForWeb(type: Javadoc) {
 
     title = "ObjectBox Java ${version} API"
     options.overview = "$projectDir/src/web/overview.html"
-    options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017-2020 <a href="https://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
+    options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017-2021 <a href="https://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
 
     doLast {
         // Note: frequently check the vanilla stylesheet.css if values still match.
