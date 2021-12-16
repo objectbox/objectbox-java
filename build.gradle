@@ -175,4 +175,7 @@ nexusPublishing {
             }
         }
     }
+    transitionCheckOptions {  // Maven Central may become very, very slow in extreme situations
+        maxRetries.set(900)  // with default delay of 10s, that's 150 minutes total; default is 60 (10 minutes)
+    }
 }
