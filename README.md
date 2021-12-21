@@ -1,4 +1,4 @@
-<img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png">
+<p align="center"><img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png"></p>
 
 # ObjectBox Java (Kotlin, Android)
 [ObjectBox](https://objectbox.io/) is a superfast object-oriented database with strong relation support.
@@ -26,48 +26,23 @@ box.put(playlist);
 
 Want details? **[Read the docs](https://docs.objectbox.io/)**
 
-High-performance database
+Features
 -------------
-🏁 High-speed data persistence enabling realtime applications
+🏁 **High performance** on restricted devices, like IoT gateways, micro controllers, ECUs etc.\
+🪂 **Resourceful** with minimal CPU, power and Memory usage for maximum flexibility and sustainability\
+🔗 **Relations:** object links / relationships are built-in\
+💻 **Multiplatform:** Linux, Windows, Android, iOS, macOS
 
-💻 Cross-platform Database for Linux, Windows, Android, iOS, macOS
+🌱 **Scalable:** handling millions of objects resource-efficiently with ease\
+💐 **Queries:** filter data as needed, even across relations\
+🦮 **Statically typed:** compile time checks & optimizations\
+📃 **Automatic schema migrations:** no update scripts needed
 
-🪂 ACID compliant: Atomic, Consistent, Isolated, Durable
-
-🌱 Scalable: grows with your needs, handling millions of objects with ease
-
-
-
-**Easy to use**
-
-🔗 Built-in [Relations (to-one, to-many)](https://docs.objectbox.io/relations)
-
-❓ [Powerful queries](https://docs.objectbox.io/queries): filter data as needed, even across relations
-
-🦮 Statically typed: compile time checks & optimizations
-
-📃 Automatic schema migrations: no update scripts needed
-
-
-
-**And much more than just data persistence**
-
-✨ **[ObjectBox Sync](https://objectbox.io/sync/)**: keeps data in sync between devices and servers
-
-🕒 [ObjectBox TS](https://objectbox.io/time-series-database/): time series extension for time based data
-
+**And much more than just data persistence**\
+👥 **[ObjectBox Sync](https://objectbox.io/sync/):** keeps data in sync between devices and servers\
+🕒 **[ObjectBox TS](https://objectbox.io/time-series-database/):** time series extension for time based data
 
 Enjoy ❤️
-
-Other languages/bindings
-------------------------
-ObjectBox supports multiple platforms and languages.
-Besides JVM based languages like Java and Kotlin, ObjectBox also offers: 
-
-* [ObjectBox Swift](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
-* [ObjectBox Dart/Flutter](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps 
-* [ObjectBox Go](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications 
-* [ObjectBox C and C++](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
 
 Gradle setup
 ------------
@@ -125,15 +100,35 @@ The `Box` object gives you access to all major functions, like `put`, `get`, `re
 
 For details please check the [docs](https://docs.objectbox.io).     
 
-Links
------
-[Features](https://objectbox.io/features/)
 
-[Docs & Changelog](https://docs.objectbox.io/), [JavaDocs](https://objectbox.io/docfiles/java/current/)
+Other languages/bindings
+------------------------
+ObjectBox supports multiple platforms and languages.
+Besides JVM based languages like Java and Kotlin, ObjectBox also offers: 
 
-[Examples](https://github.com/objectbox/objectbox-examples)
+* [ObjectBox Swift](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
+* [ObjectBox Dart/Flutter](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps 
+* [ObjectBox Go](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications 
+* [ObjectBox C and C++](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
 
-[![Follow ObjectBox on Twitter](https://img.shields.io/twitter/follow/ObjectBox_io.svg?style=flat-square&logo=twitter)](https://twitter.com/intent/follow?screen_name=ObjectBox_io)
+
+How I help ObjectBox?
+---------------------------
+We're on a mission to bring joy and delight to Mobile app developers.
+We want ObjectBox not only to be the fastest Swift database, but also the swiftiest Swift data persistence, making you enjoy coding with ObjectBox.
+
+To do that, we want your feedback: what do you love? What's amiss? Where do you struggle in everyday app development?
+
+**We're looking forward to receiving your comments and requests:**
+
+- Add [GitHub issues](https://github.com/ObjectBox/objectbox-java/issues) 
+- Upvote issues you find important by hitting the 👍/+1 reaction button
+- Drop us a line via [@ObjectBox_io](https://twitter.com/ObjectBox_io/)
+- ⭐ us, if you like what you see 
+
+Thank you! 🙏
+
+Keep in touch: For general news on ObjectBox, [check our blog](https://objectbox.io/blog)!
 
 License
 -------
