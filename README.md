@@ -24,6 +24,41 @@ playlist.songs.add(new Song("Lololo"));
 box.put(playlist);
 ```
 
+Want details? **[Read the docs](https://docs.objectbox.io/)**
+
+High-performance database
+-------------
+🏁 High-speed data persistence enabling realtime applications
+
+💻 Cross-platform Database for Linux, Windows, Android, iOS, macOS
+
+🪂 ACID compliant: Atomic, Consistent, Isolated, Durable
+
+🌱 Scalable: grows with your needs, handling millions of objects with ease
+
+
+
+**Easy to use**
+
+🔗 Built-in [Relations (to-one, to-many)](https://docs.objectbox.io/relations)
+
+❓ [Powerful queries](https://docs.objectbox.io/queries): filter data as needed, even across relations
+
+🦮 Statically typed: compile time checks & optimizations
+
+📃 Automatic schema migrations: no update scripts needed
+
+
+
+**And much more than just data persistence**
+
+✨ **[ObjectBox Sync](https://objectbox.io/sync/)**: keeps data in sync between devices and servers
+
+🕒 [ObjectBox TS](https://objectbox.io/time-series-database/): time series extension for time based data
+
+
+Enjoy ❤️
+
 Other languages/bindings
 ------------------------
 ObjectBox supports multiple platforms and languages.
