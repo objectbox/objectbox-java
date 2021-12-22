@@ -114,8 +114,7 @@ Besides JVM based languages like Java and Kotlin, ObjectBox also offers:
 
 How I help ObjectBox?
 ---------------------------
-We're on a mission to bring joy and delight to Mobile app developers.
-We want ObjectBox not only to be the fastest Swift database, but also the swiftiest Swift data persistence, making you enjoy coding with ObjectBox.
+We believe, ObjectBox is super easy to use. We are on a mission to make developers’ lives better, by building developer tools that are intuitive and fun to code with.
 
 To do that, we want your feedback: what do you love? What's amiss? Where do you struggle in everyday app development?
 
