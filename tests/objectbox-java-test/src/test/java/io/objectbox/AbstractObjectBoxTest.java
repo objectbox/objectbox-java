@@ -306,33 +306,6 @@ public abstract class AbstractObjectBoxTest {
         return entity;
     }
 
-    /**
-     * Asserts all properties, excluding id. Assumes entity was created with {@link #createTestEntity(String, int)}.
-     */
-    protected void assertTestEntity(TestEntity actual, @Nullable String simpleString, int nr) {
-        assertEquals(simpleString, actual.getSimpleString());
-        assertEquals(nr, actual.getSimpleInt());
-        assertEquals((byte) (10 + nr), actual.getSimpleByte());
-        assertEquals(nr % 2 == 0, actual.getSimpleBoolean());
-        assertEquals((short) (100 + nr), actual.getSimpleShort());
-        assertEquals(1000 + nr, actual.getSimpleLong());
-        assertEquals(200 + nr / 10f, actual.getSimpleFloat(), 0);
-        assertEquals(2000 + nr / 100f, actual.getSimpleDouble(), 0);
-        assertArrayEquals(new byte[]{1, 2, (byte) nr}, actual.getSimpleByteArray());
-        // null array items are ignored, so array/list will be empty
-        String[] expectedStringArray = simpleString == null ? new String[]{} : new String[]{simpleString};
-        assertArrayEquals(expectedStringArray, actual.getSimpleStringArray());
-        assertEquals(Arrays.asList(expectedStringArray), actual.getSimpleStringList());
-        assertEquals((short) (100 + nr), actual.getSimpleShortU());
-        assertEquals(nr, actual.getSimpleIntU());
-        assertEquals(1000 + nr, actual.getSimpleLongU());
-        if (simpleString != null) {
-            assertEquals(1, actual.getStringObjectMap().size());
-            assertEquals(simpleString, actual.getStringObjectMap().get(simpleString));
-        }
-        assertEquals(simpleString, actual.getFlexProperty());
-    }
-
     protected TestEntity putTestEntity(@Nullable String simpleString, int nr) {
         TestEntity entity = createTestEntity(simpleString, nr);
         long key = getTestEntityBox().put(entity);
