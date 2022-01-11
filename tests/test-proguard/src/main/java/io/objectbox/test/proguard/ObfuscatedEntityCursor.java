@@ -48,7 +48,7 @@ public final class ObfuscatedEntityCursor extends Cursor<ObfuscatedEntity> {
     }
 
     @Override
-    public final long getId(ObfuscatedEntity entity) {
+    public long getId(ObfuscatedEntity entity) {
         return ID_GETTER.getId(entity);
     }
 
@@ -58,7 +58,7 @@ public final class ObfuscatedEntityCursor extends Cursor<ObfuscatedEntity> {
      * @return The ID of the object within its box.
      */
     @Override
-    public final long put(ObfuscatedEntity entity) {
+    public long put(ObfuscatedEntity entity) {
         String myString = entity.getMyString();
         int __id2 = myString != null ? __ID_myString : 0;
 

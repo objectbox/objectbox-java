@@ -36,7 +36,7 @@ public final class DataLeafCursor extends Cursor<DataLeaf> {
     }
 
     @Override
-    public final long getId(DataLeaf entity) {
+    public long getId(DataLeaf entity) {
         return ID_GETTER.getId(entity);
     }
 
@@ -46,7 +46,7 @@ public final class DataLeafCursor extends Cursor<DataLeaf> {
      * @return The ID of the object within its box.
      */
     @Override
-    public final long put(DataLeaf entity) {
+    public long put(DataLeaf entity) {
         ToOne<DataBranch> dataBranch = entity.dataBranch;
         if(dataBranch != null && dataBranch.internalRequiresPutTarget()) {
             Cursor<DataBranch> targetCursor = getRelationTargetCursor(DataBranch.class);

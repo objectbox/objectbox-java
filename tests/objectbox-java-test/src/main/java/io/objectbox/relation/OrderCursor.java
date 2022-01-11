@@ -48,7 +48,7 @@ public final class OrderCursor extends Cursor<Order> {
     }
 
     @Override
-    public final long getId(Order entity) {
+    public long getId(Order entity) {
         return ID_GETTER.getId(entity);
     }
 
@@ -58,7 +58,7 @@ public final class OrderCursor extends Cursor<Order> {
      * @return The ID of the object within its box.
      */
     @Override
-    public final long put(Order entity) {
+    public long put(Order entity) {
         if(entity.customer__toOne.internalRequiresPutTarget()) {
             Cursor<Customer> targetCursor = getRelationTargetCursor(Customer.class);
             try {
@@ -84,32 +84,5 @@ public final class OrderCursor extends Cursor<Order> {
         entity.__boxStore = boxStoreForEntities;
         return __assignedId;
     }
-
-    // TODO @Override
-    protected final void attachEntity(Order entity) {
-        // TODO super.attachEntity(entity);
-        //entity.__boxStore = boxStoreForEntities;
-    }
-
-    // TODO do we need this? @Override
-    protected final boolean isEntityUpdateable() {
-        return true;
-    }
-
-    /** Internal query to resolve the "orders" to-many relationship of Customer. */
-    /* TODO
-    public List<Order> _queryCustomer_Orders(long customerId) {
-        synchronized (this) {
-            if (customer_OrdersQuery == null) {
-                QueryBuilder<Order> queryBuilder = queryBuilder();
-                queryBuilder.where(Properties.customerId.eq(null));
-                customer_OrdersQuery = queryBuilder.build();
-            }
-        }
-        Query<Order> query = customer_OrdersQuery.forCurrentThread();
-        query.setParameter(0, customerId);
-        return query.list();
-    }
-    */
 
 }

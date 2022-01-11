@@ -33,7 +33,7 @@ public final class MetaBranchCursor extends Cursor<MetaBranch> {
     }
 
     @Override
-    public final long getId(MetaBranch entity) {
+    public long getId(MetaBranch entity) {
         return ID_GETTER.getId(entity);
     }
 
@@ -43,7 +43,7 @@ public final class MetaBranchCursor extends Cursor<MetaBranch> {
      * @return The ID of the object within its box.
      */
     @Override
-    public final long put(MetaBranch entity) {
+    public long put(MetaBranch entity) {
         ToOne<MetaBranch> parent = entity.parent;
         if(parent != null && parent.internalRequiresPutTarget()) {
             Cursor<MetaBranch> targetCursor = getRelationTargetCursor(MetaBranch.class);

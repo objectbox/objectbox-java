@@ -70,7 +70,7 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
     }
 
     @Override
-    public final long getId(TestEntity entity) {
+    public long getId(TestEntity entity) {
         return ID_GETTER.getId(entity);
     }
 
@@ -80,7 +80,7 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
      * @return The ID of the object within its box.
      */
     @Override
-    public final long put(TestEntity entity) {
+    public long put(TestEntity entity) {
         String[] simpleStringArray = entity.getSimpleStringArray();
         int __id10 = simpleStringArray != null ? __ID_simpleStringArray : 0;
 

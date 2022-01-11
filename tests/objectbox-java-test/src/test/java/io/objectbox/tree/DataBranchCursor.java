@@ -33,7 +33,7 @@ public final class DataBranchCursor extends Cursor<DataBranch> {
     }
 
     @Override
-    public final long getId(DataBranch entity) {
+    public long getId(DataBranch entity) {
         return ID_GETTER.getId(entity);
     }
 
@@ -43,7 +43,7 @@ public final class DataBranchCursor extends Cursor<DataBranch> {
      * @return The ID of the object within its box.
      */
     @Override
-    public final long put(DataBranch entity) {
+    public long put(DataBranch entity) {
         ToOne<DataBranch> parent = entity.parent;
         if(parent != null && parent.internalRequiresPutTarget()) {
             Cursor<DataBranch> targetCursor = getRelationTargetCursor(DataBranch.class);

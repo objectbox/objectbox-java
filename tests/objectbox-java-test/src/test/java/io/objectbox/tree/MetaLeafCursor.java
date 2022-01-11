@@ -39,7 +39,7 @@ public final class MetaLeafCursor extends Cursor<MetaLeaf> {
     }
 
     @Override
-    public final long getId(MetaLeaf entity) {
+    public long getId(MetaLeaf entity) {
         return ID_GETTER.getId(entity);
     }
 
@@ -49,7 +49,7 @@ public final class MetaLeafCursor extends Cursor<MetaLeaf> {
      * @return The ID of the object within its box.
      */
     @Override
-    public final long put(MetaLeaf entity) {
+    public long put(MetaLeaf entity) {
         ToOne<MetaBranch> branch = entity.branch;
         if(branch != null && branch.internalRequiresPutTarget()) {
             Cursor<MetaBranch> targetCursor = getRelationTargetCursor(MetaBranch.class);

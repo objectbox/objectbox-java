@@ -17,11 +17,8 @@
 package io.objectbox.relation;
 
 
-import java.util.List;
-
 import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
-import io.objectbox.EntityInfo;
 import io.objectbox.Transaction;
 import io.objectbox.internal.CursorFactory;
 
@@ -38,18 +35,15 @@ public final class CustomerCursor extends Cursor<Customer> {
         }
     }
 
-    private static EntityInfo PROPERTIES = new Customer_();
-
-
     // Property IDs get verified in Cursor base class
     private final static int __ID_name = Customer_.name.id;
 
     public CustomerCursor(Transaction tx, long cursor, BoxStore boxStore) {
-        super(tx, cursor, PROPERTIES, boxStore);
+        super(tx, cursor, Customer_.__INSTANCE, boxStore);
     }
 
     @Override
-    public final long getId(Customer entity) {
+    public long getId(Customer entity) {
         return entity.getId();
     }
 
@@ -59,7 +53,7 @@ public final class CustomerCursor extends Cursor<Customer> {
      * @return The ID of the object within its box.
      */
     @Override
-    public final long put(Customer entity) {
+    public long put(Customer entity) {
         String name = entity.getName();
         int __id1 = name != null ? __ID_name : 0;
 
@@ -78,17 +72,6 @@ public final class CustomerCursor extends Cursor<Customer> {
         checkApplyToManyToDb(entity.getOrdersStandalone(), Order.class);
 
         return __assignedId;
-    }
-
-    // TODO @Override
-    protected final void attachEntity(Customer entity) {
-        // TODO super.attachEntity(entity);
-        entity.__boxStore = boxStoreForEntities;
-    }
-
-    // TODO do we need this? @Override
-    protected final boolean isEntityUpdateable() {
-        return true;
     }
 
 }
