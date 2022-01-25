@@ -1,5 +1,7 @@
-// dev branch only: every 30 minutes at night (1:00 - 5:00)
-String cronSchedule = BRANCH_NAME == 'dev' ? '*/30 1-5 * * *' : ''
+// dev branch only: run every hour at 30th minute at night (1:00 - 5:00)
+// Avoid running at the same time as integration tests: uses this projects snapshots
+// so make sure to not run in the middle of uploading a new snapshot to avoid dependency resolution errors.
+String cronSchedule = BRANCH_NAME == 'dev' ? '30 1-5 * * *' : ''
 String buildsToKeep = '500'
 
 String gradleArgs = '--stacktrace'
