@@ -1,10 +1,11 @@
 <p align="center"><img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png"></p>
 
 # ObjectBox Java (Kotlin, Android)
+
 [ObjectBox](https://objectbox.io/) is a superfast object-oriented database with strong relation support.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
-**Latest version: [3.1.0 (2021/12/15)](https://docs.objectbox.io/#objectbox-changelog)**
+**Latest version: [3.1.1 (2022/01/26)](https://docs.objectbox.io/#objectbox-changelog)**
 
 Demo code using ObjectBox:
 
@@ -26,8 +27,8 @@ box.put(playlist);
 
 Want details? **[Read the docs](https://docs.objectbox.io/)**
 
-Features
--------------
+## Features
+
 🏁 **High performance** on restricted devices, like IoT gateways, micro controllers, ECUs etc.\
 🪂 **Resourceful** with minimal CPU, power and Memory usage for maximum flexibility and sustainability\
 🔗 **Relations:** object links / relationships are built-in\
@@ -44,13 +45,13 @@ Features
 
 Enjoy ❤️
 
-Gradle setup
-------------
+## Gradle setup
+
 For Android projects, add the ObjectBox Gradle plugin to your root `build.gradle`: 
 
 ```groovy
 buildscript {
-    ext.objectboxVersion = "3.1.0"
+    ext.objectboxVersion = "3.1.1"
     repositories {        
         mavenCentral()    
     }
@@ -72,8 +73,8 @@ plugins {
 apply plugin: "io.objectbox" // Add after other plugins.
 ```
 
-First steps
------------
+## First steps
+
 Create a data object class `@Entity`, for example "Playlist".
 ```
 // Kotlin
@@ -101,8 +102,8 @@ The `Box` object gives you access to all major functions, like `put`, `get`, `re
 For details please check the [docs](https://docs.objectbox.io).     
 
 
-Other languages/bindings
-------------------------
+## Other languages/bindings
+
 ObjectBox supports multiple platforms and languages.
 Besides JVM based languages like Java and Kotlin, ObjectBox also offers: 
 
@@ -112,8 +113,8 @@ Besides JVM based languages like Java and Kotlin, ObjectBox also offers:
 * [ObjectBox C and C++](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
 
 
-How can I help ObjectBox?
----------------------------
+## How can I help ObjectBox?
+
 We believe, ObjectBox is super easy to use. We are on a mission to make developers’ lives better, by building developer tools that are intuitive and fun to code with.
 
 To do that, we want your feedback: what do you love? What's amiss? Where do you struggle in everyday app development?
@@ -129,9 +130,9 @@ Thank you! 🙏
 
 Keep in touch: For general news on ObjectBox, [check our blog](https://objectbox.io/blog)!
 
-License
--------
-    Copyright 2017-2021 ObjectBox Ltd. All rights reserved.
+## License
+
+    Copyright 2017-2022 ObjectBox Ltd. All rights reserved.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
