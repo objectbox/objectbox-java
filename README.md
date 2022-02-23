@@ -101,6 +101,22 @@ The `Box` object gives you access to all major functions, like `put`, `get`, `re
 
 For details please check the [docs](https://docs.objectbox.io).     
 
+## Already using ObjectBox?
+
+Your opinion matters to us! Please fill in this 2-minute [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7).
+
+We believe, ObjectBox is super easy to use. We are on a mission to make developers’ lives better, by building developer tools that are intuitive and fun to code with.
+To do that, we want your feedback: what do you love? What's amiss? Where do you struggle in everyday app development?
+
+**We're looking forward to receiving your comments and requests:**
+- Add [GitHub issues](https://github.com/ObjectBox/objectbox-java/issues) 
+- Upvote issues you find important by hitting the 👍/+1 reaction button
+- Drop us a line via [@ObjectBox_io](https://twitter.com/ObjectBox_io/) or contact[at]objectbox.io
+- ⭐ us, if you like what you see 
+
+Thank you! 🙏
+
+Keep in touch: For general news on ObjectBox, [check our blog](https://objectbox.io/blog)!
 
 ## Other languages/bindings
 
@@ -112,23 +128,6 @@ Besides JVM based languages like Java and Kotlin, ObjectBox also offers:
 * [ObjectBox Go](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications 
 * [ObjectBox C and C++](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
 
-
-## How can I help ObjectBox?
-
-We believe, ObjectBox is super easy to use. We are on a mission to make developers’ lives better, by building developer tools that are intuitive and fun to code with.
-
-To do that, we want your feedback: what do you love? What's amiss? Where do you struggle in everyday app development?
-
-**We're looking forward to receiving your comments and requests:**
-
-- Add [GitHub issues](https://github.com/ObjectBox/objectbox-java/issues) 
-- Upvote issues you find important by hitting the 👍/+1 reaction button
-- Drop us a line via [@ObjectBox_io](https://twitter.com/ObjectBox_io/)
-- ⭐ us, if you like what you see 
-
-Thank you! 🙏
-
-Keep in touch: For general news on ObjectBox, [check our blog](https://objectbox.io/blog)!
 
 ## License
 
