@@ -1,0 +1,154 @@
+# Default image for linux builds
+image: objectboxio/buildenv:21.11.11-centos7
+
+# Assumes these environment variables are configured in GitLab CI/CD Settings:
+# - SONATYPE_USER
+# - SONATYPE_PWD
+# - GOOGLE_CHAT_WEBHOOK_JAVA_CI
+# Additionally, Gradle scripts assume these Gradle project properties are set:
+# https://docs.gradle.org/current/userguide/build_environment.html#sec:project_properties
+# - ORG_GRADLE_PROJECT_signingKeyFile
+# - ORG_GRADLE_PROJECT_signingKeyId
+# - ORG_GRADLE_PROJECT_signingPassword
+
+variables:
+  # Disable the Gradle daemon for Continuous Integration servers as correctness
+  # is usually a priority over speed in CI environments. Using a fresh
+  # runtime for each build is more reliable since the runtime is completely
+  # isolated from any previous builds.
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  GITLAB_REPO_ARGS: "-PgitlabUrl=$CI_SERVER_URL -PgitlabTokenName=Job-Token -PgitlabPrivateToken=$CI_JOB_TOKEN"
+  CENTRAL_REPO_ARGS: "-PsonatypeUsername=$SONATYPE_USER -PsonatypePassword=$SONATYPE_PWD"
+  # CI_COMMIT_REF_SLUG is the branch or tag name, but web-safe (only 0-9, a-z)
+  VERSION_ARGS: "-PversionPostFix=$CI_COMMIT_REF_SLUG"
+
+# Using multiple test stages to avoid running some things in parallel (see job notes).
+stages:
+  - test
+  - test-2
+  - test-3
+  - upload-to-internal
+  - upload-to-central
+  - package-api-docs
+  - integ-tests
+
+test:
+  stage: test
+  tags: [ docker, x64 ]
+  before_script:
+    # Print Gradle and JVM version info
+    - ./gradlew -version
+    # Remove any previous JVM (Hotspot) crash log.
+    # "|| true" for an OK exit code if no file is found
+    - rm **/hs_err_pid*.log || true
+  script:
+    - ./ci/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean build
+  artifacts:
+    when: always
+    paths:
+      - "**/hs_err_pid*.log" # Only on JVM (Hotspot) crash.
+      - "**/build/reports/spotbugs/*.html"
+    reports:
+      junit: "**/build/test-results/**/TEST-*.xml"
+
+.test-template:
+  before_script:
+    # Remove any previous JVM (Hotspot) crash log.
+    # "|| true" for an OK exit code if no file is found
+    - rm **/hs_err_pid*.log || true
+  artifacts:
+    when: always
+    paths:
+      - "**/hs_err_pid*.log" # Only on JVM (Hotspot) crash.
+    reports:
+      junit: "**/build/test-results/**/TEST-*.xml"
+
+test-windows:
+  extends: .test-template
+  stage: test-2
+  tags: [ windows ]
+  script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
+
+test-macos:
+  extends: .test-template
+  stage: test-2
+  tags: [mac11+, x64]
+  script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
+
+# Address sanitizer is only available on Linux runners (see script).
+.test-asan-template:
+  extends: .test-template
+  tags: [ docker, x64 ]
+  script:
+    # Note: do not run check task as it includes SpotBugs.
+    - ./ci/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean :tests:objectbox-java-test:test
+
+# Test oldest supported and a recent JDK.
+# Note: can not run these in parallel using a matrix configuration as Gradle would step over itself.
+test-jdk-8:
+  extends: .test-asan-template
+  stage: test-2
+  variables:
+    TEST_JDK: 8
+
+test-jdk-16:
+  extends: .test-asan-template
+  stage: test-3
+  variables:
+    TEST_JDK: 16
+
+test-jdk-x86:
+  extends: .test-template
+  stage: test-3
+  tags: [ windows ]
+  variables:
+    # TEST_WITH_JAVA_X86 makes objectbox-java-test use 32-bit java executable and therefore
+    # 32-bit ObjectBox to run tests (see build.gradle file).
+    # Note: assumes JAVA_HOME_X86 is set to 32-bit JDK path.
+    TEST_WITH_JAVA_X86: "true"
+  script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
+
+upload-to-internal:
+  stage: upload-to-internal
+  tags: [ docker, x64 ]
+  script:
+    - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS publishMavenJavaPublicationToGitLabRepository
+
+upload-to-central:
+  stage: upload-to-central
+  tags: [ docker, x64 ]
+  only:
+    - publish
+  before_script:
+    - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java library:* job $CI_JOB_NAME from branch $CI_COMMIT_BRANCH ($CI_COMMIT_SHORT_SHA)..."
+  script:
+    # Note: supply internal repo as tests use native dependencies that might not be published, yet.
+    - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS $CENTRAL_REPO_ARGS publishMavenJavaPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+  after_script:
+    # Also runs on failure, so show CI_JOB_STATUS.
+    - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java library:* *$CI_JOB_STATUS* for $CI_JOB_NAME"
+    - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "Check https://repo1.maven.org/maven2/io/objectbox/ in a few minutes."
+
+package-api-docs:
+  stage: package-api-docs
+  tags: [ docker, x64 ]
+  only:
+    - publish
+  script:
+    - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS :objectbox-java:packageJavadocForWeb
+  after_script:
+    - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "API docs for web available as job artifact $CI_JOB_URL"
+  artifacts:
+    paths:
+      - "objectbox-java/build/dist/objectbox-java-web-api-docs.zip"
+
+trigger-integ-tests:
+  stage: integ-tests
+  except:
+    - schedules # Do not trigger when run on schedule, integ tests have own schedule.
+  inherit:
+    variables: false
+  allow_failure: true # Branch might not exist in integ test project.
+  trigger:
+    project: objectbox/objectbox-integration-test
+    branch: $CI_COMMIT_BRANCH

@@ -26,7 +26,7 @@ repositories {
             url "$gitlabUrl/api/v4/groups/objectbox/-/packages/maven"
             name "GitLab"
             credentials(HttpHeaderCredentials) {
-                name = 'Private-Token'
+                name = project.hasProperty("gitlabTokenName") ? gitlabTokenName : "Private-Token"
                 value = gitlabPrivateToken
             }
             authentication {

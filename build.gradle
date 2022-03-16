@@ -95,7 +95,7 @@ configure(subprojects.findAll { projectNamesToPublish.contains(it.name) }) {
                     println "GitLab repository set to $url."
 
                     credentials(HttpHeaderCredentials) {
-                        name = "Private-Token"
+                        name = project.hasProperty("gitlabTokenName") ? gitlabTokenName : "Private-Token"
                         value = gitlabPrivateToken
                     }
                     authentication {

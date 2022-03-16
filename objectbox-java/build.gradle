@@ -25,6 +25,12 @@ spotbugs {
     excludeFilter = file("spotbugs-exclude.xml")
 }
 
+tasks.spotbugsMain {
+    reports.create("html") {
+        required.set(true)
+    }
+}
+
 javadoc {
     // Hide internal API from javadoc artifact.
     exclude("**/io/objectbox/Cursor.java")
