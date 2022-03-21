@@ -25,8 +25,6 @@ variables:
 # Using multiple test stages to avoid running some things in parallel (see job notes).
 stages:
   - test
-  - test-2
-  - test-3
   - upload-to-internal
   - upload-to-central
   - package-api-docs
@@ -65,13 +63,13 @@ test:
 
 test-windows:
   extends: .test-template
-  stage: test-2
+  needs: ["test"]
   tags: [ windows ]
   script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
 
 test-macos:
   extends: .test-template
-  stage: test-2
+  needs: ["test"]
   tags: [mac11+, x64]
   script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
 
@@ -87,19 +85,19 @@ test-macos:
 # Note: can not run these in parallel using a matrix configuration as Gradle would step over itself.
 test-jdk-8:
   extends: .test-asan-template
-  stage: test-2
+  needs: ["test"]
   variables:
     TEST_JDK: 8
 
 test-jdk-16:
   extends: .test-asan-template
-  stage: test-3
+  needs: ["test-jdk-8"]
   variables:
     TEST_JDK: 16
 
 test-jdk-x86:
   extends: .test-template
-  stage: test-3
+  needs: ["test-windows"]
   tags: [ windows ]
   variables:
     # TEST_WITH_JAVA_X86 makes objectbox-java-test use 32-bit java executable and therefore
