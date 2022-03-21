@@ -1,8 +1,8 @@
 <p align="center"><img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png"></p>
 
-# ObjectBox Java (Kotlin, Android)
+# ObjectBox Java Database (Kotlin, Android)
 
-[ObjectBox](https://objectbox.io/) is a superfast object-oriented database with strong relation support.
+[ObjectBox](https://objectbox.io/) is a superfast object-oriented database with strong relation support and easy-to-use native language APIs.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
 **Latest version: [3.1.2 (2022/02/21)](https://docs.objectbox.io/#objectbox-changelog)**
@@ -123,10 +123,10 @@ Keep in touch: For general news on ObjectBox, [check our blog](https://objectbox
 ObjectBox supports multiple platforms and languages.
 Besides JVM based languages like Java and Kotlin, ObjectBox also offers: 
 
-* [ObjectBox Swift](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
-* [ObjectBox Dart/Flutter](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps 
-* [ObjectBox Go](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications 
-* [ObjectBox C and C++](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
+* [ObjectBox Swift Database](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
+* [ObjectBox Dart/Flutter Database](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps 
+* [ObjectBox Go Database](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications 
+* [ObjectBox C and C++ Database](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
 
 
 ## License
