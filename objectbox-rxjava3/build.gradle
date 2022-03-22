@@ -30,7 +30,7 @@ tasks.named("dokkaHtml") {
                 // Point to web javadoc for objectbox-java packages.
                 url.set(new URL("https://objectbox.io/docfiles/java/current/"))
                 // Note: Using JDK 9+ package-list is now called element-list.
-                packageListUrl.set(new URL(url, "element-list"))
+                packageListUrl.set(new URL("https://objectbox.io/docfiles/java/current/element-list"))
             }
         }
     }
