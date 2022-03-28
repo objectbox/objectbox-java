@@ -7,6 +7,8 @@ ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
 **Latest version: [3.1.2 (2022/02/21)](https://docs.objectbox.io/#objectbox-changelog)**
 
+**Your opinion matters to us!** Please fill in this 2-minute [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7).
+
 Demo code using ObjectBox:
 
 ```kotlin
@@ -102,8 +104,6 @@ The `Box` object gives you access to all major functions, like `put`, `get`, `re
 For details please check the [docs](https://docs.objectbox.io).     
 
 ## Already using ObjectBox?
-
-Your opinion matters to us! Please fill in this 2-minute [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7).
 
 We believe, ObjectBox is super easy to use. We are on a mission to make developers’ lives better, by building developer tools that are intuitive and fun to code with.
 To do that, we want your feedback: what do you love? What's amiss? Where do you struggle in everyday app development?
