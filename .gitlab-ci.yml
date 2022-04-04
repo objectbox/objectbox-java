@@ -12,10 +12,9 @@ image: objectboxio/buildenv:21.11.11-centos7
 # - ORG_GRADLE_PROJECT_signingPassword
 
 variables:
-  # Disable the Gradle daemon for Continuous Integration servers as correctness
-  # is usually a priority over speed in CI environments. Using a fresh
-  # runtime for each build is more reliable since the runtime is completely
-  # isolated from any previous builds.
+  # Disable the Gradle daemon. Gradle may run in a Docker container with a shared
+  # Docker volume containing GRADLE_USER_HOME. If the container is stopped after a job
+  # Gradle daemons may get killed, preventing proper clean-up of lock files in GRADLE_USER_HOME.
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
   GITLAB_REPO_ARGS: "-PgitlabUrl=$CI_SERVER_URL -PgitlabTokenName=Job-Token -PgitlabPrivateToken=$CI_JOB_TOKEN"
   CENTRAL_REPO_ARGS: "-PsonatypeUsername=$SONATYPE_USER -PsonatypePassword=$SONATYPE_PWD"
