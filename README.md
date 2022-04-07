@@ -1,13 +1,21 @@
 <p align="center"><img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png"></p>
 
+<p align="center">
+  <a href="https://docs.objectbox.io/getting-started">Getting Started</a> •
+  <a href="https://docs.objectbox.io">Documentation</a> •
+  <a href="https://github.com/objectbox/objectbox-examples">Example Apps</a> •
+  <a href="https://github.com/objectbox/objectbox-java/issues">Issues</a>
+</p>
+
+
 # ObjectBox Java Database (Kotlin, Android)
 
-[ObjectBox](https://objectbox.io/) is a superfast object-oriented database with strong relation support and easy-to-use native language APIs.
+[ObjectBox](https://objectbox.io/) is a superfast object-oriented Java database with strong relation support and easy-to-use native language APIs.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
 **Latest version: [3.1.2 (2022/02/21)](https://docs.objectbox.io/#objectbox-changelog)**
 
-**Your opinion matters to us!** Please fill in this 2-minute [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7).
+❤ **Your opinion matters to us!** Please fill in this 2-minute [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7).
 
 Demo code using ObjectBox:
 
@@ -27,9 +35,15 @@ playlist.songs.add(new Song("Lololo"));
 box.put(playlist);
 ```
 
-Want details? **[Read the docs](https://docs.objectbox.io/)**
+🧾 **Want details?** [Read the docs](https://docs.objectbox.io/)
 
-## Features
+## Why use ObjectBox
+
+ObjectBox NoSQL Java database is built for storing data locally on mobile devices. It is optimized for high efficiency on restricted devices and uses minimal CPU and RAM. Being fully ACID-compliant, ObjectBox is faster than any alternative, outperforming SQLite and Realm across all CRUD (Create, Read, Update, Delete) operations. Check out our [Performance Benchmarking App repository](https://github.com/objectbox/objectbox-performance).
+
+Additionally, our concise API is easy to learn and only requires a fraction of the code compared to SQLite. No more rows or columns, just plain objects with built-in relations.
+
+### Features
 
 🏁 **High performance** on restricted devices, like IoT gateways, micro controllers, ECUs etc.\
 🪂 **Resourceful** with minimal CPU, power and Memory usage for maximum flexibility and sustainability\
@@ -42,7 +56,7 @@ Want details? **[Read the docs](https://docs.objectbox.io/)**
 📃 **Automatic schema migrations:** no update scripts needed
 
 **And much more than just data persistence**\
-👥 **[ObjectBox Sync](https://objectbox.io/sync/):** keeps data in sync between devices and servers\
+🔄 **[ObjectBox Sync](https://objectbox.io/sync/):** keeps data in sync between devices and servers\
 🕒 **[ObjectBox TS](https://objectbox.io/time-series-database/):** time series extension for time based data
 
 Enjoy ❤️
@@ -106,6 +120,7 @@ For details please check the [docs](https://docs.objectbox.io).
 ## Already using ObjectBox?
 
 We believe, ObjectBox is super easy to use. We are on a mission to make developers’ lives better, by building developer tools that are intuitive and fun to code with.
+
 To do that, we want your feedback: what do you love? What's amiss? Where do you struggle in everyday app development?
 
 **We're looking forward to receiving your comments and requests:**
@@ -144,4 +159,3 @@ Besides JVM based languages like Java and Kotlin, ObjectBox also offers:
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
