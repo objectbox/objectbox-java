@@ -27,18 +27,22 @@ import org.junit.Before;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public abstract class AbstractObjectBoxTest {
 
@@ -152,26 +156,26 @@ public abstract class AbstractObjectBoxTest {
                 logError("Could not clean up test", e);
             }
         }
-        deleteAllFiles();
+        deleteAllFiles(boxStoreDir);
     }
 
-    protected void deleteAllFiles() {
+    protected void deleteAllFiles(@Nullable File boxStoreDir) {
         if (boxStoreDir != null && boxStoreDir.exists()) {
-            File[] files = boxStoreDir.listFiles();
-            for (File file : files) {
-                delete(file);
+            try (Stream<Path> stream = Files.walk(boxStoreDir.toPath())) {
+                stream.sorted(Comparator.reverseOrder())
+                        .forEach(path -> {
+                            try {
+                                Files.delete(path);
+                            } catch (IOException e) {
+                                logError("Could not delete file", e);
+                                fail("Could not delete file");
+                            }
+                        });
+            } catch (IOException e) {
+                logError("Could not delete file", e);
+                fail("Could not delete file");
             }
-            delete(boxStoreDir);
         }
-    }
-
-    private boolean delete(File file) {
-        boolean deleted = file.delete();
-        if (!deleted) {
-            file.deleteOnExit();
-            logError("Could not delete " + file.getAbsolutePath());
-        }
-        return deleted;
     }
 
     protected void log(String text) {
