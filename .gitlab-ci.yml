@@ -15,7 +15,8 @@ variables:
   # Disable the Gradle daemon. Gradle may run in a Docker container with a shared
   # Docker volume containing GRADLE_USER_HOME. If the container is stopped after a job
   # Gradle daemons may get killed, preventing proper clean-up of lock files in GRADLE_USER_HOME.
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  # Configure file.encoding to always use UTF-8 when running Gradle.
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dfile.encoding=UTF-8"
   GITLAB_REPO_ARGS: "-PgitlabUrl=$CI_SERVER_URL -PgitlabTokenName=Job-Token -PgitlabPrivateToken=$CI_JOB_TOKEN"
   CENTRAL_REPO_ARGS: "-PsonatypeUsername=$SONATYPE_USER -PsonatypePassword=$SONATYPE_PWD"
   # CI_COMMIT_REF_SLUG is the branch or tag name, but web-safe (only 0-9, a-z)
