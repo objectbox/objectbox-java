@@ -76,6 +76,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         boxStore1.close();
         BoxStore boxStore = builder.buildDefault();
         assertSame(boxStore, BoxStore.getDefault());
+        boxStore.close();
     }
 
     @Test(expected = IllegalStateException.class)
