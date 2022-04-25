@@ -22,6 +22,7 @@ import io.objectbox.BoxStoreBuilder;
 import io.objectbox.DebugFlags;
 import io.objectbox.TestEntity;
 import io.objectbox.TestEntity_;
+import io.objectbox.TestUtils;
 import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.NonUniqueResultException;
 import io.objectbox.query.QueryBuilder.StringOrder;
@@ -255,10 +256,11 @@ public class QueryTest extends AbstractQueryTest {
     }
 
     @Test
-    public void testOffsetLimit() {
+    public void offset_limit_find() {
         putTestEntitiesScalars();
         Query<TestEntity> query = box.query().greater(simpleInt, 2002).less(simpleShort, 2108).build();
         assertEquals(5, query.count());
+
         assertEquals(4, query.find(1, 0).size());
         assertEquals(1, query.find(4, 0).size());
         assertEquals(2, query.find(0, 2).size());
@@ -266,6 +268,57 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(2, list.size());
         assertEquals(2004, list.get(0).getSimpleInt());
         assertEquals(2005, list.get(1).getSimpleInt());
+
+        OffsetLimitFunction find = (offset, limit) -> query.find(offset, limit).size();
+        assertOffsetLimitEdgeCases(find);
+    }
+
+    @Test
+    public void offset_limit_findIds() {
+        putTestEntitiesScalars();
+        Query<TestEntity> query = box.query().greater(simpleInt, 2002).less(simpleShort, 2108).build();
+        assertEquals(5, query.count());
+
+        assertEquals(4, query.findIds(1, 0).length);
+        assertEquals(1, query.findIds(4, 0).length);
+        assertEquals(2, query.findIds(0, 2).length);
+        long[] list = query.findIds(1, 2);
+        assertEquals(2, list.length);
+        assertEquals(5, list[0]);
+        assertEquals(6, list[1]);
+
+        OffsetLimitFunction findIds = (offset, limit) -> query.findIds(offset, limit).length;
+        assertOffsetLimitEdgeCases(findIds);
+    }
+
+    private interface OffsetLimitFunction {
+        int applyAndCount(long offset, long limit);
+    }
+
+    private void assertOffsetLimitEdgeCases(OffsetLimitFunction function) {
+        // Max value
+        if (TestUtils.is32BitJVM()) {
+            // When running 32-bit ObjectBox limit and offset max is limited to 32-bit unsigned integer.
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> function.applyAndCount(Long.MAX_VALUE, Long.MAX_VALUE));
+            assertEquals("Invalid offset (9223372036854775807): exceeds the maximum value allowed on this platform (4294967295)",
+                    ex.getMessage());
+            // Ensure max allowed value works.
+            // Note: currently offset + limit must not exceed 32-bit unsigned integer max.
+            assertEquals(0, function.applyAndCount(Integer.MAX_VALUE * 2L + 1, 0));
+            assertEquals(5, function.applyAndCount(0, Integer.MAX_VALUE * 2L + 1));
+        } else {
+            // 64-bit JVM
+            assertEquals(0, function.applyAndCount(Long.MAX_VALUE, Long.MAX_VALUE));
+        }
+
+        // Min value
+        IllegalArgumentException exOffset = assertThrows(IllegalArgumentException.class,
+                () -> function.applyAndCount(Long.MIN_VALUE, 0));
+        assertEquals("Invalid offset (-9223372036854775808): must be zero or positive", exOffset.getMessage());
+        IllegalArgumentException exLimit = assertThrows(IllegalArgumentException.class,
+                () -> function.applyAndCount(0, Long.MIN_VALUE));
+        assertEquals("Invalid limit (-9223372036854775808): must be zero or positive", exLimit.getMessage());
     }
 
     @Test

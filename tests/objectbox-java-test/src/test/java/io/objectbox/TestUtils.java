@@ -38,6 +38,15 @@ public class TestUtils {
         return osName.contains("windows");
     }
 
+    /**
+     * Returns true if the JVM this code runs on is in 32-bit mode,
+     * so may not necessarily mean the system has a 32-bit architecture.
+     */
+    public static boolean is32BitJVM() {
+        final String bitness = System.getProperty("sun.arch.data.model");
+        return "32".equals(bitness);
+    }
+
     public static String loadFile(String filename) {
         try {
             InputStream in = openInputStream("/" + filename);
