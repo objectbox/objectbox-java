@@ -101,14 +101,15 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         store.close();
 
         // Check only expected files and directories exist.
-        Set<Path> expectedPaths = new HashSet<>();
-        expectedPaths.add(parentTestDir.toPath());
-        expectedPaths.add(testDir.toPath());
+        // Note: can not compare Path objects, does not appear to work on macOS for unknown reason.
+        Set<String> expectedPaths = new HashSet<>();
+        expectedPaths.add(parentTestDir.toPath().toString());
+        expectedPaths.add(testDir.toPath().toString());
         Path testDirPath = testDir.toPath();
-        expectedPaths.add(testDirPath.resolve("data.mdb"));
-        expectedPaths.add(testDirPath.resolve("lock.mdb"));
+        expectedPaths.add(testDirPath.resolve("data.mdb").toString());
+        expectedPaths.add(testDirPath.resolve("lock.mdb").toString());
         try (Stream<Path> files = Files.walk(parentTestDir.toPath())) {
-            List<Path> unexpectedPaths = files.filter(path -> !expectedPaths.remove(path)).collect(Collectors.toList());
+            List<Path> unexpectedPaths = files.filter(path -> !expectedPaths.remove(path.toString())).collect(Collectors.toList());
             if (!unexpectedPaths.isEmpty()) {
                 fail("Found unexpected paths: " + unexpectedPaths);
             }
