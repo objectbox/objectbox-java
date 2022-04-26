@@ -22,16 +22,24 @@ import org.greenrobot.essentials.io.IoUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assert.assertNotNull;
 
 public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
 
@@ -82,6 +90,35 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
     @Test(expected = IllegalStateException.class)
     public void testDefaultStoreNull() {
         BoxStore.getDefault();
+    }
+
+    @Test
+    public void directoryUnicodePath() throws IOException {
+        File parentTestDir = new File("unicode-test");
+        File testDir = new File(parentTestDir, "Îñţérñåţîöñåļîžåţîờñ");
+        builder.directory(testDir);
+        BoxStore store = builder.build();
+        store.close();
+
+        // Check only expected files and directories exist.
+        // Note: can not compare Path objects, does not appear to work on macOS for unknown reason.
+        Set<String> expectedPaths = new HashSet<>();
+        expectedPaths.add(parentTestDir.toPath().toString());
+        expectedPaths.add(testDir.toPath().toString());
+        Path testDirPath = testDir.toPath();
+        expectedPaths.add(testDirPath.resolve("data.mdb").toString());
+        expectedPaths.add(testDirPath.resolve("lock.mdb").toString());
+        try (Stream<Path> files = Files.walk(parentTestDir.toPath())) {
+            List<Path> unexpectedPaths = files.filter(path -> !expectedPaths.remove(path.toString())).collect(Collectors.toList());
+            if (!unexpectedPaths.isEmpty()) {
+                fail("Found unexpected paths: " + unexpectedPaths);
+            }
+            if (!expectedPaths.isEmpty()) {
+                fail("Missing expected paths: " + expectedPaths);
+            }
+        }
+
+        deleteAllFiles(parentTestDir);
     }
 
     @Test
