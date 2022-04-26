@@ -54,6 +54,8 @@ test:
 
 .test-template:
   before_script:
+    # Print Gradle and JVM version info
+    - ./gradlew -version
     # Remove any previous JVM (Hotspot) crash log.
     # "|| true" for an OK exit code if no file is found
     - rm **/hs_err_pid*.log || true
