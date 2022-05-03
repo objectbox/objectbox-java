@@ -28,7 +28,7 @@ stages:
   - upload-to-internal
   - upload-to-central
   - package-api-docs
-  - integ-tests
+  - triggers
 
 test:
   stage: test
@@ -148,13 +148,13 @@ package-api-docs:
     paths:
       - "objectbox-java/build/dist/objectbox-java-web-api-docs.zip"
 
-trigger-integ-tests:
-  stage: integ-tests
+trigger-plugin:
+  stage: triggers
   except:
-    - schedules # Do not trigger when run on schedule, integ tests have own schedule.
+    - schedules # Do not trigger when run on schedule, e.g. integ tests have own schedule.
   inherit:
     variables: false
-  allow_failure: true # Branch might not exist in integ test project.
+  allow_failure: true # Branch might not exist, yet, in plugin project.
   trigger:
-    project: objectbox/objectbox-integration-test
+    project: objectbox/objectbox-plugin
     branch: $CI_COMMIT_BRANCH
