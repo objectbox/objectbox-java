@@ -152,6 +152,7 @@ trigger-plugin:
   stage: triggers
   except:
     - schedules # Do not trigger when run on schedule, e.g. integ tests have own schedule.
+    - publish
   inherit:
     variables: false
   allow_failure: true # Branch might not exist, yet, in plugin project.
