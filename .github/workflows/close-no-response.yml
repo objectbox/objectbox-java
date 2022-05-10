@@ -1,0 +1,21 @@
+name: Close inactive issues
+on:
+  schedule:
+    - cron: "15 1 * * *" # “At 01:15.”
+
+jobs:
+  close-issues:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      # https://github.com/marketplace/actions/close-stale-issues
+      - uses: actions/stale@v5
+        with:
+          days-before-stale: -1 # Add the stale label manually.
+          days-before-close: 21
+          only-labels: "more info required"
+          stale-issue-label: "more info required"
+          close-issue-message: "Without additional information, we are unfortunately not sure how to resolve this issue. Therefore this issue has been automatically closed. Feel free to comment with additional details and we can re-open this issue."
+          close-pr-message: "Without additional information, we are unfortunately not sure how to address this pull request. Therefore this pull request has been automatically closed. Feel free to comment with additional details or submit a new pull request."
