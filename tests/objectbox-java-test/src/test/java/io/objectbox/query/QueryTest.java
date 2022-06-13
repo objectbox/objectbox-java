@@ -30,6 +30,7 @@ import io.objectbox.relation.MyObjectBox;
 import io.objectbox.relation.Order;
 import io.objectbox.relation.Order_;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,6 +85,56 @@ public class QueryTest extends AbstractQueryTest {
             queryBuilder.order(TestEntity_.simpleInt);
             queryBuilder.build().find();
         }
+    }
+
+    @Test
+    public void useAfterQueryClose_fails() {
+        Query<TestEntity> query = box.query().build();
+        query.close();
+
+        assertThrowsQueryIsClosed(query::count);
+        assertThrowsQueryIsClosed(query::describe);
+        assertThrowsQueryIsClosed(query::describeParameters);
+        assertThrowsQueryIsClosed(query::find);
+        assertThrowsQueryIsClosed(() -> query.find(0, 1));
+        assertThrowsQueryIsClosed(query::findFirst);
+        assertThrowsQueryIsClosed(query::findIds);
+        assertThrowsQueryIsClosed(() -> query.findIds(0, 1));
+        assertThrowsQueryIsClosed(query::findLazy);
+        assertThrowsQueryIsClosed(query::findLazyCached);
+        assertThrowsQueryIsClosed(query::findUnique);
+        assertThrowsQueryIsClosed(query::remove);
+
+        // For setParameter(s) the native method is not actually called, so fine to use incorrect alias and property.
+        assertThrowsQueryIsClosed(() -> query.setParameter("none", "value"));
+        assertThrowsQueryIsClosed(() -> query.setParameters("none", "a", "b"));
+        assertThrowsQueryIsClosed(() -> query.setParameter("none", 1));
+        assertThrowsQueryIsClosed(() -> query.setParameters("none", new int[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameters("none", new long[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameters("none", 1, 2));
+        assertThrowsQueryIsClosed(() -> query.setParameter("none", 1.0));
+        assertThrowsQueryIsClosed(() -> query.setParameters("none", 1.0, 2.0));
+        assertThrowsQueryIsClosed(() -> query.setParameters("none", new String[]{"a", "b"}));
+        assertThrowsQueryIsClosed(() -> query.setParameter("none", new byte[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, "value"));
+        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, "a", "b"));
+        assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, 1));
+        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, new int[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, new long[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, 1, 2));
+        assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, 1.0));
+        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, 1.0, 2.0));
+        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, new String[]{"a", "b"}));
+        assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, new byte[]{1, 2}));
+
+        // find would throw once first results are obtained, but shouldn't allow creating an observer to begin with.
+        assertThrowsQueryIsClosed(() -> query.subscribe().observer(data -> {
+        }));
+    }
+
+    private void assertThrowsQueryIsClosed(ThrowingRunnable runnable) {
+        IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
+        assertEquals("This query is closed. Build and use a new one.", ex.getMessage());
     }
 
     @Test
