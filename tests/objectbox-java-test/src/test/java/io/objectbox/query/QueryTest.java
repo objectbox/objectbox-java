@@ -65,28 +65,35 @@ public class QueryTest extends AbstractQueryTest {
         assertNotNull(query);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testBuildTwice() {
-        QueryBuilder<TestEntity> queryBuilder = box.query();
-        for (int i = 0; i < 2; i++) {
-            // calling any builder method after build should fail
-            // note: not calling all variants for different types
-            queryBuilder.isNull(TestEntity_.simpleString);
-            queryBuilder.and();
-            queryBuilder.notNull(TestEntity_.simpleString);
-            queryBuilder.or();
-            queryBuilder.equal(TestEntity_.simpleBoolean, true);
-            queryBuilder.notEqual(TestEntity_.simpleBoolean, true);
-            queryBuilder.less(TestEntity_.simpleInt, 42);
-            queryBuilder.greater(TestEntity_.simpleInt, 42);
-            queryBuilder.between(TestEntity_.simpleInt, 42, 43);
-            queryBuilder.in(TestEntity_.simpleInt, new int[]{42});
-            queryBuilder.notIn(TestEntity_.simpleInt, new int[]{42});
-            queryBuilder.contains(TestEntity_.simpleString, "42", StringOrder.CASE_INSENSITIVE);
-            queryBuilder.startsWith(TestEntity_.simpleString, "42", StringOrder.CASE_SENSITIVE);
-            queryBuilder.order(TestEntity_.simpleInt);
-            queryBuilder.build().find();
-        }
+    @Test
+    public void useAfterBuild_fails() {
+        QueryBuilder<TestEntity> builder = box.query();
+        Query<TestEntity> query = builder.build();
+
+        // Calling any builder method after build should fail.
+        // note: not calling all variants for different types.
+        assertThrowsBuilderClosed(() -> builder.isNull(TestEntity_.simpleString));
+        assertThrowsBuilderClosed(builder::and);
+        assertThrowsBuilderClosed(() -> builder.notNull(TestEntity_.simpleString));
+        assertThrowsBuilderClosed(builder::or);
+        assertThrowsBuilderClosed(() -> builder.equal(TestEntity_.simpleBoolean, true));
+        assertThrowsBuilderClosed(() -> builder.notEqual(TestEntity_.simpleBoolean, true));
+        assertThrowsBuilderClosed(() -> builder.less(TestEntity_.simpleInt, 42));
+        assertThrowsBuilderClosed(() -> builder.greater(TestEntity_.simpleInt, 42));
+        assertThrowsBuilderClosed(() -> builder.between(TestEntity_.simpleInt, 42, 43));
+        assertThrowsBuilderClosed(() -> builder.in(TestEntity_.simpleInt, new int[]{42}));
+        assertThrowsBuilderClosed(() -> builder.notIn(TestEntity_.simpleInt, new int[]{42}));
+        assertThrowsBuilderClosed(() -> builder.contains(TestEntity_.simpleString, "42", StringOrder.CASE_INSENSITIVE));
+        assertThrowsBuilderClosed(() -> builder.startsWith(TestEntity_.simpleString, "42", StringOrder.CASE_SENSITIVE));
+        assertThrowsBuilderClosed(() -> builder.order(TestEntity_.simpleInt));
+        assertThrowsBuilderClosed(builder::build);
+
+        query.close();
+    }
+
+    private void assertThrowsBuilderClosed(ThrowingRunnable runnable) {
+        IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
+        assertEquals("This QueryBuilder has already been closed. Please use a new instance.", ex.getMessage());
     }
 
     @Test
