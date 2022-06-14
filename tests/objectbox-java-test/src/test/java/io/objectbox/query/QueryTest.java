@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 
 import static io.objectbox.TestEntity_.simpleBoolean;
 import static io.objectbox.TestEntity_.simpleByteArray;
@@ -45,6 +46,7 @@ import static io.objectbox.TestEntity_.simpleLong;
 import static io.objectbox.TestEntity_.simpleShort;
 import static io.objectbox.TestEntity_.simpleString;
 import static io.objectbox.TestEntity_.simpleStringArray;
+import static io.objectbox.TestEntity_.stringObjectMap;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -135,6 +137,55 @@ public class QueryTest extends AbstractQueryTest {
     private void assertThrowsQueryIsClosed(ThrowingRunnable runnable) {
         IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
         assertEquals("This query is closed. Build and use a new one.", ex.getMessage());
+    }
+
+    @Test
+    public void useAfterStoreClose_failsIfUsingStore() {
+        Query<TestEntity> query = box.query(
+                simpleString.equal("")
+                        .and(stringObjectMap.containsKeyValue("", ""))
+                        .and(simpleInt.equal(0))
+                        .and(simpleInt.oneOf(new int[]{0}).alias("oneOf4"))
+                        .and(simpleLong.oneOf(new long[]{0}).alias("oneOf8"))
+                        .and(simpleInt.between(0, 0).alias("between"))
+                        .and(simpleString.oneOf(new String[]{""}).alias("oneOfS"))
+                        .and(simpleByteArray.equal(new byte[]{0}))
+        ).build();
+        store.close();
+
+        assertThrowsStoreIsClosed(query::count);
+        assertThrowsStoreIsClosed(query::find);
+        assertThrowsStoreIsClosed(() -> query.find(0, 1));
+        assertThrowsStoreIsClosed(query::findFirst);
+        assertThrowsStoreIsClosed(query::findIds);
+        assertThrowsStoreIsClosed(() -> query.findIds(0, 1));
+        assertThrowsStoreIsClosed(query::findLazy);
+        assertThrowsStoreIsClosed(query::findLazyCached);
+        assertThrowsStoreIsClosed(query::findUnique);
+        assertThrowsStoreIsClosed(query::remove);
+
+        // describe and setParameter continue to work as store is not accessed.
+        assertFalse(query.describe().isEmpty());
+        assertFalse(query.describeParameters().isEmpty());
+        query.setParameter(simpleString, "value");
+        query.setParameters(stringObjectMap, "a", "b");
+        query.setParameter(simpleInt, 1);
+        query.setParameters("oneOf4", new int[]{1, 2});
+        query.setParameters("oneOf8", new long[]{1, 2});
+        query.setParameters("between", 1, 2);
+        query.setParameter(simpleInt, 1.0);
+        query.setParameters("between", 1.0, 2.0);
+        query.setParameters("oneOfS", new String[]{"a", "b"});
+        query.setParameter(simpleByteArray, new byte[]{1, 2});
+
+        // Internal thread pool is shut down as part of closing store, should no longer accept new work.
+        assertThrows(RejectedExecutionException.class, () -> query.subscribe().observer(data -> {
+        }));
+    }
+
+    private void assertThrowsStoreIsClosed(ThrowingRunnable runnable) {
+        IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
+        assertEquals("Store is closed", ex.getMessage());
     }
 
     @Test
