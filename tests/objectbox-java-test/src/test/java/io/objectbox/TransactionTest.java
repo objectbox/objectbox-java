@@ -21,6 +21,7 @@ import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.DbMaxReadersExceededException;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -39,6 +40,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -293,12 +295,22 @@ public class TransactionTest extends AbstractObjectBoxTest {
         // Double close should be fine
         tx.close();
 
-        try {
-            tx.reset();
-            fail("Should have thrown");
-        } catch (IllegalStateException e) {
-            // OK
-        }
+        // Calling other methods should throw.
+        assertThrowsTxClosed(tx::commit);
+        assertThrowsTxClosed(tx::commitAndClose);
+        assertThrowsTxClosed(tx::abort);
+        assertThrowsTxClosed(tx::reset);
+        assertThrowsTxClosed(tx::recycle);
+        assertThrowsTxClosed(tx::renew);
+        assertThrowsTxClosed(tx::createKeyValueCursor);
+        assertThrowsTxClosed(() -> tx.createCursor(TestEntity.class));
+        assertThrowsTxClosed(tx::isActive);
+        assertThrowsTxClosed(tx::isRecycled);
+    }
+
+    private void assertThrowsTxClosed(ThrowingRunnable runnable) {
+        IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
+        assertEquals("Transaction is closed", ex.getMessage());
     }
 
     @Test
