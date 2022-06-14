@@ -58,7 +58,7 @@ import java.util.List;
  * @param <T> Entity class for which the Query is built.
  */
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
-public class QueryBuilder<T> implements Closeable {
+public class QueryBuilder<T> {
 
     public enum StringOrder {
         /**
@@ -229,7 +229,9 @@ public class QueryBuilder<T> implements Closeable {
     }
 
     /**
-     * Explicitly call {@link #close()} instead to avoid expensive finalization.
+     * Typically {@link #build()} is called on this which calls {@link #close()} and avoids expensive finalization here.
+     * <p>
+     * If {@link #build()} is not called, make sure to explicitly call {@link #close()}.
      */
     @SuppressWarnings("deprecation") // finalize()
     @Override
@@ -238,6 +240,12 @@ public class QueryBuilder<T> implements Closeable {
         super.finalize();
     }
 
+    /**
+     * Close this query builder and free used resources.
+     * <p>
+     * This is not required when calling {@link #build()}.
+     */
+    // Not implementing (Auto)Closeable as QueryBuilder is typically closed due to build() getting called.
     public synchronized void close() {
         if (handle != 0) {
             // Closeable recommendation: mark as "closed" before nativeDestroy could throw.
