@@ -26,6 +26,7 @@ import io.objectbox.TestEntityCursor;
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.NumericOverflowException;
 import io.objectbox.query.QueryBuilder.StringOrder;
+import org.junit.function.ThrowingRunnable;
 
 
 import static io.objectbox.TestEntity_.simpleBoolean;
@@ -74,6 +75,43 @@ public class PropertyQueryTest extends AbstractQueryTest {
         entity.setSimpleFloat(vFloat);
         entity.setSimpleDouble(vDouble);
         box.put(entity);
+    }
+
+    @Test
+    public void useAfterClose_fails() {
+        Query<TestEntity> query = box.query().build();
+        query.close();
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findStrings());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findLongs());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findInts());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findShorts());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findChars());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findBytes());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findFloats());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findDoubles());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findString());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findLong());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findInt());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findShort());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findChar());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findByte());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findBoolean());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findFloat());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).findDouble());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).sum());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).sumDouble());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).max());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).maxDouble());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).min());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).minDouble());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).avg());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).avgLong());
+        assertThrowsQueryIsClosed(() -> query.property(simpleInt).count());
+    }
+
+    private void assertThrowsQueryIsClosed(ThrowingRunnable runnable) {
+        IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
+        assertEquals("This query is closed. Build and use a new one.", ex.getMessage());
     }
 
     @Test

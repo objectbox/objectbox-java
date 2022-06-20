@@ -30,11 +30,13 @@ import io.objectbox.relation.MyObjectBox;
 import io.objectbox.relation.Order;
 import io.objectbox.relation.Order_;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 
 import static io.objectbox.TestEntity_.simpleBoolean;
 import static io.objectbox.TestEntity_.simpleByteArray;
@@ -44,6 +46,7 @@ import static io.objectbox.TestEntity_.simpleLong;
 import static io.objectbox.TestEntity_.simpleShort;
 import static io.objectbox.TestEntity_.simpleString;
 import static io.objectbox.TestEntity_.simpleStringArray;
+import static io.objectbox.TestEntity_.stringObjectMap;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -62,28 +65,133 @@ public class QueryTest extends AbstractQueryTest {
         assertNotNull(query);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testBuildTwice() {
-        QueryBuilder<TestEntity> queryBuilder = box.query();
-        for (int i = 0; i < 2; i++) {
-            // calling any builder method after build should fail
-            // note: not calling all variants for different types
-            queryBuilder.isNull(TestEntity_.simpleString);
-            queryBuilder.and();
-            queryBuilder.notNull(TestEntity_.simpleString);
-            queryBuilder.or();
-            queryBuilder.equal(TestEntity_.simpleBoolean, true);
-            queryBuilder.notEqual(TestEntity_.simpleBoolean, true);
-            queryBuilder.less(TestEntity_.simpleInt, 42);
-            queryBuilder.greater(TestEntity_.simpleInt, 42);
-            queryBuilder.between(TestEntity_.simpleInt, 42, 43);
-            queryBuilder.in(TestEntity_.simpleInt, new int[]{42});
-            queryBuilder.notIn(TestEntity_.simpleInt, new int[]{42});
-            queryBuilder.contains(TestEntity_.simpleString, "42", StringOrder.CASE_INSENSITIVE);
-            queryBuilder.startsWith(TestEntity_.simpleString, "42", StringOrder.CASE_SENSITIVE);
-            queryBuilder.order(TestEntity_.simpleInt);
-            queryBuilder.build().find();
-        }
+    @Test
+    public void useAfterBuild_fails() {
+        QueryBuilder<TestEntity> builder = box.query();
+        Query<TestEntity> query = builder.build();
+
+        // Calling any builder method after build should fail.
+        // note: not calling all variants for different types.
+        assertThrowsBuilderClosed(() -> builder.isNull(TestEntity_.simpleString));
+        assertThrowsBuilderClosed(builder::and);
+        assertThrowsBuilderClosed(() -> builder.notNull(TestEntity_.simpleString));
+        assertThrowsBuilderClosed(builder::or);
+        assertThrowsBuilderClosed(() -> builder.equal(TestEntity_.simpleBoolean, true));
+        assertThrowsBuilderClosed(() -> builder.notEqual(TestEntity_.simpleBoolean, true));
+        assertThrowsBuilderClosed(() -> builder.less(TestEntity_.simpleInt, 42));
+        assertThrowsBuilderClosed(() -> builder.greater(TestEntity_.simpleInt, 42));
+        assertThrowsBuilderClosed(() -> builder.between(TestEntity_.simpleInt, 42, 43));
+        assertThrowsBuilderClosed(() -> builder.in(TestEntity_.simpleInt, new int[]{42}));
+        assertThrowsBuilderClosed(() -> builder.notIn(TestEntity_.simpleInt, new int[]{42}));
+        assertThrowsBuilderClosed(() -> builder.contains(TestEntity_.simpleString, "42", StringOrder.CASE_INSENSITIVE));
+        assertThrowsBuilderClosed(() -> builder.startsWith(TestEntity_.simpleString, "42", StringOrder.CASE_SENSITIVE));
+        assertThrowsBuilderClosed(() -> builder.order(TestEntity_.simpleInt));
+        assertThrowsBuilderClosed(builder::build);
+
+        query.close();
+    }
+
+    private void assertThrowsBuilderClosed(ThrowingRunnable runnable) {
+        IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
+        assertEquals("This QueryBuilder has already been closed. Please use a new instance.", ex.getMessage());
+    }
+
+    @Test
+    public void useAfterQueryClose_fails() {
+        Query<TestEntity> query = box.query().build();
+        query.close();
+
+        assertThrowsQueryIsClosed(query::count);
+        assertThrowsQueryIsClosed(query::describe);
+        assertThrowsQueryIsClosed(query::describeParameters);
+        assertThrowsQueryIsClosed(query::find);
+        assertThrowsQueryIsClosed(() -> query.find(0, 1));
+        assertThrowsQueryIsClosed(query::findFirst);
+        assertThrowsQueryIsClosed(query::findIds);
+        assertThrowsQueryIsClosed(() -> query.findIds(0, 1));
+        assertThrowsQueryIsClosed(query::findLazy);
+        assertThrowsQueryIsClosed(query::findLazyCached);
+        assertThrowsQueryIsClosed(query::findUnique);
+        assertThrowsQueryIsClosed(query::remove);
+
+        // For setParameter(s) the native method is not actually called, so fine to use incorrect alias and property.
+        assertThrowsQueryIsClosed(() -> query.setParameter("none", "value"));
+        assertThrowsQueryIsClosed(() -> query.setParameters("none", "a", "b"));
+        assertThrowsQueryIsClosed(() -> query.setParameter("none", 1));
+        assertThrowsQueryIsClosed(() -> query.setParameters("none", new int[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameters("none", new long[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameters("none", 1, 2));
+        assertThrowsQueryIsClosed(() -> query.setParameter("none", 1.0));
+        assertThrowsQueryIsClosed(() -> query.setParameters("none", 1.0, 2.0));
+        assertThrowsQueryIsClosed(() -> query.setParameters("none", new String[]{"a", "b"}));
+        assertThrowsQueryIsClosed(() -> query.setParameter("none", new byte[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, "value"));
+        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, "a", "b"));
+        assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, 1));
+        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, new int[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, new long[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, 1, 2));
+        assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, 1.0));
+        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, 1.0, 2.0));
+        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, new String[]{"a", "b"}));
+        assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, new byte[]{1, 2}));
+
+        // find would throw once first results are obtained, but shouldn't allow creating an observer to begin with.
+        assertThrowsQueryIsClosed(() -> query.subscribe().observer(data -> {
+        }));
+    }
+
+    private void assertThrowsQueryIsClosed(ThrowingRunnable runnable) {
+        IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
+        assertEquals("This query is closed. Build and use a new one.", ex.getMessage());
+    }
+
+    @Test
+    public void useAfterStoreClose_failsIfUsingStore() {
+        Query<TestEntity> query = box.query(
+                simpleString.equal("")
+                        .and(stringObjectMap.containsKeyValue("", ""))
+                        .and(simpleInt.equal(0))
+                        .and(simpleInt.oneOf(new int[]{0}).alias("oneOf4"))
+                        .and(simpleLong.oneOf(new long[]{0}).alias("oneOf8"))
+                        .and(simpleInt.between(0, 0).alias("between"))
+                        .and(simpleString.oneOf(new String[]{""}).alias("oneOfS"))
+                        .and(simpleByteArray.equal(new byte[]{0}))
+        ).build();
+        store.close();
+
+        assertThrowsStoreIsClosed(query::count);
+        assertThrowsStoreIsClosed(query::find);
+        assertThrowsStoreIsClosed(() -> query.find(0, 1));
+        assertThrowsStoreIsClosed(query::findFirst);
+        assertThrowsStoreIsClosed(query::findIds);
+        assertThrowsStoreIsClosed(() -> query.findIds(0, 1));
+        assertThrowsStoreIsClosed(query::findLazy);
+        assertThrowsStoreIsClosed(query::findLazyCached);
+        assertThrowsStoreIsClosed(query::findUnique);
+        assertThrowsStoreIsClosed(query::remove);
+
+        // describe and setParameter continue to work as store is not accessed.
+        assertFalse(query.describe().isEmpty());
+        assertFalse(query.describeParameters().isEmpty());
+        query.setParameter(simpleString, "value");
+        query.setParameters(stringObjectMap, "a", "b");
+        query.setParameter(simpleInt, 1);
+        query.setParameters("oneOf4", new int[]{1, 2});
+        query.setParameters("oneOf8", new long[]{1, 2});
+        query.setParameters("between", 1, 2);
+        query.setParameter(simpleInt, 1.0);
+        query.setParameters("between", 1.0, 2.0);
+        query.setParameters("oneOfS", new String[]{"a", "b"});
+        query.setParameter(simpleByteArray, new byte[]{1, 2});
+
+        assertThrowsStoreIsClosed(() -> query.subscribe().observer(data -> {
+        }));
+    }
+
+    private void assertThrowsStoreIsClosed(ThrowingRunnable runnable) {
+        IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
+        assertEquals("Store is closed", ex.getMessage());
     }
 
     @Test

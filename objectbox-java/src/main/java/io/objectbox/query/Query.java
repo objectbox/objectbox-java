@@ -110,7 +110,8 @@ public class Query<T> implements Closeable {
     private final int queryAttempts;
     private static final int INITIAL_RETRY_BACK_OFF_IN_MS = 10;
 
-    long handle;
+    // volatile so checkOpen() is more up-to-date (no need for synchronized; it's a race anyway)
+    volatile long handle;
 
     Query(Box<T> box, long queryHandle, @Nullable List<EagerRelation<T, ?>> eagerRelations, @Nullable  QueryFilter<T> filter,
           @Nullable Comparator<T> comparator) {
@@ -135,7 +136,12 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * If possible, try to close the query once you are done with it to reclaim resources immediately.
+     * Closes this query and frees used resources.
+     * <p>
+     * If possible, call this always once done with this. Otherwise, will be called once this is finalized (e.g. garbage
+     * collected).
+     * <p>
+     * Calling any other methods of this afterwards will throw an {@link IllegalStateException}.
      */
     public synchronized void close() {
         if (handle != 0) {
@@ -256,6 +262,7 @@ public class Query<T> implements Closeable {
      */
     @Nonnull
     public long[] findIds(final long offset, final long limit) {
+        checkOpen();
         return box.internalCallWithReaderHandle(cursorHandle -> nativeFindIds(handle, cursorHandle, offset, limit));
     }
 
@@ -294,6 +301,7 @@ public class Query<T> implements Closeable {
     }
 
     <R> R callInReadTx(Callable<R> callable) {
+        checkOpen();
         return store.callInReadTxWithRetry(callable, queryAttempts, INITIAL_RETRY_BACK_OFF_IN_MS, true);
     }
 
@@ -308,6 +316,7 @@ public class Query<T> implements Closeable {
      */
     public void forEach(final QueryConsumer<T> consumer) {
         ensureNoComparator();
+        checkOpen(); // findIds also checks, but throw early outside of transaction.
         box.getStore().runInReadTx(() -> {
             LazyList<T> lazyList = new LazyList<>(box, findIds(), false);
             int size = lazyList.size();
@@ -384,6 +393,7 @@ public class Query<T> implements Closeable {
 
     /** Returns the count of Objects matching the query. */
     public long count() {
+        checkOpen();
         ensureNoFilter();
         return box.internalCallWithReaderHandle(cursorHandle -> nativeCount(handle, cursorHandle));
     }
@@ -392,6 +402,7 @@ public class Query<T> implements Closeable {
      * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
      */
     public Query<T> setParameter(Property<?> property, String value) {
+        checkOpen();
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
         return this;
     }
@@ -402,6 +413,7 @@ public class Query<T> implements Closeable {
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
      */
     public Query<T> setParameter(String alias, String value) {
+        checkOpen();
         nativeSetParameter(handle, 0, 0, alias, value);
         return this;
     }
@@ -410,6 +422,7 @@ public class Query<T> implements Closeable {
      * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
      */
     public Query<T> setParameter(Property<?> property, long value) {
+        checkOpen();
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
         return this;
     }
@@ -420,6 +433,7 @@ public class Query<T> implements Closeable {
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
      */
     public Query<T> setParameter(String alias, long value) {
+        checkOpen();
         nativeSetParameter(handle, 0, 0, alias, value);
         return this;
     }
@@ -428,6 +442,7 @@ public class Query<T> implements Closeable {
      * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
      */
     public Query<T> setParameter(Property<?> property, double value) {
+        checkOpen();
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
         return this;
     }
@@ -438,6 +453,7 @@ public class Query<T> implements Closeable {
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
      */
     public Query<T> setParameter(String alias, double value) {
+        checkOpen();
         nativeSetParameter(handle, 0, 0, alias, value);
         return this;
     }
@@ -481,6 +497,7 @@ public class Query<T> implements Closeable {
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
     public Query<T> setParameters(Property<?> property, long value1, long value2) {
+        checkOpen();
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, value1, value2);
         return this;
     }
@@ -491,6 +508,7 @@ public class Query<T> implements Closeable {
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
      */
     public Query<T> setParameters(String alias, long value1, long value2) {
+        checkOpen();
         nativeSetParameters(handle, 0, 0, alias, value1, value2);
         return this;
     }
@@ -499,6 +517,7 @@ public class Query<T> implements Closeable {
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
     public Query<T> setParameters(Property<?> property, int[] values) {
+        checkOpen();
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
         return this;
     }
@@ -509,6 +528,7 @@ public class Query<T> implements Closeable {
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
      */
     public Query<T> setParameters(String alias, int[] values) {
+        checkOpen();
         nativeSetParameters(handle, 0, 0, alias, values);
         return this;
     }
@@ -517,6 +537,7 @@ public class Query<T> implements Closeable {
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
     public Query<T> setParameters(Property<?> property, long[] values) {
+        checkOpen();
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
         return this;
     }
@@ -527,6 +548,7 @@ public class Query<T> implements Closeable {
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
      */
     public Query<T> setParameters(String alias, long[] values) {
+        checkOpen();
         nativeSetParameters(handle, 0, 0, alias, values);
         return this;
     }
@@ -535,6 +557,7 @@ public class Query<T> implements Closeable {
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
     public Query<T> setParameters(Property<?> property, double value1, double value2) {
+        checkOpen();
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, value1, value2);
         return this;
     }
@@ -545,6 +568,7 @@ public class Query<T> implements Closeable {
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
      */
     public Query<T> setParameters(String alias, double value1, double value2) {
+        checkOpen();
         nativeSetParameters(handle, 0, 0, alias, value1, value2);
         return this;
     }
@@ -553,6 +577,7 @@ public class Query<T> implements Closeable {
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
     public Query<T> setParameters(Property<?> property, String[] values) {
+        checkOpen();
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
         return this;
     }
@@ -563,6 +588,7 @@ public class Query<T> implements Closeable {
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
      */
     public Query<T> setParameters(String alias, String[] values) {
+        checkOpen();
         nativeSetParameters(handle, 0, 0, alias, values);
         return this;
     }
@@ -571,6 +597,7 @@ public class Query<T> implements Closeable {
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
     public Query<T> setParameters(Property<?> property, String key, String value) {
+        checkOpen();
         nativeSetParameters(handle, property.getEntityId(), property.getId(), null, key, value);
         return this;
     }
@@ -581,6 +608,7 @@ public class Query<T> implements Closeable {
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
      */
     public Query<T> setParameters(String alias, String key, String value) {
+        checkOpen();
         nativeSetParameters(handle, 0, 0, alias, key, value);
         return this;
     }
@@ -589,6 +617,7 @@ public class Query<T> implements Closeable {
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
     public Query<T> setParameter(Property<?> property, byte[] value) {
+        checkOpen();
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
         return this;
     }
@@ -599,6 +628,7 @@ public class Query<T> implements Closeable {
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
      */
     public Query<T> setParameter(String alias, byte[] value) {
+        checkOpen();
         nativeSetParameter(handle, 0, 0, alias, value);
         return this;
     }
@@ -609,6 +639,7 @@ public class Query<T> implements Closeable {
      * @return count of removed Objects
      */
     public long remove() {
+        checkOpen();
         ensureNoFilter();
         return box.internalCallWithWriterHandle(cursorHandle -> nativeRemove(handle, cursorHandle));
     }
@@ -632,6 +663,7 @@ public class Query<T> implements Closeable {
      * it may be GCed and observers may become stale (won't receive anymore data).
      */
     public SubscriptionBuilder<List<T>> subscribe() {
+        checkOpen();
         return new SubscriptionBuilder<>(publisher, null);
     }
 
@@ -663,6 +695,7 @@ public class Query<T> implements Closeable {
      * Note: the format of the returned string may change without notice.
      */
     public String describe() {
+        checkOpen();
         return nativeToString(handle);
     }
 
@@ -673,7 +706,17 @@ public class Query<T> implements Closeable {
      * Note: the format of the returned string may change without notice.
      */
     public String describeParameters() {
+        checkOpen();
         return nativeDescribeParameters(handle);
+    }
+
+    /**
+     * Throws if {@link #close()} has been called for this.
+     */
+    private void checkOpen() {
+        if (handle == 0) {
+            throw new IllegalStateException("This query is closed. Build and use a new one.");
+        }
     }
 
 }

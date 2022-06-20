@@ -18,15 +18,18 @@ package io.objectbox;
 
 import io.objectbox.exception.DbException;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import java.io.File;
 import java.util.concurrent.Callable;
+import java.util.concurrent.RejectedExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -39,12 +42,72 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void testClose() {
+        BoxStore store = this.store;
         assertFalse(store.isClosed());
         store.close();
         assertTrue(store.isClosed());
 
         // Double close should be fine
         store.close();
+
+        // Internal thread pool is shut down.
+        assertTrue(store.internalThreadPool().isShutdown());
+        assertTrue(store.internalThreadPool().isTerminated());
+
+        // Can still obtain a box (but not use it).
+        store.boxFor(TestEntity.class);
+        store.closeThreadResources();
+        //noinspection ResultOfMethodCallIgnored
+        store.getObjectBrowserPort();
+        store.isObjectBrowserRunning();
+        //noinspection ResultOfMethodCallIgnored
+        store.isDebugRelations();
+        store.internalQueryAttempts();
+        store.internalFailedReadTxAttemptCallback();
+        //noinspection ResultOfMethodCallIgnored
+        store.getSyncClient();
+        store.setSyncClient(null);
+
+        // Methods using the native store should throw.
+        assertThrowsStoreIsClosed(store::sizeOnDisk);
+        assertThrowsStoreIsClosed(store::beginTx);
+        assertThrowsStoreIsClosed(store::beginReadTx);
+        assertThrowsStoreIsClosed(store::isReadOnly);
+        assertThrowsStoreIsClosed(store::removeAllObjects);
+        assertThrowsStoreIsClosed(() -> store.runInTx(() -> {
+        }));
+        assertThrowsStoreIsClosed(() -> store.runInReadTx(() -> {
+        }));
+        assertThrowsStoreIsClosed(() -> store.callInReadTxWithRetry(() -> null,
+                3, 1, true));
+        assertThrowsStoreIsClosed(() -> store.callInReadTx(() -> null));
+        assertThrowsStoreIsClosed(() -> store.callInTx(() -> null));
+        // callInTxNoException wraps in RuntimeException
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> store.callInTxNoException(() -> null));
+        assertEquals("java.lang.IllegalStateException: Store is closed", runtimeException.getMessage());
+        // Internal thread pool is shut down as part of closing store, should no longer accept new work.
+        assertThrows(RejectedExecutionException.class, () -> store.runInTxAsync(() -> {}, null));
+        assertThrows(RejectedExecutionException.class, () -> store.callInTxAsync(() -> null, null));
+        assertThrowsStoreIsClosed(store::diagnose);
+        assertThrowsStoreIsClosed(() -> store.validate(0, false));
+        assertThrowsStoreIsClosed(store::cleanStaleReadTransactions);
+        assertThrowsStoreIsClosed(store::subscribe);
+        assertThrowsStoreIsClosed(() -> store.subscribe(TestEntity.class));
+        assertThrowsStoreIsClosed(store::startObjectBrowser);
+        assertThrowsStoreIsClosed(() -> store.startObjectBrowser(12345));
+        assertThrowsStoreIsClosed(() -> store.startObjectBrowser(""));
+        // assertThrowsStoreIsClosed(store::stopObjectBrowser); // Requires mocking, not testing for now.
+        assertThrowsStoreIsClosed(() -> store.setDbExceptionListener(null));
+        // Internal thread pool is shut down as part of closing store, should no longer accept new work.
+        assertThrows(RejectedExecutionException.class, () -> store.internalScheduleThread(() -> {}));
+        assertThrowsStoreIsClosed(() -> store.setDebugFlags(0));
+        assertThrowsStoreIsClosed(() -> store.panicModeRemoveAllObjects(TestEntity_.__ENTITY_ID));
+        assertThrowsStoreIsClosed(store::getNativeStore);
+    }
+
+    private void assertThrowsStoreIsClosed(ThrowingRunnable runnable) {
+        IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
+        assertEquals("Store is closed", ex.getMessage());
     }
 
     @Test

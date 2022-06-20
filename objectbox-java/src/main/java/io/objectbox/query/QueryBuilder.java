@@ -532,6 +532,7 @@ public class QueryBuilder<T> {
     }
 
     private void combineOperator(Operator operator) {
+        verifyHandle(); // Not using handle, but throw for consistency with other methods.
         if (lastCondition == 0) {
             throw new IllegalStateException("No previous condition. Use operators like and() and or() only between two conditions.");
         }
