@@ -1067,6 +1067,7 @@ public class BoxStore implements Closeable {
     }
 
     public int cleanStaleReadTransactions() {
+        checkOpen();
         return nativeCleanStaleReadTransactions(handle);
     }
 
@@ -1100,6 +1101,7 @@ public class BoxStore implements Closeable {
      * Note that failed or aborted transaction do not trigger observers.
      */
     public SubscriptionBuilder<Class> subscribe() {
+        checkOpen();
         return new SubscriptionBuilder<>(objectClassPublisher, null);
     }
 
@@ -1109,6 +1111,7 @@ public class BoxStore implements Closeable {
      */
     @SuppressWarnings("unchecked")
     public <T> SubscriptionBuilder<Class<T>> subscribe(Class<T> forClass) {
+        checkOpen();
         return new SubscriptionBuilder<>((DataPublisher) objectClassPublisher, forClass);
     }
 
@@ -1246,9 +1249,7 @@ public class BoxStore implements Closeable {
      * Note: Once you {@link #close()} this BoxStore, do not use it from the C API.
      */
     public long getNativeStore() {
-        if (closed) {
-            throw new IllegalStateException("Store must still be open");
-        }
+        checkOpen();
         return handle;
     }
 
