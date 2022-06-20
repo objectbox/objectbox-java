@@ -140,7 +140,7 @@ public class Query<T> implements Closeable {
      * If possible, call this always once done with this. Otherwise, will be called once this is finalized (e.g. garbage
      * collected).
      * <p>
-     * Calling any other methods of this afterwards will throw an exception.
+     * Calling any other methods of this afterwards will throw an {@link IllegalStateException}.
      */
     public synchronized void close() {
         if (handle != 0) {
