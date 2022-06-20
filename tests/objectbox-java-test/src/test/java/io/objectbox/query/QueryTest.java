@@ -185,8 +185,7 @@ public class QueryTest extends AbstractQueryTest {
         query.setParameters("oneOfS", new String[]{"a", "b"});
         query.setParameter(simpleByteArray, new byte[]{1, 2});
 
-        // Internal thread pool is shut down as part of closing store, should no longer accept new work.
-        assertThrows(RejectedExecutionException.class, () -> query.subscribe().observer(data -> {
+        assertThrowsStoreIsClosed(() -> query.subscribe().observer(data -> {
         }));
     }
 
