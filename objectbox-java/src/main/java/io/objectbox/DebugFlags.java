@@ -19,7 +19,8 @@
 package io.objectbox;
 
 /**
- * Flags to enable debug behavior like additional logging.
+ * Debug flags typically enable additional "debug logging" that can be helpful to better understand what is going on
+ * internally. These are intended for the development process only; typically one does not enable them for releases.
  */
 @SuppressWarnings("unused")
 public final class DebugFlags {
@@ -31,5 +32,6 @@ public final class DebugFlags {
   public static final int LOG_ASYNC_QUEUE = 16;
   public static final int LOG_CACHE_HITS = 32;
   public static final int LOG_CACHE_ALL = 64;
+  public static final int LOG_TREE = 128;
 }
 

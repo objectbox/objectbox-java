@@ -43,9 +43,5 @@ public final class EntityFlags {
    *       It might be OK if you can somehow ensure that only a single device will create new IDs.
    */
   public static final int SHARED_GLOBAL_IDS = 4;
-
-  public static final String[] names = { "USE_NO_ARG_CONSTRUCTOR", "SYNC_ENABLED", "", "SHARED_GLOBAL_IDS", };
-
-  public static String name(int e) { return names[e - USE_NO_ARG_CONSTRUCTOR]; }
 }
 

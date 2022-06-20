@@ -28,9 +28,5 @@ public final class SyncFlags {
    * Enable (rather extensive) logging on how IDs are mapped (local <-> global)
    */
   public static final int DEBUG_LOG_ID_MAPPING = 1;
-
-  public static final String[] names = { "DEBUG_LOG_ID_MAPPING", };
-
-  public static String name(int e) { return names[e - DEBUG_LOG_ID_MAPPING]; }
 }
 
