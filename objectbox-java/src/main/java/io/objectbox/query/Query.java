@@ -110,7 +110,8 @@ public class Query<T> implements Closeable {
     private final int queryAttempts;
     private static final int INITIAL_RETRY_BACK_OFF_IN_MS = 10;
 
-    long handle;
+    // volatile so checkOpen() is more up-to-date (no need for synchronized; it's a race anyway)
+    volatile long handle;
 
     Query(Box<T> box, long queryHandle, @Nullable List<EagerRelation<T, ?>> eagerRelations, @Nullable  QueryFilter<T> filter,
           @Nullable Comparator<T> comparator) {

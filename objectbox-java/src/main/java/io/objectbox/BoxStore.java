@@ -232,7 +232,8 @@ public class BoxStore implements Closeable {
     /** Set when running inside TX */
     final ThreadLocal<Transaction> activeTx = new ThreadLocal<>();
 
-    private boolean closed;
+    // volatile so checkOpen() is more up-to-date (no need for synchronized; it's a race anyway)
+    volatile private boolean closed;
 
     final Object txCommitCountLock = new Object();
 
