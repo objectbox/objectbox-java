@@ -1103,6 +1103,15 @@ public class BoxStore implements Closeable {
         return new SubscriptionBuilder<>(objectClassPublisher, null);
     }
 
+    /**
+     * Like {@link #subscribe()}, but wires the supplied @{@link io.objectbox.reactive.DataObserver} only to the given
+     * object class for notifications.
+     */
+    @SuppressWarnings("unchecked")
+    public <T> SubscriptionBuilder<Class<T>> subscribe(Class<T> forClass) {
+        return new SubscriptionBuilder<>((DataPublisher) objectClassPublisher, forClass);
+    }
+
     @Experimental
     @Nullable
     public String startObjectBrowser() {
@@ -1187,15 +1196,6 @@ public class BoxStore implements Closeable {
     public void setDbExceptionListener(@Nullable DbExceptionListener dbExceptionListener) {
         checkOpen();
         nativeSetDbExceptionListener(handle, dbExceptionListener);
-    }
-
-    /**
-     * Like {@link #subscribe()}, but wires the supplied @{@link io.objectbox.reactive.DataObserver} only to the given
-     * object class for notifications.
-     */
-    @SuppressWarnings("unchecked")
-    public <T> SubscriptionBuilder<Class<T>> subscribe(Class<T> forClass) {
-        return new SubscriptionBuilder<>((DataPublisher) objectClassPublisher, forClass);
     }
 
     @Internal
