@@ -117,6 +117,8 @@ test-jdk-x86:
 upload-to-internal:
   stage: upload-to-internal
   tags: [ docker, x64 ]
+  except:
+    - tags # Only publish from branches.
   script:
     - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS publishMavenJavaPublicationToGitLabRepository
 
