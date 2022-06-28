@@ -11,7 +11,7 @@ public enum Feature {
     /** TimeSeries support (date/date-nano companion ID and other time-series functionality). */
     TIME_SERIES(2),
 
-    /** Sync client availability. Visit https://objectbox.io/sync for more details. */
+     /** Sync client availability. Visit <a href="https://objectbox.io/sync">the ObjectBox Sync website</a> for more details. */
     SYNC(3),
 
     /** Check whether debug log can be enabled during runtime. */
@@ -26,7 +26,7 @@ public enum Feature {
     /** Embedded Sync server availability. */
     SYNC_SERVER(7);
 
-    public int id;
+    public final int id;
 
     Feature(int id) {
         this.id = id;
