@@ -36,11 +36,6 @@ import static org.junit.Assert.fail;
 public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
-    public void testUnalignedMemoryAccess() {
-        BoxStore.testUnalignedMemoryAccess();
-    }
-
-    @Test
     public void testEmptyTransaction() {
         Transaction transaction = store.beginTx();
         transaction.commit();

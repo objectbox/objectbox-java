@@ -137,11 +137,6 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * Diagnostics: If this method crashes on a device, please send us the logcat output.
-     */
-    public static native void testUnalignedMemoryAccess();
-
-    /**
      * Creates a native BoxStore instance with FlatBuffer {@link io.objectbox.model.FlatStoreOptions} {@code options}
      * and a {@link ModelBuilder} {@code model}. Returns the handle of the native store instance.
      */
