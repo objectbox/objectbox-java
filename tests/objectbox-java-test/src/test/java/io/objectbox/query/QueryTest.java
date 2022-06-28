@@ -160,6 +160,7 @@ public class QueryTest extends AbstractQueryTest {
         ).build();
         store.close();
 
+        // All methods accessing the store throw.
         assertThrowsStoreIsClosed(query::count);
         assertThrowsStoreIsClosed(query::find);
         assertThrowsStoreIsClosed(() -> query.find(0, 1));
@@ -171,9 +172,14 @@ public class QueryTest extends AbstractQueryTest {
         assertThrowsStoreIsClosed(query::findUnique);
         assertThrowsStoreIsClosed(query::remove);
 
-        // describe and setParameter continue to work as store is not accessed.
-        assertFalse(query.describe().isEmpty());
-        assertFalse(query.describeParameters().isEmpty());
+        // describe works, but returns no property info.
+        assertEquals("Query for entity <deleted entity type> with 15 conditions", query.describe());
+
+        // describeParameters does not work.
+        IllegalStateException exc = assertThrows(IllegalStateException.class, query::describeParameters);
+        assertEquals("Query cannot be used after entity type was deleted (e.g. store was closed)", exc.getMessage());
+
+        // setParameter continues to work.
         query.setParameter(simpleString, "value");
         query.setParameters(stringObjectMap, "a", "b");
         query.setParameter(simpleInt, 1);

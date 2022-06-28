@@ -77,10 +77,16 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void testClose() {
+        // This test suite uses a single entity (TestEntity) by default
+        // and all other tests close the store after being done. So should be 1.
+        assertEquals(1, BoxStore.nativeGloballyActiveEntityTypes());
+
         BoxStore store = this.store;
         assertFalse(store.isClosed());
         store.close();
         assertTrue(store.isClosed());
+        // Assert native Entity instances are not leaked.
+        assertEquals(0, BoxStore.nativeGloballyActiveEntityTypes());
 
         // Double close should be fine
         store.close();
@@ -154,8 +160,13 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     @Test
     public void openSamePath_afterClose_works() {
         store.close();
+        // Assert native Entity instances are not leaked.
+        assertEquals(0, BoxStore.nativeGloballyActiveEntityTypes());
+
         BoxStore store2 = createBoxStore();
         store2.close();
+        // Assert native Entity instances are not leaked.
+        assertEquals(0, BoxStore.nativeGloballyActiveEntityTypes());
     }
 
     @Test

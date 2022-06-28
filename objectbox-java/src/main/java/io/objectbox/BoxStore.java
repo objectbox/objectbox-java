@@ -148,6 +148,15 @@ public class BoxStore implements Closeable {
 
     static native void nativeDropAllData(long store);
 
+    /**
+     * A static counter for the alive entity types (entity schema instances); this can be useful to test against leaks.
+     * This number depends on the number of currently opened stores; no matter how often stores were closed and
+     * (re-)opened. E.g. when stores are regularly opened, but not closed by the user, the number should increase. When
+     * all stores are properly closed, this value should be 0.
+     */
+    @Internal
+    static native long nativeGloballyActiveEntityTypes();
+
     static native long nativeBeginTx(long store);
 
     static native long nativeBeginReadTx(long store);
