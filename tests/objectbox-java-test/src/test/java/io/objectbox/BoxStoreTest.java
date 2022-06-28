@@ -150,15 +150,17 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         assertEquals("Store is closed", ex.getMessage());
     }
 
-    @Test(expected = DbException.class)
-    public void testPreventTwoBoxStoresWithSameFileOpenend() {
-        createBoxStore();
+    @Test
+    public void openSamePath_fails() {
+        DbException ex = assertThrows(DbException.class, this::createBoxStore);
+        assertTrue(ex.getMessage().contains("Another BoxStore is still open for this directory"));
     }
 
     @Test
-    public void testOpenSameBoxStoreAfterClose() {
+    public void openSamePath_afterClose_works() {
         store.close();
-        createBoxStore();
+        BoxStore store2 = createBoxStore();
+        store2.close();
     }
 
     @Test
