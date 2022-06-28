@@ -41,6 +41,46 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void testEmptyTransaction() {
+        Transaction transaction = store.beginTx();
+        transaction.commit();
+    }
+
+    @Test
+    public void testSameBox() {
+        Box<TestEntity> box1 = store.boxFor(TestEntity.class);
+        Box<TestEntity> box2 = store.boxFor(TestEntity.class);
+        assertSame(box1, box2);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testBoxForUnknownEntity() {
+        store.boxFor(getClass());
+    }
+
+    @Test
+    public void testRegistration() {
+        assertEquals("TestEntity", store.getDbName(TestEntity.class));
+        assertEquals(TestEntity.class, store.getEntityInfo(TestEntity.class).getEntityClass());
+    }
+
+    @Test
+    public void testCloseThreadResources() {
+        Box<TestEntity> box = store.boxFor(TestEntity.class);
+        Cursor<TestEntity> reader = box.getReader();
+        box.releaseReader(reader);
+
+        Cursor<TestEntity> reader2 = box.getReader();
+        box.releaseReader(reader2);
+        assertSame(reader, reader2);
+
+        store.closeThreadResources();
+        Cursor<TestEntity> reader3 = box.getReader();
+        box.releaseReader(reader3);
+        assertNotSame(reader, reader3);
+    }
+
+    @Test
     public void testClose() {
         BoxStore store = this.store;
         assertFalse(store.isClosed());
@@ -108,46 +148,6 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     private void assertThrowsStoreIsClosed(ThrowingRunnable runnable) {
         IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
         assertEquals("Store is closed", ex.getMessage());
-    }
-
-    @Test
-    public void testEmptyTransaction() {
-        Transaction transaction = store.beginTx();
-        transaction.commit();
-    }
-
-    @Test
-    public void testSameBox() {
-        Box<TestEntity> box1 = store.boxFor(TestEntity.class);
-        Box<TestEntity> box2 = store.boxFor(TestEntity.class);
-        assertSame(box1, box2);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testBoxForUnknownEntity() {
-        store.boxFor(getClass());
-    }
-
-    @Test
-    public void testRegistration() {
-        assertEquals("TestEntity", store.getDbName(TestEntity.class));
-        assertEquals(TestEntity.class, store.getEntityInfo(TestEntity.class).getEntityClass());
-    }
-
-    @Test
-    public void testCloseThreadResources() {
-        Box<TestEntity> box = store.boxFor(TestEntity.class);
-        Cursor<TestEntity> reader = box.getReader();
-        box.releaseReader(reader);
-
-        Cursor<TestEntity> reader2 = box.getReader();
-        box.releaseReader(reader2);
-        assertSame(reader, reader2);
-
-        store.closeThreadResources();
-        Cursor<TestEntity> reader3 = box.getReader();
-        box.releaseReader(reader3);
-        assertNotSame(reader, reader3);
     }
 
     @Test(expected = DbException.class)
