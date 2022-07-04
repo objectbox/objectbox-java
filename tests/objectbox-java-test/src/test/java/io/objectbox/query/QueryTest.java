@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.RejectedExecutionException;
 
 import static io.objectbox.TestEntity_.simpleBoolean;
 import static io.objectbox.TestEntity_.simpleByteArray;
@@ -147,7 +146,7 @@ public class QueryTest extends AbstractQueryTest {
     }
 
     @Test
-    public void useAfterStoreClose_failsIfUsingStore() {
+    public void useAfterStoreClose_fails() {
         Query<TestEntity> query = box.query(
                 simpleString.equal("")
                         .and(stringObjectMap.containsKeyValue("", ""))
@@ -171,33 +170,25 @@ public class QueryTest extends AbstractQueryTest {
         assertThrowsStoreIsClosed(query::findLazyCached);
         assertThrowsStoreIsClosed(query::findUnique);
         assertThrowsStoreIsClosed(query::remove);
-
-        // describe works, but returns no property info.
-        assertEquals("Query for entity <deleted entity type> with 15 conditions", query.describe());
-
-        // describeParameters does not work.
-        IllegalStateException exc = assertThrows(IllegalStateException.class, query::describeParameters);
-        assertEquals("Query cannot be used after entity type was deleted (e.g. store was closed)", exc.getMessage());
-
-        // setParameter continues to work.
-        query.setParameter(simpleString, "value");
-        query.setParameters(stringObjectMap, "a", "b");
-        query.setParameter(simpleInt, 1);
-        query.setParameters("oneOf4", new int[]{1, 2});
-        query.setParameters("oneOf8", new long[]{1, 2});
-        query.setParameters("between", 1, 2);
-        query.setParameter(simpleInt, 1.0);
-        query.setParameters("between", 1.0, 2.0);
-        query.setParameters("oneOfS", new String[]{"a", "b"});
-        query.setParameter(simpleByteArray, new byte[]{1, 2});
-
         assertThrowsStoreIsClosed(() -> query.subscribe().observer(data -> {
         }));
+        assertThrowsStoreIsClosed(query::describe);
+        assertThrowsStoreIsClosed(query::describeParameters);
+        assertThrowsStoreIsClosed(() -> query.setParameter(simpleString, "value"));
+        assertThrowsStoreIsClosed(() -> query.setParameters(stringObjectMap, "a", "b"));
+        assertThrowsStoreIsClosed(() -> query.setParameter(simpleInt, 1));
+        assertThrowsStoreIsClosed(() -> query.setParameters("oneOf4", new int[]{1, 2}));
+        assertThrowsStoreIsClosed(() -> query.setParameters("oneOf8", new long[]{1, 2}));
+        assertThrowsStoreIsClosed(() -> query.setParameters("between", 1, 2));
+        assertThrowsStoreIsClosed(() -> query.setParameter(simpleInt, 1.0));
+        assertThrowsStoreIsClosed(() -> query.setParameters("between", 1.0, 2.0));
+        assertThrowsStoreIsClosed(() -> query.setParameters("oneOfS", new String[]{"a", "b"}));
+        assertThrowsStoreIsClosed(() -> query.setParameter(simpleByteArray, new byte[]{1, 2}));
     }
 
     private void assertThrowsStoreIsClosed(ThrowingRunnable runnable) {
         IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
-        assertEquals("Store is closed", ex.getMessage());
+        assertEquals("The store associated with this query is closed. Build and use a new one.", ex.getMessage());
     }
 
     @Test
