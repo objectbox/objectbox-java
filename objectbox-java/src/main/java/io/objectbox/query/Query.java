@@ -717,9 +717,6 @@ public class Query<T> implements Closeable {
         if (handle == 0) {
             throw new IllegalStateException("This query is closed. Build and use a new one.");
         }
-        if (store.isClosed()) {
-            throw new IllegalStateException("The store associated with this query is closed. Build and use a new one.");
-        }
     }
 
 }
