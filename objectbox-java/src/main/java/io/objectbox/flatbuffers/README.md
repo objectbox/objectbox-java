@@ -6,6 +6,9 @@ to avoid conflicts with FlatBuffers generated Java code from users of this libra
 Current version: see `Constants.java`.
 
 Copy a different version using the script in `scripts\update-flatbuffers.sh`.
+It expects FlatBuffers source files in the `../flatbuffers` directory (e.g. check out
+the desired FlatBuffers tag from https://github.com/google/flatbuffers next to this repo).
+The Java library is expected in `objectbox-java`, e.g. run the script from the root of this repo.
 
 ## Licensing
 
