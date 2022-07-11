@@ -98,11 +98,12 @@ test-jdk-8:
   variables:
     TEST_JDK: 8
 
-test-jdk-16:
+# JDK 17 is the latest LTS release.
+test-jdk-17:
   extends: .test-asan-template
   needs: ["test-jdk-8"]
   variables:
-    TEST_JDK: 16
+    TEST_JDK: 17
 
 test-jdk-x86:
   extends: .test-template

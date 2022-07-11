@@ -65,7 +65,7 @@ test {
         println("Will run tests with $javaExecutablePath")
         executable = javaExecutablePath
     } else if (System.getenv("TEST_JDK") != null) {
-        // to run tests on a different JDK
+        // To run tests on a different JDK, uses Gradle toolchains API (https://docs.gradle.org/current/userguide/toolchains.html)
         def sdkVersionInt = System.getenv("TEST_JDK") as Integer
         println("Will run tests with JDK $sdkVersionInt")
         javaLauncher.set(javaToolchains.launcherFor {
