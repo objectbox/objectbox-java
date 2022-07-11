@@ -867,14 +867,27 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(2007, entities.get(1).getSimpleInt());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testOr_bad1() {
-        box.query().or();
+        assertNoPreviousCondition(() -> box.query().or());
     }
 
-    @Test(expected = IllegalStateException.class)
+    private void assertNoPreviousCondition(ThrowingRunnable runnable) {
+        IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
+        assertEquals("No previous condition. Use operators like and() and or() only between two conditions.",
+                ex.getMessage());
+    }
+
+    @SuppressWarnings("resource") // Throws RuntimeException, so not closing Builder/Query is fine.
+    @Test
     public void testOr_bad2() {
-        box.query().equal(simpleInt, 1).or().build();
+        assertIncompleteLogicCondition(() -> box.query().equal(simpleInt, 1).or().build());
+    }
+
+    private void assertIncompleteLogicCondition(ThrowingRunnable runnable) {
+        IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
+        assertEquals("Incomplete logic condition. Use or()/and() between two conditions only.",
+                ex.getMessage());
     }
 
     @Test
@@ -887,24 +900,42 @@ public class QueryTest extends AbstractQueryTest {
         assertEquals(2008, entities.get(0).getSimpleInt());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testAnd_bad1() {
-        box.query().and();
+        assertNoPreviousCondition(() -> box.query().and());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @SuppressWarnings("resource") // Throws RuntimeException, so not closing Builder/Query is fine.
+    @Test
     public void testAnd_bad2() {
-        box.query().equal(simpleInt, 1).and().build();
+        assertIncompleteLogicCondition(() -> box.query().equal(simpleInt, 1).and().build());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @SuppressWarnings("resource") // Throws RuntimeException, so not closing Builder/Query is fine.
+    @Test
     public void testOrAfterAnd() {
-        box.query().equal(simpleInt, 1).and().or().equal(simpleInt, 2).build();
+        assertOperatorIsPending(() -> box.query()
+                .equal(simpleInt, 1)
+                .and()
+                .or()
+                .equal(simpleInt, 2)
+                .build());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @SuppressWarnings("resource") // Throws RuntimeException, so not closing Builder/Query is fine.
+    @Test
     public void testOrderAfterAnd() {
-        box.query().equal(simpleInt, 1).and().order(simpleInt).equal(simpleInt, 2).build();
+        assertOperatorIsPending(() -> box.query()
+                .equal(simpleInt, 1)
+                .and().order(simpleInt)
+                .equal(simpleInt, 2)
+                .build());
+    }
+
+    private void assertOperatorIsPending(ThrowingRunnable runnable) {
+        IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
+        assertEquals("Another operator is pending. Use operators like and() and or() only between two conditions.",
+                ex.getMessage());
     }
 
     @Test

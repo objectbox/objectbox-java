@@ -25,7 +25,6 @@ import io.objectbox.exception.DbException;
 import io.objectbox.relation.RelationInfo;
 
 import javax.annotation.Nullable;
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -355,10 +354,7 @@ public class QueryBuilder<T> {
     public QueryBuilder<T> order(Property<T> property, int flags) {
         verifyNotSubQuery();
         verifyHandle();
-        if (combineNextWith != Operator.NONE) {
-            throw new IllegalStateException(
-                    "An operator is pending. Use operators like and() and or() only between two conditions.");
-        }
+        checkNoOperatorPending();
         nativeOrder(handle, property.getId(), flags);
         return this;
     }
@@ -536,10 +532,15 @@ public class QueryBuilder<T> {
         if (lastCondition == 0) {
             throw new IllegalStateException("No previous condition. Use operators like and() and or() only between two conditions.");
         }
-        if (combineNextWith != Operator.NONE) {
-            throw new IllegalStateException("Another operator is pending. Use operators like and() and or() only between two conditions.");
-        }
+        checkNoOperatorPending();
         combineNextWith = operator;
+    }
+
+    private void checkNoOperatorPending() {
+        if (combineNextWith != Operator.NONE) {
+            throw new IllegalStateException(
+                    "Another operator is pending. Use operators like and() and or() only between two conditions.");
+        }
     }
 
     private void checkCombineCondition(long currentCondition) {
