@@ -31,7 +31,7 @@ import io.objectbox.flatbuffers.*;
  */
 @SuppressWarnings("unused")
 public final class Model extends Table {
-  public static void ValidateVersion() { Constants.FLATBUFFERS_2_0_0(); }
+  public static void ValidateVersion() { Constants.FLATBUFFERS_2_0_8(); }
   public static Model getRootAsModel(ByteBuffer _bb) { return getRootAsModel(_bb, new Model()); }
   public static Model getRootAsModel(ByteBuffer _bb, Model obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }

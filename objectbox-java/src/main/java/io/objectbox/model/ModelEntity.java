@@ -25,7 +25,7 @@ import io.objectbox.flatbuffers.*;
 
 @SuppressWarnings("unused")
 public final class ModelEntity extends Table {
-  public static void ValidateVersion() { Constants.FLATBUFFERS_2_0_0(); }
+  public static void ValidateVersion() { Constants.FLATBUFFERS_2_0_8(); }
   public static ModelEntity getRootAsModelEntity(ByteBuffer _bb) { return getRootAsModelEntity(_bb, new ModelEntity()); }
   public static ModelEntity getRootAsModelEntity(ByteBuffer _bb, ModelEntity obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }
