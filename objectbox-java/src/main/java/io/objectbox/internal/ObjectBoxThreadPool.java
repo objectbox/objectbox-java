@@ -17,65 +17,84 @@
 package io.objectbox.internal;
 
 import java.util.concurrent.Executors;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.List;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Internal;
 
 /**
- * Custom thread pool similar to {@link Executors#newCachedThreadPool()} with the following adjustments:
+ * Custom executor service similar to {@link Executors#newWorkStealingPool()} with the following adjustments:
  * <ul>
- *     <li>Release thread local resources ({@link BoxStore#closeThreadResources()})</li>
- *     <li>Reduce keep-alive time for threads to 20 seconds</li>
- *     <li>Uses a ThreadFactory to name threads like "ObjectBox-1-Thread-1"</li>
+ *     <li>Release thread local resources ({@link BoxStore#closeThreadResources()}) after task execution</li>
+ *     <li>Uses a custom thread factory to name threads like "ObjectBox-ForkJoinPool-1-Thread-1"</li>
  * </ul>
  *
  */
 @Internal
-public class ObjectBoxThreadPool extends ThreadPoolExecutor {
+public final class ObjectBoxThreadPool extends AbstractExecutorService {
     private final BoxStore boxStore;
+    private final ExecutorService executorImpl;
 
-    public ObjectBoxThreadPool(BoxStore boxStore) {
-        super(0, Integer.MAX_VALUE, 20L, TimeUnit.SECONDS, new SynchronousQueue<>(),
-                new ObjectBoxThreadFactory());
+    public ObjectBoxThreadPool(BoxStore boxStore, int parallelism) {
         this.boxStore = boxStore;
+        this.executorImpl = Executors.unconfigurableExecutorService(
+            new ForkJoinPool(
+                parallelism, 
+                pool -> {
+                    ForkJoinWorkerThread thread = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+                    // Priority and daemon status are inherited from calling thread; ensure to reset if required
+                    if (thread.getPriority() != Thread.NORM_PRIORITY) {
+                        thread.setPriority(Thread.NORM_PRIORITY);
+                    }
+                    if (thread.isDaemon()) {
+                        thread.setDaemon(false);
+                    }
+                    thread.setName("ObjectBox-" + thread.getName());
+                    return thread;
+                },
+                null,
+                false));
+    }
+
+
+    @Override
+    public void shutdown() {
+        executorImpl.shutdown();
     }
 
     @Override
-    protected void afterExecute(Runnable runnable, Throwable throwable) {
-        super.afterExecute(runnable, throwable);
-        boxStore.closeThreadResources();
+    public List<Runnable> shutdownNow() {
+        return executorImpl.shutdownNow();
     }
 
-    static class ObjectBoxThreadFactory implements ThreadFactory {
-        private static final AtomicInteger POOL_COUNT = new AtomicInteger();
+    @Override
+    public boolean isShutdown() {
+        return executorImpl.isShutdown();
+    }
 
-        private final ThreadGroup group;
-        private final String namePrefix = "ObjectBox-" + POOL_COUNT.incrementAndGet() + "-Thread-";
-        private final AtomicInteger threadCount = new AtomicInteger();
+    @Override
+    public boolean isTerminated() {
+        return executorImpl.isTerminated();
+    }
 
-        ObjectBoxThreadFactory() {
-            SecurityManager securityManager = System.getSecurityManager();
-            group = (securityManager != null) ? securityManager.getThreadGroup() :
-                    Thread.currentThread().getThreadGroup();
-        }
+    @Override
+    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+        return executorImpl.awaitTermination(timeout, unit);
+    }
 
-        public Thread newThread(Runnable runnable) {
-            String name = namePrefix + threadCount.incrementAndGet();
-            Thread thread = new Thread(group, runnable, name);
-
-            // Priority and daemon status are inherited from calling thread; ensure to reset if required
-            if (thread.getPriority() != Thread.NORM_PRIORITY) {
-                thread.setPriority(Thread.NORM_PRIORITY);
+    @Override
+    public void execute(Runnable command) {
+        executorImpl.execute(() -> {
+            try {
+                command.run();
+            } finally {
+                boxStore.closeThreadResources();
             }
-            if (thread.isDaemon()) {
-                thread.setDaemon(false);
-            }
-            return thread;
-        }
+        });
     }
 }
