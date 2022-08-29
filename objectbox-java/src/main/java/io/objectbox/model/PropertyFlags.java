@@ -97,5 +97,11 @@ public final class PropertyFlags {
    * Unique on-conflict strategy: the object being put replaces any existing conflicting object (deletes it).
    */
   public static final int UNIQUE_ON_CONFLICT_REPLACE = 32768;
+  /**
+   * If a date property has this flag (max. one per entity type), the date value specifies the time by which
+   * the object expires, at which point it MAY be deleted. There's no strict guarantee when the deletion happens.
+   * However, the deletion process can be triggered by an API call.
+   */
+  public static final int EXPIRATION_TIME = 65536;
 }
 
