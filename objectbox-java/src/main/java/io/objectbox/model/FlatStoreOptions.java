@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 ObjectBox Ltd. All rights reserved.
+ * Copyright 2022 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import io.objectbox.flatbuffers.*;
  */
 @SuppressWarnings("unused")
 public final class FlatStoreOptions extends Table {
-  public static void ValidateVersion() { Constants.FLATBUFFERS_2_0_0(); }
+  public static void ValidateVersion() { Constants.FLATBUFFERS_2_0_8(); }
   public static FlatStoreOptions getRootAsFlatStoreOptions(ByteBuffer _bb) { return getRootAsFlatStoreOptions(_bb, new FlatStoreOptions()); }
   public static FlatStoreOptions getRootAsFlatStoreOptions(ByteBuffer _bb, FlatStoreOptions obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }

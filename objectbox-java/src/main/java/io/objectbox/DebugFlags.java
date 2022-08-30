@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 ObjectBox Ltd. All rights reserved.
+ * Copyright 2022 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,5 +33,15 @@ public final class DebugFlags {
   public static final int LOG_CACHE_HITS = 32;
   public static final int LOG_CACHE_ALL = 64;
   public static final int LOG_TREE = 128;
+  /**
+   * For a limited number of error conditions, this will try to print stack traces.
+   * Note: this is Linux-only, experimental, and has several limitations:
+   * The usefulness of these stack traces depends on several factors and might not be helpful at all.
+   */
+  public static final int LOG_EXCEPTION_STACK_TRACE = 256;
+  /**
+   * Run a quick self-test to verify basic threading; somewhat paranoia to check the platform and the library setup.
+   */
+  public static final int RUN_THREADING_SELF_TEST = 512;
 }
 
