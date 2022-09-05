@@ -17,17 +17,6 @@ ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
 ❤ **Your opinion matters to us!** Please fill in this 2-minute [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7).
 
-## Table of Contents
-- [Why use ObjectBox](#why-use-objectbox)
-  - [Features](#features)
-- [Gradle setup](#gradle-setup)
-- [First steps](#first-steps)
-- [Already using ObjectBox?](#already-using-objectbox)
-- [Other languages/bindings](#other-languagesbindings)
-- [License](#license)
-
----
-
 Demo code using ObjectBox:
 
 ```kotlin
@@ -48,7 +37,16 @@ box.put(playlist);
 
 🧾 **Want details?** [Read the docs](https://docs.objectbox.io/)
 
+## Table of Contents
+- [Why use ObjectBox](#why-use-objectbox)
+  - [Features](#features)
+- [Gradle setup](#gradle-setup)
+- [First steps](#first-steps)
+- [Already using ObjectBox?](#already-using-objectbox)
+- [Other languages/bindings](#other-languagesbindings)
+- [License](#license)
 
+---
 
 ## Why use ObjectBox
 
