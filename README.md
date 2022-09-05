@@ -13,7 +13,8 @@
 [ObjectBox](https://objectbox.io/) is a superfast object-oriented Java database with strong relation support and easy-to-use native language APIs.
 ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
 
-**Latest version: [3.2.1 (2022/07/05)](https://docs.objectbox.io/#objectbox-changelog)**
+**Latest version: `3.2.1` (2022/07/05, [Release Notes](https://docs.objectbox.io/#objectbox-changelog))**
+
 ❤ **Your opinion matters to us!** Please fill in this 2-minute [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7).
 
 ## Table of Contents
