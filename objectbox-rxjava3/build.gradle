@@ -2,9 +2,12 @@ buildscript {
     ext.javadocDir = file("$buildDir/docs/javadoc")
 }
 
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
-apply plugin: 'org.jetbrains.dokka'
+plugins {
+    id("java-library")
+    id("kotlin")
+    id("org.jetbrains.dokka")
+    id("objectbox-publish")
+}
 
 // Note: use release flag instead of sourceCompatibility and targetCompatibility to ensure only JDK 8 API is used.
 // https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation
