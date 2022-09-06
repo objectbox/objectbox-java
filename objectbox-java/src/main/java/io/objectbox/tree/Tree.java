@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
  * Adding properties to tree types is allowed.
  * <p>
  * Note there are TWO ways to work with tree data (both ways can be mixed):
- * - Standard ObjectBox entity types with e.g. Box<DataLeaf>
+ * - Standard ObjectBox entity types with e.g. Box&lt;DataLeaf&gt;
  * - Higher level tree API via this Tree class
  * <p>
  * To navigate in the tree, you typically start with {@link #getRoot()}, which returns a {@link Branch}.

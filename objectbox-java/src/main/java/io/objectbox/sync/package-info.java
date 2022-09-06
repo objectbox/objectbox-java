@@ -28,8 +28,8 @@
  *     credentials.</li>
  *     <li>Optional: use the {@link io.objectbox.sync.SyncBuilder} instance from the last step to configure the sync
  *     client and set initial listeners.</li>
- *     <li>Call {@link io.objectbox.sync.SyncBuilder#build()}</li> to get an instance of
- *     {@link io.objectbox.sync.SyncClient} (and hold on to it). Synchronization is now active.
+ *     <li>Call {@link io.objectbox.sync.SyncBuilder#build()} to get an instance of
+ *     {@link io.objectbox.sync.SyncClient} (and hold on to it). Synchronization is now active.</li>
  *     <li>Optional: Interact with {@link io.objectbox.sync.SyncClient}</li>
  * </ol>
  */
