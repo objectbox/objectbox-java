@@ -39,11 +39,11 @@ tasks.named("dokkaHtml") {
 dependencies {
     api project(':objectbox-java')
     api 'io.reactivex.rxjava3:rxjava:3.0.11'
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
-    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    testImplementation "junit:junit:$junit_version"
-    testImplementation "org.mockito:mockito-core:$mockito_version"
+    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    testImplementation "junit:junit:$juniVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
 }
 
 task javadocJar(type: Jar) {

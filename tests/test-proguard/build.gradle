@@ -32,11 +32,11 @@ dependencies {
 
     // Check flag to use locally compiled version to avoid dependency cycles
     if (!project.hasProperty('noObjectBoxTestDepencies') || !noObjectBoxTestDepencies) {
-        println "Using $ob_native_dep"
-        implementation ob_native_dep
+        println "Using $obxJniLibVersion"
+        implementation obxJniLibVersion
     } else {
         println "Did NOT add native dependency"
     }
 
-    testImplementation "junit:junit:$junit_version"
+    testImplementation "junit:junit:$juniVersion"
 }

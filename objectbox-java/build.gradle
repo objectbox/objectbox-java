@@ -13,7 +13,7 @@ ext {
 
 dependencies {
     api project(':objectbox-java-api')
-    implementation "org.greenrobot:essentials:$essentials_version"
+    implementation "org.greenrobot:essentials:$essentialsVersion"
     api 'com.google.code.findbugs:jsr305:3.0.2'
 
     // https://github.com/spotbugs/spotbugs/blob/master/CHANGELOG.md

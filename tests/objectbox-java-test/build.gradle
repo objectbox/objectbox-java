@@ -38,22 +38,22 @@ repositories {
 
 dependencies {
     implementation project(':objectbox-java')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
     implementation project(':objectbox-kotlin')
-    implementation "org.greenrobot:essentials:$essentials_version"
+    implementation "org.greenrobot:essentials:$essentialsVersion"
 
     // Check flag to use locally compiled version to avoid dependency cycles
     if (!project.hasProperty('noObjectBoxTestDepencies') || !noObjectBoxTestDepencies) {
-        println "Using $ob_native_dep"
-        implementation ob_native_dep
+        println "Using $obxJniLibVersion"
+        implementation obxJniLibVersion
     } else {
         println "Did NOT add native dependency"
     }
 
-    testImplementation "junit:junit:$junit_version"
+    testImplementation "junit:junit:$juniVersion"
     // To test Coroutines
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     // To test Kotlin Flow
     testImplementation 'app.cash.turbine:turbine:0.5.2'
 }
