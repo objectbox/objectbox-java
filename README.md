@@ -20,9 +20,9 @@
   </a>
 </p>
 
-# Java Database (+ Kotlin, Android) for sustainable local data storage
+# ObjectBox Java Database (Kotlin, Android)
 
-Database for Java that's embedded into your Android, Linux, macOS, or Windows app. Store and manage data efficiently and effortlessly.
+Java database - simple but powerful, frugal but fast; embedded into your Android, Linux, macOS, iOS, or Windows app. Enjoy the speed, simplicity, and sustainability in your next app built with ObjectBox. 
 
 ### Demo code
 
@@ -33,6 +33,7 @@ playlist.songs.add(new Song("Lalala"));
 playlist.songs.add(new Song("Lololo"));
 box.put(playlist);
 ```
+--> [More details in the docs](https://docs.objectbox.io/)
 
 ```kotlin
 // Kotlin
@@ -41,7 +42,6 @@ playlist.songs.add(Song("Lalala"))
 playlist.songs.add(Song("Lololo"))
 box.put(playlist)
 ```
-[More details in the docs.](https://docs.objectbox.io/)
 
 ## Table of Contents
 - [Why use ObjectBox](#why-use-objectbox)
@@ -54,13 +54,17 @@ box.put(playlist)
 - [License](#license)
 
 
-## Why use ObjectBox for Java data management?
+## Why use ObjectBox for Java data management / Kotlin data management?
 
-This NoSQL Java database is built for storing data locally on mobile devices. It is optimized for high efficiency on restricted devices and uses minimal CPU and RAM. Being fully ACID-compliant, ObjectBox is faster than any alternative, outperforming SQLite and Realm across all CRUD (Create, Read, Update, Delete) operations. Check out our [Performance Benchmarking App repository](https://github.com/objectbox/objectbox-performance).
+The NoSQL Java database is built for storing data locally on resource-restricted devices like smartphones.
 
-Additionally, our concise API is easy to learn and only requires a fraction of the code compared to SQLite. No more rows or columns, just plain objects with built-in relations. It's also build for handling large data volumes and allows changing your model whenever needed.
+The database is otimized for high speed and low resource consumption on restricted devices, making it ideal for use on mobile devices. It uses minimal CPU, RAM, and power, which is not only great for users but also for the environment.
 
-All of this makes ObjectBox a sustainable choice for Java data persistence - it's efficient, green, and scalable.
+Being fully ACID-compliant, ObjectBox is faster than any alternative, outperforming SQLite and Realm across all CRUD (Create, Read, Update, Delete) operations. Check out our [Performance Benchmarking App repository](https://github.com/objectbox/objectbox-performance).
+
+Our concise native-language API is easy to pick up and only requires a fraction of the code compared to SQLite. No more rows or columns, just plain objects (true POJOS) with built-in relations. It isgreat for handling large data volumes and allows changing your model whenever needed.
+
+All of this makes ObjectBox a sustainable choice for local data persistence with Java and Kotlin - it's easy, efficient, and sustainable.
 
 ### Features
 
@@ -139,7 +143,7 @@ For details please check the [docs](https://docs.objectbox.io).
 
 ❤ **Your opinion matters to us!** Please fill in this 2-minute [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7).
 
-We believe, ObjectBox is super easy to use. We are on a mission to make developers’ lives better, by building developer tools that are intuitive and fun to code with. To do that, we want your feedback: what do you love? What's amiss? Where do you struggle in everyday app development?
+We believe, ObjectBox is super easy to use. We want to bring joy and delight to app developers with intuitive and fun to code with APIs. To do that, we want your feedback: what do you love? What's amiss? Where do you struggle in everyday app development?
 
 **We're looking forward to receiving your comments and requests:**
 - Add [GitHub issues](https://github.com/ObjectBox/objectbox-java/issues) 
