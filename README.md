@@ -22,7 +22,8 @@
 
 # ObjectBox Java Database (Kotlin, Android)
 
-Java database - simple but powerful, frugal but fast; embedded into your Android, Linux, macOS, iOS, or Windows app. Enjoy the speed, simplicity, and sustainability in your next app built with ObjectBox. 
+Java database - simple but powerful, frugal but fast.\
+Embedded into your Android, Linux, macOS, iOS, or Windows app, store and manage data easily, enjoy ludicrous speed, build ecoconciously 💚 
 
 ### Demo code
 
@@ -56,7 +57,7 @@ box.put(playlist)
 
 ## Why use ObjectBox for Java data management / Kotlin data management?
 
-The NoSQL Java database is built for storing data locally on resource-restricted devices like smartphones.
+The NoSQL Java database is built for storing data locally, offline-first on resource-restricted devices like phones.
 
 The database is otimized for high speed and low resource consumption on restricted devices, making it ideal for use on mobile devices. It uses minimal CPU, RAM, and power, which is not only great for users but also for the environment.
 
@@ -69,9 +70,9 @@ All of this makes ObjectBox a sustainable choice for local data persistence with
 ### Features
 
 🏁 **High performance** on restricted devices, like IoT gateways, micro controllers, ECUs etc.\
-🪂 **Resourceful** with minimal CPU, power and Memory usage for maximum flexibility and sustainability\
+💚 **Resourceful** with minimal CPU, power and Memory usage for maximum flexibility and sustainability\
 🔗 **[Relations](https://docs.objectbox.io/relations):** object links / relationships are built-in\
-💻 **Multiplatform:** Linux, Windows, Android, iOS, macOS
+💻 **Multiplatform:** Linux, Windows, Android, iOS, macOS, any POSIX system
 
 🌱 **Scalable:** handling millions of objects resource-efficiently with ease\
 💐 **[Queries](https://docs.objectbox.io/queries):** filter data as needed, even across relations\
