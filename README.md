@@ -7,17 +7,33 @@
   <a href="https://github.com/objectbox/objectbox-java/issues">Issues</a>
 </p>
 
+<p align="center">
+  <a href="https://docs.objectbox.io/#objectbox-changelog">
+    <img src="https://img.shields.io/github/v/release/objectbox/objectbox-java?color=7DDC7D&style=flat-square" alt="Latest Release">
+  </a>
+  <img src="https://img.shields.io/github/stars/objectbox/objectbox-java?color=17A6A6&logo=github&style=flat-square" alt="Star objectbox-java">
+  <a href="https://github.com/objectbox/objectbox-java/blob/main/LICENSE.txt">
+    <img src="https://img.shields.io/github/license/objectbox/objectbox-java?color=7DDC7D&logo=apache&style=flat-square" alt="Apache 2.0 license">
+  </a>
+  <a href="https://twitter.com/ObjectBox_io">
+    <img src="https://img.shields.io/twitter/follow/objectbox_io?color=%20%2300aced&logo=twitter&style=flat-square" alt="Follow @ObjectBox_io">
+  </a>
+</p>
 
 # ObjectBox Java Database (Kotlin, Android)
 
-[ObjectBox](https://objectbox.io/) is a superfast object-oriented Java database with strong relation support and easy-to-use native language APIs.
-ObjectBox is embedded into your Android, Linux, macOS, or Windows app.
+Java database - simple but powerful, frugal but fast. Embedded into your Android, Linux, macOS, iOS, or Windows app, store and manage data easily, enjoy ludicrous speed, build ecoconciously 💚 
 
-**Latest version: `3.3.1` (2022/09/05, [Release Notes](https://docs.objectbox.io/#objectbox-changelog))**
+### Demo code
 
-❤ **Your opinion matters to us!** Please fill in this 2-minute [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7).
-
-Demo code using ObjectBox:
+```java
+// Java
+Playlist playlist = new Playlist("My Favorites");
+playlist.songs.add(new Song("Lalala"));
+playlist.songs.add(new Song("Lololo"));
+box.put(playlist);
+```
+--> [More details in the docs](https://docs.objectbox.io/)
 
 ```kotlin
 // Kotlin
@@ -27,42 +43,38 @@ playlist.songs.add(Song("Lololo"))
 box.put(playlist)
 ```
 
-```java
-// Java
-Playlist playlist = new Playlist("My Favorites");
-playlist.songs.add(new Song("Lalala"));
-playlist.songs.add(new Song("Lololo"));
-box.put(playlist);
-```
-
-🧾 **Want details?** [Read the docs](https://docs.objectbox.io/)
-
 ## Table of Contents
-- [Why use ObjectBox](#why-use-objectbox)
+- [Why use ObjectBox](#why-use-objectbox-for-java-data-management--kotlin-data-management)
   - [Features](#features)
-- [Gradle setup](#gradle-setup)
-- [First steps](#first-steps)
+- [How to get started](#how-to-get-started)
+  - [Gradle setup](#gradle-setup)
+  - [First steps](#first-steps)
 - [Already using ObjectBox?](#already-using-objectbox)
 - [Other languages/bindings](#other-languagesbindings)
 - [License](#license)
 
----
 
-## Why use ObjectBox
+## Why use ObjectBox for Java data management / Kotlin data management?
 
-ObjectBox NoSQL Java database is built for storing data locally on mobile devices. It is optimized for high efficiency on restricted devices and uses minimal CPU and RAM. Being fully ACID-compliant, ObjectBox is faster than any alternative, outperforming SQLite and Realm across all CRUD (Create, Read, Update, Delete) operations. Check out our [Performance Benchmarking App repository](https://github.com/objectbox/objectbox-performance).
+The NoSQL Java database is built for storing data locally, offline-first on resource-restricted devices like phones.
 
-Additionally, our concise API is easy to learn and only requires a fraction of the code compared to SQLite. No more rows or columns, just plain objects with built-in relations.
+The database is optimized for high speed and low resource consumption on restricted devices, making it ideal for use on mobile devices. It uses minimal CPU, RAM, and power, which is not only great for users but also for the environment.
+
+Being fully ACID-compliant, ObjectBox is faster than any alternative, outperforming SQLite and Realm across all CRUD (Create, Read, Update, Delete) operations. Check out our [Performance Benchmarking App repository](https://github.com/objectbox/objectbox-performance).
+
+Our concise native-language API is easy to pick up and only requires a fraction of the code compared to SQLite. No more rows or columns, just plain objects (true POJOS) with built-in relations. It's great for handling large data volumes and allows changing your model whenever needed.
+
+All of this makes ObjectBox a smart choice for local data persistence with Java and Kotlin - it's efficient, easy and sustainable.
 
 ### Features
 
 🏁 **High performance** on restricted devices, like IoT gateways, micro controllers, ECUs etc.\
-🪂 **Resourceful** with minimal CPU, power and Memory usage for maximum flexibility and sustainability\
-🔗 **Relations:** object links / relationships are built-in\
-💻 **Multiplatform:** Linux, Windows, Android, iOS, macOS
+💚 **Resourceful** with minimal CPU, power and Memory usage for maximum flexibility and sustainability\
+🔗 **[Relations](https://docs.objectbox.io/relations):** object links / relationships are built-in\
+💻 **Multiplatform:** Linux, Windows, Android, iOS, macOS, any POSIX system
 
 🌱 **Scalable:** handling millions of objects resource-efficiently with ease\
-💐 **Queries:** filter data as needed, even across relations\
+💐 **[Queries](https://docs.objectbox.io/queries):** filter data as needed, even across relations\
 🦮 **Statically typed:** compile time checks & optimizations\
 📃 **Automatic schema migrations:** no update scripts needed
 
@@ -70,9 +82,8 @@ Additionally, our concise API is easy to learn and only requires a fraction of t
 🔄 **[ObjectBox Sync](https://objectbox.io/sync/):** keeps data in sync between devices and servers\
 🕒 **[ObjectBox TS](https://objectbox.io/time-series-database/):** time series extension for time based data
 
-Enjoy ❤️
-
-## Gradle setup
+## How to get started
+### Gradle setup
 
 For Android projects, add the ObjectBox Gradle plugin to your root `build.gradle`: 
 
@@ -100,7 +111,7 @@ plugins {
 apply plugin: "io.objectbox" // Add after other plugins.
 ```
 
-## First steps
+### First steps
 
 Create a data object class `@Entity`, for example "Playlist".
 ```
@@ -130,9 +141,9 @@ For details please check the [docs](https://docs.objectbox.io).
 
 ## Already using ObjectBox?
 
-We believe, ObjectBox is super easy to use. We are on a mission to make developers’ lives better, by building developer tools that are intuitive and fun to code with.
+❤ **Your opinion matters to us!** Please fill in this 2-minute [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7).
 
-To do that, we want your feedback: what do you love? What's amiss? Where do you struggle in everyday app development?
+We believe, ObjectBox is super easy to use. We want to bring joy and delight to app developers with intuitive and fun to code with APIs. To do that, we want your feedback: what do you love? What's amiss? Where do you struggle in everyday app development?
 
 **We're looking forward to receiving your comments and requests:**
 - Add [GitHub issues](https://github.com/ObjectBox/objectbox-java/issues) 
@@ -149,10 +160,10 @@ Keep in touch: For general news on ObjectBox, [check our blog](https://objectbox
 ObjectBox supports multiple platforms and languages.
 Besides JVM based languages like Java and Kotlin, ObjectBox also offers: 
 
-* [ObjectBox Swift Database](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
-* [ObjectBox Dart/Flutter Database](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps 
-* [ObjectBox Go Database](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications 
-* [ObjectBox C and C++ Database](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
+* [Swift Database](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
+* [Dart/Flutter Database](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps 
+* [Go Database](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications 
+* [C and C++ Database](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
 
 
 ## License
