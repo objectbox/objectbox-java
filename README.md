@@ -22,8 +22,7 @@
 
 # ObjectBox Java Database (Kotlin, Android)
 
-Java database - simple but powerful, frugal but fast.\
-Embedded into your Android, Linux, macOS, iOS, or Windows app, store and manage data easily, enjoy ludicrous speed, build ecoconciously 💚 
+Java database - simple but powerful, frugal but fast. Embedded into your Android, Linux, macOS, iOS, or Windows app, store and manage data easily, enjoy ludicrous speed, build ecoconciously 💚 
 
 ### Demo code
 
@@ -45,7 +44,7 @@ box.put(playlist)
 ```
 
 ## Table of Contents
-- [Why use ObjectBox](#why-use-objectbox)
+- [Why use ObjectBox](#why-use-objectbox-for-java-data-management--kotlin-data-management)
   - [Features](#features)
 - [How to get started](#how-to-get-started)
   - [Gradle setup](#gradle-setup)
@@ -59,13 +58,13 @@ box.put(playlist)
 
 The NoSQL Java database is built for storing data locally, offline-first on resource-restricted devices like phones.
 
-The database is otimized for high speed and low resource consumption on restricted devices, making it ideal for use on mobile devices. It uses minimal CPU, RAM, and power, which is not only great for users but also for the environment.
+The database is optimized for high speed and low resource consumption on restricted devices, making it ideal for use on mobile devices. It uses minimal CPU, RAM, and power, which is not only great for users but also for the environment.
 
 Being fully ACID-compliant, ObjectBox is faster than any alternative, outperforming SQLite and Realm across all CRUD (Create, Read, Update, Delete) operations. Check out our [Performance Benchmarking App repository](https://github.com/objectbox/objectbox-performance).
 
-Our concise native-language API is easy to pick up and only requires a fraction of the code compared to SQLite. No more rows or columns, just plain objects (true POJOS) with built-in relations. It isgreat for handling large data volumes and allows changing your model whenever needed.
+Our concise native-language API is easy to pick up and only requires a fraction of the code compared to SQLite. No more rows or columns, just plain objects (true POJOS) with built-in relations. It's great for handling large data volumes and allows changing your model whenever needed.
 
-All of this makes ObjectBox a sustainable choice for local data persistence with Java and Kotlin - it's easy, efficient, and sustainable.
+All of this makes ObjectBox a smart choice for local data persistence with Java and Kotlin - it's efficient, easy and sustainable.
 
 ### Features
 
@@ -161,10 +160,10 @@ Keep in touch: For general news on ObjectBox, [check our blog](https://objectbox
 ObjectBox supports multiple platforms and languages.
 Besides JVM based languages like Java and Kotlin, ObjectBox also offers: 
 
-* [ObjectBox Swift Database](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
-* [ObjectBox Dart/Flutter Database](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps 
-* [ObjectBox Go Database](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications 
-* [ObjectBox C and C++ Database](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
+* [Swift Database](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
+* [Dart/Flutter Database](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps 
+* [Go Database](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications 
+* [C and C++ Database](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
 
 
 ## License
