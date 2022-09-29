@@ -85,12 +85,7 @@ All of this makes ObjectBox a smart choice for local data persistence with Java 
 🕒 **[ObjectBox TS](https://objectbox.io/time-series-database/):** time series extension for time based data
 
 ## How to get started
-
-You can follow this **video guide** for a quick set-up: 
-
-https://user-images.githubusercontent.com/63849626/184360188-3220356c-3aae-4365-a998-4c941d496c3b.mp4
-
-
+You can find a [video guide](#You-can-also-follow-this-video-guide-for–a–quick-set-up) below
 ### Gradle setup
 
 For Android projects, add the ObjectBox Gradle plugin to your root `build.gradle`: 
@@ -146,6 +141,10 @@ Box<Playlist> box = boxStore.boxFor(Playlist.class);
 The `Box` object gives you access to all major functions, like `put`, `get`, `remove`, and `query`.
 
 For details please check the [docs](https://docs.objectbox.io).   
+
+###You can also follow this **video guide** for a quick set-up: 
+
+https://user-images.githubusercontent.com/63849626/184360188-3220356c-3aae-4365-a998-4c941d496c3b.mp4
 
 
 ## Already using ObjectBox?
