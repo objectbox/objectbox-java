@@ -27,6 +27,15 @@ public final class SyncFlags {
   /**
    * Enable (rather extensive) logging on how IDs are mapped (local <-> global)
    */
-  public static final int DEBUG_LOG_ID_MAPPING = 1;
+  public static final int DebugLogIdMapping = 1;
+  /**
+   * If the client gets in a state that does not allow any further synchronization, this flag instructs Sync to
+   * keep local data nevertheless. While this preserves data, you need to resolve the situation manually.
+   * For example, you could backup the data and start with a fresh database.
+   * Note that the default behavior (this flag is not set) is to wipe existing data from all sync-enabled types and
+   * sync from scratch from the server.
+   * Client-only: setting this flag for Sync server has no effect.
+   */
+  public static final int ClientKeepDataOnSyncError = 2;
 }
 
