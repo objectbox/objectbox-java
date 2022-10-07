@@ -84,6 +84,27 @@ All of this makes ObjectBox a smart choice for local data persistence with Java 
 🔄 **[ObjectBox Sync](https://objectbox.io/sync/):** keeps data in sync between devices and servers\
 🕒 **[ObjectBox TS](https://objectbox.io/time-series-database/):** time series extension for time based data
 
+## Before you get started
+Before starting with ObjectBox, ensure that our licenses (for source code, plugins and binary files) meet your app requirements. For strict FLOSS licensing, ObjectBox might not be for you.
+
+Take a closer look on all the licenses that are applied:
+<details>
+  <summary> Licenses Summary</summary>
+
+  
+  | Package          | License                                                                       | Source Code                                         | Usage        |
+|------------------|-------------------------------------------------------------------------------|-----------------------------------------------------|--------------|
+| Java Libraries   | [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0)    | [open](https://github.com/objectbox/objectbox-java) | Compile Time |
+| Gradle Plugin    | [GNU General Public License, Version 3](https://www.gnu.org/licenses/gpl.txt) | closed                                              | Compile Time |
+| Native Libraries | [ObjectBox Binary Licence](https://objectbox.io/0209-ob-binary-license/)      | closed                                              | Runtime      |
+  
+  
+  Note that the Gradle plugin adds Java and native libraries to your project dependencies as needed.
+  
+  More information on this subject can be found in issues #560 and #1102
+  
+</details>
+
 ## How to get started
 ### Gradle setup
 
