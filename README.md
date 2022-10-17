@@ -11,7 +11,9 @@
   <a href="https://docs.objectbox.io/#objectbox-changelog">
     <img src="https://img.shields.io/github/v/release/objectbox/objectbox-java?color=7DDC7D&style=flat-square" alt="Latest Release">
   </a>
-  <img src="https://img.shields.io/github/stars/objectbox/objectbox-java?color=17A6A6&logo=github&style=flat-square" alt="Star objectbox-java">
+  <a href="https://github.com/objectbox/objectbox-java/stargazers">
+    <img src="https://img.shields.io/github/stars/objectbox/objectbox-java?color=17A6A6&logo=github&style=flat-square" alt="Star objectbox-java">
+  </a>
   <a href="https://github.com/objectbox/objectbox-java/blob/main/LICENSE.txt">
     <img src="https://img.shields.io/github/license/objectbox/objectbox-java?color=7DDC7D&logo=apache&style=flat-square" alt="Apache 2.0 license">
   </a>
