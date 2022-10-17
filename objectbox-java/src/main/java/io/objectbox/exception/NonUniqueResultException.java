@@ -16,7 +16,11 @@
 
 package io.objectbox.exception;
 
-/** Throw if {@link io.objectbox.query.Query#findUnique()} returns more than one result. */
+/**
+ * Thrown if {@link io.objectbox.query.Query#findUnique() Query.findUnique()} or
+ * {@link io.objectbox.query.Query#findUniqueId() Query.findUniqueId()} is called,
+ * but the query matches more than one object.
+ */
 public class NonUniqueResultException extends DbException {
     public NonUniqueResultException(String message) {
         super(message);

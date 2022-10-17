@@ -104,14 +104,16 @@ public class QueryTest extends AbstractQueryTest {
         assertThrowsQueryIsClosed(query::count);
         assertThrowsQueryIsClosed(query::describe);
         assertThrowsQueryIsClosed(query::describeParameters);
+        assertThrowsQueryIsClosed(query::findFirst);
+        assertThrowsQueryIsClosed(query::findUnique);
         assertThrowsQueryIsClosed(query::find);
         assertThrowsQueryIsClosed(() -> query.find(0, 1));
-        assertThrowsQueryIsClosed(query::findFirst);
+        assertThrowsQueryIsClosed(query::findFirstId);
+        assertThrowsQueryIsClosed(query::findUniqueId);
         assertThrowsQueryIsClosed(query::findIds);
         assertThrowsQueryIsClosed(() -> query.findIds(0, 1));
         assertThrowsQueryIsClosed(query::findLazy);
         assertThrowsQueryIsClosed(query::findLazyCached);
-        assertThrowsQueryIsClosed(query::findUnique);
         assertThrowsQueryIsClosed(query::remove);
 
         // For setParameter(s) the native method is not actually called, so fine to use incorrect alias and property.
@@ -162,14 +164,16 @@ public class QueryTest extends AbstractQueryTest {
 
         // All methods accessing the store throw.
         assertThrowsStoreIsClosed(query::count);
+        assertThrowsStoreIsClosed(query::findFirst);
+        assertThrowsStoreIsClosed(query::findUnique);
         assertThrowsStoreIsClosed(query::find);
         assertThrowsStoreIsClosed(() -> query.find(0, 1));
-        assertThrowsStoreIsClosed(query::findFirst);
+        assertThrowsStoreIsClosed(query::findFirstId);
+        assertThrowsStoreIsClosed(query::findUniqueId);
         assertThrowsStoreIsClosed(query::findIds);
         assertThrowsStoreIsClosed(() -> query.findIds(0, 1));
         assertThrowsStoreIsClosed(query::findLazy);
         assertThrowsStoreIsClosed(query::findLazyCached);
-        assertThrowsStoreIsClosed(query::findUnique);
         assertThrowsStoreIsClosed(query::remove);
         assertThrowsStoreIsClosed(() -> query.subscribe().observer(data -> {
         }));
@@ -913,6 +917,35 @@ public class QueryTest extends AbstractQueryTest {
             assertEquals(6, query.remove());
         }
         assertEquals(4, box.count());
+    }
+
+    @Test
+    public void findFirstId() {
+        putTestEntitiesScalars();
+        try (Query<TestEntity> query = box.query(simpleInt.greater(2006)).build()) {
+            assertEquals(8, query.findFirstId());
+        }
+        // No result.
+        try (Query<TestEntity> query = box.query(simpleInt.equal(-1)).build()) {
+            assertEquals(0, query.findFirstId());
+        }
+    }
+
+    @Test
+    public void findUniqueId() {
+        putTestEntitiesScalars();
+        try (Query<TestEntity> query = box.query(simpleInt.equal(2006)).build()) {
+            assertEquals(7, query.findUniqueId());
+        }
+        // No result.
+        try (Query<TestEntity> query = box.query(simpleInt.equal(-1)).build()) {
+            assertEquals(0, query.findUniqueId());
+        }
+        // More than one result.
+        try (Query<TestEntity> query = box.query(simpleInt.greater(2006)).build()) {
+            NonUniqueResultException e = assertThrows(NonUniqueResultException.class, query::findUniqueId);
+            assertEquals("Query does not have a unique result (more than one result): 3", e.getMessage());
+        }
     }
 
     @Test
