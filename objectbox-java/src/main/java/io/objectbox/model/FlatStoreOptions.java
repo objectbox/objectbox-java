@@ -57,7 +57,7 @@ public final class FlatStoreOptions extends Table {
    * e.g. caused by programming error.
    * If your app runs into errors like "db full", you may consider to raise the limit.
    */
-  public long maxDbSizeInKByte() { int o = __offset(8); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
+  public long maxDbSizeInKbyte() { int o = __offset(8); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
   /**
    * File permissions given in Unix style octal bit flags (e.g. 0644). Ignored on Windows.
    * Note: directories become searchable if the "read" or "write" permission is set (e.g. 0640 becomes 0750).
@@ -135,11 +135,19 @@ public final class FlatStoreOptions extends Table {
    *       corner cases with e.g. transactions, which may not be fully tested at the moment.
    */
   public boolean noReaderThreadLocals() { int o = __offset(30); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
+  /**
+   * Data size tracking is more involved than DB size tracking, e.g. it stores an internal counter.
+   * Thus only use it if a stricter, more accurate limit is required.
+   * It tracks the size of actual data bytes of objects (system and metadata is not considered).
+   * On the upside, reaching the data limit still allows data to be removed (assuming DB limit is not reached).
+   * Max data and DB sizes can be combined; data size must be below the DB size.
+   */
+  public long maxDataSizeInKbyte() { int o = __offset(32); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
 
   public static int createFlatStoreOptions(FlatBufferBuilder builder,
       int directoryPathOffset,
       int modelBytesOffset,
-      long maxDbSizeInKByte,
+      long maxDbSizeInKbyte,
       long fileMode,
       long maxReaders,
       int validateOnOpen,
@@ -150,10 +158,12 @@ public final class FlatStoreOptions extends Table {
       boolean usePreviousCommitOnValidationFailure,
       boolean readOnly,
       long debugFlags,
-      boolean noReaderThreadLocals) {
-    builder.startTable(14);
+      boolean noReaderThreadLocals,
+      long maxDataSizeInKbyte) {
+    builder.startTable(15);
+    FlatStoreOptions.addMaxDataSizeInKbyte(builder, maxDataSizeInKbyte);
     FlatStoreOptions.addValidateOnOpenPageLimit(builder, validateOnOpenPageLimit);
-    FlatStoreOptions.addMaxDbSizeInKByte(builder, maxDbSizeInKByte);
+    FlatStoreOptions.addMaxDbSizeInKbyte(builder, maxDbSizeInKbyte);
     FlatStoreOptions.addDebugFlags(builder, debugFlags);
     FlatStoreOptions.addMaxReaders(builder, maxReaders);
     FlatStoreOptions.addFileMode(builder, fileMode);
@@ -169,13 +179,13 @@ public final class FlatStoreOptions extends Table {
     return FlatStoreOptions.endFlatStoreOptions(builder);
   }
 
-  public static void startFlatStoreOptions(FlatBufferBuilder builder) { builder.startTable(14); }
+  public static void startFlatStoreOptions(FlatBufferBuilder builder) { builder.startTable(15); }
   public static void addDirectoryPath(FlatBufferBuilder builder, int directoryPathOffset) { builder.addOffset(0, directoryPathOffset, 0); }
   public static void addModelBytes(FlatBufferBuilder builder, int modelBytesOffset) { builder.addOffset(1, modelBytesOffset, 0); }
   public static int createModelBytesVector(FlatBufferBuilder builder, byte[] data) { return builder.createByteVector(data); }
   public static int createModelBytesVector(FlatBufferBuilder builder, ByteBuffer data) { return builder.createByteVector(data); }
   public static void startModelBytesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(1, numElems, 1); }
-  public static void addMaxDbSizeInKByte(FlatBufferBuilder builder, long maxDbSizeInKByte) { builder.addLong(2, maxDbSizeInKByte, 0L); }
+  public static void addMaxDbSizeInKbyte(FlatBufferBuilder builder, long maxDbSizeInKbyte) { builder.addLong(2, maxDbSizeInKbyte, 0L); }
   public static void addFileMode(FlatBufferBuilder builder, long fileMode) { builder.addInt(3, (int) fileMode, (int) 0L); }
   public static void addMaxReaders(FlatBufferBuilder builder, long maxReaders) { builder.addInt(4, (int) maxReaders, (int) 0L); }
   public static void addValidateOnOpen(FlatBufferBuilder builder, int validateOnOpen) { builder.addShort(5, (short) validateOnOpen, (short) 0); }
@@ -187,6 +197,7 @@ public final class FlatStoreOptions extends Table {
   public static void addReadOnly(FlatBufferBuilder builder, boolean readOnly) { builder.addBoolean(11, readOnly, false); }
   public static void addDebugFlags(FlatBufferBuilder builder, long debugFlags) { builder.addInt(12, (int) debugFlags, (int) 0L); }
   public static void addNoReaderThreadLocals(FlatBufferBuilder builder, boolean noReaderThreadLocals) { builder.addBoolean(13, noReaderThreadLocals, false); }
+  public static void addMaxDataSizeInKbyte(FlatBufferBuilder builder, long maxDataSizeInKbyte) { builder.addLong(14, maxDataSizeInKbyte, 0L); }
   public static int endFlatStoreOptions(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;

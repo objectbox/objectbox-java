@@ -482,7 +482,7 @@ public class BoxStoreBuilder {
 
         // ...then build options.
         FlatStoreOptions.addDirectoryPath(fbb, directoryPathOffset);
-        FlatStoreOptions.addMaxDbSizeInKByte(fbb, maxSizeInKByte);
+        FlatStoreOptions.addMaxDbSizeInKbyte(fbb, maxSizeInKByte);
         FlatStoreOptions.addFileMode(fbb, fileMode);
         FlatStoreOptions.addMaxReaders(fbb, maxReaders);
         if (validateOnOpenMode != 0) {
