@@ -91,7 +91,7 @@ For Android projects, add the ObjectBox Gradle plugin to your root `build.gradle
 
 ```groovy
 buildscript {
-    ext.objectboxVersion = "3.3.1"
+    ext.objectboxVersion = "3.4.0"
     repositories {        
         mavenCentral()    
     }
