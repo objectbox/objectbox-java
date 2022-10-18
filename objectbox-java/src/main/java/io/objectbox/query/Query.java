@@ -61,6 +61,10 @@ public class Query<T> implements Closeable {
 
     native List<T> nativeFind(long handle, long cursorHandle, long offset, long limit) throws Exception;
 
+    native long nativeFindFirstId(long handle, long cursorHandle);
+
+    native long nativeFindUniqueId(long handle, long cursorHandle);
+
     native long[] nativeFindIds(long handle, long cursorHandle, long offset, long limit);
 
     native long nativeCount(long handle, long cursorHandle);
@@ -191,9 +195,9 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Find the unique Object matching the query.
-     *
-     * @throws io.objectbox.exception.NonUniqueResultException if result was not unique
+     * If there is a single matching object, returns it. If there is more than one matching object,
+     * throws {@link io.objectbox.exception.NonUniqueResultException NonUniqueResultException}.
+     * If there are no matches returns null.
      */
     @Nullable
     public T findUnique() {
@@ -242,6 +246,32 @@ public class Query<T> implements Closeable {
             resolveEagerRelations(entities);
             return entities;
         });
+    }
+
+    /**
+     * Returns the ID of the first matching object. If there are no results returns 0.
+     * <p>
+     * Like {@link #findFirst()}, but more efficient as no object is created.
+     * <p>
+     * Ignores any {@link QueryBuilder#filter(QueryFilter) query filter}.
+     */
+    public long findFirstId() {
+        checkOpen();
+        return box.internalCallWithReaderHandle(cursorHandle -> nativeFindFirstId(handle, cursorHandle));
+    }
+
+    /**
+     * If there is a single matching object, returns its ID. If there is more than one matching object,
+     * throws {@link io.objectbox.exception.NonUniqueResultException NonUniqueResultException}.
+     * If there are no matches returns 0.
+     * <p>
+     * Like {@link #findUnique()}, but more efficient as no object is created.
+     * <p>
+     * Ignores any {@link QueryBuilder#filter(QueryFilter) query filter}.
+     */
+    public long findUniqueId() {
+        checkOpen();
+        return box.internalCallWithReaderHandle(cursorHandle -> nativeFindUniqueId(handle, cursorHandle));
     }
 
     /**

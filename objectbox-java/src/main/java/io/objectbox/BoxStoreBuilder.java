@@ -77,6 +77,8 @@ public class BoxStoreBuilder {
     /** Defaults to {@link #DEFAULT_MAX_DB_SIZE_KBYTE}. */
     long maxSizeInKByte = DEFAULT_MAX_DB_SIZE_KBYTE;
 
+    long maxDataSizeInKByte;
+
     /** On Android used for native library loading. */
     @Nullable Object context;
     @Nullable Object relinker;
@@ -339,7 +341,31 @@ public class BoxStoreBuilder {
      * (for example you insert data in an infinite loop).
      */
     public BoxStoreBuilder maxSizeInKByte(long maxSizeInKByte) {
+        if (maxSizeInKByte <= maxDataSizeInKByte) {
+            throw new IllegalArgumentException("maxSizeInKByte must be larger than maxDataSizeInKByte.");
+        }
         this.maxSizeInKByte = maxSizeInKByte;
+        return this;
+    }
+
+    /**
+     * This API is experimental and may change or be removed in future releases.
+     * <p>
+     * Sets the maximum size the data stored in the database can grow to. Must be below {@link #maxSizeInKByte(long)}.
+     * <p>
+     * Different from {@link #maxSizeInKByte(long)} this only counts bytes stored in objects, excluding system and
+     * metadata. However, it is more involved than database size tracking, e.g. it stores an internal counter.
+     * Only use this if a stricter, more accurate limit is required.
+     * <p>
+     * When the data limit is reached data can be removed to get below the limit again (assuming the database size limit
+     * is not also reached).
+     */
+    @Experimental
+    public BoxStoreBuilder maxDataSizeInKByte(long maxDataSizeInKByte) {
+        if (maxDataSizeInKByte >= maxSizeInKByte) {
+            throw new IllegalArgumentException("maxDataSizeInKByte must be smaller than maxSizeInKByte.");
+        }
+        this.maxDataSizeInKByte = maxDataSizeInKByte;
         return this;
     }
 
@@ -491,13 +517,12 @@ public class BoxStoreBuilder {
                 FlatStoreOptions.addValidateOnOpenPageLimit(fbb, validateOnOpenPageLimit);
             }
         }
-        if(skipReadSchema) FlatStoreOptions.addSkipReadSchema(fbb, skipReadSchema);
-        if(usePreviousCommit) FlatStoreOptions.addUsePreviousCommit(fbb, usePreviousCommit);
-        if(readOnly) FlatStoreOptions.addReadOnly(fbb, readOnly);
-        if(noReaderThreadLocals) FlatStoreOptions.addNoReaderThreadLocals(fbb, noReaderThreadLocals);
-        if (debugFlags != 0) {
-            FlatStoreOptions.addDebugFlags(fbb, debugFlags);
-        }
+        if (skipReadSchema) FlatStoreOptions.addSkipReadSchema(fbb, true);
+        if (usePreviousCommit) FlatStoreOptions.addUsePreviousCommit(fbb, true);
+        if (readOnly) FlatStoreOptions.addReadOnly(fbb, true);
+        if (noReaderThreadLocals) FlatStoreOptions.addNoReaderThreadLocals(fbb, true);
+        if (debugFlags != 0) FlatStoreOptions.addDebugFlags(fbb, debugFlags);
+        if (maxDataSizeInKByte > 0) FlatStoreOptions.addMaxDataSizeInKbyte(fbb, maxDataSizeInKByte);
 
         int offset = FlatStoreOptions.endFlatStoreOptions(fbb);
         fbb.finish(offset);

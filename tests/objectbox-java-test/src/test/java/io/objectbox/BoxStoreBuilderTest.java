@@ -16,6 +16,8 @@
 
 package io.objectbox;
 
+import io.objectbox.exception.DbFullException;
+import io.objectbox.exception.DbMaxDataSizeExceededException;
 import io.objectbox.exception.PagesCorruptException;
 import io.objectbox.model.ValidateOnOpenMode;
 import org.greenrobot.essentials.io.IoUtils;
@@ -28,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,12 +39,15 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
 
     private BoxStoreBuilder builder;
+
+    private static final String LONG_STRING = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
 
     @Override
     protected BoxStore createBoxStore() {
@@ -165,6 +169,73 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         store = builder.build();
 
         assertTrue(store.isReadOnly());
+    }
+
+    @Test
+    public void maxSize_invalidValues_throw() {
+        // Max data larger than max database size throws.
+        builder.maxSizeInKByte(10);
+        IllegalArgumentException exSmaller = assertThrows(
+                IllegalArgumentException.class,
+                () -> builder.maxDataSizeInKByte(11)
+        );
+        assertEquals("maxDataSizeInKByte must be smaller than maxSizeInKByte.", exSmaller.getMessage());
+
+        // Max database size smaller than max data size throws.
+        builder.maxDataSizeInKByte(9);
+        IllegalArgumentException exLarger = assertThrows(
+                IllegalArgumentException.class,
+                () -> builder.maxSizeInKByte(8)
+        );
+        assertEquals("maxSizeInKByte must be larger than maxDataSizeInKByte.", exLarger.getMessage());
+    }
+
+    @Test
+    public void maxFileSize() {
+        builder = createBoxStoreBuilder(null);
+        builder.maxSizeInKByte(30); // Empty file is around 12 KB, object below adds about 8 KB each.
+        store = builder.build();
+        putTestEntity(LONG_STRING, 1);
+        TestEntity testEntity2 = createTestEntity(LONG_STRING, 2);
+        DbFullException dbFullException = assertThrows(
+                DbFullException.class,
+                () -> getTestEntityBox().put(testEntity2)
+        );
+        assertEquals("Could not commit tx", dbFullException.getMessage());
+
+        // Re-open with larger size.
+        store.close();
+        builder.maxSizeInKByte(40);
+        store = builder.build();
+        testEntity2.setId(0); // Clear ID of object that failed to put.
+        getTestEntityBox().put(testEntity2);
+    }
+
+    @Test
+    public void maxDataSize() {
+        // Put until max data size is reached, but still below max database size.
+        builder = createBoxStoreBuilder(null);
+        builder.maxSizeInKByte(50); // Empty file is around 12 KB, each put adds about 8 KB.
+        builder.maxDataSizeInKByte(1);
+        store = builder.build();
+
+        TestEntity testEntity1 = putTestEntity(LONG_STRING, 1);
+        TestEntity testEntity2 = createTestEntity(LONG_STRING, 2);
+        DbMaxDataSizeExceededException maxDataExc = assertThrows(
+                DbMaxDataSizeExceededException.class,
+                () -> getTestEntityBox().put(testEntity2)
+        );
+        assertEquals("Exceeded user-set maximum by [bytes]: 64", maxDataExc.getMessage());
+
+        // Remove to get below max data size, then put again.
+        getTestEntityBox().remove(testEntity1);
+        getTestEntityBox().put(testEntity2);
+
+        // Alternatively, re-open with larger max data size.
+        store.close();
+        builder.maxDataSizeInKByte(2);
+        store = builder.build();
+        putTestEntity(LONG_STRING, 3);
     }
 
     @Test
