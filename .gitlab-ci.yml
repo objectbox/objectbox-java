@@ -5,8 +5,7 @@ image: objectboxio/buildenv:21.11.11-centos7
 # - SONATYPE_USER
 # - SONATYPE_PWD
 # - GOOGLE_CHAT_WEBHOOK_JAVA_CI
-# Additionally, Gradle scripts assume these Gradle project properties are set:
-# https://docs.gradle.org/current/userguide/build_environment.html#sec:project_properties
+# Additionally, these environment variables used by the objectbox-publish Gradle script:
 # - ORG_GRADLE_PROJECT_signingKeyFile
 # - ORG_GRADLE_PROJECT_signingKeyId
 # - ORG_GRADLE_PROJECT_signingPassword

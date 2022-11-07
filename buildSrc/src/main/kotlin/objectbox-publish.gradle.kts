@@ -1,3 +1,17 @@
+// This script requires some Gradle project properties to be set
+// (to set as environment variable prefix with ORG_GRADLE_PROJECT_):
+// https://docs.gradle.org/current/userguide/build_environment.html#sec:project_properties
+//
+// To publish artifacts to the internal GitLab repo set:
+// - gitlabUrl
+// - gitlabPrivateToken
+// - gitlabTokenName: optional, if set used instead of "Private-Token". Use for CI to specify e.g. "Job-Token".
+//
+// To sign artifacts using an ASCII encoded PGP key given via a file set:
+// - signingKeyFile
+// - signingKeyId
+// - signingPassword
+
 plugins {
     id("maven-publish")
     id("signing")
@@ -73,6 +87,8 @@ publishing {
 
 signing {
     if (hasSigningProperties()) {
+        // Sign using an ASCII-armored key read from a file
+        // https://docs.gradle.org/current/userguide/signing_plugin.html#using_in_memory_ascii_armored_openpgp_subkeys
         val signingKey = File(project.property("signingKeyFile").toString()).readText()
         useInMemoryPgpKeys(
             project.property("signingKeyId").toString(),

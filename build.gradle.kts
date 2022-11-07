@@ -1,3 +1,10 @@
+// This script supports some Gradle project properties:
+// https://docs.gradle.org/current/userguide/build_environment.html#sec:project_properties
+// - versionPostFix: appended to snapshot version number, e.g. "1.2.3-<versionPostFix>-SNAPSHOT".
+//   Use to create different versions based on branch/tag.
+// - sonatypeUsername: Maven Central credential used by Nexus publishing.
+// - sonatypePassword: Maven Central credential used by Nexus publishing.
+
 buildscript {
     // Typically, only edit those two:
     val objectboxVersionNumber = "3.4.1" // without "-SNAPSHOT", e.g. "2.5.0" or "2.4.0-RC"
