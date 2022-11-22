@@ -37,9 +37,9 @@ public class RelationTest extends AbstractRelationTest {
 
         Order order1 = orderBox.get(order.getId());
         assertEquals(customer.getId(), order1.getCustomerId());
-        assertNull(order1.peekCustomer());
-        assertEquals(customer.getId(), order1.getCustomer().getId());
-        assertNotNull(order1.peekCustomer());
+        assertNull(order1.getCustomer().getCachedTarget());
+        assertEquals(customer.getId(), order1.getCustomer().getTarget().getId());
+        assertNotNull(order1.getCustomer().getCachedTarget());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class RelationTest extends AbstractRelationTest {
         ((ToMany<Order>) orders).reset();
         assertEquals(1, orders.size());
 
-        order2.setCustomer(null);
+        order2.getCustomer().setTarget(null);
         orderBox.put(order2);
 
         ((ToMany<Order>) orders).reset();

@@ -39,14 +39,11 @@ public class Order implements Serializable {
     long customerId;
     String text;
 
-    private Customer customer;
+    @SuppressWarnings("FieldMayBeFinal")
+    private ToOne<Customer> customer = new ToOne<>(this, Order_.customer);
 
-    /** @Depreacted Used to resolve relations */
-    @Internal
+    /** Used to resolve relations. */
     transient BoxStore __boxStore;
-
-    @Internal
-    transient ToOne<Customer> customer__toOne = new ToOne<>(this, Order_.customer);
 
     public Order() {
     }
@@ -94,20 +91,8 @@ public class Order implements Serializable {
         this.text = text;
     }
 
-    public Customer peekCustomer() {
+    public ToOne<Customer> getCustomer() {
         return customer;
-    }
-
-    /** To-one relationship, resolved on first access. */
-    public Customer getCustomer() {
-        customer = customer__toOne.getTarget(this.customerId);
-        return customer;
-    }
-
-    /** Set the to-one relation including its ID property. */
-    public void setCustomer(@Nullable Customer customer) {
-        customer__toOne.setTarget(customer);
-        this.customer = customer;
     }
 
 }

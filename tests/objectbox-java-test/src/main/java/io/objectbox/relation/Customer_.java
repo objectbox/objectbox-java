@@ -117,7 +117,7 @@ public class Customer_ implements EntityInfo<Customer> {
             }, Order_.customerId, new ToOneGetter<Order>() {
                 @Override
                 public ToOne<Customer> getToOne(Order order) {
-                    return order.customer__toOne;
+                    return order.getCustomer();
                 }
             });
 

@@ -94,20 +94,20 @@ public class RelationEagerTest extends AbstractRelationTest {
         // full list
         List<Order> orders = orderBox.query().eager(Order_.customer).build().find();
         assertEquals(2, orders.size());
-        assertTrue(orders.get(0).customer__toOne.isResolved());
-        assertTrue(orders.get(1).customer__toOne.isResolved());
+        assertTrue(orders.get(0).getCustomer().isResolved());
+        assertTrue(orders.get(1).getCustomer().isResolved());
 
         // full list paginated
         orders = orderBox.query().eager(Order_.customer).build().find(0, 10);
         assertEquals(2, orders.size());
-        assertTrue(orders.get(0).customer__toOne.isResolved());
-        assertTrue(orders.get(1).customer__toOne.isResolved());
+        assertTrue(orders.get(0).getCustomer().isResolved());
+        assertTrue(orders.get(1).getCustomer().isResolved());
 
         // list with eager limit
         orders = orderBox.query().eager(1, Order_.customer).build().find();
         assertEquals(2, orders.size());
-        assertTrue(orders.get(0).customer__toOne.isResolved());
-        assertFalse(orders.get(1).customer__toOne.isResolved());
+        assertTrue(orders.get(0).getCustomer().isResolved());
+        assertFalse(orders.get(1).getCustomer().isResolved());
 
         // forEach
         final int[] count = {0};
@@ -119,12 +119,12 @@ public class RelationEagerTest extends AbstractRelationTest {
 
         // first
         Order order = orderBox.query().eager(Order_.customer).build().findFirst();
-        assertTrue(order.customer__toOne.isResolved());
+        assertTrue(order.getCustomer().isResolved());
 
         // unique
         orderBox.remove(order);
         order = orderBox.query().eager(Order_.customer).build().findUnique();
-        assertTrue(order.customer__toOne.isResolved());
+        assertTrue(order.getCustomer().isResolved());
     }
 
     @Test

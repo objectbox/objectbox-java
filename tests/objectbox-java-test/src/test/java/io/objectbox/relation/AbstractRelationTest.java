@@ -64,7 +64,7 @@ public abstract class AbstractRelationTest extends AbstractObjectBoxTest {
 
     protected Order putOrder(@Nullable Customer customer, @Nullable String text) {
         Order order = new Order();
-        order.setCustomer(customer);
+        order.getCustomer().setTarget(customer);
         order.setText(text);
         orderBox.put(order);
         return order;

@@ -59,10 +59,11 @@ public final class OrderCursor extends Cursor<Order> {
      */
     @Override
     public long put(Order entity) {
-        if(entity.customer__toOne.internalRequiresPutTarget()) {
+        ToOne<Customer> customer = entity.getCustomer();
+        if(customer != null && customer.internalRequiresPutTarget()) {
             Cursor<Customer> targetCursor = getRelationTargetCursor(Customer.class);
             try {
-                entity.customer__toOne.internalPutTarget(targetCursor);
+                customer.internalPutTarget(targetCursor);
             } finally {
                 targetCursor.close();
             }

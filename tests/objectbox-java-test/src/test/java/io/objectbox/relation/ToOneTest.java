@@ -100,7 +100,7 @@ public class ToOneTest extends AbstractRelationTest {
         Customer target = new Customer();
         target.setName("target1");
 
-        ToOne<Customer> toOne = source.customer__toOne;
+        ToOne<Customer> toOne = source.getCustomer();
         assertTrue(toOne.isResolved());
         assertTrue(toOne.isNull());
         assertNull(toOne.getCachedTarget());

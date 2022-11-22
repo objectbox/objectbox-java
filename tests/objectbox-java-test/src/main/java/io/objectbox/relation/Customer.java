@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import io.objectbox.BoxStore;
+import io.objectbox.annotation.Backlink;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Index;
@@ -37,12 +38,12 @@ public class Customer implements Serializable {
     @Index
     private String name;
 
+    @Backlink(to = "customer") // Annotation not processed in this test, is set up manually.
     List<Order> orders = new ToMany<>(this, Customer_.orders);
 
     ToMany<Order> ordersStandalone = new ToMany<>(this, Customer_.ordersStandalone);
 
-    /** Used to resolve relations */
-    @Internal
+    /** Used to resolve relations. */
     transient BoxStore __boxStore;
 
     public Customer() {
