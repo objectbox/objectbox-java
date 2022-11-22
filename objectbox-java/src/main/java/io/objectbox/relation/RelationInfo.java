@@ -25,6 +25,8 @@ import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.ToManyGetter;
 import io.objectbox.internal.ToOneGetter;
+import io.objectbox.query.QueryCondition;
+import io.objectbox.query.RelationCountCondition;
 
 /**
  * Meta info describing a relation including source and target entity.
@@ -129,6 +131,32 @@ public class RelationInfo<SOURCE, TARGET> implements Serializable {
     @Override
     public String toString() {
         return "RelationInfo from " + sourceInfo.getEntityClass() + " to " + targetInfo.getEntityClass();
+    }
+
+    /**
+     * Creates a condition to match objects that have {@code relationCount} related objects pointing to them.
+     * <pre>
+     * try (Query&lt;Customer&gt; query = customerBox
+     *         .query(Customer_.orders.relationCount(2))
+     *         .build()) {
+     *     List&lt;Customer&gt; customersWithTwoOrders = query.find();
+     * }
+     * </pre>
+     * {@code relationCount} may be 0 to match objects that do not have related objects.
+     * It typically should be a low number.
+     * <p>
+     * This condition has some limitations:
+     * <ul>
+     *     <li>only 1:N (ToMany using @Backlink) relations are supported,</li>
+     *     <li>the complexity is {@code O(n * (relationCount + 1))} and cannot be improved via indexes,</li>
+     *     <li>the relation count cannot be changed with setParameter once the query is built.</li>
+     * </ul>
+     */
+    public QueryCondition<SOURCE> relationCount(int relationCount) {
+        if (targetIdProperty == null) {
+            throw new IllegalStateException("The relation count condition is only supported for 1:N (ToMany using @Backlink) relations.");
+        }
+        return new RelationCountCondition<>(this, relationCount);
     }
 }
 

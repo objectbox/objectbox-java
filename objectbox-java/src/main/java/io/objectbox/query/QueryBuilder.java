@@ -152,6 +152,9 @@ public class QueryBuilder<T> {
 
     private native void nativeSetParameterAlias(long conditionHandle, String alias);
 
+    private native long nativeRelationCount(long handle, long storeHandle, int relationOwnerEntityId, int propertyId,
+                                            int relationCount);
+
     // ------------------------------ (Not)Null------------------------------
 
     private native long nativeNull(long handle, int propertyId);
@@ -579,6 +582,13 @@ public class QueryBuilder<T> {
     public QueryBuilder<T> notNull(Property<T> property) {
         verifyHandle();
         checkCombineCondition(nativeNotNull(handle, property.getId()));
+        return this;
+    }
+
+    public QueryBuilder<T> relationCount(RelationInfo<T, ?> relationInfo, int relationCount) {
+        verifyHandle();
+        checkCombineCondition(nativeRelationCount(handle, storeHandle, relationInfo.targetInfo.getEntityId(),
+                relationInfo.targetIdProperty.id, relationCount));
         return this;
     }
 
