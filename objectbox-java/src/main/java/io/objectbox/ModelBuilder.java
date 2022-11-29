@@ -16,14 +16,13 @@
 
 package io.objectbox;
 
-import io.objectbox.flatbuffers.FlatBufferBuilder;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.model.IdUid;
 import io.objectbox.model.Model;
 import io.objectbox.model.ModelEntity;

@@ -302,6 +302,7 @@ public class Box<T> {
 
     /**
      * Returns all stored Objects in this Box.
+     *
      * @return since 2.4 the returned list is always mutable (before an empty result list was immutable)
      */
     public List<T> getAll() {
@@ -320,8 +321,9 @@ public class Box<T> {
     /**
      * Check if an object with the given ID exists in the database.
      * This is more efficient than a {@link #get(long)} and comparing against null.
+     *
+     * @return true if an object with the given ID was found, false otherwise.
      * @since 2.7
-     * @return true if a object with the given ID was found, false otherwise
      */
     public boolean contains(long id) {
         Cursor<T> reader = getReader();
@@ -425,6 +427,7 @@ public class Box<T> {
 
     /**
      * Removes (deletes) the Object by its ID.
+     *
      * @return true if an entity was actually removed (false if no entity exists with the given ID)
      */
     public boolean remove(long id) {
@@ -486,6 +489,7 @@ public class Box<T> {
 
     /**
      * Removes (deletes) the given Object.
+     *
      * @return true if an entity was actually removed (false if no entity exists with the given ID)
      */
     public boolean remove(T object) {

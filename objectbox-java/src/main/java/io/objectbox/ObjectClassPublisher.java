@@ -16,9 +16,6 @@
 
 package io.objectbox;
 
-import org.greenrobot.essentials.collections.MultimapSet;
-import org.greenrobot.essentials.collections.MultimapSet.SetType;
-
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,6 +29,8 @@ import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.DataPublisherUtils;
 import io.objectbox.reactive.SubscriptionBuilder;
+import org.greenrobot.essentials.collections.MultimapSet;
+import org.greenrobot.essentials.collections.MultimapSet.SetType;
 
 /**
  * A {@link DataPublisher} that notifies {@link DataObserver}s about changes in an entity box.
@@ -45,14 +44,17 @@ class ObjectClassPublisher implements DataPublisher<Class>, Runnable {
     final BoxStore boxStore;
     final MultimapSet<Integer, DataObserver<Class>> observersByEntityTypeId = MultimapSet.create(SetType.THREAD_SAFE);
     private final Deque<PublishRequest> changesQueue = new ArrayDeque<>();
+
     private static class PublishRequest {
         @Nullable private final DataObserver<Class> observer;
         private final int[] entityTypeIds;
+
         PublishRequest(@Nullable DataObserver<Class> observer, int[] entityTypeIds) {
             this.observer = observer;
             this.entityTypeIds = entityTypeIds;
         }
     }
+
     volatile boolean changePublisherRunning;
 
     ObjectClassPublisher(BoxStore boxStore) {

@@ -15,6 +15,7 @@ import io.objectbox.sync.SyncChange;
 public interface SyncChangeListener {
 
     // Note: this method is expected by JNI, check before modifying/removing it.
+
     /**
      * Called each time when data from sync was applied locally.
      *

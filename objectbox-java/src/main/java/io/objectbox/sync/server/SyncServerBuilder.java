@@ -1,13 +1,14 @@
 package io.objectbox.sync.server;
 
-import io.objectbox.BoxStore;
-import io.objectbox.annotation.apihint.Experimental;
-import io.objectbox.sync.listener.SyncChangeListener;
-import io.objectbox.sync.SyncCredentials;
-
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
+
+import io.objectbox.BoxStore;
+import io.objectbox.annotation.apihint.Experimental;
+import io.objectbox.sync.SyncCredentials;
+import io.objectbox.sync.listener.SyncChangeListener;
 
 /**
  * Creates a {@link SyncServer} and allows to set additional configuration.
@@ -80,7 +81,7 @@ public class SyncServerBuilder {
 
     /**
      * Builds and returns a Sync server ready to {@link SyncServer#start()}.
-     *
+     * <p>
      * Note: this clears all previously set authenticator credentials.
      */
     public SyncServer build() {

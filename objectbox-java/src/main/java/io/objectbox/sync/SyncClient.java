@@ -1,5 +1,9 @@
 package io.objectbox.sync;
 
+import java.io.Closeable;
+
+import javax.annotation.Nullable;
+
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.SyncBuilder.RequestUpdatesMode;
 import io.objectbox.sync.listener.SyncChangeListener;
@@ -9,12 +13,9 @@ import io.objectbox.sync.listener.SyncListener;
 import io.objectbox.sync.listener.SyncLoginListener;
 import io.objectbox.sync.listener.SyncTimeListener;
 
-import javax.annotation.Nullable;
-import java.io.Closeable;
-
 /**
  * ObjectBox sync client. Build a client with {@link Sync#client}.
- *
+ * <p>
  * Keep the instance around (avoid garbage collection) while you want to have sync ongoing.
  * For a clean shutdown, call {@link #close()}.
  * <p>
@@ -48,8 +49,9 @@ public interface SyncClient extends Closeable {
 
     /**
      * Estimates the current server timestamp in nanoseconds based on the last known server time.
+     *
      * @return unix timestamp in nanoseconds (since epoch);
-     *         or 0 if there has not been a server contact yet and thus the server's time is unknown
+     * or 0 if there has not been a server contact yet and thus the server's time is unknown
      */
     long getServerTimeNanos();
 
@@ -60,7 +62,7 @@ public interface SyncClient extends Closeable {
      * except for when the server time is unknown, then the result is zero.
      *
      * @return time difference in nanoseconds; e.g. positive if server time is ahead of local time;
-     *         or 0 if there has not been a server contact yet and thus the server's time is unknown
+     * or 0 if there has not been a server contact yet and thus the server's time is unknown
      */
     long getServerTimeDiffNanos();
 
@@ -69,7 +71,7 @@ public interface SyncClient extends Closeable {
      * This is measured during login.
      *
      * @return roundtrip time in nanoseconds;
-     *         or 0 if there has not been a server contact yet and thus the roundtrip time could not be estimated
+     * or 0 if there has not been a server contact yet and thus the roundtrip time could not be estimated
      */
     long getRoundtripTimeNanos();
 
@@ -148,9 +150,9 @@ public interface SyncClient extends Closeable {
      * This is useful if sync updates were turned off with
      * {@link SyncBuilder#requestUpdatesMode(RequestUpdatesMode) requestUpdatesMode(MANUAL)}.
      *
-     * @see #cancelUpdates()
      * @return 'true' if the request was likely sent (e.g. the sync client is in "logged in" state)
      * or 'false' if the request was not sent (and will not be sent in the future)
+     * @see #cancelUpdates()
      */
     boolean requestUpdates();
 
@@ -158,6 +160,7 @@ public interface SyncClient extends Closeable {
      * Asks the server to send sync updates until this sync client is up-to-date, then pauses sync updates again.
      * This is useful if sync updates were turned off with
      * {@link SyncBuilder#requestUpdatesMode(RequestUpdatesMode) requestUpdatesMode(MANUAL)}.
+     *
      * @return 'true' if the request was likely sent (e.g. the sync client is in "logged in" state)
      * or 'false' if the request was not sent (and will not be sent in the future)
      */

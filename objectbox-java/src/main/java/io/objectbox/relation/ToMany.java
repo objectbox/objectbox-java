@@ -15,7 +15,6 @@
  */
 package io.objectbox.relation;
 
-import io.objectbox.internal.ToManyGetter;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -42,6 +41,7 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbDetachedException;
 import io.objectbox.internal.IdGetter;
 import io.objectbox.internal.ReflectionCache;
+import io.objectbox.internal.ToManyGetter;
 import io.objectbox.internal.ToOneGetter;
 import io.objectbox.query.QueryFilter;
 import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
@@ -695,7 +695,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     private boolean prepareToManyBacklinkEntitiesForDb(long entityId, IdGetter<TARGET> idGetter,
-            @Nullable Map<TARGET, Boolean> setAdded, @Nullable Map<TARGET, Boolean> setRemoved) {
+                                                       @Nullable Map<TARGET, Boolean> setAdded, @Nullable Map<TARGET, Boolean> setRemoved) {
         ToManyGetter<TARGET> backlinkToManyGetter = relationInfo.backlinkToManyGetter;
 
         synchronized (this) {
@@ -739,7 +739,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     private boolean prepareToOneBacklinkEntitiesForDb(long entityId, IdGetter<TARGET> idGetter,
-            @Nullable Map<TARGET, Boolean> setAdded, @Nullable Map<TARGET, Boolean> setRemoved) {
+                                                      @Nullable Map<TARGET, Boolean> setAdded, @Nullable Map<TARGET, Boolean> setRemoved) {
         ToOneGetter<TARGET> backlinkToOneGetter = relationInfo.backlinkToOneGetter;
 
         synchronized (this) {

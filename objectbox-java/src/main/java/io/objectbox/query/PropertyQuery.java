@@ -347,10 +347,10 @@ public class PropertyQuery {
 
     /**
      * Sums up all values for the given property over all Objects matching the query.
-     *
+     * <p>
      * Note: this method is not recommended for properties of type long unless you know the contents of the DB not to
-     *       overflow. Use {@link #sumDouble()} instead if you cannot guarantee the sum to be in the long value range.
-     * 
+     * overflow. Use {@link #sumDouble()} instead if you cannot guarantee the sum to be in the long value range.
+     *
      * @return 0 in case no elements matched the query
      * @throws io.objectbox.exception.NumericOverflowException if the sum exceeds the numbers {@link Long} can
      * represent.
@@ -362,11 +362,11 @@ public class PropertyQuery {
         );
     }
 
-    /** 
+    /**
      * Sums up all values for the given property over all Objects matching the query.
-     * 
+     * <p>
      * Note: for integer types int and smaller, {@link #sum()} is usually preferred for sums.
-     *       
+     *
      * @return 0 in case no elements matched the query
      */
     public double sumDouble() {
@@ -386,9 +386,9 @@ public class PropertyQuery {
         );
     }
 
-    /** 
+    /**
      * Finds the maximum value for the given property over all Objects matching the query.
-     * 
+     *
      * @return NaN in case no elements matched the query
      */
     public double maxDouble() {

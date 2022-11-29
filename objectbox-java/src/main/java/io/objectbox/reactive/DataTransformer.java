@@ -33,6 +33,7 @@ package io.objectbox.reactive;
 public interface DataTransformer<FROM, TO> {
     /**
      * Transforms/processes the given data.
+     *
      * @param source data to be transformed
      * @return transformed data
      * @throws Exception Transformers may throw any exceptions, which can be reacted on via

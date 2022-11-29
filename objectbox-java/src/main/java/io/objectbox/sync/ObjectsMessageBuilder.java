@@ -1,10 +1,10 @@
 package io.objectbox.sync;
 
 /**
- * @see SyncClient#startObjectsMessage 
+ * @see SyncClient#startObjectsMessage
  */
 public interface ObjectsMessageBuilder {
-    
+
     ObjectsMessageBuilder addString(long optionalId, String value);
 
     ObjectsMessageBuilder addBytes(long optionalId, byte[] value, boolean isFlatBuffers);

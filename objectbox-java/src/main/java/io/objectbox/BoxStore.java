@@ -16,9 +16,6 @@
 
 package io.objectbox;
 
-import io.objectbox.internal.Feature;
-import org.greenrobot.essentials.collections.LongHashMap;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -49,12 +46,14 @@ import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.DbSchemaException;
+import io.objectbox.internal.Feature;
 import io.objectbox.internal.NativeLibraryLoader;
 import io.objectbox.internal.ObjectBoxThreadPool;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.SubscriptionBuilder;
 import io.objectbox.sync.SyncClient;
+import org.greenrobot.essentials.collections.LongHashMap;
 
 /**
  * An ObjectBox database that provides {@link Box Boxes} to put and get objects of specific entity classes
@@ -267,7 +266,7 @@ public class BoxStore implements Closeable {
 
         try {
             handle = nativeCreateWithFlatOptions(builder.buildFlatStoreOptions(canonicalPath), builder.model);
-            if(handle == 0) throw new DbException("Could not create native store");
+            if (handle == 0) throw new DbException("Could not create native store");
 
             int debugFlags = builder.debugFlags;
             if (debugFlags != 0) {
@@ -539,7 +538,7 @@ public class BoxStore implements Closeable {
             System.out.println("Begin TX with commit count " + initialCommitCount);
         }
         long nativeTx = nativeBeginTx(handle);
-        if(nativeTx == 0) throw new DbException("Could not create native transaction");
+        if (nativeTx == 0) throw new DbException("Could not create native transaction");
 
         Transaction tx = new Transaction(this, nativeTx, initialCommitCount);
         synchronized (transactions) {
@@ -565,7 +564,7 @@ public class BoxStore implements Closeable {
             System.out.println("Begin read TX with commit count " + initialCommitCount);
         }
         long nativeTx = nativeBeginReadTx(handle);
-        if(nativeTx == 0) throw new DbException("Could not create native read transaction");
+        if (nativeTx == 0) throw new DbException("Could not create native read transaction");
 
         Transaction tx = new Transaction(this, nativeTx, initialCommitCount);
         synchronized (transactions) {
@@ -601,7 +600,7 @@ public class BoxStore implements Closeable {
         synchronized (this) {
             oldClosedState = closed;
             if (!closed) {
-                if(objectBrowserPort != 0) { // not linked natively (yet), so clean up here
+                if (objectBrowserPort != 0) { // not linked natively (yet), so clean up here
                     try {
                         stopObjectBrowser();
                     } catch (Throwable e) {
@@ -679,7 +678,7 @@ public class BoxStore implements Closeable {
      * BoxStoreBuilder#DEFAULT_NAME})".
      *
      * @param objectStoreDirectory directory to be deleted; this is the value you previously provided to {@link
-     *                             BoxStoreBuilder#directory(File)}
+     * BoxStoreBuilder#directory(File)}
      * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
      * Note: If false is returned, any number of files may have been deleted before the failure happened.
      * @throws IllegalStateException if the given directory is still used by a open {@link BoxStore}.
@@ -715,9 +714,9 @@ public class BoxStore implements Closeable {
      * If you did not use a custom name with BoxStoreBuilder, you can pass "new File({@link
      * BoxStoreBuilder#DEFAULT_NAME})".
      *
-     * @param androidContext     provide an Android Context like Application or Service
+     * @param androidContext provide an Android Context like Application or Service
      * @param customDbNameOrNull use null for default name, or the name you previously provided to {@link
-     *                           BoxStoreBuilder#name(String)}.
+     * BoxStoreBuilder#name(String)}.
      * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
      * Note: If false is returned, any number of files may have been deleted before the failure happened.
      * @throws IllegalStateException if the given name is still used by a open {@link BoxStore}.
@@ -736,9 +735,9 @@ public class BoxStore implements Closeable {
      * BoxStoreBuilder#DEFAULT_NAME})".
      *
      * @param baseDirectoryOrNull use null for no base dir, or the value you previously provided to {@link
-     *                            BoxStoreBuilder#baseDirectory(File)}
-     * @param customDbNameOrNull  use null for default name, or the name you previously provided to {@link
-     *                            BoxStoreBuilder#name(String)}.
+     * BoxStoreBuilder#baseDirectory(File)}
+     * @param customDbNameOrNull use null for default name, or the name you previously provided to {@link
+     * BoxStoreBuilder#name(String)}.
      * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
      * Note: If false is returned, any number of files may have been deleted before the failure happened.
      * @throws IllegalStateException if the given directory (+name) is still used by a open {@link BoxStore}.
@@ -1055,8 +1054,9 @@ public class BoxStore implements Closeable {
     /**
      * Validate database pages, a lower level storage unit (integrity check).
      * Do not call this inside a transaction (currently unsupported).
+     *
      * @param pageLimit the maximum of pages to validate (e.g. to limit time spent on validation).
-     *        Pass zero set no limit and thus validate all pages.
+     * Pass zero set no limit and thus validate all pages.
      * @param checkLeafLevel Flag to validate leaf pages. These do not point to other pages but contain data.
      * @return Number of pages validated, which may be twice the given pageLimit as internally there are "two DBs".
      * @throws DbException if validation failed to run (does not tell anything about DB file consistency).
@@ -1172,7 +1172,7 @@ public class BoxStore implements Closeable {
 
     @Experimental
     public synchronized boolean stopObjectBrowser() {
-        if(objectBrowserPort == 0) {
+        if (objectBrowserPort == 0) {
             throw new IllegalStateException("ObjectBrowser has not been started before");
         }
         objectBrowserPort = 0;

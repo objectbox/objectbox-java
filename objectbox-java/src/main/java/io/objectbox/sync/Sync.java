@@ -1,7 +1,6 @@
 package io.objectbox.sync;
 
 import io.objectbox.BoxStore;
-import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.server.SyncServerBuilder;
 
 /**

@@ -167,7 +167,7 @@ public class SubscriptionBuilder<T> {
             weakObserver.setSubscription(subscription);
         }
 
-        if(dataSubscriptionList != null) {
+        if (dataSubscriptionList != null) {
             dataSubscriptionList.add(subscription);
         }
 

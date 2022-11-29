@@ -35,7 +35,7 @@ public class ModelModifier {
         }
 
         public PropertyModifier property(String name) {
-            return  new PropertyModifier(this, name);
+            return new PropertyModifier(this, name);
         }
     }
 

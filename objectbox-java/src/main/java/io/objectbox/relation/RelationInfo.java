@@ -94,7 +94,7 @@ public class RelationInfo<SOURCE, TARGET> implements Serializable {
      * ToMany as a ToMany backlink
      */
     public RelationInfo(EntityInfo<SOURCE> sourceInfo, EntityInfo<TARGET> targetInfo, ToManyGetter<SOURCE> toManyGetter,
-            ToManyGetter<TARGET> backlinkToManyGetter, int targetRelationId) {
+                        ToManyGetter<TARGET> backlinkToManyGetter, int targetRelationId) {
         this.sourceInfo = sourceInfo;
         this.targetInfo = targetInfo;
         this.toManyGetter = toManyGetter;

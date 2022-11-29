@@ -184,7 +184,7 @@ public class Transaction implements Closeable {
         EntityInfo<T> entityInfo = store.getEntityInfo(entityClass);
         CursorFactory<T> factory = entityInfo.getCursorFactory();
         long cursorHandle = nativeCreateCursor(transaction, entityInfo.getDbName(), entityClass);
-        if(cursorHandle == 0) throw new DbException("Could not create native cursor");
+        if (cursorHandle == 0) throw new DbException("Could not create native cursor");
         return factory.createCursor(this, cursorHandle, store);
     }
 

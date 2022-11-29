@@ -55,6 +55,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
         public void onData(List<T> data) {
         }
     }
+
     /** Placeholder observer to use if all subscribed observers should be notified. */
     private final SubscribedObservers<T> SUBSCRIBED_OBSERVERS = new SubscribedObservers<>();
 

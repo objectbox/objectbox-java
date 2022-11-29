@@ -42,7 +42,7 @@ public class DebugCursor implements Closeable {
     public static DebugCursor create(Transaction tx) {
         long txHandle = InternalAccess.getHandle(tx);
         long handle = nativeCreate(txHandle);
-        if(handle == 0) throw new DbException("Could not create native debug cursor");
+        if (handle == 0) throw new DbException("Could not create native debug cursor");
         return new DebugCursor(tx, handle);
     }
 

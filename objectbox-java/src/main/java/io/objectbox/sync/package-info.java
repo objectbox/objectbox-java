@@ -20,17 +20,17 @@
  * <p>
  * These are the typical steps to setup a sync client:
  * <ol>
- *     <li>Create a BoxStore as usual (using MyObjectBox)</li>
- *     <li>Get a {@link io.objectbox.sync.SyncBuilder} using {@link io.objectbox.sync.Sync#client(
- *     io.objectbox.BoxStore, java.lang.String, io.objectbox.sync.SyncCredentials)}.
- *     Here you need to pass the {@link io.objectbox.BoxStore}, along with an URL to the sync destination (server),
+ *     <li>Create a BoxStore as usual (using MyObjectBox).</li>
+ *     <li>Get a {@link io.objectbox.sync.SyncBuilder} using
+ *     {@link io.objectbox.sync.Sync#client(io.objectbox.BoxStore, java.lang.String, io.objectbox.sync.SyncCredentials) Sync.client(boxStore, url, credentials)}.
+ *     Here you need to pass the {@link io.objectbox.BoxStore BoxStore}, along with an URL to the sync destination (server),
  *     and credentials. For demo set ups, you could start with {@link io.objectbox.sync.SyncCredentials#none()}
  *     credentials.</li>
  *     <li>Optional: use the {@link io.objectbox.sync.SyncBuilder} instance from the last step to configure the sync
  *     client and set initial listeners.</li>
  *     <li>Call {@link io.objectbox.sync.SyncBuilder#build()} to get an instance of
  *     {@link io.objectbox.sync.SyncClient} (and hold on to it). Synchronization is now active.</li>
- *     <li>Optional: Interact with {@link io.objectbox.sync.SyncClient}</li>
+ *     <li>Optional: Interact with {@link io.objectbox.sync.SyncClient}.</li>
  * </ol>
  */
 @ParametersAreNonnullByDefault

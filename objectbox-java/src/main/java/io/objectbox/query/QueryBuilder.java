@@ -16,19 +16,20 @@
 
 package io.objectbox.query;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import io.objectbox.Box;
 import io.objectbox.EntityInfo;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.exception.DbException;
+import io.objectbox.exception .DbException;
 import io.objectbox.relation.RelationInfo;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Builds a {@link Query Query} using conditions which can then be used to return a list of matching Objects.
@@ -216,7 +217,7 @@ public class QueryBuilder<T> {
         this.box = box;
         this.storeHandle = storeHandle;
         handle = nativeCreate(storeHandle, entityName);
-        if(handle == 0) throw new DbException("Could not create native query builder");
+        if (handle == 0) throw new DbException("Could not create native query builder");
         isSubQuery = false;
     }
 
@@ -266,7 +267,7 @@ public class QueryBuilder<T> {
             throw new IllegalStateException("Incomplete logic condition. Use or()/and() between two conditions only.");
         }
         long queryHandle = nativeBuild(handle);
-        if(queryHandle == 0) throw new DbException("Could not create native query");
+        if (queryHandle == 0) throw new DbException("Could not create native query");
         Query<T> query = new Query<>(box, queryHandle, eagerRelations, filter, comparator);
         close();
         return query;

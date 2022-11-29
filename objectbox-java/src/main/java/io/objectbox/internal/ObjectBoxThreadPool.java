@@ -33,7 +33,6 @@ import io.objectbox.annotation.apihint.Internal;
  *     <li>Reduce keep-alive time for threads to 20 seconds</li>
  *     <li>Uses a ThreadFactory to name threads like "ObjectBox-1-Thread-1"</li>
  * </ul>
- *
  */
 @Internal
 public class ObjectBoxThreadPool extends ThreadPoolExecutor {

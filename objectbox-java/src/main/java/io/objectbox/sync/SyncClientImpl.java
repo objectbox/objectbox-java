@@ -1,5 +1,10 @@
 package io.objectbox.sync;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
+
 import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
 import io.objectbox.annotation.apihint.Experimental;
@@ -11,10 +16,6 @@ import io.objectbox.sync.listener.SyncConnectionListener;
 import io.objectbox.sync.listener.SyncListener;
 import io.objectbox.sync.listener.SyncLoginListener;
 import io.objectbox.sync.listener.SyncTimeListener;
-
-import javax.annotation.Nullable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Internal sync client implementation. Use {@link SyncClient} to access functionality,
@@ -322,8 +323,8 @@ public class SyncClientImpl implements SyncClient {
     private native boolean nativeCancelUpdates(long handle);
 
     /**
-     *  Hints to the native client that an active network connection is available.
-     *  Returns true if the native client was disconnected (and will try to re-connect).
+     * Hints to the native client that an active network connection is available.
+     * Returns true if the native client was disconnected (and will try to re-connect).
      */
     private native boolean nativeTriggerReconnect(long handle);
 

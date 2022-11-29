@@ -117,7 +117,7 @@ public class Query<T> implements Closeable {
     // volatile so checkOpen() is more up-to-date (no need for synchronized; it's a race anyway)
     volatile long handle;
 
-    Query(Box<T> box, long queryHandle, @Nullable List<EagerRelation<T, ?>> eagerRelations, @Nullable  QueryFilter<T> filter,
+    Query(Box<T> box, long queryHandle, @Nullable List<EagerRelation<T, ?>> eagerRelations, @Nullable QueryFilter<T> filter,
           @Nullable Comparator<T> comparator) {
         this.box = box;
         store = box.getStore();
@@ -282,7 +282,7 @@ public class Query<T> implements Closeable {
      */
     @Nonnull
     public long[] findIds() {
-        return findIds(0,0);
+        return findIds(0, 0);
     }
 
     /**

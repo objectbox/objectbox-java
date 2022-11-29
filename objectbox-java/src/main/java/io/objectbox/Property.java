@@ -16,6 +16,12 @@
 
 package io.objectbox;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Date;
+
+import javax.annotation.Nullable;
+
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbException;
@@ -33,11 +39,6 @@ import io.objectbox.query.PropertyQueryConditionImpl.StringCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.StringCondition.Operation;
 import io.objectbox.query.PropertyQueryConditionImpl.StringStringCondition;
 import io.objectbox.query.QueryBuilder.StringOrder;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
 
 /**
  * Meta data describing a Property of an ObjectBox Entity.
@@ -60,7 +61,8 @@ public class Property<ENTITY> implements Serializable {
     public final boolean isId;
     public final boolean isVirtual;
     public final String dbName;
-    @SuppressWarnings("rawtypes") // Use raw type of PropertyConverter to allow users to supply a generic implementation.
+    @SuppressWarnings("rawtypes")
+    // Use raw type of PropertyConverter to allow users to supply a generic implementation.
     public final Class<? extends PropertyConverter> converterClass;
 
     /** Type, which is converted to a type supported by the DB. */
@@ -83,14 +85,16 @@ public class Property<ENTITY> implements Serializable {
         this(entity, ordinal, id, type, name, isId, dbName, null, null);
     }
 
-    @SuppressWarnings("rawtypes") // Use raw type of PropertyConverter to allow users to supply a generic implementation.
+    @SuppressWarnings("rawtypes")
+    // Use raw type of PropertyConverter to allow users to supply a generic implementation.
     public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name, boolean isId,
                     @Nullable String dbName, @Nullable Class<? extends PropertyConverter> converterClass,
                     @Nullable Class<?> customType) {
         this(entity, ordinal, id, type, name, isId, false, dbName, converterClass, customType);
     }
 
-    @SuppressWarnings("rawtypes") // Use raw type of PropertyConverter to allow users to supply a generic implementation.
+    @SuppressWarnings("rawtypes")
+    // Use raw type of PropertyConverter to allow users to supply a generic implementation.
     public Property(EntityInfo<ENTITY> entity, int ordinal, int id, Class<?> type, String name, boolean isId,
                     boolean isVirtual, @Nullable String dbName,
                     @Nullable Class<? extends PropertyConverter> converterClass, @Nullable Class<?> customType) {

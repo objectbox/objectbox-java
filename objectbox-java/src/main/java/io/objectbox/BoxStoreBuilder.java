@@ -16,10 +16,6 @@
 
 package io.objectbox;
 
-import io.objectbox.flatbuffers.FlatBufferBuilder;
-
-import org.greenrobot.essentials.io.IoUtils;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -38,9 +34,11 @@ import javax.annotation.Nullable;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
+import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.ideasonly.ModelUpdate;
 import io.objectbox.model.FlatStoreOptions;
 import io.objectbox.model.ValidateOnOpenMode;
+import org.greenrobot.essentials.io.IoUtils;
 
 /**
  * Configures and builds a {@link BoxStore} with reasonable defaults. To get an instance use {@code MyObjectBox.builder()}.
@@ -299,7 +297,7 @@ public class BoxStoreBuilder {
      * amount of threads you are using.
      * For highly concurrent setups (e.g. you are using ObjectBox on the server side) it may make sense to increase the
      * number.
-     *
+     * <p>
      * Note: Each thread that performed a read transaction and is still alive holds on to a reader slot.
      * These slots only get vacated when the thread ends. Thus, be mindful with the number of active threads.
      * Alternatively, you can opt to try the experimental noReaderThreadLocals option flag.
@@ -312,9 +310,9 @@ public class BoxStoreBuilder {
     /**
      * Disables the usage of thread locals for "readers" related to read transactions.
      * This can make sense if you are using a lot of threads that are kept alive.
-     *
+     * <p>
      * Note: This is still experimental, as it comes with subtle behavior changes at a low level and may affect
-     *       corner cases with e.g. transactions, which may not be fully tested at the moment.
+     * corner cases with e.g. transactions, which may not be fully tested at the moment.
      */
     public BoxStoreBuilder noReaderThreadLocals() {
         this.noReaderThreadLocals = true;
@@ -527,7 +525,7 @@ public class BoxStoreBuilder {
         int offset = FlatStoreOptions.endFlatStoreOptions(fbb);
         fbb.finish(offset);
         return fbb.sizedByteArray();
-    }    
+    }
 
     /**
      * Builds a {@link BoxStore} using any given configuration.
