@@ -16,6 +16,10 @@
 
 package io.objectbox.exception;
 
+/**
+ * Thrown when applying a transaction (e.g. putting an object) would exceed the
+ * {@link io.objectbox.BoxStoreBuilder#maxSizeInKByte(long) maxSizeInKByte} configured for the store.
+ */
 public class DbFullException extends DbException {
     public DbFullException(String message) {
         super(message);

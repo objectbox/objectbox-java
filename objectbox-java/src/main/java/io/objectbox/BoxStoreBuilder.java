@@ -34,6 +34,8 @@ import javax.annotation.Nullable;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
+import io.objectbox.exception.DbFullException;
+import io.objectbox.exception.DbMaxDataSizeExceededException;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.ideasonly.ModelUpdate;
 import io.objectbox.model.FlatStoreOptions;
@@ -333,10 +335,13 @@ public class BoxStoreBuilder {
 
     /**
      * Sets the maximum size the database file can grow to.
-     * By default this is 1 GB, which should be sufficient for most applications.
+     * When applying a transaction (e.g. putting an object) would exceed it a {@link DbFullException} is thrown.
      * <p>
-     * In general, a maximum size prevents the DB from growing indefinitely when something goes wrong
-     * (for example you insert data in an infinite loop).
+     * By default, this is 1 GB, which should be sufficient for most applications.
+     * In general, a maximum size prevents the database from growing indefinitely when something goes wrong
+     * (for example data is put in an infinite loop).
+     * <p>
+     * This value can be changed, so increased or also decreased, each time when opening a store.
      */
     public BoxStoreBuilder maxSizeInKByte(long maxSizeInKByte) {
         if (maxSizeInKByte <= maxDataSizeInKByte) {
@@ -349,13 +354,17 @@ public class BoxStoreBuilder {
     /**
      * This API is experimental and may change or be removed in future releases.
      * <p>
-     * Sets the maximum size the data stored in the database can grow to. Must be below {@link #maxSizeInKByte(long)}.
+     * Sets the maximum size the data stored in the database can grow to.
+     * When applying a transaction (e.g. putting an object) would exceed it a {@link DbMaxDataSizeExceededException}
+     * is thrown.
+     * <p>
+     * Must be below {@link #maxSizeInKByte(long)}.
      * <p>
      * Different from {@link #maxSizeInKByte(long)} this only counts bytes stored in objects, excluding system and
      * metadata. However, it is more involved than database size tracking, e.g. it stores an internal counter.
      * Only use this if a stricter, more accurate limit is required.
      * <p>
-     * When the data limit is reached data can be removed to get below the limit again (assuming the database size limit
+     * When the data limit is reached, data can be removed to get below the limit again (assuming the database size limit
      * is not also reached).
      */
     @Experimental
@@ -455,7 +464,7 @@ public class BoxStoreBuilder {
      * {@link io.objectbox.exception.DbException} are thrown during query execution).
      *
      * @param queryAttempts number of attempts a query find operation will be executed before failing.
-     *                      Recommended values are in the range of 2 to 5, e.g. a value of 3 as a starting point.
+     * Recommended values are in the range of 2 to 5, e.g. a value of 3 as a starting point.
      */
     @Experimental
     public BoxStoreBuilder queryAttempts(int queryAttempts) {
