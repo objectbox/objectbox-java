@@ -55,6 +55,9 @@ public class Query<T> implements Closeable {
 
     native void nativeDestroy(long handle);
 
+    /** Clones the native query, incl. conditions and parameters, and returns a handle to the clone. */
+    native long nativeClone(long handle);
+
     native Object nativeFindFirst(long handle, long cursorHandle);
 
     native Object nativeFindUnique(long handle, long cursorHandle);
@@ -130,6 +133,20 @@ public class Query<T> implements Closeable {
     }
 
     /**
+     * Creates a copy of the {@code originalQuery}, but pointing to a different native query using {@code handle}.
+     */
+    // Note: not using recommended copy constructor (just passing this) as handle needs to change.
+    private Query(Query<T> originalQuery, long handle) {
+        this(
+                originalQuery.box,
+                handle,
+                originalQuery.eagerRelations,
+                originalQuery.filter,
+                originalQuery.comparator
+        );
+    }
+
+    /**
      * Explicitly call {@link #close()} instead to avoid expensive finalization.
      */
     @SuppressWarnings("deprecation") // finalize()
@@ -154,6 +171,22 @@ public class Query<T> implements Closeable {
             handle = 0;
             nativeDestroy(handleCopy);
         }
+    }
+
+    /**
+     * Creates a copy of this for use in another thread.
+     * <p>
+     * Clones the native query, keeping any previously set parameters.
+     * <p>
+     * Closing the original query does not close the copy. {@link #close()} the copy once finished using it.
+     * <p>
+     * Note: a set {@link QueryBuilder#filter(QueryFilter) filter} or {@link QueryBuilder#sort(Comparator) sort}
+     * order <b>must be thread safe</b>.
+     */
+    // Note: not overriding clone() to avoid confusion with Java's cloning mechanism.
+    public Query<T> copy() {
+        long cloneHandle = nativeClone(handle);
+        return new Query<>(this, cloneHandle);
     }
 
     /** To be called inside a read TX */
