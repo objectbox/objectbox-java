@@ -15,7 +15,14 @@
  */
 package io.objectbox.exception;
 
-/** Errors were detected in a file, e.g. illegal values or structural inconsistencies. */
+import io.objectbox.BoxStoreBuilder;
+
+/**
+ * Errors were detected in a database file, e.g. illegal values or structural inconsistencies.
+ * <p>
+ * It may be possible to re-open the store with {@link BoxStoreBuilder#usePreviousCommit()} to restore
+ * to a working state.
+ */
 public class FileCorruptException extends DbException {
     public FileCorruptException(String message) {
         super(message);

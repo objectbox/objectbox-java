@@ -17,10 +17,10 @@
 package io.objectbox.exception;
 
 /**
- * Thrown when an error occurred that requires the DB to shutdown.
- * This may be an I/O error for example.
- * Regular operations won't be possible anymore.
- * To handle that situation you could exit the app or try to reopen the store.
+ * Thrown when an error occurred that requires the store to be closed.
+ * <p>
+ * This may be an I/O error. Regular operations won't be possible.
+ * To handle this exit the app or try to reopen the store.
  */
 public class DbShutdownException extends DbException {
     public DbShutdownException(String message) {

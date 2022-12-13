@@ -16,6 +16,15 @@
 
 package io.objectbox.exception;
 
+/**
+ * Thrown when there is an error with the data schema (data model).
+ * <p>
+ * Typically, there is a conflict between the data model defined in your code (using {@link io.objectbox.annotation.Entity @Entity}
+ * classes) and the data model of the existing database file.
+ * <p>
+ * Read the <a href="https://docs.objectbox.io/advanced/meta-model-ids-and-uids#resolving-meta-model-conflicts">meta model docs</a>
+ * on why this can happen and how to resolve such conflicts.
+ */
 public class DbSchemaException extends DbException {
     public DbSchemaException(String message) {
         super(message);

@@ -36,6 +36,7 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbFullException;
 import io.objectbox.exception.DbMaxDataSizeExceededException;
+import io.objectbox.exception.DbMaxReadersExceededException;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.ideasonly.ModelUpdate;
 import io.objectbox.model.FlatStoreOptions;
@@ -291,18 +292,18 @@ public class BoxStoreBuilder {
     }
 
     /**
-     * Sets the maximum number of concurrent readers. For most applications, the default is fine (~ 126 readers).
+     * Sets the maximum number of concurrent readers. For most applications, the default is fine (about 126 readers).
      * <p>
-     * A "reader" is short for a thread involved in a read transaction.
+     * A "reader" is short for a thread involved in a read transaction. If the maximum is exceeded the store throws
+     * {@link DbMaxReadersExceededException}. In this case check that your code only uses a reasonable amount of
+     * threads.
      * <p>
-     * If you hit {@link io.objectbox.exception.DbMaxReadersExceededException}, you should first worry about the
-     * amount of threads you are using.
      * For highly concurrent setups (e.g. you are using ObjectBox on the server side) it may make sense to increase the
      * number.
      * <p>
      * Note: Each thread that performed a read transaction and is still alive holds on to a reader slot.
      * These slots only get vacated when the thread ends. Thus, be mindful with the number of active threads.
-     * Alternatively, you can opt to try the experimental noReaderThreadLocals option flag.
+     * Alternatively, you can try the experimental {@link #noReaderThreadLocals()} option flag.
      */
     public BoxStoreBuilder maxReaders(int maxReaders) {
         this.maxReaders = maxReaders;
@@ -460,8 +461,8 @@ public class BoxStoreBuilder {
     /**
      * For massive concurrent setups (app is using a lot of threads), you can enable automatic retries for queries.
      * This can resolve situations in which resources are getting sparse (e.g.
-     * {@link io.objectbox.exception.DbMaxReadersExceededException} or other variations of
-     * {@link io.objectbox.exception.DbException} are thrown during query execution).
+     * {@link DbMaxReadersExceededException} or other variations of
+     * {@link DbException} are thrown during query execution).
      *
      * @param queryAttempts number of attempts a query find operation will be executed before failing.
      * Recommended values are in the range of 2 to 5, e.g. a value of 3 as a starting point.

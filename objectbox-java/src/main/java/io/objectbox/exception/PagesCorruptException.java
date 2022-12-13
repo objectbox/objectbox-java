@@ -15,7 +15,9 @@
  */
 package io.objectbox.exception;
 
-/** Errors were detected in a file related to pages, e.g. illegal values or structural inconsistencies. */
+/**
+ * Errors related to pages were detected in a database file, e.g. bad page refs outside of the file.
+ */
 public class PagesCorruptException extends FileCorruptException {
     public PagesCorruptException(String message) {
         super(message);

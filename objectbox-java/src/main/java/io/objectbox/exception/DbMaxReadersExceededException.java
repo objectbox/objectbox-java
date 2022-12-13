@@ -21,9 +21,9 @@ import io.objectbox.BoxStoreBuilder;
 
 /**
  * Thrown when the maximum of readers (read transactions) was exceeded.
- * Verify that you run a reasonable amount of threads only.
+ * Verify that your code only uses a reasonable amount of threads.
  * <p>
- * If you intend to work with a very high number of threads (&gt;100), consider increasing the number of maximum readers
+ * If a very high number of threads (&gt;100) needs to be used, consider increasing the number of maximum readers
  * using {@link BoxStoreBuilder#maxReaders(int)} and enabling query retries using
  * {@link BoxStoreBuilder#queryAttempts(int)}.
  * <p>
