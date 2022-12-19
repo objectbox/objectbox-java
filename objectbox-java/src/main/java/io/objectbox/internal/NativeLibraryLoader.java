@@ -175,6 +175,8 @@ public class NativeLibraryLoader {
                                     "please report this to us: os.arch=%s, machine=%s%n",
                             cpuArch, osArch, getCpuArchOSOrNull());
                 }
+            } else if (osArch.equalsIgnoreCase("loongarch64")) {
+                cpuArch = "loongarch64";
             }
         }
         // If os.arch is not covered above try a x86 version based on JVM bit-ness.
