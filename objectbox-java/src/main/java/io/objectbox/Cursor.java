@@ -327,9 +327,9 @@ public abstract class Cursor<T> implements Closeable {
         nativeModifyRelationsSingle(cursor, relationId, key, targetKey, remove);
     }
 
-    protected <TARGET> void checkApplyToManyToDb(List<TARGET> orders, Class<TARGET> targetClass) {
-        if (orders instanceof ToMany) {
-            ToMany<TARGET> toMany = (ToMany<TARGET>) orders;
+    protected <TARGET> void checkApplyToManyToDb(List<TARGET> relationField, Class<TARGET> targetClass) {
+        if (relationField instanceof ToMany) {
+            ToMany<TARGET> toMany = (ToMany<TARGET>) relationField;
             if (toMany.internalCheckApplyToDbRequired()) {
                 try (Cursor<TARGET> targetCursor = getRelationTargetCursor(targetClass)) {
                     toMany.internalApplyToDb(this, targetCursor);
