@@ -2,6 +2,7 @@ name: Close inactive issues
 on:
   schedule:
     - cron: "15 1 * * *" # “At 01:15.”
+  workflow_dispatch: # To support running manually.
 
 jobs:
   close-issues:
@@ -11,7 +12,7 @@ jobs:
       pull-requests: write
     steps:
       # https://github.com/marketplace/actions/close-stale-issues
-      - uses: actions/stale@v5
+      - uses: actions/stale@v7
         with:
           days-before-stale: -1 # Add the stale label manually.
           days-before-close: 21
