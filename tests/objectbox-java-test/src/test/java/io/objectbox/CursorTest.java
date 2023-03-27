@@ -49,15 +49,20 @@ public class CursorTest extends AbstractObjectBoxTest {
         transaction.abort();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPutEntityWithInvalidId() {
         TestEntity entity = new TestEntity();
         entity.setId(777);
         Transaction transaction = store.beginTx();
         Cursor<TestEntity> cursor = transaction.createCursor(TestEntity.class);
+
         try {
-            cursor.put(entity);
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> cursor.put(entity));
+            assertEquals(ex.getMessage(), "ID is higher or equal to internal ID sequence: 777 (vs. 1)." +
+                    " Use ID 0 (zero) to insert new entities.");
         } finally {
+            // Always clean up, even if assertions fail, to avoid misleading clean-up errors.
             cursor.close();
             transaction.close();
         }
