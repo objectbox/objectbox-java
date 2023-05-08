@@ -64,6 +64,12 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
     private final static int __ID_simpleLongU = TestEntity_.simpleLongU.id;
     private final static int __ID_stringObjectMap = TestEntity_.stringObjectMap.id;
     private final static int __ID_flexProperty = TestEntity_.flexProperty.id;
+    private final static int __ID_shortArray = TestEntity_.shortArray.id;
+    private final static int __ID_charArray = TestEntity_.charArray.id;
+    private final static int __ID_intArray = TestEntity_.intArray.id;
+    private final static int __ID_longArray = TestEntity_.longArray.id;
+    private final static int __ID_floatArray = TestEntity_.floatArray.id;
+    private final static int __ID_doubleArray = TestEntity_.doubleArray.id;
 
     public TestEntityCursor(io.objectbox.Transaction tx, long cursor, BoxStore boxStore) {
         super(tx, cursor, TestEntity_.__INSTANCE, boxStore);
@@ -81,10 +87,46 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
      */
     @Override
     public long put(TestEntity entity) {
+        short[] shortArray = entity.getShortArray();
+        int __id17 = shortArray != null ? __ID_shortArray : 0;
+
+        collectShortArray(cursor, 0, PUT_FLAG_FIRST,
+                __id17, shortArray);
+
+        char[] charArray = entity.getCharArray();
+        int __id18 = charArray != null ? __ID_charArray : 0;
+
+        collectCharArray(cursor, 0, 0,
+                __id18, charArray);
+
+        int[] intArray = entity.getIntArray();
+        int __id19 = intArray != null ? __ID_intArray : 0;
+
+        collectIntArray(cursor, 0, 0,
+                __id19, intArray);
+
+        long[] longArray = entity.getLongArray();
+        int __id20 = longArray != null ? __ID_longArray : 0;
+
+        collectLongArray(cursor, 0, 0,
+                __id20, longArray);
+
+        float[] floatArray = entity.getFloatArray();
+        int __id21 = floatArray != null ? __ID_floatArray : 0;
+
+        collectFloatArray(cursor, 0, 0,
+                __id21, floatArray);
+
+        double[] doubleArray = entity.getDoubleArray();
+        int __id22 = doubleArray != null ? __ID_doubleArray : 0;
+
+        collectDoubleArray(cursor, 0, 0,
+                __id22, doubleArray);
+
         String[] simpleStringArray = entity.getSimpleStringArray();
         int __id10 = simpleStringArray != null ? __ID_simpleStringArray : 0;
 
-        collectStringArray(cursor, 0, PUT_FLAG_FIRST,
+        collectStringArray(cursor, 0, 0,
                 __id10, simpleStringArray);
 
         java.util.List<String> simpleStringList = entity.getSimpleStringList();

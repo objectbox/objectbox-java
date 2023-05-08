@@ -51,6 +51,11 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertTrue(id != 0);
         assertEquals(id, entity.getId());
 
+        short valShort = 100 + simpleInt;
+        long valLong = 1000 + simpleInt;
+        float valFloat = 200 + simpleInt / 10f;
+        double valDouble = 2000 + simpleInt / 100f;
+
         TestEntity entityRead = box.get(id);
         assertNotNull(entityRead);
         assertEquals(id, entityRead.getId());
@@ -58,10 +63,10 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertEquals(simpleInt, entityRead.getSimpleInt());
         assertEquals((byte) (10 + simpleInt), entityRead.getSimpleByte());
         assertFalse(entityRead.getSimpleBoolean());
-        assertEquals((short) (100 + simpleInt), entityRead.getSimpleShort());
-        assertEquals(1000 + simpleInt, entityRead.getSimpleLong());
-        assertEquals(200 + simpleInt / 10f, entityRead.getSimpleFloat(), 0);
-        assertEquals(2000 + simpleInt / 100f, entityRead.getSimpleDouble(), 0);
+        assertEquals(valShort, entityRead.getSimpleShort());
+        assertEquals(valLong, entityRead.getSimpleLong());
+        assertEquals(valFloat, entityRead.getSimpleFloat(), 0);
+        assertEquals(valDouble, entityRead.getSimpleDouble(), 0);
         assertArrayEquals(new byte[]{1, 2, (byte) simpleInt}, entityRead.getSimpleByteArray());
         String[] expectedStringArray = new String[]{simpleString};
         assertArrayEquals(expectedStringArray, entityRead.getSimpleStringArray());
@@ -72,6 +77,12 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertEquals(1, entityRead.getStringObjectMap().size());
         assertEquals(simpleString, entityRead.getStringObjectMap().get(simpleString));
         assertEquals(simpleString, entityRead.getFlexProperty());
+        assertArrayEquals(new short[]{(short) -valShort, valShort}, entity.getShortArray());
+        assertArrayEquals(simpleString.toCharArray(), entity.getCharArray());
+        assertArrayEquals(new int[]{-simpleInt, simpleInt}, entity.getIntArray());
+        assertArrayEquals(new long[]{-valLong, valLong}, entity.getLongArray());
+        assertArrayEquals(new float[]{-valFloat, valFloat}, entityRead.getFloatArray(), 0);
+        assertArrayEquals(new double[]{-valDouble, valDouble}, entity.getDoubleArray(), 0);
     }
 
     @Test
@@ -95,6 +106,12 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertEquals(0, defaultEntity.getSimpleLongU());
         assertNull(defaultEntity.getStringObjectMap());
         assertNull(defaultEntity.getFlexProperty());
+        assertNull(defaultEntity.getShortArray());
+        assertNull(defaultEntity.getCharArray());
+        assertNull(defaultEntity.getIntArray());
+        assertNull(defaultEntity.getLongArray());
+        assertNull(defaultEntity.getFloatArray());
+        assertNull(defaultEntity.getDoubleArray());
     }
 
     @Test
