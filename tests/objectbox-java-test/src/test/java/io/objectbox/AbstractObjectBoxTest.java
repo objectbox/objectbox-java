@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import javax.annotation.Nullable;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -262,7 +263,15 @@ public abstract class AbstractObjectBoxTest {
                 .id(TestEntity_.stringObjectMap.id, ++lastUid);
         entityBuilder.property("flexProperty", PropertyType.Flex).id(TestEntity_.flexProperty.id, ++lastUid);
 
-        int lastId = TestEntity_.flexProperty.id;
+        // Integer and floating point arrays
+        entityBuilder.property("shortArray", PropertyType.ShortVector).id(TestEntity_.shortArray.id, ++lastUid);
+        entityBuilder.property("charArray", PropertyType.CharVector).id(TestEntity_.charArray.id, ++lastUid);
+        entityBuilder.property("intArray", PropertyType.IntVector).id(TestEntity_.intArray.id, ++lastUid);
+        entityBuilder.property("longArray", PropertyType.LongVector).id(TestEntity_.longArray.id, ++lastUid);
+        entityBuilder.property("floatArray", PropertyType.FloatVector).id(TestEntity_.floatArray.id, ++lastUid);
+        entityBuilder.property("doubleArray", PropertyType.DoubleVector).id(TestEntity_.doubleArray.id, ++lastUid);
+
+        int lastId = TestEntity_.doubleArray.id;
         entityBuilder.lastPropertyId(lastId, lastUid);
         addOptionalFlagsToTestEntity(entityBuilder);
         entityBuilder.entityDone();
@@ -309,6 +318,12 @@ public abstract class AbstractObjectBoxTest {
             entity.setStringObjectMap(stringObjectMap);
         }
         entity.setFlexProperty(simpleString);
+        entity.setShortArray(new short[]{(short) -(100 + nr), entity.getSimpleShort()});
+        entity.setCharArray(simpleString != null ? simpleString.toCharArray() : null);
+        entity.setIntArray(new int[]{-entity.getSimpleInt(), entity.getSimpleInt()});
+        entity.setLongArray(new long[]{-entity.getSimpleLong(), entity.getSimpleLong()});
+        entity.setFloatArray(new float[]{-entity.getSimpleFloat(), entity.getSimpleFloat()});
+        entity.setDoubleArray(new double[]{-entity.getSimpleDouble(), entity.getSimpleDouble()});
         return entity;
     }
 

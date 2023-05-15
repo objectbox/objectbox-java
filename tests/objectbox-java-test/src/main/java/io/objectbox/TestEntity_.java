@@ -102,6 +102,24 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
     public final static io.objectbox.Property<TestEntity> flexProperty =
             new io.objectbox.Property<>(__INSTANCE, 16, 17, byte[].class, "flexProperty", false, "flexProperty", FlexObjectConverter.class, Object.class);
 
+    public final static io.objectbox.Property<TestEntity> shortArray =
+            new io.objectbox.Property<>(__INSTANCE, 17, 19, short[].class, "shortArray");
+
+    public final static io.objectbox.Property<TestEntity> charArray =
+            new io.objectbox.Property<>(__INSTANCE, 18, 20, char[].class, "charArray");
+
+    public final static io.objectbox.Property<TestEntity> intArray =
+            new io.objectbox.Property<>(__INSTANCE, 19, 21, int[].class, "intArray");
+
+    public final static io.objectbox.Property<TestEntity> longArray =
+            new io.objectbox.Property<>(__INSTANCE, 20, 22, long[].class, "longArray");
+
+    public final static io.objectbox.Property<TestEntity> floatArray =
+            new io.objectbox.Property<>(__INSTANCE, 21, 18, float[].class, "floatArray");
+
+    public final static io.objectbox.Property<TestEntity> doubleArray =
+            new io.objectbox.Property<>(__INSTANCE, 22, 23, double[].class, "doubleArray");
+
     @SuppressWarnings("unchecked")
     public final static io.objectbox.Property<TestEntity>[] __ALL_PROPERTIES = new io.objectbox.Property[]{
             id,
@@ -120,7 +138,13 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
             simpleIntU,
             simpleLongU,
             stringObjectMap,
-            flexProperty
+            flexProperty,
+            shortArray,
+            charArray,
+            intArray,
+            longArray,
+            floatArray,
+            doubleArray
     };
 
     public final static io.objectbox.Property<TestEntity> __ID_PROPERTY = id;

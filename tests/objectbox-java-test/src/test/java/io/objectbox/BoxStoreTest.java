@@ -305,7 +305,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
         // No limit.
         long validated = store.validate(0, true);
-        assertEquals(9, validated);
+        assertEquals(14, validated);
 
         // With limit.
         validated = store.validate(1, true);

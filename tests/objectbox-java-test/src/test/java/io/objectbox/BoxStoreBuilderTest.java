@@ -225,7 +225,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
                 DbMaxDataSizeExceededException.class,
                 () -> getTestEntityBox().put(testEntity2)
         );
-        assertEquals("Exceeded user-set maximum by [bytes]: 64", maxDataExc.getMessage());
+        assertEquals("Exceeded user-set maximum by [bytes]: 528", maxDataExc.getMessage());
 
         // Remove to get below max data size, then put again.
         getTestEntityBox().remove(testEntity1);

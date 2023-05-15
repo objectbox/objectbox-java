@@ -53,6 +53,12 @@ public class TestEntity {
     private long simpleLongU;
     private Map<String, Object> stringObjectMap;
     private Object flexProperty;
+    private short[] shortArray;
+    private char[] charArray;
+    private int[] intArray;
+    private long[] longArray;
+    private float[] floatArray;
+    private double[] doubleArray;
 
     transient boolean noArgsConstructorCalled;
 
@@ -64,11 +70,30 @@ public class TestEntity {
         this.id = id;
     }
 
-    public TestEntity(long id, boolean simpleBoolean, byte simpleByte, short simpleShort, int simpleInt,
-                      long simpleLong, float simpleFloat, double simpleDouble, String simpleString,
-                      byte[] simpleByteArray, String[] simpleStringArray, List<String> simpleStringList,
-                      short simpleShortU, int simpleIntU, long simpleLongU, Map<String, Object> stringObjectMap,
-                      Object flexProperty) {
+    public TestEntity(long id,
+                      boolean simpleBoolean,
+                      byte simpleByte,
+                      short simpleShort,
+                      int simpleInt,
+                      long simpleLong,
+                      float simpleFloat,
+                      double simpleDouble,
+                      String simpleString,
+                      byte[] simpleByteArray,
+                      String[] simpleStringArray,
+                      List<String> simpleStringList,
+                      short simpleShortU,
+                      int simpleIntU,
+                      long simpleLongU,
+                      Map<String, Object> stringObjectMap,
+                      Object flexProperty,
+                      short[] shortArray,
+                      char[] charArray,
+                      int[] intArray,
+                      long[] longArray,
+                      float[] floatArray,
+                      double[] doubleArray
+    ) {
         this.id = id;
         this.simpleBoolean = simpleBoolean;
         this.simpleByte = simpleByte;
@@ -86,6 +111,12 @@ public class TestEntity {
         this.simpleLongU = simpleLongU;
         this.stringObjectMap = stringObjectMap;
         this.flexProperty = flexProperty;
+        this.shortArray = shortArray;
+        this.charArray = charArray;
+        this.intArray = intArray;
+        this.longArray = longArray;
+        this.floatArray = floatArray;
+        this.doubleArray = doubleArray;
         if (STRING_VALUE_THROW_IN_CONSTRUCTOR.equals(simpleString)) {
             throw new RuntimeException(EXCEPTION_IN_CONSTRUCTOR_MESSAGE);
         }
@@ -239,6 +270,60 @@ public class TestEntity {
         return this;
     }
 
+    @Nullable
+    public short[] getShortArray() {
+        return shortArray;
+    }
+
+    public void setShortArray(@Nullable short[] shortArray) {
+        this.shortArray = shortArray;
+    }
+
+    @Nullable
+    public char[] getCharArray() {
+        return charArray;
+    }
+
+    public void setCharArray(@Nullable char[] charArray) {
+        this.charArray = charArray;
+    }
+
+    @Nullable
+    public int[] getIntArray() {
+        return intArray;
+    }
+
+    public void setIntArray(@Nullable int[] intArray) {
+        this.intArray = intArray;
+    }
+
+    @Nullable
+    public long[] getLongArray() {
+        return longArray;
+    }
+
+    public void setLongArray(@Nullable long[] longArray) {
+        this.longArray = longArray;
+    }
+
+    @Nullable
+    public float[] getFloatArray() {
+        return floatArray;
+    }
+
+    public void setFloatArray(@Nullable float[] floatArray) {
+        this.floatArray = floatArray;
+    }
+
+    @Nullable
+    public double[] getDoubleArray() {
+        return doubleArray;
+    }
+
+    public void setDoubleArray(@Nullable double[] doubleArray) {
+        this.doubleArray = doubleArray;
+    }
+
     @Override
     public String toString() {
         return "TestEntity{" +
@@ -259,6 +344,12 @@ public class TestEntity {
                 ", simpleLongU=" + simpleLongU +
                 ", stringObjectMap=" + stringObjectMap +
                 ", flexProperty=" + flexProperty +
+                ", shortArray=" + Arrays.toString(shortArray) +
+                ", charArray=" + Arrays.toString(charArray) +
+                ", intArray=" + Arrays.toString(intArray) +
+                ", longArray=" + Arrays.toString(longArray) +
+                ", floatArray=" + Arrays.toString(floatArray) +
+                ", doubleArray=" + Arrays.toString(doubleArray) +
                 ", noArgsConstructorCalled=" + noArgsConstructorCalled +
                 '}';
     }

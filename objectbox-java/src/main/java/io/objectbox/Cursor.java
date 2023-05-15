@@ -105,6 +105,7 @@ public abstract class Cursor<T> implements Closeable {
                                                int idLong3, long valueLong3, int idLong4, long valueLong4
     );
 
+    // STRING ARRAYS
     protected static native long collectStringArray(long cursor, long keyIfComplete, int flags,
                                                     int idStringArray, @Nullable String[] stringArray
     );
@@ -112,6 +113,26 @@ public abstract class Cursor<T> implements Closeable {
     protected static native long collectStringList(long cursor, long keyIfComplete, int flags,
                                                    int idStringList, @Nullable List<String> stringList
     );
+
+    // INTEGER ARRAYS
+    protected static native long collectShortArray(long cursor, long keyIfComplete, int flags,
+                                                   int propertyId, @Nullable short[] value);
+
+    protected static native long collectCharArray(long cursor, long keyIfComplete, int flags,
+                                                  int propertyId, @Nullable char[] value);
+
+    protected static native long collectIntArray(long cursor, long keyIfComplete, int flags,
+                                                 int propertyId, @Nullable int[] value);
+
+    protected static native long collectLongArray(long cursor, long keyIfComplete, int flags,
+                                                  int propertyId, @Nullable long[] value);
+
+    // FLOATING POINT ARRAYS
+    protected static native long collectFloatArray(long cursor, long keyIfComplete, int flags,
+                                                   int propertyId, @Nullable float[] value);
+
+    protected static native long collectDoubleArray(long cursor, long keyIfComplete, int flags,
+                                                    int propertyId, @Nullable double[] value);
 
     native int nativePropertyId(long cursor, String propertyValue);
 
