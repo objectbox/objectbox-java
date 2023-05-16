@@ -67,9 +67,10 @@ task javadocForWeb(type: Javadoc) {
         exclude("**/io/objectbox/ModelBuilder.java")
         exclude("**/io/objectbox/Properties.java")
         exclude("**/io/objectbox/Transaction.java")
-        exclude("**/io/objectbox/model/**")
+        exclude("**/io/objectbox/flatbuffers/**")
         exclude("**/io/objectbox/ideasonly/**")
         exclude("**/io/objectbox/internal/**")
+        exclude("**/io/objectbox/model/**")
         exclude("**/io/objectbox/reactive/DataPublisherUtils.java")
         exclude("**/io/objectbox/reactive/WeakDataObserver.java")
     }
