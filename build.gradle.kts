@@ -7,9 +7,9 @@
 
 buildscript {
     // Typically, only edit those two:
-    val objectboxVersionNumber = "3.5.2" // without "-SNAPSHOT", e.g. "2.5.0" or "2.4.0-RC"
+    val objectboxVersionNumber = "3.6.0" // without "-SNAPSHOT", e.g. "2.5.0" or "2.4.0-RC"
     val objectboxVersionRelease =
-        false // set to true for releasing to ignore versionPostFix to avoid e.g. "-dev" versions
+        true // set to true for releasing to ignore versionPostFix to avoid e.g. "-dev" versions
 
     // version post fix: "-<value>" or "" if not defined; e.g. used by CI to pass in branch name
     val versionPostFixValue = project.findProperty("versionPostFix")
