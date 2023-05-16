@@ -10,7 +10,7 @@ plugins {
 
 // Note: use release flag instead of sourceCompatibility and targetCompatibility to ensure only JDK 8 API is used.
 // https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.release.set(8)
 }
 
@@ -38,14 +38,14 @@ tasks.named("dokkaHtml") {
     }
 }
 
-task javadocJar(type: Jar) {
+tasks.register('javadocJar', Jar) {
     dependsOn tasks.named("dokkaHtml")
     group = 'build'
     archiveClassifier.set('javadoc')
     from "$javadocDir"
 }
 
-task sourcesJar(type: Jar) {
+tasks.register('sourcesJar', Jar) {
     group = 'build'
     archiveClassifier.set('sources')
     from sourceSets.main.allSource
