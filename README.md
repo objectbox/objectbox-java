@@ -22,9 +22,9 @@
   </a>
 </p>
 
-# ObjectBox Java Database (Kotlin, Android)
+# ObjectBox Android Database (Kotlin, Java)
 
-Java database - simple but powerful, frugal but fast. Embedded into your Android, Linux, macOS, iOS, or Windows app, store and manage data easily, enjoy ludicrous speed, build ecoconciously 💚 
+Android database - simple but powerful, frugal but fast. Embedded into your Android, Linux, macOS, iOS, or Windows app, store and manage data easily, enjoy ludicrous speed, build ecoconciously 💚 
 
 ### Demo code
 
