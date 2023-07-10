@@ -24,10 +24,6 @@ import io.objectbox.sync.SyncClient;
 @Internal
 public class InternalAccess {
 
-    public static long getHandle(BoxStore boxStore) {
-        return boxStore.internalHandle();
-    }
-
     public static Transaction getActiveTx(BoxStore boxStore) {
         Transaction tx = boxStore.activeTx.get();
         if (tx == null) {

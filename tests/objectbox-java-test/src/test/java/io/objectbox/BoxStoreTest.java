@@ -136,7 +136,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         assertThrowsStoreIsClosed(() -> store.subscribe(TestEntity.class));
         assertThrowsStoreIsClosed(store::startObjectBrowser);
         assertThrowsStoreIsClosed(() -> store.startObjectBrowser(12345));
-        assertThrowsStoreIsClosed(() -> store.startObjectBrowser(""));
+        assertThrowsStoreIsClosed(() -> store.startObjectBrowser("http://127.0.0.1"));
         // assertThrowsStoreIsClosed(store::stopObjectBrowser); // Requires mocking, not testing for now.
         assertThrowsStoreIsClosed(() -> store.setDbExceptionListener(null));
         // Internal thread pool is shut down as part of closing store, should no longer accept new work.

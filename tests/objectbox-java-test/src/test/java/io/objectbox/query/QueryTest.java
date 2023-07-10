@@ -62,9 +62,11 @@ public class QueryTest extends AbstractQueryTest {
     public void createIfStoreClosed_throws() {
         store.close();
 
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> box.query());
-        // FIXME Replace with actual error message
-        assertEquals("No schema set on store", ex.getMessage());
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> box.query()
+        );
+        assertEquals("Store is closed", ex.getMessage());
     }
 
     @Test

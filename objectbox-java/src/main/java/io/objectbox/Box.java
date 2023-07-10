@@ -574,7 +574,7 @@ public class Box<T> {
      * Returns a builder to create queries for Object matching supplied criteria.
      */
     public QueryBuilder<T> query() {
-        return new QueryBuilder<>(this, store.internalHandle(), store.getDbName(entityClass));
+        return new QueryBuilder<>(this, store.getNativeStore(), store.getDbName(entityClass));
     }
 
     /**
