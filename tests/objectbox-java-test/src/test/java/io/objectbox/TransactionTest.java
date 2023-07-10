@@ -16,13 +16,7 @@
 
 package io.objectbox;
 
-import io.objectbox.exception.DbException;
-import io.objectbox.exception.DbExceptionListener;
-import io.objectbox.exception.DbMaxReadersExceededException;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.function.ThrowingRunnable;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -33,6 +27,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import io.objectbox.exception.DbException;
+import io.objectbox.exception.DbExceptionListener;
+import io.objectbox.exception.DbMaxReadersExceededException;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -533,5 +534,67 @@ public class TransactionTest extends AbstractObjectBoxTest {
         for (Future<Integer> txTask : txTasks) {
             txTask.get(1, TimeUnit.MINUTES);  // 1s would be enough for normally, but use 1 min to allow debug sessions
         }
+    }
+
+    @Test
+    public void runInTx_forwardsException() {
+        // Exception from callback is forwarded.
+        RuntimeException e = assertThrows(
+                RuntimeException.class,
+                () -> store.runInTx(() -> {
+                    throw new RuntimeException("Thrown inside callback");
+                })
+        );
+        assertEquals("Thrown inside callback", e.getMessage());
+
+        // Can create a new transaction afterward.
+        store.runInTx(() -> store.boxFor(TestEntity.class).count());
+    }
+
+    @Test
+    public void runInReadTx_forwardsException() {
+        // Exception from callback is forwarded.
+        RuntimeException e = assertThrows(
+                RuntimeException.class,
+                () -> store.runInReadTx(() -> {
+                    throw new RuntimeException("Thrown inside callback");
+                })
+        );
+        assertEquals("Thrown inside callback", e.getMessage());
+
+        // Can create a new transaction afterward.
+        store.runInReadTx(() -> store.boxFor(TestEntity.class).count());
+    }
+
+    @Test
+    public void callInTx_forwardsException() throws Exception {
+        // Exception from callback is forwarded.
+        Exception e = assertThrows(
+                Exception.class,
+                () -> store.callInTx(() -> {
+                    throw new Exception("Thrown inside callback");
+                })
+        );
+        assertEquals("Thrown inside callback", e.getMessage());
+
+        // Can create a new transaction afterward.
+        store.callInTx(() -> store.boxFor(TestEntity.class).count());
+    }
+
+    @Test
+    public void callInReadTx_forwardsException() {
+        // Exception from callback is forwarded, but wrapped inside a RuntimeException.
+        RuntimeException e = assertThrows(
+                RuntimeException.class,
+                () -> store.callInReadTx(() -> {
+                    throw new IOException("Thrown inside callback");
+                })
+        );
+        assertEquals("Callable threw exception", e.getMessage());
+        assertTrue(e.getCause() instanceof IOException);
+        assertEquals("Thrown inside callback", e.getCause().getMessage());
+
+        // Can create a new transaction afterward.
+        store.callInReadTx(() -> store.boxFor(TestEntity.class).count());
     }
 }
