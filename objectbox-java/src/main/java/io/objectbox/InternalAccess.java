@@ -23,9 +23,6 @@ import io.objectbox.sync.SyncClient;
 
 @Internal
 public class InternalAccess {
-    public static <T> Cursor<T> getReader(Box<T> box) {
-        return box.getReader();
-    }
 
     public static long getHandle(BoxStore boxStore) {
         return boxStore.internalHandle();
@@ -40,20 +37,12 @@ public class InternalAccess {
         return tx;
     }
 
-    public static long getHandle(Cursor reader) {
-        return reader.internalHandle();
-    }
-
     public static long getHandle(Transaction tx) {
         return tx.internalHandle();
     }
 
     public static void setSyncClient(BoxStore boxStore, @Nullable SyncClient syncClient) {
         boxStore.setSyncClient(syncClient);
-    }
-
-    public static <T> void releaseReader(Box<T> box, Cursor<T> reader) {
-        box.releaseReader(reader);
     }
 
     public static <T> Cursor<T> getWriter(Box<T> box) {
@@ -66,10 +55,6 @@ public class InternalAccess {
 
     public static <T> long getActiveTxCursorHandle(Box<T> box) {
         return box.getActiveTxCursor().internalHandle();
-    }
-
-    public static <T> void releaseWriter(Box<T> box, Cursor<T> writer) {
-        box.releaseWriter(writer);
     }
 
     public static <T> void commitWriter(Box<T> box, Cursor<T> writer) {
