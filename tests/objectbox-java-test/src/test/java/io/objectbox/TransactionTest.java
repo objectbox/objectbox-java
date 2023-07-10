@@ -165,28 +165,28 @@ public class TransactionTest extends AbstractObjectBoxTest {
         transaction.abort();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testCreateCursorAfterAbortException() {
         Transaction tx = store.beginReadTx();
         tx.abort();
-        tx.createKeyValueCursor();
+        IllegalStateException ex = assertThrows(IllegalStateException.class, tx::createKeyValueCursor);
+        assertTrue(ex.getMessage().contains("TX is not active anymore"));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testCommitAfterAbortException() {
         Transaction tx = store.beginTx();
         tx.abort();
-        tx.commit();
+        IllegalStateException ex = assertThrows(IllegalStateException.class, tx::commit);
+        assertTrue(ex.getMessage().contains("TX is not active anymore"));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testCommitReadTxException() {
         Transaction tx = store.beginReadTx();
-        try {
-            tx.commit();
-        } finally {
-            tx.abort();
-        }
+        IllegalStateException ex = assertThrows(IllegalStateException.class, tx::commit);
+        assertEquals("Read transactions may not be committed - use abort instead", ex.getMessage());
+        tx.abort();
     }
 
     @Test
@@ -195,18 +195,19 @@ public class TransactionTest extends AbstractObjectBoxTest {
         DbExceptionListener exceptionListener = e -> exs[0] = e;
         Transaction tx = store.beginReadTx();
         store.setDbExceptionListener(exceptionListener);
-        try {
-            tx.commit();
-            fail("Should have thrown");
-        } catch (IllegalStateException e) {
-            tx.abort();
-            assertSame(e, exs[0]);
-        }
+        IllegalStateException e = assertThrows(IllegalStateException.class, tx::commit);
+        tx.abort();
+        assertSame(e, exs[0]);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testCancelExceptionOutsideDbExceptionListener() {
-        DbExceptionListener.cancelCurrentException();
+        IllegalStateException e = assertThrows(
+                IllegalStateException.class,
+                DbExceptionListener::cancelCurrentException
+        );
+        assertEquals("Canceling Java exceptions can only be done from inside exception listeners",
+                e.getMessage());
     }
 
     @Test
@@ -388,9 +389,13 @@ public class TransactionTest extends AbstractObjectBoxTest {
         });
     }
 
-    @Test(expected = DbException.class)
+    @Test
     public void testRunInReadTx_putFails() {
-        store.runInReadTx(() -> getTestEntityBox().put(new TestEntity()));
+        DbException e = assertThrows(
+                DbException.class,
+                () -> store.runInReadTx(() -> getTestEntityBox().put(new TestEntity()))
+        );
+        assertEquals("Cannot put in read transaction", e.getMessage());
     }
 
     @Test
