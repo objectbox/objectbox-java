@@ -520,7 +520,7 @@ public class BoxStoreBuilder {
         FlatStoreOptions.addFileMode(fbb, fileMode);
         FlatStoreOptions.addMaxReaders(fbb, maxReaders);
         if (validateOnOpenMode != 0) {
-            FlatStoreOptions.addValidateOnOpen(fbb, validateOnOpenMode);
+            FlatStoreOptions.addValidateOnOpenPages(fbb, validateOnOpenMode);
             if (validateOnOpenPageLimit != 0) {
                 FlatStoreOptions.addValidateOnOpenPageLimit(fbb, validateOnOpenPageLimit);
             }

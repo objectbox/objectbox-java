@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 ObjectBox Ltd. All rights reserved.
+ * Copyright 2023 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,5 +45,15 @@ public final class TreeOptionFlags {
    * first node is picked.
    */
   public static final int AllowNonUniqueNodes = 8;
+  /**
+   * Nodes described in AllowNonUniqueNodes will be automatically detected to consolidate them (manually).
+   */
+  public static final int DetectNonUniqueNodes = 16;
+  /**
+   * Nodes described in AllowNonUniqueNodes will be automatically consolidated to make them unique.
+   * This consolidation happens e.g. on put/remove operations.
+   * Using this value implies DetectNonUniqueNodes.
+   */
+  public static final int AutoConsolidateNonUniqueNodes = 32;
 }
 
