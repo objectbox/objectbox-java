@@ -22,9 +22,9 @@
   </a>
 </p>
 
-# ObjectBox Java Database (Kotlin, Android)
+# ObjectBox - Fast and Efficient Java Database (Kotlin, Android)
 
-Java database - simple but powerful, frugal but fast. Embedded into your Android, Linux, macOS, iOS, or Windows app, store and manage data easily, enjoy ludicrous speed, build ecoconciously 💚 
+ObjectBox Java is a simple yet powerful database designed specifically for Java applications. Store and manage data effortlessly in your Android, Linux, macOS, iOS, or Windows app with ObjectBox. Enjoy exceptional speed, frugal resource usage, and environmentally-friendly development 💚
 
 ### Demo code
 
@@ -46,45 +46,22 @@ box.put(playlist)
 ```
 
 ## Table of Contents
-- [Why use ObjectBox](#why-use-objectbox-for-java-data-management--kotlin-data-management)
-  - [Features](#features)
-- [How to get started](#how-to-get-started)
+- [Key Features](#key-features)
+- [Getting started](#getting-started)
   - [Gradle setup](#gradle-setup)
   - [First steps](#first-steps)
-- [Already using ObjectBox?](#already-using-objectbox)
+- [Why use ObjectBox?](#why-use-objectbox-for-java-data-management)
+- [Community and Support](#community-and-support)
 - [Other languages/bindings](#other-languagesbindings)
 - [License](#license)
 
+## Key Features
+🏁 **High performance:** exceptional speed, outperforming alternatives like SQLite and Realm in all CRUD operations.\
+💚 **Efficient Resource Usage:** minimal CPU, power and Memory consumption for maximum flexibility and sustainability.\
+🔗 **[Built-in Object Relations](https://docs.objectbox.io/relations):** built-in support for object relations, allowing you to easily establish and manage relationships between objects.\
+👌 **Ease of use:** concise API that eliminates the need for complex SQL queries, saving you time and effort during development.
 
-## Why use ObjectBox for Java data management / Kotlin data management?
-
-The NoSQL Java database is built for storing data locally, offline-first on resource-restricted devices like phones.
-
-The database is optimized for high speed and low resource consumption on restricted devices, making it ideal for use on mobile devices. It uses minimal CPU, RAM, and power, which is not only great for users but also for the environment.
-
-Being fully ACID-compliant, ObjectBox is faster than any alternative, outperforming SQLite and Realm across all CRUD (Create, Read, Update, Delete) operations. Check out our [Performance Benchmarking App repository](https://github.com/objectbox/objectbox-performance).
-
-Our concise native-language API is easy to pick up and only requires a fraction of the code compared to SQLite. No more rows or columns, just plain objects (true POJOS) with built-in relations. It's great for handling large data volumes and allows changing your model whenever needed.
-
-All of this makes ObjectBox a smart choice for local data persistence with Java and Kotlin - it's efficient, easy and sustainable.
-
-### Features
-
-🏁 **High performance** on restricted devices, like IoT gateways, micro controllers, ECUs etc.\
-💚 **Resourceful** with minimal CPU, power and Memory usage for maximum flexibility and sustainability\
-🔗 **[Relations](https://docs.objectbox.io/relations):** object links / relationships are built-in\
-💻 **Multiplatform:** Linux, Windows, Android, iOS, macOS, any POSIX system
-
-🌱 **Scalable:** handling millions of objects resource-efficiently with ease\
-💐 **[Queries](https://docs.objectbox.io/queries):** filter data as needed, even across relations\
-🦮 **Statically typed:** compile time checks & optimizations\
-📃 **Automatic schema migrations:** no update scripts needed
-
-**And much more than just data persistence**\
-🔄 **[ObjectBox Sync](https://objectbox.io/sync/):** keeps data in sync between devices and servers\
-🕒 **[ObjectBox TS](https://objectbox.io/time-series-database/):** time series extension for time based data
-
-## How to get started
+## Getting started
 ### Gradle setup
 
 For Android projects, add the ObjectBox Gradle plugin to your root `build.gradle`: 
@@ -141,21 +118,41 @@ The `Box` object gives you access to all major functions, like `put`, `get`, `re
 
 For details please check the [docs](https://docs.objectbox.io).     
 
-## Already using ObjectBox?
+## Why use ObjectBox for Java data management?
 
-❤ **Your opinion matters to us!** Please fill in this 2-minute [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7).
+ObjectBox is a NoSQL Java database designed for local data storage on resource-restricted devices, prioritizing offline-first functionality. It is a smart and sustainable choice for local data persistence in Java and Kotlin applications. It offers efficiency, ease of use, and flexibility.
 
-We believe, ObjectBox is super easy to use. We want to bring joy and delight to app developers with intuitive and fun to code with APIs. To do that, we want your feedback: what do you love? What's amiss? Where do you struggle in everyday app development?
+### Fast but resourceful
+Optimized for speed and minimal resource consumption, ObjectBox is an ideal solution for mobile devices. It has excellent performance, while also minimizing CPU, RAM, and power usage. ObjectBox outperforms SQLite and Realm across all CRUD (Create, Read, Update, Delete) operations. Check out our [Performance Benchmarking App repository](https://github.com/objectbox/objectbox-performance).
 
-**We're looking forward to receiving your comments and requests:**
+### Simple but powerful
+With its concise native-language API, ObjectBox simplifies development by requiring less code compared to SQLite. It operates on plain objects (POJOs) with built-in relations, eliminating the need to manage rows and columns. This approach is efficient for handling large data volumes and allows for easy model modifications.
+
+### Functionality
+
+💐 **[Queries](https://docs.objectbox.io/queries):** filter data as needed, even across relations\
+💻 **Multiplatform:** supports Linux, Windows, Android, iOS, macOS, and any POSIX system\
+🌱 **Scalable:** handling millions of objects resource-efficiently with ease\
+🦮 **Statically typed:** compile time checks & optimizations\
+📃 **Automatic schema migrations:** no update scripts needed
+
+**And much more than just data persistence**\
+🔄 **[ObjectBox Sync](https://objectbox.io/sync/):** keeps data in sync between devices and servers\
+🕒 **[ObjectBox TS](https://objectbox.io/time-series-database/):** time series extension for time based data
+
+## Community and Support
+
+❤ **Tell us what you think!** Share your thoughts through our [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7).
+
+At ObjectBox, we are dedicated to bringing joy and delight to app developers by providing intuitive and fun-to-code-with APIs. We genuinely want to hear from you: What do you love about ObjectBox? What could be improved? Where do you face challenges in everyday app development?
+
+**We eagerly await your comments and requests, so please feel free to reach out to us:**
 - Add [GitHub issues](https://github.com/ObjectBox/objectbox-java/issues) 
-- Upvote issues you find important by hitting the 👍/+1 reaction button
+- Upvote important issues 👍
 - Drop us a line via [@ObjectBox_io](https://twitter.com/ObjectBox_io/) or contact[at]objectbox.io
-- ⭐ us, if you like what you see 
+- ⭐ us on GitHub if you like what you see! 
 
-Thank you! 🙏
-
-Keep in touch: For general news on ObjectBox, [check our blog](https://objectbox.io/blog)!
+Thank you! Stay updated with our [blog](https://objectbox.io/blog)
 
 ## Other languages/bindings
 
