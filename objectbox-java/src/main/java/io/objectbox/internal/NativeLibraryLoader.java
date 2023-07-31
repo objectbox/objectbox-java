@@ -30,6 +30,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import javax.annotation.Nonnull;
@@ -203,7 +204,8 @@ public class NativeLibraryLoader {
         try {
             // Linux
             Process exec = Runtime.getRuntime().exec("uname -m");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(exec.getInputStream(), Charset.defaultCharset()));
             archOrNull = reader.readLine();
             reader.close();
         } catch (Exception ignored) {
