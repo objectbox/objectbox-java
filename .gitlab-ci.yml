@@ -1,5 +1,5 @@
 # Default image for linux builds
-image: objectboxio/buildenv:21.11.11-centos7
+image: objectboxio/buildenv-core:2023-07-28
 
 # Assumes these environment variables are configured in GitLab CI/CD Settings:
 # - SONATYPE_USER
