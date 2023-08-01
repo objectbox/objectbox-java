@@ -56,7 +56,7 @@ pipeline {
 
         stage('build-java') {
             steps {
-                sh "./ci/test-with-asan.sh $gradleArgs $signingArgs $gitlabRepoArgs clean build"
+                sh "./scripts/test-with-asan.sh $gradleArgs $signingArgs $gitlabRepoArgs clean build"
             }
             post {
                 always {
@@ -78,7 +78,7 @@ pipeline {
                 // "|| true" for an OK exit code if no file is found
                 sh 'rm tests/objectbox-java-test/hs_err_pid*.log || true'
                 // Note: do not run check task as it includes SpotBugs.
-                sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs clean :tests:objectbox-java-test:test"
+                sh "./scripts/test-with-asan.sh $gradleArgs $gitlabRepoArgs clean :tests:objectbox-java-test:test"
             }
             post {
                 always {
@@ -95,7 +95,7 @@ pipeline {
                 // "|| true" for an OK exit code if no file is found
                 sh 'rm tests/objectbox-java-test/hs_err_pid*.log || true'
                 // Note: do not run check task as it includes SpotBugs.
-                sh "./ci/test-with-asan.sh $gradleArgs $gitlabRepoArgs clean :tests:objectbox-java-test:test"
+                sh "./scripts/test-with-asan.sh $gradleArgs $gitlabRepoArgs clean :tests:objectbox-java-test:test"
             }
             post {
                 always {
