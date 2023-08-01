@@ -9,7 +9,7 @@ plugins {
     // https://github.com/spotbugs/spotbugs-gradle-plugin/releases
     id("com.github.spotbugs") version "5.0.14" apply false
     // https://github.com/gradle-nexus/publish-plugin/releases
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
 
 buildscript {
