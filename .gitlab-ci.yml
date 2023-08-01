@@ -99,13 +99,12 @@ test-jdk-8:
   variables:
     TEST_JDK: 8
 
-# JDK 17 is currently the default of the build image. JDK 21 LTS will arrive around September 2023.
-# JDK 17 is the latest LTS release.
-#test-jdk-17:
-#  extends: .test-asan-template
-#  needs: ["test-jdk-8"]
-#  variables:
-#    TEST_JDK: 17
+# JDK 11 is the next oldest LTS release.
+test-jdk-11:
+  extends: .test-asan-template
+  needs: ["test-jdk-8"]
+  variables:
+    TEST_JDK: 11
 
 test-jdk-x86:
   extends: .test-template
