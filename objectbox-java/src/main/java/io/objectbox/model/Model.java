@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 ObjectBox Ltd. All rights reserved.
+ * Copyright 2023 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,22 @@
 
 package io.objectbox.model;
 
-import java.nio.*;
-import java.lang.*;
-import java.util.*;
-import io.objectbox.flatbuffers.*;
+import io.objectbox.flatbuffers.BaseVector;
+import io.objectbox.flatbuffers.BooleanVector;
+import io.objectbox.flatbuffers.ByteVector;
+import io.objectbox.flatbuffers.Constants;
+import io.objectbox.flatbuffers.DoubleVector;
+import io.objectbox.flatbuffers.FlatBufferBuilder;
+import io.objectbox.flatbuffers.FloatVector;
+import io.objectbox.flatbuffers.IntVector;
+import io.objectbox.flatbuffers.LongVector;
+import io.objectbox.flatbuffers.ShortVector;
+import io.objectbox.flatbuffers.StringVector;
+import io.objectbox.flatbuffers.Struct;
+import io.objectbox.flatbuffers.Table;
+import io.objectbox.flatbuffers.UnionVector;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * A model describes all entities and other meta data.
@@ -31,7 +43,7 @@ import io.objectbox.flatbuffers.*;
  */
 @SuppressWarnings("unused")
 public final class Model extends Table {
-  public static void ValidateVersion() { Constants.FLATBUFFERS_2_0_8(); }
+  public static void ValidateVersion() { Constants.FLATBUFFERS_23_5_26(); }
   public static Model getRootAsModel(ByteBuffer _bb) { return getRootAsModel(_bb, new Model()); }
   public static Model getRootAsModel(ByteBuffer _bb, Model obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 ObjectBox Ltd. All rights reserved.
+ * Copyright 2023 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,22 @@
 
 package io.objectbox.model;
 
-import java.nio.*;
-import java.lang.*;
-import java.util.*;
-import io.objectbox.flatbuffers.*;
+import io.objectbox.flatbuffers.BaseVector;
+import io.objectbox.flatbuffers.BooleanVector;
+import io.objectbox.flatbuffers.ByteVector;
+import io.objectbox.flatbuffers.Constants;
+import io.objectbox.flatbuffers.DoubleVector;
+import io.objectbox.flatbuffers.FlatBufferBuilder;
+import io.objectbox.flatbuffers.FloatVector;
+import io.objectbox.flatbuffers.IntVector;
+import io.objectbox.flatbuffers.LongVector;
+import io.objectbox.flatbuffers.ShortVector;
+import io.objectbox.flatbuffers.StringVector;
+import io.objectbox.flatbuffers.Struct;
+import io.objectbox.flatbuffers.Table;
+import io.objectbox.flatbuffers.UnionVector;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Options to open a store with. Set only the values you want; defaults are used otherwise.
@@ -31,7 +43,7 @@ import io.objectbox.flatbuffers.*;
  */
 @SuppressWarnings("unused")
 public final class FlatStoreOptions extends Table {
-  public static void ValidateVersion() { Constants.FLATBUFFERS_2_0_8(); }
+  public static void ValidateVersion() { Constants.FLATBUFFERS_23_5_26(); }
   public static FlatStoreOptions getRootAsFlatStoreOptions(ByteBuffer _bb) { return getRootAsFlatStoreOptions(_bb, new FlatStoreOptions()); }
   public static FlatStoreOptions getRootAsFlatStoreOptions(ByteBuffer _bb, FlatStoreOptions obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __reset(_i, _bb); }
@@ -85,7 +97,7 @@ public final class FlatStoreOptions extends Table {
    * OSes, file systems, or hardware.
    * Note: ObjectBox builds upon ACID storage, which already has strong consistency mechanisms in place.
    */
-  public int validateOnOpen() { int o = __offset(14); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
+  public int validateOnOpenPages() { int o = __offset(14); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
   /**
    * To fine-tune database validation, you can specify a limit on how much data is looked at.
    * This is measured in "pages" with a page typically holding 4K.
@@ -143,6 +155,11 @@ public final class FlatStoreOptions extends Table {
    * Max data and DB sizes can be combined; data size must be below the DB size.
    */
   public long maxDataSizeInKbyte() { int o = __offset(32); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
+  /**
+   * When a database is opened, ObjectBox can perform additional consistency checks on its database structure.
+   * This enum is used to enable validation checks on a key/value level.
+   */
+  public int validateOnOpenKv() { int o = __offset(34); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
 
   public static int createFlatStoreOptions(FlatBufferBuilder builder,
       int directoryPathOffset,
@@ -150,7 +167,7 @@ public final class FlatStoreOptions extends Table {
       long maxDbSizeInKbyte,
       long fileMode,
       long maxReaders,
-      int validateOnOpen,
+      int validateOnOpenPages,
       long validateOnOpenPageLimit,
       int putPaddingMode,
       boolean skipReadSchema,
@@ -159,8 +176,9 @@ public final class FlatStoreOptions extends Table {
       boolean readOnly,
       long debugFlags,
       boolean noReaderThreadLocals,
-      long maxDataSizeInKbyte) {
-    builder.startTable(15);
+      long maxDataSizeInKbyte,
+      int validateOnOpenKv) {
+    builder.startTable(16);
     FlatStoreOptions.addMaxDataSizeInKbyte(builder, maxDataSizeInKbyte);
     FlatStoreOptions.addValidateOnOpenPageLimit(builder, validateOnOpenPageLimit);
     FlatStoreOptions.addMaxDbSizeInKbyte(builder, maxDbSizeInKbyte);
@@ -169,8 +187,9 @@ public final class FlatStoreOptions extends Table {
     FlatStoreOptions.addFileMode(builder, fileMode);
     FlatStoreOptions.addModelBytes(builder, modelBytesOffset);
     FlatStoreOptions.addDirectoryPath(builder, directoryPathOffset);
+    FlatStoreOptions.addValidateOnOpenKv(builder, validateOnOpenKv);
     FlatStoreOptions.addPutPaddingMode(builder, putPaddingMode);
-    FlatStoreOptions.addValidateOnOpen(builder, validateOnOpen);
+    FlatStoreOptions.addValidateOnOpenPages(builder, validateOnOpenPages);
     FlatStoreOptions.addNoReaderThreadLocals(builder, noReaderThreadLocals);
     FlatStoreOptions.addReadOnly(builder, readOnly);
     FlatStoreOptions.addUsePreviousCommitOnValidationFailure(builder, usePreviousCommitOnValidationFailure);
@@ -179,7 +198,7 @@ public final class FlatStoreOptions extends Table {
     return FlatStoreOptions.endFlatStoreOptions(builder);
   }
 
-  public static void startFlatStoreOptions(FlatBufferBuilder builder) { builder.startTable(15); }
+  public static void startFlatStoreOptions(FlatBufferBuilder builder) { builder.startTable(16); }
   public static void addDirectoryPath(FlatBufferBuilder builder, int directoryPathOffset) { builder.addOffset(0, directoryPathOffset, 0); }
   public static void addModelBytes(FlatBufferBuilder builder, int modelBytesOffset) { builder.addOffset(1, modelBytesOffset, 0); }
   public static int createModelBytesVector(FlatBufferBuilder builder, byte[] data) { return builder.createByteVector(data); }
@@ -188,7 +207,7 @@ public final class FlatStoreOptions extends Table {
   public static void addMaxDbSizeInKbyte(FlatBufferBuilder builder, long maxDbSizeInKbyte) { builder.addLong(2, maxDbSizeInKbyte, 0L); }
   public static void addFileMode(FlatBufferBuilder builder, long fileMode) { builder.addInt(3, (int) fileMode, (int) 0L); }
   public static void addMaxReaders(FlatBufferBuilder builder, long maxReaders) { builder.addInt(4, (int) maxReaders, (int) 0L); }
-  public static void addValidateOnOpen(FlatBufferBuilder builder, int validateOnOpen) { builder.addShort(5, (short) validateOnOpen, (short) 0); }
+  public static void addValidateOnOpenPages(FlatBufferBuilder builder, int validateOnOpenPages) { builder.addShort(5, (short) validateOnOpenPages, (short) 0); }
   public static void addValidateOnOpenPageLimit(FlatBufferBuilder builder, long validateOnOpenPageLimit) { builder.addLong(6, validateOnOpenPageLimit, 0L); }
   public static void addPutPaddingMode(FlatBufferBuilder builder, int putPaddingMode) { builder.addShort(7, (short) putPaddingMode, (short) 0); }
   public static void addSkipReadSchema(FlatBufferBuilder builder, boolean skipReadSchema) { builder.addBoolean(8, skipReadSchema, false); }
@@ -198,6 +217,7 @@ public final class FlatStoreOptions extends Table {
   public static void addDebugFlags(FlatBufferBuilder builder, long debugFlags) { builder.addInt(12, (int) debugFlags, (int) 0L); }
   public static void addNoReaderThreadLocals(FlatBufferBuilder builder, boolean noReaderThreadLocals) { builder.addBoolean(13, noReaderThreadLocals, false); }
   public static void addMaxDataSizeInKbyte(FlatBufferBuilder builder, long maxDataSizeInKbyte) { builder.addLong(14, maxDataSizeInKbyte, 0L); }
+  public static void addValidateOnOpenKv(FlatBufferBuilder builder, int validateOnOpenKv) { builder.addShort(15, (short) validateOnOpenKv, (short) 0); }
   public static int endFlatStoreOptions(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
