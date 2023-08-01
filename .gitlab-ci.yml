@@ -34,8 +34,9 @@ test:
   stage: test
   tags: [ docker, linux, x64 ]
   variables:
-    # CentOS 7 defaults to ASCII, use a UTF-8 compatible locale so UTF-8 tests that interact with file system work.
-    LC_ALL: "en_US.UTF-8"
+    # Image defaults to POSIX (ASCII), set a compatible locale so UTF-8 tests that interact with the file system work.
+    # Check with 'locale -a' for available locales.
+    LC_ALL: "C.UTF-8"
   before_script:
     # Print Gradle and JVM version info
     - ./gradlew -version
@@ -83,8 +84,9 @@ test-macos:
   extends: .test-template
   tags: [ docker, linux, x64 ]
   variables:
-    # CentOS 7 defaults to ASCII, use a UTF-8 compatible locale so UTF-8 tests that interact with file system work.
-    LC_ALL: "en_US.UTF-8"
+    # Image defaults to POSIX (ASCII), set a compatible locale so UTF-8 tests that interact with the file system work.
+    # Check with 'locale -a' for available locales.
+    LC_ALL: "C.UTF-8"
   script:
     # Note: do not run check task as it includes SpotBugs.
     - ./ci/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean :tests:objectbox-java-test:test
