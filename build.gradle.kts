@@ -5,6 +5,13 @@
 // - sonatypeUsername: Maven Central credential used by Nexus publishing.
 // - sonatypePassword: Maven Central credential used by Nexus publishing.
 
+plugins {
+    // https://github.com/spotbugs/spotbugs-gradle-plugin/releases
+    id("com.github.spotbugs") version "5.0.14" apply false
+    // https://github.com/gradle-nexus/publish-plugin/releases
+    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
+}
+
 buildscript {
     // Typically, only edit those two:
     val objectboxVersionNumber = "3.6.1" // without "-SNAPSHOT", e.g. "2.5.0" or "2.4.0-RC"
@@ -48,9 +55,6 @@ buildscript {
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
-        // https://github.com/spotbugs/spotbugs-gradle-plugin/releases
-        classpath("gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.7.0")
-        classpath("io.github.gradle-nexus:publish-plugin:1.1.0")
     }
 }
 
