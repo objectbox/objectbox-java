@@ -55,9 +55,16 @@ public abstract class AbstractRelationTest extends AbstractObjectBoxTest {
         orderBox.removeAll();
     }
 
+    /**
+     * Puts customer Joe.
+     */
     protected Customer putCustomer() {
+        return putCustomer("Joe");
+    }
+
+    Customer putCustomer(String name) {
         Customer customer = new Customer();
-        customer.setName("Joe");
+        customer.setName(name);
         customerBox.put(customer);
         return customer;
     }
