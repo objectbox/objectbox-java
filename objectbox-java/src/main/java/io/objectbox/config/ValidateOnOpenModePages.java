@@ -22,8 +22,8 @@ package io.objectbox.config;
  * Defines if and how the database is checked for structural consistency (pages) when opening it.
  */
 @SuppressWarnings("unused")
-public final class ValidateOnOpenMode {
-  private ValidateOnOpenMode() { }
+public final class ValidateOnOpenModePages {
+  private ValidateOnOpenModePages() { }
   /**
    * Not a real type, just best practice (e.g. forward compatibility)
    */

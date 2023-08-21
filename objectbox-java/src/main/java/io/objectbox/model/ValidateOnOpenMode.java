@@ -21,7 +21,7 @@ package io.objectbox.model;
 /**
  * Defines if and how the database is checked for structural consistency (pages) when opening it.
  *
- * @deprecated This class has moved to the config package, use {@link io.objectbox.config.ValidateOnOpenMode} instead.
+ * @deprecated This class has moved to the config package, use {@link io.objectbox.config.ValidateOnOpenModePages} instead.
  */
 @Deprecated
 @SuppressWarnings("unused")
