@@ -458,7 +458,7 @@ public class BoxStoreBuilder {
      * <p>
      * See also {@link #validateOnOpen(short)} for additional consistency checks.
      *
-     * @param mode One of {@link ValidateOnOpenMode}.
+     * @param mode One of {@link ValidateOnOpenModeKv}.
      */
     public BoxStoreBuilder validateOnOpenKv(short mode) {
         if (mode < ValidateOnOpenModeKv.Regular || mode > ValidateOnOpenModeKv.Regular) {
