@@ -21,9 +21,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import io.objectbox.config.ValidateOnOpenModePages;
 import io.objectbox.exception.FileCorruptException;
 import io.objectbox.exception.PagesCorruptException;
-import io.objectbox.model.ValidateOnOpenMode;
 import org.greenrobot.essentials.io.IoUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +62,7 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
         // Then re-open database with validation and ensure db is operational
         builder = new BoxStoreBuilder(model).directory(boxStoreDir);
         builder.entity(new TestEntity_());
-        builder.validateOnOpen(ValidateOnOpenMode.Full);
+        builder.validateOnOpen(ValidateOnOpenModePages.Full);
         store = builder.build();
         assertNotNull(getTestEntityBox().get(id));
         getTestEntityBox().put(new TestEntity(0));
@@ -75,7 +75,7 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
         prepareBadDataFile(dir, "corrupt-pageno-in-branch-data.mdb");
 
         builder = BoxStoreBuilder.createDebugWithoutModel().directory(dir);
-        builder.validateOnOpen(ValidateOnOpenMode.Full);
+        builder.validateOnOpen(ValidateOnOpenModePages.Full);
 
         @SuppressWarnings("resource")
         FileCorruptException ex = assertThrows(PagesCorruptException.class, () -> builder.build());
@@ -90,7 +90,7 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
         File dir = prepareTempDir("object-store-test-corrupted");
         prepareBadDataFile(dir, "corrupt-pageno-in-branch-data.mdb");
         builder = BoxStoreBuilder.createDebugWithoutModel().directory(dir);
-        builder.validateOnOpen(ValidateOnOpenMode.Full).usePreviousCommit();
+        builder.validateOnOpen(ValidateOnOpenModePages.Full).usePreviousCommit();
         store = builder.build();
         String diagnoseString = store.diagnose();
         assertTrue(diagnoseString.contains("entries=2"));
@@ -104,7 +104,7 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
         File dir = prepareTempDir("object-store-test-corrupted");
         prepareBadDataFile(dir, "corrupt-pageno-in-branch-data.mdb");
         builder = BoxStoreBuilder.createDebugWithoutModel().directory(dir);
-        builder.validateOnOpen(ValidateOnOpenMode.Full);
+        builder.validateOnOpen(ValidateOnOpenModePages.Full);
         try {
             store = builder.build();
             fail("Should have thrown");

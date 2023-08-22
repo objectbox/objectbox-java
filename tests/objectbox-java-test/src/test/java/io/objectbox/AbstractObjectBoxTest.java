@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2023 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package io.objectbox;
 import io.objectbox.ModelBuilder.EntityBuilder;
 import io.objectbox.ModelBuilder.PropertyBuilder;
 import io.objectbox.annotation.IndexType;
+import io.objectbox.config.DebugFlags;
 import io.objectbox.model.PropertyFlags;
 import io.objectbox.model.PropertyType;
 import org.junit.After;

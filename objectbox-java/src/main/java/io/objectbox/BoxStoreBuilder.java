@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2023 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,16 @@ import javax.annotation.Nullable;
 
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.config.DebugFlags;
+import io.objectbox.config.FlatStoreOptions;
+import io.objectbox.config.ValidateOnOpenModeKv;
+import io.objectbox.config.ValidateOnOpenModePages;
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbFullException;
 import io.objectbox.exception.DbMaxDataSizeExceededException;
 import io.objectbox.exception.DbMaxReadersExceededException;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.ideasonly.ModelUpdate;
-import io.objectbox.model.FlatStoreOptions;
-import io.objectbox.model.ValidateOnOpenMode;
-import io.objectbox.model.ValidateOnOpenModeKv;
 import org.greenrobot.essentials.io.IoUtils;
 
 /**
@@ -413,13 +414,14 @@ public class BoxStoreBuilder {
      * See also {@link #validateOnOpenPageLimit(long)} to fine-tune this check and {@link #validateOnOpenKv(short)} for
      * additional checks.
      *
-     * @param validateOnOpenMode One of {@link ValidateOnOpenMode}.
+     * @param validateOnOpenModePages One of {@link ValidateOnOpenModePages}.
      */
-    public BoxStoreBuilder validateOnOpen(short validateOnOpenMode) {
-        if (validateOnOpenMode < ValidateOnOpenMode.None || validateOnOpenMode > ValidateOnOpenMode.Full) {
-            throw new IllegalArgumentException("Must be one of ValidateOnOpenMode");
+    public BoxStoreBuilder validateOnOpen(short validateOnOpenModePages) {
+        if (validateOnOpenModePages < ValidateOnOpenModePages.None
+                || validateOnOpenModePages > ValidateOnOpenModePages.Full) {
+            throw new IllegalArgumentException("Must be one of ValidateOnOpenModePages");
         }
-        this.validateOnOpenModePages = validateOnOpenMode;
+        this.validateOnOpenModePages = validateOnOpenModePages;
         return this;
     }
 
@@ -428,10 +430,12 @@ public class BoxStoreBuilder {
      * This is measured in "pages" with a page typically holding 4000.
      * Usually a low number (e.g. 1-20) is sufficient and does not impact startup performance significantly.
      * <p>
-     * This can only be used with {@link ValidateOnOpenMode#Regular} and {@link ValidateOnOpenMode#WithLeaves}.
+     * This can only be used with {@link ValidateOnOpenModePages#Regular} and
+     * {@link ValidateOnOpenModePages#WithLeaves}.
      */
     public BoxStoreBuilder validateOnOpenPageLimit(long limit) {
-        if (validateOnOpenModePages != ValidateOnOpenMode.Regular && validateOnOpenModePages != ValidateOnOpenMode.WithLeaves) {
+        if (validateOnOpenModePages != ValidateOnOpenModePages.Regular &&
+                validateOnOpenModePages != ValidateOnOpenModePages.WithLeaves) {
             throw new IllegalStateException("Must call validateOnOpen(mode) with mode Regular or WithLeaves first");
         }
         if (limit < 1) {
