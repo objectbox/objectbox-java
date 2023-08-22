@@ -21,9 +21,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import io.objectbox.config.ValidateOnOpenMode;
 import io.objectbox.exception.FileCorruptException;
 import io.objectbox.exception.PagesCorruptException;
-import io.objectbox.model.ValidateOnOpenMode;
 import org.greenrobot.essentials.io.IoUtils;
 import org.junit.Before;
 import org.junit.Test;

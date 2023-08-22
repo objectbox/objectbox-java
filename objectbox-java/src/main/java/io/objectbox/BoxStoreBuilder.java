@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2023 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,16 @@ import javax.annotation.Nullable;
 
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.config.DebugFlags;
+import io.objectbox.config.FlatStoreOptions;
+import io.objectbox.config.ValidateOnOpenMode;
+import io.objectbox.config.ValidateOnOpenModeKv;
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbFullException;
 import io.objectbox.exception.DbMaxDataSizeExceededException;
 import io.objectbox.exception.DbMaxReadersExceededException;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.ideasonly.ModelUpdate;
-import io.objectbox.model.FlatStoreOptions;
-import io.objectbox.model.ValidateOnOpenMode;
-import io.objectbox.model.ValidateOnOpenModeKv;
 import org.greenrobot.essentials.io.IoUtils;
 
 /**

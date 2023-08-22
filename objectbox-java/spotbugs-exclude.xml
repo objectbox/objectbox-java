@@ -6,6 +6,9 @@
         <Class name="io.objectbox.DebugFlags" />
     </Match>
     <Match>
+        <Package name="io.objectbox.config" />
+    </Match>
+    <Match>
         <Package name="io.objectbox.model" />
     </Match>
     <Match>

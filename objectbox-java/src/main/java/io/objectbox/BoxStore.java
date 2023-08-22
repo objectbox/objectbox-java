@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2023 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ import javax.annotation.concurrent.ThreadSafe;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.config.DebugFlags;
+import io.objectbox.config.FlatStoreOptions;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbExceptionListener;
@@ -136,7 +138,7 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * Creates a native BoxStore instance with FlatBuffer {@link io.objectbox.model.FlatStoreOptions} {@code options}
+     * Creates a native BoxStore instance with FlatBuffer {@link FlatStoreOptions} {@code options}
      * and a {@link ModelBuilder} {@code model}. Returns the handle of the native store instance.
      */
     static native long nativeCreateWithFlatOptions(byte[] options, byte[] model);
