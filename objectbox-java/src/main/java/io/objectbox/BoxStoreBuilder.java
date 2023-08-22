@@ -41,6 +41,7 @@ import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.ideasonly.ModelUpdate;
 import io.objectbox.model.FlatStoreOptions;
 import io.objectbox.model.ValidateOnOpenMode;
+import io.objectbox.model.ValidateOnOpenModeKv;
 import org.greenrobot.essentials.io.IoUtils;
 
 /**
@@ -81,8 +82,10 @@ public class BoxStoreBuilder {
     long maxDataSizeInKByte;
 
     /** On Android used for native library loading. */
-    @Nullable Object context;
-    @Nullable Object relinker;
+    @Nullable
+    Object context;
+    @Nullable
+    Object relinker;
 
     ModelUpdate modelUpdate;
 
@@ -105,8 +108,10 @@ public class BoxStoreBuilder {
     boolean readOnly;
     boolean usePreviousCommit;
 
-    short validateOnOpenMode;
+    short validateOnOpenModePages;
     long validateOnOpenPageLimit;
+
+    short validateOnOpenModeKv;
 
     TxCallback<?> failedReadTxAttemptCallback;
 
@@ -404,6 +409,9 @@ public class BoxStoreBuilder {
      * OSes, file systems, or hardware.
      * <p>
      * Note: ObjectBox builds upon ACID storage, which already has strong consistency mechanisms in place.
+     * <p>
+     * See also {@link #validateOnOpenPageLimit(long)} to fine-tune this check and {@link #validateOnOpenKv(short)} for
+     * additional checks.
      *
      * @param validateOnOpenMode One of {@link ValidateOnOpenMode}.
      */
@@ -411,7 +419,7 @@ public class BoxStoreBuilder {
         if (validateOnOpenMode < ValidateOnOpenMode.None || validateOnOpenMode > ValidateOnOpenMode.Full) {
             throw new IllegalArgumentException("Must be one of ValidateOnOpenMode");
         }
-        this.validateOnOpenMode = validateOnOpenMode;
+        this.validateOnOpenModePages = validateOnOpenMode;
         return this;
     }
 
@@ -423,13 +431,40 @@ public class BoxStoreBuilder {
      * This can only be used with {@link ValidateOnOpenMode#Regular} and {@link ValidateOnOpenMode#WithLeaves}.
      */
     public BoxStoreBuilder validateOnOpenPageLimit(long limit) {
-        if (validateOnOpenMode != ValidateOnOpenMode.Regular && validateOnOpenMode != ValidateOnOpenMode.WithLeaves) {
+        if (validateOnOpenModePages != ValidateOnOpenMode.Regular && validateOnOpenModePages != ValidateOnOpenMode.WithLeaves) {
             throw new IllegalStateException("Must call validateOnOpen(mode) with mode Regular or WithLeaves first");
         }
         if (limit < 1) {
             throw new IllegalArgumentException("limit must be positive");
         }
         this.validateOnOpenPageLimit = limit;
+        return this;
+    }
+
+    /**
+     * When a database is opened, ObjectBox can perform additional consistency checks on its database structure.
+     * This enables validation checks on a key/value level.
+     * <p>
+     * This is a shortcut for {@link #validateOnOpenKv(short) validateOnOpenKv(ValidateOnOpenModeKv.Regular)}.
+     */
+    public BoxStoreBuilder validateOnOpenKv() {
+        this.validateOnOpenModeKv = ValidateOnOpenModeKv.Regular;
+        return this;
+    }
+
+    /**
+     * When a database is opened, ObjectBox can perform additional consistency checks on its database structure.
+     * This enables validation checks on a key/value level.
+     * <p>
+     * See also {@link #validateOnOpen(short)} for additional consistency checks.
+     *
+     * @param mode One of {@link ValidateOnOpenMode}.
+     */
+    public BoxStoreBuilder validateOnOpenKv(short mode) {
+        if (mode < ValidateOnOpenModeKv.Regular || mode > ValidateOnOpenMode.Regular) {
+            throw new IllegalArgumentException("Must be one of ValidateOnOpenModeKv");
+        }
+        this.validateOnOpenModeKv = mode;
         return this;
     }
 
@@ -465,7 +500,7 @@ public class BoxStoreBuilder {
      * {@link DbException} are thrown during query execution).
      *
      * @param queryAttempts number of attempts a query find operation will be executed before failing.
-     * Recommended values are in the range of 2 to 5, e.g. a value of 3 as a starting point.
+     *                      Recommended values are in the range of 2 to 5, e.g. a value of 3 as a starting point.
      */
     @Experimental
     public BoxStoreBuilder queryAttempts(int queryAttempts) {
@@ -519,11 +554,14 @@ public class BoxStoreBuilder {
         FlatStoreOptions.addMaxDbSizeInKbyte(fbb, maxSizeInKByte);
         FlatStoreOptions.addFileMode(fbb, fileMode);
         FlatStoreOptions.addMaxReaders(fbb, maxReaders);
-        if (validateOnOpenMode != 0) {
-            FlatStoreOptions.addValidateOnOpenPages(fbb, validateOnOpenMode);
+        if (validateOnOpenModePages != 0) {
+            FlatStoreOptions.addValidateOnOpenPages(fbb, validateOnOpenModePages);
             if (validateOnOpenPageLimit != 0) {
                 FlatStoreOptions.addValidateOnOpenPageLimit(fbb, validateOnOpenPageLimit);
             }
+        }
+        if (validateOnOpenModeKv != 0) {
+            FlatStoreOptions.addValidateOnOpenKv(fbb, validateOnOpenModeKv);
         }
         if (skipReadSchema) FlatStoreOptions.addSkipReadSchema(fbb, true);
         if (usePreviousCommit) FlatStoreOptions.addUsePreviousCommit(fbb, true);
