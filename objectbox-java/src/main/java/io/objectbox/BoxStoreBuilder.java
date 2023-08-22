@@ -461,7 +461,7 @@ public class BoxStoreBuilder {
      * @param mode One of {@link ValidateOnOpenMode}.
      */
     public BoxStoreBuilder validateOnOpenKv(short mode) {
-        if (mode < ValidateOnOpenModeKv.Regular || mode > ValidateOnOpenMode.Regular) {
+        if (mode < ValidateOnOpenModeKv.Regular || mode > ValidateOnOpenModeKv.Regular) {
             throw new IllegalArgumentException("Must be one of ValidateOnOpenModeKv");
         }
         this.validateOnOpenModeKv = mode;
