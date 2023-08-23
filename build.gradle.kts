@@ -83,7 +83,7 @@ tasks.wrapper {
 // This plugin ensures a separate, named staging repo is created for each build when publishing.
 apply(plugin = "io.github.gradle-nexus.publish-plugin")
 configure<io.github.gradlenexus.publishplugin.NexusPublishExtension> {
-    repositories {
+    this.repositories {
         sonatype {
             if (project.hasProperty("sonatypeUsername") && project.hasProperty("sonatypePassword")) {
                 println("nexusPublishing credentials supplied.")
