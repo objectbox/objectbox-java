@@ -26,7 +26,7 @@ buildscript {
     // Native library version for tests
     // Be careful to diverge here; easy to forget and hard to find JNI problems
     val nativeVersion = objectboxVersionNumber + (if (objectboxVersionRelease) "" else "-dev-SNAPSHOT")
-    val osName = System.getProperty("os.name").toLowerCase()
+    val osName = System.getProperty("os.name").lowercase()
     val objectboxPlatform = when {
         osName.contains("linux") -> "linux"
         osName.contains("windows") -> "windows"
