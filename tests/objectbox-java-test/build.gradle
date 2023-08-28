@@ -51,7 +51,7 @@ dependencies {
         println "Did NOT add native dependency"
     }
 
-    testImplementation "junit:junit:$juniVersion"
+    testImplementation "junit:junit:$junitVersion"
     // To test Coroutines
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     // To test Kotlin Flow

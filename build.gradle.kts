@@ -36,7 +36,7 @@ buildscript {
     val obxJniLibVersion by extra("io.objectbox:objectbox-$objectboxPlatform:$nativeVersion")
 
     val essentialsVersion by extra("3.1.0")
-    val juniVersion by extra("4.13.2")
+    val junitVersion by extra("4.13.2")
     val mockitoVersion by extra("3.8.0")
     val kotlinVersion by extra("1.7.20")
     val coroutinesVersion by extra("1.6.4")

@@ -45,7 +45,7 @@ dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    testImplementation "junit:junit:$juniVersion"
+    testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
 }
 

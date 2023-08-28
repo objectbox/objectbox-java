@@ -38,5 +38,5 @@ dependencies {
         println "Did NOT add native dependency"
     }
 
-    testImplementation "junit:junit:$juniVersion"
+    testImplementation "junit:junit:$junitVersion"
 }
