@@ -14,10 +14,13 @@ tasks.withType(JavaCompile).configureEach {
     options.release.set(8)
 }
 
-// Produce Java 8 byte code, would default to Java 6.
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
+        // Produce Java 8 byte code, would default to Java 6.
         jvmTarget = "1.8"
+        // Try to use APIs at most one version newer than lowest supported (notably by Gradle plugin).
+        // Note: Kotlin is able to compile with binaries up to one later version.
+        apiVersion = "1.5"
     }
 }
 
