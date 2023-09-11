@@ -9,7 +9,7 @@ import io.reactivex.rxjava3.core.Single
 /**
  * Shortcut for [`RxQuery.flowableOneByOne(query, strategy)`][RxQuery.flowableOneByOne].
  */
-fun <T> Query<T>.flowableOneByOne(strategy: BackpressureStrategy = BackpressureStrategy.BUFFER): Flowable<T> {
+fun <T : Any> Query<T>.flowableOneByOne(strategy: BackpressureStrategy = BackpressureStrategy.BUFFER): Flowable<T> {
     return RxQuery.flowableOneByOne(this, strategy)
 }
 
