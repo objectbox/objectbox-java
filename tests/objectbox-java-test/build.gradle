@@ -60,7 +60,8 @@ dependencies {
 
 test {
     if (System.getenv("TEST_WITH_JAVA_X86") == "true") {
-        // to run tests with 32-bit ObjectBox
+        // To run tests with 32-bit ObjectBox
+        // Note: 32-bit JDK is only available on Windows
         def javaExecutablePath = System.getenv("JAVA_HOME_X86") + "\\bin\\java.exe"
         println("Will run tests with $javaExecutablePath")
         executable = javaExecutablePath
