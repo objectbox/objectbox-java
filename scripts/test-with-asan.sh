@@ -5,6 +5,7 @@ set -e
 # If no arguments are specified runs the test task.
 # The ASAN detection is known to work with the buildenv-core image or Ubuntu 22.04 with a clang setup.
 
+# ASAN shared library (gcc or clang setup)
 if [ -z "$ASAN_LIB_SO" ]; then  # If not supplied (e.g. by CI script), try to locate the lib:
     ASAN_ARCH=$(uname -m) # x86_64 or aarch64
     echo "No ASAN_LIB_SO defined, trying to locate dynamically..."
@@ -28,8 +29,13 @@ if [ -z "$ASAN_LIB_SO" ]; then  # If not supplied (e.g. by CI script), try to lo
     fi
 fi
 
+# llvm-symbolizer (clang setup only)
+# Rocky Linux 8 (buildenv-core)
 if [ -z "$ASAN_SYMBOLIZER_PATH" ]; then
-    ## TODO what to look for when using gcc's lib?
+    export ASAN_SYMBOLIZER_PATH="$(find /usr/local/bin/ -name llvm-symbolizer | tail -1 )"
+fi
+# Ubuntu 22.04
+if [ -z "$ASAN_SYMBOLIZER_PATH" ]; then
     export ASAN_SYMBOLIZER_PATH="$(find /usr/lib/llvm-*/ -name llvm-symbolizer | tail -1)"
 fi
 
