@@ -1,6 +1,6 @@
 ## What does this MR do?
 
-<!-- Briefly describe what this MR is about. -->
+Addresses #NUMBER+: <!-- Briefly describe what this MR is about. -->
 
 ## Author's checklist
 
@@ -19,5 +19,3 @@
   * Coverage percentages do not decrease
   * New code conforms to standards and guidelines
   * If applicable, additional checks were done for special code changes (e.g. core performance, binary size, OSS licenses)
-
-/assign me
