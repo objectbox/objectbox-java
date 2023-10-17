@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 
 package io.objectbox;
 
-import io.objectbox.exception.DbException;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
 import java.io.File;
 import java.util.concurrent.Callable;
 import java.util.concurrent.RejectedExecutionException;
+
+import io.objectbox.exception.DbException;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,6 +34,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 public class BoxStoreTest extends AbstractObjectBoxTest {
 
@@ -178,12 +182,15 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void testDeleteAllFiles() {
+        assumeFalse(IN_MEMORY);
         closeStoreForTest();
     }
 
     @Test
     public void testDeleteAllFiles_staticDir() {
+        assumeFalse(IN_MEMORY);
         closeStoreForTest();
+
         File boxStoreDir2 = new File(boxStoreDir.getAbsolutePath() + "-2");
         BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(null)).directory(boxStoreDir2);
         BoxStore store2 = builder.build();
@@ -196,6 +203,8 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void testDeleteAllFiles_baseDirName() {
+        assumeFalse(IN_MEMORY);
+
         closeStoreForTest();
         File basedir = new File("test-base-dir");
         String name = "mydb";
@@ -220,6 +229,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test(expected = IllegalStateException.class)
     public void testDeleteAllFiles_openStore() {
+        assumeFalse(IN_MEMORY);
         BoxStore.deleteAllFiles(boxStoreDir);
     }
 
@@ -245,9 +255,13 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     }
 
     private void closeStoreForTest() {
-        assertTrue(boxStoreDir.exists());
+        if (!IN_MEMORY) {
+            assertTrue(boxStoreDir.exists());
+        }
         store.close();
-        assertTrue(store.deleteAllFiles());
+        if (!IN_MEMORY) {
+            assertTrue(store.deleteAllFiles());
+        }
         assertFalse(boxStoreDir.exists());
     }
 
@@ -295,22 +309,36 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void testSizeOnDisk() {
+        assumeFalse(IN_MEMORY);
+
         long size = store.sizeOnDisk();
         assertTrue(size >= 8192);
+    }
+
+    @Test
+    public void testInMemory_createsNoFiles() {
+        assumeTrue(IN_MEMORY);
+
+        assertFalse(boxStoreDir.exists());
+        assertFalse(new File("memory").exists());
+        assertFalse(new File("memory:").exists());
+        String identifierPart = boxStoreDir.getPath().substring("memory:".length());
+        assertFalse(new File(identifierPart).exists());
     }
 
     @Test
     public void validate() {
         putTestEntities(100);
 
+        // Note: not implemented for in-memory, returns 0.
         // No limit.
         long validated = store.validate(0, true);
-        assertEquals(14, validated);
+        assertEquals(IN_MEMORY ? 0 : 14, validated);
 
         // With limit.
         validated = store.validate(1, true);
         // 2 because the first page doesn't contain any actual data?
-        assertEquals(2, validated);
+        assertEquals(IN_MEMORY ? 0 : 2, validated);
     }
 
     @Test

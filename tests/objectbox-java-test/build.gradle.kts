@@ -72,7 +72,18 @@ dependencies {
     testImplementation("app.cash.turbine:turbine:0.5.2")
 }
 
-tasks.test {
+val testInMemory by tasks.registering(Test::class) {
+    group = "verification"
+    description = "Run unit tests with in-memory database"
+    systemProperty("obx.inMemory", true)
+}
+
+// Run in-memory tests as part of regular check run
+tasks.check {
+    dependsOn(testInMemory)
+}
+
+tasks.withType<Test> {
     if (System.getenv("TEST_WITH_JAVA_X86") == "true") {
         // To run tests with 32-bit ObjectBox
         // Note: 32-bit JDK is only available on Windows

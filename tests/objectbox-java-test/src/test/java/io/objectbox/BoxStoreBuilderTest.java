@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package io.objectbox;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,14 +31,14 @@ import java.util.stream.Stream;
 
 import io.objectbox.exception.DbFullException;
 import io.objectbox.exception.DbMaxDataSizeExceededException;
-import org.junit.Before;
-import org.junit.Test;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 
 public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
 
@@ -186,6 +189,8 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
 
     @Test
     public void maxFileSize() {
+        assumeFalse(IN_MEMORY); // no max size support for in-memory
+
         builder = createBoxStoreBuilder(null);
         builder.maxSizeInKByte(30); // Empty file is around 12 KB, object below adds about 8 KB each.
         store = builder.build();
