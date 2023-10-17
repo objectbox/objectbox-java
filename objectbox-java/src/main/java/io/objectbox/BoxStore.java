@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,9 @@ public class BoxStore implements Closeable {
     /** On Android used for native library loading. */
     @Nullable private static Object context;
     @Nullable private static Object relinker;
+
+    /** Prefix supplied with database directory to signal a file-less and in-memory database should be used. */
+    public static final String IN_MEMORY_PREFIX = "memory:";
 
     /** Change so ReLinker will update native library when using workaround loading. */
     public static final String JNI_VERSION = "3.7.1";
@@ -318,6 +321,12 @@ public class BoxStore implements Closeable {
     }
 
     static String getCanonicalPath(File directory) {
+        // Skip directory check if in-memory prefix is used.
+        if (directory.getPath().startsWith(IN_MEMORY_PREFIX)) {
+            // Just return the path as is (e.g. "memory:data"), safe to use for string-based open check as well.
+            return directory.getPath();
+        }
+
         if (directory.exists()) {
             if (!directory.isDirectory()) {
                 throw new DbException("Is not a directory: " + directory.getAbsolutePath());

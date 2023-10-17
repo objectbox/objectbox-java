@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package io.objectbox;
+
+import org.greenrobot.essentials.io.IoUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -43,7 +45,6 @@ import io.objectbox.exception.DbMaxDataSizeExceededException;
 import io.objectbox.exception.DbMaxReadersExceededException;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.ideasonly.ModelUpdate;
-import org.greenrobot.essentials.io.IoUtils;
 
 /**
  * Configures and builds a {@link BoxStore} with reasonable defaults. To get an instance use {@code MyObjectBox.builder()}.
@@ -161,8 +162,21 @@ public class BoxStoreBuilder {
     }
 
     /**
-     * The directory where all DB files should be placed in.
-     * Cannot be used in combination with {@link #name(String)}/{@link #baseDirectory(File)}.
+     * The directory where all database files should be placed in.
+     * <p>
+     * If the directory does not exist, it will be created. Make sure the process has permissions to write to this
+     * directory.
+     * <p>
+     * To switch to an in-memory database, use a file path with {@link BoxStore#IN_MEMORY_PREFIX} and an identifier
+     * instead:
+     * <p>
+     * <pre>{@code
+     * BoxStore inMemoryStore = MyObjectBox.builder()
+     *     .directory(BoxStore.IN_MEMORY_PREFIX + "notes-db")
+     *     .build();
+     * }</pre>
+     * <p>
+     * Can not be used in combination with {@link #name(String)} or {@link #baseDirectory(File)}.
      */
     public BoxStoreBuilder directory(File directory) {
         if (name != null) {
