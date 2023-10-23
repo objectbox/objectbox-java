@@ -38,9 +38,12 @@ buildscript {
     val essentialsVersion by extra("3.1.0")
     val junitVersion by extra("4.13.2")
     val mockitoVersion by extra("3.8.0")
-    val kotlinVersion by extra("1.7.20")
-    val coroutinesVersion by extra("1.6.4")
-    val dokkaVersion by extra("1.7.20")
+    // The versions of Kotlin, Kotlin Coroutines and Dokka must work together.
+    // Check https://github.com/Kotlin/kotlinx.coroutines#readme
+    // and https://github.com/Kotlin/dokka/releases
+    val kotlinVersion by extra("1.8.20")
+    val coroutinesVersion by extra("1.7.3")
+    val dokkaVersion by extra("1.8.20")
 
     println("version=$obxJavaVersion")
     println("objectboxNativeDependency=$obxJniLibVersion")
