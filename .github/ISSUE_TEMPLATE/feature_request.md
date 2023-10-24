@@ -1,26 +1,37 @@
 ---
 name: Feature request
-about: Suggest an idea
+about: Suggest an improvement for ObjectBox.
 title: ''
-labels: 'feature'
+labels: 'enhancement'
 assignees: ''
 
 ---
 
-:rotating_light: First, please check:
- - existing issues,
- - Docs https://docs.objectbox.io/
- - Troubleshooting page https://docs.objectbox.io/troubleshooting
- - FAQ page https://docs.objectbox.io/faq
+<!--
 
-Start with a clear and concise description of what problem you are trying to solve.
-Often there is already a solution! 
+If you are looking for support, please check out our documentation:
+- https://docs.objectbox.io
+- https://docs.objectbox.io/faq
+- https://docs.objectbox.io/troubleshooting
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+-->
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+### Is there an existing issue?
 
-**Additional context**
-Add any other context (e.g. platform or language) about the feature request here.
+- [ ] I have searched [existing issues](https://github.com/objectbox/objectbox-java/issues)
+
+### Use case
+
+_TODO Describe what problem you are trying to solve._
+
+### Proposed solution
+
+_TODO Describe what you want to be able to do with ObjectBox._
+
+### Alternatives
+
+_TODO Describe any alternative solutions or features you've considered._
+
+### Additional context
+
+_TODO Add any other context (e.g. platform or language) about the feature request here._
