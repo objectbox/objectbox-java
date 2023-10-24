@@ -1,6 +1,8 @@
 ## What does this MR do?
 
-Addresses #NUMBER+: <!-- Briefly describe what this MR is about. -->
+Addresses #NUMBER+
+
+<!-- Briefly describe what this MR is about. -->
 
 ## Author's checklist
 
@@ -9,6 +11,7 @@ Addresses #NUMBER+: <!-- Briefly describe what this MR is about. -->
   * I added unit tests for new/changed behavior; all test pass.
   * My code conforms to our coding standards and guidelines.
   * My changes are prepared in a way that makes the review straightforward for the reviewer.
+- [ ] I assigned a reviewer and added the Review label.
 
 ## Review checklist
 
