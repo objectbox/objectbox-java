@@ -220,7 +220,8 @@ public class BoxStore implements Closeable {
 
     private final File directory;
     private final String canonicalPath;
-    private final long handle;
+    /** Reference to the native store. Should probably get through {@link #getNativeStore()} instead. */
+    private long handle;
     private final Map<Class<?>, String> dbNameByClass = new HashMap<>();
     private final Map<Class<?>, Integer> entityTypeIdByClass = new HashMap<>();
     private final Map<Class<?>, EntityInfo<?>> propertiesByClass = new HashMap<>();
@@ -467,11 +468,12 @@ public class BoxStore implements Closeable {
      * @return 0 if the size could not be determined (does not throw unless this store was already closed)
      */
     public long sizeOnDisk() {
-        checkOpen();
-        return nativeSizeOnDisk(handle);
+        return nativeSizeOnDisk(getNativeStore());
     }
 
     /**
+     * Closes this if this is finalized.
+     * <p>
      * Explicitly call {@link #close()} instead to avoid expensive finalization.
      */
     @SuppressWarnings("deprecation") // finalize()
@@ -481,8 +483,11 @@ public class BoxStore implements Closeable {
         super.finalize();
     }
 
+    /**
+     * Verifies this has not been {@link #close() closed}.
+     */
     private void checkOpen() {
-        if (closed) {
+        if (isClosed()) {
             throw new IllegalStateException("Store is closed");
         }
     }
@@ -533,13 +538,12 @@ public class BoxStore implements Closeable {
      */
     @Internal
     public Transaction beginTx() {
-        checkOpen();
         // Because write TXs are typically not cached, initialCommitCount is not as relevant than for read TXs.
         int initialCommitCount = commitCount;
         if (debugTxWrite) {
             System.out.println("Begin TX with commit count " + initialCommitCount);
         }
-        long nativeTx = nativeBeginTx(handle);
+        long nativeTx = nativeBeginTx(getNativeStore());
         if (nativeTx == 0) throw new DbException("Could not create native transaction");
 
         Transaction tx = new Transaction(this, nativeTx, initialCommitCount);
@@ -555,7 +559,6 @@ public class BoxStore implements Closeable {
      */
     @Internal
     public Transaction beginReadTx() {
-        checkOpen();
         // initialCommitCount should be acquired before starting the tx. In race conditions, there is a chance the
         // commitCount is already outdated. That's OK because it only gives a false positive for an TX being obsolete.
         // In contrast, a false negative would make a TX falsely not considered obsolete, and thus readers would not be
@@ -565,7 +568,7 @@ public class BoxStore implements Closeable {
         if (debugTxRead) {
             System.out.println("Begin read TX with commit count " + initialCommitCount);
         }
-        long nativeTx = nativeBeginReadTx(handle);
+        long nativeTx = nativeBeginReadTx(getNativeStore());
         if (nativeTx == 0) throw new DbException("Could not create native read transaction");
 
         Transaction tx = new Transaction(this, nativeTx, initialCommitCount);
@@ -575,6 +578,9 @@ public class BoxStore implements Closeable {
         return tx;
     }
 
+    /**
+     * If this was {@link #close() closed}.
+     */
     public boolean isClosed() {
         return closed;
     }
@@ -584,8 +590,7 @@ public class BoxStore implements Closeable {
      * If true the schema is not updated and write transactions are not possible.
      */
     public boolean isReadOnly() {
-        checkOpen();
-        return nativeIsReadOnly(handle);
+        return nativeIsReadOnly(getNativeStore());
     }
 
     /**
@@ -621,7 +626,9 @@ public class BoxStore implements Closeable {
                 }
                 if (handle != 0) { // failed before native handle was created?
                     nativeDelete(handle);
-                    // TODO set handle to 0 and check in native methods
+                    // The Java API has open checks, but just in case re-set the handle so any native methods will
+                    // not crash due to an invalid pointer.
+                    handle = 0;
                 }
 
                 // When running the full unit test suite, we had 100+ threads before, hope this helps:
@@ -665,7 +672,7 @@ public class BoxStore implements Closeable {
      * Note: If false is returned, any number of files may have been deleted before the failure happened.
      */
     public boolean deleteAllFiles() {
-        if (!closed) {
+        if (!isClosed()) {
             throw new IllegalStateException("Store must be closed");
         }
         return deleteAllFiles(directory);
@@ -765,8 +772,7 @@ public class BoxStore implements Closeable {
      * </ul>
      */
     public void removeAllObjects() {
-        checkOpen();
-        nativeDropAllData(handle);
+        nativeDropAllData(getNativeStore());
     }
 
     @Internal
@@ -1049,8 +1055,7 @@ public class BoxStore implements Closeable {
      * @return String that is typically logged by the application.
      */
     public String diagnose() {
-        checkOpen();
-        return nativeDiagnose(handle);
+        return nativeDiagnose(getNativeStore());
     }
 
     /**
@@ -1069,13 +1074,11 @@ public class BoxStore implements Closeable {
         if (pageLimit < 0) {
             throw new IllegalArgumentException("pageLimit must be zero or positive");
         }
-        checkOpen();
-        return nativeValidate(handle, pageLimit, checkLeafLevel);
+        return nativeValidate(getNativeStore(), pageLimit, checkLeafLevel);
     }
 
     public int cleanStaleReadTransactions() {
-        checkOpen();
-        return nativeCleanStaleReadTransactions(handle);
+        return nativeCleanStaleReadTransactions(getNativeStore());
     }
 
     /**
@@ -1088,11 +1091,6 @@ public class BoxStore implements Closeable {
             box.closeThreadResources();
         }
         // activeTx is cleaned up in finally blocks, so do not free them here
-    }
-
-    @Internal
-    long internalHandle() {
-        return handle;
     }
 
     /**
@@ -1146,8 +1144,7 @@ public class BoxStore implements Closeable {
     @Nullable
     public String startObjectBrowser(int port) {
         verifyObjectBrowserNotRunning();
-        checkOpen();
-        String url = nativeStartObjectBrowser(handle, null, port);
+        String url = nativeStartObjectBrowser(getNativeStore(), null, port);
         if (url != null) {
             objectBrowserPort = port;
         }
@@ -1158,14 +1155,13 @@ public class BoxStore implements Closeable {
     @Nullable
     public String startObjectBrowser(String urlToBindTo) {
         verifyObjectBrowserNotRunning();
-        checkOpen();
         int port;
         try {
             port = new URL(urlToBindTo).getPort(); // Gives -1 if not available
         } catch (MalformedURLException e) {
             throw new RuntimeException("Can not start Object Browser at " + urlToBindTo, e);
         }
-        String url = nativeStartObjectBrowser(handle, urlToBindTo, 0);
+        String url = nativeStartObjectBrowser(getNativeStore(), urlToBindTo, 0);
         if (url != null) {
             objectBrowserPort = port;
         }
@@ -1178,8 +1174,7 @@ public class BoxStore implements Closeable {
             throw new IllegalStateException("ObjectBrowser has not been started before");
         }
         objectBrowserPort = 0;
-        checkOpen();
-        return nativeStopObjectBrowser(handle);
+        return nativeStopObjectBrowser(getNativeStore());
     }
 
     @Experimental
@@ -1204,8 +1199,7 @@ public class BoxStore implements Closeable {
      * This for example allows central error handling or special logging for database-related exceptions.
      */
     public void setDbExceptionListener(@Nullable DbExceptionListener dbExceptionListener) {
-        checkOpen();
-        nativeSetDbExceptionListener(handle, dbExceptionListener);
+        nativeSetDbExceptionListener(getNativeStore(), dbExceptionListener);
     }
 
     @Internal
@@ -1234,18 +1228,19 @@ public class BoxStore implements Closeable {
     }
 
     void setDebugFlags(int debugFlags) {
-        checkOpen();
-        nativeSetDebugFlags(handle, debugFlags);
+        nativeSetDebugFlags(getNativeStore(), debugFlags);
     }
 
     long panicModeRemoveAllObjects(int entityId) {
-        checkOpen();
-        return nativePanicModeRemoveAllObjects(handle, entityId);
+        return nativePanicModeRemoveAllObjects(getNativeStore(), entityId);
     }
 
     /**
-     * If you want to use the same ObjectBox store using the C API, e.g. via JNI, this gives the required pointer,
-     * which you have to pass on to obx_store_wrap().
+     * Gets the reference to the native store. Can be used with the C API to use the same store, e.g. via JNI, by
+     * passing it on to {@code obx_store_wrap()}.
+     * <p>
+     * Throws if the store is closed.
+     * <p>
      * The procedure is like this:<br>
      * 1) you create a BoxStore on the Java side<br>
      * 2) you call this method to get the native store pointer<br>

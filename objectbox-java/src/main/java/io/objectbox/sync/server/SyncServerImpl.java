@@ -2,7 +2,6 @@ package io.objectbox.sync.server;
 
 import javax.annotation.Nullable;
 
-import io.objectbox.InternalAccess;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.sync.SyncCredentials;
 import io.objectbox.sync.SyncCredentialsToken;
@@ -24,7 +23,7 @@ public class SyncServerImpl implements SyncServer {
     SyncServerImpl(SyncServerBuilder builder) {
         this.url = builder.url;
 
-        long storeHandle = InternalAccess.getHandle(builder.boxStore);
+        long storeHandle = builder.boxStore.getNativeStore();
         long handle = nativeCreate(storeHandle, url, builder.certificatePath);
         if (handle == 0) {
             throw new RuntimeException("Failed to create sync server: handle is zero.");

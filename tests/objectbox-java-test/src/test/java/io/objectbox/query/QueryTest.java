@@ -16,26 +16,26 @@
 
 package io.objectbox.query;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
 import io.objectbox.TestEntity;
 import io.objectbox.TestEntity_;
 import io.objectbox.TestUtils;
+import io.objectbox.config.DebugFlags;
 import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.NonUniqueResultException;
-import io.objectbox.config.DebugFlags;
 import io.objectbox.query.QueryBuilder.StringOrder;
 import io.objectbox.relation.MyObjectBox;
 import io.objectbox.relation.Order;
 import io.objectbox.relation.Order_;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 
 import static io.objectbox.TestEntity_.simpleBoolean;
 import static io.objectbox.TestEntity_.simpleByteArray;
@@ -57,6 +57,17 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class QueryTest extends AbstractQueryTest {
+
+    @Test
+    public void createIfStoreClosed_throws() {
+        store.close();
+
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> box.query()
+        );
+        assertEquals("Store is closed", ex.getMessage());
+    }
 
     @Test
     public void testBuild() {

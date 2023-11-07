@@ -48,7 +48,7 @@ public class SyncClientImpl implements SyncClient {
         this.serverUrl = builder.url;
         this.connectivityMonitor = builder.platform.getConnectivityMonitor();
 
-        long boxStoreHandle = InternalAccess.getHandle(builder.boxStore);
+        long boxStoreHandle = builder.boxStore.getNativeStore();
         long handle = nativeCreate(boxStoreHandle, serverUrl, builder.trustedCertPaths);
         if (handle == 0) {
             throw new RuntimeException("Failed to create sync client: handle is zero.");
