@@ -221,7 +221,7 @@ public class BoxStore implements Closeable {
     private final File directory;
     private final String canonicalPath;
     /** Reference to the native store. Should probably get through {@link #getNativeStore()} instead. */
-    private final long handle;
+    private long handle;
     private final Map<Class<?>, String> dbNameByClass = new HashMap<>();
     private final Map<Class<?>, Integer> entityTypeIdByClass = new HashMap<>();
     private final Map<Class<?>, EntityInfo<?>> propertiesByClass = new HashMap<>();
@@ -626,7 +626,9 @@ public class BoxStore implements Closeable {
                 }
                 if (handle != 0) { // failed before native handle was created?
                     nativeDelete(handle);
-                    // TODO set handle to 0 and check in native methods
+                    // The Java API has open checks, but just in case re-set the handle so any native methods will
+                    // not crash due to an invalid pointer.
+                    handle = 0;
                 }
 
                 // When running the full unit test suite, we had 100+ threads before, hope this helps:
