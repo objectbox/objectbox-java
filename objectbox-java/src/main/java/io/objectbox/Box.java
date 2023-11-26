@@ -138,14 +138,20 @@ public class Box<T> {
     }
 
     void releaseReader(Cursor<T> cursor) {
-        // NOP if TX is ongoing
-        if (activeTxCursor.get() == null) {
-            Transaction tx = cursor.getTx();
-            if (tx.isClosed() || tx.isRecycled() || !tx.isReadOnly()) {
-                throw new IllegalStateException("Illegal reader TX state");
-            }
-            tx.recycle();
+        if (activeTxCursor.get() != null) {
+            return; // NOP if TX is ongoing
         }
+
+        Transaction tx = cursor.getTx();
+        if (!isValidTransactionToRelease(tx)) {
+            throw new IllegalStateException("Illegal reader TX state");
+        }
+
+        tx.recycle();
+    }
+
+    private boolean isValidTransactionToRelease(Transaction tx) {
+        return !tx.isClosed() && !tx.isRecycled() && tx.isReadOnly();
     }
 
     /**
