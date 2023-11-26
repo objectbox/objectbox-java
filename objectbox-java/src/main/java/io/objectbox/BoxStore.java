@@ -373,16 +373,18 @@ public class BoxStore implements Closeable {
     }
 
     static boolean isFileOpenSync(String canonicalPath, boolean runFinalization) {
+        int Num_Of_Retries = 5;
+        int Timeout = 100; // in millis
         synchronized (openFiles) {
             int tries = 0;
-            while (tries < 5 && openFiles.contains(canonicalPath)) {
+            while (tries < Num_Of_Retries && openFiles.contains(canonicalPath)) {
                 tries++;
                 System.gc();
                 if (runFinalization && tries > 1) System.runFinalization();
                 System.gc();
                 if (runFinalization && tries > 1) System.runFinalization();
                 try {
-                    openFiles.wait(100);
+                    openFiles.wait(Timeout);
                 } catch (InterruptedException e) {
                     // Ignore
                 }
