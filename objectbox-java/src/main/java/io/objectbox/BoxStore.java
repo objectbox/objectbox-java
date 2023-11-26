@@ -342,6 +342,23 @@ public class BoxStore implements Closeable {
         }
     }
 
+
+    private static void openFileOnDiffThread(final String canonicalPath){
+            // Use a thread to avoid finalizers that block us
+        Thread thread = new Thread(() -> {
+                isFileOpenSync(canonicalPath, true);
+                openFilesCheckerThread = null; // Clean ref to itself
+            });
+            thread.setDaemon(true);
+            openFilesCheckerThread = thread;
+            thread.start();
+            try {
+                thread.join(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+    }
+
     /** Also retries up to 500ms to improve GC race condition situation. */
     static boolean isFileOpen(final String canonicalPath) {
         synchronized (openFiles) {
@@ -349,26 +366,13 @@ public class BoxStore implements Closeable {
         }
         Thread checkerThread = BoxStore.openFilesCheckerThread;
         if (checkerThread == null || !checkerThread.isAlive()) {
-            // Use a thread to avoid finalizers that block us
-            checkerThread = new Thread(() -> {
-                isFileOpenSync(canonicalPath, true);
-                BoxStore.openFilesCheckerThread = null; // Clean ref to itself
-            });
-            checkerThread.setDaemon(true);
-
-            BoxStore.openFilesCheckerThread = checkerThread;
-            checkerThread.start();
-            try {
-                checkerThread.join(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            openFileOnDiffThread(canonicalPath);
+            synchronized (openFiles) {
+                return openFiles.contains(canonicalPath);
             }
         } else {
             // Waiting for finalizers are blocking; only do that in the thread ^
             return isFileOpenSync(canonicalPath, false);
-        }
-        synchronized (openFiles) {
-            return openFiles.contains(canonicalPath);
         }
     }
 
