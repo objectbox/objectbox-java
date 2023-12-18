@@ -4,6 +4,10 @@ on:
     - cron: "15 1 * * *" # “At 01:15.”
   workflow_dispatch: # To support running manually.
 
+# Minimal access by default
+permissions:
+  contents: read
+
 jobs:
   close-issues:
     runs-on: ubuntu-latest
@@ -12,7 +16,7 @@ jobs:
       pull-requests: write
     steps:
       # https://github.com/marketplace/actions/close-stale-issues
-      - uses: actions/stale@v7
+      - uses: actions/stale@6f05e4244c9a0b2ed3401882b05d701dd0a7289b # v7.0.0
         with:
           days-before-stale: -1 # Add the stale label manually.
           days-before-close: 21
