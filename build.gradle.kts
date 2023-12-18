@@ -41,6 +41,8 @@ buildscript {
     // The versions of Kotlin, Kotlin Coroutines and Dokka must work together.
     // Check https://github.com/Kotlin/kotlinx.coroutines#readme
     // and https://github.com/Kotlin/dokka/releases
+    // Note: when updating might also have to increase the minimum compiler version supported
+    // by consuming projects, see objectbox-kotlin/ build script.
     val kotlinVersion by extra("1.8.20")
     val coroutinesVersion by extra("1.7.3")
     val dokkaVersion by extra("1.8.20")
