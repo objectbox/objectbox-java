@@ -1,7 +1,12 @@
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 
-tasks.withType(JavaCompile).configureEach {
+plugins {
+    id("java-library")
+    id("kotlin")
+}
+
+tasks.withType<JavaCompile> {
     // Note: use release flag instead of sourceCompatibility and targetCompatibility to ensure only JDK 8 API is used.
     // https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation
     options.release.set(8)
@@ -10,7 +15,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 // Produce Java 8 byte code, would default to Java 6.
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
         jvmTarget = "1.8"
     }
@@ -18,56 +23,65 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
 
 repositories {
     // Native lib might be deployed only in internal repo
-    if (project.hasProperty('gitlabUrl')) {
-        println "gitlabUrl=$gitlabUrl added to repositories."
+    if (project.hasProperty("gitlabUrl")) {
+        val gitlabUrl = project.property("gitlabUrl")
+        println("gitlabUrl=$gitlabUrl added to repositories.")
         maven {
-            url "$gitlabUrl/api/v4/groups/objectbox/-/packages/maven"
-            name "GitLab"
-            credentials(HttpHeaderCredentials) {
-                name = project.hasProperty("gitlabTokenName") ? gitlabTokenName : "Private-Token"
-                value = gitlabPrivateToken
+            url = uri("$gitlabUrl/api/v4/groups/objectbox/-/packages/maven")
+            name = "GitLab"
+            credentials(HttpHeaderCredentials::class) {
+                name = project.findProperty("gitlabTokenName")?.toString() ?: "Private-Token"
+                value = project.property("gitlabPrivateToken").toString()
             }
             authentication {
-                header(HttpHeaderAuthentication)
+                create<HttpHeaderAuthentication>("header")
             }
         }
     } else {
-        println "Property gitlabUrl not set."
+        println("Property gitlabUrl not set.")
     }
 }
 
+val obxJniLibVersion: String by rootProject.extra
+
+val kotlinVersion: String by rootProject.extra
+val coroutinesVersion: String by rootProject.extra
+val essentialsVersion: String by rootProject.extra
+val junitVersion: String by rootProject.extra
+
 dependencies {
-    implementation project(':objectbox-java')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
-    implementation project(':objectbox-kotlin')
-    implementation "org.greenrobot:essentials:$essentialsVersion"
+    implementation(project(":objectbox-java"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+    implementation(project(":objectbox-kotlin"))
+    implementation("org.greenrobot:essentials:$essentialsVersion")
 
     // Check flag to use locally compiled version to avoid dependency cycles
-    if (!project.hasProperty('noObjectBoxTestDepencies') || !noObjectBoxTestDepencies) {
-        println "Using $obxJniLibVersion"
-        implementation obxJniLibVersion
+    if (!project.hasProperty("noObjectBoxTestDepencies")
+        || project.property("noObjectBoxTestDepencies") == false) {
+        println("Using $obxJniLibVersion")
+        implementation(obxJniLibVersion)
     } else {
-        println "Did NOT add native dependency"
+        println("Did NOT add native dependency")
     }
 
-    testImplementation "junit:junit:$junitVersion"
+    testImplementation("junit:junit:$junitVersion")
     // To test Coroutines
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     // To test Kotlin Flow
-    testImplementation 'app.cash.turbine:turbine:0.5.2'
+    testImplementation("app.cash.turbine:turbine:0.5.2")
 }
 
-test {
+tasks.test {
     if (System.getenv("TEST_WITH_JAVA_X86") == "true") {
         // To run tests with 32-bit ObjectBox
         // Note: 32-bit JDK is only available on Windows
-        def javaExecutablePath = System.getenv("JAVA_HOME_X86") + "\\bin\\java.exe"
+        val javaExecutablePath = System.getenv("JAVA_HOME_X86") + "\\bin\\java.exe"
         println("Will run tests with $javaExecutablePath")
         executable = javaExecutablePath
     } else if (System.getenv("TEST_JDK") != null) {
         // To run tests on a different JDK, uses Gradle toolchains API (https://docs.gradle.org/current/userguide/toolchains.html)
-        def sdkVersionInt = System.getenv("TEST_JDK") as Integer
+        val sdkVersionInt = System.getenv("TEST_JDK").toInt()
         println("Will run tests with JDK $sdkVersionInt")
         javaLauncher.set(javaToolchains.launcherFor {
             languageVersion.set(JavaLanguageVersion.of(sdkVersionInt))
@@ -76,19 +90,22 @@ test {
 
     // This is pretty useless now because it floods console with warnings about internal Java classes
     // However we might check from time to time, also with Java 9.
-    // jvmArgs '-Xcheck:jni'
+    // jvmArgs "-Xcheck:jni"
 
     filter {
         // Note: Tree API currently incubating on Linux only.
-        if (!System.getProperty("os.name").toLowerCase().contains('linux')) {
-            excludeTestsMatching "io.objectbox.tree.*"
+        if (!System.getProperty("os.name").lowercase().contains("linux")) {
+            excludeTestsMatching("io.objectbox.tree.*")
         }
     }
 
     testLogging {
         showStandardStreams = true
-        exceptionFormat = 'full'
+        exceptionFormat = TestExceptionFormat.FULL
         displayGranularity = 2
-        events 'started', 'passed'
+        events = setOf(
+            TestLogEvent.STARTED,
+            TestLogEvent.PASSED
+        )
     }
 }
