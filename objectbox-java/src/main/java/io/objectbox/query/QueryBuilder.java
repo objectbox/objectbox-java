@@ -28,7 +28,7 @@ import io.objectbox.EntityInfo;
 import io.objectbox.Property;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.exception .DbException;
+import io.objectbox.exception.DbException;
 import io.objectbox.relation.RelationInfo;
 
 /**
