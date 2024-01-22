@@ -35,7 +35,6 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
 
 public class BoxStoreTest extends AbstractObjectBoxTest {
 
@@ -313,17 +312,6 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
         long size = store.sizeOnDisk();
         assertTrue(size >= 8192);
-    }
-
-    @Test
-    public void testInMemory_createsNoFiles() {
-        assumeTrue(IN_MEMORY);
-
-        assertFalse(boxStoreDir.exists());
-        assertFalse(new File("memory").exists());
-        assertFalse(new File("memory:").exists());
-        String identifierPart = boxStoreDir.getPath().substring("memory:".length());
-        assertFalse(new File(identifierPart).exists());
     }
 
     @Test

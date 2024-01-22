@@ -34,6 +34,7 @@ import io.objectbox.exception.DbMaxDataSizeExceededException;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -120,6 +121,72 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         }
 
         deleteAllFiles(parentTestDir);
+    }
+
+    @Test
+    public void directoryConflictingOptionsError() {
+        // using conflicting option after directory option
+        assertThrows(IllegalStateException.class, () -> createBuilderWithTestModel()
+                .directory(boxStoreDir)
+                .name("options-test")
+        );
+        assertThrows(IllegalStateException.class, () -> createBuilderWithTestModel()
+                .directory(boxStoreDir)
+                .baseDirectory(boxStoreDir)
+        );
+
+        // using directory option after conflicting option
+        assertThrows(IllegalStateException.class, () -> createBuilderWithTestModel()
+                .name("options-test")
+                .directory(boxStoreDir)
+        );
+        assertThrows(IllegalStateException.class, () -> createBuilderWithTestModel()
+                .baseDirectory(boxStoreDir)
+                .directory(boxStoreDir)
+        );
+    }
+
+    @Test
+    public void inMemoryConflictingOptionsError() {
+        // directory-based option after switching to in-memory
+        assertThrows(IllegalStateException.class, () -> createBuilderWithTestModel()
+                .inMemory("options-test")
+                .name("options-test")
+        );
+        assertThrows(IllegalStateException.class, () -> createBuilderWithTestModel()
+                .inMemory("options-test")
+                .directory(boxStoreDir)
+        );
+        assertThrows(IllegalStateException.class, () -> createBuilderWithTestModel()
+                .inMemory("options-test")
+                .baseDirectory(boxStoreDir)
+        );
+
+        // in-memory after specifying directory-based option
+        assertThrows(IllegalStateException.class, () -> createBuilderWithTestModel()
+                .name("options-test")
+                .inMemory("options-test")
+        );
+        assertThrows(IllegalStateException.class, () -> createBuilderWithTestModel()
+                .directory(boxStoreDir)
+                .inMemory("options-test")
+        );
+        assertThrows(IllegalStateException.class, () -> createBuilderWithTestModel()
+                .baseDirectory(boxStoreDir)
+                .inMemory("options-test")
+        );
+    }
+
+    @Test
+    public void inMemoryCreatesNoFiles() {
+        // let base class clean up store in tearDown method
+        store = createBuilderWithTestModel().inMemory("in-memory-test").build();
+
+        assertFalse(boxStoreDir.exists());
+        assertFalse(new File("memory").exists());
+        assertFalse(new File("memory:").exists());
+        String identifierPart = boxStoreDir.getPath().substring("memory:".length());
+        assertFalse(new File(identifierPart).exists());
     }
 
     @Test
