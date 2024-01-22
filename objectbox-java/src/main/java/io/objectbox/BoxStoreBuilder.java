@@ -135,6 +135,8 @@ public class BoxStoreBuilder {
     /** Called internally from the generated class "MyObjectBox". Check MyObjectBox.builder() to get an instance. */
     @Internal
     public BoxStoreBuilder(byte[] model) {
+        // Note: annotations do not guarantee parameter is non-null.
+        //noinspection ConstantValue
         if (model == null) {
             throw new IllegalArgumentException("Model may not be null");
         }
@@ -150,9 +152,7 @@ public class BoxStoreBuilder {
      * Default: "objectbox", {@link #DEFAULT_NAME} (unless {@link #directory(File)} is used)
      */
     public BoxStoreBuilder name(String name) {
-        if (directory != null) {
-            throw new IllegalArgumentException("Already has directory, cannot assign name");
-        }
+        checkIsNull(directory, "Already has directory, cannot assign name");
         if (name.contains("/") || name.contains("\\")) {
             throw new IllegalArgumentException("Name may not contain (back) slashes. " +
                     "Use baseDirectory() or directory() to configure alternative directories");
@@ -179,11 +179,9 @@ public class BoxStoreBuilder {
      * Can not be used in combination with {@link #name(String)} or {@link #baseDirectory(File)}.
      */
     public BoxStoreBuilder directory(File directory) {
-        if (name != null) {
-            throw new IllegalArgumentException("Already has name, cannot assign directory");
-        }
-        if (!android && baseDirectory != null) {
-            throw new IllegalArgumentException("Already has base directory, cannot assign directory");
+        checkIsNull(name, "Already has name, cannot assign directory");
+        if (!android) {
+            checkIsNull(baseDirectory, "Already has base directory, cannot assign directory");
         }
         this.directory = directory;
         return this;
@@ -195,11 +193,19 @@ public class BoxStoreBuilder {
      * Cannot be used in combination with {@link #directory(File)}.
      */
     public BoxStoreBuilder baseDirectory(File baseDirectory) {
-        if (directory != null) {
-            throw new IllegalArgumentException("Already has directory, cannot assign base directory");
-        }
+        checkIsNull(directory, "Already has directory, cannot assign base directory");
         this.baseDirectory = baseDirectory;
         return this;
+    }
+
+    /**
+     * Use to check conflicting properties are not set.
+     * If not null, throws {@link IllegalStateException} with the given message.
+     */
+    private static void checkIsNull(@Nullable Object value, String errorMessage) {
+        if (value != null) {
+            throw new IllegalStateException(errorMessage);
+        }
     }
 
     /**
