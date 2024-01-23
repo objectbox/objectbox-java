@@ -96,8 +96,6 @@ public class BoxStoreBuilder {
 
     int debugFlags;
 
-    private boolean android;
-
     boolean debugRelations;
 
     int fileMode;
@@ -187,9 +185,7 @@ public class BoxStoreBuilder {
     public BoxStoreBuilder directory(File directory) {
         checkIsNull(name, "Already has name, cannot assign directory");
         checkIsNull(inMemory, "Already set to in-memory database, cannot assign directory");
-        if (!android) {
-            checkIsNull(baseDirectory, "Already has base directory, cannot assign directory");
-        }
+        checkIsNull(baseDirectory, "Already has base directory, cannot assign directory");
         this.directory = directory;
         return this;
     }
@@ -232,17 +228,18 @@ public class BoxStoreBuilder {
 
     /**
      * Use on Android to pass a <a href="https://developer.android.com/reference/android/content/Context">Context</a>
-     * for loading the native library and, if {@link #inMemory(String)} was not called before, creating the base
+     * for loading the native library and, if not an {@link #inMemory(String)} database, for creating the base
      * directory for database files in the
      * <a href="https://developer.android.com/reference/android/content/Context#getFilesDir()">files directory of the app</a>.
      * <p>
-     * In more detail, this assigns the base directory (see {@link #baseDirectory}) to
+     * In more detail, upon {@link #build()} assigns the base directory (see {@link #baseDirectory}) to
      * {@code context.getFilesDir() + "/objectbox/"}.
      * Thus, when using the default name (also "objectbox", unless overwritten using {@link #name(String)}), the default
      * location of database files will be "objectbox/objectbox/" inside the app's files directory.
      * If a custom name is specified, for example with {@code name("foobar")}, it would become "objectbox/foobar/".
      * <p>
-     * Alternatively, use {@link #baseDirectory(File)} or {@link #directory(File)}.
+     * Use {@link #baseDirectory(File)} or {@link #directory(File)} to specify a different directory for the database
+     * files.
      */
     public BoxStoreBuilder androidContext(Object context) {
         //noinspection ConstantConditions Annotation does not enforce non-null.
@@ -250,23 +247,6 @@ public class BoxStoreBuilder {
             throw new NullPointerException("Context may not be null");
         }
         this.context = getApplicationContext(context);
-
-        // Only create directories if not already an in-memory database.
-        // Note: this will still create directories if this is called before switching to an in-memory database.
-        if (inMemory == null) {
-            File baseDir = getAndroidBaseDir(context);
-            if (!baseDir.exists()) {
-                baseDir.mkdir();
-                if (!baseDir.exists()) { // check baseDir.exists() because of potential concurrent processes
-                    throw new RuntimeException("Could not init Android base dir at " + baseDir.getAbsolutePath());
-                }
-            }
-            if (!baseDir.isDirectory()) {
-                throw new RuntimeException("Android base dir is not a dir: " + baseDir.getAbsolutePath());
-            }
-            baseDirectory = baseDir;
-        }
-        android = true;
         return this;
     }
 
@@ -627,11 +607,29 @@ public class BoxStoreBuilder {
     }
 
     /**
-     * Builds a {@link BoxStore} using any given configuration.
+     * Builds a {@link BoxStore} using the current configuration of this builder.
+     *
+     * <p>If {@link #androidContext(Object)} was called and no {@link #directory(File)} or {@link #baseDirectory(File)}
+     * is configured, creates and sets {@link #baseDirectory(File)} as explained in {@link #androidContext(Object)}.
      */
     public BoxStore build() {
+        // If in-memory, use a special directory (it will never be created)
         if (inMemory != null) {
             directory = new File(BoxStore.IN_MEMORY_PREFIX + inMemory);
+        }
+        // On Android, create and set base directory if no directory is explicitly configured
+        if (directory == null && baseDirectory == null && context != null) {
+            File baseDir = getAndroidBaseDir(context);
+            if (!baseDir.exists()) {
+                baseDir.mkdir();
+                if (!baseDir.exists()) { // check baseDir.exists() because of potential concurrent processes
+                    throw new RuntimeException("Could not init Android base dir at " + baseDir.getAbsolutePath());
+                }
+            }
+            if (!baseDir.isDirectory()) {
+                throw new RuntimeException("Android base dir is not a dir: " + baseDir.getAbsolutePath());
+            }
+            baseDirectory = baseDir;
         }
         if (directory == null) {
             directory = getDbDir(baseDirectory, name);
