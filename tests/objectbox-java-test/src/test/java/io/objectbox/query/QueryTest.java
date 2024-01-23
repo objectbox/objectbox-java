@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package io.objectbox.query;
+
+import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,8 +37,7 @@ import io.objectbox.query.QueryBuilder.StringOrder;
 import io.objectbox.relation.MyObjectBox;
 import io.objectbox.relation.Order;
 import io.objectbox.relation.Order_;
-import org.junit.Test;
-import org.junit.function.ThrowingRunnable;
+
 
 import static io.objectbox.TestEntity_.simpleBoolean;
 import static io.objectbox.TestEntity_.simpleByteArray;
@@ -1234,7 +1236,7 @@ public class QueryTest extends AbstractQueryTest {
     // TODO can we improve? More than just "still works"?
     public void testQueryAttempts() {
         store.close();
-        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(null)).directory(boxStoreDir)
+        BoxStoreBuilder builder = createBuilderWithTestModel().directory(boxStoreDir)
                 .queryAttempts(5)
                 .failedReadTxAttemptCallback((result, error) -> {
                     if (error != null) {

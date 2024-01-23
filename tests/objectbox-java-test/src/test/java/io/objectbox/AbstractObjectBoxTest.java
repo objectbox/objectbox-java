@@ -236,6 +236,13 @@ public abstract class AbstractObjectBoxTest {
         return modelBuilder.build();
     }
 
+    /**
+     * When not using the {@link #store} of this to create a builder with the default test model.
+     */
+    protected BoxStoreBuilder createBuilderWithTestModel() {
+        return new BoxStoreBuilder(createTestModel(null));
+    }
+
     private void addTestEntity(ModelBuilder modelBuilder, @Nullable IndexType simpleStringIndexType) {
         lastEntityUid = ++lastUid;
         EntityBuilder entityBuilder = modelBuilder.entity("TestEntity").id(++lastEntityId, lastEntityUid);

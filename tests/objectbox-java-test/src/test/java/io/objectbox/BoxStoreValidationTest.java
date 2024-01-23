@@ -53,7 +53,7 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
     @Before
     public void setUpBuilder() {
         BoxStore.clearDefaultStore();
-        builder = new BoxStoreBuilder(createTestModel(null)).directory(boxStoreDir);
+        builder = createBuilderWithTestModel().directory(boxStoreDir);
     }
 
     @Test
