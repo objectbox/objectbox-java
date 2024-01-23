@@ -120,7 +120,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
             }
         }
 
-        deleteAllFiles(parentTestDir);
+        cleanUpAllFiles(parentTestDir);
     }
 
     @Test

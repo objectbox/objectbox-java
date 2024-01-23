@@ -181,7 +181,8 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void testDeleteAllFiles() {
-        assumeFalse(IN_MEMORY);
+        // Note: for in-memory can not really assert database is gone,
+        // relying on native code returning true for deleteAllFiles.
         closeStoreForTest();
     }
 
@@ -228,7 +229,6 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test(expected = IllegalStateException.class)
     public void testDeleteAllFiles_openStore() {
-        assumeFalse(IN_MEMORY);
         BoxStore.deleteAllFiles(boxStoreDir);
     }
 
@@ -258,9 +258,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
             assertTrue(boxStoreDir.exists());
         }
         store.close();
-        if (!IN_MEMORY) {
-            assertTrue(store.deleteAllFiles());
-        }
+        assertTrue(store.deleteAllFiles());
         assertFalse(boxStoreDir.exists());
     }
 

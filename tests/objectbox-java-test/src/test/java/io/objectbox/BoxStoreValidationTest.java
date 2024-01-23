@@ -87,7 +87,7 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
         assertEquals("Validating pages failed (page not found)", ex.getMessage());
 
         // Clean up
-        deleteAllFiles(dir);
+        cleanUpAllFiles(dir);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
                 ex.getMessage());
 
         // Clean up
-        deleteAllFiles(dir);
+        cleanUpAllFiles(dir);
     }
 
     /**

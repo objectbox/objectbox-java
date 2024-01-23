@@ -117,8 +117,7 @@ public abstract class AbstractObjectBoxTest {
         if (IN_MEMORY) {
             // Instead of random temp directory, use random suffix for each test to avoid re-using existing database
             // from other tests in case clean-up fails.
-            // Note: all clean-up code will gracefully fail (e.g. deleting the database files will do nothing as the
-            // directory does not exist).
+            // Note: tearDown code will still work as the directory does not exist.
             String randomPart = Long.toUnsignedString(random.nextLong());
             return new File(BoxStore.IN_MEMORY_PREFIX + prefix + randomPart);
         } else {
@@ -178,10 +177,13 @@ public abstract class AbstractObjectBoxTest {
                 logError("Could not clean up test", e);
             }
         }
-        deleteAllFiles(boxStoreDir);
+        cleanUpAllFiles(boxStoreDir);
     }
 
-    protected void deleteAllFiles(@Nullable File boxStoreDir) {
+    /**
+     * Manually clean up any leftover files to prevent interference with other tests.
+     */
+    protected void cleanUpAllFiles(@Nullable File boxStoreDir) {
         if (boxStoreDir != null && boxStoreDir.exists()) {
             try (Stream<Path> stream = Files.walk(boxStoreDir.toPath())) {
                 stream.sorted(Comparator.reverseOrder())
