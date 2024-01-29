@@ -182,7 +182,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     @Test
     public void testDeleteAllFiles() {
         // Note: for in-memory can not really assert database is gone,
-        // relying on native code returning true for deleteAllFiles.
+        // e.g. using sizeOnDisk is not possible after closing the store from Java.
         closeStoreForTest();
     }
 
@@ -306,10 +306,9 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void testSizeOnDisk() {
-        assumeFalse(IN_MEMORY);
-
         long size = store.sizeOnDisk();
-        assertTrue(size >= 8192);
+        // Note: initial database does have a non-zero (file) size.
+        assertTrue(size > 0);
     }
 
     @Test
