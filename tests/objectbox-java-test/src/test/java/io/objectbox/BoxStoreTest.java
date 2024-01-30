@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 
 package io.objectbox;
 
-import io.objectbox.exception.DbException;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
 import java.io.File;
 import java.util.concurrent.Callable;
 import java.util.concurrent.RejectedExecutionException;
+
+import io.objectbox.exception.DbException;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,6 +34,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 
 public class BoxStoreTest extends AbstractObjectBoxTest {
 
@@ -172,20 +175,24 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     @Test
     public void testOpenTwoBoxStoreTwoFiles() {
         File boxStoreDir2 = new File(boxStoreDir.getAbsolutePath() + "-2");
-        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(null)).directory(boxStoreDir2);
+        BoxStoreBuilder builder = createBuilderWithTestModel().directory(boxStoreDir2);
         builder.entity(new TestEntity_());
     }
 
     @Test
     public void testDeleteAllFiles() {
+        // Note: for in-memory can not really assert database is gone,
+        // e.g. using sizeOnDisk is not possible after closing the store from Java.
         closeStoreForTest();
     }
 
     @Test
     public void testDeleteAllFiles_staticDir() {
+        assumeFalse(IN_MEMORY);
         closeStoreForTest();
+
         File boxStoreDir2 = new File(boxStoreDir.getAbsolutePath() + "-2");
-        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(null)).directory(boxStoreDir2);
+        BoxStoreBuilder builder = createBuilderWithTestModel().directory(boxStoreDir2);
         BoxStore store2 = builder.build();
         store2.close();
 
@@ -196,6 +203,8 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void testDeleteAllFiles_baseDirName() {
+        assumeFalse(IN_MEMORY);
+
         closeStoreForTest();
         File basedir = new File("test-base-dir");
         String name = "mydb";
@@ -208,7 +217,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         File dbDir = new File(basedir, name);
         assertFalse(dbDir.exists());
 
-        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(null)).baseDirectory(basedir).name(name);
+        BoxStoreBuilder builder = createBuilderWithTestModel().baseDirectory(basedir).name(name);
         BoxStore store2 = builder.build();
         store2.close();
 
@@ -245,7 +254,9 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     }
 
     private void closeStoreForTest() {
-        assertTrue(boxStoreDir.exists());
+        if (!IN_MEMORY) {
+            assertTrue(boxStoreDir.exists());
+        }
         store.close();
         assertTrue(store.deleteAllFiles());
         assertFalse(boxStoreDir.exists());
@@ -271,7 +282,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         final int[] countHolder = {0};
         final int[] countHolderCallback = {0};
 
-        BoxStoreBuilder builder = new BoxStoreBuilder(createTestModel(null)).directory(boxStoreDir)
+        BoxStoreBuilder builder = createBuilderWithTestModel().directory(boxStoreDir)
                 .failedReadTxAttemptCallback((result, error) -> {
                     assertNotNull(error);
                     countHolderCallback[0]++;
@@ -296,21 +307,23 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     @Test
     public void testSizeOnDisk() {
         long size = store.sizeOnDisk();
-        assertTrue(size >= 8192);
+        // Note: initial database does have a non-zero (file) size.
+        assertTrue(size > 0);
     }
 
     @Test
     public void validate() {
         putTestEntities(100);
 
+        // Note: not implemented for in-memory, returns 0.
         // No limit.
         long validated = store.validate(0, true);
-        assertEquals(14, validated);
+        assertEquals(IN_MEMORY ? 0 : 14, validated);
 
         // With limit.
         validated = store.validate(1, true);
         // 2 because the first page doesn't contain any actual data?
-        assertEquals(2, validated);
+        assertEquals(IN_MEMORY ? 0 : 2, validated);
     }
 
     @Test

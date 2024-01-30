@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package io.objectbox;
+
+import org.greenrobot.essentials.io.IoUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -43,7 +45,6 @@ import io.objectbox.exception.DbMaxDataSizeExceededException;
 import io.objectbox.exception.DbMaxReadersExceededException;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.ideasonly.ModelUpdate;
-import org.greenrobot.essentials.io.IoUtils;
 
 /**
  * Configures and builds a {@link BoxStore} with reasonable defaults. To get an instance use {@code MyObjectBox.builder()}.
@@ -77,6 +78,9 @@ public class BoxStoreBuilder {
     /** Ignored by BoxStore */
     private String name;
 
+    /** If non-null, using an in-memory database with this identifier. */
+    private String inMemory;
+
     /** Defaults to {@link #DEFAULT_MAX_DB_SIZE_KBYTE}. */
     long maxSizeInKByte = DEFAULT_MAX_DB_SIZE_KBYTE;
 
@@ -91,8 +95,6 @@ public class BoxStoreBuilder {
     ModelUpdate modelUpdate;
 
     int debugFlags;
-
-    private boolean android;
 
     boolean debugRelations;
 
@@ -134,6 +136,8 @@ public class BoxStoreBuilder {
     /** Called internally from the generated class "MyObjectBox". Check MyObjectBox.builder() to get an instance. */
     @Internal
     public BoxStoreBuilder(byte[] model) {
+        // Note: annotations do not guarantee parameter is non-null.
+        //noinspection ConstantValue
         if (model == null) {
             throw new IllegalArgumentException("Model may not be null");
         }
@@ -142,16 +146,15 @@ public class BoxStoreBuilder {
     }
 
     /**
-     * Name of the database, which will be used as a directory for DB files.
+     * Name of the database, which will be used as a directory for database files.
      * You can also specify a base directory for this one using {@link #baseDirectory(File)}.
-     * Cannot be used in combination with {@link #directory(File)}.
+     * Cannot be used in combination with {@link #directory(File)} and {@link #inMemory(String)}.
      * <p>
      * Default: "objectbox", {@link #DEFAULT_NAME} (unless {@link #directory(File)} is used)
      */
     public BoxStoreBuilder name(String name) {
-        if (directory != null) {
-            throw new IllegalArgumentException("Already has directory, cannot assign name");
-        }
+        checkIsNull(directory, "Already has directory, cannot assign name");
+        checkIsNull(inMemory, "Already set to in-memory database, cannot assign name");
         if (name.contains("/") || name.contains("\\")) {
             throw new IllegalArgumentException("Name may not contain (back) slashes. " +
                     "Use baseDirectory() or directory() to configure alternative directories");
@@ -161,16 +164,28 @@ public class BoxStoreBuilder {
     }
 
     /**
-     * The directory where all DB files should be placed in.
-     * Cannot be used in combination with {@link #name(String)}/{@link #baseDirectory(File)}.
+     * The directory where all database files should be placed in.
+     * <p>
+     * If the directory does not exist, it will be created. Make sure the process has permissions to write to this
+     * directory.
+     * <p>
+     * To switch to an in-memory database, use a file path with {@link BoxStore#IN_MEMORY_PREFIX} and an identifier
+     * instead:
+     * <p>
+     * <pre>{@code
+     * BoxStore inMemoryStore = MyObjectBox.builder()
+     *     .directory(BoxStore.IN_MEMORY_PREFIX + "notes-db")
+     *     .build();
+     * }</pre>
+     * Alternatively, use {@link #inMemory(String)}.
+     * <p>
+     * Can not be used in combination with {@link #name(String)}, {@link #baseDirectory(File)}
+     * or {@link #inMemory(String)}.
      */
     public BoxStoreBuilder directory(File directory) {
-        if (name != null) {
-            throw new IllegalArgumentException("Already has name, cannot assign directory");
-        }
-        if (!android && baseDirectory != null) {
-            throw new IllegalArgumentException("Already has base directory, cannot assign directory");
-        }
+        checkIsNull(name, "Already has name, cannot assign directory");
+        checkIsNull(inMemory, "Already set to in-memory database, cannot assign directory");
+        checkIsNull(baseDirectory, "Already has base directory, cannot assign directory");
         this.directory = directory;
         return this;
     }
@@ -178,28 +193,53 @@ public class BoxStoreBuilder {
     /**
      * In combination with {@link #name(String)}, this lets you specify the location of where the DB files should be
      * stored.
-     * Cannot be used in combination with {@link #directory(File)}.
+     * Cannot be used in combination with {@link #directory(File)} or {@link #inMemory(String)}.
      */
     public BoxStoreBuilder baseDirectory(File baseDirectory) {
-        if (directory != null) {
-            throw new IllegalArgumentException("Already has directory, cannot assign base directory");
-        }
+        checkIsNull(directory, "Already has directory, cannot assign base directory");
+        checkIsNull(inMemory, "Already set to in-memory database, cannot assign base directory");
         this.baseDirectory = baseDirectory;
         return this;
     }
 
     /**
-     * On Android, you can pass a Context to set the base directory using this method.
-     * This will conveniently configure the storage location to be in the files directory of your app.
+     * Switches to an in-memory database using the given name as its identifier.
      * <p>
-     * In more detail, this assigns the base directory (see {@link #baseDirectory}) to
+     * Can not be used in combination with {@link #name(String)}, {@link #directory(File)}
+     * or {@link #baseDirectory(File)}.
+     */
+    public BoxStoreBuilder inMemory(String identifier) {
+        checkIsNull(name, "Already has name, cannot switch to in-memory database");
+        checkIsNull(directory, "Already has directory, cannot switch to in-memory database");
+        checkIsNull(baseDirectory, "Already has base directory, cannot switch to in-memory database");
+        inMemory = identifier;
+        return this;
+    }
+
+    /**
+     * Use to check conflicting properties are not set.
+     * If not null, throws {@link IllegalStateException} with the given message.
+     */
+    private static void checkIsNull(@Nullable Object value, String errorMessage) {
+        if (value != null) {
+            throw new IllegalStateException(errorMessage);
+        }
+    }
+
+    /**
+     * Use on Android to pass a <a href="https://developer.android.com/reference/android/content/Context">Context</a>
+     * for loading the native library and, if not an {@link #inMemory(String)} database, for creating the base
+     * directory for database files in the
+     * <a href="https://developer.android.com/reference/android/content/Context#getFilesDir()">files directory of the app</a>.
+     * <p>
+     * In more detail, upon {@link #build()} assigns the base directory (see {@link #baseDirectory}) to
      * {@code context.getFilesDir() + "/objectbox/"}.
-     * Thus, when using the default name (also "objectbox" unless overwritten using {@link #name(String)}), the default
-     * location of DB files will be "objectbox/objectbox/" inside the app files directory.
-     * If you specify a custom name, for example with {@code name("foobar")}, it would become
-     * "objectbox/foobar/".
+     * Thus, when using the default name (also "objectbox", unless overwritten using {@link #name(String)}), the default
+     * location of database files will be "objectbox/objectbox/" inside the app's files directory.
+     * If a custom name is specified, for example with {@code name("foobar")}, it would become "objectbox/foobar/".
      * <p>
-     * Alternatively, you can also use {@link #baseDirectory} or {@link #directory(File)} instead.
+     * Use {@link #baseDirectory(File)} or {@link #directory(File)} to specify a different directory for the database
+     * files.
      */
     public BoxStoreBuilder androidContext(Object context) {
         //noinspection ConstantConditions Annotation does not enforce non-null.
@@ -207,19 +247,6 @@ public class BoxStoreBuilder {
             throw new NullPointerException("Context may not be null");
         }
         this.context = getApplicationContext(context);
-
-        File baseDir = getAndroidBaseDir(context);
-        if (!baseDir.exists()) {
-            baseDir.mkdir();
-            if (!baseDir.exists()) { // check baseDir.exists() because of potential concurrent processes
-                throw new RuntimeException("Could not init Android base dir at " + baseDir.getAbsolutePath());
-            }
-        }
-        if (!baseDir.isDirectory()) {
-            throw new RuntimeException("Android base dir is not a dir: " + baseDir.getAbsolutePath());
-        }
-        baseDirectory = baseDir;
-        android = true;
         return this;
     }
 
@@ -504,7 +531,7 @@ public class BoxStoreBuilder {
      * {@link DbException} are thrown during query execution).
      *
      * @param queryAttempts number of attempts a query find operation will be executed before failing.
-     *                      Recommended values are in the range of 2 to 5, e.g. a value of 3 as a starting point.
+     * Recommended values are in the range of 2 to 5, e.g. a value of 3 as a starting point.
      */
     @Experimental
     public BoxStoreBuilder queryAttempts(int queryAttempts) {
@@ -580,14 +607,36 @@ public class BoxStoreBuilder {
     }
 
     /**
-     * Builds a {@link BoxStore} using any given configuration.
+     * Builds a {@link BoxStore} using the current configuration of this builder.
+     *
+     * <p>If {@link #androidContext(Object)} was called and no {@link #directory(File)} or {@link #baseDirectory(File)}
+     * is configured, creates and sets {@link #baseDirectory(File)} as explained in {@link #androidContext(Object)}.
      */
     public BoxStore build() {
+        // If in-memory, use a special directory (it will never be created)
+        if (inMemory != null) {
+            directory = new File(BoxStore.IN_MEMORY_PREFIX + inMemory);
+        }
+        // On Android, create and set base directory if no directory is explicitly configured
+        if (directory == null && baseDirectory == null && context != null) {
+            File baseDir = getAndroidBaseDir(context);
+            if (!baseDir.exists()) {
+                baseDir.mkdir();
+                if (!baseDir.exists()) { // check baseDir.exists() because of potential concurrent processes
+                    throw new RuntimeException("Could not init Android base dir at " + baseDir.getAbsolutePath());
+                }
+            }
+            if (!baseDir.isDirectory()) {
+                throw new RuntimeException("Android base dir is not a dir: " + baseDir.getAbsolutePath());
+            }
+            baseDirectory = baseDir;
+        }
         if (directory == null) {
-            name = dbName(name);
             directory = getDbDir(baseDirectory, name);
         }
-        checkProvisionInitialDbFile();
+        if (inMemory == null) {
+            checkProvisionInitialDbFile();
+        }
         return new BoxStore(this);
     }
 

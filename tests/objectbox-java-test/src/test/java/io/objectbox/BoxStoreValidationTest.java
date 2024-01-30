@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 ObjectBox Ltd. All rights reserved.
+ * Copyright 2023-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package io.objectbox;
 
+import org.greenrobot.essentials.io.IoUtils;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,15 +28,14 @@ import java.io.InputStream;
 import io.objectbox.config.ValidateOnOpenModePages;
 import io.objectbox.exception.FileCorruptException;
 import io.objectbox.exception.PagesCorruptException;
-import org.greenrobot.essentials.io.IoUtils;
-import org.junit.Before;
-import org.junit.Test;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Tests validation (and recovery) options on opening a store.
@@ -50,7 +53,7 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
     @Before
     public void setUpBuilder() {
         BoxStore.clearDefaultStore();
-        builder = new BoxStoreBuilder(createTestModel(null)).directory(boxStoreDir);
+        builder = createBuilderWithTestModel().directory(boxStoreDir);
     }
 
     @Test
@@ -71,6 +74,8 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
 
     @Test
     public void validateOnOpenCorruptFile() throws IOException {
+        assumeFalse(IN_MEMORY);
+
         File dir = prepareTempDir("object-store-test-corrupted");
         prepareBadDataFile(dir, "corrupt-pageno-in-branch-data.mdb");
 
@@ -82,11 +87,13 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
         assertEquals("Validating pages failed (page not found)", ex.getMessage());
 
         // Clean up
-        deleteAllFiles(dir);
+        cleanUpAllFiles(dir);
     }
 
     @Test
     public void usePreviousCommitWithCorruptFile() throws IOException {
+        assumeFalse(IN_MEMORY);
+
         File dir = prepareTempDir("object-store-test-corrupted");
         prepareBadDataFile(dir, "corrupt-pageno-in-branch-data.mdb");
         builder = BoxStoreBuilder.createDebugWithoutModel().directory(dir);
@@ -101,6 +108,8 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
 
     @Test
     public void usePreviousCommitAfterFileCorruptException() throws IOException {
+        assumeFalse(IN_MEMORY);
+
         File dir = prepareTempDir("object-store-test-corrupted");
         prepareBadDataFile(dir, "corrupt-pageno-in-branch-data.mdb");
         builder = BoxStoreBuilder.createDebugWithoutModel().directory(dir);
@@ -137,6 +146,8 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
 
     @Test
     public void validateOnOpenKvCorruptFile() throws IOException {
+        assumeFalse(IN_MEMORY);
+        
         File dir = prepareTempDir("obx-store-validate-kv-corrupted");
         prepareBadDataFile(dir, "corrupt-keysize0-data.mdb");
 
@@ -149,7 +160,7 @@ public class BoxStoreValidationTest extends AbstractObjectBoxTest {
                 ex.getMessage());
 
         // Clean up
-        deleteAllFiles(dir);
+        cleanUpAllFiles(dir);
     }
 
     /**

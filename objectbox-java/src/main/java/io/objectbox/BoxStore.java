@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package io.objectbox;
+
+import org.greenrobot.essentials.collections.LongHashMap;
 
 import java.io.Closeable;
 import java.io.File;
@@ -55,7 +57,6 @@ import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataPublisher;
 import io.objectbox.reactive.SubscriptionBuilder;
 import io.objectbox.sync.SyncClient;
-import org.greenrobot.essentials.collections.LongHashMap;
 
 /**
  * An ObjectBox database that provides {@link Box Boxes} to put and get objects of specific entity classes
@@ -68,6 +69,9 @@ public class BoxStore implements Closeable {
     /** On Android used for native library loading. */
     @Nullable private static Object context;
     @Nullable private static Object relinker;
+
+    /** Prefix supplied with database directory to signal a file-less and in-memory database should be used. */
+    public static final String IN_MEMORY_PREFIX = "memory:";
 
     /** Change so ReLinker will update native library when using workaround loading. */
     public static final String JNI_VERSION = "3.7.1";
@@ -136,6 +140,12 @@ public class BoxStore implements Closeable {
         NativeLibraryLoader.ensureLoaded();
         return nativeGetVersion();
     }
+
+    /**
+     * @return true if DB files did not exist or were successfully removed,
+     * false if DB files exist that could not be removed.
+     */
+    static native boolean nativeRemoveDbFiles(String directory, boolean removeDir);
 
     /**
      * Creates a native BoxStore instance with FlatBuffer {@link FlatStoreOptions} {@code options}
@@ -318,6 +328,12 @@ public class BoxStore implements Closeable {
     }
 
     static String getCanonicalPath(File directory) {
+        // Skip directory check if in-memory prefix is used.
+        if (directory.getPath().startsWith(IN_MEMORY_PREFIX)) {
+            // Just return the path as is (e.g. "memory:data"), safe to use for string-based open check as well.
+            return directory.getPath();
+        }
+
         if (directory.exists()) {
             if (!directory.isDirectory()) {
                 throw new DbException("Is not a directory: " + directory.getAbsolutePath());
@@ -681,38 +697,30 @@ public class BoxStore implements Closeable {
     /**
      * Danger zone! This will delete all files in the given directory!
      * <p>
-     * No {@link BoxStore} may be alive using the given directory.
+     * No {@link BoxStore} may be alive using the given directory. E.g. call this before building a store. When calling
+     * this after {@link #close() closing} a store, read the docs of that method carefully first!
      * <p>
-     * If you did not use a custom name with BoxStoreBuilder, you can pass "new File({@link
-     * BoxStoreBuilder#DEFAULT_NAME})".
+     * If no {@link BoxStoreBuilder#name(String) name} was specified when building the store, use like:
+     *
+     * <pre>{@code
+     *     BoxStore.deleteAllFiles(new File(BoxStoreBuilder.DEFAULT_NAME));
+     * }</pre>
+     *
+     * <p>For an {@link BoxStoreBuilder#inMemory(String) in-memory} database, this will just clean up the in-memory
+     * database.
      *
      * @param objectStoreDirectory directory to be deleted; this is the value you previously provided to {@link
      * BoxStoreBuilder#directory(File)}
      * @return true if the directory 1) was deleted successfully OR 2) did not exist in the first place.
      * Note: If false is returned, any number of files may have been deleted before the failure happened.
-     * @throws IllegalStateException if the given directory is still used by a open {@link BoxStore}.
+     * @throws IllegalStateException if the given directory is still used by an open {@link BoxStore}.
      */
     public static boolean deleteAllFiles(File objectStoreDirectory) {
-        if (!objectStoreDirectory.exists()) {
-            return true;
-        }
-        if (isFileOpen(getCanonicalPath(objectStoreDirectory))) {
+        String canonicalPath = getCanonicalPath(objectStoreDirectory);
+        if (isFileOpen(canonicalPath)) {
             throw new IllegalStateException("Cannot delete files: store is still open");
         }
-
-        File[] files = objectStoreDirectory.listFiles();
-        if (files == null) {
-            return false;
-        }
-        for (File file : files) {
-            if (!file.delete()) {
-                // OK if concurrently deleted. Fail fast otherwise.
-                if (file.exists()) {
-                    return false;
-                }
-            }
-        }
-        return objectStoreDirectory.delete();
+        return nativeRemoveDbFiles(canonicalPath, true);
     }
 
     /**
