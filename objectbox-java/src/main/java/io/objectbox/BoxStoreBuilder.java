@@ -386,8 +386,6 @@ public class BoxStoreBuilder {
     }
 
     /**
-     * This API is experimental and may change or be removed in future releases.
-     * <p>
      * Sets the maximum size the data stored in the database can grow to.
      * When applying a transaction (e.g. putting an object) would exceed it a {@link DbMaxDataSizeExceededException}
      * is thrown.
@@ -401,7 +399,6 @@ public class BoxStoreBuilder {
      * When the data limit is reached, data can be removed to get below the limit again (assuming the database size limit
      * is not also reached).
      */
-    @Experimental
     public BoxStoreBuilder maxDataSizeInKByte(long maxDataSizeInKByte) {
         if (maxDataSizeInKByte >= maxSizeInKByte) {
             throw new IllegalArgumentException("maxDataSizeInKByte must be smaller than maxSizeInKByte.");
