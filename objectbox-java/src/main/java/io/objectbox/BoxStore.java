@@ -453,6 +453,7 @@ public class BoxStore implements Closeable {
      */
     @Experimental
     public static long sysProcMeminfoKb(String key) {
+        NativeLibraryLoader.ensureLoaded();
         return nativeSysProcMeminfoKb(key);
     }
 
@@ -475,6 +476,7 @@ public class BoxStore implements Closeable {
      */
     @Experimental
     public static long sysProcStatusKb(String key) {
+        NativeLibraryLoader.ensureLoaded();
         return nativeSysProcStatusKb(key);
     }
 
@@ -720,6 +722,7 @@ public class BoxStore implements Closeable {
         if (isFileOpen(canonicalPath)) {
             throw new IllegalStateException("Cannot delete files: store is still open");
         }
+        NativeLibraryLoader.ensureLoaded();
         return nativeRemoveDbFiles(canonicalPath, true);
     }
 
