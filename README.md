@@ -71,7 +71,7 @@ For Android projects, add the ObjectBox Gradle plugin to your root `build.gradle
 
 ```groovy
 buildscript {
-    ext.objectboxVersion = "3.7.1"
+    ext.objectboxVersion = "3.8.0"
     repositories {        
         mavenCentral()    
     }
@@ -178,7 +178,7 @@ Besides JVM based languages like Java and Kotlin, ObjectBox also offers:
 
 ## License
 
-    Copyright 2017-2023 ObjectBox Ltd. All rights reserved.
+    Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
