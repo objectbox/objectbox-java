@@ -114,6 +114,8 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
         // Methods using the native store should throw.
         assertThrowsStoreIsClosed(store::sizeOnDisk);
+        assertThrowsStoreIsClosed(store::dbSize);
+        assertThrowsStoreIsClosed(store::dbSizeOnDisk);
         assertThrowsStoreIsClosed(store::beginTx);
         assertThrowsStoreIsClosed(store::beginReadTx);
         assertThrowsStoreIsClosed(store::isReadOnly);
@@ -306,9 +308,18 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
 
     @Test
     public void testSizeOnDisk() {
-        long size = store.sizeOnDisk();
         // Note: initial database does have a non-zero (file) size.
-        assertTrue(size > 0);
+        long legacySizeOnDisk = store.sizeOnDisk();
+        assertTrue(legacySizeOnDisk > 0);
+
+        assertTrue(store.dbSize() > 0);
+
+        long sizeOnDisk = store.dbSizeOnDisk();
+        if (IN_MEMORY) {
+            assertEquals(0, sizeOnDisk);
+        } else {
+            assertTrue(sizeOnDisk > 0);
+        }
     }
 
     @Test
