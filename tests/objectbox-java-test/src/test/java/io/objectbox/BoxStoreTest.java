@@ -315,11 +315,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         assertTrue(store.getDbSize() > 0);
 
         long sizeOnDisk = store.getDbSizeOnDisk();
-        if (IN_MEMORY) {
-            assertEquals(0, sizeOnDisk);
-        } else {
-            assertTrue(sizeOnDisk > 0);
-        }
+        assertEquals(IN_MEMORY ? 0 : 12288, sizeOnDisk);
     }
 
     @Test
