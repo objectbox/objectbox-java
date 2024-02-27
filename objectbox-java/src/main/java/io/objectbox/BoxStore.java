@@ -194,7 +194,9 @@ public class BoxStore implements Closeable {
 
     static native boolean nativeIsObjectBrowserAvailable();
 
-    native long nativeSizeOnDisk(long store);
+    native long nativeDbSize(long store);
+
+    native long nativeDbSizeOnDisk(long store);
 
     native long nativeValidate(long store, long pageLimit, boolean checkLeafLevel);
 
@@ -484,9 +486,31 @@ public class BoxStore implements Closeable {
      * The size in bytes occupied by the data file on disk.
      *
      * @return 0 if the size could not be determined (does not throw unless this store was already closed)
+     * @deprecated Use {@link #getDbSize()} or {@link #getDbSizeOnDisk()} instead which properly handle in-memory databases.
      */
+    @Deprecated
     public long sizeOnDisk() {
-        return nativeSizeOnDisk(getNativeStore());
+        return getDbSize();
+    }
+
+    /**
+     * Get the size of this store. For a disk-based store type, this corresponds to the size on disk, and for the
+     * in-memory store type, this is roughly the used memory bytes occupied by the data.
+     *
+     * @return The size in bytes of the database, or 0 if the file does not exist or some error occurred.
+     */
+    public long getDbSize() {
+        return nativeDbSize(getNativeStore());
+    }
+
+    /**
+     * The size in bytes occupied by the database on disk (if any).
+     *
+     * @return The size in bytes of the database on disk, or 0 if the underlying database is in-memory only
+     * or the size could not be determined.
+     */
+    public long getDbSizeOnDisk() {
+        return nativeDbSizeOnDisk(getNativeStore());
     }
 
     /**
