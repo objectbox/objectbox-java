@@ -1,6 +1,6 @@
 package io.objectbox.sync;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import javax.annotation.Nullable;
@@ -21,8 +21,10 @@ public final class SyncCredentialsToken extends SyncCredentials {
         this.token = null;
     }
 
-    SyncCredentialsToken(CredentialsType type, @SuppressWarnings("NullableProblems") byte[] token) {
+    SyncCredentialsToken(CredentialsType type, byte[] token) {
         this(type);
+        // Annotations do not guarantee non-null values
+        //noinspection ConstantValue
         if (token == null || token.length == 0) {
             throw new IllegalArgumentException("Token must not be empty");
         }
@@ -30,7 +32,7 @@ public final class SyncCredentialsToken extends SyncCredentials {
     }
 
     SyncCredentialsToken(CredentialsType type, String token) {
-        this(type, asUtf8Bytes(token));
+        this(type, token.getBytes(StandardCharsets.UTF_8));
     }
 
     @Nullable
@@ -56,12 +58,4 @@ public final class SyncCredentialsToken extends SyncCredentials {
         this.token = null;
     }
 
-    private static byte[] asUtf8Bytes(String token) {
-        try {
-            //noinspection CharsetObjectCanBeUsed On Android not available until SDK 19.
-            return token.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
