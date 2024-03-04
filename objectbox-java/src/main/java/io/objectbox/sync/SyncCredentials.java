@@ -1,13 +1,10 @@
 package io.objectbox.sync;
 
-import io.objectbox.annotation.apihint.Experimental;
-
 /**
  * Use the static helper methods to build Sync credentials,
  * for example {@link #sharedSecret(String) SyncCredentials.sharedSecret("secret")}.
  */
 @SuppressWarnings("unused")
-@Experimental
 public class SyncCredentials {
 
     /**
@@ -15,14 +12,14 @@ public class SyncCredentials {
      * The string is expected to use UTF-8 characters.
      */
     public static SyncCredentials sharedSecret(String secret) {
-        return new SyncCredentialsToken(CredentialsType.SHARED_SECRET, secret);
+        return new SyncCredentialsToken(CredentialsType.SHARED_SECRET_SIPPED, secret);
     }
 
     /**
      * Authenticate with a shared secret. This could be a passphrase, big number or randomly chosen bytes.
      */
     public static SyncCredentials sharedSecret(byte[] secret) {
-        return new SyncCredentialsToken(CredentialsType.SHARED_SECRET, secret);
+        return new SyncCredentialsToken(CredentialsType.SHARED_SECRET_SIPPED, secret);
     }
 
     /**
@@ -44,10 +41,11 @@ public class SyncCredentials {
         // Note: this needs to match with CredentialsType in Core.
 
         NONE(1),
-
         SHARED_SECRET(2),
-
-        GOOGLE(3);
+        GOOGLE(3),
+        SHARED_SECRET_SIPPED(4),
+        OBX_ADMIN_USER(5),
+        USER_PASSWORD(6);
 
         public final long id;
 
