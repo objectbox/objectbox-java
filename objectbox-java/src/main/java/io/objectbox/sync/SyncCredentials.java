@@ -7,6 +7,8 @@ package io.objectbox.sync;
 @SuppressWarnings("unused")
 public class SyncCredentials {
 
+    private final CredentialsType type;
+
     /**
      * Authenticate with a shared secret. This could be a passphrase, big number or randomly chosen bytes.
      * The string is expected to use UTF-8 characters.
@@ -28,6 +30,10 @@ public class SyncCredentials {
      */
     public static SyncCredentials google(String idToken) {
         return new SyncCredentialsToken(CredentialsType.GOOGLE, idToken);
+    }
+
+    public static SyncCredentials userAndPassword(String user, String password) {
+        return new SyncCredentialsUserPassword(user, password);
     }
 
     /**
@@ -54,7 +60,12 @@ public class SyncCredentials {
         }
     }
 
-    SyncCredentials() {
+    SyncCredentials(CredentialsType type) {
+        this.type = type;
+    }
+
+    public long getTypeId() {
+        return type.id;
     }
 
 }

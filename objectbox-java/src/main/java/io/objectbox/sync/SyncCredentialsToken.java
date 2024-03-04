@@ -11,14 +11,13 @@ import io.objectbox.annotation.apihint.Internal;
  * Internal credentials implementation. Use {@link SyncCredentials} to build credentials.
  */
 @Internal
-public class SyncCredentialsToken extends SyncCredentials {
+public final class SyncCredentialsToken extends SyncCredentials {
 
-    private final CredentialsType type;
     @Nullable private byte[] token;
     private volatile boolean cleared;
 
     SyncCredentialsToken(CredentialsType type) {
-        this.type = type;
+        super(type);
         this.token = null;
     }
 
@@ -32,10 +31,6 @@ public class SyncCredentialsToken extends SyncCredentials {
 
     SyncCredentialsToken(CredentialsType type, String token) {
         this(type, asUtf8Bytes(token));
-    }
-
-    public long getTypeId() {
-        return type.id;
     }
 
     @Nullable
