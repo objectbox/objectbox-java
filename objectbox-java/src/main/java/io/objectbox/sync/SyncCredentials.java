@@ -64,6 +64,10 @@ public class SyncCredentials {
         this.type = type;
     }
 
+    public CredentialsType getType() {
+        return type;
+    }
+
     public long getTypeId() {
         return type.id;
     }

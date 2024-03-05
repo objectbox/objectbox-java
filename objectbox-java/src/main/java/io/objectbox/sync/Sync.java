@@ -37,6 +37,9 @@ public final class Sync {
      * Start building a sync server. Requires the BoxStore the server should use,
      * the URL and port the server should bind to and authenticator credentials to authenticate clients.
      * Additional authenticator credentials can be supplied using the builder.
+     * <p>
+     * For the embedded server, currently only {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none}
+     * are supported.
      */
     public static SyncServerBuilder server(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         return new SyncServerBuilder(boxStore, url, authenticatorCredentials);
