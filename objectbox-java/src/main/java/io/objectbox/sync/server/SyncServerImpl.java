@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.sync.SyncCredentials;
+import io.objectbox.sync.SyncCredentials.CredentialsType;
 import io.objectbox.sync.SyncCredentialsToken;
 import io.objectbox.sync.listener.SyncChangeListener;
 
@@ -31,8 +32,16 @@ public class SyncServerImpl implements SyncServer {
         this.handle = handle;
 
         for (SyncCredentials credentials : builder.credentials) {
+            if (!(credentials instanceof SyncCredentialsToken)) {
+                throw new IllegalArgumentException("Sync credentials of type " + credentials.getType() + " are not supported");
+            }
             SyncCredentialsToken credentialsInternal = (SyncCredentialsToken) credentials;
-            nativeSetAuthenticator(handle, credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
+            // The core API used by nativeSetAuthenticator only supports the NONE and SHARED_SECRET types
+            // (however, protocol v3 versions do also add SHARED_SECRET_SIPPED if SHARED_SECRET is given).
+            final CredentialsType type = credentialsInternal.getType() == CredentialsType.SHARED_SECRET_SIPPED
+                    ? CredentialsType.SHARED_SECRET
+                    : credentialsInternal.getType();
+            nativeSetAuthenticator(handle, type.id, credentialsInternal.getTokenBytes());
             credentialsInternal.clear(); // Clear immediately, not needed anymore.
         }
 

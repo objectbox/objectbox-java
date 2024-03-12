@@ -167,9 +167,17 @@ public class SyncClientImpl implements SyncClient {
 
     @Override
     public void setLoginCredentials(SyncCredentials credentials) {
-        SyncCredentialsToken credentialsInternal = (SyncCredentialsToken) credentials;
-        nativeSetLoginInfo(getHandle(), credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
-        credentialsInternal.clear(); // Clear immediately, not needed anymore.
+        if (credentials instanceof SyncCredentialsToken) {
+            SyncCredentialsToken credToken = (SyncCredentialsToken) credentials;
+            nativeSetLoginInfo(getHandle(), credToken.getTypeId(), credToken.getTokenBytes());
+            credToken.clear(); // Clear immediately, not needed anymore.
+        } else if (credentials instanceof SyncCredentialsUserPassword) {
+            SyncCredentialsUserPassword credUserPassword = (SyncCredentialsUserPassword) credentials;
+            nativeSetLoginInfoUserPassword(getHandle(), credUserPassword.getTypeId(), credUserPassword.getUsername(),
+                    credUserPassword.getPassword());
+        } else {
+            throw new IllegalArgumentException("credentials is not a supported type");
+        }
     }
 
     @Override
@@ -295,6 +303,8 @@ public class SyncClientImpl implements SyncClient {
     private native void nativeStop(long handle);
 
     private native void nativeSetLoginInfo(long handle, long credentialsType, @Nullable byte[] credentials);
+
+    private native void nativeSetLoginInfoUserPassword(long handle, long credentialsType, String username, String password);
 
     private native void nativeSetListener(long handle, @Nullable InternalSyncClientListener listener);
 

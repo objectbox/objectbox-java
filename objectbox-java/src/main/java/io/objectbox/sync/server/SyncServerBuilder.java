@@ -46,6 +46,9 @@ public class SyncServerBuilder {
 
     /**
      * Adds additional authenticator credentials to authenticate clients with.
+     * <p>
+     * For the embedded server, currently only {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none}
+     * are supported.
      */
     public SyncServerBuilder authenticatorCredentials(SyncCredentials authenticatorCredentials) {
         checkNotNull(authenticatorCredentials, "Authenticator credentials must not be null.");
