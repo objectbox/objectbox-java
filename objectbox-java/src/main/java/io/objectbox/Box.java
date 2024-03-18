@@ -355,6 +355,8 @@ public class Box<T> {
 
     /**
      * Puts the given entities in a box using a single transaction.
+     * <p>
+     * See {@link #put(Object)} for more details.
      */
     @SafeVarargs // Not using T... as Object[], no ClassCastException expected.
     public final void put(@Nullable T... entities) {
@@ -375,6 +377,8 @@ public class Box<T> {
 
     /**
      * Puts the given entities in a box using a single transaction.
+     * <p>
+     * See {@link #put(Object)} for more details.
      *
      * @param entities It is fine to pass null or an empty collection:
      *                 this case is handled efficiently without overhead.
@@ -397,6 +401,8 @@ public class Box<T> {
 
     /**
      * Puts the given entities in a box in batches using a separate transaction for each batch.
+     * <p>
+     * See {@link #put(Object)} for more details.
      *
      * @param entities  It is fine to pass null or an empty collection:
      *                  this case is handled efficiently without overhead.
