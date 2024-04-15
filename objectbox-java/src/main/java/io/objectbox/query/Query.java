@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
 import io.objectbox.Property;
+import io.objectbox.annotation.HnswIndex;
 import io.objectbox.exception.NonUniqueResultException;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataSubscriptionList;
@@ -70,6 +71,10 @@ public class Query<T> implements Closeable {
     native long nativeFindUniqueId(long handle, long cursorHandle);
 
     native long[] nativeFindIds(long handle, long cursorHandle, long offset, long limit);
+
+    native List<ObjectWithScore<T>> nativeFindWithScores(long handle, long cursorHandle, long offset, long limit);
+
+    native List<IdWithScore> nativeFindIdsWithScores(long handle, long cursorHandle, long offset, long limit);
 
     native long nativeCount(long handle, long cursorHandle);
 
@@ -378,6 +383,68 @@ public class Query<T> implements Closeable {
     public LazyList<T> findLazyCached() {
         ensureNoFilterNoComparator();
         return new LazyList<>(box, findIds(), true);
+    }
+
+    /**
+     * Like {@link #findIdsWithScores()}, but can skip and limit results.
+     * <p>
+     * Use to get a slice of the whole result, e.g. for "result paging".
+     *
+     * @param offset If greater than 0, skips this many results.
+     * @param limit If greater than 0, returns at most this many results.
+     */
+    @Nonnull
+    public List<IdWithScore> findIdsWithScores(final long offset, final long limit) {
+        checkOpen();
+        return box.internalCallWithReaderHandle(cursorHandle -> nativeFindIdsWithScores(handle, cursorHandle, offset, limit));
+    }
+
+    /**
+     * Finds IDs of objects matching the query associated to their query score (e.g. distance in NN search).
+     * <p>
+     * This only works on objects with a property with an {@link HnswIndex}.
+     *
+     * @return A list of {@link IdWithScore} that wraps IDs of matching objects and their score, sorted by score in
+     * ascending order.
+     */
+    @Nonnull
+    public List<IdWithScore> findIdsWithScores() {
+        return findIdsWithScores(0, 0);
+    }
+
+    /**
+     * Like {@link #findWithScores()}, but can skip and limit results.
+     * <p>
+     * Use to get a slice of the whole result, e.g. for "result paging".
+     *
+     * @param offset If greater than 0, skips this many results.
+     * @param limit If greater than 0, returns at most this many results.
+     */
+    @Nonnull
+    public List<ObjectWithScore<T>> findWithScores(final long offset, final long limit) {
+        ensureNoFilterNoComparator();
+        return callInReadTx(() -> {
+            List<ObjectWithScore<T>> results = nativeFindWithScores(handle, cursorHandle(), offset, limit);
+            if (eagerRelations != null) {
+                for (int i = 0; i < results.size(); i++) {
+                    resolveEagerRelationForNonNullEagerRelations(results.get(i).getObject(), i);
+                }
+            }
+            return results;
+        });
+    }
+
+    /**
+     * Finds objects matching the query associated to their query score (e.g. distance in NN search).
+     * <p>
+     * This only works on objects with a property with an {@link HnswIndex}.
+     *
+     * @return A list of {@link ObjectWithScore} that wraps matching objects and their score, sorted by score in
+     * ascending order.
+     */
+    @Nonnull
+    public List<ObjectWithScore<T>> findWithScores() {
+        return findWithScores(0, 0);
     }
 
     /**
