@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 public class BoxTest extends AbstractObjectBoxTest {
@@ -83,6 +85,27 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertArrayEquals(new long[]{-valLong, valLong}, entity.getLongArray());
         assertArrayEquals(new float[]{-valFloat, valFloat}, entityRead.getFloatArray(), 0);
         assertArrayEquals(new double[]{-valDouble, valDouble}, entity.getDoubleArray(), 0);
+    }
+
+    // Note: There is a similar test using the Cursor API directly (which is deprecated) in CursorTest.
+    @Test
+    public void testPut_notAssignedId_fails() {
+        TestEntity entity = new TestEntity();
+        // Set ID that was not assigned
+        entity.setId(1);
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> box.put(entity));
+        assertEquals(ex.getMessage(), "ID is higher or equal to internal ID sequence: 1 (vs. 1). Use ID 0 (zero) to insert new objects.");
+    }
+
+    @Test
+    public void testPut_assignedId_inserts() {
+        long id = box.put(new TestEntity());
+        box.remove(id);
+        // Put with previously assigned ID should insert
+        TestEntity entity = new TestEntity();
+        entity.setId(id);
+        box.put(entity);
+        assertEquals(1L, box.count());
     }
 
     @Test
