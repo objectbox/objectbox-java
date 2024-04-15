@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Date;
 
 import javax.annotation.Nullable;
 
+import io.objectbox.annotation.HnswIndex;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbException;
@@ -33,6 +34,7 @@ import io.objectbox.query.PropertyQueryConditionImpl.IntArrayCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.LongArrayCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.LongCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.LongLongCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.NearestNeighborCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.NullCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.StringArrayCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.StringCondition;
@@ -300,6 +302,22 @@ public class Property<ENTITY> implements Serializable {
     public PropertyQueryCondition<ENTITY> between(double lowerBoundary, double upperBoundary) {
         return new DoubleDoubleCondition<>(this, DoubleDoubleCondition.Operation.BETWEEN,
                 lowerBoundary, upperBoundary);
+    }
+
+    /**
+     * Performs an approximate nearest neighbor (ANN) search to find objects near to the given {@code queryVector}.
+     * <p>
+     * This requires the vector property to have an {@link HnswIndex}.
+     * <p>
+     * The dimensions of the query vector should be at least the dimensions of this vector property.
+     * <p>
+     * Use {@code maxResultCount} to set the maximum number of objects to return by the ANN condition. Hint: it can also
+     * be used as the "ef" HNSW parameter to increase the search quality in combination with a query limit. For example,
+     * use maxResultCount of 100 with a Query limit of 10 to have 10 results that are of potentially better quality than
+     * just passing in 10 for maxResultCount (quality/performance tradeoff).
+     */
+    public PropertyQueryCondition<ENTITY> nearestNeighborsF32(float[] queryVector, int maxResultCount) {
+        return new NearestNeighborCondition<>(this, queryVector, maxResultCount);
     }
 
     /** Creates an "equal ('=')" condition for this property. */

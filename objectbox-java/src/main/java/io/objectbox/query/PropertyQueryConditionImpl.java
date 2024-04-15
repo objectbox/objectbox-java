@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 ObjectBox Ltd. All rights reserved.
+ * Copyright 2020-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -456,6 +456,26 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
                 default:
                     throw new UnsupportedOperationException(op + " is not supported for byte[]");
             }
+        }
+    }
+
+    /**
+     * Conditions for properties with an {@link io.objectbox.annotation.HnswIndex}.
+     */
+    public static class NearestNeighborCondition<T> extends PropertyQueryConditionImpl<T> {
+
+        private final float[] queryVector;
+        private final int maxResultCount;
+
+        public NearestNeighborCondition(Property<T> property, float[] queryVector, int maxResultCount) {
+            super(property);
+            this.queryVector = queryVector;
+            this.maxResultCount = maxResultCount;
+        }
+
+        @Override
+        void applyCondition(QueryBuilder<T> builder) {
+            builder.nearestNeighborsF32(property, queryVector, maxResultCount);
         }
     }
 }
