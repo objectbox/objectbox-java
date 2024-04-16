@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 ObjectBox Ltd. All rights reserved.
+ * Copyright 2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,8 +84,14 @@ public final class ModelProperty extends Table {
    * For value-based indexes, this defines the maximum length of the value stored for indexing
    */
   public long maxIndexValueLength() { int o = __offset(20); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  /**
+   * For float vectors properties and nearest neighbor search, you can index the property with HNSW.
+   * This is the configuration for the HNSW index, e.g. dimensions and parameters affecting quality/speed tradeoff.
+   */
+  public io.objectbox.model.HnswParams hnswParams() { return hnswParams(new io.objectbox.model.HnswParams()); }
+  public io.objectbox.model.HnswParams hnswParams(io.objectbox.model.HnswParams obj) { int o = __offset(22); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
 
-  public static void startModelProperty(FlatBufferBuilder builder) { builder.startTable(9); }
+  public static void startModelProperty(FlatBufferBuilder builder) { builder.startTable(10); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addStruct(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(2, (short) type, (short) 0); }
@@ -95,6 +101,7 @@ public final class ModelProperty extends Table {
   public static void addVirtualTarget(FlatBufferBuilder builder, int virtualTargetOffset) { builder.addOffset(6, virtualTargetOffset, 0); }
   public static void addNameSecondary(FlatBufferBuilder builder, int nameSecondaryOffset) { builder.addOffset(7, nameSecondaryOffset, 0); }
   public static void addMaxIndexValueLength(FlatBufferBuilder builder, long maxIndexValueLength) { builder.addInt(8, (int) maxIndexValueLength, (int) 0L); }
+  public static void addHnswParams(FlatBufferBuilder builder, int hnswParamsOffset) { builder.addOffset(9, hnswParamsOffset, 0); }
   public static int endModelProperty(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
