@@ -1,14 +1,31 @@
+/*
+ * Copyright 2021 ObjectBox Ltd. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.objectbox.tree;
+
+import java.io.Closeable;
+import java.util.concurrent.Callable;
+
+import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
 import io.objectbox.Transaction;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.model.PropertyType;
-
-import javax.annotation.Nullable;
-import java.io.Closeable;
-import java.util.concurrent.Callable;
 
 /**
  * A higher level tree API operating on branch and leaf nodes.
