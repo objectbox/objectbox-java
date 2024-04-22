@@ -28,6 +28,7 @@ import java.util.concurrent.Callable;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
+import io.objectbox.annotation.Backlink;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Experimental;
@@ -344,19 +345,19 @@ public class Box<T> {
      * available ID. For example, if there is an object with ID 1 and another with ID 100, it will be assigned ID 101.
      * The new ID is also set on the given object before this returns.
      * <p>
-     * If instead the object has an assigned ID set, if an object with the same ID exists it will be updated.
-     * Otherwise, it will be inserted with that ID.
+     * If instead the object has an assigned ID set, if an object with the same ID exists it is updated. Otherwise, it
+     * is inserted with that ID.
      * <p>
      * If the ID was not assigned before an {@link IllegalArgumentException} is thrown.
      * <p>
      * When the object contains {@link ToOne} or {@link ToMany} relations, they are created (or updated) to point to the
-     * (new) target objects.
-     * The target objects themselves are not updated or removed. To do so, put or remove them using their box.
-     * However, for convenience, if a target object is new, it will be inserted and assigned an ID in its box before
-     * creating or updating the relation.
+     * (new) target objects. The target objects themselves are typically not updated or removed. To do so, put or remove
+     * them using their {@link Box}. However, for convenience, if a target object is new, it will be inserted and
+     * assigned an ID in its Box before creating or updating the relation. Also, for ToMany relations based on a
+     * {@link Backlink} the target objects are updated (to store changes in the linked ToOne or ToMany relation).
      * <p>
-     * Performance note: if you want to put several objects, consider {@link #put(Collection)},
-     * {@link #put(Object[])}, {@link BoxStore#runInTx(Runnable)}, etc. instead.
+     * Performance note: if you want to put several objects, consider {@link #put(Collection)}, {@link #put(Object[])},
+     * {@link BoxStore#runInTx(Runnable)}, etc. instead.
      */
     public long put(T entity) {
         Cursor<T> cursor = getWriter();
