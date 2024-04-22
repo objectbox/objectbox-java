@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,20 @@
 
 package io.objectbox;
 
-import io.objectbox.annotation.IndexType;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import io.objectbox.annotation.IndexType;
+
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class CursorTest extends AbstractObjectBoxTest {
 
@@ -60,7 +67,7 @@ public class CursorTest extends AbstractObjectBoxTest {
             IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                     () -> cursor.put(entity));
             assertEquals(ex.getMessage(), "ID is higher or equal to internal ID sequence: 777 (vs. 1)." +
-                    " Use ID 0 (zero) to insert new entities.");
+                    " Use ID 0 (zero) to insert new objects.");
         } finally {
             // Always clean up, even if assertions fail, to avoid misleading clean-up errors.
             cursor.close();
