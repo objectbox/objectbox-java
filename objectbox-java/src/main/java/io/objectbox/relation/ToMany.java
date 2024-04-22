@@ -35,6 +35,7 @@ import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
 import io.objectbox.InternalAccess;
+import io.objectbox.annotation.Backlink;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
@@ -43,21 +44,28 @@ import io.objectbox.internal.IdGetter;
 import io.objectbox.internal.ReflectionCache;
 import io.objectbox.internal.ToManyGetter;
 import io.objectbox.internal.ToOneGetter;
+import io.objectbox.query.QueryBuilder;
 import io.objectbox.query.QueryFilter;
 import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 
 import static java.lang.Boolean.TRUE;
 
 /**
- * A List representing a to-many relation.
- * It tracks changes (adds and removes) that can be later applied (persisted) to the database.
- * This happens either on {@link Box#put(Object)} of the source entity of this relation or using
- * {@link #applyChangesToDb()}.
+ * A lazily loaded {@link List} of target objects representing a to-many relation, a unidirectional link from a "source"
+ * entity to multiple objects of a "target" entity.
  * <p>
- * If this relation is a backlink from a {@link ToOne} relation, a DB sync will also update ToOne objects
- * (but not vice versa).
+ * It tracks changes (adds and removes) that can be later applied (persisted) to the database. This happens either when
+ * the object that contains this relation is put or using {@link #applyChangesToDb()}. For some important details about
+ * applying changes, see the notes about relations of {@link Box#put(Object)}.
  * <p>
- * ToMany is thread-safe by default (only if the default {@link java.util.concurrent.CopyOnWriteArrayList} is used).
+ * The objects are loaded lazily on first access of this list, and then cached. The database query runs on the calling
+ * thread, so avoid accessing this from a UI or main thread. Subsequent calls to any method, like {@link #size()}, do
+ * not query the database, even if the relation was changed elsewhere. To get the latest data {@link Box#get} the source
+ * object again or use {@link #reset()} before accessing the list again.
+ * <p>
+ * It is possible to preload the list when running a query using {@link QueryBuilder#eager}.
+ * <p>
+ * ToMany is thread-safe by default (may not be the case if {@link #setListFactory(ListFactory)} is used).
  *
  * @param <TARGET> Object type (entity).
  */
@@ -482,8 +490,10 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     /**
-     * Resets the already loaded entities so they will be re-loaded on their next access.
-     * This allows to sync with non-tracked changes (outside of this ToMany object).
+     * Resets the already loaded (cached) objects of this list, so they will be re-loaded when accessing this list
+     * again.
+     * <p>
+     * Use this to sync with changes to this relation or target objects made outside of this ToMany.
      */
     public synchronized void reset() {
         entities = null;
@@ -540,12 +550,14 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     /**
-     * Applies (persists) tracked changes (added and removed entities) to the target box
-     * and/or updates standalone relations.
-     * Note that this is done automatically when you put the source entity of this to-many relation.
-     * However, if only this to-many relation has changed, it is more efficient to call this method.
+     * Saves changes (added and removed entities) made to this relation to the database. For some important details, see
+     * the notes about relations of {@link Box#put(Object)}.
+     * <p>
+     * Note that this is called already when the object that contains this ToMany is put. However, if only this ToMany
+     * has changed, it is more efficient to just use this method.
      *
-     * @throws IllegalStateException If the source entity of this to-many relation was not previously persisted
+     * @throws IllegalStateException If the object that contains this ToMany has no ID assigned (it must have been put
+     * before).
      */
     public void applyChangesToDb() {
         long id = relationInfo.sourceInfo.getIdGetter().getId(entity);
@@ -571,7 +583,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     /**
      * Returns true if at least one of the entities matches the given filter.
      * <p>
-     * For use with {@link io.objectbox.query.QueryBuilder#filter(QueryFilter)} inside a {@link QueryFilter} to check
+     * For use with {@link QueryBuilder#filter(QueryFilter)} inside a {@link QueryFilter} to check
      * to-many relation entities.
      */
     @Beta
@@ -589,7 +601,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     /**
      * Returns true if all of the entities match the given filter. Returns false if the list is empty.
      * <p>
-     * For use with {@link io.objectbox.query.QueryBuilder#filter(QueryFilter)} inside a {@link QueryFilter} to check
+     * For use with {@link QueryBuilder#filter(QueryFilter)} inside a {@link QueryFilter} to check
      * to-many relation entities.
      */
     @Beta
@@ -694,6 +706,17 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         }
     }
 
+    /**
+     * Modifies the {@link Backlink linked} ToMany relation of added or removed target objects and schedules put by
+     * {@link #internalApplyToDb} for them.
+     * <p>
+     * If {@link #setRemoveFromTargetBox} is true, removed target objects are scheduled for removal instead of just
+     * updating their ToMany relation.
+     * <p>
+     * If target objects are new, schedules a put if they were added, but never if they were removed from this relation.
+     *
+     * @return Whether there are any target objects to put or remove.
+     */
     private boolean prepareToManyBacklinkEntitiesForDb(long entityId, IdGetter<TARGET> idGetter,
                                                        @Nullable Map<TARGET, Boolean> setAdded, @Nullable Map<TARGET, Boolean> setRemoved) {
         ToManyGetter<TARGET, Object> backlinkToManyGetter = relationInfo.backlinkToManyGetter;
@@ -738,6 +761,9 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         }
     }
 
+    /**
+     * Like {@link #prepareToManyBacklinkEntitiesForDb} but for the linked ToOne relation.
+     */
     private boolean prepareToOneBacklinkEntitiesForDb(long entityId, IdGetter<TARGET> idGetter,
                                                       @Nullable Map<TARGET, Boolean> setAdded, @Nullable Map<TARGET, Boolean> setRemoved) {
         ToOneGetter<TARGET, Object> backlinkToOneGetter = relationInfo.backlinkToOneGetter;
