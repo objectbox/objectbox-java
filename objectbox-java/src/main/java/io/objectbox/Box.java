@@ -595,9 +595,10 @@ public class Box<T> {
 
     /**
      * Returns a builder to create queries for Object matching supplied criteria.
-     * <p>
-     * New code should use {@link #query(QueryCondition)} instead.
+     *
+     * @deprecated New code should use {@link #query(QueryCondition)} instead.
      */
+    @Deprecated
     public QueryBuilder<T> query() {
         return new QueryBuilder<>(this, store.getNativeStore(), store.getDbName(entityClass));
     }
