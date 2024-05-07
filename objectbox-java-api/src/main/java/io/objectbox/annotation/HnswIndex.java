@@ -59,7 +59,7 @@ public @interface HnswIndex {
     /**
      * The distance type used for the HNSW index. Changing this value causes re-indexing.
      */
-    HnswDistanceType distanceType() default HnswDistanceType.DEFAULT;
+    VectorDistanceType distanceType() default VectorDistanceType.DEFAULT;
 
     /**
      * When repairing the graph after a node was removed, this gives the probability of adding backlinks to the repaired

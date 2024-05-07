@@ -17,9 +17,9 @@
 package io.objectbox.annotation;
 
 /**
- * The distance algorithm used by an {@link HnswIndex} (vector search).
+ * The vector distance algorithm used by an {@link HnswIndex} (vector search).
  */
-public enum HnswDistanceType {
+public enum VectorDistanceType {
 
     /**
      * The default; currently {@link #EUCLIDEAN}.
