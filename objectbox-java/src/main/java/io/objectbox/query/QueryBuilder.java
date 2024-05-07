@@ -425,8 +425,7 @@ public class QueryBuilder<T> {
 
     /**
      * Specifies relations that should be resolved eagerly.
-     * This prepares the given relation objects to be preloaded (cached) avoiding further get operations from the db.
-     * A common use case is prealoading all
+     * This prepares the given relation objects to be preloaded (cached) avoiding further get operations from the database.
      *
      * @param relationInfo The relation as found in the generated meta info class ("EntityName_") of class T.
      * @param more         Supply further relations to be eagerly loaded.

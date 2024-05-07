@@ -31,6 +31,7 @@ import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
 import io.objectbox.Property;
+import io.objectbox.exception.NonUniqueResultException;
 import io.objectbox.reactive.DataObserver;
 import io.objectbox.reactive.DataSubscriptionList;
 import io.objectbox.reactive.SubscriptionBuilder;
@@ -38,9 +39,9 @@ import io.objectbox.relation.RelationInfo;
 import io.objectbox.relation.ToOne;
 
 /**
- * A repeatable Query returning the latest matching Objects.
+ * A repeatable Query returning the latest matching objects.
  * <p>
- * Use {@link #find()} or related methods to fetch the latest results from the BoxStore.
+ * Use {@link #find()} or related methods to fetch the latest results from the {@link BoxStore}.
  * <p>
  * Use {@link #property(Property)} to only return values or an aggregate of a single Property.
  * <p>
@@ -195,7 +196,12 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Find the first Object matching the query.
+     * Finds the first object matching this query.
+     * <p>
+     * Note: if no {@link QueryBuilder#order} conditions are present, which object is the first one might be arbitrary
+     * (sometimes the one with the lowest ID, but never guaranteed to be).
+     *
+     * @return The first object if there are matches. {@code null} if no object matches.
      */
     @Nullable
     public T findFirst() {
@@ -228,9 +234,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * If there is a single matching object, returns it. If there is more than one matching object,
-     * throws {@link io.objectbox.exception.NonUniqueResultException NonUniqueResultException}.
-     * If there are no matches returns null.
+     * Finds the only object matching this query.
+     *
+     * @return The object if a single object matches. {@code null} if no object matches. Throws
+     * {@link NonUniqueResultException} if there are multiple objects matching the query.
      */
     @Nullable
     public T findUnique() {
@@ -244,7 +251,12 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Find all Objects matching the query.
+     * Finds objects matching the query.
+     * <p>
+     * Note: if no {@link QueryBuilder#order} conditions are present, the order is arbitrary (sometimes ordered by ID,
+     * but never guaranteed to).
+     *
+     * @return A list of matching objects. An empty list if no object matches.
      */
     @Nonnull
     public List<T> find() {
@@ -268,8 +280,12 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Find all Objects matching the query, skipping the first offset results and returning at most limit results.
-     * Use this for pagination.
+     * Like {@link #find()}, but can skip and limit results.
+     * <p>
+     * Use to get a slice of the whole result, e.g. for "result paging".
+     *
+     * @param offset If greater than 0, skips this many results.
+     * @param limit If greater than 0, returns at most this many results.
      */
     @Nonnull
     public List<T> find(final long offset, final long limit) {
@@ -282,11 +298,13 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Returns the ID of the first matching object. If there are no results returns 0.
+     * Like {@link #findFirst()}, but returns just the ID of the object.
      * <p>
-     * Like {@link #findFirst()}, but more efficient as no object is created.
+     * This is more efficient as no object is created.
      * <p>
      * Ignores any {@link QueryBuilder#filter(QueryFilter) query filter}.
+     *
+     * @return The ID of the first matching object. {@code 0} if no object matches.
      */
     public long findFirstId() {
         checkOpen();
@@ -294,13 +312,14 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * If there is a single matching object, returns its ID. If there is more than one matching object,
-     * throws {@link io.objectbox.exception.NonUniqueResultException NonUniqueResultException}.
-     * If there are no matches returns 0.
+     * Like {@link #findUnique()}, but returns just the ID of the object.
      * <p>
-     * Like {@link #findUnique()}, but more efficient as no object is created.
+     * This is more efficient as no object is created.
      * <p>
      * Ignores any {@link QueryBuilder#filter(QueryFilter) query filter}.
+     *
+     * @return The ID of the object, if a single object matches. {@code 0} if no object matches. Throws
+     * {@link NonUniqueResultException} if there are multiple objects matching the query.
      */
     public long findUniqueId() {
         checkOpen();
@@ -308,10 +327,15 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Very efficient way to get just the IDs without creating any objects. IDs can later be used to lookup objects
-     * (lookups by ID are also very efficient in ObjectBox).
+     * Like {@link #find()}, but returns just the IDs of the objects.
+     * <p>
+     * IDs can later be used to {@link Box#get} objects.
+     * <p>
+     * This is very efficient as no objects are created.
      * <p>
      * Note: a filter set with {@link QueryBuilder#filter(QueryFilter)} will be silently ignored!
+     *
+     * @return An array of IDs of matching objects. An empty array if no objects match.
      */
     @Nonnull
     public long[] findIds() {
@@ -319,9 +343,14 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Like {@link #findIds()} but with a offset/limit param, e.g. for pagination.
+     * Like {@link #findIds()}, but can skip and limit results.
+     * <p>
+     * Use to get a slice of the whole result, e.g. for "result paging".
      * <p>
      * Note: a filter set with {@link QueryBuilder#filter(QueryFilter)} will be silently ignored!
+     *
+     * @param offset If greater than 0, skips this many results.
+     * @param limit If greater than 0, returns at most this many results.
      */
     @Nonnull
     public long[] findIds(final long offset, final long limit) {
