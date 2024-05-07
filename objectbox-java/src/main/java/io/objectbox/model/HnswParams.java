@@ -71,7 +71,7 @@ public final class HnswParams extends Table {
   public long indexingSearchCount() { int o = __offset(8); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
   public long flags() { int o = __offset(10); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
   /**
-   * The distance type used for the HNSW index; for now only "Euclidean" is supported.
+   * The distance type used for the HNSW index; if none is given, the default Euclidean is used.
    * Changing this value causes re-indexing.
    */
   public int distanceType() { int o = __offset(12); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
