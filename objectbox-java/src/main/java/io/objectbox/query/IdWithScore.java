@@ -31,14 +31,14 @@ public class IdWithScore {
     }
 
     /**
-     * The object ID.
+     * Returns the object ID.
      */
     public long getId() {
         return id;
     }
 
     /**
-     * The query score for the {@link #getId() id}.
+     * Returns the query score for the {@link #getId() id}.
      * <p>
      * The query score indicates some quality measurement. E.g. for vector nearest neighbor searches, the score is the
      * distance to the given vector.

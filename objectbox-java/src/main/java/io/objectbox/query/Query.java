@@ -430,7 +430,7 @@ public class Query<T> implements Closeable {
             List<ObjectWithScore<T>> results = nativeFindWithScores(handle, cursorHandle(), offset, limit);
             if (eagerRelations != null) {
                 for (int i = 0; i < results.size(); i++) {
-                    resolveEagerRelationForNonNullEagerRelations(results.get(i).getObject(), i);
+                    resolveEagerRelationForNonNullEagerRelations(results.get(i).get(), i);
                 }
             }
             return results;

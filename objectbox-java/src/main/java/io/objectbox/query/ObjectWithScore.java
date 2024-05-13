@@ -30,15 +30,16 @@ public class ObjectWithScore<T> {
         this.score = score;
     }
 
+    // Do not use getObject() to avoid having to escape the name in Kotlin
     /**
-     * The object.
+     * Returns the matching object.
      */
-    public T getObject() {
+    public T get() {
         return object;
     }
 
     /**
-     * The query score for the {@link #getObject() object}.
+     * Returns the query score for the {@link #get() object}.
      * <p>
      * The query score indicates some quality measurement. E.g. for vector nearest neighbor searches, the score is the
      * distance to the given vector.
