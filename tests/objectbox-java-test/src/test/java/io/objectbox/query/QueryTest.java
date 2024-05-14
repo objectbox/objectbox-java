@@ -133,22 +133,22 @@ public class QueryTest extends AbstractQueryTest {
         assertThrowsQueryIsClosed(() -> query.setParameter("none", "value"));
         assertThrowsQueryIsClosed(() -> query.setParameters("none", "a", "b"));
         assertThrowsQueryIsClosed(() -> query.setParameter("none", 1));
-        assertThrowsQueryIsClosed(() -> query.setParameters("none", new int[]{1, 2}));
-        assertThrowsQueryIsClosed(() -> query.setParameters("none", new long[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameter("none", new int[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameter("none", new long[]{1, 2}));
         assertThrowsQueryIsClosed(() -> query.setParameters("none", 1, 2));
         assertThrowsQueryIsClosed(() -> query.setParameter("none", 1.0));
         assertThrowsQueryIsClosed(() -> query.setParameters("none", 1.0, 2.0));
-        assertThrowsQueryIsClosed(() -> query.setParameters("none", new String[]{"a", "b"}));
+        assertThrowsQueryIsClosed(() -> query.setParameter("none", new String[]{"a", "b"}));
         assertThrowsQueryIsClosed(() -> query.setParameter("none", new byte[]{1, 2}));
         assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, "value"));
         assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, "a", "b"));
         assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, 1));
-        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, new int[]{1, 2}));
-        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, new long[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, new int[]{1, 2}));
+        assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, new long[]{1, 2}));
         assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, 1, 2));
         assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, 1.0));
         assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, 1.0, 2.0));
-        assertThrowsQueryIsClosed(() -> query.setParameters(simpleString, new String[]{"a", "b"}));
+        assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, new String[]{"a", "b"}));
         assertThrowsQueryIsClosed(() -> query.setParameter(simpleString, new byte[]{1, 2}));
 
         // find would throw once first results are obtained, but shouldn't allow creating an observer to begin with.
@@ -201,12 +201,12 @@ public class QueryTest extends AbstractQueryTest {
         assertThrowsEntityDeleted(() -> query.setParameter(simpleString, "value"));
         assertThrowsEntityDeleted(() -> query.setParameters(stringObjectMap, "a", "b"));
         assertThrowsEntityDeleted(() -> query.setParameter(simpleInt, 1));
-        assertThrowsEntityDeleted(() -> query.setParameters("oneOf4", new int[]{1, 2}));
-        assertThrowsEntityDeleted(() -> query.setParameters("oneOf8", new long[]{1, 2}));
+        assertThrowsEntityDeleted(() -> query.setParameter("oneOf4", new int[]{1, 2}));
+        assertThrowsEntityDeleted(() -> query.setParameter("oneOf8", new long[]{1, 2}));
         assertThrowsEntityDeleted(() -> query.setParameters("between", 1, 2));
         assertThrowsEntityDeleted(() -> query.setParameter(simpleInt, 1.0));
         assertThrowsEntityDeleted(() -> query.setParameters("between", 1.0, 2.0));
-        assertThrowsEntityDeleted(() -> query.setParameters("oneOfS", new String[]{"a", "b"}));
+        assertThrowsEntityDeleted(() -> query.setParameter("oneOfS", new String[]{"a", "b"}));
         assertThrowsEntityDeleted(() -> query.setParameter(simpleByteArray, new byte[]{1, 2}));
     }
 
@@ -342,11 +342,11 @@ public class QueryTest extends AbstractQueryTest {
             assertEquals(3, query.count());
 
             int[] valuesInt2 = {2003};
-            query.setParameters(simpleInt, valuesInt2);
+            query.setParameter(simpleInt, valuesInt2);
             assertEquals(1, query.count());
 
             int[] valuesInt3 = {2003, 2007};
-            query.setParameters("int", valuesInt3);
+            query.setParameter("int", valuesInt3);
             assertEquals(2, query.count());
         }
     }
@@ -360,11 +360,11 @@ public class QueryTest extends AbstractQueryTest {
             assertEquals(3, query.count());
 
             long[] valuesLong2 = {3003};
-            query.setParameters(simpleLong, valuesLong2);
+            query.setParameter(simpleLong, valuesLong2);
             assertEquals(1, query.count());
 
             long[] valuesLong3 = {3003, 3007};
-            query.setParameters("long", valuesLong3);
+            query.setParameter("long", valuesLong3);
             assertEquals(2, query.count());
         }
     }
@@ -378,11 +378,11 @@ public class QueryTest extends AbstractQueryTest {
             assertEquals(7, query.count());
 
             int[] valuesInt2 = {2003};
-            query.setParameters(simpleInt, valuesInt2);
+            query.setParameter(simpleInt, valuesInt2);
             assertEquals(9, query.count());
 
             int[] valuesInt3 = {2003, 2007};
-            query.setParameters("int", valuesInt3);
+            query.setParameter("int", valuesInt3);
             assertEquals(8, query.count());
         }
     }
@@ -396,11 +396,11 @@ public class QueryTest extends AbstractQueryTest {
             assertEquals(7, query.count());
 
             long[] valuesLong2 = {3003};
-            query.setParameters(simpleLong, valuesLong2);
+            query.setParameter(simpleLong, valuesLong2);
             assertEquals(9, query.count());
 
             long[] valuesLong3 = {3003, 3007};
-            query.setParameters("long", valuesLong3);
+            query.setParameter("long", valuesLong3);
             assertEquals(8, query.count());
         }
     }
@@ -666,7 +666,7 @@ public class QueryTest extends AbstractQueryTest {
             assertEquals("foo bar", entities.get(2).getSimpleString());
 
             String[] values2 = {"bar"};
-            query.setParameters(simpleString, values2);
+            query.setParameter(simpleString, values2);
             entities = query.find();
         }
         assertEquals(2, entities.size());

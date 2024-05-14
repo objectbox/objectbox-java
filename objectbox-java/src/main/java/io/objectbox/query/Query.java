@@ -659,6 +659,54 @@ public class Query<T> implements Closeable {
      * Changes the parameter of the query condition for {@code property} to a new {@code value}.
      *
      * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param value The new {@code int[]} value to use for the query condition.
+     */
+    public Query<T> setParameter(Property<?> property, int[] value) {
+        checkOpen();
+        nativeSetParameters(handle, property.getEntityId(), property.getId(), null, value);
+        return this;
+    }
+
+    /**
+     * Changes the parameter of the query condition with the matching {@code alias} to a new {@code value}.
+     *
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param value The new {@code int[]} value to use for the query condition.
+     */
+    public Query<T> setParameter(String alias, int[] value) {
+        checkOpen();
+        nativeSetParameters(handle, 0, 0, alias, value);
+        return this;
+    }
+
+    /**
+     * Changes the parameter of the query condition for {@code property} to a new {@code value}.
+     *
+     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param value The new {@code long[]} value to use for the query condition.
+     */
+    public Query<T> setParameter(Property<?> property, long[] value) {
+        checkOpen();
+        nativeSetParameters(handle, property.getEntityId(), property.getId(), null, value);
+        return this;
+    }
+
+    /**
+     * Changes the parameter of the query condition with the matching {@code alias} to a new {@code value}.
+     *
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param value The new {@code long[]} value to use for the query condition.
+     */
+    public Query<T> setParameter(String alias, long[] value) {
+        checkOpen();
+        nativeSetParameters(handle, 0, 0, alias, value);
+        return this;
+    }
+
+    /**
+     * Changes the parameter of the query condition for {@code property} to a new {@code value}.
+     *
+     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
      * @param value The new {@code float[]} value to use for the query condition.
      */
     public Query<T> setParameter(Property<?> property, float[] value) {
@@ -676,6 +724,30 @@ public class Query<T> implements Closeable {
     public Query<T> setParameter(String alias, float[] value) {
         checkOpen();
         nativeSetParameter(handle, 0, 0, alias, value);
+        return this;
+    }
+
+    /**
+     * Changes the parameter of the query condition for {@code property} to a new {@code value}.
+     *
+     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param value The new {@code String[]} value to use for the query condition.
+     */
+    public Query<T> setParameter(Property<?> property, String[] value) {
+        checkOpen();
+        nativeSetParameters(handle, property.getEntityId(), property.getId(), null, value);
+        return this;
+    }
+
+    /**
+     * Changes the parameter of the query condition with the matching {@code alias} to a new {@code value}.
+     *
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param value The new {@code String[]} value to use for the query condition.
+     */
+    public Query<T> setParameter(String alias, String[] value) {
+        checkOpen();
+        nativeSetParameters(handle, 0, 0, alias, value);
         return this;
     }
 
@@ -701,42 +773,44 @@ public class Query<T> implements Closeable {
 
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     *
+     * @deprecated Use {@link #setParameter(Property, int[])} instead.
      */
+    @Deprecated
     public Query<T> setParameters(Property<?> property, int[] values) {
-        checkOpen();
-        nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
-        return this;
+        return setParameter(property, values);
     }
 
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      *
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     * @deprecated Use {@link #setParameter(String, int[])} instead.
      */
+    @Deprecated
     public Query<T> setParameters(String alias, int[] values) {
-        checkOpen();
-        nativeSetParameters(handle, 0, 0, alias, values);
-        return this;
+        return setParameter(alias, values);
     }
 
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     *
+     * @deprecated Use {@link #setParameter(Property, long[])} instead.
      */
+    @Deprecated
     public Query<T> setParameters(Property<?> property, long[] values) {
-        checkOpen();
-        nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
-        return this;
+        return setParameter(property, values);
     }
 
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      *
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     * @deprecated Use {@link #setParameter(String, long[])} instead.
      */
+    @Deprecated
     public Query<T> setParameters(String alias, long[] values) {
-        checkOpen();
-        nativeSetParameters(handle, 0, 0, alias, values);
-        return this;
+        return setParameter(alias, values);
     }
 
     /**
@@ -761,22 +835,23 @@ public class Query<T> implements Closeable {
 
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     *
+     * @deprecated Use {@link #setParameter(Property, String[])} instead.
      */
+    @Deprecated
     public Query<T> setParameters(Property<?> property, String[] values) {
-        checkOpen();
-        nativeSetParameters(handle, property.getEntityId(), property.getId(), null, values);
-        return this;
+        return setParameter(property, values);
     }
 
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      *
      * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     * @deprecated Use {@link #setParameter(String, String[])} instead.
      */
+    @Deprecated
     public Query<T> setParameters(String alias, String[] values) {
-        checkOpen();
-        nativeSetParameters(handle, 0, 0, alias, values);
-        return this;
+        return setParameter(alias, values);
     }
 
     /**

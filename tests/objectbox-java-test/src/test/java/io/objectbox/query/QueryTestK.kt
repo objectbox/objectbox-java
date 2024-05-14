@@ -101,11 +101,11 @@ class QueryTestK : AbstractQueryTest() {
         assertEquals(3, query.count())
 
         val valuesInt2 = intArrayOf(2003)
-        query.setParameters(TestEntity_.simpleInt, valuesInt2)
+        query.setParameter(TestEntity_.simpleInt, valuesInt2)
         assertEquals(1, query.count())
 
         val valuesInt3 = intArrayOf(2003, 2007)
-        query.setParameters("int", valuesInt3)
+        query.setParameter("int", valuesInt3)
         assertEquals(2, query.count())
     }
 
