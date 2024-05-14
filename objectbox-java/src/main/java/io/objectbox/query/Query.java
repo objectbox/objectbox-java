@@ -796,11 +796,11 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Sets parameters previously given to {@link Property#nearestNeighborsF32(float[], int)}.
+     * Sets parameters previously given to {@link Property#nearestNeighbors(float[], int)}.
      *
      * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
      */
-    public Query<T> setParametersNearestNeighborsF32(Property<?> property, float[] queryVector, int maxResultCount) {
+    public Query<T> setParametersNearestNeighbors(Property<?> property, float[] queryVector, int maxResultCount) {
         checkOpen();
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, queryVector);
         nativeSetParameter(handle, property.getEntityId(), property.getId(), null, maxResultCount);
@@ -808,11 +808,11 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Sets parameters previously given to {@link Property#nearestNeighborsF32(float[], int)}.
+     * Sets parameters previously given to {@link Property#nearestNeighbors(float[], int)}.
      *
      * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
      */
-    public Query<T> setParametersNearestNeighborsF32(String alias, float[] queryVector, int maxResultCount) {
+    public Query<T> setParametersNearestNeighbors(String alias, float[] queryVector, int maxResultCount) {
         checkOpen();
         nativeSetParameter(handle, 0, 0, alias, queryVector);
         nativeSetParameter(handle, 0, 0, alias, maxResultCount);

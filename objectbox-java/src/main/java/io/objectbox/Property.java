@@ -316,7 +316,7 @@ public class Property<ENTITY> implements Serializable {
      * use maxResultCount of 100 with a Query limit of 10 to have 10 results that are of potentially better quality than
      * just passing in 10 for maxResultCount (quality/performance tradeoff).
      */
-    public PropertyQueryCondition<ENTITY> nearestNeighborsF32(float[] queryVector, int maxResultCount) {
+    public PropertyQueryCondition<ENTITY> nearestNeighbors(float[] queryVector, int maxResultCount) {
         return new NearestNeighborCondition<>(this, queryVector, maxResultCount);
     }
 

@@ -898,7 +898,7 @@ public class QueryBuilder<T> {
         return this;
     }
 
-    QueryBuilder<T> nearestNeighborsF32(Property<T> property, float[] queryVector, int maxResultCount) {
+    public QueryBuilder<T> nearestNeighbors(Property<T> property, float[] queryVector, int maxResultCount) {
         verifyHandle();
         checkCombineCondition(nativeNearestNeighborsF32(handle, property.getId(), queryVector, maxResultCount));
         return this;

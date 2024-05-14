@@ -475,7 +475,7 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
 
         @Override
         void applyCondition(QueryBuilder<T> builder) {
-            builder.nearestNeighborsF32(property, queryVector, maxResultCount);
+            builder.nearestNeighbors(property, queryVector, maxResultCount);
         }
     }
 }
