@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,12 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.objectbox.annotation.HnswIndex;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
+import io.objectbox.model.HnswDistanceType;
+import io.objectbox.model.HnswFlags;
+import io.objectbox.model.HnswParams;
 import io.objectbox.model.IdUid;
 import io.objectbox.model.Model;
 import io.objectbox.model.ModelEntity;
@@ -63,6 +67,7 @@ public class ModelBuilder {
         private int indexId;
         private long indexUid;
         private int indexMaxValueLength;
+        private int hnswParamsOffset;
 
         PropertyBuilder(String name, @Nullable String targetEntityName, @Nullable String virtualTarget, int type) {
             this.type = type;
@@ -88,6 +93,50 @@ public class ModelBuilder {
         public PropertyBuilder indexMaxValueLength(int indexMaxValueLength) {
             checkNotFinished();
             this.indexMaxValueLength = indexMaxValueLength;
+            return this;
+        }
+
+        /**
+         * Set parameters for {@link HnswIndex}.
+         *
+         * @param dimensions see {@link HnswIndex#dimensions()}.
+         * @param neighborsPerNode see {@link HnswIndex#neighborsPerNode()}.
+         * @param indexingSearchCount see {@link HnswIndex#indexingSearchCount()}.
+         * @param flags see {@link HnswIndex#flags()}, mapped to {@link HnswFlags}.
+         * @param distanceType see {@link HnswIndex#distanceType()}, mapped to {@link HnswDistanceType}.
+         * @param reparationBacklinkProbability see {@link HnswIndex#reparationBacklinkProbability()}.
+         * @param vectorCacheHintSizeKb see {@link HnswIndex#vectorCacheHintSizeKB()}.
+         * @return this builder.
+         */
+        public PropertyBuilder hnswParams(long dimensions,
+                                          @Nullable Long neighborsPerNode,
+                                          @Nullable Long indexingSearchCount,
+                                          @Nullable Integer flags,
+                                          @Nullable Short distanceType,
+                                          @Nullable Float reparationBacklinkProbability,
+                                          @Nullable Long vectorCacheHintSizeKb) {
+            checkNotFinished();
+            HnswParams.startHnswParams(fbb);
+            HnswParams.addDimensions(fbb, dimensions);
+            if (neighborsPerNode != null) {
+                HnswParams.addNeighborsPerNode(fbb, neighborsPerNode);
+            }
+            if (indexingSearchCount != null) {
+                HnswParams.addIndexingSearchCount(fbb, indexingSearchCount);
+            }
+            if (flags != null) {
+                HnswParams.addFlags(fbb, flags);
+            }
+            if (distanceType != null) {
+                HnswParams.addDistanceType(fbb, distanceType);
+            }
+            if (reparationBacklinkProbability != null) {
+                HnswParams.addReparationBacklinkProbability(fbb, reparationBacklinkProbability);
+            }
+            if (vectorCacheHintSizeKb != null) {
+                HnswParams.addVectorCacheHintSizeKb(fbb, vectorCacheHintSizeKb);
+            }
+            hnswParamsOffset = HnswParams.endHnswParams(fbb);
             return this;
         }
 
@@ -133,6 +182,9 @@ public class ModelBuilder {
             }
             if (indexMaxValueLength > 0) {
                 ModelProperty.addMaxIndexValueLength(fbb, indexMaxValueLength);
+            }
+            if (hnswParamsOffset != 0) {
+                ModelProperty.addHnswParams(fbb, hnswParamsOffset);
             }
             ModelProperty.addType(fbb, type);
             if (flags != 0) {

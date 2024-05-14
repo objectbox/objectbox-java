@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,6 +205,8 @@ public class QueryBuilder<T> {
     private native long nativeGreater(long handle, int propertyId, double value, boolean withEqual);
 
     private native long nativeBetween(long handle, int propertyId, double value1, double value2);
+
+    private native long nativeNearestNeighborsF32(long handle, int propertyId, float[] queryVector, int maxResultCount);
 
     // ------------------------------ Bytes ------------------------------
 
@@ -893,6 +895,12 @@ public class QueryBuilder<T> {
     public QueryBuilder<T> between(Property<T> property, double value1, double value2) {
         verifyHandle();
         checkCombineCondition(nativeBetween(handle, property.getId(), value1, value2));
+        return this;
+    }
+
+    public QueryBuilder<T> nearestNeighbors(Property<T> property, float[] queryVector, int maxResultCount) {
+        verifyHandle();
+        checkCombineCondition(nativeNearestNeighborsF32(handle, property.getId(), queryVector, maxResultCount));
         return this;
     }
 
