@@ -40,11 +40,12 @@ import io.objectbox.query.PropertyQueryConditionImpl.StringArrayCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.StringCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.StringCondition.Operation;
 import io.objectbox.query.PropertyQueryConditionImpl.StringStringCondition;
+import io.objectbox.query.Query;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
 /**
  * Meta data describing a Property of an ObjectBox Entity.
- * Properties are typically used when defining {@link io.objectbox.query.Query Query} conditions
+ * Properties are typically used when defining {@link Query Query} conditions
  * using {@link io.objectbox.query.QueryBuilder QueryBuilder}.
  * Access properties using the generated underscore class of an entity (e.g. {@code Example_.id}).
  */
@@ -315,6 +316,9 @@ public class Property<ENTITY> implements Serializable {
      * be used as the "ef" HNSW parameter to increase the search quality in combination with a query limit. For example,
      * use maxResultCount of 100 with a Query limit of 10 to have 10 results that are of potentially better quality than
      * just passing in 10 for maxResultCount (quality/performance tradeoff).
+     * <p>
+     * To change the given parameters after building the query, use {@link Query#setParameter(Property, float[])} and
+     * {@link Query#setParameter(Property, long)} or their alias equivalent.
      */
     public PropertyQueryCondition<ENTITY> nearestNeighbors(float[] queryVector, int maxResultCount) {
         return new NearestNeighborCondition<>(this, queryVector, maxResultCount);

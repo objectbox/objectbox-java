@@ -656,6 +656,30 @@ public class Query<T> implements Closeable {
     }
 
     /**
+     * Changes the parameter of the query condition for {@code property} to a new {@code value}.
+     *
+     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param value The new {@code float[]} value to use for the query condition.
+     */
+    public Query<T> setParameter(Property<?> property, float[] value) {
+        checkOpen();
+        nativeSetParameter(handle, property.getEntityId(), property.getId(), null, value);
+        return this;
+    }
+
+    /**
+     * Changes the parameter of the query condition with the matching {@code alias} to a new {@code value}.
+     *
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param value The new {@code float[]} value to use for the query condition.
+     */
+    public Query<T> setParameter(String alias, float[] value) {
+        checkOpen();
+        nativeSetParameter(handle, 0, 0, alias, value);
+        return this;
+    }
+
+    /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
     public Query<T> setParameters(Property<?> property, long value1, long value2) {
@@ -792,30 +816,6 @@ public class Query<T> implements Closeable {
     public Query<T> setParameter(String alias, byte[] value) {
         checkOpen();
         nativeSetParameter(handle, 0, 0, alias, value);
-        return this;
-    }
-
-    /**
-     * Sets parameters previously given to {@link Property#nearestNeighbors(float[], int)}.
-     *
-     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
-     */
-    public Query<T> setParametersNearestNeighbors(Property<?> property, float[] queryVector, int maxResultCount) {
-        checkOpen();
-        nativeSetParameter(handle, property.getEntityId(), property.getId(), null, queryVector);
-        nativeSetParameter(handle, property.getEntityId(), property.getId(), null, maxResultCount);
-        return this;
-    }
-
-    /**
-     * Sets parameters previously given to {@link Property#nearestNeighbors(float[], int)}.
-     *
-     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
-     */
-    public Query<T> setParametersNearestNeighbors(String alias, float[] queryVector, int maxResultCount) {
-        checkOpen();
-        nativeSetParameter(handle, 0, 0, alias, queryVector);
-        nativeSetParameter(handle, 0, 0, alias, maxResultCount);
         return this;
     }
 
