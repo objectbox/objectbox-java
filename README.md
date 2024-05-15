@@ -22,11 +22,12 @@
   </a>
 </p>
 
-# ObjectBox - Fast and Efficient Java Database (Android, JVM)
+# ObjectBox - Fast and Efficient Java Database (Android, JVM) with Vector Search
 
-ObjectBox Java is a simple yet powerful database designed specifically for **Java and Kotlin** applications.
+ObjectBox Java is a lightweight yet powerful on-device database & vector database designed specifically for **Java and Kotlin** applications.
 Store and manage data effortlessly in your Android or JVM Linux, macOS or Windows app with ObjectBox.
-Enjoy exceptional speed, frugal resource usage, and environmentally-friendly development. 💚
+Easily manage vector data alongside your objects and perform superfast on-device vector search to empower your apps with RAG AI, generative AI, and similarity search.
+Enjoy exceptional speed, battery-friendly resource usage, and environmentally-friendly development. 💚
 
 ### Demo code
 
@@ -59,6 +60,7 @@ box.put(playlist)
 - [License](#license)
 
 ## Key Features
+🧠 **First on-device vector database:** easily manage vector data and perform fast vector search
 🏁 **High performance:** exceptional speed, outperforming alternatives like SQLite and Realm in all CRUD operations.\
 💚 **Efficient Resource Usage:** minimal CPU, power and memory consumption for maximum flexibility and sustainability.\
 🔗 **[Built-in Object Relations](https://docs.objectbox.io/relations):** built-in support for object relations, allowing you to easily establish and manage relationships between objects.\
