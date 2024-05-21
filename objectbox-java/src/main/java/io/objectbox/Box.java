@@ -594,11 +594,10 @@ public class Box<T> {
     }
 
     /**
-     * Returns a builder to create queries for Object matching supplied criteria.
+     * Create a query with no conditions.
      *
-     * @deprecated New code should use {@link #query(QueryCondition)} instead.
+     * @see #query(QueryCondition)
      */
-    @Deprecated
     public QueryBuilder<T> query() {
         return new QueryBuilder<>(this, store.getNativeStore(), store.getDbName(entityClass));
     }
