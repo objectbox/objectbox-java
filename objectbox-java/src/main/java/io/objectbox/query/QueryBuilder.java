@@ -368,6 +368,9 @@ public class QueryBuilder<T> {
 
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
      * Assigns the given alias to the previous condition.
      *
      * @param alias The string alias for use with setParameter(s) methods.
@@ -570,18 +573,30 @@ public class QueryBuilder<T> {
         lastCondition = nativeCombine(handle, leftCondition, rightCondition, true);
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> isNull(Property<T> property) {
         verifyHandle();
         checkCombineCondition(nativeNull(handle, property.getId()));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> notNull(Property<T> property) {
         verifyHandle();
         checkCombineCondition(nativeNotNull(handle, property.getId()));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> relationCount(RelationInfo<T, ?> relationInfo, int relationCount) {
         verifyHandle();
         checkCombineCondition(nativeRelationCount(handle, storeHandle, relationInfo.targetInfo.getEntityId(),
@@ -593,36 +608,60 @@ public class QueryBuilder<T> {
     //                                              Integers
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> equal(Property<T> property, long value) {
         verifyHandle();
         checkCombineCondition(nativeEqual(handle, property.getId(), value));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> notEqual(Property<T> property, long value) {
         verifyHandle();
         checkCombineCondition(nativeNotEqual(handle, property.getId(), value));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> less(Property<T> property, long value) {
         verifyHandle();
         checkCombineCondition(nativeLess(handle, property.getId(), value, false));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> lessOrEqual(Property<T> property, long value) {
         verifyHandle();
         checkCombineCondition(nativeLess(handle, property.getId(), value, true));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> greater(Property<T> property, long value) {
         verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value, false));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> greaterOrEqual(Property<T> property, long value) {
         verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value, true));
@@ -630,6 +669,9 @@ public class QueryBuilder<T> {
     }
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
      * Finds objects with property value between and including the first and second value.
      */
     public QueryBuilder<T> between(Property<T> property, long value1, long value2) {
@@ -639,12 +681,20 @@ public class QueryBuilder<T> {
     }
 
     // FIXME DbException: invalid unordered_map<K, T> key
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> in(Property<T> property, long[] values) {
         verifyHandle();
         checkCombineCondition(nativeIn(handle, property.getId(), values, false));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> notIn(Property<T> property, long[] values) {
         verifyHandle();
         checkCombineCondition(nativeIn(handle, property.getId(), values, true));
@@ -655,12 +705,20 @@ public class QueryBuilder<T> {
     // Integers -> int[]
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> in(Property<T> property, int[] values) {
         verifyHandle();
         checkCombineCondition(nativeIn(handle, property.getId(), values, false));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> notIn(Property<T> property, int[] values) {
         verifyHandle();
         checkCombineCondition(nativeIn(handle, property.getId(), values, true));
@@ -671,12 +729,20 @@ public class QueryBuilder<T> {
     // Integers -> boolean
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> equal(Property<T> property, boolean value) {
         verifyHandle();
         checkCombineCondition(nativeEqual(handle, property.getId(), value ? 1 : 0));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> notEqual(Property<T> property, boolean value) {
         verifyHandle();
         checkCombineCondition(nativeNotEqual(handle, property.getId(), value ? 1 : 0));
@@ -688,6 +754,9 @@ public class QueryBuilder<T> {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     *
      * @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead.
      */
     public QueryBuilder<T> equal(Property<T> property, Date value) {
@@ -697,6 +766,9 @@ public class QueryBuilder<T> {
     }
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     *
      * @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead.
      */
     public QueryBuilder<T> notEqual(Property<T> property, Date value) {
@@ -706,6 +778,9 @@ public class QueryBuilder<T> {
     }
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     *
      * @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead.
      */
     public QueryBuilder<T> less(Property<T> property, Date value) {
@@ -715,6 +790,9 @@ public class QueryBuilder<T> {
     }
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     *
      * @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead.
      */
     public QueryBuilder<T> lessOrEqual(Property<T> property, Date value) {
@@ -724,6 +802,9 @@ public class QueryBuilder<T> {
     }
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     *
      * @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead.
      */
     public QueryBuilder<T> greater(Property<T> property, Date value) {
@@ -733,6 +814,9 @@ public class QueryBuilder<T> {
     }
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     *
      * @throws NullPointerException if given value is null. Use {@link #isNull(Property)} instead.
      */
     public QueryBuilder<T> greaterOrEqual(Property<T> property, Date value) {
@@ -742,6 +826,9 @@ public class QueryBuilder<T> {
     }
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
      * Finds objects with property value between and including the first and second value.
      *
      * @throws NullPointerException if one of the given values is null.
@@ -757,6 +844,9 @@ public class QueryBuilder<T> {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
      * Creates an "equal ('=')" condition for this property.
      */
     public QueryBuilder<T> equal(Property<T> property, String value, StringOrder order) {
@@ -766,6 +856,9 @@ public class QueryBuilder<T> {
     }
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
      * Creates a "not equal ('&lt;&gt;')" condition for this property.
      */
     public QueryBuilder<T> notEqual(Property<T> property, String value, StringOrder order) {
@@ -775,7 +868,10 @@ public class QueryBuilder<T> {
     }
 
     /**
-     * Creates an contains condition.
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
+     * Creates a contains condition.
      * <p>
      * Note: for a String array property, use {@link #containsElement} instead.
      */
@@ -789,6 +885,9 @@ public class QueryBuilder<T> {
     }
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
      * For a String array, list or String-key map property, matches if at least one element equals the given value.
      */
     public QueryBuilder<T> containsElement(Property<T> property, String value, StringOrder order) {
@@ -798,6 +897,9 @@ public class QueryBuilder<T> {
     }
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
      * For a String-key map property, matches if at least one key and value combination equals the given values.
      */
     public QueryBuilder<T> containsKeyValue(Property<T> property, String key, String value, StringOrder order) {
@@ -806,42 +908,70 @@ public class QueryBuilder<T> {
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> startsWith(Property<T> property, String value, StringOrder order) {
         verifyHandle();
         checkCombineCondition(nativeStartsWith(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> endsWith(Property<T> property, String value, StringOrder order) {
         verifyHandle();
         checkCombineCondition(nativeEndsWith(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> less(Property<T> property, String value, StringOrder order) {
         verifyHandle();
         checkCombineCondition(nativeLess(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE, false));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> lessOrEqual(Property<T> property, String value, StringOrder order) {
         verifyHandle();
         checkCombineCondition(nativeLess(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE, true));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> greater(Property<T> property, String value, StringOrder order) {
         verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE, false));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> greaterOrEqual(Property<T> property, String value, StringOrder order) {
         verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value, order == StringOrder.CASE_SENSITIVE, true));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> in(Property<T> property, String[] values, StringOrder order) {
         verifyHandle();
         checkCombineCondition(nativeIn(handle, property.getId(), values, order == StringOrder.CASE_SENSITIVE));
@@ -856,6 +986,9 @@ public class QueryBuilder<T> {
     // Help people with floating point equality...
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
      * Floating point equality is non-trivial; this is just a convenience for
      * {@link #between(Property, double, double)} with parameters(property, value - tolerance, value + tolerance).
      * When using {@link Query#setParameters(Property, double, double)},
@@ -865,24 +998,40 @@ public class QueryBuilder<T> {
         return between(property, value - tolerance, value + tolerance);
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> less(Property<T> property, double value) {
         verifyHandle();
         checkCombineCondition(nativeLess(handle, property.getId(), value, false));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> lessOrEqual(Property<T> property, double value) {
         verifyHandle();
         checkCombineCondition(nativeLess(handle, property.getId(), value, true));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> greater(Property<T> property, double value) {
         verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value, false));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> greaterOrEqual(Property<T> property, double value) {
         verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value, true));
@@ -890,6 +1039,9 @@ public class QueryBuilder<T> {
     }
 
     /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
      * Finds objects with property value between and including the first and second value.
      */
     public QueryBuilder<T> between(Property<T> property, double value1, double value2) {
@@ -898,6 +1050,10 @@ public class QueryBuilder<T> {
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> nearestNeighbors(Property<T> property, float[] queryVector, int maxResultCount) {
         verifyHandle();
         checkCombineCondition(nativeNearestNeighborsF32(handle, property.getId(), queryVector, maxResultCount));
@@ -908,30 +1064,50 @@ public class QueryBuilder<T> {
     //                                                 Bytes
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> equal(Property<T> property, byte[] value) {
         verifyHandle();
         checkCombineCondition(nativeEqual(handle, property.getId(), value));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> less(Property<T> property, byte[] value) {
         verifyHandle();
         checkCombineCondition(nativeLess(handle, property.getId(), value, false));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> lessOrEqual(Property<T> property, byte[] value) {
         verifyHandle();
         checkCombineCondition(nativeLess(handle, property.getId(), value, true));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> greater(Property<T> property, byte[] value) {
         verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value, false));
         return this;
     }
 
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     */
     public QueryBuilder<T> greaterOrEqual(Property<T> property, byte[] value) {
         verifyHandle();
         checkCombineCondition(nativeGreater(handle, property.getId(), value, true));
