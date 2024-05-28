@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
 import io.objectbox.InternalAccess;
 import io.objectbox.annotation.Backlink;
+import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
@@ -51,23 +52,60 @@ import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 import static java.lang.Boolean.TRUE;
 
 /**
- * A lazily loaded {@link List} of target objects representing a to-many relation, a unidirectional link from a "source"
- * entity to multiple objects of a "target" entity.
+ * A to-many relation of an entity that references multiple objects of a {@link TARGET} entity.
  * <p>
- * It tracks changes (adds and removes) that can be later applied (persisted) to the database. This happens either when
- * the object that contains this relation is put or using {@link #applyChangesToDb()}. For some important details about
- * applying changes, see the notes about relations of {@link Box#put(Object)}.
+ * Example:
+ * <pre>{@code
+ * // Java
+ * @Entity
+ * public class Student{
+ *     private ToMany<Teacher> teachers;
+ * }
+ *
+ * // Kotlin
+ * @Entity
+ * data class Student() {
+ *     lateinit var teachers: ToMany<Teacher>
+ * }
+ * }</pre>
  * <p>
- * The objects are loaded lazily on first access of this list, and then cached. The database query runs on the calling
- * thread, so avoid accessing this from a UI or main thread. Subsequent calls to any method, like {@link #size()}, do
- * not query the database, even if the relation was changed elsewhere. To get the latest data {@link Box#get} the source
- * object again or use {@link #reset()} before accessing the list again.
+ * Implements the {@link List} interface and uses lazy initialization. The target objects are only read from the
+ * database when the list is first accessed.
  * <p>
+ * The required database query runs on the calling thread, so avoid accessing ToMany from a UI or main thread. To get the
+ * latest data {@link Box#get} the object with the ToMany again or use {@link #reset()} before accessing the list again.
  * It is possible to preload the list when running a query using {@link QueryBuilder#eager}.
  * <p>
- * ToMany is thread-safe by default (may not be the case if {@link #setListFactory(ListFactory)} is used).
+ * Tracks when target objects are added and removed. Common usage:
+ * <ul>
+ * <li>{@link #add(Object)} to add target objects to the relation.
+ * <li>{@link #remove(Object)} to remove target objects from the relation.
+ * <li>{@link #remove(int)} to remove target objects at a specific index.
+ * </ul>
+ * <p>
+ * To apply (persist) the changes to the database, call {@link #applyChangesToDb()} or put the object with the ToMany.
+ * For important details, see the notes about relations of {@link Box#put(Object)}.
+ * <p>
+ * <pre>{@code
+ * // Example 1: add target objects to a relation
+ * student.getTeachers().add(teacher1);
+ * student.getTeachers().add(teacher2);
+ * store.boxFor(Student.class).put(student);
  *
- * @param <TARGET> Object type (entity).
+ * // Example 2: remove a target object from the relation
+ * student.getTeachers().remove(index);
+ * student.getTeachers().applyChangesToDb();
+ * // or store.boxFor(Student.class).put(student);
+ * }</pre>
+ * <p>
+ * In the database, the target objects are referenced by their IDs, which are persisted as part of the relation of the
+ * object with the ToMany.
+ * <p>
+ * ToMany is thread-safe by default (may not be the case if {@link #setListFactory(ListFactory)} is used).
+ * <p>
+ * To get all objects with a ToMany that reference a target object, see {@link Backlink}.
+ *
+ * @param <TARGET> target object type ({@link Entity @Entity} class).
  */
 public class ToMany<TARGET> implements List<TARGET>, Serializable {
     private static final long serialVersionUID = 2367317778240689006L;
