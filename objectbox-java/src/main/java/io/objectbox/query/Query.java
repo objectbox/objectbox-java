@@ -570,9 +570,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
+     * Changes the parameter of the query condition with the matching {@code alias} to a new {@code value}.
      *
-     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param value The new value to use for the query condition.
      */
     public Query<T> setParameter(String alias, String value) {
         checkOpen();
@@ -590,9 +591,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
+     * Changes the parameter of the query condition with the matching {@code alias} to a new {@code value}.
      *
-     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param value The new value to use for the query condition.
      */
     public Query<T> setParameter(String alias, long value) {
         checkOpen();
@@ -610,9 +612,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
+     * Changes the parameter of the query condition with the matching {@code alias} to a new {@code value}.
      *
-     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param value The new value to use for the query condition.
      */
     public Query<T> setParameter(String alias, double value) {
         checkOpen();
@@ -630,9 +633,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
+     * Changes the parameter of the query condition with the matching {@code alias} to a new {@code value}.
      *
-     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param value The new value to use for the query condition.
      * @throws NullPointerException if given date is null
      */
     public Query<T> setParameter(String alias, Date value) {
@@ -647,9 +651,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to a new value.
+     * Changes the parameter of the query condition with the matching {@code alias} to a new {@code value}.
      *
-     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param value The new value to use for the query condition.
      */
     public Query<T> setParameter(String alias, boolean value) {
         return setParameter(alias, value ? 1 : 0);
@@ -761,9 +766,11 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     * Changes the parameters of the query condition with the matching {@code alias} to the new values.
      *
-     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param value1 The first value to use for the query condition.
+     * @param value2 The second value to use for the query condition.
      */
     public Query<T> setParameters(String alias, long value1, long value2) {
         checkOpen();
@@ -823,9 +830,11 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     * Changes the parameters of the query condition with the matching {@code alias} to the new values.
      *
-     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param value1 The first value to use for the query condition.
+     * @param value2 The second value to use for the query condition.
      */
     public Query<T> setParameters(String alias, double value1, double value2) {
         checkOpen();
@@ -864,9 +873,11 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     * Changes the parameters of the query condition with the matching {@code alias} to the new values.
      *
-     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param key The first value to use for the query condition.
+     * @param value The second value to use for the query condition.
      */
     public Query<T> setParameters(String alias, String key, String value) {
         checkOpen();
@@ -884,9 +895,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
+     * Changes the parameter of the query condition with the matching {@code alias} to a new {@code value}.
      *
-     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param value The new value to use for the query condition.
      */
     public Query<T> setParameter(String alias, byte[] value) {
         checkOpen();
