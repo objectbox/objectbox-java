@@ -128,7 +128,9 @@ public class ToOne<TARGET> implements Serializable {
     }
 
     /**
-     * @return The target entity of the to-one relation.
+      * Returns the target object or {@code null} if there is none.
+     * <p>
+     * {@link ToOne} uses lazy initialization, so on first access this will read the target object from the database.
      */
     public TARGET getTarget() {
         return getTarget(getTargetId());
@@ -193,10 +195,11 @@ public class ToOne<TARGET> implements Serializable {
     }
 
     /**
-     * Sets or clears the target ID in the source entity. Pass 0 to clear.
+     * Prepares to set the target of this relation to the object with the given ID. Pass {@code 0} to remove an existing
+     * one.
      * <p>
-     * Put the source entity to persist changes.
-     * If the ID is not 0 creates a relation to the target entity with this ID, otherwise dissolves it.
+     * To apply changes, put the object with the ToOne. For important details, see the notes about relations of
+     * {@link Box#put(Object)}.
      *
      * @see #setTarget
      */
@@ -224,10 +227,10 @@ public class ToOne<TARGET> implements Serializable {
     }
 
     /**
-     * Sets or clears the target entity and ID in the source entity. Pass null to clear.
+     * Prepares to set the target object of this relation. Pass {@code null} to remove an existing one.
      * <p>
-     * Put the source entity to persist changes.
-     * If the target entity was not put yet (its ID is 0), it will be stored when the source entity is put.
+     * To apply changes, put the object with the ToOne. For important details, see the notes about relations of
+     * {@link Box#put(Object)}.
      *
      * @see #setTargetId
      */
