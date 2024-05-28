@@ -37,9 +37,7 @@ import io.objectbox.internal.ReflectionCache;
  * the ToMany object will not be notified/updated about persisted changes here.
  * Call {@link ToMany#reset()} so it will update when next accessed.
  */
-// TODO add more tests
 // TODO not exactly thread safe
-// TODO enforce not-null (not zero) checks on the target setters once we use some not-null annotation
 public class ToOne<TARGET> implements Serializable {
     private static final long serialVersionUID = 5092547044335989281L;
 
