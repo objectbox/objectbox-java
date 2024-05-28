@@ -264,9 +264,10 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     /**
-     * Adds the given entity to the list and tracks the addition so it can be later applied to the database
-     * (e.g. via {@link Box#put(Object)} of the entity owning the ToMany, or via {@link #applyChangesToDb()}).
-     * Note that the given entity will remain unchanged at this point (e.g. to-ones are not updated).
+     * Prepares to add the given target object to this relation.
+     * <p>
+     * To apply changes, call {@link #applyChangesToDb()} or put the object with the ToMany. For important details, see
+     * the notes about relations of {@link Box#put(Object)}.
      */
     @Override
     public synchronized boolean add(TARGET object) {
@@ -367,8 +368,9 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     /**
-     * @return An object for the given ID, or null if the object was already removed from its box
-     * (and was not cached before).
+     * Gets the target object at the given index.
+     * <p>
+     * {@link ToMany} uses lazy initialization, so on first access this will read the target objects from the database.
      */
     @Override
     public TARGET get(int location) {
@@ -419,6 +421,9 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         return entities.listIterator(location);
     }
 
+    /**
+     * Like {@link #remove(Object)}, but using the location of the target object.
+     */
     @Override
     public synchronized TARGET remove(int location) {
         ensureEntitiesWithTrackingLists();
@@ -427,6 +432,12 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         return removed;
     }
 
+    /**
+     * Prepares to remove the target object from this relation.
+     * <p>
+     * To apply changes, call {@link #applyChangesToDb()} or put the object with the ToMany. For important details, see
+     * the notes about relations of {@link Box#put(Object)}.
+     */
     @SuppressWarnings("unchecked") // Cast to TARGET: If removed, must be of type TARGET.
     @Override
     public synchronized boolean remove(Object object) {
@@ -438,7 +449,9 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         return removed;
     }
 
-    /** Removes an object by its entity ID. */
+    /**
+     * Like {@link #remove(Object)}, but using just the ID of the target object.
+     */
     public synchronized TARGET removeById(long id) {
         ensureEntities();
         int size = entities.size();
