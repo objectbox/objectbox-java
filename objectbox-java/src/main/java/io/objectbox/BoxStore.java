@@ -74,7 +74,7 @@ public class BoxStore implements Closeable {
     public static final String IN_MEMORY_PREFIX = "memory:";
 
     /** Change so ReLinker will update native library when using workaround loading. */
-    public static final String JNI_VERSION = "4.0.0";
+    public static final String JNI_VERSION = "4.0.1";
 
     private static final String VERSION = "4.0.0-2024-05-14";
     private static BoxStore defaultStore;
