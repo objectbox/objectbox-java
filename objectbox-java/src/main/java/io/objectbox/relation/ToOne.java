@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,22 +24,65 @@ import javax.annotation.Nullable;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
+import io.objectbox.annotation.Backlink;
+import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbDetachedException;
 import io.objectbox.internal.ReflectionCache;
 
 /**
- * Manages a to-one relation: resolves the target object, keeps the target Id in sync, etc.
- * A to-relation is unidirectional: it points from the source entity to the target entity.
- * The target is referenced by its ID, which is persisted in the source entity.
+ * A to-one relation of an entity that references one object of a {@link TARGET} entity.
  * <p>
- * If there is a {@link ToMany} relation linking back to this to-one relation (@Backlink),
- * the ToMany object will not be notified/updated about persisted changes here.
- * Call {@link ToMany#reset()} so it will update when next accessed.
+ * Example:
+ * <pre>{@code
+ * // Java
+ * @Entity
+ * public class Order {
+ *     private ToOne<Customer> customer;
+ * }
+ *
+ * // Kotlin
+ * @Entity
+ * data class Order() {
+ *     lateinit var customer: ToOne<Customer>
+ * }
+ * }</pre>
+ * <p>
+ * Uses lazy initialization. The target object ({@link #getTarget()}) is only read from the database when it is first
+ * accessed.
+ * <p>
+ * Common usage:
+ * <ul>
+ * <li>Set the target object with {@link #setTarget} to create a relation.
+ *     When the object with the ToOne is put, if the target object is new (its ID is 0), it will be put as well.
+ *     Otherwise, only the target ID in the database is updated.
+ * <li>{@link #setTargetId} of the target object to create a relation.
+ * <li>{@link #setTarget} with {@code null} or {@link #setTargetId} to {@code 0} to remove the relation.
+ * </ul>
+ * <p>
+ * Then, to persist the changes {@link Box#put} the object with the ToOne.
+ * <p>
+ * <pre>{@code
+ * // Example 1: create a relation
+ * order.getCustomer().setTarget(customer);
+ * // or order.getCustomer().setTargetId(customerId);
+ * store.boxFor(Order.class).put(order);
+ *
+ * // Example 2: remove the relation
+ * order.getCustomer().setTarget(null);
+ * // or order.getCustomer().setTargetId(0);
+ * store.boxFor(Order.class).put(order);
+ * }</pre>
+ * <p>
+ * The target object is referenced by its ID.
+ * This target ID ({@link #getTargetId()}) is persisted as part of the object with the ToOne in a special
+ * property created for each ToOne (named like "customerId").
+ * <p>
+ * To get all objects with a ToOne that reference a target object, see {@link Backlink}.
+ *
+ * @param <TARGET> target object type ({@link Entity @Entity} class).
  */
-// TODO add more tests
 // TODO not exactly thread safe
-// TODO enforce not-null (not zero) checks on the target setters once we use some not-null annotation
 public class ToOne<TARGET> implements Serializable {
     private static final long serialVersionUID = 5092547044335989281L;
 
@@ -85,7 +128,9 @@ public class ToOne<TARGET> implements Serializable {
     }
 
     /**
-     * @return The target entity of the to-one relation.
+      * Returns the target object or {@code null} if there is none.
+     * <p>
+     * {@link ToOne} uses lazy initialization, so on first access this will read the target object from the database.
      */
     public TARGET getTarget() {
         return getTarget(getTargetId());
@@ -150,10 +195,11 @@ public class ToOne<TARGET> implements Serializable {
     }
 
     /**
-     * Sets or clears the target ID in the source entity. Pass 0 to clear.
+     * Prepares to set the target of this relation to the object with the given ID. Pass {@code 0} to remove an existing
+     * one.
      * <p>
-     * Put the source entity to persist changes.
-     * If the ID is not 0 creates a relation to the target entity with this ID, otherwise dissolves it.
+     * To apply changes, put the object with the ToOne. For important details, see the notes about relations of
+     * {@link Box#put(Object)}.
      *
      * @see #setTarget
      */
@@ -181,10 +227,10 @@ public class ToOne<TARGET> implements Serializable {
     }
 
     /**
-     * Sets or clears the target entity and ID in the source entity. Pass null to clear.
+     * Prepares to set the target object of this relation. Pass {@code null} to remove an existing one.
      * <p>
-     * Put the source entity to persist changes.
-     * If the target entity was not put yet (its ID is 0), it will be stored when the source entity is put.
+     * To apply changes, put the object with the ToOne. For important details, see the notes about relations of
+     * {@link Box#put(Object)}.
      *
      * @see #setTargetId
      */
