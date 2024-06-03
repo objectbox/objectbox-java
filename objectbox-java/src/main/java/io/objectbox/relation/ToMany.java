@@ -193,8 +193,8 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             try {
                 boxStore = (BoxStore) boxStoreField.get(entity);
                 if (boxStore == null) {
-                    throw new DbDetachedException("Cannot resolve relation for detached entities, " +
-                            "call box.attach(entity) beforehand.");
+                    throw new DbDetachedException("Cannot resolve relation for detached objects, " +
+                            "call box.attach(object) beforehand.");
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -570,9 +570,9 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     /**
-     * Sorts the list by the "natural" ObjectBox order for to-many list (by entity ID).
-     * This will be the order when you get the entities fresh (e.g. initially or after calling {@link #reset()}).
-     * Note that non persisted entities (ID is zero) will be put to the end as they are still to get an ID.
+     * Sorts the list by the "natural" ObjectBox order for to-many list (by object ID).
+     * This will be the order when you get the objects fresh (e.g. initially or after calling {@link #reset()}).
+     * Note that non persisted objects (ID is zero) will be put to the end as they are still to get an ID.
      */
     public void sortById() {
         ensureEntities();
@@ -601,7 +601,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     /**
-     * Saves changes (added and removed entities) made to this relation to the database. For some important details, see
+     * Saves changes (added and removed objects) made to this relation to the database. For some important details, see
      * the notes about relations of {@link Box#put(Object)}.
      * <p>
      * Note that this is called already when the object that contains this ToMany is put. However, if only this ToMany
@@ -614,12 +614,12 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         long id = relationInfo.sourceInfo.getIdGetter().getId(entity);
         if (id == 0) {
             throw new IllegalStateException(
-                    "The source entity was not yet persisted (no ID), use box.put() on it instead");
+                    "The object with the ToMany was not yet persisted (no ID), use box.put() on it instead");
         }
         try {
             ensureBoxes();
         } catch (DbDetachedException e) {
-            throw new IllegalStateException("The source entity was not yet persisted, use box.put() on it instead");
+            throw new IllegalStateException("The object with the ToMany was not yet persisted, use box.put() on it instead");
         }
         if (internalCheckApplyToDbRequired()) {
             // We need a TX because we use two writers and both must use same TX (without: unchecked, SIGSEGV)
@@ -632,10 +632,10 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     /**
-     * Returns true if at least one of the entities matches the given filter.
+     * Returns true if at least one of the target objects matches the given filter.
      * <p>
      * For use with {@link QueryBuilder#filter(QueryFilter)} inside a {@link QueryFilter} to check
-     * to-many relation entities.
+     * to-many relation objects.
      */
     @Beta
     public boolean hasA(QueryFilter<TARGET> filter) {
@@ -650,10 +650,10 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
     }
 
     /**
-     * Returns true if all of the entities match the given filter. Returns false if the list is empty.
+     * Returns true if all of the target objects match the given filter. Returns false if the list is empty.
      * <p>
      * For use with {@link QueryBuilder#filter(QueryFilter)} inside a {@link QueryFilter} to check
-     * to-many relation entities.
+     * to-many relation objects.
      */
     @Beta
     public boolean hasAll(QueryFilter<TARGET> filter) {
@@ -670,7 +670,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         return true;
     }
 
-    /** Gets an object by its entity ID. */
+    /** Gets an object by its ID. */
     @Beta
     public TARGET getById(long id) {
         ensureEntities();
@@ -685,7 +685,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         return null;
     }
 
-    /** Gets the index of the object with the given entity ID. */
+    /** Gets the index of the object with the given ID. */
     @Beta
     public int indexOfId(long id) {
         ensureEntities();
@@ -704,7 +704,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     /**
      * Returns true if there are pending changes for the DB.
-     * Changes will be automatically persisted once the owning entity is put, or an explicit call to
+     * Changes will be automatically persisted once the object with the ToMany is put, or an explicit call to
      * {@link #applyChangesToDb()} is made.
      */
     public boolean hasPendingDbChanges() {
@@ -719,7 +719,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
 
     /**
      * For internal use only; do not use in your app.
-     * Called after relation source entity is put (so we have its ID).
+     * Called after relation source object is put (so we have its ID).
      * Prepares data for {@link #internalApplyToDb(Cursor, Cursor)}
      */
     @Internal
@@ -743,7 +743,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             // Relation based on Backlink
             long entityId = relationInfo.sourceInfo.getIdGetter().getId(entity);
             if (entityId == 0) {
-                throw new IllegalStateException("Source entity has no ID (should have been put before)");
+                throw new IllegalStateException("Object with the ToMany has no ID (should have been put before)");
             }
             IdGetter<TARGET> idGetter = relationInfo.targetInfo.getIdGetter();
             Map<TARGET, Boolean> setAdded = this.entitiesAdded;
@@ -917,7 +917,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
         if (isStandaloneRelation) {
             long entityId = relationInfo.sourceInfo.getIdGetter().getId(entity);
             if (entityId == 0) {
-                throw new IllegalStateException("Source entity has no ID (should have been put before)");
+                throw new IllegalStateException("Object with the ToMany has no ID (should have been put before)");
             }
 
             if (removedStandalone != null) {
@@ -960,7 +960,7 @@ public class ToMany<TARGET> implements List<TARGET>, Serializable {
             long targetId = targetIdGetter.getId(added[i]);
             if (targetId == 0) {
                 // Paranoia
-                throw new IllegalStateException("Target entity has no ID (should have been put before)");
+                throw new IllegalStateException("Target object has no ID (should have been put before)");
             }
             targetIds[i] = targetId;
         }
