@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 ObjectBox Ltd. All rights reserved.
+ * Copyright 2020-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package io.objectbox.converter;
 import io.objectbox.flatbuffers.FlexBuffers;
 
 /**
- * Used to automatically convert {@code Map&lt;Integer, Long&gt;}.
+ * Like {@link IntegerFlexMapConverter}, but always restores integer map values as {@link Long}.
  * <p>
- * Unlike {@link FlexObjectConverter} always restores integer map values as {@link Long}.
+ * Used by default to convert {@code Map<Integer, Long>}.
  */
 public class IntegerLongMapConverter extends IntegerFlexMapConverter {
     @Override
