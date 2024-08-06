@@ -636,13 +636,14 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * Closes the BoxStore and frees associated resources.
-     * This method is useful for unit tests;
-     * most real applications should open a BoxStore once and keep it open until the app dies.
+     * Closes this BoxStore and releases associated resources.
      * <p>
-     * WARNING:
-     * This is a somewhat delicate thing to do if you have threads running that may potentially still use the BoxStore.
-     * This results in undefined behavior, including the possibility of crashing.
+     * Before calling, <b>all database operations must have finished</b> (there are no more active transactions).
+     * <p>
+     * If that is not the case, the method will briefly wait on any active transactions, but then will forcefully close
+     * them to avoid crashes and print warning messages ("Transactions are still active"). If this occurs,
+     * analyze your code to make sure all database operations, notably in other threads or data observers,
+     * are properly finished.
      */
     public void close() {
         boolean oldClosedState;
@@ -658,14 +659,37 @@ public class BoxStore implements Closeable {
                 }
 
                 // Closeable recommendation: mark as closed before any code that might throw.
+                // Also, before checking on transactions to avoid any new transactions from getting created
+                // (due to all Java APIs doing closed checks).
                 closed = true;
+
                 List<Transaction> transactionsToClose;
                 synchronized (transactions) {
+                    // Give open transactions some time to close (BoxStore.unregisterTransaction() calls notify),
+                    // 1000 ms should be long enough for most small operations and short enough to avoid ANRs on Android.
+                    if (hasActiveTransaction()) {
+                        System.out.println("Briefly waiting for active transactions before closing the Store...");
+                        try {
+                            // It is fine to hold a lock on BoxStore.this as well as BoxStore.unregisterTransaction()
+                            // only synchronizes on "transactions".
+                            //noinspection WaitWhileHoldingTwoLocks
+                            transactions.wait(1000);
+                        } catch (InterruptedException e) {
+                            // If interrupted, continue with releasing native resources
+                        }
+                        if (hasActiveTransaction()) {
+                            System.err.println("Transactions are still active:"
+                                    + " ensure that all database operations are finished before closing the Store!");
+                        }
+                    }
                     transactionsToClose = new ArrayList<>(this.transactions);
                 }
+                // Close all transactions, including recycled (not active) ones stored in Box threadLocalReader.
+                // It is expected that this prints a warning if a transaction is not owned by the current thread.
                 for (Transaction t : transactionsToClose) {
                     t.close();
                 }
+
                 if (handle != 0) { // failed before native handle was created?
                     nativeDelete(handle);
                     // The Java API has open checks, but just in case re-set the handle so any native methods will
@@ -814,7 +838,25 @@ public class BoxStore implements Closeable {
     public void unregisterTransaction(Transaction transaction) {
         synchronized (transactions) {
             transactions.remove(transaction);
+            // For close(): notify if there are no more open transactions
+            if (!hasActiveTransaction()) {
+                transactions.notifyAll();
+            }
         }
+    }
+
+    /**
+     * Returns if {@link #transactions} has a single transaction that {@link Transaction#isActive() isActive()}.
+     * <p>
+     * Callers must synchronize on {@link #transactions}.
+     */
+    private boolean hasActiveTransaction() {
+        for (Transaction tx : transactions) {
+            if (tx.isActive()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void txCommitted(Transaction tx, @Nullable int[] entityTypeIdsAffected) {
@@ -1288,6 +1330,18 @@ public class BoxStore implements Closeable {
     public long getNativeStore() {
         checkOpen();
         return handle;
+    }
+
+    /**
+     * For internal use only. This API might change or be removed with a future release.
+     * <p>
+     * Returns if the native Store was closed.
+     * <p>
+     * This is {@code true} shortly after {@link #close()} was called and {@link #isClosed()} returns {@code true}.
+     */
+    @Internal
+    public boolean isNativeStoreClosed() {
+        return handle == 0;
     }
 
     /**

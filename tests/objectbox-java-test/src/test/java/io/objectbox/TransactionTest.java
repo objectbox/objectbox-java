@@ -299,6 +299,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
         assertFalse(tx.isClosed());
         tx.close();
         assertTrue(tx.isClosed());
+        assertFalse(tx.isActive());
 
         // Double close should be fine
         tx.close();
@@ -312,7 +313,6 @@ public class TransactionTest extends AbstractObjectBoxTest {
         assertThrowsTxClosed(tx::renew);
         assertThrowsTxClosed(tx::createKeyValueCursor);
         assertThrowsTxClosed(() -> tx.createCursor(TestEntity.class));
-        assertThrowsTxClosed(tx::isActive);
         assertThrowsTxClosed(tx::isRecycled);
     }
 
