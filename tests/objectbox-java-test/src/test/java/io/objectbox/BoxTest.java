@@ -22,6 +22,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -85,6 +86,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertArrayEquals(new long[]{-valLong, valLong}, entity.getLongArray());
         assertArrayEquals(new float[]{-valFloat, valFloat}, entityRead.getFloatArray(), 0);
         assertArrayEquals(new double[]{-valDouble, valDouble}, entity.getDoubleArray(), 0);
+        assertEquals(new Date(1000 + simpleInt), entity.getDate());
     }
 
     // Note: There is a similar test using the Cursor API directly (which is deprecated) in CursorTest.
@@ -135,6 +137,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertNull(defaultEntity.getLongArray());
         assertNull(defaultEntity.getFloatArray());
         assertNull(defaultEntity.getDoubleArray());
+        assertNull(defaultEntity.getDate());
     }
 
     @Test

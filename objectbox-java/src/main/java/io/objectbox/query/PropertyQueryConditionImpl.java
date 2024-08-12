@@ -212,6 +212,15 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
             this.value = value;
         }
 
+        public LongArrayCondition(Property<T> property, Operation op, Date[] value) {
+            super(property);
+            this.op = op;
+            this.value = new long[value.length];
+            for (int i = 0; i < value.length; i++) {
+                this.value[i] = value[i].getTime();
+            }
+        }
+
         @Override
         void applyCondition(QueryBuilder<T> builder) {
             switch (op) {

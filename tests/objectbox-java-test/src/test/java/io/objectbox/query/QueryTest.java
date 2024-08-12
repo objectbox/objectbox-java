@@ -30,15 +30,12 @@ import io.objectbox.BoxStoreBuilder;
 import io.objectbox.TestEntity;
 import io.objectbox.TestEntity_;
 import io.objectbox.TestUtils;
-import io.objectbox.config.DebugFlags;
 import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.NonUniqueResultException;
 import io.objectbox.query.QueryBuilder.StringOrder;
-import io.objectbox.relation.MyObjectBox;
-import io.objectbox.relation.Order;
-import io.objectbox.relation.Order_;
 
 
+import static io.objectbox.TestEntity_.date;
 import static io.objectbox.TestEntity_.simpleBoolean;
 import static io.objectbox.TestEntity_.simpleByteArray;
 import static io.objectbox.TestEntity_.simpleFloat;
@@ -1253,29 +1250,84 @@ public class QueryTest extends AbstractQueryTest {
     }
 
     @Test
-    public void testDateParam() {
-        store.close();
-        assertTrue(store.deleteAllFiles());
-        store = MyObjectBox.builder().baseDirectory(boxStoreDir).debugFlags(DebugFlags.LOG_QUERY_PARAMETERS).build();
-
+    public void date_equal_and_setParameter_works() {
         Date now = new Date();
-        Order order = new Order();
-        order.setDate(now);
-        Box<Order> box = store.boxFor(Order.class);
-        box.put(order);
+        TestEntity entity = new TestEntity();
+        entity.setDate(now);
+        Box<TestEntity> box = store.boxFor(TestEntity.class);
+        box.put(entity);
 
-        Query<Order> query = box.query().equal(Order_.date, 0).build();
-        assertEquals(0, query.count());
-
-        query.setParameter(Order_.date, now);
-        assertEquals(1, query.count());
+        try (Query<TestEntity> query = box.query(TestEntity_.date.equal(0)).build()) {
+            assertEquals(0, query.count());
+            query.setParameter(TestEntity_.date, now);
+            assertEquals(1, query.count());
+        }
 
         // Again, but using alias
-        Query<Order> aliasQuery = box.query().equal(Order_.date, 0).parameterAlias("date").build();
-        assertEquals(0, aliasQuery.count());
+        try (Query<TestEntity> aliasQuery = box.query(TestEntity_.date.equal(0)).parameterAlias("date").build()) {
+            assertEquals(0, aliasQuery.count());
+            aliasQuery.setParameter("date", now);
+            assertEquals(1, aliasQuery.count());
+        }
+    }
 
-        aliasQuery.setParameter("date", now);
-        assertEquals(1, aliasQuery.count());
+    @Test
+    public void date_between_works() {
+        putTestEntitiesScalars();
+        try (Query<TestEntity> query = box.query(date.between(new Date(3002L), new Date(3008L))).build()) {
+            assertEquals(7, query.count());
+        }
+    }
+
+    @Test
+    public void date_lessAndGreater_works() {
+        putTestEntitiesScalars();
+        try (Query<TestEntity> query = box.query(date.less(new Date(3002L))).build()) {
+            assertEquals(2, query.count());
+        }
+        try (Query<TestEntity> query = box.query(date.lessOrEqual(new Date(3003L))).build()) {
+            assertEquals(4, query.count());
+        }
+        try (Query<TestEntity> query = box.query(date.greater(new Date(3008L))).build()) {
+            assertEquals(1, query.count());
+        }
+        try (Query<TestEntity> query = box.query(date.greaterOrEqual(new Date(3008L))).build()) {
+            assertEquals(2, query.count());
+        }
+    }
+
+    @Test
+    public void date_oneOf_works() {
+        putTestEntitiesScalars();
+        Date[] valuesDate = new Date[]{new Date(3002L), new Date(), new Date(0)};
+        try (Query<TestEntity> query = box.query(date.oneOf(valuesDate)).build()) {
+            assertEquals(1, query.count());
+        }
+        Date[] valuesDate2 = new Date[]{new Date()};
+        try (Query<TestEntity> query = box.query(date.oneOf(valuesDate2)).build()) {
+            assertEquals(0, query.count());
+        }
+        Date[] valuesDate3 = new Date[]{new Date(3002L), new Date(3009L)};
+        try (Query<TestEntity> query = box.query(date.oneOf(valuesDate3)).build()) {
+            assertEquals(2, query.count());
+        }
+    }
+
+    @Test
+    public void date_notOneOf_works() {
+        putTestEntitiesScalars();
+        Date[] valuesDate = new Date[]{new Date(3002L), new Date(), new Date(0)};
+        try (Query<TestEntity> query = box.query(date.notOneOf(valuesDate)).build()) {
+            assertEquals(9, query.count());
+        }
+        Date[] valuesDate2 = new Date[]{new Date()};
+        try (Query<TestEntity> query = box.query(date.notOneOf(valuesDate2)).build()) {
+            assertEquals(10, query.count());
+        }
+        Date[] valuesDate3 = new Date[]{new Date(3002L), new Date(3009L)};
+        try (Query<TestEntity> query = box.query(date.notOneOf(valuesDate3)).build()) {
+            assertEquals(8, query.count());
+        }
     }
 
     @Test
