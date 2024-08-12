@@ -111,12 +111,15 @@ tasks.withType<Test> {
     }
 
     testLogging {
-        showStandardStreams = true
         exceptionFormat = TestExceptionFormat.FULL
         displayGranularity = 2
+        // Note: this overwrites showStandardStreams = true, so set it by
+        // adding the standard out/error events.
         events = setOf(
             TestLogEvent.STARTED,
-            TestLogEvent.PASSED
+            TestLogEvent.PASSED,
+            TestLogEvent.STANDARD_OUT,
+            TestLogEvent.STANDARD_ERROR
         )
     }
 }
