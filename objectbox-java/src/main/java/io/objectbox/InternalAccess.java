@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,12 @@ import javax.annotation.Nullable;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.sync.SyncClient;
 
+/**
+ * This is a workaround to access internal APIs, notably for tests.
+ * <p>
+ * To avoid this, future APIs should be exposed via interfaces with an internal implementation that can be used by
+ * tests.
+ */
 @Internal
 public class InternalAccess {
 

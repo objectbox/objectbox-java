@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package io.objectbox;
 
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -27,13 +31,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.DbMaxReadersExceededException;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.function.ThrowingRunnable;
+import io.objectbox.query.InternalQueryAccess;
+import io.objectbox.query.Query;
+
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -44,6 +49,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 
 public class TransactionTest extends AbstractObjectBoxTest {
 
@@ -293,6 +299,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
         assertFalse(tx.isClosed());
         tx.close();
         assertTrue(tx.isClosed());
+        assertFalse(tx.isActive());
 
         // Double close should be fine
         tx.close();
@@ -306,13 +313,61 @@ public class TransactionTest extends AbstractObjectBoxTest {
         assertThrowsTxClosed(tx::renew);
         assertThrowsTxClosed(tx::createKeyValueCursor);
         assertThrowsTxClosed(() -> tx.createCursor(TestEntity.class));
-        assertThrowsTxClosed(tx::isActive);
         assertThrowsTxClosed(tx::isRecycled);
     }
 
     private void assertThrowsTxClosed(ThrowingRunnable runnable) {
         IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
         assertEquals("Transaction is closed", ex.getMessage());
+    }
+
+    @Test
+    public void nativeCallInTx_storeIsClosed_throws() throws InterruptedException {
+        // Ignore test on Windows, it was observed to crash with EXCEPTION_ACCESS_VIOLATION
+        assumeFalse(TestUtils.isWindows());
+
+        System.out.println("NOTE This test will cause \"Transaction is still active\" and \"Irrecoverable memory error\" error logs!");
+
+        CountDownLatch callableIsReady = new CountDownLatch(1);
+        CountDownLatch storeIsClosed = new CountDownLatch(1);
+        CountDownLatch callableIsDone = new CountDownLatch(1);
+        AtomicReference<Exception> callableException = new AtomicReference<>();
+
+        // Goal: be just passed closed checks on the Java side, about to call a native query API.
+        // Then close the Store, then call the native API. The native API call should not crash the VM.
+        Callable<Void> waitingCallable = () -> {
+            Box<TestEntity> box = store.boxFor(TestEntity.class);
+            Query<TestEntity> query = box.query().build();
+            // Obtain Cursor handle before closing the Store as getActiveTxCursor() has a closed check
+            long cursorHandle = io.objectbox.InternalAccess.getActiveTxCursorHandle(box);
+            
+            callableIsReady.countDown();
+            try {
+                if (!storeIsClosed.await(5, TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("Store did not close within 5 seconds");
+                }
+                // Call native query API within the transaction (opened by callInReadTx below)
+                InternalQueryAccess.nativeFindFirst(query, cursorHandle);
+                query.close();
+            } catch (Exception e) {
+                callableException.set(e);
+            }
+            callableIsDone.countDown();
+            return null;
+        };
+        new Thread(() -> store.callInReadTx(waitingCallable)).start();
+
+        callableIsReady.await();
+        store.close();
+        storeIsClosed.countDown();
+
+        if (!callableIsDone.await(10, TimeUnit.SECONDS)) {
+            fail("Callable did not finish within 10 seconds");
+        }
+        Exception exception = callableException.get();
+        assertTrue(exception instanceof IllegalStateException);
+        // Note: the "State" at the end of the message may be different depending on platform, so only assert prefix
+        assertTrue(exception.getMessage().startsWith("Illegal Store instance detected! This is a severe usage error that must be fixed."));
     }
 
     @Test
