@@ -14,9 +14,9 @@ plugins {
 
 buildscript {
     // To publish a release, typically, only edit those two:
-    val objectboxVersionNumber = "4.0.2" // without "-SNAPSHOT", e.g. "2.5.0" or "2.4.0-RC"
+    val objectboxVersionNumber = "4.0.3" // without "-SNAPSHOT", e.g. "2.5.0" or "2.4.0-RC"
     val objectboxVersionRelease =
-        true // set to true for releasing to ignore versionPostFix to avoid e.g. "-dev" versions
+        false // set to true for releasing to ignore versionPostFix to avoid e.g. "-dev" versions
 
     // version post fix: "-<value>" or "" if not defined; e.g. used by CI to pass in branch name
     val versionPostFixValue = project.findProperty("versionPostFix")
