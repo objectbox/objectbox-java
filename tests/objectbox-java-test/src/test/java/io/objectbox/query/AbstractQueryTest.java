@@ -60,6 +60,7 @@ public class AbstractQueryTest extends AbstractObjectBoxTest {
      * <li>longArray = [{-3000,3000}..{-3009,3009}]</li>
      * <li>floatArray = [{-400.0,400.0}..{-400.9,400.9}]</li>
      * <li>doubleArray = [{-2020.00,2020.00}..{-2020.09,2020.09}] (approximately)</li>
+     * <li>date = [Date(3000)..Date(3009)]</li>
      */
     public List<TestEntity> putTestEntitiesScalars() {
         return putTestEntities(10, null, 2000);

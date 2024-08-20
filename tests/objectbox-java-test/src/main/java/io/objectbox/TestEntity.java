@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package io.objectbox;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 /** In "real" entity would be annotated with @Entity. */
 public class TestEntity {
@@ -59,6 +61,7 @@ public class TestEntity {
     private long[] longArray;
     private float[] floatArray;
     private double[] doubleArray;
+    private Date date;
 
     transient boolean noArgsConstructorCalled;
 
@@ -92,7 +95,8 @@ public class TestEntity {
                       int[] intArray,
                       long[] longArray,
                       float[] floatArray,
-                      double[] doubleArray
+                      double[] doubleArray,
+                      Date date
     ) {
         this.id = id;
         this.simpleBoolean = simpleBoolean;
@@ -117,6 +121,7 @@ public class TestEntity {
         this.longArray = longArray;
         this.floatArray = floatArray;
         this.doubleArray = doubleArray;
+        this.date = date;
         if (STRING_VALUE_THROW_IN_CONSTRUCTOR.equals(simpleString)) {
             throw new RuntimeException(EXCEPTION_IN_CONSTRUCTOR_MESSAGE);
         }
@@ -324,6 +329,14 @@ public class TestEntity {
         this.doubleArray = doubleArray;
     }
 
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
     @Override
     public String toString() {
         return "TestEntity{" +
@@ -350,6 +363,7 @@ public class TestEntity {
                 ", longArray=" + Arrays.toString(longArray) +
                 ", floatArray=" + Arrays.toString(floatArray) +
                 ", doubleArray=" + Arrays.toString(doubleArray) +
+                ", date=" + date +
                 ", noArgsConstructorCalled=" + noArgsConstructorCalled +
                 '}';
     }

@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -299,7 +300,10 @@ public abstract class AbstractObjectBoxTest {
         entityBuilder.property("floatArray", PropertyType.FloatVector).id(TestEntity_.floatArray.id, ++lastUid);
         entityBuilder.property("doubleArray", PropertyType.DoubleVector).id(TestEntity_.doubleArray.id, ++lastUid);
 
-        int lastId = TestEntity_.doubleArray.id;
+        // Date property
+        entityBuilder.property("date", PropertyType.Date).id(TestEntity_.date.id, ++lastUid);
+
+        int lastId = TestEntity_.date.id;
         entityBuilder.lastPropertyId(lastId, lastUid);
         addOptionalFlagsToTestEntity(entityBuilder);
         entityBuilder.entityDone();
@@ -352,6 +356,7 @@ public abstract class AbstractObjectBoxTest {
         entity.setLongArray(new long[]{-entity.getSimpleLong(), entity.getSimpleLong()});
         entity.setFloatArray(new float[]{-entity.getSimpleFloat(), entity.getSimpleFloat()});
         entity.setDoubleArray(new double[]{-entity.getSimpleDouble(), entity.getSimpleDouble()});
+        entity.setDate(new Date(1000 + nr));
         return entity;
     }
 

@@ -354,6 +354,16 @@ public class Property<ENTITY> implements Serializable {
         return new LongCondition<>(this, LongCondition.Operation.LESS_OR_EQUAL, value);
     }
 
+    /** Creates an "IN (..., ..., ...)" condition for this property. */
+    public PropertyQueryCondition<ENTITY> oneOf(Date[] value) {
+        return new LongArrayCondition<>(this, LongArrayCondition.Operation.IN, value);
+    }
+
+    /** Creates a "NOT IN (..., ..., ...)" condition for this property. */
+    public PropertyQueryCondition<ENTITY> notOneOf(Date[] value) {
+        return new LongArrayCondition<>(this, LongArrayCondition.Operation.NOT_IN, value);
+    }
+
     /**
      * Creates a "BETWEEN ... AND ..." condition for this property.
      * Finds objects with property value between and including the first and second value.
