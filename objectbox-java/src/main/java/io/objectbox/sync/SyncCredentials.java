@@ -60,14 +60,13 @@ public class SyncCredentials {
     }
 
     public enum CredentialsType {
-        // Note: this needs to match with CredentialsType in Core.
 
-        NONE(1),
-        SHARED_SECRET(2),
-        GOOGLE(3),
-        SHARED_SECRET_SIPPED(4),
-        OBX_ADMIN_USER(5),
-        USER_PASSWORD(6);
+        NONE(io.objectbox.sync.CredentialsType.None),
+        SHARED_SECRET(io.objectbox.sync.CredentialsType.SharedSecret),
+        GOOGLE(io.objectbox.sync.CredentialsType.GoogleAuth),
+        SHARED_SECRET_SIPPED(io.objectbox.sync.CredentialsType.SharedSecretSipped),
+        OBX_ADMIN_USER(io.objectbox.sync.CredentialsType.ObxAdminUser),
+        USER_PASSWORD(io.objectbox.sync.CredentialsType.UserPassword);
 
         public final long id;
 
