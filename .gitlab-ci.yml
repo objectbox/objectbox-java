@@ -124,6 +124,7 @@ upload-to-internal:
   except:
     - tags # Only publish from branches.
     - schedules # Do not publish artifacts from scheduled jobs to save on disk space.
+    - main # Do not overwrite release artifacts.
   script:
     - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS publishMavenJavaPublicationToGitLabRepository
 
