@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,18 @@
 
 package io.objectbox.sync.server;
 
-import io.objectbox.annotation.apihint.Experimental;
-import io.objectbox.sync.SyncCredentials;
+import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.sync.SyncCredentialsToken;
 
-@Experimental
+/**
+ * Internal class to keep configuration for a cluster peer.
+ */
+@Internal
 class PeerInfo {
     String url;
-    SyncCredentials credentials;
+    SyncCredentialsToken credentials;
 
-    PeerInfo(String url, SyncCredentials credentials) {
+    PeerInfo(String url, SyncCredentialsToken credentials) {
         this.url = url;
         this.credentials = credentials;
     }

@@ -569,7 +569,7 @@ public class BoxStoreBuilder {
 
     byte[] buildFlatStoreOptions(String canonicalPath) {
         FlatBufferBuilder fbb = new FlatBufferBuilder();
-        // FlatBuffer default values are set in generated code, e.g. may be different from here, so always store value.
+        // Always put values, even if they match the default values (defined in the generated classes)
         fbb.forceDefaults(true);
 
         // Add non-integer values first...
