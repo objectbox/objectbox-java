@@ -18,6 +18,14 @@ buildscript {
     val objectboxVersionRelease =
         true // set to true for releasing to ignore versionPostFix to avoid e.g. "-dev" versions
 
+    // To avoid duplicate release artifacts on the internal repository,
+    // prevent uploading from branches other than publish, and main (for which uploading is turned off).
+    val isCI = System.getenv("CI") == "true"
+    val branchOrTag = System.getenv("CI_COMMIT_REF_NAME")
+    if (isCI && objectboxVersionRelease && !("publish" == branchOrTag || "main" == branchOrTag)) {
+        throw GradleException("objectboxVersionRelease = true is only allowed on branch publish or main")
+    }
+
     // version post fix: "-<value>" or "" if not defined; e.g. used by CI to pass in branch name
     val versionPostFixValue = project.findProperty("versionPostFix")
     val versionPostFix = if (versionPostFixValue != null) "-$versionPostFixValue" else ""
