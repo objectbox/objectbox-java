@@ -122,9 +122,10 @@ upload-to-internal:
   stage: upload-to-internal
   tags: [ docker, x64 ]
   except:
-    - tags # Only publish from branches.
-    - schedules # Do not publish artifacts from scheduled jobs to save on disk space.
-    - main # Do not overwrite release artifacts.
+    - main # Do not upload duplicate release artifacts
+    - pipelines # Do not upload artifacts if triggered by upstream project to save on disk space
+    - schedules # Do not upload artifacts from scheduled jobs to save on disk space
+    - tags # Only upload artifacts from branches
   script:
     - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS publishMavenJavaPublicationToGitLabRepository
 
