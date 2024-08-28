@@ -1,42 +1,49 @@
-apply plugin: 'java-library'
+plugins {
+    id("java-library")
+}
 
-// Note: use release flag instead of sourceCompatibility and targetCompatibility to ensure only JDK 8 API is used.
-// https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation
-tasks.withType(JavaCompile).configureEach {
+tasks.withType<JavaCompile> {
+    // Note: use release flag instead of sourceCompatibility and targetCompatibility to ensure only JDK 8 API is used.
+    // https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation
     options.release.set(8)
 }
 
 repositories {
     // Native lib might be deployed only in internal repo
-    if (project.hasProperty('gitlabUrl')) {
-        println "gitlabUrl=$gitlabUrl added to repositories."
+    if (project.hasProperty("gitlabUrl")) {
+        val gitlabUrl = project.property("gitlabUrl")
+        println("gitlabUrl=$gitlabUrl added to repositories.")
         maven {
-            url "$gitlabUrl/api/v4/groups/objectbox/-/packages/maven"
-            name "GitLab"
-            credentials(HttpHeaderCredentials) {
-                name = project.hasProperty("gitlabTokenName") ? gitlabTokenName : "Private-Token"
-                value = gitlabPrivateToken
+            url = uri("$gitlabUrl/api/v4/groups/objectbox/-/packages/maven")
+            name = "GitLab"
+            credentials(HttpHeaderCredentials::class) {
+                name = project.findProperty("gitlabTokenName")?.toString() ?: "Private-Token"
+                value = project.property("gitlabPrivateToken").toString()
             }
             authentication {
-                header(HttpHeaderAuthentication)
+                create<HttpHeaderAuthentication>("header")
             }
         }
     } else {
-        println "Property gitlabUrl not set."
+        println("Property gitlabUrl not set.")
     }
 }
 
+val obxJniLibVersion: String by rootProject.extra
+
+val junitVersion: String by rootProject.extra
+
 dependencies {
-    implementation project(':objectbox-java')
-    implementation project(':objectbox-java-api')
+    implementation(project(":objectbox-java"))
 
     // Check flag to use locally compiled version to avoid dependency cycles
-    if (!project.hasProperty('noObjectBoxTestDepencies') || !noObjectBoxTestDepencies) {
-        println "Using $obxJniLibVersion"
-        implementation obxJniLibVersion
+    if (!project.hasProperty("noObjectBoxTestDepencies")
+        || project.property("noObjectBoxTestDepencies") == false) {
+        println("Using $obxJniLibVersion")
+        implementation(obxJniLibVersion)
     } else {
-        println "Did NOT add native dependency"
+        println("Did NOT add native dependency")
     }
 
-    testImplementation "junit:junit:$junitVersion"
+    testImplementation("junit:junit:$junitVersion")
 }
