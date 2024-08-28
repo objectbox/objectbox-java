@@ -3,6 +3,7 @@
 image: objectboxio/buildenv-core:2023-07-28
 
 # Assumes these environment variables are configured in GitLab CI/CD Settings:
+# - OBX_READ_PACKAGES_TOKEN
 # - SONATYPE_USER
 # - SONATYPE_PWD
 # - GOOGLE_CHAT_WEBHOOK_JAVA_CI
@@ -18,8 +19,9 @@ variables:
   # Configure file.encoding to always use UTF-8 when running Gradle.
   # Use low priority processes to avoid Gradle builds consuming all build machine resources.
   GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dfile.encoding=UTF-8 -Dorg.gradle.priority=low"
-  GITLAB_REPO_ARGS: "-PgitlabUrl=$CI_SERVER_URL -PgitlabTokenName=Job-Token -PgitlabPrivateToken=$CI_JOB_TOKEN"
-  CENTRAL_REPO_ARGS: "-PsonatypeUsername=$SONATYPE_USER -PsonatypePassword=$SONATYPE_PWD"
+  GITLAB_REPO_ARGS: "-PgitlabUrl=$CI_SERVER_URL -PgitlabPrivateTokenName=Deploy-Token -PgitlabPrivateToken=$OBX_READ_PACKAGES_TOKEN"
+  GITLAB_PUBLISH_ARGS: "-PgitlabPublishTokenName=Job-Token -PgitlabPublishToken=$CI_JOB_TOKEN"
+  CENTRAL_PUBLISH_ARGS: "-PsonatypeUsername=$SONATYPE_USER -PsonatypePassword=$SONATYPE_PWD"
   # CI_COMMIT_REF_SLUG is the branch or tag name, but web-safe (only 0-9, a-z)
   VERSION_ARGS: "-PversionPostFix=$CI_COMMIT_REF_SLUG"
 
@@ -127,7 +129,7 @@ upload-to-internal:
     - schedules # Do not upload artifacts from scheduled jobs to save on disk space
     - tags # Only upload artifacts from branches
   script:
-    - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS publishMavenJavaPublicationToGitLabRepository
+    - ./gradlew $GITLAB_REPO_ARGS $GITLAB_PUBLISH_ARGS $VERSION_ARGS publishMavenJavaPublicationToGitLabRepository
 
 upload-to-central:
   stage: upload-to-central
@@ -138,7 +140,7 @@ upload-to-central:
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java library:* job $CI_JOB_NAME from branch $CI_COMMIT_BRANCH ($CI_COMMIT_SHORT_SHA)..."
   script:
     # Note: supply internal repo as tests use native dependencies that might not be published, yet.
-    - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS $CENTRAL_REPO_ARGS publishMavenJavaPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+    - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS $CENTRAL_PUBLISH_ARGS publishMavenJavaPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
   after_script:
     # Also runs on failure, so show CI_JOB_STATUS.
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java library:* *$CI_JOB_STATUS* for $CI_JOB_NAME"
