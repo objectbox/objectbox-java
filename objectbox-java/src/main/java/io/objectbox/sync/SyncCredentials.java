@@ -62,7 +62,6 @@ public class SyncCredentials {
     public enum CredentialsType {
 
         NONE(io.objectbox.sync.CredentialsType.None),
-        SHARED_SECRET(io.objectbox.sync.CredentialsType.SharedSecret),
         GOOGLE(io.objectbox.sync.CredentialsType.GoogleAuth),
         SHARED_SECRET_SIPPED(io.objectbox.sync.CredentialsType.SharedSecretSipped),
         OBX_ADMIN_USER(io.objectbox.sync.CredentialsType.ObxAdminUser),

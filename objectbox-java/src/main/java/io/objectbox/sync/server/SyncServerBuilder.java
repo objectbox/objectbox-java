@@ -204,13 +204,7 @@ public class SyncServerBuilder {
         }
 
         Credentials.startCredentials(fbb);
-        // TODO Will this still be necessary?
-        // The core API used by nativeSetAuthenticator only supports the NONE and SHARED_SECRET types
-        // (however, protocol v3 versions do also add SHARED_SECRET_SIPPED if SHARED_SECRET is given).
-        final SyncCredentials.CredentialsType type = tokenCredentials.getType() == SyncCredentials.CredentialsType.SHARED_SECRET_SIPPED
-                ? SyncCredentials.CredentialsType.SHARED_SECRET
-                : tokenCredentials.getType();
-        Credentials.addType(fbb, type.id);
+        Credentials.addType(fbb, tokenCredentials.getTypeId());
         if (tokenBytesOffset > 0) {
             Credentials.addBytes(fbb, tokenBytesOffset);
         }
