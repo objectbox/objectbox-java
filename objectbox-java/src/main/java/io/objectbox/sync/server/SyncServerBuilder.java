@@ -28,6 +28,7 @@ import io.objectbox.sync.Credentials;
 import io.objectbox.sync.Sync;
 import io.objectbox.sync.SyncCredentials;
 import io.objectbox.sync.SyncCredentialsToken;
+import io.objectbox.sync.SyncFlags;
 import io.objectbox.sync.listener.SyncChangeListener;
 
 /**
@@ -46,6 +47,11 @@ public class SyncServerBuilder {
     private @Nullable String clusterId;
     private final List<ClusterPeerInfo> clusterPeers = new ArrayList<>();
     private int clusterFlags;
+    private long historySizeMaxKb;
+    private long historySizeTargetKb;
+    private int syncFlags;
+    private int syncServerFlags;
+    private int workerThreads;
 
     /**
      * Use {@link Sync#server(BoxStore, String, SyncCredentials)} instead.
@@ -107,6 +113,9 @@ public class SyncServerBuilder {
      * Enables cluster mode (requires the Cluster feature) and associates this cluster peer with the given ID.
      * <p>
      * Cluster peers need to share the same ID to be in the same cluster.
+     *
+     * @see #clusterPeer(String, SyncCredentials)
+     * @see #clusterFlags(int)
      */
     public SyncServerBuilder clusterId(String id) {
         checkNotNull(id, "Cluster ID must not be null");
@@ -153,6 +162,65 @@ public class SyncServerBuilder {
      */
     public SyncServerBuilder clusterFlags(int flags) {
         this.clusterFlags = flags;
+        return this;
+    }
+
+    /**
+     * Sets the maximum transaction history size.
+     * <p>
+     * Once the maximum size is reached, old transaction logs are deleted to stay below this limit. This is sometimes
+     * also called "history pruning" in the context of Sync.
+     * <p>
+     * If not set or set to 0, defaults to no limit.
+     *
+     * @see #historySizeTargetKb(long)
+     */
+    public SyncServerBuilder historySizeMaxKb(long historySizeMaxKb) {
+        this.historySizeMaxKb = historySizeMaxKb;
+        return this;
+    }
+
+    /**
+     * Sets the target transaction history size.
+     * <p>
+     * Once the maximum size ({@link #historySizeMaxKb(long)}) is reached, old transaction logs are deleted until this
+     * size target is reached (lower than the maximum size). Using this target size typically lowers the frequency of
+     * history pruning and thus may improve efficiency.
+     * <p>
+     * If not set or set to 0, defaults to {@link #historySizeMaxKb(long)}.
+     */
+    public SyncServerBuilder historySizeTargetKb(long historySizeTargetKb) {
+        this.historySizeTargetKb = historySizeTargetKb;
+        return this;
+    }
+
+    /**
+     * Sets bit flags to adjust Sync behavior, like additional logging.
+     *
+     * @param syncFlags One or more of {@link SyncFlags}.
+     */
+    public SyncServerBuilder syncFlags(int syncFlags) {
+        this.syncFlags = syncFlags;
+        return this;
+    }
+
+    /**
+     * Sets bit flags to configure the Sync server.
+     *
+     * @param syncServerFlags One or more of {@link SyncServerFlags}.
+     */
+    public SyncServerBuilder syncServerFlags(int syncServerFlags) {
+        this.syncServerFlags = syncServerFlags;
+        return this;
+    }
+
+    /**
+     * Sets the number of workers for the main task pool.
+     * <p>
+     * If not set or set to 0, this uses a hardware-dependant default, e.g. 3 * CPU "cores".
+     */
+    public SyncServerBuilder workerThreads(int workerThreads) {
+        this.workerThreads = workerThreads;
         return this;
     }
 
@@ -209,21 +277,28 @@ public class SyncServerBuilder {
         int authenticationMethodsOffset = buildAuthenticationMethods(fbb);
         int clusterPeersVectorOffset = buildClusterPeers(fbb);
 
-        // TODO Support remaining options
         // After collecting all offsets, create options
         SyncServerOptions.startSyncServerOptions(fbb);
         SyncServerOptions.addUrl(fbb, urlOffset);
         SyncServerOptions.addAuthenticationMethods(fbb, authenticationMethodsOffset);
-//        SyncServerOptions.addSyncFlags();
-//        SyncServerOptions.addSyncServerFlags();
+        if (syncFlags > 0) {
+            SyncServerOptions.addSyncFlags(fbb, syncFlags);
+        }
+        if (syncServerFlags > 0) {
+            SyncServerOptions.addSyncFlags(fbb, syncServerFlags);
+        }
         if (certificatePathOffset > 0) {
             SyncServerOptions.addCertificatePath(fbb, certificatePathOffset);
         }
-//        SyncServerOptions.addWorkerThreads();
-//        SyncServerOptions.addHistorySizeMaxKb();
-//        SyncServerOptions.addHistorySizeTargetKb();
-//        SyncServerOptions.addAdminUrl();
-//        SyncServerOptions.addAdminThreads();
+        if (workerThreads > 0) {
+            SyncServerOptions.addWorkerThreads(fbb, workerThreads);
+        }
+        if (historySizeMaxKb > 0) {
+            SyncServerOptions.addHistorySizeMaxKb(fbb, historySizeMaxKb);
+        }
+        if (historySizeTargetKb > 0) {
+            SyncServerOptions.addHistorySizeTargetKb(fbb, historySizeTargetKb);
+        }
         if (clusterIdOffset > 0) {
             SyncServerOptions.addClusterId(fbb, clusterIdOffset);
         }
