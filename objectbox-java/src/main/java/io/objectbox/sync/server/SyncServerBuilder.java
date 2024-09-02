@@ -22,7 +22,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
-import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.sync.Credentials;
 import io.objectbox.sync.Sync;
@@ -35,7 +34,6 @@ import io.objectbox.sync.listener.SyncChangeListener;
  * Creates a {@link SyncServer} and allows to set additional configuration.
  */
 @SuppressWarnings({"unused", "UnusedReturnValue"})
-@Experimental
 public class SyncServerBuilder {
 
     final BoxStore boxStore;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.Closeable;
 
 import javax.annotation.Nullable;
 
-import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.Sync;
 import io.objectbox.sync.listener.SyncChangeListener;
 
@@ -28,7 +27,6 @@ import io.objectbox.sync.listener.SyncChangeListener;
  * ObjectBox sync server. Build a server with {@link Sync#server}.
  */
 @SuppressWarnings("unused")
-@Experimental
 public interface SyncServer extends Closeable {
 
     /**
