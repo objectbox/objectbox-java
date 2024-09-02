@@ -25,6 +25,7 @@ import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.sync.Credentials;
+import io.objectbox.sync.Sync;
 import io.objectbox.sync.SyncCredentials;
 import io.objectbox.sync.SyncCredentialsToken;
 import io.objectbox.sync.listener.SyncChangeListener;
@@ -46,6 +47,9 @@ public class SyncServerBuilder {
     private final List<ClusterPeerInfo> clusterPeers = new ArrayList<>();
     private int clusterFlags;
 
+    /**
+     * Use {@link Sync#server(BoxStore, String, SyncCredentials)} instead.
+     */
     public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(url, "Sync server URL is required.");

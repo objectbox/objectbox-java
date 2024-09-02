@@ -17,6 +17,7 @@
 package io.objectbox.sync;
 
 import io.objectbox.BoxStore;
+import io.objectbox.sync.server.SyncServer;
 import io.objectbox.sync.server.SyncServerBuilder;
 
 /**
@@ -50,12 +51,15 @@ public final class Sync {
     }
 
     /**
-     * Start building a sync server. Requires the BoxStore the server should use,
-     * the URL and port the server should bind to and authenticator credentials to authenticate clients.
-     * Additional authenticator credentials can be supplied using the builder.
-     * <p>
-     * For the embedded server, currently only {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none}
-     * are supported.
+     * Starts building a {@link SyncServer}. Once done, complete with {@link SyncServerBuilder#build() build()}.
+     *
+     * @param boxStore The {@link BoxStore} the server should use.
+     * @param url The URL of the Sync server on which the Sync protocol is exposed. This is typically a WebSockets URL
+     * starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
+     * {@code ws://0.0.0.0:9999}.
+     * @param authenticatorCredentials A list of enabled authentication methods available to Sync clients. Additional
+     * authenticator credentials can be supplied using the builder. For the embedded server, currently only
+     * {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none} are supported.
      */
     public static SyncServerBuilder server(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         return new SyncServerBuilder(boxStore, url, authenticatorCredentials);
