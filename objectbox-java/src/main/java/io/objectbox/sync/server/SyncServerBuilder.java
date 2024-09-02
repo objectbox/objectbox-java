@@ -39,10 +39,12 @@ public class SyncServerBuilder {
     final BoxStore boxStore;
     final String url;
     private final List<SyncCredentialsToken> credentials = new ArrayList<>();
-    final List<PeerInfo> peers = new ArrayList<>();
 
     private @Nullable String certificatePath;
     SyncChangeListener changeListener;
+    private @Nullable String clusterId;
+    private final List<ClusterPeerInfo> clusterPeers = new ArrayList<>();
+    private int clusterFlags;
 
     public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         checkNotNull(boxStore, "BoxStore is required.");
@@ -98,21 +100,55 @@ public class SyncServerBuilder {
     }
 
     /**
-     * Adds a server peer, to which this server should connect to as a client using {@link SyncCredentials#none()}.
+     * Enables cluster mode (requires the Cluster feature) and associates this cluster peer with the given ID.
+     * <p>
+     * Cluster peers need to share the same ID to be in the same cluster.
      */
-    public SyncServerBuilder peer(String url) {
-        return peer(url, SyncCredentials.none());
+    public SyncServerBuilder clusterId(String id) {
+        checkNotNull(id, "Cluster ID must not be null");
+        this.clusterId = id;
+        return this;
     }
 
     /**
-     * Adds a server peer, to which this server should connect to as a client using the given credentials.
+     * @deprecated Use {@link #clusterPeer(String, SyncCredentials) clusterPeer(url, SyncCredentials.none())} instead.
      */
+    @Deprecated
+    public SyncServerBuilder peer(String url) {
+        return clusterPeer(url, SyncCredentials.none());
+    }
+
+    /**
+     * @deprecated Use {@link #clusterPeer(String,SyncCredentials)} instead.
+     */
+    @Deprecated
     public SyncServerBuilder peer(String url, SyncCredentials credentials) {
+        return clusterPeer(url, credentials);
+    }
+
+    /**
+     * Adds a (remote) cluster peer, to which this server should connect to as a client using the given credentials.
+     * <p>
+     * To use this, must set a {@link #clusterId(String)}.
+     */
+    public SyncServerBuilder clusterPeer(String url, SyncCredentials credentials) {
         if (!(credentials instanceof SyncCredentialsToken)) {
             throw new IllegalArgumentException("Sync credentials of type " + credentials.getType()
                     + " are not supported");
         }
-        peers.add(new PeerInfo(url, (SyncCredentialsToken) credentials));
+        clusterPeers.add(new ClusterPeerInfo(url, (SyncCredentialsToken) credentials));
+        return this;
+    }
+
+    /**
+     * Sets bit flags to configure the cluster behavior of the Sync server (aka cluster peer).
+     * <p>
+     * To use this, must set a {@link #clusterId(String)}.
+     *
+     * @param flags One or more of {@link ClusterFlags}.
+     */
+    public SyncServerBuilder clusterFlags(int flags) {
+        this.clusterFlags = flags;
         return this;
     }
 
@@ -124,6 +160,9 @@ public class SyncServerBuilder {
     public SyncServer build() {
         if (credentials.isEmpty()) {
             throw new IllegalStateException("At least one authenticator is required.");
+        }
+        if (!clusterPeers.isEmpty() || clusterFlags != 0) {
+            checkNotNull(clusterId, "Cluster ID must be set to use cluster features.");
         }
         return new SyncServerImpl(this);
     }
@@ -159,6 +198,10 @@ public class SyncServerBuilder {
         if (certificatePath != null) {
             certificatePathOffset = fbb.createString(certificatePath);
         }
+        int clusterIdOffset = 0;
+        if (clusterId != null) {
+            clusterIdOffset = fbb.createString(clusterId);
+        }
         int authenticationMethodsOffset = buildAuthenticationMethods(fbb);
         int clusterPeersVectorOffset = buildClusterPeers(fbb);
 
@@ -177,11 +220,15 @@ public class SyncServerBuilder {
 //        SyncServerOptions.addHistorySizeTargetKb();
 //        SyncServerOptions.addAdminUrl();
 //        SyncServerOptions.addAdminThreads();
-//        SyncServerOptions.addClusterId();
+        if (clusterIdOffset > 0) {
+            SyncServerOptions.addClusterId(fbb, clusterIdOffset);
+        }
         if (clusterPeersVectorOffset > 0) {
             SyncServerOptions.addClusterPeers(fbb, clusterPeersVectorOffset);
         }
-//        SyncServerOptions.addClusterFlags();
+        if (clusterFlags > 0) {
+            SyncServerOptions.addClusterFlags(fbb, clusterFlags);
+        }
         int offset = SyncServerOptions.endSyncServerOptions(fbb);
         fbb.finish(offset);
 
@@ -216,13 +263,13 @@ public class SyncServerBuilder {
     }
 
     private int buildClusterPeers(FlatBufferBuilder fbb) {
-        if (peers.isEmpty()) {
+        if (clusterPeers.isEmpty()) {
             return 0;
         }
 
-        int[] peersOffsets = new int[peers.size()];
-        for (int i = 0; i < peers.size(); i++) {
-            PeerInfo peer = peers.get(i);
+        int[] peersOffsets = new int[clusterPeers.size()];
+        for (int i = 0; i < clusterPeers.size(); i++) {
+            ClusterPeerInfo peer = clusterPeers.get(i);
 
             int urlOffset = fbb.createString(peer.url);
             int credentialsOffset = buildCredentials(fbb, peer.credentials);
