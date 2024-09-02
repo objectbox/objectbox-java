@@ -279,31 +279,31 @@ public class SyncServerBuilder {
         SyncServerOptions.startSyncServerOptions(fbb);
         SyncServerOptions.addUrl(fbb, urlOffset);
         SyncServerOptions.addAuthenticationMethods(fbb, authenticationMethodsOffset);
-        if (syncFlags > 0) {
+        if (syncFlags != 0) {
             SyncServerOptions.addSyncFlags(fbb, syncFlags);
         }
-        if (syncServerFlags > 0) {
+        if (syncServerFlags != 0) {
             SyncServerOptions.addSyncFlags(fbb, syncServerFlags);
         }
-        if (certificatePathOffset > 0) {
+        if (certificatePathOffset != 0) {
             SyncServerOptions.addCertificatePath(fbb, certificatePathOffset);
         }
-        if (workerThreads > 0) {
+        if (workerThreads != 0) {
             SyncServerOptions.addWorkerThreads(fbb, workerThreads);
         }
-        if (historySizeMaxKb > 0) {
+        if (historySizeMaxKb != 0) {
             SyncServerOptions.addHistorySizeMaxKb(fbb, historySizeMaxKb);
         }
-        if (historySizeTargetKb > 0) {
+        if (historySizeTargetKb != 0) {
             SyncServerOptions.addHistorySizeTargetKb(fbb, historySizeTargetKb);
         }
-        if (clusterIdOffset > 0) {
+        if (clusterIdOffset != 0) {
             SyncServerOptions.addClusterId(fbb, clusterIdOffset);
         }
-        if (clusterPeersVectorOffset > 0) {
+        if (clusterPeersVectorOffset != 0) {
             SyncServerOptions.addClusterPeers(fbb, clusterPeersVectorOffset);
         }
-        if (clusterFlags > 0) {
+        if (clusterFlags != 0) {
             SyncServerOptions.addClusterFlags(fbb, clusterFlags);
         }
         int offset = SyncServerOptions.endSyncServerOptions(fbb);
@@ -329,7 +329,7 @@ public class SyncServerBuilder {
 
         Credentials.startCredentials(fbb);
         Credentials.addType(fbb, tokenCredentials.getTypeId());
-        if (tokenBytesOffset > 0) {
+        if (tokenBytesOffset != 0) {
             Credentials.addBytes(fbb, tokenBytesOffset);
         }
         int credentialsOffset = Credentials.endCredentials(fbb);
