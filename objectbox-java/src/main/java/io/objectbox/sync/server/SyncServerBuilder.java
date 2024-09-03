@@ -274,6 +274,14 @@ public class SyncServerBuilder {
         }
         int authenticationMethodsOffset = buildAuthenticationMethods(fbb);
         int clusterPeersVectorOffset = buildClusterPeers(fbb);
+        // Clear credentials immediately to make abuse less likely,
+        // but only after setting all options to allow re-using the same credentials object.
+        for (SyncCredentialsToken credential : credentials) {
+            credential.clear();
+        }
+        for (ClusterPeerInfo peer : clusterPeers) {
+            peer.credentials.clear();
+        }
 
         // After collecting all offsets, create options
         SyncServerOptions.startSyncServerOptions(fbb);
@@ -332,11 +340,7 @@ public class SyncServerBuilder {
         if (tokenBytesOffset != 0) {
             Credentials.addBytes(fbb, tokenBytesOffset);
         }
-        int credentialsOffset = Credentials.endCredentials(fbb);
-
-        tokenCredentials.clear(); // Clear immediately, not needed anymore.
-
-        return credentialsOffset;
+        return Credentials.endCredentials(fbb);
     }
 
     private int buildClusterPeers(FlatBufferBuilder fbb) {
