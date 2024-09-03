@@ -33,8 +33,11 @@ import io.objectbox.exception.DbFullException;
 import io.objectbox.exception.DbMaxDataSizeExceededException;
 
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -304,4 +307,33 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         putTestEntity(LONG_STRING, 3);
     }
 
+
+    @Test
+    public void testCreateClone() {
+        builder = createBoxStoreBuilder(null);
+        store = builder.build();
+        putTestEntity(LONG_STRING, 1);
+
+        BoxStoreBuilder clonedBuilder = builder.createClone("-cloned");
+        assertEquals(clonedBuilder.directory.getAbsolutePath(), boxStoreDir.getAbsolutePath() + "-cloned");
+
+        BoxStore clonedStore = clonedBuilder.build();
+        assertNotNull(clonedStore);
+        assertNotSame(store, clonedStore);
+        assertArrayEquals(store.getAllEntityTypeIds(), clonedStore.getAllEntityTypeIds());
+
+        Box<TestEntity> boxOriginal = store.boxFor(TestEntity.class);
+        assertEquals(1, boxOriginal.count());
+        Box<TestEntity> boxClone = clonedStore.boxFor(TestEntity.class);
+        assertEquals(0, boxClone.count());
+
+        boxClone.put(createTestEntity("I'm a clone", 2));
+        boxClone.put(createTestEntity("I'm a clone, too", 3));
+        assertEquals(2, boxClone.count());
+        assertEquals(1, boxOriginal.count());
+
+        store.close();
+        clonedStore.close();
+        clonedStore.deleteAllFiles();
+    }
 }

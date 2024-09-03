@@ -60,6 +60,10 @@ public class SyncClientImpl implements SyncClient {
     private volatile boolean started;
 
     SyncClientImpl(SyncBuilder builder) {
+        if (builder.url == null) {
+            throw new IllegalArgumentException("Sync client destination URL was not specified");
+        }
+
         this.boxStore = builder.boxStore;
         this.serverUrl = builder.url;
         this.connectivityMonitor = builder.platform.getConnectivityMonitor();

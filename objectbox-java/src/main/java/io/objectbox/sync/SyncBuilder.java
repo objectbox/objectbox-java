@@ -21,6 +21,7 @@ import java.util.Arrays;
 import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
+import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.sync.internal.Platform;
 import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.listener.SyncCompletedListener;
@@ -38,7 +39,7 @@ public class SyncBuilder {
 
     final Platform platform;
     final BoxStore boxStore;
-    final String url;
+    String url;
     final SyncCredentials credentials;
 
     @Nullable SyncLoginListener loginListener;
@@ -82,9 +83,9 @@ public class SyncBuilder {
         AUTO_NO_PUSHES
     }
 
-    public SyncBuilder(BoxStore boxStore, String url, SyncCredentials credentials) {
+    @Internal
+    public SyncBuilder(BoxStore boxStore, SyncCredentials credentials) {
         checkNotNull(boxStore, "BoxStore is required.");
-        checkNotNull(url, "Sync server URL is required.");
         checkNotNull(credentials, "Sync credentials are required.");
         if (!BoxStore.isSyncAvailable()) {
             throw new IllegalStateException(
@@ -93,8 +94,22 @@ public class SyncBuilder {
         }
         this.platform = Platform.findPlatform();
         this.boxStore = boxStore;
-        this.url = url;
         this.credentials = credentials;
+    }
+
+    public SyncBuilder(BoxStore boxStore, String url, SyncCredentials credentials) {
+        this(boxStore, credentials);
+        checkNotNull(url, "Sync server URL is required.");
+        this.url = url;
+    }
+
+    /**
+     * Internal URL setter for late assignment (used by {@link io.objectbox.sync.server.SyncHybridBuilder}).
+     */
+    @Internal
+    public SyncBuilder lateUrl(String url) {
+        this.url = url;
+        return this;
     }
 
     /**

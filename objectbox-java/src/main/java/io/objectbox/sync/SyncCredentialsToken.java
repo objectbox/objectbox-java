@@ -74,4 +74,15 @@ public final class SyncCredentialsToken extends SyncCredentials {
         this.token = null;
     }
 
+    @Override
+    public SyncCredentialsToken createClone() {
+        if (cleared) {
+            throw new IllegalStateException("Cannot clone: credentials already have been cleared");
+        }
+        if (token == null) {
+            return new SyncCredentialsToken(getType());
+        } else {
+            return new SyncCredentialsToken(getType(), Arrays.copyOf(token, token.length));
+        }
+    }
 }

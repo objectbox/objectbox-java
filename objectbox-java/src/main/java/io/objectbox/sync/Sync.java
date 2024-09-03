@@ -17,6 +17,8 @@
 package io.objectbox.sync;
 
 import io.objectbox.BoxStore;
+import io.objectbox.BoxStoreBuilder;
+import io.objectbox.sync.server.SyncHybridBuilder;
 import io.objectbox.sync.server.SyncServer;
 import io.objectbox.sync.server.SyncServerBuilder;
 
@@ -43,6 +45,13 @@ public final class Sync {
     }
 
     /**
+     * Returns true if the included native (JNI) ObjectBox library supports Sync hybrids (server & client).
+     */
+    public static boolean isHybridAvailable() {
+        return isAvailable() && isServerAvailable();
+    }
+
+    /**
      * Start building a sync client. Requires the BoxStore that should be synced with the server,
      * the URL and port of the server to connect to and credentials to authenticate against the server.
      */
@@ -65,6 +74,29 @@ public final class Sync {
      */
     public static SyncServerBuilder server(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         return new SyncServerBuilder(boxStore, url, authenticatorCredentials);
+    }
+
+    /**
+     * Starts building a {@link SyncHybridBuilder}, a client/server hybrid typically used for embedded cluster setups.
+     * <p/>
+     * Unlike {@link #client(BoxStore, String, SyncCredentials)} and {@link #server(BoxStore, String, SyncCredentials)},
+     * you cannot pass in an already built store. Instead, you must pass in the store builder.
+     * The store will be created internally when calling this method.
+     * <p/>
+     * As this is a hybrid, you can configure client and server aspects using the {@link SyncHybridBuilder}.
+     *
+     * @param storeBuilder the BoxStoreBuilder to use for building the main store.
+     * @param url The URL of the Sync server on which the Sync protocol is exposed. This is typically a WebSockets URL
+     * starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
+     * {@code ws://0.0.0.0:9999}.
+     * @param authenticatorCredentials A list of enabled authentication methods available to Sync clients. Additional
+     * authenticator credentials can be supplied using the builder. For the embedded server, currently only
+     * {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none} are supported.
+     * @return an instance of SyncHybridBuilder.
+     */
+    public static SyncHybridBuilder hybrid(BoxStoreBuilder storeBuilder, String url,
+                                           SyncCredentials authenticatorCredentials) {
+        return new SyncHybridBuilder(storeBuilder, url, authenticatorCredentials);
     }
 
     private Sync() {

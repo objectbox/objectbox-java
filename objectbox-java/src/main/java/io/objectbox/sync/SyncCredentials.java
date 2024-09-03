@@ -21,7 +21,7 @@ package io.objectbox.sync;
  * for example {@link #sharedSecret(String) SyncCredentials.sharedSecret("secret")}.
  */
 @SuppressWarnings("unused")
-public class SyncCredentials {
+public abstract class SyncCredentials {
 
     private final CredentialsType type;
 
@@ -85,5 +85,13 @@ public class SyncCredentials {
     public long getTypeId() {
         return type.id;
     }
+
+    /**
+     * Creates a copy of these credentials.
+     * <p>
+     * This can be useful to use the same credentials when creating multiple clients or a server in combination with a
+     * client as some credentials may get cleared when building a client or server.
+     */
+    public abstract SyncCredentials createClone();
 
 }

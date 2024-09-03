@@ -682,4 +682,43 @@ public class BoxStoreBuilder {
         BoxStore.setDefault(store);
         return store;
     }
+
+
+    @Internal
+    BoxStoreBuilder createClone(String namePostfix) {
+        if (model == null) {
+            throw new IllegalStateException("BoxStoreBuilder must have a model");
+        }
+        if (initialDbFileFactory != null) {
+            throw new IllegalStateException("Initial DB files factories are not supported for sync-enabled DBs");
+        }
+
+        BoxStoreBuilder clone = new BoxStoreBuilder(model);
+        // Note: don't use absolute path for directories; it messes with in-memory paths ("memory:")
+        clone.directory = this.directory != null ? new File(this.directory.getPath() + namePostfix) : null;
+        clone.baseDirectory = this.baseDirectory != null ? new File(this.baseDirectory.getPath()) : null;
+        clone.name = this.name != null ? name + namePostfix : null;
+        clone.inMemory = this.inMemory;
+        clone.maxSizeInKByte = this.maxSizeInKByte;
+        clone.maxDataSizeInKByte = this.maxDataSizeInKByte;
+        clone.context = this.context;
+        clone.relinker = this.relinker;
+        clone.debugFlags = this.debugFlags;
+        clone.debugRelations = this.debugRelations;
+        clone.fileMode = this.fileMode;
+        clone.maxReaders = this.maxReaders;
+        clone.noReaderThreadLocals = this.noReaderThreadLocals;
+        clone.queryAttempts = this.queryAttempts;
+        clone.skipReadSchema = this.skipReadSchema;
+        clone.readOnly = this.readOnly;
+        clone.usePreviousCommit = this.usePreviousCommit;
+        clone.validateOnOpenModePages = this.validateOnOpenModePages;
+        clone.validateOnOpenPageLimit = this.validateOnOpenPageLimit;
+        clone.validateOnOpenModeKv = this.validateOnOpenModeKv;
+
+        clone.initialDbFileFactory = this.initialDbFileFactory;
+        clone.entityInfoList.addAll(this.entityInfoList); // Entity info is stateless & immutable; shallow clone is OK
+
+        return clone;
+    }
 }

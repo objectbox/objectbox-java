@@ -78,4 +78,9 @@ public class InternalAccess {
         Transaction.TRACK_CREATION_STACK = true;
         Cursor.TRACK_CREATION_STACK = true;
     }
+
+    @Internal
+    public static BoxStoreBuilder clone(BoxStoreBuilder original, String namePostfix) {
+        return original.createClone(namePostfix);
+    }
 }

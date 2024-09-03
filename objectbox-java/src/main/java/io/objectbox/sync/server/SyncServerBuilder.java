@@ -281,7 +281,8 @@ public class SyncServerBuilder {
         int authenticationMethodsOffset = buildAuthenticationMethods(fbb);
         int clusterPeersVectorOffset = buildClusterPeers(fbb);
         // Clear credentials immediately to make abuse less likely,
-        // but only after setting all options to allow re-using the same credentials object.
+        // but only after setting all options to allow (re-)using the same credentials object
+        // for authentication and cluster peers login credentials.
         for (SyncCredentialsToken credential : credentials) {
             credential.clear();
         }
