@@ -52,6 +52,8 @@ public final class Sync {
 
     /**
      * Starts building a {@link SyncServer}. Once done, complete with {@link SyncServerBuilder#build() build()}.
+     * <p>
+     * Note: when also using Admin, make sure it is started before the server.
      *
      * @param boxStore The {@link BoxStore} the server should use.
      * @param url The URL of the Sync server on which the Sync protocol is exposed. This is typically a WebSockets URL
