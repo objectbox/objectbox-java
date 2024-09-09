@@ -16,6 +16,8 @@
 
 package io.objectbox.sync.server;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +39,7 @@ import io.objectbox.sync.listener.SyncChangeListener;
 public class SyncServerBuilder {
 
     final BoxStore boxStore;
-    final String url;
+    final URI url;
     private final List<SyncCredentialsToken> credentials = new ArrayList<>();
 
     private @Nullable String certificatePath;
@@ -64,7 +66,11 @@ public class SyncServerBuilder {
                             "Please visit https://objectbox.io/sync/ for options.");
         }
         this.boxStore = boxStore;
-        this.url = url;
+        try {
+            this.url = new URI(url);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Sync server URL is invalid: " + url, e);
+        }
         authenticatorCredentials(authenticatorCredentials);
     }
 
@@ -263,7 +269,7 @@ public class SyncServerBuilder {
         fbb.forceDefaults(true);
 
         // Serialize non-integer values first to get their offset
-        int urlOffset = fbb.createString(url);
+        int urlOffset = fbb.createString(url.toString());
         int certificatePathOffset = 0;
         if (certificatePath != null) {
             certificatePathOffset = fbb.createString(certificatePath);

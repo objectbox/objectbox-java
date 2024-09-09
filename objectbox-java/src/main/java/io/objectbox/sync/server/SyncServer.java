@@ -30,12 +30,15 @@ import io.objectbox.sync.listener.SyncChangeListener;
 public interface SyncServer extends Closeable {
 
     /**
-     * Gets the URL the server is running at.
+     * Returns the URL this server is listening on, including the bound port (see {@link #getPort()}).
      */
     String getUrl();
 
     /**
-     * Gets the port the server has bound to.
+     * Returns the port this server listens on, or 0 if the server was not yet started.
+     * <p>
+     * This is especially useful if the port was assigned arbitrarily (a "0" port was used in the URL when building the
+     * server).
      */
     int getPort();
 

@@ -16,6 +16,9 @@
 
 package io.objectbox.sync.server;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import javax.annotation.Nullable;
 
 import io.objectbox.annotation.apihint.Internal;
@@ -28,7 +31,7 @@ import io.objectbox.sync.listener.SyncChangeListener;
 @Internal
 public class SyncServerImpl implements SyncServer {
 
-    private final String url;
+    private final URI url;
     private volatile long handle;
 
     /**
@@ -63,7 +66,11 @@ public class SyncServerImpl implements SyncServer {
 
     @Override
     public String getUrl() {
-        return url;
+        try {
+            return new URI(url.getScheme(), null, url.getHost(), getPort(), null, null, null).toString();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Server URL can not be constructed", e);
+        }
     }
 
     @Override
