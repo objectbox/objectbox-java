@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.Closeable;
 
 import javax.annotation.Nullable;
 
-import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.Sync;
 import io.objectbox.sync.listener.SyncChangeListener;
 
@@ -28,16 +27,18 @@ import io.objectbox.sync.listener.SyncChangeListener;
  * ObjectBox sync server. Build a server with {@link Sync#server}.
  */
 @SuppressWarnings("unused")
-@Experimental
 public interface SyncServer extends Closeable {
 
     /**
-     * Gets the URL the server is running at.
+     * Returns the URL this server is listening on, including the bound port (see {@link #getPort()}).
      */
     String getUrl();
 
     /**
-     * Gets the port the server has bound to.
+     * Returns the port this server listens on, or 0 if the server was not yet started.
+     * <p>
+     * This is especially useful if the port was assigned arbitrarily (a "0" port was used in the URL when building the
+     * server).
      */
     int getPort();
 

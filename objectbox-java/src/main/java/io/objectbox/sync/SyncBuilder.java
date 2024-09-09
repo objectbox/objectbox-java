@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Arrays;
 import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
-import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.internal.Platform;
 import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.listener.SyncCompletedListener;
@@ -34,7 +33,6 @@ import io.objectbox.sync.listener.SyncTimeListener;
  * A builder to create a {@link SyncClient}; the builder itself should be created via
  * {@link Sync#client(BoxStore, String, SyncCredentials)}.
  */
-@Experimental
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class SyncBuilder {
 

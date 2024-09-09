@@ -16,12 +16,12 @@
 
 package io.objectbox.sync.server;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import javax.annotation.Nullable;
 
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.sync.SyncCredentials;
-import io.objectbox.sync.SyncCredentials.CredentialsType;
-import io.objectbox.sync.SyncCredentialsToken;
 import io.objectbox.sync.listener.SyncChangeListener;
 
 /**
@@ -31,9 +31,13 @@ import io.objectbox.sync.listener.SyncChangeListener;
 @Internal
 public class SyncServerImpl implements SyncServer {
 
-    private final String url;
+    private final URI url;
     private volatile long handle;
 
+    /**
+     * Protects listener instance from garbage collection.
+     */
+    @SuppressWarnings("unused")
     @Nullable
     private volatile SyncChangeListener syncChangeListener;
 
@@ -41,30 +45,11 @@ public class SyncServerImpl implements SyncServer {
         this.url = builder.url;
 
         long storeHandle = builder.boxStore.getNativeStore();
-        long handle = nativeCreate(storeHandle, url, builder.certificatePath);
+        long handle = nativeCreateFromFlatOptions(storeHandle, builder.buildSyncServerOptions());
         if (handle == 0) {
             throw new RuntimeException("Failed to create sync server: handle is zero.");
         }
         this.handle = handle;
-
-        for (SyncCredentials credentials : builder.credentials) {
-            if (!(credentials instanceof SyncCredentialsToken)) {
-                throw new IllegalArgumentException("Sync credentials of type " + credentials.getType() + " are not supported");
-            }
-            SyncCredentialsToken credentialsInternal = (SyncCredentialsToken) credentials;
-            // The core API used by nativeSetAuthenticator only supports the NONE and SHARED_SECRET types
-            // (however, protocol v3 versions do also add SHARED_SECRET_SIPPED if SHARED_SECRET is given).
-            final CredentialsType type = credentialsInternal.getType() == CredentialsType.SHARED_SECRET_SIPPED
-                    ? CredentialsType.SHARED_SECRET
-                    : credentialsInternal.getType();
-            nativeSetAuthenticator(handle, type.id, credentialsInternal.getTokenBytes());
-            credentialsInternal.clear(); // Clear immediately, not needed anymore.
-        }
-
-        for (PeerInfo peer : builder.peers) {
-            SyncCredentialsToken credentialsInternal = (SyncCredentialsToken) peer.credentials;
-            nativeAddPeer(handle, peer.url, credentialsInternal.getTypeId(), credentialsInternal.getTokenBytes());
-        }
 
         if (builder.changeListener != null) {
             setSyncChangeListener(builder.changeListener);
@@ -81,7 +66,11 @@ public class SyncServerImpl implements SyncServer {
 
     @Override
     public String getUrl() {
-        return url;
+        try {
+            return new URI(url.getScheme(), null, url.getHost(), getPort(), null, null, null).toString();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Server URL can not be constructed", e);
+        }
     }
 
     @Override
@@ -134,7 +123,12 @@ public class SyncServerImpl implements SyncServer {
         super.finalize();
     }
 
-    private static native long nativeCreate(long storeHandle, String uri, @Nullable String certificatePath);
+    /**
+     * Creates a native Sync server instance with FlatBuffer {@link SyncServerOptions} {@code flatOptionsByteArray}.
+     *
+     * @return The handle of the native server instance.
+     */
+    private static native long nativeCreateFromFlatOptions(long storeHandle, byte[] flatOptionsByteArray);
 
     private native void nativeDelete(long handle);
 
