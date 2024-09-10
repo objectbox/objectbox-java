@@ -1,13 +1,31 @@
+/*
+ * Copyright 2020-2024 ObjectBox Ltd. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.objectbox.converter;
 
 import org.junit.Test;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
+
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -37,6 +55,7 @@ public class FlexMapConverterTest {
         map.put("long", 1L);
         map.put("float", 1.3f);
         map.put("double", -1.4d);
+        map.put("null", null);
         Map<String, Object> restoredMap = convertAndBack(map, converter);
         // Java integers are returned as Long if one value is larger than 32 bits, so expect Long.
         map.put("byte", 1L);
@@ -158,10 +177,12 @@ public class FlexMapConverterTest {
         Map<String, String> embeddedMap1 = new HashMap<>();
         embeddedMap1.put("Hello1", "Grüezi1");
         embeddedMap1.put("💡1", "Idea1");
+        embeddedMap1.put("null1", null);
         map.put("Hello", embeddedMap1);
         Map<String, String> embeddedMap2 = new HashMap<>();
         embeddedMap2.put("Hello2", "Grüezi2");
         embeddedMap2.put("💡2", "Idea2");
+        embeddedMap2.put("null2", null);
         map.put("💡", embeddedMap2);
         convertAndBackThenAssert(map, converter);
     }
@@ -181,6 +202,7 @@ public class FlexMapConverterTest {
         embeddedList1.add(-2L);
         embeddedList1.add(1.3f);
         embeddedList1.add(-1.4d);
+        embeddedList1.add(null);
         map.put("Hello", embeddedList1);
         List<Object> embeddedList2 = new LinkedList<>();
         embeddedList2.add("Grüezi");
@@ -213,17 +235,12 @@ public class FlexMapConverterTest {
     }
 
     @Test
-    public void nullKeyOrValue_throws() {
+    public void nullKey_throws() {
         FlexObjectConverter converter = new StringFlexMapConverter();
         Map<String, String> map = new HashMap<>();
 
-        map.put("Hello", null);
-        convertThenAssertThrows(map, converter, "Map keys or values must not be null");
-
-        map.clear();
-
         map.put(null, "Idea");
-        convertThenAssertThrows(map, converter, "Map keys or values must not be null");
+        convertThenAssertThrows(map, converter, "Map keys must not be null");
     }
 
     @Test
