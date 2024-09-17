@@ -19,17 +19,12 @@ package io.objectbox.query;
 import io.objectbox.annotation.apihint.Internal;
 
 /**
- * This is a workaround to access internal APIs for tests.
- * <p>
- * To avoid this, future APIs should be exposed via interfaces with an internal implementation that can be used by
- * tests.
+ * Exposes internal APIs to tests and code in other packages.
  */
 @Internal
-public class InternalQueryAccess {
+public class InternalAccess {
 
-    /**
-     * For testing only.
-     */
+    @Internal
     public static <T> void nativeFindFirst(Query<T> query, long cursorHandle) {
         query.nativeFindFirst(query.handle, cursorHandle);
     }

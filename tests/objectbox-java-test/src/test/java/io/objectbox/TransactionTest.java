@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.DbMaxReadersExceededException;
-import io.objectbox.query.InternalQueryAccess;
 import io.objectbox.query.Query;
 
 
@@ -339,7 +338,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
             Box<TestEntity> box = store.boxFor(TestEntity.class);
             Query<TestEntity> query = box.query().build();
             // Obtain Cursor handle before closing the Store as getActiveTxCursor() has a closed check
-            long cursorHandle = io.objectbox.InternalAccess.getActiveTxCursorHandle(box);
+            long cursorHandle = InternalAccess.getActiveTxCursorHandle(box);
             
             callableIsReady.countDown();
             try {
@@ -347,7 +346,7 @@ public class TransactionTest extends AbstractObjectBoxTest {
                     throw new IllegalStateException("Store did not close within 5 seconds");
                 }
                 // Call native query API within the transaction (opened by callInReadTx below)
-                InternalQueryAccess.nativeFindFirst(query, cursorHandle);
+                io.objectbox.query.InternalAccess.nativeFindFirst(query, cursorHandle);
                 query.close();
             } catch (Exception e) {
                 callableException.set(e);

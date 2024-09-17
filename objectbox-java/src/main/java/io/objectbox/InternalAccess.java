@@ -22,14 +22,12 @@ import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.sync.SyncClient;
 
 /**
- * This is a workaround to access internal APIs, notably for tests.
- * <p>
- * To avoid this, future APIs should be exposed via interfaces with an internal implementation that can be used by
- * tests.
+ * Exposes internal APIs to tests and code in other packages.
  */
 @Internal
 public class InternalAccess {
 
+    @Internal
     public static Transaction getActiveTx(BoxStore boxStore) {
         Transaction tx = boxStore.activeTx.get();
         if (tx == null) {
@@ -39,31 +37,43 @@ public class InternalAccess {
         return tx;
     }
 
+    @Internal
     public static long getHandle(Transaction tx) {
         return tx.internalHandle();
     }
 
+    @Internal
     public static void setSyncClient(BoxStore boxStore, @Nullable SyncClient syncClient) {
         boxStore.setSyncClient(syncClient);
     }
 
+    @Internal
     public static <T> Cursor<T> getWriter(Box<T> box) {
         return box.getWriter();
     }
 
+    @Internal
     public static <T> Cursor<T> getActiveTxCursor(Box<T> box) {
         return box.getActiveTxCursor();
     }
 
+    @Internal
     public static <T> long getActiveTxCursorHandle(Box<T> box) {
         return box.getActiveTxCursor().internalHandle();
     }
 
+    @Internal
     public static <T> void commitWriter(Box<T> box, Cursor<T> writer) {
         box.commitWriter(writer);
     }
 
-    /** Makes creation more expensive, but lets Finalizers show the creation stack for dangling resources. */
+    /**
+     * Makes creation more expensive, but lets Finalizers show the creation stack for dangling resources.
+     * <p>
+     * Currently used by integration tests.
+     */
+    @SuppressWarnings("unused")
+    @Internal
     public static void enableCreationStackTracking() {
         Transaction.TRACK_CREATION_STACK = true;
         Cursor.TRACK_CREATION_STACK = true;
