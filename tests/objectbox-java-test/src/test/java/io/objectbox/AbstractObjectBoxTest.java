@@ -362,9 +362,9 @@ public abstract class AbstractObjectBoxTest {
 
     protected TestEntity putTestEntity(@Nullable String simpleString, int nr) {
         TestEntity entity = createTestEntity(simpleString, nr);
-        long key = getTestEntityBox().put(entity);
-        assertTrue(key != 0);
-        assertEquals(key, entity.getId());
+        long id = getTestEntityBox().put(entity);
+        assertTrue(id != 0);
+        assertEquals(id, entity.getId());
         return entity;
     }
 
