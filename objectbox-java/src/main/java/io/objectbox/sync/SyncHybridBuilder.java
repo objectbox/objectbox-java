@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package io.objectbox.sync.server;
+package io.objectbox.sync;
 
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
 import io.objectbox.InternalAccess;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.sync.Sync;
-import io.objectbox.sync.SyncBuilder;
-import io.objectbox.sync.SyncClient;
-import io.objectbox.sync.SyncCredentials;
+import io.objectbox.sync.server.SyncServer;
+import io.objectbox.sync.server.SyncServerBuilder;
 
 /**
  * Allows to configure the client and server setup to build a {@link SyncHybrid}.
@@ -42,7 +40,7 @@ public final class SyncHybridBuilder {
      * Internal API; use {@link Sync#hybrid(BoxStoreBuilder, String, SyncCredentials)} instead.
      */
     @Internal
-    public SyncHybridBuilder(BoxStoreBuilder storeBuilder, String url, SyncCredentials authenticatorCredentials) {
+    SyncHybridBuilder(BoxStoreBuilder storeBuilder, String url, SyncCredentials authenticatorCredentials) {
         BoxStoreBuilder storeBuilderServer = InternalAccess.clone(storeBuilder, "-server");
         boxStore = storeBuilder.build();
         boxStoreServer = storeBuilderServer.build();
@@ -74,8 +72,9 @@ public final class SyncHybridBuilder {
         // Build and start the server first, we may need to get a  port for the client
         SyncServer server = serverBuilder.buildAndStart();
 
-        clientBuilder.lateUrl(server.getUrl());
-        SyncClient client = clientBuilder.buildAndStart();
+        SyncClient client = clientBuilder
+                .serverUrl(server.getUrl())
+                .buildAndStart();
 
         return new SyncHybrid(boxStore, client, boxStoreServer, server);
     }

@@ -43,7 +43,7 @@ public final class SyncCredentialsUserPassword extends SyncCredentials {
     }
 
     @Override
-    public SyncCredentials createClone() {
+    SyncCredentials createClone() {
         return new SyncCredentialsUserPassword(this.username, this.password);
     }
 }

@@ -97,6 +97,7 @@ public class SyncBuilder {
         this.credentials = credentials;
     }
 
+    @Internal
     public SyncBuilder(BoxStore boxStore, String url, SyncCredentials credentials) {
         this(boxStore, credentials);
         checkNotNull(url, "Sync server URL is required.");
@@ -104,10 +105,10 @@ public class SyncBuilder {
     }
 
     /**
-     * Internal URL setter for late assignment (used by {@link io.objectbox.sync.server.SyncHybridBuilder}).
+     * Allows internal code to set the Sync server URL after creating this builder.
      */
     @Internal
-    public SyncBuilder lateUrl(String url) {
+    SyncBuilder serverUrl(String url) {
         this.url = url;
         return this;
     }
@@ -220,6 +221,7 @@ public class SyncBuilder {
         if (boxStore.getSyncClient() != null) {
             throw new IllegalStateException("The given store is already associated with a Sync client, close it first.");
         }
+        checkNotNull(url, "Sync Server URL is required.");
         return new SyncClientImpl(this);
     }
 

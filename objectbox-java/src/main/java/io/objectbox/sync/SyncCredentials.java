@@ -92,6 +92,6 @@ public abstract class SyncCredentials {
      * This can be useful to use the same credentials when creating multiple clients or a server in combination with a
      * client as some credentials may get cleared when building a client or server.
      */
-    public abstract SyncCredentials createClone();
+    abstract SyncCredentials createClone();
 
 }

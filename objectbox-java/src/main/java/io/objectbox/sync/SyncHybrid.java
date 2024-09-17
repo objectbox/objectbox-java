@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.objectbox.sync.server;
+package io.objectbox.sync;
 
 import java.io.Closeable;
 
 import io.objectbox.BoxStore;
-import io.objectbox.sync.SyncClient;
+import io.objectbox.sync.server.SyncServer;
 
 /**
  * The SyncHybrid combines the functionality of a Sync Client and a Sync Server.
@@ -36,7 +36,7 @@ public final class SyncHybrid implements Closeable {
     private BoxStore storeServer;
     private final SyncServer server;
 
-    public SyncHybrid(BoxStore store, SyncClient client, BoxStore storeServer, SyncServer server) {
+    SyncHybrid(BoxStore store, SyncClient client, BoxStore storeServer, SyncServer server) {
         this.store = store;
         this.client = client;
         this.storeServer = storeServer;

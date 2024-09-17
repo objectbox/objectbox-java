@@ -75,7 +75,7 @@ public final class SyncCredentialsToken extends SyncCredentials {
     }
 
     @Override
-    public SyncCredentialsToken createClone() {
+    SyncCredentialsToken createClone() {
         if (cleared) {
             throw new IllegalStateException("Cannot clone: credentials already have been cleared");
         }

@@ -18,7 +18,6 @@ package io.objectbox.sync;
 
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
-import io.objectbox.sync.server.SyncHybridBuilder;
 import io.objectbox.sync.server.SyncServer;
 import io.objectbox.sync.server.SyncServerBuilder;
 
