@@ -62,8 +62,11 @@ public final class SyncCredentialsToken extends SyncCredentials {
     /**
      * Clear after usage.
      * <p>
-     * Note that actual data is not removed from memory until the next garbage collector run.
-     * Anyhow, the credentials are still kept in memory by the native component.
+     * Note that when the token is passed as a String, that String is removed from memory at the earliest with the next
+     * garbage collector run.
+     * <p>
+     * Also note that while the token is removed from the Java heap, it is present on the native heap of the Sync
+     * component using it.
      */
     public void clear() {
         cleared = true;
