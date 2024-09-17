@@ -37,7 +37,7 @@ import io.objectbox.sync.listener.SyncChangeListener;
  * Creates a {@link SyncServer} and allows to set additional configuration.
  */
 @SuppressWarnings({"unused", "UnusedReturnValue"})
-public class SyncServerBuilder {
+public final class SyncServerBuilder {
 
     final BoxStore boxStore;
     final URI url;

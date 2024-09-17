@@ -35,7 +35,7 @@ import io.objectbox.sync.listener.SyncTimeListener;
  * {@link Sync#client(BoxStore, String, SyncCredentials)}.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class SyncBuilder {
+public final class SyncBuilder {
 
     final Platform platform;
     final BoxStore boxStore;

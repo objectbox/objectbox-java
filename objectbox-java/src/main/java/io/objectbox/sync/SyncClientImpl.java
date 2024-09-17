@@ -38,7 +38,7 @@ import io.objectbox.sync.listener.SyncTimeListener;
  * this class may change without notice.
  */
 @Internal
-public class SyncClientImpl implements SyncClient {
+public final class SyncClientImpl implements SyncClient {
 
     @Nullable
     private BoxStore boxStore;

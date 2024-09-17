@@ -29,7 +29,7 @@ import io.objectbox.sync.listener.SyncChangeListener;
  * this class may change without notice.
  */
 @Internal
-public class SyncServerImpl implements SyncServer {
+public final class SyncServerImpl implements SyncServer {
 
     private final URI url;
     private volatile long handle;
