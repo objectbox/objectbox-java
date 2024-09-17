@@ -25,7 +25,6 @@ repositories {
     // Native lib might be deployed only in internal repo
     if (project.hasProperty("gitlabUrl")) {
         val gitlabUrl = project.property("gitlabUrl")
-        println("gitlabUrl=$gitlabUrl added to repositories.")
         maven {
             url = uri("$gitlabUrl/api/v4/groups/objectbox/-/packages/maven")
             name = "GitLab"
@@ -36,9 +35,10 @@ repositories {
             authentication {
                 create<HttpHeaderAuthentication>("header")
             }
+            println("Dependencies: added GitLab repository $url")
         }
     } else {
-        println("Property gitlabUrl not set.")
+        println("Dependencies: GitLab repository not added. To resolve dependencies from the GitLab Package Repository, set gitlabUrl and gitlabPrivateToken.")
     }
 }
 

@@ -99,11 +99,11 @@ configure<io.github.gradlenexus.publishplugin.NexusPublishExtension> {
     this.repositories {
         sonatype {
             if (project.hasProperty("sonatypeUsername") && project.hasProperty("sonatypePassword")) {
-                println("nexusPublishing credentials supplied.")
                 username.set(project.property("sonatypeUsername").toString())
                 password.set(project.property("sonatypePassword").toString())
+                println("Publishing: configured Maven Central repository")
             } else {
-                println("nexusPublishing credentials NOT supplied.")
+                println("Publishing: Maven Central repository not configured")
             }
         }
     }
