@@ -140,10 +140,6 @@ public final class SyncServerImpl implements SyncServer {
 
     private native int nativeGetPort(long handle);
 
-    private native void nativeSetAuthenticator(long handle, long credentialsType, @Nullable byte[] credentials);
-
-    private native void nativeAddPeer(long handle, String uri, long credentialsType, @Nullable byte[] credentials);
-
     private native String nativeGetStatsString(long handle);
 
     private native void nativeSetSyncChangesListener(long handle, @Nullable SyncChangeListener changesListener);
