@@ -21,6 +21,7 @@ import java.util.Arrays;
 import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
+import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.sync.internal.Platform;
 import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.listener.SyncCompletedListener;
@@ -34,11 +35,11 @@ import io.objectbox.sync.listener.SyncTimeListener;
  * {@link Sync#client(BoxStore, String, SyncCredentials)}.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class SyncBuilder {
+public final class SyncBuilder {
 
     final Platform platform;
     final BoxStore boxStore;
-    final String url;
+    String url;
     final SyncCredentials credentials;
 
     @Nullable SyncLoginListener loginListener;
@@ -82,9 +83,9 @@ public class SyncBuilder {
         AUTO_NO_PUSHES
     }
 
-    public SyncBuilder(BoxStore boxStore, String url, SyncCredentials credentials) {
+    @Internal
+    public SyncBuilder(BoxStore boxStore, SyncCredentials credentials) {
         checkNotNull(boxStore, "BoxStore is required.");
-        checkNotNull(url, "Sync server URL is required.");
         checkNotNull(credentials, "Sync credentials are required.");
         if (!BoxStore.isSyncAvailable()) {
             throw new IllegalStateException(
@@ -93,8 +94,23 @@ public class SyncBuilder {
         }
         this.platform = Platform.findPlatform();
         this.boxStore = boxStore;
-        this.url = url;
         this.credentials = credentials;
+    }
+
+    @Internal
+    public SyncBuilder(BoxStore boxStore, String url, SyncCredentials credentials) {
+        this(boxStore, credentials);
+        checkNotNull(url, "Sync server URL is required.");
+        this.url = url;
+    }
+
+    /**
+     * Allows internal code to set the Sync server URL after creating this builder.
+     */
+    @Internal
+    SyncBuilder serverUrl(String url) {
+        this.url = url;
+        return this;
     }
 
     /**
@@ -205,6 +221,7 @@ public class SyncBuilder {
         if (boxStore.getSyncClient() != null) {
             throw new IllegalStateException("The given store is already associated with a Sync client, close it first.");
         }
+        checkNotNull(url, "Sync Server URL is required.");
         return new SyncClientImpl(this);
     }
 

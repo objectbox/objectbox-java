@@ -23,7 +23,7 @@ import io.objectbox.sync.SyncCredentialsToken;
  * Internal class to keep configuration for a cluster peer.
  */
 @Internal
-class ClusterPeerInfo {
+final class ClusterPeerInfo {
     String url;
     SyncCredentialsToken credentials;
 

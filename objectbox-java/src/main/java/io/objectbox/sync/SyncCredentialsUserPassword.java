@@ -41,4 +41,9 @@ public final class SyncCredentialsUserPassword extends SyncCredentials {
     public String getPassword() {
         return password;
     }
+
+    @Override
+    SyncCredentials createClone() {
+        return new SyncCredentialsUserPassword(this.username, this.password);
+    }
 }

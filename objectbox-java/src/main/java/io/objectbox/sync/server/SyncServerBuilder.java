@@ -24,6 +24,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
+import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.sync.Credentials;
 import io.objectbox.sync.Sync;
@@ -36,7 +37,7 @@ import io.objectbox.sync.listener.SyncChangeListener;
  * Creates a {@link SyncServer} and allows to set additional configuration.
  */
 @SuppressWarnings({"unused", "UnusedReturnValue"})
-public class SyncServerBuilder {
+public final class SyncServerBuilder {
 
     final BoxStore boxStore;
     final URI url;
@@ -56,6 +57,7 @@ public class SyncServerBuilder {
     /**
      * Use {@link Sync#server(BoxStore, String, SyncCredentials)} instead.
      */
+    @Internal
     public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(url, "Sync server URL is required.");
@@ -87,7 +89,7 @@ public class SyncServerBuilder {
     }
 
     /**
-     * Adds additional authenticator credentials to authenticate clients with.
+     * Adds additional authenticator credentials to authenticate clients or peers with.
      * <p>
      * For the embedded server, currently only {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none}
      * are supported.
@@ -281,7 +283,8 @@ public class SyncServerBuilder {
         int authenticationMethodsOffset = buildAuthenticationMethods(fbb);
         int clusterPeersVectorOffset = buildClusterPeers(fbb);
         // Clear credentials immediately to make abuse less likely,
-        // but only after setting all options to allow re-using the same credentials object.
+        // but only after setting all options to allow (re-)using the same credentials object
+        // for authentication and cluster peers login credentials.
         for (SyncCredentialsToken credential : credentials) {
             credential.clear();
         }

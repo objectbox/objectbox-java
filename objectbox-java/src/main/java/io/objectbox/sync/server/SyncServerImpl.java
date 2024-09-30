@@ -29,7 +29,7 @@ import io.objectbox.sync.listener.SyncChangeListener;
  * this class may change without notice.
  */
 @Internal
-public class SyncServerImpl implements SyncServer {
+public final class SyncServerImpl implements SyncServer {
 
     private final URI url;
     private volatile long handle;
@@ -139,10 +139,6 @@ public class SyncServerImpl implements SyncServer {
     private native boolean nativeIsRunning(long handle);
 
     private native int nativeGetPort(long handle);
-
-    private native void nativeSetAuthenticator(long handle, long credentialsType, @Nullable byte[] credentials);
-
-    private native void nativeAddPeer(long handle, String uri, long credentialsType, @Nullable byte[] credentials);
 
     private native String nativeGetStatsString(long handle);
 
