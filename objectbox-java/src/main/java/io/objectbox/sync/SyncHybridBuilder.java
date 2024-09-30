@@ -24,7 +24,8 @@ import io.objectbox.sync.server.SyncServer;
 import io.objectbox.sync.server.SyncServerBuilder;
 
 /**
- * Allows to configure the client and server setup to build a {@link SyncHybrid}.
+ * Builder for a Sync client and server hybrid setup, a {@link SyncHybrid}.
+ * <p>
  * To change the server/cluster configuration, call {@link #serverBuilder()}, and for the client configuration
  * {@link #clientBuilder()}.
  */
@@ -50,26 +51,27 @@ public final class SyncHybridBuilder {
     }
 
     /**
-     * Allows to customize client options of the hybrid.
+     * Returns the builder of the client of the hybrid for additional configuration.
      */
     public SyncBuilder clientBuilder() {
         return clientBuilder;
     }
 
     /**
-     * Allows to customize server options of the hybrid.
+     * Returns the builder of the server of the hybrid for additional configuration.
      */
     public SyncServerBuilder serverBuilder() {
         return serverBuilder;
     }
 
     /**
-     * Builds, starts and returns a SyncHybrid.
-     * Note that building and started must be done in one go for hybrids to ensure the correct sequence.
+     * Builds, starts and returns the hybrid.
+     * <p>
+     * Ensures the correct order of starting the server and client.
      */
     @SuppressWarnings("resource") // User is responsible for closing
     public SyncHybrid buildAndStart() {
-        // Build and start the server first, we may need to get a  port for the client
+        // Build and start the server first to obtain its URL, the port may have been set to 0 and dynamically assigned
         SyncServer server = serverBuilder.buildAndStart();
 
         SyncClient client = clientBuilder

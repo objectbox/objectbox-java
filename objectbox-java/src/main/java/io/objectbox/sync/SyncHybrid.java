@@ -22,13 +22,14 @@ import io.objectbox.BoxStore;
 import io.objectbox.sync.server.SyncServer;
 
 /**
- * The SyncHybrid combines the functionality of a Sync Client and a Sync Server.
+ * Combines the functionality of a Sync client and a Sync server.
+ * <p>
  * It is typically used in local cluster setups, in which a "hybrid" functions as a client & cluster peer (server).
- * <p/>
- * Call {@link #getStore()} to retrieve the store.
- * To set sync listeners use the {@link SyncClient} that is available from {@link #getClient()}.
- * <p/>
- * This class implements the Closeable interface, ensuring that resources are cleaned up properly.
+ * <p>
+ * Call {@link #getStore()} to retrieve the store. To set sync listeners use the {@link SyncClient} that is available
+ * from {@link #getClient()}.
+ * <p>
+ * This class implements the {@link Closeable} interface, ensuring that resources are cleaned up properly.
  */
 public final class SyncHybrid implements Closeable {
     private BoxStore store;
@@ -48,31 +49,42 @@ public final class SyncHybrid implements Closeable {
     }
 
     /**
-     * Typically only used to set sync listeners.
-     * <p/>
-     * Note: you should not directly call start(), stop(), close() on the {@link SyncClient} directly.
-     * Instead, call {@link #stop()} or {@link #close()} on this instance (it is already started during creation).
+     * Returns the {@link SyncClient} of this hybrid, typically only to set Sync listeners.
+     * <p>
+     * Note: do not stop or close the client directly. Instead, use the {@link #stop()} and {@link #close()} methods of
+     * this hybrid.
      */
     public SyncClient getClient() {
         return client;
     }
 
     /**
-     * Typically, you won't need access to the SyncServer.
-     * It is still exposed for advanced use cases if you know what you are doing.
-     * <p/>
-     * Note: you should not directly call start(), stop(), close() on the {@link SyncServer} directly.
-     * Instead, call {@link #stop()} or {@link #close()} on this instance (it is already started during creation).
+     * Returns the {@link SyncServer} of this hybrid.
+     * <p>
+     * Typically, the server should not be touched. Yet, it is still exposed for advanced use cases.
+     * <p>
+     * Note: do not stop or close the server directly. Instead, use the {@link #stop()} and {@link #close()} methods of
+     * this hybrid.
      */
     public SyncServer getServer() {
         return server;
     }
 
+    /**
+     * Stops the client and server.
+     */
     public void stop() {
         client.stop();
         server.stop();
     }
 
+    /**
+     * Closes and cleans up all resources used by this Sync hybrid.
+     * <p>
+     * It can no longer be used afterward, build a new one instead.
+     * <p>
+     * Does nothing if this has already been closed.
+     */
     @Override
     public void close() {
         // Clear reference to boxStore but do not close it (same behavior as SyncClient and SyncServer)
@@ -80,7 +92,7 @@ public final class SyncHybrid implements Closeable {
         client.close();
         server.close();
         if (storeServer != null) {
-            storeServer.close();  // The server store is "internal", so we can close it
+            storeServer.close(); // The server store is "internal", so can safely close it
             storeServer = null;
         }
     }

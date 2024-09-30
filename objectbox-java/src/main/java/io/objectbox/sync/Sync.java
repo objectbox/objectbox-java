@@ -81,22 +81,23 @@ public final class Sync {
     }
 
     /**
-     * Starts building a {@link SyncHybridBuilder}, a client/server hybrid typically used for embedded cluster setups.
-     * <p/>
+     * Starts building a {@link SyncHybrid}, a client/server hybrid typically used for embedded cluster setups.
+     * <p>
      * Unlike {@link #client(BoxStore, String, SyncCredentials)} and {@link #server(BoxStore, String, SyncCredentials)},
-     * you cannot pass in an already built store. Instead, you must pass in the store builder.
-     * The store will be created internally when calling this method.
-     * <p/>
-     * As this is a hybrid, you can configure client and server aspects using the {@link SyncHybridBuilder}.
+     * the client Store is not built before. Instead, a Store builder must be passed. The client and server Store will
+     * be built internally when calling this method.
+     * <p>
+     * To configure client and server use the methods on {@link SyncHybridBuilder}.
      *
-     * @param storeBuilder the BoxStoreBuilder to use for building the main store.
+     * @param storeBuilder The {@link BoxStoreBuilder} to use for building the client store.
      * @param url The URL of the Sync server on which the Sync protocol is exposed. This is typically a WebSockets URL
      * starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
      * {@code ws://0.0.0.0:9999}.
-     * @param authenticatorCredentials A list of enabled authentication methods available to Sync clients. Additional
-     * authenticator credentials can be supplied using the builder. For the embedded server, currently only
-     * {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none} are supported.
-     * @return an instance of SyncHybridBuilder.
+     * @param authenticatorCredentials An authentication method available to Sync clients and peers. The client of the
+     * hybrid is pre-configured with them. Additional credentials can be supplied using the client and server builder of
+     * the returned builder. For the embedded server, currently only {@link SyncCredentials#sharedSecret} and
+     * {@link SyncCredentials#none} are supported.
+     * @return An instance of {@link SyncHybridBuilder}.
      */
     public static SyncHybridBuilder hybrid(BoxStoreBuilder storeBuilder, String url,
                                            SyncCredentials authenticatorCredentials) {
