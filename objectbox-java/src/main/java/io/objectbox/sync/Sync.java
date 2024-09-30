@@ -23,8 +23,8 @@ import io.objectbox.sync.server.SyncServerBuilder;
 
 /**
  * <a href="https://objectbox.io/sync/">ObjectBox Sync</a> makes data available on other devices.
- * Start building a sync client using Sync.{@link #client(BoxStore, String, SyncCredentials)}
- * or an embedded server using Sync.{@link #server(BoxStore, String, SyncCredentials)}.
+ * <p>
+ * Use the static methods to build a Sync client or embedded server.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class Sync {
@@ -51,8 +51,13 @@ public final class Sync {
     }
 
     /**
-     * Start building a sync client. Requires the BoxStore that should be synced with the server,
-     * the URL and port of the server to connect to and credentials to authenticate against the server.
+     * Starts building a {@link SyncClient}. Once done, complete with {@link SyncBuilder#build() build()}.
+     *
+     * @param boxStore The {@link BoxStore} the client should use.
+     * @param url The URL of the Sync server on which the Sync protocol is exposed. This is typically a WebSockets URL
+     * starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
+     * {@code ws://127.0.0.1:9999}.
+     * @param credentials {@link SyncCredentials} to authenticate with the server.
      */
     public static SyncBuilder client(BoxStore boxStore, String url, SyncCredentials credentials) {
         return new SyncBuilder(boxStore, url, credentials);
@@ -67,8 +72,8 @@ public final class Sync {
      * @param url The URL of the Sync server on which the Sync protocol is exposed. This is typically a WebSockets URL
      * starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
      * {@code ws://0.0.0.0:9999}.
-     * @param authenticatorCredentials A list of enabled authentication methods available to Sync clients. Additional
-     * authenticator credentials can be supplied using the builder. For the embedded server, currently only
+     * @param authenticatorCredentials An authentication method available to Sync clients and peers. Additional
+     * authenticator credentials can be supplied using the returned builder. For the embedded server, currently only
      * {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none} are supported.
      */
     public static SyncServerBuilder server(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {

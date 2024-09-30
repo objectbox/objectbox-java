@@ -89,7 +89,7 @@ public final class SyncServerBuilder {
     }
 
     /**
-     * Adds additional authenticator credentials to authenticate clients with.
+     * Adds additional authenticator credentials to authenticate clients or peers with.
      * <p>
      * For the embedded server, currently only {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none}
      * are supported.
