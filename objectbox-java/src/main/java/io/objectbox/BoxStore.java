@@ -73,10 +73,11 @@ public class BoxStore implements Closeable {
     /** Prefix supplied with database directory to signal a file-less and in-memory database should be used. */
     public static final String IN_MEMORY_PREFIX = "memory:";
 
-    /** Change so ReLinker will update native library when using workaround loading. */
-    public static final String JNI_VERSION = "4.0.2";
+    /** ReLinker uses this as a suffix for the extracted shared library file. If different, it will update it. */
+    public static final String JNI_VERSION = "4.0.2-2024-10-15";
 
-    private static final String VERSION = "4.0.2-2024-08-19";
+    /** The native or core version of ObjectBox the Java library is known to work with. */
+    private static final String VERSION = "4.0.2-2024-10-15";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
