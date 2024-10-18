@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,9 @@ import io.objectbox.flatbuffers.UnionVector;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * The type/class of an entity object.
+ */
 @SuppressWarnings("unused")
 public final class ModelEntity extends Table {
   public static void ValidateVersion() { Constants.FLATBUFFERS_23_5_26(); }
@@ -70,8 +73,14 @@ public final class ModelEntity extends Table {
   public String nameSecondary() { int o = __offset(16); return o != 0 ? __string(o + bb_pos) : null; }
   public ByteBuffer nameSecondaryAsByteBuffer() { return __vector_as_bytebuffer(16, 1); }
   public ByteBuffer nameSecondaryInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 16, 1); }
+  /**
+   * Optional name used in an external system, e.g. another database that ObjectBox syncs with.
+   */
+  public String externalName() { int o = __offset(18); return o != 0 ? __string(o + bb_pos) : null; }
+  public ByteBuffer externalNameAsByteBuffer() { return __vector_as_bytebuffer(18, 1); }
+  public ByteBuffer externalNameInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 18, 1); }
 
-  public static void startModelEntity(FlatBufferBuilder builder) { builder.startTable(7); }
+  public static void startModelEntity(FlatBufferBuilder builder) { builder.startTable(8); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addStruct(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addProperties(FlatBufferBuilder builder, int propertiesOffset) { builder.addOffset(2, propertiesOffset, 0); }
@@ -83,6 +92,7 @@ public final class ModelEntity extends Table {
   public static void startRelationsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
   public static void addFlags(FlatBufferBuilder builder, long flags) { builder.addInt(5, (int) flags, (int) 0L); }
   public static void addNameSecondary(FlatBufferBuilder builder, int nameSecondaryOffset) { builder.addOffset(6, nameSecondaryOffset, 0); }
+  public static void addExternalName(FlatBufferBuilder builder, int externalNameOffset) { builder.addOffset(7, externalNameOffset, 0); }
   public static int endModelEntity(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
