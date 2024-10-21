@@ -4,6 +4,21 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
+## 4.0.3 - 2024-10-15
+
+* Make closing the Store more robust. In addition to transactions, it also waits for ongoing queries. This is just an
+  additional safety net. Your apps should still make sure to finish all Store operations, like queries, before closing it.
+* [Flex properties](https://docs.objectbox.io/advanced/custom-types#flex-properties) support `null` map and list values.
+* Some minor vector search performance improvements.
+
+### Sync
+
+* **Fix a serious regression, please update as soon as possible.**
+* Add new options, notably for cluster configuration, when building `SyncServer`. Improve documentation.
+  Deprecate the old peer options in favor of the new cluster options.
+* Add `SyncHybrid`, a combination of a Sync client and a Sync server. It can be used in local cluster setups, in
+  which a "hybrid" functions as a client & cluster peer (server).
+
 ## 4.0.2 - 2024-08-20
 
 * Add convenience `oneOf` and `notOneOf` conditions that accept `Date` to avoid manual conversion using `getTime()`.
