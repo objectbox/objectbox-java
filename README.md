@@ -1,4 +1,4 @@
-<p align="center"><img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png"></p>
+<p align="center"><img width="466" src="https://raw.githubusercontent.com/objectbox/objectbox-java/master/logo.png" alt="ObjectBox"></p>
 
 <p align="center">
   <a href="https://docs.objectbox.io/getting-started">Getting Started</a> •
@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="https://docs.objectbox.io/#objectbox-changelog">
+  <a href="https://github.com/objectbox/objectbox-java/releases/latest">
     <img src="https://img.shields.io/github/v/release/objectbox/objectbox-java?color=7DDC7D&style=flat-square" alt="Latest Release">
   </a>
   <a href="https://github.com/objectbox/objectbox-java/stargazers">
@@ -29,7 +29,7 @@ Store and manage data effortlessly in your Android or JVM Linux, macOS or Window
 Easily manage vector data alongside your objects and perform superfast on-device vector search to empower your apps with RAG AI, generative AI, and similarity search.
 Enjoy exceptional speed, battery-friendly resource usage, and environmentally-friendly development. 💚
 
-### Demo code
+## Demo code
 
 ```java
 // Java
@@ -50,6 +50,7 @@ box.put(playlist)
 ```
 
 ## Table of Contents
+
 - [Key Features](#key-features)
 - [Getting started](#getting-started)
   - [Gradle setup](#gradle-setup)
@@ -60,6 +61,7 @@ box.put(playlist)
 - [License](#license)
 
 ## Key Features
+
 🧠 **First on-device vector database:** easily manage vector data and perform fast vector search
 🏁 **High performance:** exceptional speed, outperforming alternatives like SQLite and Realm in all CRUD operations.\
 💚 **Efficient Resource Usage:** minimal CPU, power and memory consumption for maximum flexibility and sustainability.\
@@ -67,9 +69,10 @@ box.put(playlist)
 👌 **Ease of use:** concise API that eliminates the need for complex SQL queries, saving you time and effort during development.
 
 ## Getting started
+
 ### Gradle setup
 
-For Android projects, add the ObjectBox Gradle plugin to your root `build.gradle`: 
+For Android projects, add the ObjectBox Gradle plugin to your root `build.gradle`:
 
 ```groovy
 buildscript {
@@ -98,13 +101,15 @@ apply plugin: "io.objectbox" // Add after other plugins.
 ### First steps
 
 Create a data object class `@Entity`, for example "Playlist".
-```
+
+```kotlin
 // Kotlin
 @Entity data class Playlist( ... )
 
 // Java
 @Entity public class Playlist { ... }
 ```
+
 Now build the project to let ObjectBox generate the class `MyObjectBox` for you.
 
 Prepare the BoxStore object once for your app, e.g. in `onCreate` in your Application class:
@@ -121,22 +126,24 @@ Box<Playlist> box = boxStore.boxFor(Playlist.class);
 
 The `Box` object gives you access to all major functions, like `put`, `get`, `remove`, and `query`.
 
-For details please check the [docs](https://docs.objectbox.io).     
+For details please check the [docs](https://docs.objectbox.io).
 
 ## Why use ObjectBox for Java data management?
 
-ObjectBox is a NoSQL Java database designed for local data storage on resource-restricted devices, prioritizing 
-offline-first functionality. It is a smart and sustainable choice for local data persistence in Java and Kotlin 
+ObjectBox is a NoSQL Java database designed for local data storage on resource-restricted devices, prioritizing
+offline-first functionality. It is a smart and sustainable choice for local data persistence in Java and Kotlin
 applications. It offers efficiency, ease of use, and flexibility.
 
 ### Fast but resourceful
-Optimized for speed and minimal resource consumption, ObjectBox is an ideal solution for mobile devices. It has 
-excellent performance, while also minimizing CPU, RAM, and power usage. ObjectBox outperforms SQLite and Realm across 
+
+Optimized for speed and minimal resource consumption, ObjectBox is an ideal solution for mobile devices. It has
+excellent performance, while also minimizing CPU, RAM, and power usage. ObjectBox outperforms SQLite and Realm across
 all CRUD (Create, Read, Update, Delete) operations. Check out our [Performance Benchmarking App repository](https://github.com/objectbox/objectbox-performance).
 
 ### Simple but powerful
-With its concise language-native API, ObjectBox simplifies development by requiring less code compared to SQLite. It 
-operates on plain objects (POJOs) with built-in relations, eliminating the need to manage rows and columns. This 
+
+With its concise language-native API, ObjectBox simplifies development by requiring less code compared to SQLite. It
+operates on plain objects (POJOs) with built-in relations, eliminating the need to manage rows and columns. This
 approach is efficient for handling large data volumes and allows for easy model modifications.
 
 ### Functionality
@@ -160,39 +167,41 @@ APIs. We genuinely want to hear from you: What do you love about ObjectBox? What
 challenges in everyday app development?
 
 **We eagerly await your comments and requests, so please feel free to reach out to us:**
-- Add [GitHub issues](https://github.com/ObjectBox/objectbox-java/issues) 
+
+- Add [GitHub issues](https://github.com/ObjectBox/objectbox-java/issues)
 - Upvote important issues 👍
 - Drop us a line via [@ObjectBox_io](https://twitter.com/ObjectBox_io/) or contact[at]objectbox.io
-- ⭐ us on GitHub if you like what you see! 
+- ⭐ us on GitHub if you like what you see!
 
 Thank you! Stay updated with our [blog](https://objectbox.io/blog).
 
 ## Other languages/bindings
 
 ObjectBox supports multiple platforms and languages.
-Besides JVM based languages like Java and Kotlin, ObjectBox also offers: 
+Besides JVM based languages like Java and Kotlin, ObjectBox also offers:
 
-* [Swift Database](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS) 
-* [Dart/Flutter Database](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps 
-* [Go Database](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications 
-* [C and C++ Database](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
-
+- [Swift Database](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS)
+- [Dart/Flutter Database](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps
+- [Go Database](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications
+- [C and C++ Database](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
 
 ## License
 
-    Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
-    
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-    
-        http://www.apache.org/licenses/LICENSE-2.0
-    
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+```text
+Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
 
 Note that this license applies to the code in this repository only.
 See our website on details about all [licenses for ObjectBox components](https://objectbox.io/faq/#license-pricing).
