@@ -57,6 +57,7 @@ box.put(playlist)
   - [First steps](#first-steps)
 - [Why use ObjectBox?](#why-use-objectbox-for-java-data-management)
 - [Community and Support](#community-and-support)
+- [Changelog](#changelog)
 - [Other languages/bindings](#other-languagesbindings)
 - [License](#license)
 
@@ -174,6 +175,10 @@ challenges in everyday app development?
 - ⭐ us on GitHub if you like what you see!
 
 Thank you! Stay updated with our [blog](https://objectbox.io/blog).
+
+## Changelog
+
+For notable and important changes in new releases, read the [changelog](CHANGELOG.md).
 
 ## Other languages/bindings
 
