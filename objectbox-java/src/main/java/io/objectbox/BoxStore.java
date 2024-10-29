@@ -21,6 +21,7 @@ import org.greenrobot.essentials.collections.LongHashMap;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -238,6 +239,7 @@ public class BoxStore implements Closeable {
 
     native long nativePanicModeRemoveAllObjects(long store, int entityId);
 
+    private final PrintStream errorOutputStream;
     private final File directory;
     private final String canonicalPath;
     /** Reference to the native store. Should probably get through {@link #getNativeStore()} instead. */
@@ -283,6 +285,7 @@ public class BoxStore implements Closeable {
         relinker = builder.relinker;
         NativeLibraryLoader.ensureLoaded();
 
+        errorOutputStream = builder.errorOutputStream;
         directory = builder.directory;
         canonicalPath = getCanonicalPath(directory);
         verifyNotAlreadyOpen(canonicalPath);
@@ -613,7 +616,7 @@ public class BoxStore implements Closeable {
         // Because write TXs are typically not cached, initialCommitCount is not as relevant than for read TXs.
         int initialCommitCount = commitCount;
         if (debugTxWrite) {
-            System.out.println("Begin TX with commit count " + initialCommitCount);
+            getOutput().println("Begin TX with commit count " + initialCommitCount);
         }
         long nativeTx = nativeBeginTx(getNativeStore());
         if (nativeTx == 0) throw new DbException("Could not create native transaction");
@@ -638,7 +641,7 @@ public class BoxStore implements Closeable {
         // TODO add multithreaded test for this
         int initialCommitCount = commitCount;
         if (debugTxRead) {
-            System.out.println("Begin read TX with commit count " + initialCommitCount);
+            getOutput().println("Begin read TX with commit count " + initialCommitCount);
         }
         long nativeTx = nativeBeginReadTx(getNativeStore());
         if (nativeTx == 0) throw new DbException("Could not create native read transaction");
@@ -698,7 +701,7 @@ public class BoxStore implements Closeable {
                     // Give open transactions some time to close (BoxStore.unregisterTransaction() calls notify),
                     // 1000 ms should be long enough for most small operations and short enough to avoid ANRs on Android.
                     if (hasActiveTransaction()) {
-                        System.out.println("Briefly waiting for active transactions before closing the Store...");
+                        getOutput().println("Briefly waiting for active transactions before closing the Store...");
                         try {
                             // It is fine to hold a lock on BoxStore.this as well as BoxStore.unregisterTransaction()
                             // only synchronizes on "transactions".
@@ -708,7 +711,7 @@ public class BoxStore implements Closeable {
                             // If interrupted, continue with releasing native resources
                         }
                         if (hasActiveTransaction()) {
-                            System.err.println("Transactions are still active:"
+                            getErrorOutput().println("Transactions are still active:"
                                     + " ensure that all database operations are finished before closing the Store!");
                         }
                     }
@@ -745,16 +748,16 @@ public class BoxStore implements Closeable {
         try {
             if (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) {
                 int activeCount = Thread.activeCount();
-                System.err.println("Thread pool not terminated in time; printing stack traces...");
+                getErrorOutput().println("Thread pool not terminated in time; printing stack traces...");
                 Thread[] threads = new Thread[activeCount + 2];
                 int count = Thread.enumerate(threads);
                 for (int i = 0; i < count; i++) {
-                    System.err.println("Thread: " + threads[i].getName());
+                    getErrorOutput().println("Thread: " + threads[i].getName());
                     Thread.dumpStack();
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            e.printStackTrace(getErrorOutput());
         }
     }
 
@@ -894,7 +897,7 @@ public class BoxStore implements Closeable {
         synchronized (txCommitCountLock) {
             commitCount++; // Overflow is OK because we check for equality
             if (debugTxWrite) {
-                System.out.println("TX committed. New commit count: " + commitCount + ", entity types affected: " +
+                getOutput().println("TX committed. New commit count: " + commitCount + ", entity types affected: " +
                         (entityTypeIdsAffected != null ? entityTypeIdsAffected.length : 0));
             }
         }
@@ -1013,10 +1016,10 @@ public class BoxStore implements Closeable {
                 String diagnose = diagnose();
                 String message = attempt + " of " + attempts + " attempts of calling a read TX failed:";
                 if (logAndHeal) {
-                    System.err.println(message);
+                    getErrorOutput().println(message);
                     e.printStackTrace();
-                    System.err.println(diagnose);
-                    System.err.flush();
+                    getErrorOutput().println(diagnose);
+                    getErrorOutput().flush();
 
                     System.gc();
                     System.runFinalization();
@@ -1335,6 +1338,20 @@ public class BoxStore implements Closeable {
     @Internal
     public TxCallback<?> internalFailedReadTxAttemptCallback() {
         return failedReadTxAttemptCallback;
+    }
+
+    /**
+     * The output stream to print log messages to. Currently {@link System#out}.
+     */
+    private PrintStream getOutput() {
+        return System.out;
+    }
+
+    /**
+     * The error output stream to print log messages to. This is {@link System#err} by default.
+     */
+    private PrintStream getErrorOutput() {
+        return errorOutputStream;
     }
 
     void setDebugFlags(int debugFlags) {

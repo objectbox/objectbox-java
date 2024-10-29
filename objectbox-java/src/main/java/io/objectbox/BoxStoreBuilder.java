@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,6 +67,12 @@ public class BoxStoreBuilder {
 
     /** The default maximum size the DB can grow to, which can be overwritten using {@link #maxSizeInKByte}. */
     public static final int DEFAULT_MAX_DB_SIZE_KBYTE = 1024 * 1024;
+
+    /**
+     * The error output stream {@link BoxStore} uses for logging. Defaults to {@link System#err}, but can be customized
+     * for tests.
+     */
+    PrintStream errorOutputStream = System.err;
 
     final byte[] model;
 
@@ -143,6 +150,15 @@ public class BoxStoreBuilder {
         }
         // Future-proofing: copy to prevent external modification.
         this.model = Arrays.copyOf(model, model.length);
+    }
+
+    /**
+     * For testing: set a custom error output stream {@link BoxStore} uses for logging. Defaults to {@link System#err}.
+     */
+    @Internal
+    BoxStoreBuilder setErrorOutput(PrintStream err) {
+        errorOutputStream = err;
+        return this;
     }
 
     /**
