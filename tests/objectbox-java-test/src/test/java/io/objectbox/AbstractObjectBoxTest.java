@@ -162,6 +162,10 @@ public abstract class AbstractObjectBoxTest {
 
     @After
     public void tearDown() {
+        // Note: do not collect dangling Cursors and Transactions before store closes (using System.gc()
+        // or System.runFinalization()). Tests should mirror user code and do that themselves (calling close())
+        // or rely on the library (through finalizers or BoxStore.close()).
+
         if (store != null) {
             try {
                 store.close();
