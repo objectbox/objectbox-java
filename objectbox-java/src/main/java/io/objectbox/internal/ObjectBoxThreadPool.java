@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd.
+ * Copyright 2017-2024 ObjectBox Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import io.objectbox.annotation.apihint.Internal;
  */
 @Internal
 public class ObjectBoxThreadPool extends ThreadPoolExecutor {
+
+    public static String THREAD_NAME_PREFIX = "ObjectBox-";
     private final BoxStore boxStore;
 
     public ObjectBoxThreadPool(BoxStore boxStore) {
@@ -54,7 +56,7 @@ public class ObjectBoxThreadPool extends ThreadPoolExecutor {
         private static final AtomicInteger POOL_COUNT = new AtomicInteger();
 
         private final ThreadGroup group;
-        private final String namePrefix = "ObjectBox-" + POOL_COUNT.incrementAndGet() + "-Thread-";
+        private final String namePrefix = THREAD_NAME_PREFIX + POOL_COUNT.incrementAndGet() + "-Thread-";
         private final AtomicInteger threadCount = new AtomicInteger();
 
         ObjectBoxThreadFactory() {

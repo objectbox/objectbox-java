@@ -743,18 +743,31 @@ public class BoxStore implements Closeable {
         }
     }
 
-    /** dump thread stacks if pool does not terminate promptly. */
+    /**
+     * Waits briefly for the internal {@link #threadPool} to terminate. If it does not terminate in time, prints stack
+     * traces of the pool threads.
+     */
     private void checkThreadTermination() {
         try {
             if (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) {
-                int activeCount = Thread.activeCount();
-                getErrorOutput().println("Thread pool not terminated in time; printing stack traces...");
-                Thread[] threads = new Thread[activeCount + 2];
+                getErrorOutput().println("ObjectBox thread pool not terminated in time." +
+                        " Ensure all async calls have completed and subscriptions are cancelled before closing the Store." +
+                        "\nPrinting pool threads...");
+                // Note: this may not print any pool threads if other threads are started while enumerating
+                // (and the pool threads do not make it into the threads array).
+                Thread[] threads = new Thread[Thread.activeCount()];
                 int count = Thread.enumerate(threads);
                 for (int i = 0; i < count; i++) {
-                    getErrorOutput().println("Thread: " + threads[i].getName());
-                    Thread.dumpStack();
+                    Thread thread = threads[i];
+                    if (thread.getName().startsWith(ObjectBoxThreadPool.THREAD_NAME_PREFIX)) {
+                        getErrorOutput().println("Thread: " + thread.getName());
+                        StackTraceElement[] trace = thread.getStackTrace();
+                        for (StackTraceElement traceElement : trace) {
+                            getErrorOutput().println("\tat " + traceElement);
+                        }
+                    }
                 }
+                getErrorOutput().println("Printing pool threads...DONE");
             }
         } catch (InterruptedException e) {
             e.printStackTrace(getErrorOutput());
