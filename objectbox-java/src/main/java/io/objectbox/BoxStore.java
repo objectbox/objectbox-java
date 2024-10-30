@@ -696,6 +696,11 @@ public class BoxStore implements Closeable {
                 // (due to all Java APIs doing closed checks).
                 closed = true;
 
+                // Stop accepting new tasks (async calls, query publishers) on the internal thread pool
+                internalThreadPool().shutdown();
+                // Give running tasks some time to finish, print warnings if they do not to help callers fix their code
+                checkThreadTermination();
+
                 List<Transaction> transactionsToClose;
                 synchronized (transactions) {
                     // Give open transactions some time to close (BoxStore.unregisterTransaction() calls notify),
@@ -729,10 +734,6 @@ public class BoxStore implements Closeable {
                 if (handleToDelete != 0) { // failed before native handle was created?
                     nativeDelete(handleToDelete);
                 }
-
-                // When running the full unit test suite, we had 100+ threads before, hope this helps:
-                internalThreadPool().shutdown();
-                checkThreadTermination();
             }
         }
         if (!oldClosedState) {
