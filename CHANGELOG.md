@@ -4,6 +4,8 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
+## Unreleased
+
 ## 4.0.3 - 2024-10-15
 
 - Make closing the Store more robust. In addition to transactions, it also waits for ongoing queries. This is just an
