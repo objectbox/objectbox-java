@@ -731,7 +731,7 @@ public class BoxStore implements Closeable {
                 }
 
                 // When running the full unit test suite, we had 100+ threads before, hope this helps:
-                threadPool.shutdown();
+                internalThreadPool().shutdown();
                 checkThreadTermination();
             }
         }
@@ -744,12 +744,12 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * Waits briefly for the internal {@link #threadPool} to terminate. If it does not terminate in time, prints stack
-     * traces of the pool threads.
+     * Waits briefly for the internal {@link #internalThreadPool()} to terminate. If it does not terminate in time,
+     * prints stack traces of the pool threads.
      */
     private void checkThreadTermination() {
         try {
-            if (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) {
+            if (!internalThreadPool().awaitTermination(1, TimeUnit.SECONDS)) {
                 getErrorOutput().println("ObjectBox thread pool not terminated in time." +
                         " Ensure all async calls have completed and subscriptions are cancelled before closing the Store." +
                         "\nPrinting pool threads...");
@@ -1137,7 +1137,7 @@ public class BoxStore implements Closeable {
      * See also {@link #runInTx(Runnable)}.
      */
     public void runInTxAsync(final Runnable runnable, @Nullable final TxCallback<Void> callback) {
-        threadPool.submit(() -> {
+        internalScheduleThread(() -> {
             try {
                 runInTx(runnable);
                 if (callback != null) {
@@ -1158,7 +1158,7 @@ public class BoxStore implements Closeable {
      * * See also {@link #callInTx(Callable)}.
      */
     public <R> void callInTxAsync(final Callable<R> callable, @Nullable final TxCallback<R> callback) {
-        threadPool.submit(() -> {
+        internalScheduleThread(() -> {
             try {
                 R result = callInTx(callable);
                 if (callback != null) {
@@ -1330,11 +1330,11 @@ public class BoxStore implements Closeable {
 
     @Internal
     public Future<?> internalScheduleThread(Runnable runnable) {
-        return threadPool.submit(runnable);
+        return internalThreadPool().submit(runnable);
     }
 
     @Internal
-    public ExecutorService internalThreadPool() {
+    ExecutorService internalThreadPool() {
         return threadPool;
     }
 
