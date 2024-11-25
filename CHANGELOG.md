@@ -6,6 +6,8 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
 
 ## Unreleased
 
+- Android: require Android 5.0 (API level 21) or higher.
+
 ## 4.0.3 - 2024-10-15
 
 - Make closing the Store more robust. In addition to transactions, it also waits for ongoing queries. This is just an
