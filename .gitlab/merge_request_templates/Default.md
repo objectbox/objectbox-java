@@ -11,6 +11,7 @@
   - I added unit tests for new or changed behavior; existing and new tests pass
   - My code conforms to our coding standards and guidelines
   - My changes are prepared (focused commits, good messages) so reviewing them is easy for the reviewer
+- [ ] I amended the [changelog](/CHANGELOG.md) if this affects users in any way
 - [ ] I assigned a reviewer to request review
 
 ## Reviewer's checklist
