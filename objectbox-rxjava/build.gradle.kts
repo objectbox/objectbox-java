@@ -21,7 +21,7 @@ dependencies {
 }
 
 val javadocJar by tasks.registering(Jar::class) {
-    dependsOn(tasks.named("javadoc"))
+    dependsOn(tasks.javadoc)
     archiveClassifier.set("javadoc")
     from("build/docs/javadoc")
 }

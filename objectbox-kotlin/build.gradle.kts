@@ -2,8 +2,6 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URL
 
-val javadocDir = file("$buildDir/docs/javadoc")
-
 plugins {
     kotlin("jvm")
     id("org.jetbrains.dokka")
@@ -30,8 +28,9 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-tasks.named<DokkaTask>("dokkaHtml") {
-    outputDirectory.set(javadocDir)
+val dokkaHtml = tasks.named<DokkaTask>("dokkaHtml")
+dokkaHtml.configure {
+    outputDirectory.set(layout.buildDirectory.dir("docs/javadoc"))
 
     dokkaSourceSets.configureEach {
         // Fix "Can't find node by signature": have to manually point to dependencies.
@@ -46,10 +45,10 @@ tasks.named<DokkaTask>("dokkaHtml") {
 }
 
 val javadocJar by tasks.registering(Jar::class) {
-    dependsOn(tasks.named("dokkaHtml"))
+    dependsOn(dokkaHtml)
     group = "build"
     archiveClassifier.set("javadoc")
-    from(javadocDir)
+    from(dokkaHtml.get().outputDirectory)
 }
 
 val sourcesJar by tasks.registering(Jar::class) {

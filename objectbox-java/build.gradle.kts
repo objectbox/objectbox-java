@@ -14,7 +14,7 @@ tasks.withType<JavaCompile> {
     options.release.set(8)
 }
 
-val javadocForWebDir = "$buildDir/docs/web-api-docs"
+val javadocForWebDir = layout.buildDirectory.dir("docs/web-api-docs")
 val essentialsVersion: String by rootProject.extra
 
 dependencies {
@@ -63,7 +63,7 @@ tasks.javadoc {
 }
 
 // Note: use packageJavadocForWeb to get as ZIP.
-tasks.register<Javadoc>("javadocForWeb") {
+val javadocForWeb by tasks.registering(Javadoc::class) {
     group = "documentation"
     description = "Builds Javadoc incl. objectbox-java-api classes with web tweaks."
 
@@ -100,7 +100,7 @@ tasks.register<Javadoc>("javadocForWeb") {
     source = filteredSources + fileTree(srcApi)
 
     classpath = sourceSets.main.get().output + sourceSets.main.get().compileClasspath
-    setDestinationDir(file(javadocForWebDir))
+    setDestinationDir(javadocForWebDir.get().asFile)
 
     title = "ObjectBox Java ${project.version} API"
     (options as StandardJavadocDocletOptions).apply {
@@ -141,22 +141,23 @@ tasks.register<Javadoc>("javadocForWeb") {
 }
 
 tasks.register<Zip>("packageJavadocForWeb") {
-    dependsOn("javadocForWeb")
+    dependsOn(javadocForWeb)
     group = "documentation"
     description = "Packages Javadoc incl. objectbox-java-api classes with web tweaks as ZIP."
 
     archiveFileName.set("objectbox-java-web-api-docs.zip")
-    destinationDirectory.set(file("$buildDir/dist"))
+    val distDir = layout.buildDirectory.dir("dist")
+    destinationDirectory.set(distDir)
 
     from(file(javadocForWebDir))
 
     doLast {
-        println("Javadoc for web packaged to ${file("$buildDir/dist/objectbox-java-web-api-docs.zip")}")
+        println("Javadoc for web packaged to ${distDir.get().file("objectbox-java-web-api-docs.zip")}")
     }
 }
 
 val javadocJar by tasks.registering(Jar::class) {
-    dependsOn("javadoc")
+    dependsOn(tasks.javadoc)
     archiveClassifier.set("javadoc")
     from("build/docs/javadoc")
 }
