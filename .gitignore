@@ -13,6 +13,9 @@ target/
 out/
 classes/
 
+# Kotlin
+.kotlin
+
 # Local build properties
 build.properties
 local.properties

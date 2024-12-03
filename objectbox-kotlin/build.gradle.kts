@@ -23,8 +23,8 @@ tasks.withType<KotlinCompile> {
         // Kotlin supports the development with at least three previous versions, so pick the oldest one possible.
         // https://kotlinlang.org/docs/kotlin-evolution.html#evolving-the-binary-format
         // https://kotlinlang.org/docs/compatibility-modes.html
-        apiVersion = "1.5"
-        languageVersion = "1.5"
+        apiVersion = "1.7"
+        languageVersion = "1.7"
     }
 }
 

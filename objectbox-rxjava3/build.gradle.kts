@@ -1,5 +1,5 @@
 import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.net.URL
 
 plugins {
@@ -15,10 +15,10 @@ tasks.withType<JavaCompile> {
     options.release.set(8)
 }
 
-// Produce Java 8 byte code, would default to Java 6.
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
+kotlin {
+    compilerOptions {
+        // Produce Java 8 byte code, would default to Java 6
+        jvmTarget.set(JvmTarget.JVM_1_8)
     }
 }
 

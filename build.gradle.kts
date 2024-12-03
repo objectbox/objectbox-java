@@ -52,14 +52,17 @@ buildscript {
     val essentialsVersion by extra("3.1.0")
     val junitVersion by extra("4.13.2")
     val mockitoVersion by extra("3.8.0")
-    // The versions of Kotlin, Kotlin Coroutines and Dokka must work together.
-    // Check https://github.com/Kotlin/kotlinx.coroutines#readme
-    // and https://github.com/Kotlin/dokka/releases
-    // Note: when updating might also have to increase the minimum compiler version supported
+    // The versions of Gradle, Kotlin and Kotlin Coroutines must work together.
+    // Check
+    // - https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+    // - https://github.com/Kotlin/kotlinx.coroutines#readme
+    // Note: when updating to a new minor version also have to increase the minimum compiler version supported
     // by consuming projects, see objectbox-kotlin/ build script.
-    val kotlinVersion by extra("1.8.20")
-    val coroutinesVersion by extra("1.7.3")
-    val dokkaVersion by extra("1.8.20")
+    val kotlinVersion by extra("2.0.21")
+    val coroutinesVersion by extra("1.9.0")
+    // Dokka includes its own version of the Kotlin compiler, so it must not match the used Kotlin version.
+    // But it might not understand new language features.
+    val dokkaVersion by extra("1.9.20")
 
     repositories {
         mavenCentral()

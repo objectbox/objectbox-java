@@ -4,6 +4,10 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
+## 4.3.1 - in development
+
+- Requires at least Kotlin compiler and standard library 1.7.
+
 ## 4.3.0 - 2025-05-13
 
 - Basic support for boolean array properties (`boolean[]` in Java or `BooleanArray` in Kotlin).

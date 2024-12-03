@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("java-library")
@@ -12,10 +13,10 @@ tasks.withType<JavaCompile> {
     options.release.set(8)
 }
 
-// Produce Java 8 byte code, would default to Java 6.
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
+kotlin {
+    compilerOptions {
+        // Produce Java 8 byte code, would default to Java 6
+        jvmTarget.set(JvmTarget.JVM_1_8)
     }
 }
 
