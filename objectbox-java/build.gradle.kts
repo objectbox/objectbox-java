@@ -23,7 +23,7 @@ dependencies {
     api("com.google.code.findbugs:jsr305:3.0.2")
 
     // https://github.com/spotbugs/spotbugs/blob/master/CHANGELOG.md
-    compileOnly("com.github.spotbugs:spotbugs-annotations:4.7.3")
+    compileOnly("com.github.spotbugs:spotbugs-annotations:4.8.6")
 }
 
 spotbugs {

@@ -9,7 +9,7 @@ plugins {
     // https://github.com/ben-manes/gradle-versions-plugin/releases
     id("com.github.ben-manes.versions") version "0.51.0"
     // https://github.com/spotbugs/spotbugs-gradle-plugin/releases
-    id("com.github.spotbugs") version "5.0.14" apply false
+    id("com.github.spotbugs") version "6.0.26" apply false
     // https://github.com/gradle-nexus/publish-plugin/releases
     id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
