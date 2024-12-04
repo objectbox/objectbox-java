@@ -6,6 +6,8 @@
 // - sonatypePassword: Maven Central credential used by Nexus publishing.
 
 plugins {
+    // https://github.com/ben-manes/gradle-versions-plugin/releases
+    id("com.github.ben-manes.versions") version "0.51.0"
     // https://github.com/spotbugs/spotbugs-gradle-plugin/releases
     id("com.github.spotbugs") version "5.0.14" apply false
     // https://github.com/gradle-nexus/publish-plugin/releases
@@ -93,6 +95,19 @@ allprojects {
         // Otherwise, it defaults to the system file encoding. This is required even though setting file.encoding
         // for the Gradle daemon (see gradle.properties) as Gradle does not pass it on to the javadoc tool.
         options.encoding = "UTF-8"
+    }
+}
+
+// Exclude pre-release versions from dependencyUpdates task
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
+}
+tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
+    rejectVersionIf {
+        isNonStable(candidate.version)
     }
 }
 
