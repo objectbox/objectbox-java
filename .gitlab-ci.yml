@@ -127,12 +127,12 @@ test-jdk-8:
   variables:
     TEST_JDK: 8
 
-# JDK 11 is the next oldest LTS release.
-test-jdk-11:
+# JDK 17 is the default of the current build image, so test the latest LTS JDK 21
+test-jdk-21:
   extends: .test-asan-template
   needs: ["test-jdk-8"]
   variables:
-    TEST_JDK: 11
+    TEST_JDK: 21
 
 test-jdk-x86:
   extends: .test-template
