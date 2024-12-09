@@ -1,8 +1,8 @@
 # https://docs.gitlab.com/ci/yaml/
 
 # Default image for linux builds
-# Using core instead of base to get access to ASAN from clang.
-image: objectboxio/buildenv-core:2023-07-28
+# This should match the image used to build the JVM database libraries (so Address Sanitizer library matches)
+image: objectboxio/buildenv-core:2024-07-11 # With JDK 17
 
 # Assumes these environment variables are configured in GitLab CI/CD Settings:
 # - OBX_READ_PACKAGES_TOKEN
