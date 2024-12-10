@@ -23,7 +23,18 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-/** In "real" entity would be annotated with @Entity. */
+import io.objectbox.annotation.Entity;
+import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Unsigned;
+
+/**
+ * The annotations in this class have no effect as the Gradle plugin is not configured in this project. However, test
+ * code builds a model like if the annotations were processed.
+ * <p>
+ * There is a matching test in the internal integration test project where this is tested and model builder code can be
+ * "stolen" from.
+ */
+@Entity
 public class TestEntity {
 
     public static final String STRING_VALUE_THROW_IN_CONSTRUCTOR =
@@ -32,7 +43,7 @@ public class TestEntity {
     public static final String EXCEPTION_IN_CONSTRUCTOR_MESSAGE =
             "Hello, this is an exception from TestEntity constructor";
 
-    /** In "real" entity would be annotated with @Id. */
+    @Id
     private long id;
     private boolean simpleBoolean;
     private byte simpleByte;
@@ -47,11 +58,11 @@ public class TestEntity {
     /** Not-null value. */
     private String[] simpleStringArray;
     private List<String> simpleStringList;
-    /** In "real" entity would be annotated with @Unsigned. */
+    @Unsigned
     private short simpleShortU;
-    /** In "real" entity would be annotated with @Unsigned. */
+    @Unsigned
     private int simpleIntU;
-    /** In "real" entity would be annotated with @Unsigned. */
+    @Unsigned
     private long simpleLongU;
     private Map<String, Object> stringObjectMap;
     private Object flexProperty;
