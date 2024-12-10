@@ -96,7 +96,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         // Set ID that was not assigned
         entity.setId(1);
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> box.put(entity));
-        assertEquals(ex.getMessage(), "ID is higher or equal to internal ID sequence: 1 (vs. 1). Use ID 0 (zero) to insert new objects.");
+        assertEquals("ID is higher or equal to internal ID sequence: 1 (vs. 1). Use ID 0 (zero) to insert new objects.", ex.getMessage());
     }
 
     @Test
