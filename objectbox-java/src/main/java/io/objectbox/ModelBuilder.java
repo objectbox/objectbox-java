@@ -24,6 +24,7 @@ import javax.annotation.Nullable;
 import io.objectbox.annotation.HnswIndex;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
+import io.objectbox.model.ExternalPropertyType;
 import io.objectbox.model.HnswDistanceType;
 import io.objectbox.model.HnswFlags;
 import io.objectbox.model.HnswParams;
@@ -67,6 +68,7 @@ public class ModelBuilder {
         private int indexId;
         private long indexUid;
         private int indexMaxValueLength;
+        private int externalPropertyType;
         private int hnswParamsOffset;
 
         PropertyBuilder(String name, @Nullable String targetEntityName, @Nullable String virtualTarget, int type) {
@@ -93,6 +95,17 @@ public class ModelBuilder {
         public PropertyBuilder indexMaxValueLength(int indexMaxValueLength) {
             checkNotFinished();
             this.indexMaxValueLength = indexMaxValueLength;
+            return this;
+        }
+
+        /**
+         * Set a {@link ExternalPropertyType} constant.
+         *
+         * @return this builder.
+         */
+        public PropertyBuilder externalType(int externalPropertyType) {
+            checkNotFinished();
+            this.externalPropertyType = externalPropertyType;
             return this;
         }
 
@@ -182,6 +195,9 @@ public class ModelBuilder {
             }
             if (indexMaxValueLength > 0) {
                 ModelProperty.addMaxIndexValueLength(fbb, indexMaxValueLength);
+            }
+            if (externalPropertyType != 0) {
+                ModelProperty.addExternalType(fbb, externalPropertyType);
             }
             if (hnswParamsOffset != 0) {
                 ModelProperty.addHnswParams(fbb, hnswParamsOffset);

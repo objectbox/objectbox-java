@@ -58,6 +58,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         long valLong = 1000 + simpleInt;
         float valFloat = 200 + simpleInt / 10f;
         double valDouble = 2000 + simpleInt / 100f;
+        byte[] valByteArray = {1, 2, (byte) simpleInt};
 
         TestEntity entityRead = box.get(id);
         assertNotNull(entityRead);
@@ -70,7 +71,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertEquals(valLong, entityRead.getSimpleLong());
         assertEquals(valFloat, entityRead.getSimpleFloat(), 0);
         assertEquals(valDouble, entityRead.getSimpleDouble(), 0);
-        assertArrayEquals(new byte[]{1, 2, (byte) simpleInt}, entityRead.getSimpleByteArray());
+        assertArrayEquals(valByteArray, entityRead.getSimpleByteArray());
         String[] expectedStringArray = new String[]{simpleString};
         assertArrayEquals(expectedStringArray, entityRead.getSimpleStringArray());
         assertEquals(Arrays.asList(expectedStringArray), entityRead.getSimpleStringList());
@@ -87,6 +88,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertArrayEquals(new float[]{-valFloat, valFloat}, entityRead.getFloatArray(), 0);
         assertArrayEquals(new double[]{-valDouble, valDouble}, entity.getDoubleArray(), 0);
         assertEquals(new Date(1000 + simpleInt), entity.getDate());
+        assertArrayEquals(valByteArray, entity.getExternalId());
     }
 
     // Note: There is a similar test using the Cursor API directly (which is deprecated) in CursorTest.
@@ -123,7 +125,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertEquals(0, defaultEntity.getSimpleLong());
         assertEquals(0, defaultEntity.getSimpleFloat(), 0);
         assertEquals(0, defaultEntity.getSimpleDouble(), 0);
-        assertArrayEquals(null, defaultEntity.getSimpleByteArray());
+        assertNull(defaultEntity.getSimpleByteArray());
         assertNull(defaultEntity.getSimpleStringArray());
         assertNull(defaultEntity.getSimpleStringList());
         assertEquals(0, defaultEntity.getSimpleShortU());
@@ -138,6 +140,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertNull(defaultEntity.getFloatArray());
         assertNull(defaultEntity.getDoubleArray());
         assertNull(defaultEntity.getDate());
+        assertNull(defaultEntity.getExternalId());
     }
 
     @Test
