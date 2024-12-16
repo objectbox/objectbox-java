@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@
 package io.objectbox.exception;
 
 /**
- * Thrown when applying a transaction (e.g. putting an object) would exceed the
- * {@link io.objectbox.BoxStoreBuilder#maxSizeInKByte(long) maxSizeInKByte} configured for the store.
+ * Thrown when applying a database operation would exceed the (default)
+ * {@link io.objectbox.BoxStoreBuilder#maxSizeInKByte(long) maxSizeInKByte} configured for the Store.
+ * <p>
+ * This can occur for operations like when an Object is {@link io.objectbox.Box#put(Object) put}, at the point when the
+ * (internal) transaction is committed. Or when the Store is opened with a max size smaller than the existing database.
  */
 public class DbFullException extends DbException {
     public DbFullException(String message) {
