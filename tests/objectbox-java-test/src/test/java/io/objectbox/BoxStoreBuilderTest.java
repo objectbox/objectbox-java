@@ -262,6 +262,14 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
         assumeFalse(IN_MEMORY); // no max size support for in-memory
 
         builder = createBoxStoreBuilder(null);
+        // The empty data.mdb file is around 12 KB, but creating will fail also if slightly above that
+        builder.maxSizeInKByte(15);
+        DbFullException couldNotPut = assertThrows(
+                DbFullException.class,
+                () -> builder.build()
+        );
+        assertEquals("Could not put", couldNotPut.getMessage());
+
         builder.maxSizeInKByte(30); // Empty file is around 12 KB, object below adds about 8 KB each.
         store = builder.build();
         putTestEntity(LONG_STRING, 1);

@@ -369,13 +369,13 @@ public class BoxStoreBuilder {
 
     /**
      * Sets the maximum size the database file can grow to.
-     * When applying a transaction (e.g. putting an object) would exceed it a {@link DbFullException} is thrown.
      * <p>
-     * By default, this is 1 GB, which should be sufficient for most applications.
-     * In general, a maximum size prevents the database from growing indefinitely when something goes wrong
-     * (for example data is put in an infinite loop).
+     * The Store will throw when the file size is about to be exceeded, see {@link DbFullException} for details.
      * <p>
-     * This value can be changed, so increased or also decreased, each time when opening a store.
+     * By default, this is 1 GB, which should be sufficient for most applications. In general, a maximum size prevents
+     * the database from growing indefinitely when something goes wrong (for example data is put in an infinite loop).
+     * <p>
+     * This can be set to a value different, so higher or also lower, from when last building the Store.
      */
     public BoxStoreBuilder maxSizeInKByte(long maxSizeInKByte) {
         if (maxSizeInKByte <= maxDataSizeInKByte) {

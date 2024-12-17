@@ -21,7 +21,7 @@ package io.objectbox.exception;
  * {@link io.objectbox.BoxStoreBuilder#maxSizeInKByte(long) maxSizeInKByte} configured for the Store.
  * <p>
  * This can occur for operations like when an Object is {@link io.objectbox.Box#put(Object) put}, at the point when the
- * (internal) transaction is committed. Or when the Store is opened with a max size smaller than the existing database.
+ * (internal) transaction is committed. Or when the Store is opened with a max size too small for the existing database.
  */
 public class DbFullException extends DbException {
     public DbFullException(String message) {
