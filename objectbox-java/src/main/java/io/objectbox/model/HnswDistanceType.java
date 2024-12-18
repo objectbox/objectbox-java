@@ -45,6 +45,12 @@ public final class HnswDistanceType {
    */
   public static final short DotProduct = 3;
   /**
+   * For geospatial coordinates aka latitude/longitude pairs.
+   * Note, that the vector dimension must be 2, with the latitude being the first element and longitude the second.
+   * Internally, this uses haversine distance.
+   */
+  public static final short Geo = 6;
+  /**
    * A custom dot product similarity measure that does not require the vectors to be normalized.
    * Note: this is no replacement for cosine similarity (like DotProduct for normalized vectors is).
    * The non-linear conversion provides a high precision over the entire float range (for the raw dot product).
@@ -54,7 +60,7 @@ public final class HnswDistanceType {
    */
   public static final short DotProductNonNormalized = 10;
 
-  public static final String[] names = { "Unknown", "Euclidean", "Cosine", "DotProduct", "", "", "", "", "", "", "DotProductNonNormalized", };
+  public static final String[] names = { "Unknown", "Euclidean", "Cosine", "DotProduct", "", "", "Geo", "", "", "", "DotProductNonNormalized", };
 
   public static String name(int e) { return names[e]; }
 }

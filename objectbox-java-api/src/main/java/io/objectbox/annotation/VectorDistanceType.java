@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2024-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,19 @@ public enum VectorDistanceType {
      * Value range (normalized vectors): 0.0 - 2.0 (0.0: same direction, 1.0: orthogonal, 2.0: opposite direction)
      */
     DOT_PRODUCT,
+
+    /**
+     * For geospatial coordinates, more specifically latitude and longitude pairs.
+     * <p>
+     * Note, the vector dimension should be 2, with the latitude being the first element and longitude the second.
+     * If the vector has more than 2 dimensions, only the first 2 dimensions are used.
+     * If the vector has fewer than 2 dimensions, the distance is always zero.
+     * <p>
+     * Internally, this uses haversine distance.
+     * <p>
+     * Value range: 0 km - 6371 * π km (approx. 20015.09 km; half the Earth's circumference)
+     */
+    GEO,
 
     /**
      * A custom dot product similarity measure that does not require the vectors to be normalized.
