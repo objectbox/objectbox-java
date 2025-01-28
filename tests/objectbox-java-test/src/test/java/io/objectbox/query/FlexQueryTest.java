@@ -16,7 +16,6 @@
 
 package io.objectbox.query;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -123,7 +122,6 @@ public class FlexQueryTest extends AbstractQueryTest {
         return entity;
     }
 
-    @Ignore("Broken due to flex map query API changes, see objectbox#1099")
     @Test
     public void contains_stringObjectMap() {
         // Note: map keys and values can not be null, so no need to test. See FlexMapConverterTest.
@@ -148,8 +146,8 @@ public class FlexQueryTest extends AbstractQueryTest {
 
         // containsKeyValue only matches if key and value is equal.
         assertContainsKeyValue("banana-string", "banana");
-        assertContainsKeyValue("banana-long", -1L);
-        // containsKeyValue only supports strings and integers.
+        // containsKeyValue only supports strings for now (TODO: until objectbox#1099 functionality is added).
+        // assertContainsKeyValue("banana-long", -1L);
 
         // setParameters works with strings and integers.
         Query<TestEntity> setParamQuery = box.query(
@@ -162,10 +160,10 @@ public class FlexQueryTest extends AbstractQueryTest {
         assertEquals(1, setParamResults.size());
         assertTrue(setParamResults.get(0).getStringObjectMap().containsKey("banana-string"));
 
-        setParamQuery.setParameters("contains", "banana milk shake-long", Long.toString(1));
+        setParamQuery.setParameters("contains", "banana milk shake-string", "banana milk shake");
         setParamResults = setParamQuery.find();
         assertEquals(1, setParamResults.size());
-        assertTrue(setParamResults.get(0).getStringObjectMap().containsKey("banana milk shake-long"));
+        assertTrue(setParamResults.get(0).getStringObjectMap().containsKey("banana milk shake-string"));
     }
 
     private void assertContainsKey(String key) {
