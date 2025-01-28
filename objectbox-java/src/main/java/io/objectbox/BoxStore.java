@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class BoxStore implements Closeable {
     public static final String JNI_VERSION = "4.0.2-2024-10-15";
 
     /** The native or core version of ObjectBox the Java library is known to work with. */
-    private static final String VERSION = "4.0.3-2024-11-05";
+    private static final String VERSION = "4.1.0-2025-01-28";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
