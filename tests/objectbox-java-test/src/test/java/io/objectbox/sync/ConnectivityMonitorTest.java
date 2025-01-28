@@ -159,6 +159,11 @@ public class ConnectivityMonitorTest {
         }
 
         @Override
+        public void setLoginCredentials(SyncCredentials[] multipleCredentials) {
+
+        }
+
+        @Override
         public boolean awaitFirstLogin(long millisToWait) {
             return false;
         }

@@ -54,6 +54,11 @@ public final class SyncServerBuilder {
     private int syncServerFlags;
     private int workerThreads;
 
+    private String publicKey;
+    private String publicKeyUrl;
+    private String claimIss;
+    private String claimAud;
+
     /**
      * Use {@link Sync#server(BoxStore, String, SyncCredentials)} instead.
      */
@@ -222,11 +227,45 @@ public final class SyncServerBuilder {
 
     /**
      * Sets the number of workers for the main task pool.
-     * <p>
+     *
      * If not set or set to 0, this uses a hardware-dependant default, e.g. 3 * CPU "cores".
      */
     public SyncServerBuilder workerThreads(int workerThreads) {
         this.workerThreads = workerThreads;
+        return this;
+    }
+
+    /**
+     * Set the public key used to verify JWT tokens.
+     * <p>
+     * The public key should be in the PEM format.
+     */
+    public SyncServerBuilder jwtConfigPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+        return this;
+    }
+
+    /**
+     * Set the JWKS (Json Web Key Sets) URL to fetch the current public key used to verify JWT tokens.
+     */
+    public SyncServerBuilder jwtConfigPublicKeyUrl(String publicKeyUrl) {
+        this.publicKeyUrl = publicKeyUrl;
+        return this;
+    }
+
+    /**
+     * Set the JWT claim "iss" (issuer) used to verify JWT tokens.
+     */
+    public SyncServerBuilder jwtConfigClaimIss(String claimIss) {
+        this.claimIss = claimIss;
+        return this;
+    }
+
+    /**
+     * Set the JWT claim "aud" (audience) used to verify JWT tokens.
+     */
+    public SyncServerBuilder jwtConfigClaimAud(String claimAud) {
+        this.claimAud = claimAud;
         return this;
     }
 
@@ -282,6 +321,16 @@ public final class SyncServerBuilder {
         }
         int authenticationMethodsOffset = buildAuthenticationMethods(fbb);
         int clusterPeersVectorOffset = buildClusterPeers(fbb);
+        int jwtConfigOffset = 0;
+        if (publicKey != null || publicKeyUrl != null) {
+            if (claimAud == null) {
+                throw new IllegalArgumentException("claimAud must be set");
+            }
+            if (claimIss == null) {
+                throw new IllegalArgumentException("claimIss must be set");
+            }
+            jwtConfigOffset = buildJwtConfig(fbb, publicKey, publicKeyUrl, claimIss, claimAud);
+        }
         // Clear credentials immediately to make abuse less likely,
         // but only after setting all options to allow (re-)using the same credentials object
         // for authentication and cluster peers login credentials.
@@ -323,6 +372,9 @@ public final class SyncServerBuilder {
         if (clusterFlags != 0) {
             SyncServerOptions.addClusterFlags(fbb, clusterFlags);
         }
+        if (jwtConfigOffset != 0) {
+            SyncServerOptions.addJwtConfig(fbb, jwtConfigOffset);
+        }
         int offset = SyncServerOptions.endSyncServerOptions(fbb);
         fbb.finish(offset);
 
@@ -350,6 +402,30 @@ public final class SyncServerBuilder {
             Credentials.addBytes(fbb, tokenBytesOffset);
         }
         return Credentials.endCredentials(fbb);
+    }
+
+    private int buildJwtConfig(FlatBufferBuilder fbb, @Nullable String publicKey, @Nullable String publicKeyUrl, String claimIss, String claimAud) {
+        if (publicKey == null && publicKeyUrl == null) {
+            throw new IllegalArgumentException("Either publicKey or publicKeyUrl must be set");
+        }
+        int publicKeyOffset = 0;
+        int publicKeyUrlOffset = 0;
+        if (publicKey != null) {
+            publicKeyOffset = fbb.createString(publicKey);
+        } else {
+            publicKeyUrlOffset = fbb.createString(publicKeyUrl);
+        }
+        int claimIssOffset = fbb.createString(claimIss);
+        int claimAudOffset = fbb.createString(claimAud);
+        JwtConfig.startJwtConfig(fbb);
+        if (publicKeyOffset != 0) {
+            JwtConfig.addPublicKey(fbb, publicKeyOffset);
+        } else {
+            JwtConfig.addPublicKeyUrl(fbb, publicKeyUrlOffset);
+        }
+        JwtConfig.addClaimIss(fbb, claimIssOffset);
+        JwtConfig.addClaimAud(fbb, claimAudOffset);
+        return JwtConfig.endJwtConfig(fbb);
     }
 
     private int buildClusterPeers(FlatBufferBuilder fbb) {

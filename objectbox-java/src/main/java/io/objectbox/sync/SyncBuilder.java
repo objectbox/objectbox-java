@@ -17,6 +17,8 @@
 package io.objectbox.sync;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -40,7 +42,7 @@ public final class SyncBuilder {
     final Platform platform;
     final BoxStore boxStore;
     String url;
-    final SyncCredentials credentials;
+    final List<SyncCredentials> credentials;
 
     @Nullable SyncLoginListener loginListener;
     @Nullable SyncCompletedListener completedListener;
@@ -94,12 +96,35 @@ public final class SyncBuilder {
         }
         this.platform = Platform.findPlatform();
         this.boxStore = boxStore;
-        this.credentials = credentials;
+        this.credentials = Collections.singletonList(credentials);
+    }
+
+    @Internal
+    public SyncBuilder(BoxStore boxStore, SyncCredentials[] multipleCredentials) {
+        checkNotNull(boxStore, "BoxStore is required.");
+        if (multipleCredentials.length == 0) {
+            throw new IllegalArgumentException("At least one Sync credential is required.");
+        }
+        if (!BoxStore.isSyncAvailable()) {
+            throw new IllegalStateException(
+                    "This library does not include ObjectBox Sync. " +
+                            "Please visit https://objectbox.io/sync/ for options.");
+        }
+        this.platform = Platform.findPlatform();
+        this.boxStore = boxStore;
+        this.credentials = Arrays.asList(multipleCredentials);
     }
 
     @Internal
     public SyncBuilder(BoxStore boxStore, String url, SyncCredentials credentials) {
         this(boxStore, credentials);
+        checkNotNull(url, "Sync server URL is required.");
+        this.url = url;
+    }
+
+    @Internal
+    public SyncBuilder(BoxStore boxStore, String url, SyncCredentials[] multipleCredentials) {
+        this(boxStore, multipleCredentials);
         checkNotNull(url, "Sync server URL is required.");
         this.url = url;
     }

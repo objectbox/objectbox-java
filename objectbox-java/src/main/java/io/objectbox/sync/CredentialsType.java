@@ -54,5 +54,21 @@ public final class CredentialsType {
    * Generic credential type suitable for ObjectBox admin (and possibly others in the future)
    */
   public static final int UserPassword = 6;
+  /**
+   * JSON Web Token (JWT): an ID token that typically provides identity information about the authenticated user.
+   */
+  public static final int JwtId = 7;
+  /**
+   * JSON Web Token (JWT): an access token that is used to access resources.
+   */
+  public static final int JwtAccess = 8;
+  /**
+   * JSON Web Token (JWT): a refresh token that is used to obtain a new access token.
+   */
+  public static final int JwtRefresh = 9;
+  /**
+   * JSON Web Token (JWT): a token that is neither an ID, access, nor refresh token.
+   */
+  public static final int JwtCustom = 10;
 }
 

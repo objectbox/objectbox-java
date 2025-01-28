@@ -52,6 +52,22 @@ public abstract class SyncCredentials {
         return new SyncCredentialsUserPassword(user, password);
     }
 
+    public static SyncCredentials jwtIdToken(String jwtIdToken) {
+        return new SyncCredentialsToken(CredentialsType.JWT_ID_TOKEN, jwtIdToken);
+    }
+
+    public static SyncCredentials jwtAccessToken(String jwtAccessToken) {
+        return new SyncCredentialsToken(CredentialsType.JWT_ACCESS_TOKEN, jwtAccessToken);
+    }
+
+    public static SyncCredentials jwtRefreshToken(String jwtRefreshToken) {
+        return new SyncCredentialsToken(CredentialsType.JWT_REFRESH_TOKEN, jwtRefreshToken);
+    }
+
+    public static SyncCredentials jwtCustomToken(String jwtCustomToken) {
+        return new SyncCredentialsToken(CredentialsType.JWT_CUSTOM_TOKEN, jwtCustomToken);
+    }
+
     /**
      * No authentication, unsecured. Use only for development and testing purposes.
      */
@@ -65,7 +81,11 @@ public abstract class SyncCredentials {
         GOOGLE(io.objectbox.sync.CredentialsType.GoogleAuth),
         SHARED_SECRET_SIPPED(io.objectbox.sync.CredentialsType.SharedSecretSipped),
         OBX_ADMIN_USER(io.objectbox.sync.CredentialsType.ObxAdminUser),
-        USER_PASSWORD(io.objectbox.sync.CredentialsType.UserPassword);
+        USER_PASSWORD(io.objectbox.sync.CredentialsType.UserPassword),
+        JWT_ID_TOKEN(io.objectbox.sync.CredentialsType.JwtId),
+        JWT_ACCESS_TOKEN(io.objectbox.sync.CredentialsType.JwtAccess),
+        JWT_REFRESH_TOKEN(io.objectbox.sync.CredentialsType.JwtRefresh),
+        JWT_CUSTOM_TOKEN(io.objectbox.sync.CredentialsType.JwtCustom);
 
         public final long id;
 

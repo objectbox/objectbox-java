@@ -64,6 +64,19 @@ public final class Sync {
     }
 
     /**
+     * Starts building a {@link SyncClient}. Once done, complete with {@link SyncBuilder#build() build()}.
+     *
+     * @param boxStore The {@link BoxStore} the client should use.
+     * @param url The URL of the Sync server on which the Sync protocol is exposed. This is typically a WebSockets URL
+     * starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
+     * {@code ws://127.0.0.1:9999}.
+     * @param multipleCredentials An array of {@link SyncCredentials} to be used to authenticate the user.
+     */
+    public static SyncBuilder client(BoxStore boxStore, String url, SyncCredentials[] multipleCredentials) {
+        return new SyncBuilder(boxStore, url, multipleCredentials);
+    }
+
+    /**
      * Starts building a {@link SyncServer}. Once done, complete with {@link SyncServerBuilder#build() build()}.
      * <p>
      * Note: when also using Admin, make sure it is started before the server.
