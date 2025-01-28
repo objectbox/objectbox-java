@@ -9,6 +9,8 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
 - Android: require Android 5.0 (API level 21) or higher.
 - JVM: ObjectBox might crash on Windows when creating a BoxStore. To resolve this, make sure to update your JDK to the
   latest patch release (8.0.432+6, 11.0.25+9, 17.0.13+11 and 21.0.5+11-LTS are known to work).
+- Vector Search: add new `VectorDistanceType.GEO` distance type to perform vector searches on geographical coordinates.
+  This is particularly useful for location-based applications.
 
 ## 4.0.3 - 2024-10-15
 
