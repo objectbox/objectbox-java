@@ -80,7 +80,8 @@ public final class SyncServerImpl implements SyncServer {
 
     @Override
     public boolean isRunning() {
-        return nativeIsRunning(getHandle());
+        long handle = this.handle;  // Do not call getHandle() as it throws if handle is 0
+        return handle != 0 && nativeIsRunning(handle);
     }
 
     @Override
