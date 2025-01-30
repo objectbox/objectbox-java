@@ -48,8 +48,46 @@ public abstract class SyncCredentials {
         return new SyncCredentialsToken(CredentialsType.GOOGLE, idToken);
     }
 
+    /**
+     * ObjectBox admin users (username/password)
+     */
+    public static SyncCredentials obxAdminUser(String user, String password) {
+        return new SyncCredentialsUserPassword(CredentialsType.OBX_ADMIN_USER, user, password);
+    }
+
+    /**
+     * Generic credential type suitable for ObjectBox admin (and possibly others in the future)
+     */
     public static SyncCredentials userAndPassword(String user, String password) {
-        return new SyncCredentialsUserPassword(user, password);
+        return new SyncCredentialsUserPassword(CredentialsType.USER_PASSWORD, user, password);
+    }
+
+    /**
+     * JSON Web Token (JWT): an ID token that typically provides identity information about the authenticated user.
+     */
+    public static SyncCredentials jwtIdToken(String jwtIdToken) {
+        return new SyncCredentialsToken(CredentialsType.JWT_ID_TOKEN, jwtIdToken);
+    }
+
+    /**
+     * JSON Web Token (JWT): an access token that is used to access resources.
+     */
+    public static SyncCredentials jwtAccessToken(String jwtAccessToken) {
+        return new SyncCredentialsToken(CredentialsType.JWT_ACCESS_TOKEN, jwtAccessToken);
+    }
+
+    /**
+     * JSON Web Token (JWT): a refresh token that is used to obtain a new access token.
+     */
+    public static SyncCredentials jwtRefreshToken(String jwtRefreshToken) {
+        return new SyncCredentialsToken(CredentialsType.JWT_REFRESH_TOKEN, jwtRefreshToken);
+    }
+
+    /**
+     * JSON Web Token (JWT): a token that is neither an ID, access, nor refresh token.
+     */
+    public static SyncCredentials jwtCustomToken(String jwtCustomToken) {
+        return new SyncCredentialsToken(CredentialsType.JWT_CUSTOM_TOKEN, jwtCustomToken);
     }
 
     /**
@@ -65,7 +103,11 @@ public abstract class SyncCredentials {
         GOOGLE(io.objectbox.sync.CredentialsType.GoogleAuth),
         SHARED_SECRET_SIPPED(io.objectbox.sync.CredentialsType.SharedSecretSipped),
         OBX_ADMIN_USER(io.objectbox.sync.CredentialsType.ObxAdminUser),
-        USER_PASSWORD(io.objectbox.sync.CredentialsType.UserPassword);
+        USER_PASSWORD(io.objectbox.sync.CredentialsType.UserPassword),
+        JWT_ID_TOKEN(io.objectbox.sync.CredentialsType.JwtId),
+        JWT_ACCESS_TOKEN(io.objectbox.sync.CredentialsType.JwtAccess),
+        JWT_REFRESH_TOKEN(io.objectbox.sync.CredentialsType.JwtRefresh),
+        JWT_CUSTOM_TOKEN(io.objectbox.sync.CredentialsType.JwtCustom);
 
         public final long id;
 

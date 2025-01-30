@@ -134,6 +134,12 @@ public interface SyncClient extends Closeable {
     void setLoginCredentials(SyncCredentials credentials);
 
     /**
+     * Updates the login credentials. This should not be required during regular use.
+     * It allows passing login credentials that the client can use to authenticate with the server.
+     */
+    void setLoginCredentials(SyncCredentials[] multipleCredentials);
+
+    /**
      * Waits until the sync client receives a response to its first (connection and) login attempt
      * or until the given time has expired.
      * Use {@link #isLoggedIn()} or {@link #getLastLoginCode()} afterwards to determine if login was successful.

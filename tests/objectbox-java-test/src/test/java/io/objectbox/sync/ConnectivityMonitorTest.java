@@ -155,7 +155,10 @@ public class ConnectivityMonitorTest {
 
         @Override
         public void setLoginCredentials(SyncCredentials credentials) {
+        }
 
+        @Override
+        public void setLoginCredentials(SyncCredentials[] multipleCredentials) {
         }
 
         @Override
@@ -165,17 +168,14 @@ public class ConnectivityMonitorTest {
 
         @Override
         public void start() {
-
         }
 
         @Override
         public void stop() {
-
         }
 
         @Override
         public void close() {
-
         }
 
         @Override

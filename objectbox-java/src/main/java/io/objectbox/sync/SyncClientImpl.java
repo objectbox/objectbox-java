@@ -96,7 +96,13 @@ public final class SyncClientImpl implements SyncClient {
         this.internalListener = new InternalSyncClientListener();
         nativeSetListener(handle, internalListener);
 
-        setLoginCredentials(builder.credentials);
+        if (builder.credentials.size() == 1) {
+            setLoginCredentials(builder.credentials.get(0));
+        } else if (builder.credentials.size() > 1) {
+            setLoginCredentials(builder.credentials.toArray(new SyncCredentials[0]));
+        } else {
+            throw new IllegalArgumentException("No credentials provided");
+        }
 
         // If created successfully, let store keep a reference so the caller does not have to.
         InternalAccess.setSyncClient(builder.boxStore, this);
@@ -195,6 +201,26 @@ public final class SyncClientImpl implements SyncClient {
             throw new IllegalArgumentException("credentials is not a supported type");
         }
     }
+
+    @Override
+    public void setLoginCredentials(SyncCredentials[] multipleCredentials) {
+        for (int i = 0; i < multipleCredentials.length; i++) {
+            SyncCredentials credentials = multipleCredentials[i];
+            boolean isLast = i == (multipleCredentials.length - 1);
+            if (credentials instanceof SyncCredentialsToken) {
+                SyncCredentialsToken credToken = (SyncCredentialsToken) credentials;
+                nativeAddLoginCredentials(getHandle(), credToken.getTypeId(), credToken.getTokenBytes(), isLast);
+                credToken.clear(); // Clear immediately, not needed anymore.
+            } else if (credentials instanceof SyncCredentialsUserPassword) {
+                SyncCredentialsUserPassword credUserPassword = (SyncCredentialsUserPassword) credentials;
+                nativeAddLoginCredentialsUserPassword(getHandle(), credUserPassword.getTypeId(), credUserPassword.getUsername(),
+                        credUserPassword.getPassword(), isLast);
+            } else {
+                throw new IllegalArgumentException("credentials is not a supported type");
+            }
+        }
+    }
+
 
     @Override
     public boolean awaitFirstLogin(long millisToWait) {
@@ -321,6 +347,10 @@ public final class SyncClientImpl implements SyncClient {
     private native void nativeSetLoginInfo(long handle, long credentialsType, @Nullable byte[] credentials);
 
     private native void nativeSetLoginInfoUserPassword(long handle, long credentialsType, String username, String password);
+
+    private native void nativeAddLoginCredentials(long handle, long credentialsType, @Nullable byte[] credentials, boolean complete);
+
+    private native void nativeAddLoginCredentialsUserPassword(long handle, long credentialsType, String username, String password, boolean complete);
 
     private native void nativeSetListener(long handle, @Nullable InternalSyncClientListener listener);
 

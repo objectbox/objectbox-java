@@ -16,6 +16,7 @@
 
 package io.objectbox.sync;
 
+import io.objectbox.exception.FeatureNotAvailableException;
 import org.junit.Test;
 
 import io.objectbox.AbstractObjectBoxTest;
@@ -53,8 +54,8 @@ public class SyncTest extends AbstractObjectBoxTest {
 
     @Test
     public void creatingSyncClient_throws() {
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class,
+        FeatureNotAvailableException exception = assertThrows(
+                FeatureNotAvailableException.class,
                 () -> Sync.client(store, "wss://127.0.0.1", SyncCredentials.none())
         );
         String message = exception.getMessage();
@@ -64,8 +65,8 @@ public class SyncTest extends AbstractObjectBoxTest {
 
     @Test
     public void creatingSyncServer_throws() {
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class,
+        FeatureNotAvailableException exception = assertThrows(
+                FeatureNotAvailableException.class,
                 () -> Sync.server(store, "wss://127.0.0.1", SyncCredentials.none())
         );
         String message = exception.getMessage();

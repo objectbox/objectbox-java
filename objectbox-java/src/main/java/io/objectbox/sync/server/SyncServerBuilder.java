@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.exception.FeatureNotAvailableException;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.sync.Credentials;
 import io.objectbox.sync.Sync;
@@ -54,6 +55,19 @@ public final class SyncServerBuilder {
     private int syncServerFlags;
     private int workerThreads;
 
+    private String publicKey;
+    private String publicKeyUrl;
+    private String claimIss;
+    private String claimAud;
+
+    private static void checkFeatureSyncServerAvailable() {
+        if (!BoxStore.isSyncServerAvailable()) {
+            throw new FeatureNotAvailableException(
+                    "This library does not include ObjectBox Sync Server. " +
+                            "Please visit https://objectbox.io/sync/ for options.");
+        }
+    }
+
     /**
      * Use {@link Sync#server(BoxStore, String, SyncCredentials)} instead.
      */
@@ -62,11 +76,7 @@ public final class SyncServerBuilder {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(url, "Sync server URL is required.");
         checkNotNull(authenticatorCredentials, "Authenticator credentials are required.");
-        if (!BoxStore.isSyncServerAvailable()) {
-            throw new IllegalStateException(
-                    "This library does not include ObjectBox Sync Server. " +
-                            "Please visit https://objectbox.io/sync/ for options.");
-        }
+        checkFeatureSyncServerAvailable();
         this.boxStore = boxStore;
         try {
             this.url = new URI(url);
@@ -74,6 +84,24 @@ public final class SyncServerBuilder {
             throw new IllegalArgumentException("Sync server URL is invalid: " + url, e);
         }
         authenticatorCredentials(authenticatorCredentials);
+    }
+
+    /**
+     * Use {@link Sync#server(BoxStore, String, SyncCredentials)} instead.
+     */
+    @Internal
+    public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials[] multipleAuthenticatorCredentials) {
+        checkNotNull(boxStore, "BoxStore is required.");
+        checkNotNull(url, "Sync server URL is required.");
+        checkNotNull(multipleAuthenticatorCredentials, "Authenticator credentials are required.");
+        checkFeatureSyncServerAvailable();
+        this.boxStore = boxStore;
+        try {
+            this.url = new URI(url);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Sync server URL is invalid: " + url, e);
+        }
+        authenticatorCredentials(multipleAuthenticatorCredentials);
     }
 
     /**
@@ -101,6 +129,20 @@ public final class SyncServerBuilder {
                     + " are not supported");
         }
         credentials.add((SyncCredentialsToken) authenticatorCredentials);
+        return this;
+    }
+
+    /**
+     * Adds additional authenticator credentials to authenticate clients or peers with.
+     * <p>
+     * For the embedded server, currently only {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none}
+     * are supported.
+     */
+    public SyncServerBuilder authenticatorCredentials(SyncCredentials[] multipleAuthenticatorCredentials) {
+        checkNotNull(multipleAuthenticatorCredentials, "Authenticator credentials must not be null.");
+        for (SyncCredentials credentials : multipleAuthenticatorCredentials) {
+            authenticatorCredentials(credentials);
+        }
         return this;
     }
 
@@ -138,7 +180,7 @@ public final class SyncServerBuilder {
     }
 
     /**
-     * @deprecated Use {@link #clusterPeer(String,SyncCredentials)} instead.
+     * @deprecated Use {@link #clusterPeer(String, SyncCredentials)} instead.
      */
     @Deprecated
     public SyncServerBuilder peer(String url, SyncCredentials credentials) {
@@ -231,6 +273,40 @@ public final class SyncServerBuilder {
     }
 
     /**
+     * Set the public key used to verify JWT tokens.
+     * <p>
+     * The public key should be in the PEM format.
+     */
+    public SyncServerBuilder jwtConfigPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+        return this;
+    }
+
+    /**
+     * Set the JWKS (Json Web Key Sets) URL to fetch the current public key used to verify JWT tokens.
+     */
+    public SyncServerBuilder jwtConfigPublicKeyUrl(String publicKeyUrl) {
+        this.publicKeyUrl = publicKeyUrl;
+        return this;
+    }
+
+    /**
+     * Set the JWT claim "iss" (issuer) used to verify JWT tokens.
+     */
+    public SyncServerBuilder jwtConfigClaimIss(String claimIss) {
+        this.claimIss = claimIss;
+        return this;
+    }
+
+    /**
+     * Set the JWT claim "aud" (audience) used to verify JWT tokens.
+     */
+    public SyncServerBuilder jwtConfigClaimAud(String claimAud) {
+        this.claimAud = claimAud;
+        return this;
+    }
+
+    /**
      * Builds and returns a Sync server ready to {@link SyncServer#start()}.
      * <p>
      * Note: this clears all previously set authenticator credentials.
@@ -282,6 +358,16 @@ public final class SyncServerBuilder {
         }
         int authenticationMethodsOffset = buildAuthenticationMethods(fbb);
         int clusterPeersVectorOffset = buildClusterPeers(fbb);
+        int jwtConfigOffset = 0;
+        if (publicKey != null || publicKeyUrl != null) {
+            if (claimAud == null) {
+                throw new IllegalArgumentException("claimAud must be set");
+            }
+            if (claimIss == null) {
+                throw new IllegalArgumentException("claimIss must be set");
+            }
+            jwtConfigOffset = buildJwtConfig(fbb, publicKey, publicKeyUrl, claimIss, claimAud);
+        }
         // Clear credentials immediately to make abuse less likely,
         // but only after setting all options to allow (re-)using the same credentials object
         // for authentication and cluster peers login credentials.
@@ -323,6 +409,9 @@ public final class SyncServerBuilder {
         if (clusterFlags != 0) {
             SyncServerOptions.addClusterFlags(fbb, clusterFlags);
         }
+        if (jwtConfigOffset != 0) {
+            SyncServerOptions.addJwtConfig(fbb, jwtConfigOffset);
+        }
         int offset = SyncServerOptions.endSyncServerOptions(fbb);
         fbb.finish(offset);
 
@@ -350,6 +439,30 @@ public final class SyncServerBuilder {
             Credentials.addBytes(fbb, tokenBytesOffset);
         }
         return Credentials.endCredentials(fbb);
+    }
+
+    private int buildJwtConfig(FlatBufferBuilder fbb, @Nullable String publicKey, @Nullable String publicKeyUrl, String claimIss, String claimAud) {
+        if (publicKey == null && publicKeyUrl == null) {
+            throw new IllegalArgumentException("Either publicKey or publicKeyUrl must be set");
+        }
+        int publicKeyOffset = 0;
+        int publicKeyUrlOffset = 0;
+        if (publicKey != null) {
+            publicKeyOffset = fbb.createString(publicKey);
+        } else {
+            publicKeyUrlOffset = fbb.createString(publicKeyUrl);
+        }
+        int claimIssOffset = fbb.createString(claimIss);
+        int claimAudOffset = fbb.createString(claimAud);
+        JwtConfig.startJwtConfig(fbb);
+        if (publicKeyOffset != 0) {
+            JwtConfig.addPublicKey(fbb, publicKeyOffset);
+        } else {
+            JwtConfig.addPublicKeyUrl(fbb, publicKeyUrlOffset);
+        }
+        JwtConfig.addClaimIss(fbb, claimIssOffset);
+        JwtConfig.addClaimAud(fbb, claimAudOffset);
+        return JwtConfig.endJwtConfig(fbb);
     }
 
     private int buildClusterPeers(FlatBufferBuilder fbb) {
