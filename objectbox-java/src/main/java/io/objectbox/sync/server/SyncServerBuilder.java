@@ -82,6 +82,28 @@ public final class SyncServerBuilder {
     }
 
     /**
+     * Use {@link Sync#server(BoxStore, String, SyncCredentials)} instead.
+     */
+    @Internal
+    public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials[] multipleAuthenticatorCredentials) {
+        checkNotNull(boxStore, "BoxStore is required.");
+        checkNotNull(url, "Sync server URL is required.");
+        checkNotNull(multipleAuthenticatorCredentials, "Authenticator credentials are required.");
+        if (!BoxStore.isSyncServerAvailable()) {
+            throw new IllegalStateException(
+                    "This library does not include ObjectBox Sync Server. " +
+                            "Please visit https://objectbox.io/sync/ for options.");
+        }
+        this.boxStore = boxStore;
+        try {
+            this.url = new URI(url);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Sync server URL is invalid: " + url, e);
+        }
+        authenticatorCredentials(multipleAuthenticatorCredentials);
+    }
+
+    /**
      * Sets the path to a directory that contains a cert.pem and key.pem file to use to establish encrypted
      * connections.
      * <p>
@@ -106,6 +128,20 @@ public final class SyncServerBuilder {
                     + " are not supported");
         }
         credentials.add((SyncCredentialsToken) authenticatorCredentials);
+        return this;
+    }
+
+    /**
+     * Adds additional authenticator credentials to authenticate clients or peers with.
+     * <p>
+     * For the embedded server, currently only {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none}
+     * are supported.
+     */
+    public SyncServerBuilder authenticatorCredentials(SyncCredentials[] multipleAuthenticatorCredentials) {
+        checkNotNull(multipleAuthenticatorCredentials, "Authenticator credentials must not be null.");
+        for (SyncCredentials credentials : multipleAuthenticatorCredentials) {
+            authenticatorCredentials(credentials);
+        }
         return this;
     }
 

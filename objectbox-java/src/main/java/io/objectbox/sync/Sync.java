@@ -94,6 +94,23 @@ public final class Sync {
     }
 
     /**
+     * Starts building a {@link SyncServer}. Once done, complete with {@link SyncServerBuilder#build() build()}.
+     * <p>
+     * Note: when also using Admin, make sure it is started before the server.
+     *
+     * @param boxStore The {@link BoxStore} the server should use.
+     * @param url The URL of the Sync server on which the Sync protocol is exposed. This is typically a WebSockets URL
+     * starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
+     * {@code ws://0.0.0.0:9999}.
+     * @param multipleAuthenticatorCredentials An authentication method available to Sync clients and peers. Additional
+     * authenticator credentials can be supplied using the returned builder. For the embedded server, currently only
+     * {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none} are supported.
+     */
+    public static SyncServerBuilder server(BoxStore boxStore, String url, SyncCredentials[] multipleAuthenticatorCredentials) {
+        return new SyncServerBuilder(boxStore, url, multipleAuthenticatorCredentials);
+    }
+
+    /**
      * Starts building a {@link SyncHybrid}, a client/server hybrid typically used for embedded cluster setups.
      * <p>
      * Unlike {@link #client(BoxStore, String, SyncCredentials)} and {@link #server(BoxStore, String, SyncCredentials)},

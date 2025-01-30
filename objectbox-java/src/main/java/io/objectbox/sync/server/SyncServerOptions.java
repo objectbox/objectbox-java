@@ -129,6 +129,15 @@ public final class SyncServerOptions extends Table {
    */
   public io.objectbox.sync.server.JwtConfig jwtConfig() { return jwtConfig(new io.objectbox.sync.server.JwtConfig()); }
   public io.objectbox.sync.server.JwtConfig jwtConfig(io.objectbox.sync.server.JwtConfig obj) { int o = __offset(30); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
+  /**
+   * Credential types that are required for clients logging in.
+   */
+  public long requiredCredentials(int j) { int o = __offset(32); return o != 0 ? (long)bb.getInt(__vector(o) + j * 4) & 0xFFFFFFFFL : 0; }
+  public int requiredCredentialsLength() { int o = __offset(32); return o != 0 ? __vector_len(o) : 0; }
+  public IntVector requiredCredentialsVector() { return requiredCredentialsVector(new IntVector()); }
+  public IntVector requiredCredentialsVector(IntVector obj) { int o = __offset(32); return o != 0 ? obj.__assign(__vector(o), bb) : null; }
+  public ByteBuffer requiredCredentialsAsByteBuffer() { return __vector_as_bytebuffer(32, 4); }
+  public ByteBuffer requiredCredentialsInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 32, 4); }
 
   public static int createSyncServerOptions(FlatBufferBuilder builder,
                                             int urlOffset,
@@ -144,10 +153,12 @@ public final class SyncServerOptions extends Table {
                                             int clusterIdOffset,
                                             int clusterPeersOffset,
                                             long clusterFlags,
-                                            int jwtConfigOffset) {
-    builder.startTable(14);
+                                            int jwtConfigOffset,
+                                            int requiredCredentialsOffset) {
+    builder.startTable(15);
     SyncServerOptions.addHistorySizeTargetKb(builder, historySizeTargetKb);
     SyncServerOptions.addHistorySizeMaxKb(builder, historySizeMaxKb);
+    SyncServerOptions.addRequiredCredentials(builder, requiredCredentialsOffset);
     SyncServerOptions.addJwtConfig(builder, jwtConfigOffset);
     SyncServerOptions.addClusterFlags(builder, clusterFlags);
     SyncServerOptions.addClusterPeers(builder, clusterPeersOffset);
@@ -163,7 +174,7 @@ public final class SyncServerOptions extends Table {
     return SyncServerOptions.endSyncServerOptions(builder);
   }
 
-  public static void startSyncServerOptions(FlatBufferBuilder builder) { builder.startTable(14); }
+  public static void startSyncServerOptions(FlatBufferBuilder builder) { builder.startTable(15); }
   public static void addUrl(FlatBufferBuilder builder, int urlOffset) { builder.addOffset(0, urlOffset, 0); }
   public static void addAuthenticationMethods(FlatBufferBuilder builder, int authenticationMethodsOffset) { builder.addOffset(1, authenticationMethodsOffset, 0); }
   public static int createAuthenticationMethodsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
@@ -182,6 +193,9 @@ public final class SyncServerOptions extends Table {
   public static void startClusterPeersVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
   public static void addClusterFlags(FlatBufferBuilder builder, long clusterFlags) { builder.addInt(12, (int) clusterFlags, (int) 0L); }
   public static void addJwtConfig(FlatBufferBuilder builder, int jwtConfigOffset) { builder.addOffset(13, jwtConfigOffset, 0); }
+  public static void addRequiredCredentials(FlatBufferBuilder builder, int requiredCredentialsOffset) { builder.addOffset(14, requiredCredentialsOffset, 0); }
+  public static int createRequiredCredentialsVector(FlatBufferBuilder builder, long[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt((int) data[i]); return builder.endVector(); }
+  public static void startRequiredCredentialsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
   public static int endSyncServerOptions(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;

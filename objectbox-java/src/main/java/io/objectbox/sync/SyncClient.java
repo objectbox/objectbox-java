@@ -133,6 +133,10 @@ public interface SyncClient extends Closeable {
      */
     void setLoginCredentials(SyncCredentials credentials);
 
+    /**
+     * Updates the login credentials. This should not be required during regular use.
+     * It allows passing login credentials that the client can use to authenticate with the server.
+     */
     void setLoginCredentials(SyncCredentials[] multipleCredentials);
 
     /**
