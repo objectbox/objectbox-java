@@ -28,8 +28,8 @@ public final class SyncCredentialsUserPassword extends SyncCredentials {
     private final String username;
     private final String password;
 
-    SyncCredentialsUserPassword(String username, String password) {
-        super(CredentialsType.USER_PASSWORD);
+    SyncCredentialsUserPassword(CredentialsType type, String username, String password) {
+        super(type);
         this.username = username;
         this.password = password;
     }
@@ -44,6 +44,6 @@ public final class SyncCredentialsUserPassword extends SyncCredentials {
 
     @Override
     SyncCredentials createClone() {
-        return new SyncCredentialsUserPassword(this.username, this.password);
+        return new SyncCredentialsUserPassword(getType(), this.username, this.password);
     }
 }

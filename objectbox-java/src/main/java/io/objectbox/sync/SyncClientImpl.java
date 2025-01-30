@@ -206,7 +206,7 @@ public final class SyncClientImpl implements SyncClient {
     public void setLoginCredentials(SyncCredentials[] multipleCredentials) {
         for (int i = 0; i < multipleCredentials.length; i++) {
             SyncCredentials credentials = multipleCredentials[i];
-            boolean isLast = i == multipleCredentials.length - 1;
+            boolean isLast = i == (multipleCredentials.length - 1);
             if (credentials instanceof SyncCredentialsToken) {
                 SyncCredentialsToken credToken = (SyncCredentialsToken) credentials;
                 nativeAddLoginCredentials(getHandle(), credToken.getTypeId(), credToken.getTokenBytes(), isLast);

@@ -48,22 +48,44 @@ public abstract class SyncCredentials {
         return new SyncCredentialsToken(CredentialsType.GOOGLE, idToken);
     }
 
-    public static SyncCredentials userAndPassword(String user, String password) {
-        return new SyncCredentialsUserPassword(user, password);
+    /**
+     * ObjectBox admin users (username/password)
+     */
+    public static SyncCredentials obxAdminUser(String user, String password) {
+        return new SyncCredentialsUserPassword(CredentialsType.OBX_ADMIN_USER, user, password);
     }
 
+    /**
+     * Generic credential type suitable for ObjectBox admin (and possibly others in the future)
+     */
+    public static SyncCredentials userAndPassword(String user, String password) {
+        return new SyncCredentialsUserPassword(CredentialsType.USER_PASSWORD, user, password);
+    }
+
+    /**
+     * JSON Web Token (JWT): an ID token that typically provides identity information about the authenticated user.
+     */
     public static SyncCredentials jwtIdToken(String jwtIdToken) {
         return new SyncCredentialsToken(CredentialsType.JWT_ID_TOKEN, jwtIdToken);
     }
 
+    /**
+     * JSON Web Token (JWT): an access token that is used to access resources.
+     */
     public static SyncCredentials jwtAccessToken(String jwtAccessToken) {
         return new SyncCredentialsToken(CredentialsType.JWT_ACCESS_TOKEN, jwtAccessToken);
     }
 
+    /**
+     * JSON Web Token (JWT): a refresh token that is used to obtain a new access token.
+     */
     public static SyncCredentials jwtRefreshToken(String jwtRefreshToken) {
         return new SyncCredentialsToken(CredentialsType.JWT_REFRESH_TOKEN, jwtRefreshToken);
     }
 
+    /**
+     * JSON Web Token (JWT): a token that is neither an ID, access, nor refresh token.
+     */
     public static SyncCredentials jwtCustomToken(String jwtCustomToken) {
         return new SyncCredentialsToken(CredentialsType.JWT_CUSTOM_TOKEN, jwtCustomToken);
     }

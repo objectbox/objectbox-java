@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.exception.FeatureNotAvailableException;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.sync.Credentials;
 import io.objectbox.sync.Sync;
@@ -59,6 +60,14 @@ public final class SyncServerBuilder {
     private String claimIss;
     private String claimAud;
 
+    private static void checkFeatureSyncServerAvailable() {
+        if (!BoxStore.isSyncServerAvailable()) {
+            throw new FeatureNotAvailableException(
+                    "This library does not include ObjectBox Sync Server. " +
+                            "Please visit https://objectbox.io/sync/ for options.");
+        }
+    }
+
     /**
      * Use {@link Sync#server(BoxStore, String, SyncCredentials)} instead.
      */
@@ -67,11 +76,7 @@ public final class SyncServerBuilder {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(url, "Sync server URL is required.");
         checkNotNull(authenticatorCredentials, "Authenticator credentials are required.");
-        if (!BoxStore.isSyncServerAvailable()) {
-            throw new IllegalStateException(
-                    "This library does not include ObjectBox Sync Server. " +
-                            "Please visit https://objectbox.io/sync/ for options.");
-        }
+        checkFeatureSyncServerAvailable();
         this.boxStore = boxStore;
         try {
             this.url = new URI(url);
@@ -89,11 +94,7 @@ public final class SyncServerBuilder {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(url, "Sync server URL is required.");
         checkNotNull(multipleAuthenticatorCredentials, "Authenticator credentials are required.");
-        if (!BoxStore.isSyncServerAvailable()) {
-            throw new IllegalStateException(
-                    "This library does not include ObjectBox Sync Server. " +
-                            "Please visit https://objectbox.io/sync/ for options.");
-        }
+        checkFeatureSyncServerAvailable();
         this.boxStore = boxStore;
         try {
             this.url = new URI(url);
@@ -179,7 +180,7 @@ public final class SyncServerBuilder {
     }
 
     /**
-     * @deprecated Use {@link #clusterPeer(String,SyncCredentials)} instead.
+     * @deprecated Use {@link #clusterPeer(String, SyncCredentials)} instead.
      */
     @Deprecated
     public SyncServerBuilder peer(String url, SyncCredentials credentials) {
@@ -263,7 +264,7 @@ public final class SyncServerBuilder {
 
     /**
      * Sets the number of workers for the main task pool.
-     *
+     * <p>
      * If not set or set to 0, this uses a hardware-dependant default, e.g. 3 * CPU "cores".
      */
     public SyncServerBuilder workerThreads(int workerThreads) {

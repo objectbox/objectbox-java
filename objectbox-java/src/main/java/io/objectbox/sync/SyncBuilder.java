@@ -24,6 +24,7 @@ import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Internal;
+import io.objectbox.exception.FeatureNotAvailableException;
 import io.objectbox.sync.internal.Platform;
 import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.listener.SyncCompletedListener;
@@ -85,15 +86,20 @@ public final class SyncBuilder {
         AUTO_NO_PUSHES
     }
 
+    private static void checkSyncFeatureAvailable() {
+        if (!BoxStore.isSyncAvailable()) {
+            throw new FeatureNotAvailableException(
+                    "This library does not include ObjectBox Sync. " +
+                            "Please visit https://objectbox.io/sync/ for options.");
+        }
+    }
+
+
     @Internal
     public SyncBuilder(BoxStore boxStore, SyncCredentials credentials) {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(credentials, "Sync credentials are required.");
-        if (!BoxStore.isSyncAvailable()) {
-            throw new IllegalStateException(
-                    "This library does not include ObjectBox Sync. " +
-                            "Please visit https://objectbox.io/sync/ for options.");
-        }
+        checkSyncFeatureAvailable();
         this.platform = Platform.findPlatform();
         this.boxStore = boxStore;
         this.credentials = Collections.singletonList(credentials);
@@ -105,11 +111,7 @@ public final class SyncBuilder {
         if (multipleCredentials.length == 0) {
             throw new IllegalArgumentException("At least one Sync credential is required.");
         }
-        if (!BoxStore.isSyncAvailable()) {
-            throw new IllegalStateException(
-                    "This library does not include ObjectBox Sync. " +
-                            "Please visit https://objectbox.io/sync/ for options.");
-        }
+        checkSyncFeatureAvailable();
         this.platform = Platform.findPlatform();
         this.boxStore = boxStore;
         this.credentials = Arrays.asList(multipleCredentials);
