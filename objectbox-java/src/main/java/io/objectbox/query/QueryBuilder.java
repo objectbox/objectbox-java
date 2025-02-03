@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,6 +176,16 @@ public class QueryBuilder<T> {
 
     private native long nativeIn(long handle, int propertyId, long[] values, boolean negate);
 
+    private native long nativeEqualKeyValue(long handle, int propertyId, String key, long value);
+
+    private native long nativeGreaterKeyValue(long handle, int propertyId, String key, long value);
+
+    private native long nativeGreaterEqualsKeyValue(long handle, int propertyId, String key, long value);
+
+    private native long nativeLessKeyValue(long handle, int propertyId, String key, long value);
+
+    private native long nativeLessEqualsKeyValue(long handle, int propertyId, String key, long value);
+
     // ------------------------------ Strings ------------------------------
 
     private native long nativeEqual(long handle, int propertyId, String value, boolean caseSensitive);
@@ -186,7 +196,15 @@ public class QueryBuilder<T> {
 
     private native long nativeContainsElement(long handle, int propertyId, String value, boolean caseSensitive);
 
-    private native long nativeContainsKeyValue(long handle, int propertyId, String key, String value, boolean caseSensitive);
+    private native long nativeEqualKeyValue(long handle, int propertyId, String key, String value, boolean caseSensitive);
+
+    private native long nativeGreaterKeyValue(long handle, int propertyId, String key, String value, boolean caseSensitive);
+
+    private native long nativeGreaterEqualsKeyValue(long handle, int propertyId, String key, String value, boolean caseSensitive);
+
+    private native long nativeLessKeyValue(long handle, int propertyId, String key, String value, boolean caseSensitive);
+
+    private native long nativeLessEqualsKeyValue(long handle, int propertyId, String key, String value, boolean caseSensitive);
 
     private native long nativeStartsWith(long handle, int propertyId, String value, boolean caseSensitive);
 
@@ -207,6 +225,16 @@ public class QueryBuilder<T> {
     private native long nativeBetween(long handle, int propertyId, double value1, double value2);
 
     private native long nativeNearestNeighborsF32(long handle, int propertyId, float[] queryVector, int maxResultCount);
+
+    private native long nativeEqualKeyValue(long handle, int propertyId, String key, double value);
+
+    private native long nativeGreaterKeyValue(long handle, int propertyId, String key, double value);
+
+    private native long nativeGreaterEqualsKeyValue(long handle, int propertyId, String key, double value);
+
+    private native long nativeLessKeyValue(long handle, int propertyId, String key, double value);
+
+    private native long nativeLessEqualsKeyValue(long handle, int propertyId, String key, double value);
 
     // ------------------------------ Bytes ------------------------------
 
@@ -681,6 +709,7 @@ public class QueryBuilder<T> {
     }
 
     // FIXME DbException: invalid unordered_map<K, T> key
+
     /**
      * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
      * to use this, there are currently no plans to remove the old query API.
@@ -897,14 +926,163 @@ public class QueryBuilder<T> {
     }
 
     /**
-     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
-     * to use this, there are currently no plans to remove the old query API.
-     * <p>
-     * For a String-key map property, matches if at least one key and value combination equals the given values.
+     * @deprecated Use {@link Property#equalKeyValue(String, String, StringOrder)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
      */
+    @Deprecated
     public QueryBuilder<T> containsKeyValue(Property<T> property, String key, String value, StringOrder order) {
         verifyHandle();
-        checkCombineCondition(nativeContainsKeyValue(handle, property.getId(), key, value, order == StringOrder.CASE_SENSITIVE));
+        checkCombineCondition(nativeEqualKeyValue(handle, property.getId(), key, value, order == StringOrder.CASE_SENSITIVE));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#equalKeyValue(String, String, StringOrder)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> equalKeyValue(Property<T> property, String key, String value, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeEqualKeyValue(handle, property.getId(), key, value, order == StringOrder.CASE_SENSITIVE));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#lessKeyValue(String, String, StringOrder)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> lessKeyValue(Property<T> property, String key, String value, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeLessKeyValue(handle, property.getId(), key, value, order == StringOrder.CASE_SENSITIVE));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#lessOrEqualKeyValue(String, String, StringOrder)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> lessOrEqualKeyValue(Property<T> property, String key, String value, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeLessEqualsKeyValue(handle, property.getId(), key, value, order == StringOrder.CASE_SENSITIVE));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#greaterKeyValue(String, String, StringOrder)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> greaterKeyValue(Property<T> property, String key, String value, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeGreaterKeyValue(handle, property.getId(), key, value, order == StringOrder.CASE_SENSITIVE));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#greaterOrEqualKeyValue(String, String, StringOrder)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> greaterOrEqualKeyValue(Property<T> property, String key, String value, StringOrder order) {
+        verifyHandle();
+        checkCombineCondition(nativeGreaterEqualsKeyValue(handle, property.getId(), key, value, order == StringOrder.CASE_SENSITIVE));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#equalKeyValue(String, long)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> equalKeyValue(Property<T> property, String key, long value) {
+        verifyHandle();
+        checkCombineCondition(nativeEqualKeyValue(handle, property.getId(), key, value));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#lessKeyValue(String, long)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> lessKeyValue(Property<T> property, String key, long value) {
+        verifyHandle();
+        checkCombineCondition(nativeLessKeyValue(handle, property.getId(), key, value));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#lessOrEqualKeyValue(String, long)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> lessOrEqualKeyValue(Property<T> property, String key, long value) {
+        verifyHandle();
+        checkCombineCondition(nativeLessEqualsKeyValue(handle, property.getId(), key, value));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#greaterOrEqualKeyValue(String, long)} (String, String, StringOrder)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> greaterKeyValue(Property<T> property, String key, long value) {
+        verifyHandle();
+        checkCombineCondition(nativeGreaterKeyValue(handle, property.getId(), key, value));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#greaterOrEqualKeyValue(String, long)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> greaterOrEqualKeyValue(Property<T> property, String key, long value) {
+        verifyHandle();
+        checkCombineCondition(nativeGreaterEqualsKeyValue(handle, property.getId(), key, value));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#equalKeyValue(String, double)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> equalKeyValue(Property<T> property, String key, double value) {
+        verifyHandle();
+        checkCombineCondition(nativeEqualKeyValue(handle, property.getId(), key, value));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#lessKeyValue(String, double)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> lessKeyValue(Property<T> property, String key, double value) {
+        verifyHandle();
+        checkCombineCondition(nativeLessKeyValue(handle, property.getId(), key, value));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#lessOrEqualKeyValue(String, double)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> lessOrEqualKeyValue(Property<T> property, String key, double value) {
+        verifyHandle();
+        checkCombineCondition(nativeLessEqualsKeyValue(handle, property.getId(), key, value));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#greaterKeyValue(String, double)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> greaterKeyValue(Property<T> property, String key, double value) {
+        verifyHandle();
+        checkCombineCondition(nativeGreaterKeyValue(handle, property.getId(), key, value));
+        return this;
+    }
+
+    /**
+     * Note: Use {@link Property#greaterOrEqualKeyValue(String, double)} with the
+     * {@link Box#query(QueryCondition) new query API} instead.
+     */
+    public QueryBuilder<T> greaterOrEqualKeyValue(Property<T> property, String key, double value) {
+        verifyHandle();
+        checkCombineCondition(nativeGreaterEqualsKeyValue(handle, property.getId(), key, value));
         return this;
     }
 

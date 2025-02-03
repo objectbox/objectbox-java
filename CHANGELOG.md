@@ -4,6 +4,13 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
+## 4.1.1 - in development
+
+- Add new query conditions `equalKeyValue`, `greaterKeyValue`, `lessKeyValue`, `lessOrEqualKeyValue`, and 
+  `greaterOrEqualKeyValue` that are helpful to write complex queries for [string maps](https://docs.objectbox.io/advanced/custom-types#flex-properties).
+  These methods support `String`, `long` and `double` data types for the values in the string map.
+- Deprecate the `containsKeyValue` condition, use the new `equalKeyValue` condition instead.
+
 ## 4.1.0 - 2025-01-30
 
 - Vector Search: add new `VectorDistanceType.GEO` distance type to perform vector searches on geographical coordinates.

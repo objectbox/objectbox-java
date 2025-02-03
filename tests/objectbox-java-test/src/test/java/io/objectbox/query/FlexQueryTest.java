@@ -16,20 +16,19 @@
 
 package io.objectbox.query;
 
+import io.objectbox.TestEntity;
+import io.objectbox.TestEntity_;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
-import io.objectbox.TestEntity;
-import io.objectbox.TestEntity_;
-
-
+import static io.objectbox.TestEntity_.stringObjectMap;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -132,7 +131,7 @@ public class FlexQueryTest extends AbstractQueryTest {
 
         // contains throws when used with flex property.
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> box.query(TestEntity_.stringObjectMap.contains("banana-string")));
+                () -> box.query(stringObjectMap.contains("banana-string")));
         assertEquals("Property type is neither a string nor array of strings: Flex", exception.getMessage());
 
         // containsElement only matches if key is equal.
@@ -145,17 +144,16 @@ public class FlexQueryTest extends AbstractQueryTest {
         assertContainsKey("banana-map");
 
         // containsKeyValue only matches if key and value is equal.
-        assertContainsKeyValue("banana-string", "banana");
-        // containsKeyValue only supports strings for now (TODO: until objectbox#1099 functionality is added).
-        // assertContainsKeyValue("banana-long", -1L);
+        assertQueryCondition(stringObjectMap.equalKeyValue("banana-string", "banana", QueryBuilder.StringOrder.CASE_SENSITIVE), 1);
+        assertQueryCondition(stringObjectMap.equalKeyValue("banana-long", -1L), 1);
 
         // setParameters works with strings and integers.
         Query<TestEntity> setParamQuery = box.query(
-                TestEntity_.stringObjectMap.containsKeyValue("", "").alias("contains")
+                stringObjectMap.equalKeyValue("", "", QueryBuilder.StringOrder.CASE_SENSITIVE).alias("contains")
         ).build();
         assertEquals(0, setParamQuery.find().size());
 
-        setParamQuery.setParameters(TestEntity_.stringObjectMap, "banana-string", "banana");
+        setParamQuery.setParameters(stringObjectMap, "banana-string", "banana");
         List<TestEntity> setParamResults = setParamQuery.find();
         assertEquals(1, setParamResults.size());
         assertTrue(setParamResults.get(0).getStringObjectMap().containsKey("banana-string"));
@@ -164,22 +162,128 @@ public class FlexQueryTest extends AbstractQueryTest {
         setParamResults = setParamQuery.find();
         assertEquals(1, setParamResults.size());
         assertTrue(setParamResults.get(0).getStringObjectMap().containsKey("banana milk shake-string"));
+
+        setParamQuery.close();
     }
 
     private void assertContainsKey(String key) {
-        List<TestEntity> results = box.query(
-                TestEntity_.stringObjectMap.containsElement(key)
-        ).build().find();
-        assertEquals(1, results.size());
-        assertTrue(results.get(0).getStringObjectMap().containsKey(key));
+        try (Query<TestEntity> query = box.query(
+                stringObjectMap.containsElement(key)
+        ).build()) {
+            List<TestEntity> results = query.find();
+            assertEquals(1, results.size());
+            assertTrue(results.get(0).getStringObjectMap().containsKey(key));
+        }
     }
 
-    private void assertContainsKeyValue(String key, Object value) {
-        List<TestEntity> results = box.query(
-                TestEntity_.stringObjectMap.containsKeyValue(key, value.toString())
-        ).build().find();
-        assertEquals(1, results.size());
-        assertTrue(results.get(0).getStringObjectMap().containsKey(key));
-        assertEquals(value, results.get(0).getStringObjectMap().get(key));
+    private TestEntity createObjectWithStringObjectMap(String s, long l, double d) {
+        TestEntity entity = new TestEntity();
+        Map<String, Object> map = new HashMap<>();
+        map.put("key-string", s);
+        map.put("key-long", l);
+        map.put("key-double", d);
+        entity.setStringObjectMap(map);
+        return entity;
     }
+
+    private List<TestEntity> createObjectsWithStringObjectMap() {
+        return Arrays.asList(
+                createObjectWithStringObjectMap("apple", -1L, -0.2d),
+                createObjectWithStringObjectMap("Cherry", 3L, -1234.56d),
+                createObjectWithStringObjectMap("Apple", 234234234L, 1234.56d),
+                createObjectWithStringObjectMap("pineapple", -567L, 0.1d)
+        );
+    }
+
+    @Test
+    public void greaterKeyValue_stringObjectMap() {
+        List<TestEntity> objects = createObjectsWithStringObjectMap();
+        box.put(objects);
+        long apple = objects.get(0).getId();
+        long Cherry = objects.get(1).getId();
+        long Apple = objects.get(2).getId();
+        long pineapple = objects.get(3).getId();
+
+        // Note: CASE_SENSITIVE orders like "Apple, Cherry, apple, pineapple"
+        assertQueryCondition(stringObjectMap.greaterKeyValue("key-string", "Cherry",
+                QueryBuilder.StringOrder.CASE_SENSITIVE), apple, pineapple);
+        assertQueryCondition(stringObjectMap.greaterKeyValue("key-string", "Cherry",
+                QueryBuilder.StringOrder.CASE_INSENSITIVE), pineapple);
+        assertQueryCondition(stringObjectMap.greaterKeyValue("key-long", -2L), apple, Cherry, Apple);
+        assertQueryCondition(stringObjectMap.greaterKeyValue("key-long", 234234234L));
+        assertQueryCondition(stringObjectMap.greaterKeyValue("key-double", 0.0d), Apple, pineapple);
+        assertQueryCondition(stringObjectMap.greaterKeyValue("key-double", 1234.56d));
+    }
+
+    @Test
+    public void greaterEqualsKeyValue_stringObjectMap() {
+        List<TestEntity> objects = createObjectsWithStringObjectMap();
+        box.put(objects);
+        long apple = objects.get(0).getId();
+        long Cherry = objects.get(1).getId();
+        long Apple = objects.get(2).getId();
+        long pineapple = objects.get(3).getId();
+
+        // Note: CASE_SENSITIVE orders like "Apple, Cherry, apple, pineapple"
+        assertQueryCondition(stringObjectMap.greaterOrEqualKeyValue("key-string", "Cherry",
+                QueryBuilder.StringOrder.CASE_SENSITIVE), apple, Cherry, pineapple);
+        assertQueryCondition(stringObjectMap.greaterOrEqualKeyValue("key-string", "Cherry",
+                QueryBuilder.StringOrder.CASE_INSENSITIVE), Cherry, pineapple);
+        assertQueryCondition(stringObjectMap.greaterOrEqualKeyValue("key-long", -2L), apple, Cherry, Apple);
+        assertQueryCondition(stringObjectMap.greaterOrEqualKeyValue("key-long", 234234234L), Apple);
+        assertQueryCondition(stringObjectMap.greaterOrEqualKeyValue("key-double", 0.05d), Apple, pineapple);
+        assertQueryCondition(stringObjectMap.greaterOrEqualKeyValue("key-double", 1234.54d), Apple);
+    }
+
+    @Test
+    public void lessKeyValue_stringObjectMap() {
+        List<TestEntity> objects = createObjectsWithStringObjectMap();
+        box.put(objects);
+        long apple = objects.get(0).getId();
+        long Cherry = objects.get(1).getId();
+        long Apple = objects.get(2).getId();
+        long pineapple = objects.get(3).getId();
+
+        // Note: CASE_SENSITIVE orders like "Apple, Cherry, apple, pineapple"
+        assertQueryCondition(stringObjectMap.lessKeyValue("key-string", "Cherry",
+                QueryBuilder.StringOrder.CASE_SENSITIVE), Apple);
+        assertQueryCondition(stringObjectMap.lessKeyValue("key-string", "Cherry",
+                QueryBuilder.StringOrder.CASE_INSENSITIVE), apple, Apple);
+        assertQueryCondition(stringObjectMap.lessKeyValue("key-long", -2L), pineapple);
+        assertQueryCondition(stringObjectMap.lessKeyValue("key-long", 6734234234L), apple, Cherry, Apple, pineapple);
+        assertQueryCondition(stringObjectMap.lessKeyValue("key-double", 0.0d), apple, Cherry);
+        assertQueryCondition(stringObjectMap.lessKeyValue("key-double", 1234.56d), apple, Cherry, pineapple);
+    }
+
+    @Test
+    public void lessEqualsKeyValue_stringObjectMap() {
+        List<TestEntity> objects = createObjectsWithStringObjectMap();
+        box.put(objects);
+        long apple = objects.get(0).getId();
+        long Cherry = objects.get(1).getId();
+        long Apple = objects.get(2).getId();
+        long pineapple = objects.get(3).getId();
+
+        // Note: CASE_SENSITIVE orders like "Apple, Cherry, apple, pineapple"
+        assertQueryCondition(stringObjectMap.lessOrEqualKeyValue("key-string", "Cherry",
+                QueryBuilder.StringOrder.CASE_SENSITIVE), Cherry, Apple);
+        assertQueryCondition(stringObjectMap.lessOrEqualKeyValue("key-string", "Cherry",
+                QueryBuilder.StringOrder.CASE_INSENSITIVE), apple, Cherry, Apple);
+        assertQueryCondition(stringObjectMap.lessOrEqualKeyValue("key-long", -1L), apple, pineapple);
+        assertQueryCondition(stringObjectMap.lessOrEqualKeyValue("key-long", -567L), pineapple);
+        assertQueryCondition(stringObjectMap.lessOrEqualKeyValue("key-double", 0.0d), apple, Cherry);
+        assertQueryCondition(stringObjectMap.lessOrEqualKeyValue("key-double", 1234.56d), apple, Cherry, Apple, pineapple);
+    }
+
+    private void assertQueryCondition(PropertyQueryCondition<TestEntity> condition, long... expectedIds) {
+        try (Query<TestEntity> query = box.query(condition).build()) {
+            List<TestEntity> results = query.find();
+            assertResultIds(expectedIds, results);
+        }
+    }
+
+    private void assertResultIds(long[] expected, List<TestEntity> results) {
+        assertArrayEquals(expected, results.stream().mapToLong(TestEntity::getId).toArray());
+    }
+
 }

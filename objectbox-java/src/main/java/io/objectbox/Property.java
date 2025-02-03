@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ import io.objectbox.query.PropertyQueryConditionImpl.StringArrayCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.StringCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.StringCondition.Operation;
 import io.objectbox.query.PropertyQueryConditionImpl.StringStringCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.StringLongCondition;
+import io.objectbox.query.PropertyQueryConditionImpl.StringDoubleCondition;
 import io.objectbox.query.Query;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
@@ -496,19 +498,159 @@ public class Property<ENTITY> implements Serializable {
      * For a String-key map property, matches if at least one key and value combination equals the given values
      * using {@link StringOrder#CASE_SENSITIVE StringOrder#CASE_SENSITIVE}.
      *
+     * @deprecated Use the {@link #equalKeyValue(String, String, StringOrder)} condition instead.
+     *
      * @see #containsKeyValue(String, String, StringOrder)
      */
+    @Deprecated
     public PropertyQueryCondition<ENTITY> containsKeyValue(String key, String value) {
-        return new StringStringCondition<>(this, StringStringCondition.Operation.CONTAINS_KEY_VALUE,
+        return new StringStringCondition<>(this, StringStringCondition.Operation.EQUAL_KEY_VALUE,
                 key, value, StringOrder.CASE_SENSITIVE);
     }
 
     /**
+     * @deprecated Use the {@link #equalKeyValue(String, String, StringOrder)} condition instead.
      * @see #containsKeyValue(String, String)
      */
+    @Deprecated
     public PropertyQueryCondition<ENTITY> containsKeyValue(String key, String value, StringOrder order) {
-        return new StringStringCondition<>(this, StringStringCondition.Operation.CONTAINS_KEY_VALUE,
+        return new StringStringCondition<>(this, StringStringCondition.Operation.EQUAL_KEY_VALUE,
                 key, value, order);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is equal
+     * to the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> equalKeyValue(String key, String value, StringOrder order) {
+        return new StringStringCondition<>(this, StringStringCondition.Operation.EQUAL_KEY_VALUE,
+                key, value, order);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is greater
+     * than the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> greaterKeyValue(String key, String value, StringOrder order) {
+        return new StringStringCondition<>(this, StringStringCondition.Operation.GREATER_KEY_VALUE,
+                key, value, order);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is greater
+     * than or equal to the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> greaterOrEqualKeyValue(String key, String value, StringOrder order) {
+        return new StringStringCondition<>(this, StringStringCondition.Operation.GREATER_EQUALS_KEY_VALUE,
+                key, value, order);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is less
+     * than the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> lessKeyValue(String key, String value, StringOrder order) {
+        return new StringStringCondition<>(this, StringStringCondition.Operation.LESS_KEY_VALUE,
+                key, value, order);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is less
+     * than or equal to the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> lessOrEqualKeyValue(String key, String value, StringOrder order) {
+        return new StringStringCondition<>(this, StringStringCondition.Operation.LESS_EQUALS_KEY_VALUE,
+                key, value, order);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is equal
+     * to the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> equalKeyValue(String key, long value) {
+        return new StringLongCondition<>(this, StringLongCondition.Operation.EQUAL_KEY_VALUE,
+                key, value);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is greater
+     * than the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> greaterKeyValue(String key, long value) {
+        return new StringLongCondition<>(this, StringLongCondition.Operation.GREATER_KEY_VALUE,
+                key, value);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is greater
+     * than or equal to the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> greaterOrEqualKeyValue(String key, long value) {
+        return new StringLongCondition<>(this, StringLongCondition.Operation.GREATER_EQUALS_KEY_VALUE,
+                key, value);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is less
+     * than the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> lessKeyValue(String key, long value) {
+        return new StringLongCondition<>(this, StringLongCondition.Operation.LESS_KEY_VALUE,
+                key, value);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is less
+     * than or equal to the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> lessOrEqualKeyValue(String key, long value) {
+        return new StringLongCondition<>(this, StringLongCondition.Operation.LESS_EQUALS_KEY_VALUE,
+                key, value);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is equal
+     * to the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> equalKeyValue(String key, double value) {
+        return new StringDoubleCondition<>(this, StringDoubleCondition.Operation.EQUAL_KEY_VALUE,
+                key, value);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is greater
+     * than the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> greaterKeyValue(String key, double value) {
+        return new StringDoubleCondition<>(this, StringDoubleCondition.Operation.GREATER_KEY_VALUE,
+                key, value);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is greater
+     * than or equal to the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> greaterOrEqualKeyValue(String key, double value) {
+        return new StringDoubleCondition<>(this, StringDoubleCondition.Operation.GREATER_EQUALS_KEY_VALUE,
+                key, value);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is less
+     * than the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> lessKeyValue(String key, double value) {
+        return new StringDoubleCondition<>(this, StringDoubleCondition.Operation.LESS_KEY_VALUE,
+                key, value);
+    }
+
+    /**
+     * For a String-key map property, matches the combination where the key and value of at least one map entry is less
+     * than or equal to the given {@code key} and {@code value}.
+     */
+    public PropertyQueryCondition<ENTITY> lessOrEqualKeyValue(String key, double value) {
+        return new StringDoubleCondition<>(this, StringDoubleCondition.Operation.LESS_EQUALS_KEY_VALUE,
+                key, value);
     }
 
     /**
