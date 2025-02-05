@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import io.objectbox.annotation.Backlink;
 import io.objectbox.annotation.Id;
-import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
@@ -642,7 +641,14 @@ public class Box<T> {
         return entityInfo;
     }
 
-    @Beta
+    /**
+     * Attaches the given object to this.
+     * <p>
+     * This typically should only be used when <a
+     * href="https://docs.objectbox.io/advanced/object-ids#self-assigned-object-ids">manually assigning IDs</a>.
+     *
+     * @param entity The object to attach this to.
+     */
     public void attach(T entity) {
         if (boxStoreField == null) {
             try {
