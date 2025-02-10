@@ -1160,9 +1160,12 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * Call this method from a thread that is about to be shutdown or likely not to use ObjectBox anymore:
-     * it frees any cached resources tied to the calling thread (e.g. readers). This method calls
-     * {@link Box#closeThreadResources()} for all initiated boxes ({@link #boxFor(Class)}).
+     * Frees any cached resources tied to the calling thread (e.g. readers).
+     * <p>
+     * Call this method from a thread that is about to be shut down or likely not to use ObjectBox anymore.
+     * <b>Careful:</b> ensure all transactions, like a query fetching results, have finished before.
+     * <p>
+     * This method calls {@link Box#closeThreadResources()} for all initiated boxes ({@link #boxFor(Class)}).
      */
     public void closeThreadResources() {
         for (Box<?> box : boxes.values()) {
