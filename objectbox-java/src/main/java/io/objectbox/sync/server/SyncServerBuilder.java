@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,10 +55,10 @@ public final class SyncServerBuilder {
     private int syncServerFlags;
     private int workerThreads;
 
-    private String publicKey;
-    private String publicKeyUrl;
-    private String claimIss;
-    private String claimAud;
+    private @Nullable String jwtPublicKey;
+    private @Nullable String jwtPublicKeyUrl;
+    private @Nullable String jwtClaimIss;
+    private @Nullable String jwtClaimAud;
 
     private static void checkFeatureSyncServerAvailable() {
         if (!BoxStore.isSyncServerAvailable()) {
@@ -273,37 +273,41 @@ public final class SyncServerBuilder {
     }
 
     /**
-     * Set the public key used to verify JWT tokens.
+     * Sets the public key used to verify JWT tokens.
      * <p>
      * The public key should be in the PEM format.
      */
     public SyncServerBuilder jwtConfigPublicKey(String publicKey) {
-        this.publicKey = publicKey;
+        this.jwtPublicKey = publicKey;
         return this;
     }
 
     /**
-     * Set the JWKS (Json Web Key Sets) URL to fetch the current public key used to verify JWT tokens.
+     * Sets the JWKS (Json Web Key Sets) URL to fetch the current public key used to verify JWT tokens.
      */
     public SyncServerBuilder jwtConfigPublicKeyUrl(String publicKeyUrl) {
-        this.publicKeyUrl = publicKeyUrl;
+        this.jwtPublicKeyUrl = publicKeyUrl;
         return this;
     }
 
     /**
-     * Set the JWT claim "iss" (issuer) used to verify JWT tokens.
+     * Sets the JWT claim "iss" (issuer) used to verify JWT tokens.
      */
     public SyncServerBuilder jwtConfigClaimIss(String claimIss) {
-        this.claimIss = claimIss;
+        this.jwtClaimIss = claimIss;
         return this;
     }
 
     /**
-     * Set the JWT claim "aud" (audience) used to verify JWT tokens.
+     * Sets the JWT claim "aud" (audience) used to verify JWT tokens.
      */
     public SyncServerBuilder jwtConfigClaimAud(String claimAud) {
-        this.claimAud = claimAud;
+        this.jwtClaimAud = claimAud;
         return this;
+    }
+
+    private boolean hasJwtConfig() {
+        return jwtPublicKey != null || jwtPublicKeyUrl != null;
     }
 
     /**
@@ -314,6 +318,14 @@ public final class SyncServerBuilder {
     public SyncServer build() {
         if (credentials.isEmpty()) {
             throw new IllegalStateException("At least one authenticator is required.");
+        }
+        if (hasJwtConfig()) {
+            if (jwtClaimAud == null) {
+                throw new IllegalArgumentException("To use JWT authentication, claimAud must be set");
+            }
+            if (jwtClaimIss == null) {
+                throw new IllegalArgumentException("To use JWT authentication, claimIss must be set");
+            }
         }
         if (!clusterPeers.isEmpty() || clusterFlags != 0) {
             checkNotNull(clusterId, "Cluster ID must be set to use cluster features.");
@@ -359,14 +371,8 @@ public final class SyncServerBuilder {
         int authenticationMethodsOffset = buildAuthenticationMethods(fbb);
         int clusterPeersVectorOffset = buildClusterPeers(fbb);
         int jwtConfigOffset = 0;
-        if (publicKey != null || publicKeyUrl != null) {
-            if (claimAud == null) {
-                throw new IllegalArgumentException("claimAud must be set");
-            }
-            if (claimIss == null) {
-                throw new IllegalArgumentException("claimIss must be set");
-            }
-            jwtConfigOffset = buildJwtConfig(fbb, publicKey, publicKeyUrl, claimIss, claimAud);
+        if (hasJwtConfig()) {
+            jwtConfigOffset = buildJwtConfig(fbb, jwtPublicKey, jwtPublicKeyUrl, jwtClaimIss, jwtClaimAud);
         }
         // Clear credentials immediately to make abuse less likely,
         // but only after setting all options to allow (re-)using the same credentials object
