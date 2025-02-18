@@ -72,10 +72,9 @@ public final class SyncServerBuilder {
      * Use {@link Sync#server(BoxStore, String, SyncCredentials)} instead.
      */
     @Internal
-    public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
+    public SyncServerBuilder(BoxStore boxStore, String url, @Nullable SyncCredentials authenticatorCredentials) {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(url, "Sync server URL is required.");
-        checkNotNull(authenticatorCredentials, "Authenticator credentials are required.");
         checkFeatureSyncServerAvailable();
         this.boxStore = boxStore;
         try {
@@ -83,7 +82,7 @@ public final class SyncServerBuilder {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Sync server URL is invalid: " + url, e);
         }
-        authenticatorCredentials(authenticatorCredentials);
+        authenticatorCredentialsOrNull(authenticatorCredentials);
     }
 
     /**
@@ -116,6 +115,18 @@ public final class SyncServerBuilder {
         return this;
     }
 
+    private SyncServerBuilder authenticatorCredentialsOrNull(@Nullable SyncCredentials authenticatorCredentials) {
+        if (authenticatorCredentials == null) {
+            return this; // Do nothing
+        }
+        if (!(authenticatorCredentials instanceof SyncCredentialsToken)) {
+            throw new IllegalArgumentException("Sync credentials of type " + authenticatorCredentials.getType()
+                    + " are not supported");
+        }
+        credentials.add((SyncCredentialsToken) authenticatorCredentials);
+        return this;
+    }
+
     /**
      * Adds additional authenticator credentials to authenticate clients or peers with.
      * <p>
@@ -124,12 +135,7 @@ public final class SyncServerBuilder {
      */
     public SyncServerBuilder authenticatorCredentials(SyncCredentials authenticatorCredentials) {
         checkNotNull(authenticatorCredentials, "Authenticator credentials must not be null.");
-        if (!(authenticatorCredentials instanceof SyncCredentialsToken)) {
-            throw new IllegalArgumentException("Sync credentials of type " + authenticatorCredentials.getType()
-                    + " are not supported");
-        }
-        credentials.add((SyncCredentialsToken) authenticatorCredentials);
-        return this;
+        return authenticatorCredentialsOrNull(authenticatorCredentials);
     }
 
     /**
@@ -316,7 +322,7 @@ public final class SyncServerBuilder {
      * Note: this clears all previously set authenticator credentials.
      */
     public SyncServer build() {
-        if (credentials.isEmpty()) {
+        if (!hasJwtConfig() && credentials.isEmpty()) {
             throw new IllegalStateException("At least one authenticator is required.");
         }
         if (hasJwtConfig()) {
@@ -368,7 +374,10 @@ public final class SyncServerBuilder {
         if (clusterId != null) {
             clusterIdOffset = fbb.createString(clusterId);
         }
-        int authenticationMethodsOffset = buildAuthenticationMethods(fbb);
+        int authenticationMethodsOffset = 0;
+        if (!credentials.isEmpty()) {
+            authenticationMethodsOffset = buildAuthenticationMethods(fbb);
+        }
         int clusterPeersVectorOffset = buildClusterPeers(fbb);
         int jwtConfigOffset = 0;
         if (hasJwtConfig()) {
@@ -387,7 +396,9 @@ public final class SyncServerBuilder {
         // After collecting all offsets, create options
         SyncServerOptions.startSyncServerOptions(fbb);
         SyncServerOptions.addUrl(fbb, urlOffset);
-        SyncServerOptions.addAuthenticationMethods(fbb, authenticationMethodsOffset);
+        if (authenticationMethodsOffset != 0) {
+            SyncServerOptions.addAuthenticationMethods(fbb, authenticationMethodsOffset);
+        }
         if (syncFlags != 0) {
             SyncServerOptions.addSyncFlags(fbb, syncFlags);
         }

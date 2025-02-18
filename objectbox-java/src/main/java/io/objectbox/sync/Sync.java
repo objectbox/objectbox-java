@@ -16,6 +16,8 @@
 
 package io.objectbox.sync;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
 import io.objectbox.sync.server.SyncServer;
@@ -83,9 +85,10 @@ public final class Sync {
      * {@code ws://0.0.0.0:9999}.
      * @param authenticatorCredentials An authentication method available to Sync clients and peers. Additional
      * authenticator credentials can be supplied using the returned builder. For the embedded server, currently only
-     * {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none} are supported.
+     * {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none} are supported. When only JWT
+     * authentication should be possible, pass {@code null}.
      */
-    public static SyncServerBuilder server(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
+    public static SyncServerBuilder server(BoxStore boxStore, String url, @Nullable SyncCredentials authenticatorCredentials) {
         return new SyncServerBuilder(boxStore, url, authenticatorCredentials);
     }
 
@@ -93,7 +96,7 @@ public final class Sync {
      * Like {@link #server(BoxStore, String, SyncCredentials)}, but supports passing a set of authentication methods
      * for clients and peers.
      */
-    public static SyncServerBuilder server(BoxStore boxStore, String url, SyncCredentials[] multipleAuthenticatorCredentials) {
+    public static SyncServerBuilder server(BoxStore boxStore, String url, @Nullable SyncCredentials[] multipleAuthenticatorCredentials) {
         return new SyncServerBuilder(boxStore, url, multipleAuthenticatorCredentials);
     }
 
