@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public final class SyncClientImpl implements SyncClient {
 
     SyncClientImpl(SyncBuilder builder) {
         this.boxStore = builder.boxStore;
-        this.serverUrl = builder.url;
+        this.serverUrl = builder.serverUrl();
         this.connectivityMonitor = builder.platform.getConnectivityMonitor();
 
         long boxStoreHandle = builder.boxStore.getNativeStore();
@@ -189,6 +189,9 @@ public final class SyncClientImpl implements SyncClient {
 
     @Override
     public void setLoginCredentials(SyncCredentials credentials) {
+        if (credentials == null) {
+            throw new IllegalArgumentException("credentials must not be null");
+        }
         if (credentials instanceof SyncCredentialsToken) {
             SyncCredentialsToken credToken = (SyncCredentialsToken) credentials;
             nativeSetLoginInfo(getHandle(), credToken.getTypeId(), credToken.getTokenBytes());
@@ -204,6 +207,9 @@ public final class SyncClientImpl implements SyncClient {
 
     @Override
     public void setLoginCredentials(SyncCredentials[] multipleCredentials) {
+        if (multipleCredentials == null) {
+            throw new IllegalArgumentException("credentials must not be null");
+        }
         for (int i = 0; i < multipleCredentials.length; i++) {
             SyncCredentials credentials = multipleCredentials[i];
             boolean isLast = i == (multipleCredentials.length - 1);
