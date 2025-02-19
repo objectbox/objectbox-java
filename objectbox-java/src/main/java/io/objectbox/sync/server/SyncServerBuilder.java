@@ -72,9 +72,10 @@ public final class SyncServerBuilder {
      * Use {@link Sync#server(BoxStore, String, SyncCredentials)} instead.
      */
     @Internal
-    public SyncServerBuilder(BoxStore boxStore, String url, @Nullable SyncCredentials authenticatorCredentials) {
+    public SyncServerBuilder(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(url, "Sync server URL is required.");
+        checkNotNull(authenticatorCredentials, "Authenticator credentials are required.");
         checkFeatureSyncServerAvailable();
         this.boxStore = boxStore;
         try {
@@ -82,7 +83,7 @@ public final class SyncServerBuilder {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Sync server URL is invalid: " + url, e);
         }
-        authenticatorCredentialsOrNull(authenticatorCredentials);
+        authenticatorCredentials(authenticatorCredentials);
     }
 
     /**
@@ -100,7 +101,9 @@ public final class SyncServerBuilder {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Sync server URL is invalid: " + url, e);
         }
-        authenticatorCredentials(multipleAuthenticatorCredentials);
+        for (SyncCredentials credentials : multipleAuthenticatorCredentials) {
+            authenticatorCredentials(credentials);
+        }
     }
 
     /**
@@ -115,48 +118,39 @@ public final class SyncServerBuilder {
         return this;
     }
 
-    private SyncServerBuilder authenticatorCredentialsOrNull(@Nullable SyncCredentials authenticatorCredentials) {
-        if (authenticatorCredentials == null) {
-            return this; // Do nothing
-        }
+    /**
+     * Adds additional authenticator credentials to authenticate clients or peers with.
+     * <p>
+     * For the embedded server, currently only {@link SyncCredentials#sharedSecret}, any JWT method like
+     * {@link SyncCredentials#jwtIdTokenServer()} as well as {@link SyncCredentials#none} are supported.
+     */
+    public SyncServerBuilder authenticatorCredentials(SyncCredentials authenticatorCredentials) {
+        checkNotNull(authenticatorCredentials, "Authenticator credentials must not be null.");
         if (!(authenticatorCredentials instanceof SyncCredentialsToken)) {
             throw new IllegalArgumentException("Sync credentials of type " + authenticatorCredentials.getType()
                     + " are not supported");
         }
-        credentials.add((SyncCredentialsToken) authenticatorCredentials);
-        return this;
-    }
-
-    /**
-     * Adds additional authenticator credentials to authenticate clients or peers with.
-     * <p>
-     * For the embedded server, currently only {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none}
-     * are supported.
-     */
-    public SyncServerBuilder authenticatorCredentials(SyncCredentials authenticatorCredentials) {
-        checkNotNull(authenticatorCredentials, "Authenticator credentials must not be null.");
-        return authenticatorCredentialsOrNull(authenticatorCredentials);
-    }
-
-    /**
-     * Adds additional authenticator credentials to authenticate clients or peers with.
-     * <p>
-     * For the embedded server, currently only {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none}
-     * are supported.
-     */
-    public SyncServerBuilder authenticatorCredentials(SyncCredentials[] multipleAuthenticatorCredentials) {
-        checkNotNull(multipleAuthenticatorCredentials, "Authenticator credentials must not be null.");
-        for (SyncCredentials credentials : multipleAuthenticatorCredentials) {
-            authenticatorCredentials(credentials);
+        SyncCredentialsToken tokenCredential = (SyncCredentialsToken) authenticatorCredentials;
+        SyncCredentials.CredentialsType type = tokenCredential.getType();
+        switch (type) {
+            case JWT_ID_TOKEN:
+            case JWT_ACCESS_TOKEN:
+            case JWT_REFRESH_TOKEN:
+            case JWT_CUSTOM_TOKEN:
+                if (tokenCredential.hasToken()) {
+                    throw new IllegalArgumentException("Must not supply a token for a credential of type "
+                            + authenticatorCredentials.getType());
+                }
         }
+        credentials.add(tokenCredential);
         return this;
     }
 
     /**
      * Sets a listener to observe fine granular changes happening during sync.
      * <p>
-     * This listener can also be {@link SyncServer#setSyncChangeListener(SyncChangeListener) set or removed}
-     * on the Sync server directly.
+     * This listener can also be {@link SyncServer#setSyncChangeListener(SyncChangeListener) set or removed} on the Sync
+     * server directly.
      */
     public SyncServerBuilder changeListener(SyncChangeListener changeListener) {
         this.changeListener = changeListener;
@@ -282,6 +276,10 @@ public final class SyncServerBuilder {
      * Sets the public key used to verify JWT tokens.
      * <p>
      * The public key should be in the PEM format.
+     * <p>
+     * However, typically the key is supplied using a JWKS file served from a {@link #jwtPublicKeyUrl(String)}.
+     * <p>
+     * See {@link #jwtPublicKeyUrl(String)} for a common configuration to enable JWT auth.
      */
     public SyncServerBuilder jwtPublicKey(String publicKey) {
         this.jwtPublicKey = publicKey;
@@ -290,6 +288,19 @@ public final class SyncServerBuilder {
 
     /**
      * Sets the JWKS (Json Web Key Sets) URL to fetch the current public key used to verify JWT tokens.
+     * <p>
+     * A working JWT configuration can look like this:
+     * <pre>{@code
+     * SyncCredentials auth = SyncCredentials.jwtIdTokenServer();
+     * SyncServer server = Sync.server(store, url, auth)
+     *         .jwtPublicKeyUrl("https://example.com/public-key")
+     *         .jwtClaimAud("<audience>")
+     *         .jwtClaimIss("<issuer>")
+     *         .build();
+     * }</pre>
+     *
+     * See the <a href="https://sync.objectbox.io/sync-server-configuration/jwt-authentication">JWT authentication documentation</a>
+     * for details.
      */
     public SyncServerBuilder jwtPublicKeyUrl(String publicKeyUrl) {
         this.jwtPublicKeyUrl = publicKeyUrl;
@@ -298,6 +309,8 @@ public final class SyncServerBuilder {
 
     /**
      * Sets the JWT claim "iss" (issuer) used to verify JWT tokens.
+     *
+     * @see #jwtPublicKeyUrl(String)
      */
     public SyncServerBuilder jwtClaimIss(String claimIss) {
         this.jwtClaimIss = claimIss;
@@ -306,6 +319,8 @@ public final class SyncServerBuilder {
 
     /**
      * Sets the JWT claim "aud" (audience) used to verify JWT tokens.
+     *
+     * @see #jwtPublicKeyUrl(String)
      */
     public SyncServerBuilder jwtClaimAud(String claimAud) {
         this.jwtClaimAud = claimAud;
@@ -322,7 +337,8 @@ public final class SyncServerBuilder {
      * Note: this clears all previously set authenticator credentials.
      */
     public SyncServer build() {
-        if (!hasJwtConfig() && credentials.isEmpty()) {
+        // Note: even when only using JWT auth, must supply one of the credentials of JWT type
+        if (credentials.isEmpty()) {
             throw new IllegalStateException("At least one authenticator is required.");
         }
         if (hasJwtConfig()) {
@@ -374,10 +390,7 @@ public final class SyncServerBuilder {
         if (clusterId != null) {
             clusterIdOffset = fbb.createString(clusterId);
         }
-        int authenticationMethodsOffset = 0;
-        if (!credentials.isEmpty()) {
-            authenticationMethodsOffset = buildAuthenticationMethods(fbb);
-        }
+        int authenticationMethodsOffset = buildAuthenticationMethods(fbb);
         int clusterPeersVectorOffset = buildClusterPeers(fbb);
         int jwtConfigOffset = 0;
         if (hasJwtConfig()) {
@@ -396,9 +409,7 @@ public final class SyncServerBuilder {
         // After collecting all offsets, create options
         SyncServerOptions.startSyncServerOptions(fbb);
         SyncServerOptions.addUrl(fbb, urlOffset);
-        if (authenticationMethodsOffset != 0) {
-            SyncServerOptions.addAuthenticationMethods(fbb, authenticationMethodsOffset);
-        }
+        SyncServerOptions.addAuthenticationMethods(fbb, authenticationMethodsOffset);
         if (syncFlags != 0) {
             SyncServerOptions.addSyncFlags(fbb, syncFlags);
         }
