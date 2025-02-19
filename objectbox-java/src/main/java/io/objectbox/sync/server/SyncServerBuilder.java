@@ -283,7 +283,7 @@ public final class SyncServerBuilder {
      * <p>
      * The public key should be in the PEM format.
      */
-    public SyncServerBuilder jwtConfigPublicKey(String publicKey) {
+    public SyncServerBuilder jwtPublicKey(String publicKey) {
         this.jwtPublicKey = publicKey;
         return this;
     }
@@ -291,7 +291,7 @@ public final class SyncServerBuilder {
     /**
      * Sets the JWKS (Json Web Key Sets) URL to fetch the current public key used to verify JWT tokens.
      */
-    public SyncServerBuilder jwtConfigPublicKeyUrl(String publicKeyUrl) {
+    public SyncServerBuilder jwtPublicKeyUrl(String publicKeyUrl) {
         this.jwtPublicKeyUrl = publicKeyUrl;
         return this;
     }
@@ -299,7 +299,7 @@ public final class SyncServerBuilder {
     /**
      * Sets the JWT claim "iss" (issuer) used to verify JWT tokens.
      */
-    public SyncServerBuilder jwtConfigClaimIss(String claimIss) {
+    public SyncServerBuilder jwtClaimIss(String claimIss) {
         this.jwtClaimIss = claimIss;
         return this;
     }
@@ -307,7 +307,7 @@ public final class SyncServerBuilder {
     /**
      * Sets the JWT claim "aud" (audience) used to verify JWT tokens.
      */
-    public SyncServerBuilder jwtConfigClaimAud(String claimAud) {
+    public SyncServerBuilder jwtClaimAud(String claimAud) {
         this.jwtClaimAud = claimAud;
         return this;
     }
