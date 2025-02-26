@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,19 @@ package io.objectbox.relation;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
-
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.NameInDb;
-import io.objectbox.annotation.apihint.Internal;
 
 /**
- * Entity mapped to table "ORDERS".
+ * Order entity to test relations together with {@link Customer}.
+ * <p>
+ * The annotations in this class have no effect as the Gradle plugin is not configured in this project. However, test
+ * code builds a model like if the annotations were processed.
+ * <p>
+ * There is a matching test in the internal integration test project where this is tested and model builder code can be
+ * "stolen" from.
  */
 @Entity
 @NameInDb("ORDERS")
@@ -39,10 +42,13 @@ public class Order implements Serializable {
     long customerId;
     String text;
 
+    // Note: in a typical project the relation fields are initialized by the ObjectBox byte code transformer
+    // https://docs.objectbox.io/relations#initialization-magic
     @SuppressWarnings("FieldMayBeFinal")
     private ToOne<Customer> customer = new ToOne<>(this, Order_.customer);
 
-    /** Used to resolve relations. */
+    // Note: in a typical project the BoxStore field is added by the ObjectBox byte code transformer
+    // https://docs.objectbox.io/relations#initialization-magic
     transient BoxStore __boxStore;
 
     public Order() {

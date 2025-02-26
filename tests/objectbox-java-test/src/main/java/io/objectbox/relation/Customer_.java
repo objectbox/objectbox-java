@@ -1,6 +1,5 @@
-
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +27,8 @@ import io.objectbox.internal.ToManyGetter;
 import io.objectbox.internal.ToOneGetter;
 import io.objectbox.relation.CustomerCursor.Factory;
 
-// THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project
+// NOTE: Instead of updating this by hand, copy changes from the internal integration test project after updating its
+// Customer class.
 
 /**
  * Properties for entity "Customer". Can be used for QueryBuilder and for referencing DB names.

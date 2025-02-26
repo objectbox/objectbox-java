@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,15 @@ import io.objectbox.annotation.Backlink;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Index;
-import io.objectbox.annotation.apihint.Internal;
 
 /**
- * Entity mapped to table "CUSTOMER".
+ * Customer entity to test relations together with {@link Order}.
+ * <p>
+ * The annotations in this class have no effect as the Gradle plugin is not configured in this project. However, test
+ * code builds a model like if the annotations were processed.
+ * <p>
+ * There is a matching test in the internal integration test project where this is tested and model builder code can be
+ * "stolen" from.
  */
 @Entity
 public class Customer implements Serializable {
@@ -38,12 +43,16 @@ public class Customer implements Serializable {
     @Index
     private String name;
 
-    @Backlink(to = "customer") // Annotation not processed in this test, is set up manually.
+    // Note: in a typical project the relation fields are initialized by the ObjectBox byte code transformer
+    // https://docs.objectbox.io/relations#initialization-magic
+
+    @Backlink(to = "customer")
     List<Order> orders = new ToMany<>(this, Customer_.orders);
 
     ToMany<Order> ordersStandalone = new ToMany<>(this, Customer_.ordersStandalone);
 
-    /** Used to resolve relations. */
+    // Note: in a typical project the BoxStore field is added by the ObjectBox byte code transformer
+    // https://docs.objectbox.io/relations#initialization-magic
     transient BoxStore __boxStore;
 
     public Customer() {

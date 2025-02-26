@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package io.objectbox.relation;
 
 import io.objectbox.BoxStore;
 import io.objectbox.Cursor;
-import io.objectbox.EntityInfo;
 import io.objectbox.Transaction;
 import io.objectbox.internal.CursorFactory;
 
-// THIS CODE IS ADAPTED from generated resources of the test-entity-annotations project
+// NOTE: Instead of updating this by hand, copy changes from the internal integration test project after updating its
+// Customer class.
 
 /**
  * Cursor for DB entity "ORDERS".
