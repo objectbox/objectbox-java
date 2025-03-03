@@ -149,7 +149,7 @@ public class ModelBuilder {
         }
 
         /**
-         * Set a {@link ExternalPropertyType} constant.
+         * Sets the {@link ExternalPropertyType} constant for this.
          *
          * @return this builder.
          */
@@ -261,6 +261,7 @@ public class ModelBuilder {
         private final long relationUid;
         private final int targetEntityId;
         private final long targetEntityUid;
+        private int externalPropertyType;
 
         private RelationBuilder(FlatBufferBuilder fbb, String name, int relationId, long relationUid,
                                 int targetEntityId, long targetEntityUid) {
@@ -270,6 +271,17 @@ public class ModelBuilder {
             this.relationUid = relationUid;
             this.targetEntityId = targetEntityId;
             this.targetEntityUid = targetEntityUid;
+        }
+
+        /**
+         * Sets the {@link ExternalPropertyType} constant for this.
+         *
+         * @return this builder.
+         */
+        public RelationBuilder externalType(int externalPropertyType) {
+            checkNotFinished();
+            this.externalPropertyType = externalPropertyType;
+            return this;
         }
 
         @Override
@@ -282,6 +294,9 @@ public class ModelBuilder {
             ModelRelation.addId(fbb, relationIdOffset);
             int targetEntityIdOffset = IdUid.createIdUid(fbb, targetEntityId, targetEntityUid);
             ModelRelation.addTargetEntityId(fbb, targetEntityIdOffset);
+            if (externalPropertyType != 0) {
+                ModelRelation.addExternalType(fbb, externalPropertyType);
+            }
             return ModelRelation.endModelRelation(fbb);
         }
     }

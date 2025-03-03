@@ -129,4 +129,14 @@ public class Customer_ implements EntityInfo<Customer> {
                 }
             }, 1);
 
+    /** To-many relation "toManyExternalId" to target entity "Order". */
+    public static final RelationInfo<Customer, Order> toManyExternalId = new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE,
+            new ToManyGetter<Customer, Order>() {
+                @Override
+                public List<Order> getToMany(Customer entity) {
+                    return entity.getToManyExternalId();
+                }
+            },
+            2);
+
 }

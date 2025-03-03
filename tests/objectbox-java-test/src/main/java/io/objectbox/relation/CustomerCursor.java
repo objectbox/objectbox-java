@@ -71,6 +71,7 @@ public final class CustomerCursor extends Cursor<Customer> {
 
         checkApplyToManyToDb(entity.getOrders(), Order.class);
         checkApplyToManyToDb(entity.getOrdersStandalone(), Order.class);
+        checkApplyToManyToDb(entity.getToManyExternalId(), Order.class);
 
         return __assignedId;
     }

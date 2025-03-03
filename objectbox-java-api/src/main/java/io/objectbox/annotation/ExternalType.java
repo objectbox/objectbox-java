@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use to set the type of property in an external system (like another database).
+ * Sets the type of a property or the type of object IDs of a ToMany in an external system (like another database).
  * <p>
  * This is useful if there is no default mapping of the ObjectBox type to the type in the external system.
  * <p>
