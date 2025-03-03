@@ -125,7 +125,7 @@ public class Customer_ implements EntityInfo<Customer> {
             new RelationInfo<>(Customer_.__INSTANCE, Order_.__INSTANCE, new ToManyGetter<Customer, Order>() {
                 @Override
                 public List<Order> getToMany(Customer customer) {
-                    return customer.getOrders();
+                    return customer.getOrdersStandalone();
                 }
             }, 1);
 

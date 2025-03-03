@@ -69,7 +69,7 @@ public final class CustomerCursor extends Cursor<Customer> {
         entity.setId(__assignedId);
         entity.__boxStore = boxStoreForEntities;
 
-        checkApplyToManyToDb(entity.orders, Order.class);
+        checkApplyToManyToDb(entity.getOrders(), Order.class);
         checkApplyToManyToDb(entity.getOrdersStandalone(), Order.class);
 
         return __assignedId;
