@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,14 +128,13 @@ public interface SyncClient extends Closeable {
     void setSyncTimeListener(@Nullable SyncTimeListener timeListener);
 
     /**
-     * Updates the login credentials. This should not be required during regular use.
+     * Updates the credentials used to authenticate with the server. This should not be required during regular use.
      * The original credentials were passed when building sync client.
      */
     void setLoginCredentials(SyncCredentials credentials);
 
     /**
-     * Updates the login credentials. This should not be required during regular use.
-     * It allows passing login credentials that the client can use to authenticate with the server.
+     * Like {@link #setLoginCredentials(SyncCredentials)}, but allows setting multiple credentials.
      */
     void setLoginCredentials(SyncCredentials[] multipleCredentials);
 

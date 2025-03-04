@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,45 +49,109 @@ public abstract class SyncCredentials {
     }
 
     /**
-     * ObjectBox admin users (username/password)
+     * ObjectBox Admin user (username and password).
      */
     public static SyncCredentials obxAdminUser(String user, String password) {
         return new SyncCredentialsUserPassword(CredentialsType.OBX_ADMIN_USER, user, password);
     }
 
     /**
-     * Generic credential type suitable for ObjectBox admin (and possibly others in the future)
+     * Generic credentials type suitable for ObjectBox Admin (and possibly others in the future).
      */
     public static SyncCredentials userAndPassword(String user, String password) {
         return new SyncCredentialsUserPassword(CredentialsType.USER_PASSWORD, user, password);
     }
 
     /**
-     * JSON Web Token (JWT): an ID token that typically provides identity information about the authenticated user.
+     * Authenticate with a JSON Web Token (JWT) that is an ID token.
+     * <p>
+     * An ID token typically provides identity information about the authenticated user.
+     * <p>
+     * Use this and the other JWT methods that accept a token to configure JWT auth for a Sync client or server peer.
+     * To configure Sync server auth options, use the server variants, like {@link #jwtIdTokenServer()}, instead.
+     * <p>
+     * See the <a href="https://sync.objectbox.io/sync-server-configuration/jwt-authentication">JWT authentication documentation</a>
+     * for details.
      */
     public static SyncCredentials jwtIdToken(String jwtIdToken) {
         return new SyncCredentialsToken(CredentialsType.JWT_ID_TOKEN, jwtIdToken);
     }
 
     /**
-     * JSON Web Token (JWT): an access token that is used to access resources.
+     * Authenticate with a JSON Web Token (JWT) that is an access token.
+     * <p>
+     * An access token is used to access resources.
+     * <p>
+     * See {@link #jwtIdToken(String)} for some common remarks.
      */
     public static SyncCredentials jwtAccessToken(String jwtAccessToken) {
         return new SyncCredentialsToken(CredentialsType.JWT_ACCESS_TOKEN, jwtAccessToken);
     }
 
     /**
-     * JSON Web Token (JWT): a refresh token that is used to obtain a new access token.
+     * Authenticate with a JSON Web Token (JWT) that is a refresh token.
+     * <p>
+     * A refresh token is used to obtain a new access token.
+     * <p>
+     * See {@link #jwtIdToken(String)} for some common remarks.
      */
     public static SyncCredentials jwtRefreshToken(String jwtRefreshToken) {
         return new SyncCredentialsToken(CredentialsType.JWT_REFRESH_TOKEN, jwtRefreshToken);
     }
 
     /**
-     * JSON Web Token (JWT): a token that is neither an ID, access, nor refresh token.
+     * Authenticate with a JSON Web Token (JWT) that is neither an ID, access, nor refresh token.
+     * <p>
+     * See {@link #jwtIdToken(String)} for some common remarks.
      */
     public static SyncCredentials jwtCustomToken(String jwtCustomToken) {
         return new SyncCredentialsToken(CredentialsType.JWT_CUSTOM_TOKEN, jwtCustomToken);
+    }
+
+    /**
+     * Enable authentication using a JSON Web Token (JWT) that is an ID token.
+     * <p>
+     * An ID token typically provides identity information about the authenticated user.
+     * <p>
+     * Use this and the other JWT server credentials types to configure a Sync server.
+     * For Sync clients, use the ones that accept a token, like {@link #jwtIdToken(String)}, instead.
+     * <p>
+     * See the <a href="https://sync.objectbox.io/sync-server-configuration/jwt-authentication">JWT authentication documentation</a>
+     * for details.
+     */
+    public static SyncCredentials jwtIdTokenServer() {
+        return new SyncCredentialsToken(CredentialsType.JWT_ID_TOKEN);
+    }
+
+    /**
+     * Enable authentication using a JSON Web Token (JWT) that is an access token.
+     * <p>
+     * An access token is used to access resources.
+     * <p>
+     * See {@link #jwtIdTokenServer()} for some common remarks.
+     */
+    public static SyncCredentials jwtAccessTokenServer() {
+        return new SyncCredentialsToken(CredentialsType.JWT_ACCESS_TOKEN);
+    }
+
+    /**
+     * Enable authentication using a JSON Web Token (JWT) that is a refresh token.
+     * <p>
+     * A refresh token is used to obtain a new access token.
+     * <p>
+     * See {@link #jwtIdTokenServer()} for some common remarks.
+     */
+    public static SyncCredentials jwtRefreshTokenServer() {
+        return new SyncCredentialsToken(CredentialsType.JWT_REFRESH_TOKEN);
+    }
+
+    /**
+     * Enable authentication using a JSON Web Token (JWT) that is neither an ID, access, nor refresh token.
+     * <p>
+     * See {@link #jwtIdTokenServer()} for some common remarks.
+     */
+    public static SyncCredentials jwtCustomTokenServer() {
+        return new SyncCredentialsToken(CredentialsType.JWT_CUSTOM_TOKEN);
     }
 
     /**

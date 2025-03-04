@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,10 +55,10 @@ public final class SyncServerBuilder {
     private int syncServerFlags;
     private int workerThreads;
 
-    private String publicKey;
-    private String publicKeyUrl;
-    private String claimIss;
-    private String claimAud;
+    private @Nullable String jwtPublicKey;
+    private @Nullable String jwtPublicKeyUrl;
+    private @Nullable String jwtClaimIss;
+    private @Nullable String jwtClaimAud;
 
     private static void checkFeatureSyncServerAvailable() {
         if (!BoxStore.isSyncServerAvailable()) {
@@ -101,7 +101,9 @@ public final class SyncServerBuilder {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Sync server URL is invalid: " + url, e);
         }
-        authenticatorCredentials(multipleAuthenticatorCredentials);
+        for (SyncCredentials credentials : multipleAuthenticatorCredentials) {
+            authenticatorCredentials(credentials);
+        }
     }
 
     /**
@@ -119,8 +121,8 @@ public final class SyncServerBuilder {
     /**
      * Adds additional authenticator credentials to authenticate clients or peers with.
      * <p>
-     * For the embedded server, currently only {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none}
-     * are supported.
+     * For the embedded server, currently only {@link SyncCredentials#sharedSecret}, any JWT method like
+     * {@link SyncCredentials#jwtIdTokenServer()} as well as {@link SyncCredentials#none} are supported.
      */
     public SyncServerBuilder authenticatorCredentials(SyncCredentials authenticatorCredentials) {
         checkNotNull(authenticatorCredentials, "Authenticator credentials must not be null.");
@@ -128,29 +130,27 @@ public final class SyncServerBuilder {
             throw new IllegalArgumentException("Sync credentials of type " + authenticatorCredentials.getType()
                     + " are not supported");
         }
-        credentials.add((SyncCredentialsToken) authenticatorCredentials);
-        return this;
-    }
-
-    /**
-     * Adds additional authenticator credentials to authenticate clients or peers with.
-     * <p>
-     * For the embedded server, currently only {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none}
-     * are supported.
-     */
-    public SyncServerBuilder authenticatorCredentials(SyncCredentials[] multipleAuthenticatorCredentials) {
-        checkNotNull(multipleAuthenticatorCredentials, "Authenticator credentials must not be null.");
-        for (SyncCredentials credentials : multipleAuthenticatorCredentials) {
-            authenticatorCredentials(credentials);
+        SyncCredentialsToken tokenCredential = (SyncCredentialsToken) authenticatorCredentials;
+        SyncCredentials.CredentialsType type = tokenCredential.getType();
+        switch (type) {
+            case JWT_ID_TOKEN:
+            case JWT_ACCESS_TOKEN:
+            case JWT_REFRESH_TOKEN:
+            case JWT_CUSTOM_TOKEN:
+                if (tokenCredential.hasToken()) {
+                    throw new IllegalArgumentException("Must not supply a token for a credential of type "
+                            + authenticatorCredentials.getType());
+                }
         }
+        credentials.add(tokenCredential);
         return this;
     }
 
     /**
      * Sets a listener to observe fine granular changes happening during sync.
      * <p>
-     * This listener can also be {@link SyncServer#setSyncChangeListener(SyncChangeListener) set or removed}
-     * on the Sync server directly.
+     * This listener can also be {@link SyncServer#setSyncChangeListener(SyncChangeListener) set or removed} on the Sync
+     * server directly.
      */
     public SyncServerBuilder changeListener(SyncChangeListener changeListener) {
         this.changeListener = changeListener;
@@ -273,37 +273,62 @@ public final class SyncServerBuilder {
     }
 
     /**
-     * Set the public key used to verify JWT tokens.
+     * Sets the public key used to verify JWT tokens.
      * <p>
      * The public key should be in the PEM format.
+     * <p>
+     * However, typically the key is supplied using a JWKS file served from a {@link #jwtPublicKeyUrl(String)}.
+     * <p>
+     * See {@link #jwtPublicKeyUrl(String)} for a common configuration to enable JWT auth.
      */
-    public SyncServerBuilder jwtConfigPublicKey(String publicKey) {
-        this.publicKey = publicKey;
+    public SyncServerBuilder jwtPublicKey(String publicKey) {
+        this.jwtPublicKey = publicKey;
         return this;
     }
 
     /**
-     * Set the JWKS (Json Web Key Sets) URL to fetch the current public key used to verify JWT tokens.
+     * Sets the JWKS (Json Web Key Sets) URL to fetch the current public key used to verify JWT tokens.
+     * <p>
+     * A working JWT configuration can look like this:
+     * <pre>{@code
+     * SyncCredentials auth = SyncCredentials.jwtIdTokenServer();
+     * SyncServer server = Sync.server(store, url, auth)
+     *         .jwtPublicKeyUrl("https://example.com/public-key")
+     *         .jwtClaimAud("<audience>")
+     *         .jwtClaimIss("<issuer>")
+     *         .build();
+     * }</pre>
+     *
+     * See the <a href="https://sync.objectbox.io/sync-server-configuration/jwt-authentication">JWT authentication documentation</a>
+     * for details.
      */
-    public SyncServerBuilder jwtConfigPublicKeyUrl(String publicKeyUrl) {
-        this.publicKeyUrl = publicKeyUrl;
+    public SyncServerBuilder jwtPublicKeyUrl(String publicKeyUrl) {
+        this.jwtPublicKeyUrl = publicKeyUrl;
         return this;
     }
 
     /**
-     * Set the JWT claim "iss" (issuer) used to verify JWT tokens.
+     * Sets the JWT claim "iss" (issuer) used to verify JWT tokens.
+     *
+     * @see #jwtPublicKeyUrl(String)
      */
-    public SyncServerBuilder jwtConfigClaimIss(String claimIss) {
-        this.claimIss = claimIss;
+    public SyncServerBuilder jwtClaimIss(String claimIss) {
+        this.jwtClaimIss = claimIss;
         return this;
     }
 
     /**
-     * Set the JWT claim "aud" (audience) used to verify JWT tokens.
+     * Sets the JWT claim "aud" (audience) used to verify JWT tokens.
+     *
+     * @see #jwtPublicKeyUrl(String)
      */
-    public SyncServerBuilder jwtConfigClaimAud(String claimAud) {
-        this.claimAud = claimAud;
+    public SyncServerBuilder jwtClaimAud(String claimAud) {
+        this.jwtClaimAud = claimAud;
         return this;
+    }
+
+    private boolean hasJwtConfig() {
+        return jwtPublicKey != null || jwtPublicKeyUrl != null;
     }
 
     /**
@@ -312,8 +337,17 @@ public final class SyncServerBuilder {
      * Note: this clears all previously set authenticator credentials.
      */
     public SyncServer build() {
+        // Note: even when only using JWT auth, must supply one of the credentials of JWT type
         if (credentials.isEmpty()) {
             throw new IllegalStateException("At least one authenticator is required.");
+        }
+        if (hasJwtConfig()) {
+            if (jwtClaimAud == null) {
+                throw new IllegalArgumentException("To use JWT authentication, claimAud must be set");
+            }
+            if (jwtClaimIss == null) {
+                throw new IllegalArgumentException("To use JWT authentication, claimIss must be set");
+            }
         }
         if (!clusterPeers.isEmpty() || clusterFlags != 0) {
             checkNotNull(clusterId, "Cluster ID must be set to use cluster features.");
@@ -359,14 +393,8 @@ public final class SyncServerBuilder {
         int authenticationMethodsOffset = buildAuthenticationMethods(fbb);
         int clusterPeersVectorOffset = buildClusterPeers(fbb);
         int jwtConfigOffset = 0;
-        if (publicKey != null || publicKeyUrl != null) {
-            if (claimAud == null) {
-                throw new IllegalArgumentException("claimAud must be set");
-            }
-            if (claimIss == null) {
-                throw new IllegalArgumentException("claimIss must be set");
-            }
-            jwtConfigOffset = buildJwtConfig(fbb, publicKey, publicKeyUrl, claimIss, claimAud);
+        if (hasJwtConfig()) {
+            jwtConfigOffset = buildJwtConfig(fbb, jwtPublicKey, jwtPublicKeyUrl, jwtClaimIss, jwtClaimAud);
         }
         // Clear credentials immediately to make abuse less likely,
         // but only after setting all options to allow (re-)using the same credentials object

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,13 +64,9 @@ public final class Sync {
     }
 
     /**
-     * Starts building a {@link SyncClient}. Once done, complete with {@link SyncBuilder#build() build()}.
+     * Like {@link #client(BoxStore, String, SyncCredentials)}, but supports passing a set of authentication methods.
      *
-     * @param boxStore The {@link BoxStore} the client should use.
-     * @param url The URL of the Sync server on which the Sync protocol is exposed. This is typically a WebSockets URL
-     * starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
-     * {@code ws://127.0.0.1:9999}.
-     * @param multipleCredentials An array of {@link SyncCredentials} to be used to authenticate the user.
+     * @param multipleCredentials An array of {@link SyncCredentials} to be used to authenticate with the server.
      */
     public static SyncBuilder client(BoxStore boxStore, String url, SyncCredentials[] multipleCredentials) {
         return new SyncBuilder(boxStore, url, multipleCredentials);
@@ -87,24 +83,16 @@ public final class Sync {
      * {@code ws://0.0.0.0:9999}.
      * @param authenticatorCredentials An authentication method available to Sync clients and peers. Additional
      * authenticator credentials can be supplied using the returned builder. For the embedded server, currently only
-     * {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none} are supported.
+     * {@link SyncCredentials#sharedSecret}, any JWT method like {@link SyncCredentials#jwtIdTokenServer()} as well as
+     * {@link SyncCredentials#none} are supported.
      */
     public static SyncServerBuilder server(BoxStore boxStore, String url, SyncCredentials authenticatorCredentials) {
         return new SyncServerBuilder(boxStore, url, authenticatorCredentials);
     }
 
     /**
-     * Starts building a {@link SyncServer}. Once done, complete with {@link SyncServerBuilder#build() build()}.
-     * <p>
-     * Note: when also using Admin, make sure it is started before the server.
-     *
-     * @param boxStore The {@link BoxStore} the server should use.
-     * @param url The URL of the Sync server on which the Sync protocol is exposed. This is typically a WebSockets URL
-     * starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
-     * {@code ws://0.0.0.0:9999}.
-     * @param multipleAuthenticatorCredentials An authentication method available to Sync clients and peers. Additional
-     * authenticator credentials can be supplied using the returned builder. For the embedded server, currently only
-     * {@link SyncCredentials#sharedSecret} and {@link SyncCredentials#none} are supported.
+     * Like {@link #server(BoxStore, String, SyncCredentials)}, but supports passing a set of authentication methods
+     * for clients and peers.
      */
     public static SyncServerBuilder server(BoxStore boxStore, String url, SyncCredentials[] multipleAuthenticatorCredentials) {
         return new SyncServerBuilder(boxStore, url, multipleAuthenticatorCredentials);
@@ -125,8 +113,8 @@ public final class Sync {
      * {@code ws://0.0.0.0:9999}.
      * @param authenticatorCredentials An authentication method available to Sync clients and peers. The client of the
      * hybrid is pre-configured with them. Additional credentials can be supplied using the client and server builder of
-     * the returned builder. For the embedded server, currently only {@link SyncCredentials#sharedSecret} and
-     * {@link SyncCredentials#none} are supported.
+     * the returned builder. For the embedded server, currently only {@link SyncCredentials#sharedSecret}, any JWT
+     * method like {@link SyncCredentials#jwtIdTokenServer()} as well as {@link SyncCredentials#none} are supported.
      * @return An instance of {@link SyncHybridBuilder}.
      */
     public static SyncHybridBuilder hybrid(BoxStoreBuilder storeBuilder, String url,

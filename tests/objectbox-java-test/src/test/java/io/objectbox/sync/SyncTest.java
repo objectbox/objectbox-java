@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2020-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package io.objectbox.sync;
 
-import io.objectbox.exception.FeatureNotAvailableException;
 import org.junit.Test;
 
-import io.objectbox.AbstractObjectBoxTest;
-
 import java.nio.charset.StandardCharsets;
+
+import io.objectbox.AbstractObjectBoxTest;
+import io.objectbox.exception.FeatureNotAvailableException;
+
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
@@ -30,6 +31,8 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 public class SyncTest extends AbstractObjectBoxTest {
+
+    private static final String SERVER_URL = "wss://127.0.0.1";
 
     /**
      * Ensure that non-sync native library correctly reports sync client availability.
@@ -54,9 +57,14 @@ public class SyncTest extends AbstractObjectBoxTest {
 
     @Test
     public void creatingSyncClient_throws() {
+        // If no credentials are passed
+        assertThrows(IllegalArgumentException.class, () -> Sync.client(store, SERVER_URL, (SyncCredentials) null));
+        assertThrows(IllegalArgumentException.class, () -> Sync.client(store, SERVER_URL, (SyncCredentials[]) null));
+
+        // If no Sync feature is available
         FeatureNotAvailableException exception = assertThrows(
                 FeatureNotAvailableException.class,
-                () -> Sync.client(store, "wss://127.0.0.1", SyncCredentials.none())
+                () -> Sync.client(store, SERVER_URL, SyncCredentials.none())
         );
         String message = exception.getMessage();
         assertTrue(message, message.contains("does not include ObjectBox Sync") &&
@@ -67,7 +75,7 @@ public class SyncTest extends AbstractObjectBoxTest {
     public void creatingSyncServer_throws() {
         FeatureNotAvailableException exception = assertThrows(
                 FeatureNotAvailableException.class,
-                () -> Sync.server(store, "wss://127.0.0.1", SyncCredentials.none())
+                () -> Sync.server(store, SERVER_URL, SyncCredentials.none())
         );
         String message = exception.getMessage();
         assertTrue(message, message.contains("does not include ObjectBox Sync Server") &&

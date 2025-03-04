@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public final class SyncBuilder {
 
     final Platform platform;
     final BoxStore boxStore;
-    String url;
+    @Nullable private String url;
     final List<SyncCredentials> credentials;
 
     @Nullable SyncLoginListener loginListener;
@@ -94,41 +94,32 @@ public final class SyncBuilder {
         }
     }
 
-
-    @Internal
-    public SyncBuilder(BoxStore boxStore, SyncCredentials credentials) {
+    private SyncBuilder(BoxStore boxStore, @Nullable String url, @Nullable List<SyncCredentials> credentials) {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(credentials, "Sync credentials are required.");
-        checkSyncFeatureAvailable();
-        this.platform = Platform.findPlatform();
         this.boxStore = boxStore;
-        this.credentials = Collections.singletonList(credentials);
-    }
-
-    @Internal
-    public SyncBuilder(BoxStore boxStore, SyncCredentials[] multipleCredentials) {
-        checkNotNull(boxStore, "BoxStore is required.");
-        if (multipleCredentials.length == 0) {
-            throw new IllegalArgumentException("At least one Sync credential is required.");
-        }
+        this.url = url;
+        this.credentials = credentials;
         checkSyncFeatureAvailable();
-        this.platform = Platform.findPlatform();
-        this.boxStore = boxStore;
-        this.credentials = Arrays.asList(multipleCredentials);
+        this.platform = Platform.findPlatform(); // Requires APIs only present in Android Sync library
     }
 
     @Internal
-    public SyncBuilder(BoxStore boxStore, String url, SyncCredentials credentials) {
-        this(boxStore, credentials);
-        checkNotNull(url, "Sync server URL is required.");
-        this.url = url;
+    public SyncBuilder(BoxStore boxStore, String url, @Nullable SyncCredentials credentials) {
+        this(boxStore, url, credentials == null ? null : Collections.singletonList(credentials));
     }
 
     @Internal
-    public SyncBuilder(BoxStore boxStore, String url, SyncCredentials[] multipleCredentials) {
-        this(boxStore, multipleCredentials);
-        checkNotNull(url, "Sync server URL is required.");
-        this.url = url;
+    public SyncBuilder(BoxStore boxStore, String url, @Nullable SyncCredentials[] multipleCredentials) {
+        this(boxStore, url, multipleCredentials == null ? null : Arrays.asList(multipleCredentials));
+    }
+
+    /**
+     * When using this constructor, make sure to set the server URL before starting.
+     */
+    @Internal
+    public SyncBuilder(BoxStore boxStore, @Nullable SyncCredentials credentials) {
+        this(boxStore, null, credentials == null ? null : Collections.singletonList(credentials));
     }
 
     /**
@@ -138,6 +129,12 @@ public final class SyncBuilder {
     SyncBuilder serverUrl(String url) {
         this.url = url;
         return this;
+    }
+
+    @Internal
+    String serverUrl() {
+        checkNotNull(url, "Sync Server URL is null.");
+        return url;
     }
 
     /**
@@ -261,7 +258,7 @@ public final class SyncBuilder {
         return syncClient;
     }
 
-    private void checkNotNull(Object object, String message) {
+    private void checkNotNull(@Nullable Object object, String message) {
         //noinspection ConstantConditions Non-null annotation does not enforce, so check for null.
         if (object == null) {
             throw new IllegalArgumentException(message);

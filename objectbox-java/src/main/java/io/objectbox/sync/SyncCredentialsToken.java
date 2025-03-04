@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2019-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,10 @@ public final class SyncCredentialsToken extends SyncCredentials {
 
     SyncCredentialsToken(CredentialsType type, String token) {
         this(type, token.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public boolean hasToken() {
+        return token != null;
     }
 
     @Nullable
