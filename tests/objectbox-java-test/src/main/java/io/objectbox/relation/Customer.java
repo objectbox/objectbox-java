@@ -22,6 +22,8 @@ import java.util.List;
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.Backlink;
 import io.objectbox.annotation.Entity;
+import io.objectbox.annotation.ExternalPropertyType;
+import io.objectbox.annotation.ExternalType;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Index;
 
@@ -50,6 +52,10 @@ public class Customer implements Serializable {
     List<Order> orders = new ToMany<>(this, Customer_.orders);
 
     ToMany<Order> ordersStandalone = new ToMany<>(this, Customer_.ordersStandalone);
+
+    // Just smoke testing, also use UUID instead of the default Mongo ID
+    @ExternalType(ExternalPropertyType.UUID_VECTOR)
+    private ToMany<Order> toManyExternalId = new ToMany<>(this, Customer_.toManyExternalId);
 
     // Note: in a typical project the BoxStore field is added by the ObjectBox byte code transformer
     // https://docs.objectbox.io/relations#initialization-magic
@@ -85,5 +91,9 @@ public class Customer implements Serializable {
 
     public ToMany<Order> getOrdersStandalone() {
         return ordersStandalone;
+    }
+
+    public ToMany<Order> getToManyExternalId() {
+        return toManyExternalId;
     }
 }

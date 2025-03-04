@@ -24,6 +24,8 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import io.objectbox.annotation.Entity;
+import io.objectbox.annotation.ExternalPropertyType;
+import io.objectbox.annotation.ExternalType;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Unsigned;
 
@@ -73,6 +75,9 @@ public class TestEntity {
     private float[] floatArray;
     private double[] doubleArray;
     private Date date;
+    // Just smoke testing, also use UUID instead of the default Mongo ID
+    @ExternalType(ExternalPropertyType.UUID)
+    private byte[] externalId;
 
     transient boolean noArgsConstructorCalled;
 
@@ -107,7 +112,8 @@ public class TestEntity {
                       long[] longArray,
                       float[] floatArray,
                       double[] doubleArray,
-                      Date date
+                      Date date,
+                      byte[] externalId
     ) {
         this.id = id;
         this.simpleBoolean = simpleBoolean;
@@ -133,6 +139,7 @@ public class TestEntity {
         this.floatArray = floatArray;
         this.doubleArray = doubleArray;
         this.date = date;
+        this.externalId = externalId;
         if (STRING_VALUE_THROW_IN_CONSTRUCTOR.equals(simpleString)) {
             throw new RuntimeException(EXCEPTION_IN_CONSTRUCTOR_MESSAGE);
         }
@@ -348,6 +355,17 @@ public class TestEntity {
         this.date = date;
     }
 
+    @Nullable
+    public byte[] getExternalId() {
+        return externalId;
+    }
+
+    @Nullable
+    public TestEntity setExternalId(byte[] externalId) {
+        this.externalId = externalId;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "TestEntity{" +
@@ -375,6 +393,7 @@ public class TestEntity {
                 ", floatArray=" + Arrays.toString(floatArray) +
                 ", doubleArray=" + Arrays.toString(doubleArray) +
                 ", date=" + date +
+                ", externalId=" + Arrays.toString(externalId) +
                 ", noArgsConstructorCalled=" + noArgsConstructorCalled +
                 '}';
     }

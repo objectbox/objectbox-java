@@ -20,6 +20,7 @@ import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
 import io.objectbox.ModelBuilder;
 import io.objectbox.ModelBuilder.EntityBuilder;
+import io.objectbox.model.ExternalPropertyType;
 import io.objectbox.model.PropertyFlags;
 import io.objectbox.model.PropertyType;
 
@@ -45,17 +46,22 @@ public class MyObjectBox {
         ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.lastEntityId(4, 5318696586219463633L);
         modelBuilder.lastIndexId(2, 8919874872236271392L);
-        modelBuilder.lastRelationId(1, 8943758920347589435L);
+        modelBuilder.lastRelationId(2, 297832184913930702L);
 
-        EntityBuilder entityBuilder;
-
-        entityBuilder = modelBuilder.entity("Customer");
+        EntityBuilder entityBuilder = modelBuilder.entity("Customer");
         entityBuilder.id(1, 8247662514375611729L).lastPropertyId(2, 7412962174183812632L);
         entityBuilder.property("_id", PropertyType.Long).id(1, 1888039726372206411L)
                 .flags(PropertyFlags.ID | PropertyFlags.ID_SELF_ASSIGNABLE);
         entityBuilder.property("name", PropertyType.String).id(2, 7412962174183812632L)
                 .flags(PropertyFlags.INDEXED).indexId(1, 5782921847050580892L);
+
         entityBuilder.relation("ordersStandalone", 1, 8943758920347589435L, 3, 6367118380491771428L);
+
+        // Note: there is no way to test external type mapping works here. Instead, verify passing a model with
+        // externalType(int) works.
+        entityBuilder.relation("toManyExternalId", 2, 297832184913930702L, 3, 6367118380491771428L)
+                .externalType(ExternalPropertyType.UuidVector);
+
         entityBuilder.entityDone();
 
 

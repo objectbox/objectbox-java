@@ -124,6 +124,9 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
     public final static io.objectbox.Property<TestEntity> date =
             new io.objectbox.Property<>(__INSTANCE, 23, 24, java.util.Date.class, "date");
 
+    public final static io.objectbox.Property<TestEntity> externalId =
+            new io.objectbox.Property<>(__INSTANCE, 24, 25, byte[].class, "externalId");
+
     @SuppressWarnings("unchecked")
     public final static io.objectbox.Property<TestEntity>[] __ALL_PROPERTIES = new io.objectbox.Property[]{
             id,
@@ -149,7 +152,8 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
             longArray,
             floatArray,
             doubleArray,
-            date
+            date,
+            externalId
     };
 
     public final static io.objectbox.Property<TestEntity> __ID_PROPERTY = id;

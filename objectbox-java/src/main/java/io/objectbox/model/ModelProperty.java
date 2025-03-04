@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,8 +90,19 @@ public final class ModelProperty extends Table {
    */
   public io.objectbox.model.HnswParams hnswParams() { return hnswParams(new io.objectbox.model.HnswParams()); }
   public io.objectbox.model.HnswParams hnswParams(io.objectbox.model.HnswParams obj) { int o = __offset(22); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
+  /**
+   * Optional type used in an external system, e.g. another database that ObjectBox syncs with.
+   * Note that the supported mappings from ObjectBox types to external types are limited.
+   */
+  public int externalType() { int o = __offset(24); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
+  /**
+   * Optional name used in an external system, e.g. another database that ObjectBox syncs with.
+   */
+  public String externalName() { int o = __offset(26); return o != 0 ? __string(o + bb_pos) : null; }
+  public ByteBuffer externalNameAsByteBuffer() { return __vector_as_bytebuffer(26, 1); }
+  public ByteBuffer externalNameInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 26, 1); }
 
-  public static void startModelProperty(FlatBufferBuilder builder) { builder.startTable(10); }
+  public static void startModelProperty(FlatBufferBuilder builder) { builder.startTable(12); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addStruct(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addType(FlatBufferBuilder builder, int type) { builder.addShort(2, (short) type, (short) 0); }
@@ -102,6 +113,8 @@ public final class ModelProperty extends Table {
   public static void addNameSecondary(FlatBufferBuilder builder, int nameSecondaryOffset) { builder.addOffset(7, nameSecondaryOffset, 0); }
   public static void addMaxIndexValueLength(FlatBufferBuilder builder, long maxIndexValueLength) { builder.addInt(8, (int) maxIndexValueLength, (int) 0L); }
   public static void addHnswParams(FlatBufferBuilder builder, int hnswParamsOffset) { builder.addOffset(9, hnswParamsOffset, 0); }
+  public static void addExternalType(FlatBufferBuilder builder, int externalType) { builder.addShort(10, (short) externalType, (short) 0); }
+  public static void addExternalName(FlatBufferBuilder builder, int externalNameOffset) { builder.addOffset(11, externalNameOffset, 0); }
   public static int endModelProperty(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.annotation.Nullable;
 import io.objectbox.annotation.HnswIndex;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
+import io.objectbox.model.ExternalPropertyType;
 import io.objectbox.model.HnswDistanceType;
 import io.objectbox.model.HnswFlags;
 import io.objectbox.model.HnswParams;
@@ -33,43 +34,94 @@ import io.objectbox.model.ModelEntity;
 import io.objectbox.model.ModelProperty;
 import io.objectbox.model.ModelRelation;
 
-// Remember: IdUid is a struct, not a table, and thus must be inlined
-@SuppressWarnings("WeakerAccess,UnusedReturnValue, unused")
+// To learn how to use the FlatBuffers API see https://flatbuffers.dev/tutorial/
+// Note: IdUid is a struct, not a table, and thus must be inlined
+
+/**
+ * Builds a flatbuffer representation of the database model to be passed when opening a store.
+ * <p>
+ * This is an internal API that should only be called by the generated MyObjectBox code.
+ */
 @Internal
 public class ModelBuilder {
     private static final int MODEL_VERSION = 2;
 
-    final FlatBufferBuilder fbb = new FlatBufferBuilder();
-    final List<Integer> entityOffsets = new ArrayList<>();
+    private final FlatBufferBuilder fbb = new FlatBufferBuilder();
+    private final List<Integer> entityOffsets = new ArrayList<>();
 
-    long version = 1;
+    private long version = 1;
 
-    Integer lastEntityId;
-    Long lastEntityUid;
+    private Integer lastEntityId;
+    private Long lastEntityUid;
 
-    Integer lastIndexId;
-    Long lastIndexUid;
+    private Integer lastIndexId;
+    private Long lastIndexUid;
 
-    Integer lastRelationId;
-    Long lastRelationUid;
+    private Integer lastRelationId;
+    private Long lastRelationUid;
 
-    public class PropertyBuilder {
+    /**
+     * Base class for builders.
+     * <p>
+     * Methods adding properties to be used by {@link #createFlatBufferTable(FlatBufferBuilder)} should call
+     * {@link #checkNotFinished()}.
+     * <p>
+     * The last call should be {@link #finish()}.
+     */
+    abstract static class PartBuilder {
+
+        private final FlatBufferBuilder fbb;
+        private boolean finished;
+
+        PartBuilder(FlatBufferBuilder fbb) {
+            this.fbb = fbb;
+        }
+
+        FlatBufferBuilder getFbb() {
+            return fbb;
+        }
+
+        void checkNotFinished() {
+            if (finished) {
+                throw new IllegalStateException("Already finished");
+            }
+        }
+
+        /**
+         * Marks this as finished and returns {@link #createFlatBufferTable(FlatBufferBuilder)}.
+         */
+        public final int finish() {
+            checkNotFinished();
+            finished = true;
+            return createFlatBufferTable(getFbb());
+        }
+
+        /**
+         * Creates a flatbuffer table using the given builder and returns its offset.
+         */
+        public abstract int createFlatBufferTable(FlatBufferBuilder fbb);
+    }
+
+    public static class PropertyBuilder extends PartBuilder {
+
         private final int type;
         private final int virtualTargetOffset;
         private final int propertyNameOffset;
         private final int targetEntityOffset;
 
         private int secondaryNameOffset;
-        boolean finished;
         private int flags;
         private int id;
         private long uid;
         private int indexId;
         private long indexUid;
         private int indexMaxValueLength;
+        private int externalPropertyType;
         private int hnswParamsOffset;
 
-        PropertyBuilder(String name, @Nullable String targetEntityName, @Nullable String virtualTarget, int type) {
+        private PropertyBuilder(FlatBufferBuilder fbb, String name, @Nullable String targetEntityName,
+                                @Nullable String virtualTarget, int type) {
+            super(fbb);
             this.type = type;
             propertyNameOffset = fbb.createString(name);
             targetEntityOffset = targetEntityName != null ? fbb.createString(targetEntityName) : 0;
@@ -97,6 +149,17 @@ public class ModelBuilder {
         }
 
         /**
+         * Sets the {@link ExternalPropertyType} constant for this.
+         *
+         * @return this builder.
+         */
+        public PropertyBuilder externalType(int externalPropertyType) {
+            checkNotFinished();
+            this.externalPropertyType = externalPropertyType;
+            return this;
+        }
+
+        /**
          * Set parameters for {@link HnswIndex}.
          *
          * @param dimensions see {@link HnswIndex#dimensions()}.
@@ -116,6 +179,7 @@ public class ModelBuilder {
                                           @Nullable Float reparationBacklinkProbability,
                                           @Nullable Long vectorCacheHintSizeKb) {
             checkNotFinished();
+            FlatBufferBuilder fbb = getFbb();
             HnswParams.startHnswParams(fbb);
             HnswParams.addDimensions(fbb, dimensions);
             if (neighborsPerNode != null) {
@@ -148,19 +212,12 @@ public class ModelBuilder {
 
         public PropertyBuilder secondaryName(String secondaryName) {
             checkNotFinished();
-            secondaryNameOffset = fbb.createString(secondaryName);
+            secondaryNameOffset = getFbb().createString(secondaryName);
             return this;
         }
 
-        private void checkNotFinished() {
-            if (finished) {
-                throw new IllegalStateException("Already finished");
-            }
-        }
-
-        public int finish() {
-            checkNotFinished();
-            finished = true;
+        @Override
+        public int createFlatBufferTable(FlatBufferBuilder fbb) {
             ModelProperty.startModelProperty(fbb);
             ModelProperty.addName(fbb, propertyNameOffset);
             if (targetEntityOffset != 0) {
@@ -183,6 +240,9 @@ public class ModelBuilder {
             if (indexMaxValueLength > 0) {
                 ModelProperty.addMaxIndexValueLength(fbb, indexMaxValueLength);
             }
+            if (externalPropertyType != 0) {
+                ModelProperty.addExternalType(fbb, externalPropertyType);
+            }
             if (hnswParamsOffset != 0) {
                 ModelProperty.addHnswParams(fbb, hnswParamsOffset);
             }
@@ -194,7 +254,56 @@ public class ModelBuilder {
         }
     }
 
-    public class EntityBuilder {
+    public static class RelationBuilder extends PartBuilder {
+
+        private final String name;
+        private final int relationId;
+        private final long relationUid;
+        private final int targetEntityId;
+        private final long targetEntityUid;
+        private int externalPropertyType;
+
+        private RelationBuilder(FlatBufferBuilder fbb, String name, int relationId, long relationUid,
+                                int targetEntityId, long targetEntityUid) {
+            super(fbb);
+            this.name = name;
+            this.relationId = relationId;
+            this.relationUid = relationUid;
+            this.targetEntityId = targetEntityId;
+            this.targetEntityUid = targetEntityUid;
+        }
+
+        /**
+         * Sets the {@link ExternalPropertyType} constant for this.
+         *
+         * @return this builder.
+         */
+        public RelationBuilder externalType(int externalPropertyType) {
+            checkNotFinished();
+            this.externalPropertyType = externalPropertyType;
+            return this;
+        }
+
+        @Override
+        public int createFlatBufferTable(FlatBufferBuilder fbb) {
+            int nameOffset = fbb.createString(name);
+
+            ModelRelation.startModelRelation(fbb);
+            ModelRelation.addName(fbb, nameOffset);
+            int relationIdOffset = IdUid.createIdUid(fbb, relationId, relationUid);
+            ModelRelation.addId(fbb, relationIdOffset);
+            int targetEntityIdOffset = IdUid.createIdUid(fbb, targetEntityId, targetEntityUid);
+            ModelRelation.addTargetEntityId(fbb, targetEntityIdOffset);
+            if (externalPropertyType != 0) {
+                ModelRelation.addExternalType(fbb, externalPropertyType);
+            }
+            return ModelRelation.endModelRelation(fbb);
+        }
+    }
+
+    public static class EntityBuilder extends PartBuilder {
+
+        private final ModelBuilder model;
         final String name;
         final List<Integer> propertyOffsets = new ArrayList<>();
         final List<Integer> relationOffsets = new ArrayList<>();
@@ -204,10 +313,13 @@ public class ModelBuilder {
         Integer flags;
         Integer lastPropertyId;
         Long lastPropertyUid;
-        PropertyBuilder propertyBuilder;
+        @Nullable PropertyBuilder propertyBuilder;
+        @Nullable RelationBuilder relationBuilder;
         boolean finished;
 
-        EntityBuilder(String name) {
+        EntityBuilder(ModelBuilder model, FlatBufferBuilder fbb, String name) {
+            super(fbb);
+            this.model = model;
             this.name = name;
         }
 
@@ -230,12 +342,6 @@ public class ModelBuilder {
             return this;
         }
 
-        private void checkNotFinished() {
-            if (finished) {
-                throw new IllegalStateException("Already finished");
-            }
-        }
-
         public PropertyBuilder property(String name, int type) {
             return property(name, null, type);
         }
@@ -247,43 +353,48 @@ public class ModelBuilder {
         public PropertyBuilder property(String name, @Nullable String targetEntityName, @Nullable String virtualTarget,
                                         int type) {
             checkNotFinished();
-            checkFinishProperty();
-            propertyBuilder = new PropertyBuilder(name, targetEntityName, virtualTarget, type);
+            finishPropertyOrRelation();
+            propertyBuilder = new PropertyBuilder(getFbb(), name, targetEntityName, virtualTarget, type);
             return propertyBuilder;
         }
 
-        void checkFinishProperty() {
+        public RelationBuilder relation(String name, int relationId, long relationUid, int targetEntityId,
+                                        long targetEntityUid) {
+            checkNotFinished();
+            finishPropertyOrRelation();
+
+            RelationBuilder relationBuilder = new RelationBuilder(getFbb(), name, relationId, relationUid, targetEntityId, targetEntityUid);
+            this.relationBuilder = relationBuilder;
+            return relationBuilder;
+        }
+
+        private void finishPropertyOrRelation() {
+            if (propertyBuilder != null && relationBuilder != null) {
+                throw new IllegalStateException("Must not build property and relation at the same time.");
+            }
             if (propertyBuilder != null) {
                 propertyOffsets.add(propertyBuilder.finish());
                 propertyBuilder = null;
             }
-        }
-
-        public EntityBuilder relation(String name, int relationId, long relationUid, int targetEntityId,
-                                      long targetEntityUid) {
-            checkNotFinished();
-            checkFinishProperty();
-
-            int propertyNameOffset = fbb.createString(name);
-
-            ModelRelation.startModelRelation(fbb);
-            ModelRelation.addName(fbb, propertyNameOffset);
-            int relationIdOffset = IdUid.createIdUid(fbb, relationId, relationUid);
-            ModelRelation.addId(fbb, relationIdOffset);
-            int targetEntityIdOffset = IdUid.createIdUid(fbb, targetEntityId, targetEntityUid);
-            ModelRelation.addTargetEntityId(fbb, targetEntityIdOffset);
-            relationOffsets.add(ModelRelation.endModelRelation(fbb));
-
-            return this;
+            if (relationBuilder != null) {
+                relationOffsets.add(relationBuilder.finish());
+                relationBuilder = null;
+            }
         }
 
         public ModelBuilder entityDone() {
+            // Make sure any pending property or relation is finished first
             checkNotFinished();
-            checkFinishProperty();
-            finished = true;
+            finishPropertyOrRelation();
+            model.entityOffsets.add(finish());
+            return model;
+        }
+
+        @Override
+        public int createFlatBufferTable(FlatBufferBuilder fbb) {
             int testEntityNameOffset = fbb.createString(name);
-            int propertiesOffset = createVector(propertyOffsets);
-            int relationsOffset = relationOffsets.isEmpty() ? 0 : createVector(relationOffsets);
+            int propertiesOffset = model.createVector(propertyOffsets);
+            int relationsOffset = relationOffsets.isEmpty() ? 0 : model.createVector(relationOffsets);
 
             ModelEntity.startModelEntity(fbb);
             ModelEntity.addName(fbb, testEntityNameOffset);
@@ -300,12 +411,12 @@ public class ModelBuilder {
             if (flags != null) {
                 ModelEntity.addFlags(fbb, flags);
             }
-            entityOffsets.add(ModelEntity.endModelEntity(fbb));
-            return ModelBuilder.this;
+            return ModelEntity.endModelEntity(fbb);
         }
+
     }
 
-    int createVector(List<Integer> offsets) {
+    private int createVector(List<Integer> offsets) {
         int[] offsetArray = new int[offsets.size()];
         for (int i = 0; i < offsets.size(); i++) {
             offsetArray[i] = offsets.get(i);
@@ -319,7 +430,7 @@ public class ModelBuilder {
     }
 
     public EntityBuilder entity(String name) {
-        return new EntityBuilder(name);
+        return new EntityBuilder(this, fbb, name);
     }
 
     public ModelBuilder lastEntityId(int lastEntityId, long lastEntityUid) {

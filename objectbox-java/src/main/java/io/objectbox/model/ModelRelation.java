@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,17 @@
 
 package io.objectbox.model;
 
-import io.objectbox.flatbuffers.BaseVector;
-import io.objectbox.flatbuffers.BooleanVector;
-import io.objectbox.flatbuffers.ByteVector;
-import io.objectbox.flatbuffers.Constants;
-import io.objectbox.flatbuffers.DoubleVector;
-import io.objectbox.flatbuffers.FlatBufferBuilder;
-import io.objectbox.flatbuffers.FloatVector;
-import io.objectbox.flatbuffers.IntVector;
-import io.objectbox.flatbuffers.LongVector;
-import io.objectbox.flatbuffers.ShortVector;
-import io.objectbox.flatbuffers.StringVector;
-import io.objectbox.flatbuffers.Struct;
-import io.objectbox.flatbuffers.Table;
-import io.objectbox.flatbuffers.UnionVector;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import io.objectbox.flatbuffers.BaseVector;
+import io.objectbox.flatbuffers.Constants;
+import io.objectbox.flatbuffers.FlatBufferBuilder;
+import io.objectbox.flatbuffers.Table;
+
+/**
+ * A many-to-many relation between two entity types.
+ */
 @SuppressWarnings("unused")
 public final class ModelRelation extends Table {
   public static void ValidateVersion() { Constants.FLATBUFFERS_23_5_26(); }
@@ -50,11 +44,25 @@ public final class ModelRelation extends Table {
   public ByteBuffer nameInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 6, 1); }
   public io.objectbox.model.IdUid targetEntityId() { return targetEntityId(new io.objectbox.model.IdUid()); }
   public io.objectbox.model.IdUid targetEntityId(io.objectbox.model.IdUid obj) { int o = __offset(8); return o != 0 ? obj.__assign(o + bb_pos, bb) : null; }
+  /**
+   * Optional type used in an external system, e.g. another database that ObjectBox syncs with.
+   * Note that the supported mappings from ObjectBox types to external types are limited.
+   * Here, external relation types must be vectors, i.e. a list of IDs.
+   */
+  public int externalType() { int o = __offset(10); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
+  /**
+   * Optional name used in an external system, e.g. another database that ObjectBox syncs with.
+   */
+  public String externalName() { int o = __offset(12); return o != 0 ? __string(o + bb_pos) : null; }
+  public ByteBuffer externalNameAsByteBuffer() { return __vector_as_bytebuffer(12, 1); }
+  public ByteBuffer externalNameInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 12, 1); }
 
-  public static void startModelRelation(FlatBufferBuilder builder) { builder.startTable(3); }
+  public static void startModelRelation(FlatBufferBuilder builder) { builder.startTable(5); }
   public static void addId(FlatBufferBuilder builder, int idOffset) { builder.addStruct(0, idOffset, 0); }
   public static void addName(FlatBufferBuilder builder, int nameOffset) { builder.addOffset(1, nameOffset, 0); }
   public static void addTargetEntityId(FlatBufferBuilder builder, int targetEntityIdOffset) { builder.addStruct(2, targetEntityIdOffset, 0); }
+  public static void addExternalType(FlatBufferBuilder builder, int externalType) { builder.addShort(3, (short) externalType, (short) 0); }
+  public static void addExternalName(FlatBufferBuilder builder, int externalNameOffset) { builder.addOffset(4, externalNameOffset, 0); }
   public static int endModelRelation(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;

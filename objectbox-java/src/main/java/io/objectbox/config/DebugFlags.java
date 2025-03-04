@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,5 +43,9 @@ public final class DebugFlags {
    * Run a quick self-test to verify basic threading; somewhat paranoia to check the platform and the library setup.
    */
   public static final int RUN_THREADING_SELF_TEST = 512;
+  /**
+   * Enables debug logs for write-ahead logging
+   */
+  public static final int LOG_WAL = 1024;
 }
 

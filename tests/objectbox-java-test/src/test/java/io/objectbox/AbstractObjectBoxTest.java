@@ -42,6 +42,7 @@ import io.objectbox.ModelBuilder.EntityBuilder;
 import io.objectbox.ModelBuilder.PropertyBuilder;
 import io.objectbox.annotation.IndexType;
 import io.objectbox.config.DebugFlags;
+import io.objectbox.model.ExternalPropertyType;
 import io.objectbox.model.PropertyFlags;
 import io.objectbox.model.PropertyType;
 
@@ -303,7 +304,14 @@ public abstract class AbstractObjectBoxTest {
         // Date property
         entityBuilder.property("date", PropertyType.Date).id(TestEntity_.date.id, ++lastUid);
 
-        int lastId = TestEntity_.date.id;
+        int lastId = TestEntity_.externalId.id;
+
+        // External type property
+        // Note: there is no way to test external type mapping works here. Instead, verify passing a model with
+        // externalType(int) works.
+        entityBuilder.property("externalId", PropertyType.ByteVector).id(lastId, ++lastUid)
+                .externalType(ExternalPropertyType.Uuid);
+
         entityBuilder.lastPropertyId(lastId, lastUid);
         addOptionalFlagsToTestEntity(entityBuilder);
         entityBuilder.entityDone();
@@ -357,6 +365,9 @@ public abstract class AbstractObjectBoxTest {
         entity.setFloatArray(new float[]{-entity.getSimpleFloat(), entity.getSimpleFloat()});
         entity.setDoubleArray(new double[]{-entity.getSimpleDouble(), entity.getSimpleDouble()});
         entity.setDate(new Date(1000 + nr));
+        // Note: there is no way to test external type mapping works here. Instead, verify that
+        // there are no side effects for put and get.
+        entity.setExternalId(entity.getSimpleByteArray());
         return entity;
     }
 
