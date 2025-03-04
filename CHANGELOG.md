@@ -4,7 +4,7 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
-## 4.1.1 - in development
+## 4.2.0 - 2025-03-04
 
 - Add new query conditions `equalKeyValue`, `greaterKeyValue`, `lessKeyValue`, `lessOrEqualKeyValue`, and 
   `greaterOrEqualKeyValue` that are helpful to write complex queries for [string maps](https://docs.objectbox.io/advanced/custom-types#flex-properties).
