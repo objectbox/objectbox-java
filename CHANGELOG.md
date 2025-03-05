@@ -10,6 +10,7 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
   `greaterOrEqualKeyValue` that are helpful to write complex queries for [string maps](https://docs.objectbox.io/advanced/custom-types#flex-properties).
   These methods support `String`, `long` and `double` data types for the values in the string map.
 - Deprecate the `containsKeyValue` condition, use the new `equalKeyValue` condition instead.
+- Android: to build, at least Android Plugin 8.1.1 and Gradle 8.2.1 are required.
 
 ## 4.1.0 - 2025-01-30
 
