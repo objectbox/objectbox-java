@@ -474,6 +474,7 @@ public class QueryTest extends AbstractQueryTest {
     public void testString() {
         List<TestEntity> entities = putTestEntitiesStrings();
         int count = entities.size();
+        
         try (Query<TestEntity> equal = box.query()
                 .equal(simpleString, "banana", StringOrder.CASE_INSENSITIVE)
                 .build()) {
@@ -490,10 +491,24 @@ public class QueryTest extends AbstractQueryTest {
                 .build()) {
             assertEquals(4, getUniqueNotNull(startsEndsWith).getId());
         }
+
+        // contains
         try (Query<TestEntity> contains = box.query()
                 .contains(simpleString, "nana", StringOrder.CASE_INSENSITIVE)
                 .build()) {
             assertEquals(2, contains.count());
+        }
+        // Verify case-sensitive setting has no side effects for non-ASCII characters
+        box.put(createTestEntity("Îñţérñåţîöñåļîžåţîờñ is key", 6));
+        try (Query<TestEntity> contains = box.query()
+                .contains(simpleString, "Îñţérñåţîöñåļîžåţîờñ", StringOrder.CASE_SENSITIVE)
+                .build()) {
+            assertEquals(1, contains.count());
+        }
+        try (Query<TestEntity> contains = box.query()
+                .contains(simpleString, "Îñţérñåţîöñåļîžåţîờñ", StringOrder.CASE_INSENSITIVE)
+                .build()) {
+            assertEquals(1, contains.count());
         }
     }
 
