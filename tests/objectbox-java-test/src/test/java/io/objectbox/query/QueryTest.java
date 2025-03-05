@@ -499,7 +499,7 @@ public class QueryTest extends AbstractQueryTest {
             assertEquals(2, contains.count());
         }
         // Verify case-sensitive setting has no side effects for non-ASCII characters
-        box.put(createTestEntity("Îñţérñåţîöñåļîžåţîờñ is key", 6));
+        box.put(createTestEntity("Note that Îñţérñåţîöñåļîžåţîờñ is key", 6));
         try (Query<TestEntity> contains = box.query()
                 .contains(simpleString, "Îñţérñåţîöñåļîžåţîờñ", StringOrder.CASE_SENSITIVE)
                 .build()) {
