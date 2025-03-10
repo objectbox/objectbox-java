@@ -1,8 +1,8 @@
 ## What does this merge request do?
 
-<!-- TODO Link associated issue from title, like: <title> #NUMBER -->
+TODO Link associated issue from title, like: `<title> #NUMBER`
 
-<!-- TODO Briefly list what this merge request is about -->
+TODO Briefly list what this merge request is about
 
 ## Author's checklist
 
@@ -16,7 +16,9 @@
 
 ## Reviewer's checklist
 
-- [ ] I reviewed all changes line-by-line and addressed relevant issues
+- [ ] I reviewed all changes line-by-line and addressed relevant issues. However:
+  - for quickly resolved issues, I considered creating a fixup commit and discussing that, and
+  - instead of many or long comments, I considered a meeting with or a draft commit for the author.
 - [ ] The requirements of the associated task are fully met
 - [ ] I can confirm that:
   - CI passes
