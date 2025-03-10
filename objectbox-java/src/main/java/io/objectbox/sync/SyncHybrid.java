@@ -24,7 +24,7 @@ import io.objectbox.sync.server.SyncServer;
 /**
  * Combines the functionality of a Sync client and a Sync server.
  * <p>
- * It is typically used in local cluster setups, in which a "hybrid" functions as a client & cluster peer (server).
+ * It is typically used in local cluster setups, in which a "hybrid" functions as a client and cluster peer (server).
  * <p>
  * Call {@link #getStore()} to retrieve the store. To set sync listeners use the {@link SyncClient} that is available
  * from {@link #getClient()}.

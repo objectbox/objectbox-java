@@ -35,18 +35,28 @@ tasks.spotbugsMain {
     }
 }
 
+// Note: used for the Maven javadoc artifact, a separate task is used to build API docs to publish online
 javadoc {
-    // Hide internal API from javadoc artifact.
+    // Internal Java APIs
     exclude("**/io/objectbox/Cursor.java")
     exclude("**/io/objectbox/KeyValueCursor.java")
     exclude("**/io/objectbox/ModelBuilder.java")
     exclude("**/io/objectbox/Properties.java")
     exclude("**/io/objectbox/Transaction.java")
-    exclude("**/io/objectbox/model/**")
     exclude("**/io/objectbox/ideasonly/**")
     exclude("**/io/objectbox/internal/**")
     exclude("**/io/objectbox/reactive/DataPublisherUtils.java")
     exclude("**/io/objectbox/reactive/WeakDataObserver.java")
+    exclude("**/io/objectbox/sync/server/ClusterPeerInfo.java")
+    // Repackaged FlatBuffers distribution
+    exclude("**/io/objectbox/flatbuffers/**")
+    // FlatBuffers generated files only used internally (note: some are part of the public API)
+    exclude("**/io/objectbox/model/**")
+    exclude("**/io/objectbox/sync/Credentials.java")
+    exclude("**/io/objectbox/sync/CredentialsType.java")
+    exclude("**/io/objectbox/sync/server/ClusterPeerConfig.java")
+    exclude("**/io/objectbox/sync/server/JwtConfig.java")
+    exclude("**/io/objectbox/sync/server/SyncServerOptions.java")
 }
 
 // Note: use packageJavadocForWeb to get as ZIP.
@@ -55,25 +65,34 @@ tasks.register('javadocForWeb', Javadoc) {
     description = 'Builds Javadoc incl. objectbox-java-api classes with web tweaks.'
 
     javadocTool = javaToolchains.javadocToolFor {
-        // Note: the style changes only work if using JDK 10+, 11 is latest LTS.
-        languageVersion = JavaLanguageVersion.of(11)
+        // Note: the style changes only work if using JDK 10+, 17 is the LTS release used to publish this
+        languageVersion = JavaLanguageVersion.of(17)
     }
 
     def srcApi = project(':objectbox-java-api').file('src/main/java/')
     if (!srcApi.directory) throw new GradleScriptException("Not a directory: ${srcApi}", null)
     // Hide internal API from javadoc artifact.
     def filteredSources = sourceSets.main.allJava.matching {
+        // Internal Java APIs
         exclude("**/io/objectbox/Cursor.java")
         exclude("**/io/objectbox/KeyValueCursor.java")
         exclude("**/io/objectbox/ModelBuilder.java")
         exclude("**/io/objectbox/Properties.java")
         exclude("**/io/objectbox/Transaction.java")
-        exclude("**/io/objectbox/flatbuffers/**")
         exclude("**/io/objectbox/ideasonly/**")
         exclude("**/io/objectbox/internal/**")
-        exclude("**/io/objectbox/model/**")
         exclude("**/io/objectbox/reactive/DataPublisherUtils.java")
         exclude("**/io/objectbox/reactive/WeakDataObserver.java")
+        exclude("**/io/objectbox/sync/server/ClusterPeerInfo.java")
+        // Repackaged FlatBuffers distribution
+        exclude("**/io/objectbox/flatbuffers/**")
+        // FlatBuffers generated files only used internally (note: some are part of the public API)
+        exclude("**/io/objectbox/model/**")
+        exclude("**/io/objectbox/sync/Credentials.java")
+        exclude("**/io/objectbox/sync/CredentialsType.java")
+        exclude("**/io/objectbox/sync/server/ClusterPeerConfig.java")
+        exclude("**/io/objectbox/sync/server/JwtConfig.java")
+        exclude("**/io/objectbox/sync/server/SyncServerOptions.java")
     }
     source = filteredSources + srcApi
 
@@ -81,7 +100,6 @@ tasks.register('javadocForWeb', Javadoc) {
     destinationDir = file(javadocForWebDir)
 
     title = "ObjectBox Java ${version} API"
-    options.encoding = 'UTF-8' // Set UTF-8 encoding to support unicode characters used in docs
     options.overview = "$projectDir/src/web/overview.html"
     options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017-2024 <a href="https://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
 

@@ -44,7 +44,7 @@ public final class Sync {
     }
 
     /**
-     * Returns true if the included native (JNI) ObjectBox library supports Sync hybrids (server & client).
+     * Returns true if the included native (JNI) ObjectBox library supports Sync hybrids (server and client).
      */
     public static boolean isHybridAvailable() {
         return isAvailable() && isServerAvailable();
