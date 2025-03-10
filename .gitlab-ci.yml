@@ -28,10 +28,18 @@ variables:
 # Using multiple test stages to avoid running some things in parallel (see job notes).
 stages:
   - test
-  - upload-to-internal
-  - upload-to-central
+  - publish-maven-internal
+  - publish-maven-central
   - package-api-docs
   - triggers
+
+workflow:
+  rules:
+    # Never create a pipeline when a tag is pushed (to simplify release checks in root build script)
+    - if: $CI_COMMIT_TAG
+      when: never
+    # Otherwise, only create a pipeline when a branch is pushed
+    - if: $CI_PIPELINE_SOURCE == "push"
 
 test:
   stage: test
@@ -47,7 +55,9 @@ test:
     # "|| true" for an OK exit code if no file is found
     - rm **/hs_err_pid*.log || true
   script:
-    - ./scripts/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean build
+    # build to assemble, run tests and spotbugs
+    # javadocForWeb to catch API docs errors before releasing
+    - ./scripts/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean build javadocForWeb
   artifacts:
     when: always
     paths:
@@ -120,22 +130,32 @@ test-jdk-x86:
     TEST_WITH_JAVA_X86: "true"
   script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
 
-upload-to-internal:
-  stage: upload-to-internal
+# Publish Maven artifacts to internal Maven repo
+publish-maven-internal:
+  stage: publish-maven-internal
   tags: [ docker, x64 ]
-  except:
-    - main # Do not upload duplicate release artifacts
-    - pipelines # Do not upload artifacts if triggered by upstream project to save on disk space
-    - schedules # Do not upload artifacts from scheduled jobs to save on disk space
-    - tags # Only upload artifacts from branches
+  rules:
+    # Not from main branch, doing so may duplicate release artifacts (uploaded from publish branch)
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: never
+    # Not if triggered by upstream project to save on disk space
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+      when: never
+    # Not from scheduled pipelines to save on disk space
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    # Otherwise, only on push to branch
+    - if: $CI_PIPELINE_SOURCE == "push"
   script:
     - ./gradlew $GITLAB_REPO_ARGS $GITLAB_PUBLISH_ARGS $VERSION_ARGS publishMavenJavaPublicationToGitLabRepository
 
-upload-to-central:
-  stage: upload-to-central
+# Publish Maven artifacts to public Maven repo at Central
+publish-maven-central:
+  stage: publish-maven-central
   tags: [ docker, x64 ]
-  only:
-    - publish
+  rules:
+    # Only on publish branch
+    - if: $CI_COMMIT_BRANCH == "publish"
   before_script:
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java library:* job $CI_JOB_NAME from branch $CI_COMMIT_BRANCH ($CI_COMMIT_SHORT_SHA)..."
   script:
@@ -146,11 +166,13 @@ upload-to-central:
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java library:* *$CI_JOB_STATUS* for $CI_JOB_NAME"
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "Check https://repo1.maven.org/maven2/io/objectbox/ in a few minutes."
 
+# Create Java API docs archive
 package-api-docs:
   stage: package-api-docs
   tags: [ docker, x64 ]
-  only:
-    - publish
+  rules:
+    # Only on publish branch
+    - if: $CI_COMMIT_BRANCH == "publish"
   script:
     - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS :objectbox-java:packageJavadocForWeb
   after_script:
@@ -159,14 +181,18 @@ package-api-docs:
     paths:
       - "objectbox-java/build/dist/objectbox-java-web-api-docs.zip"
 
+# Trigger Gradle plugin build to test new Maven snapshots of this project
 trigger-plugin:
   stage: triggers
-  except:
-    - schedules # Do not trigger when run on schedule, e.g. integ tests have own schedule.
-    - publish
+  rules:
+    # Do not trigger publishing of plugin
+    - if: $CI_COMMIT_BRANCH == "publish"
+      when: never
+    # Otherwise, only on push to branch (also set allow_failure in case branch does not exist downstream)
+    - if: $CI_PIPELINE_SOURCE == "push"
   inherit:
     variables: false
-  allow_failure: true # Branch might not exist, yet, in plugin project.
+  allow_failure: true # Branch might not exist in plugin project
   trigger:
     project: objectbox/objectbox-plugin
     branch: $CI_COMMIT_BRANCH

@@ -35,6 +35,18 @@ buildscript {
     }
     val obxJniLibVersion by extra("io.objectbox:objectbox-$objectboxPlatform:$nativeVersion")
 
+    println("version=$obxJavaVersion")
+    println("objectboxNativeDependency=$obxJniLibVersion")
+
+    // To avoid duplicate release artifacts on the internal repository,
+    // prevent publishing from branches other than publish, and main (for which publishing is turned off).
+    val isCI = System.getenv("CI") == "true"
+    val branchOrTag = System.getenv("CI_COMMIT_REF_NAME")
+    if (isCI && isRelease && !("publish" == branchOrTag || "main" == branchOrTag)) {
+        throw GradleException("isRelease = true only allowed on publish or main branch, but is $branchOrTag")
+    }
+
+    // Versions for third party dependencies and plugins
     val essentialsVersion by extra("3.1.0")
     val junitVersion by extra("4.13.2")
     val mockitoVersion by extra("3.8.0")
@@ -46,17 +58,6 @@ buildscript {
     val kotlinVersion by extra("1.8.20")
     val coroutinesVersion by extra("1.7.3")
     val dokkaVersion by extra("1.8.20")
-
-    println("version=$obxJavaVersion")
-    println("objectboxNativeDependency=$obxJniLibVersion")
-
-    // To avoid duplicate release artifacts on the internal repository,
-    // prevent uploading from branches other than publish, and main (for which uploading is turned off).
-    val isCI = System.getenv("CI") == "true"
-    val branchOrTag = System.getenv("CI_COMMIT_REF_NAME")
-    if (isCI && isRelease && !("publish" == branchOrTag || "main" == branchOrTag)) {
-        throw GradleException("isRelease = true is only allowed on branch publish or main")
-    }
 
     repositories {
         mavenCentral()
