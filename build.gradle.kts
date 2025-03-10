@@ -13,8 +13,8 @@ plugins {
 }
 
 buildscript {
-    val versionNumber = "4.2.0" // without "-SNAPSHOT", e.g. "2.5.0" or "2.4.0-RC"
-    val isRelease = true        // WARNING: only set true to publish a release on publish branch!
+    val versionNumber = "4.2.1" // without "-SNAPSHOT", e.g. "2.5.0" or "2.4.0-RC"
+    val isRelease = false       // WARNING: only set true to publish a release on publish branch!
                                 // See the release checklist for details.
                                 // Makes this produce release artifacts, changes dependencies to release versions.
 
