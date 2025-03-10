@@ -35,18 +35,28 @@ tasks.spotbugsMain {
     }
 }
 
+// Note: used for the Maven javadoc artifact, a separate task is used to build API docs to publish online
 javadoc {
-    // Hide internal API from javadoc artifact.
+    // Internal Java APIs
     exclude("**/io/objectbox/Cursor.java")
     exclude("**/io/objectbox/KeyValueCursor.java")
     exclude("**/io/objectbox/ModelBuilder.java")
     exclude("**/io/objectbox/Properties.java")
     exclude("**/io/objectbox/Transaction.java")
-    exclude("**/io/objectbox/model/**")
     exclude("**/io/objectbox/ideasonly/**")
     exclude("**/io/objectbox/internal/**")
     exclude("**/io/objectbox/reactive/DataPublisherUtils.java")
     exclude("**/io/objectbox/reactive/WeakDataObserver.java")
+    exclude("**/io/objectbox/sync/server/ClusterPeerInfo.java")
+    // Repackaged FlatBuffers distribution
+    exclude("**/io/objectbox/flatbuffers/**")
+    // FlatBuffers generated files only used internally (note: some are part of the public API)
+    exclude("**/io/objectbox/model/**")
+    exclude("**/io/objectbox/sync/Credentials.java")
+    exclude("**/io/objectbox/sync/CredentialsType.java")
+    exclude("**/io/objectbox/sync/server/ClusterPeerConfig.java")
+    exclude("**/io/objectbox/sync/server/JwtConfig.java")
+    exclude("**/io/objectbox/sync/server/SyncServerOptions.java")
 }
 
 // Note: use packageJavadocForWeb to get as ZIP.
@@ -63,17 +73,26 @@ tasks.register('javadocForWeb', Javadoc) {
     if (!srcApi.directory) throw new GradleScriptException("Not a directory: ${srcApi}", null)
     // Hide internal API from javadoc artifact.
     def filteredSources = sourceSets.main.allJava.matching {
+        // Internal Java APIs
         exclude("**/io/objectbox/Cursor.java")
         exclude("**/io/objectbox/KeyValueCursor.java")
         exclude("**/io/objectbox/ModelBuilder.java")
         exclude("**/io/objectbox/Properties.java")
         exclude("**/io/objectbox/Transaction.java")
-        exclude("**/io/objectbox/flatbuffers/**")
         exclude("**/io/objectbox/ideasonly/**")
         exclude("**/io/objectbox/internal/**")
-        exclude("**/io/objectbox/model/**")
         exclude("**/io/objectbox/reactive/DataPublisherUtils.java")
         exclude("**/io/objectbox/reactive/WeakDataObserver.java")
+        exclude("**/io/objectbox/sync/server/ClusterPeerInfo.java")
+        // Repackaged FlatBuffers distribution
+        exclude("**/io/objectbox/flatbuffers/**")
+        // FlatBuffers generated files only used internally (note: some are part of the public API)
+        exclude("**/io/objectbox/model/**")
+        exclude("**/io/objectbox/sync/Credentials.java")
+        exclude("**/io/objectbox/sync/CredentialsType.java")
+        exclude("**/io/objectbox/sync/server/ClusterPeerConfig.java")
+        exclude("**/io/objectbox/sync/server/JwtConfig.java")
+        exclude("**/io/objectbox/sync/server/SyncServerOptions.java")
     }
     source = filteredSources + srcApi
 
