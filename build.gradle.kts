@@ -87,6 +87,13 @@ allprojects {
             cacheChangingModulesFor(0, "seconds")
         }
     }
+
+    tasks.withType<Javadoc>().configureEach {
+        // To support Unicode characters in API docs force the javadoc tool to use UTF-8 encoding.
+        // Otherwise, it defaults to the system file encoding. This is required even though setting file.encoding
+        // for the Gradle daemon (see gradle.properties) as Gradle does not pass it on to the javadoc tool.
+        options.encoding = "UTF-8"
+    }
 }
 
 tasks.wrapper {
