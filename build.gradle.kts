@@ -13,19 +13,19 @@ plugins {
 }
 
 buildscript {
-    // To publish a release, typically, only edit those two:
-    val objectboxVersionNumber = "4.1.1" // without "-SNAPSHOT", e.g. "2.5.0" or "2.4.0-RC"
-    val objectboxVersionRelease =
-        false // set to true for releasing to ignore versionPostFix to avoid e.g. "-dev" versions
+    val versionNumber = "4.2.0" // without "-SNAPSHOT", e.g. "2.5.0" or "2.4.0-RC"
+    val isRelease = true        // WARNING: only set true to publish a release on publish branch!
+                                // See the release checklist for details.
+                                // Makes this produce release artifacts, changes dependencies to release versions.
 
     // version post fix: "-<value>" or "" if not defined; e.g. used by CI to pass in branch name
     val versionPostFixValue = project.findProperty("versionPostFix")
     val versionPostFix = if (versionPostFixValue != null) "-$versionPostFixValue" else ""
-    val obxJavaVersion by extra(objectboxVersionNumber + (if (objectboxVersionRelease) "" else "$versionPostFix-SNAPSHOT"))
+    val obxJavaVersion by extra(versionNumber + (if (isRelease) "" else "$versionPostFix-SNAPSHOT"))
 
     // Native library version for tests
     // Be careful to diverge here; easy to forget and hard to find JNI problems
-    val nativeVersion = objectboxVersionNumber + (if (objectboxVersionRelease) "" else "-dev-SNAPSHOT")
+    val nativeVersion = versionNumber + (if (isRelease) "" else "-dev-SNAPSHOT")
     val osName = System.getProperty("os.name").lowercase()
     val objectboxPlatform = when {
         osName.contains("linux") -> "linux"
@@ -54,8 +54,8 @@ buildscript {
     // prevent uploading from branches other than publish, and main (for which uploading is turned off).
     val isCI = System.getenv("CI") == "true"
     val branchOrTag = System.getenv("CI_COMMIT_REF_NAME")
-    if (isCI && objectboxVersionRelease && !("publish" == branchOrTag || "main" == branchOrTag)) {
-        throw GradleException("objectboxVersionRelease = true is only allowed on branch publish or main")
+    if (isCI && isRelease && !("publish" == branchOrTag || "main" == branchOrTag)) {
+        throw GradleException("isRelease = true is only allowed on branch publish or main")
     }
 
     repositories {

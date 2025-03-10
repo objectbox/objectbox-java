@@ -81,6 +81,7 @@ tasks.register('javadocForWeb', Javadoc) {
     destinationDir = file(javadocForWebDir)
 
     title = "ObjectBox Java ${version} API"
+    options.encoding = 'UTF-8' // Set UTF-8 encoding to support unicode characters used in docs
     options.overview = "$projectDir/src/web/overview.html"
     options.bottom = 'Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017-2024 <a href="https://objectbox.io/">ObjectBox Ltd</a>. All Rights Reserved.</i>'
 
