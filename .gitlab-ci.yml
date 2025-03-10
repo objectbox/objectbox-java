@@ -55,7 +55,9 @@ test:
     # "|| true" for an OK exit code if no file is found
     - rm **/hs_err_pid*.log || true
   script:
-    - ./scripts/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean build
+    # build to assemble, run tests and spotbugs
+    # javadocForWeb to catch API docs errors before releasing
+    - ./scripts/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean build javadocForWeb
   artifacts:
     when: always
     paths:
