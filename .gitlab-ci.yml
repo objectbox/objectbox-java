@@ -33,6 +33,14 @@ stages:
   - package-api-docs
   - triggers
 
+workflow:
+  rules:
+    # Never create a pipeline when a tag is pushed (to simplify release checks in root build script)
+    - if: $CI_COMMIT_TAG
+      when: never
+    # Otherwise, only create a pipeline when a branch is pushed
+    - if: $CI_PIPELINE_SOURCE == "push"
+
 test:
   stage: test
   tags: [ docker, linux, x64 ]
@@ -133,9 +141,6 @@ publish-maven-internal:
       when: never
     # Not from scheduled pipelines to save on disk space
     - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
-    # Not from tags
-    - if: $CI_COMMIT_TAG == null
       when: never
     # Otherwise, only on push to branch
     - if: $CI_PIPELINE_SOURCE == "push"
