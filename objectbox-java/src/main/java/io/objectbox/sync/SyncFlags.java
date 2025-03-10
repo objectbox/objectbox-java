@@ -25,7 +25,7 @@ package io.objectbox.sync;
 public final class SyncFlags {
   private SyncFlags() { }
   /**
-   * Enable (rather extensive) logging on how IDs are mapped (local <-> global)
+   * Enable (rather extensive) logging on how IDs are mapped (local &lt;-&gt; global)
    */
   public static final int DebugLogIdMapping = 1;
   /**

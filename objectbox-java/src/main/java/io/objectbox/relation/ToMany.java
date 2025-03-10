@@ -58,7 +58,7 @@ import static java.lang.Boolean.TRUE;
  * <pre>{@code
  * // Java
  * @Entity
- * public class Student{
+ * public class Student {
  *     private ToMany<Teacher> teachers;
  * }
  *
@@ -85,7 +85,6 @@ import static java.lang.Boolean.TRUE;
  * <p>
  * To apply (persist) the changes to the database, call {@link #applyChangesToDb()} or put the object with the ToMany.
  * For important details, see the notes about relations of {@link Box#put(Object)}.
- * <p>
  * <pre>{@code
  * // Example 1: add target objects to a relation
  * student.getTeachers().add(teacher1);

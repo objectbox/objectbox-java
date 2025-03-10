@@ -61,7 +61,6 @@ import io.objectbox.internal.ReflectionCache;
  * </ul>
  * <p>
  * Then, to persist the changes {@link Box#put} the object with the ToOne.
- * <p>
  * <pre>{@code
  * // Example 1: create a relation
  * order.getCustomer().setTarget(customer);
