@@ -34,11 +34,14 @@ stages:
 
 workflow:
   rules:
-    # Never create a pipeline when a tag is pushed (to simplify release checks in root build script)
+    # Disable merge request pipelines https://docs.gitlab.com/ci/jobs/job_rules/#ci_pipeline_source-predefined-variable
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    # Never create a pipeline when a tag is pushed (to simplify version computation in root build script)
     - if: $CI_COMMIT_TAG
       when: never
-    # Otherwise, only create a pipeline when a branch is pushed
-    - if: $CI_PIPELINE_SOURCE == "push"
+    # In all other cases, create a pipeline
+    - when: always
 
 test:
   stage: test
@@ -134,17 +137,17 @@ publish-maven-internal:
   stage: publish-maven-internal
   tags: [ docker, x64 ]
   rules:
-    # Not from main branch, doing so may duplicate release artifacts (uploaded from publish branch)
+    # Not for main branch, doing so may duplicate release artifacts (uploaded from publish branch)
     - if: $CI_COMMIT_BRANCH == "main"
       when: never
     # Not if triggered by upstream project to save on disk space
     - if: $CI_PIPELINE_SOURCE == "pipeline"
       when: never
-    # Not from scheduled pipelines to save on disk space
+    # Not for scheduled pipelines to save on disk space
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never
-    # Otherwise, only on push to branch
-    - if: $CI_PIPELINE_SOURCE == "push"
+    # Otherwise, only if no previous stages failed
+    - when: on_success
   script:
     - ./gradlew $GITLAB_REPO_ARGS $GITLAB_PUBLISH_ARGS $VERSION_ARGS publishMavenJavaPublicationToGitLabRepository
 
@@ -153,8 +156,9 @@ publish-maven-central:
   stage: publish-maven-central
   tags: [ docker, x64 ]
   rules:
-    # Only on publish branch
+    # Only on publish branch, only if no previous stages failed
     - if: $CI_COMMIT_BRANCH == "publish"
+      when: on_success
   before_script:
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java library:* job $CI_JOB_NAME from branch $CI_COMMIT_BRANCH ($CI_COMMIT_SHORT_SHA)..."
   script:
@@ -170,8 +174,9 @@ package-api-docs:
   stage: package-api-docs
   tags: [ docker, x64 ]
   rules:
-    # Only on publish branch
+    # Only on publish branch, only if no previous stages failed
     - if: $CI_COMMIT_BRANCH == "publish"
+      when: on_success
   script:
     - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS :objectbox-java:packageJavadocForWeb
   after_script:
@@ -187,8 +192,8 @@ trigger-plugin:
     # Do not trigger publishing of plugin
     - if: $CI_COMMIT_BRANCH == "publish"
       when: never
-    # Otherwise, only on push to branch (also set allow_failure in case branch does not exist downstream)
-    - if: $CI_PIPELINE_SOURCE == "push"
+    # Otherwise, only if no previous stages failed. Also set allow_failure in case branch does not exist downstream.
+    - when: on_success
   inherit:
     variables: false
   allow_failure: true # Branch might not exist in plugin project
