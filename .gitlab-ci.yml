@@ -192,6 +192,9 @@ trigger-plugin:
     # Do not trigger publishing of plugin
     - if: $CI_COMMIT_BRANCH == "publish"
       when: never
+    # Not for scheduled pipelines where Maven snapshots of this project do not change
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
     # Otherwise, only if no previous stages failed. Also set allow_failure in case branch does not exist downstream.
     - when: on_success
   inherit:
