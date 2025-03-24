@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 ObjectBox Ltd. All rights reserved.
+ * Copyright 2021-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,17 @@ import io.objectbox.query.QueryBuilder
 
 
 /**
+ * Note: new code should use the [Box.query] functions directly, including the new query API.
+ *
  * Allows building a query for this Box instance with a call to [build][QueryBuilder.build] to return a [Query] instance.
+ *
  * ```
  * val query = box.query {
  *     equal(Entity_.property, value)
  * }
  * ```
  */
+@Deprecated("New code should use query(queryCondition).build() instead.")
 inline fun <T> Box<T>.query(block: QueryBuilder<T>.() -> Unit): Query<T> {
     val builder = query()
     block(builder)
