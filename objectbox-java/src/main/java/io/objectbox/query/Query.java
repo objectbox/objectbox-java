@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.InternalAccess;
 import io.objectbox.Property;
+import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.HnswIndex;
 import io.objectbox.exception.NonUniqueResultException;
 import io.objectbox.reactive.DataObserver;
@@ -918,22 +919,26 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * A {@link io.objectbox.reactive.DataObserver} can be subscribed to data changes using the returned builder.
-     * The observer is supplied via {@link SubscriptionBuilder#observer(DataObserver)} and will be notified once
-     * the query results have (potentially) changed.
+     * Returns a {@link SubscriptionBuilder} to build a subscription to observe changes to the results of this query.
      * <p>
-     * With subscribing, the observer will immediately get current query results.
-     * The query is run for the subscribing observer.
+     * Typical usage:
+     * <pre>
+     * DataSubscription subscription = query.subscribe()
+     *         .observer((List&lt;T&gt; data) -> {
+     *               // Do something with the returned results
+     *         });
+     * // Once the observer should no longer be notified
+     * subscription.cancel();
+     * </pre>
+     * Note that the observer will receive new results on any changes to the {@link Box} of the {@link Entity @Entity}
+     * this queries, regardless of the conditions of this query. This is because the {@link QueryPublisher} used for the
+     * subscription observes changes by using {@link BoxStore#subscribe(Class)} on the Box this queries.
      * <p>
-     * Threading notes:
-     * Query observers are notified from a thread pooled. Observers may be notified in parallel.
-     * The notification order is the same as the subscription order, although this may not always be guaranteed in
-     * the future.
+     * To customize this or for advanced use cases, consider using {@link BoxStore#subscribe(Class)} directly.
      * <p>
-     * Stale observers: you must hold on to the Query or {@link io.objectbox.reactive.DataSubscription} objects to keep
-     * your {@link DataObserver}s active. If this Query is not referenced anymore
-     * (along with its {@link io.objectbox.reactive.DataSubscription}s, which hold a reference to the Query internally),
-     * it may be GCed and observers may become stale (won't receive anymore data).
+     * See {@link SubscriptionBuilder#observer(DataObserver)} for additional details.
+     *
+     * @return A {@link SubscriptionBuilder} to build a subscription.
      */
     public SubscriptionBuilder<List<T>> subscribe() {
         checkOpen();
