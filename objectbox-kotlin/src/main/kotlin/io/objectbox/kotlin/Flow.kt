@@ -33,13 +33,13 @@ fun <T> SubscriptionBuilder<T>.toFlow(): Flow<T> = callbackFlow {
 }
 
 /**
- * Shortcut for `BoxStore.subscribe(forClass).toFlow()`, see [toFlow].
+ * Shortcut for `BoxStore.subscribe(forClass).toFlow()`, see [BoxStore.subscribe] and [toFlow] for details.
  */
 @ExperimentalCoroutinesApi
 fun <T> BoxStore.flow(forClass: Class<T>): Flow<Class<T>> = this.subscribe(forClass).toFlow()
 
 /**
- * Shortcut for `query.subscribe().toFlow()`, see [toFlow].
+ * Shortcut for `query.subscribe().toFlow()`, see [Query.subscribe] and [toFlow] for details.
  */
 @ExperimentalCoroutinesApi
 fun <T> Query<T>.flow(): Flow<MutableList<T>> = this@flow.subscribe().toFlow()
