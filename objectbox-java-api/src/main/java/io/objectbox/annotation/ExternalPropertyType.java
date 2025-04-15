@@ -117,7 +117,7 @@ public enum ExternalPropertyType {
      */
     INT_128_VECTOR,
     /**
-     * A vector (array) of Int128 values.
+     * A vector (array) of Uuid values.
      */
     UUID_VECTOR,
     /**
