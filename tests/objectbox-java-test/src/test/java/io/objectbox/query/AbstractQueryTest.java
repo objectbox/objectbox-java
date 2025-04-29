@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023 ObjectBox Ltd. All rights reserved.
+ * Copyright 2018-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@
 
 package io.objectbox.query;
 
-import io.objectbox.annotation.IndexType;
 import org.junit.Before;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.BoxStoreBuilder;
 import io.objectbox.TestEntity;
+import io.objectbox.annotation.IndexType;
 import io.objectbox.config.DebugFlags;
-
-import javax.annotation.Nullable;
 
 public class AbstractQueryTest extends AbstractObjectBoxTest {
     protected Box<TestEntity> box;
@@ -55,6 +55,7 @@ public class AbstractQueryTest extends AbstractObjectBoxTest {
      * <li>simpleFloat = [400.0..400.9]</li>
      * <li>simpleDouble = [2020.00..2020.09] (approximately)</li>
      * <li>simpleByteArray = [{1,2,2000}..{1,2,2009}]</li>
+     * <li>boolArray = [{true, false, true}..{false, false, true}]</li>
      * <li>shortArray = [{-2100,2100}..{-2109,2109}]</li>
      * <li>intArray = [{-2000,2000}..{-2009,2009}]</li>
      * <li>longArray = [{-3000,3000}..{-3009,3009}]</li>

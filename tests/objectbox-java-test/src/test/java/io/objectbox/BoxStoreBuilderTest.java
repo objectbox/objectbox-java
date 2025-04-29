@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -302,7 +302,7 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
                 DbMaxDataSizeExceededException.class,
                 () -> getTestEntityBox().put(testEntity2)
         );
-        assertEquals("Exceeded user-set maximum by [bytes]: 560", maxDataExc.getMessage());
+        assertEquals("Exceeded user-set maximum by [bytes]: 592", maxDataExc.getMessage());
 
         // Remove to get below max data size, then put again.
         getTestEntityBox().remove(testEntity1);

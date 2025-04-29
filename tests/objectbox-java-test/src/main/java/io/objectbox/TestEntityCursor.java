@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
     private final static int __ID_simpleLongU = TestEntity_.simpleLongU.id;
     private final static int __ID_stringObjectMap = TestEntity_.stringObjectMap.id;
     private final static int __ID_flexProperty = TestEntity_.flexProperty.id;
+    private final static int __ID_booleanArray = TestEntity_.booleanArray.id;
     private final static int __ID_shortArray = TestEntity_.shortArray.id;
     private final static int __ID_charArray = TestEntity_.charArray.id;
     private final static int __ID_intArray = TestEntity_.intArray.id;
@@ -92,41 +93,47 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public long put(TestEntity entity) {
-        short[] shortArray = entity.getShortArray();
-        int __id17 = shortArray != null ? __ID_shortArray : 0;
+        boolean[] booleanArray = entity.getBooleanArray();
+        int __id17 = booleanArray != null ? __ID_booleanArray : 0;
 
-        collectShortArray(cursor, 0, PUT_FLAG_FIRST,
-                __id17, shortArray);
+        collectBooleanArray(cursor, 0, PUT_FLAG_FIRST,
+                __id17, booleanArray);
+
+        short[] shortArray = entity.getShortArray();
+        int __id18 = shortArray != null ? __ID_shortArray : 0;
+
+        collectShortArray(cursor, 0, 0,
+                __id18, shortArray);
 
         char[] charArray = entity.getCharArray();
-        int __id18 = charArray != null ? __ID_charArray : 0;
+        int __id19 = charArray != null ? __ID_charArray : 0;
 
         collectCharArray(cursor, 0, 0,
-                __id18, charArray);
+                __id19, charArray);
 
         int[] intArray = entity.getIntArray();
-        int __id19 = intArray != null ? __ID_intArray : 0;
+        int __id20 = intArray != null ? __ID_intArray : 0;
 
         collectIntArray(cursor, 0, 0,
-                __id19, intArray);
+                __id20, intArray);
 
         long[] longArray = entity.getLongArray();
-        int __id20 = longArray != null ? __ID_longArray : 0;
+        int __id21 = longArray != null ? __ID_longArray : 0;
 
         collectLongArray(cursor, 0, 0,
-                __id20, longArray);
+                __id21, longArray);
 
         float[] floatArray = entity.getFloatArray();
-        int __id21 = floatArray != null ? __ID_floatArray : 0;
+        int __id22 = floatArray != null ? __ID_floatArray : 0;
 
         collectFloatArray(cursor, 0, 0,
-                __id21, floatArray);
+                __id22, floatArray);
 
         double[] doubleArray = entity.getDoubleArray();
-        int __id22 = doubleArray != null ? __ID_doubleArray : 0;
+        int __id23 = doubleArray != null ? __ID_doubleArray : 0;
 
         collectDoubleArray(cursor, 0, 0,
-                __id22, doubleArray);
+                __id23, doubleArray);
 
         String[] simpleStringArray = entity.getSimpleStringArray();
         int __id10 = simpleStringArray != null ? __ID_simpleStringArray : 0;
@@ -145,26 +152,26 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
         byte[] simpleByteArray = entity.getSimpleByteArray();
         int __id9 = simpleByteArray != null ? __ID_simpleByteArray : 0;
         byte[] externalId = entity.getExternalId();
-        int __id24 = externalId != null ? __ID_externalId : 0;
+        int __id25 = externalId != null ? __ID_externalId : 0;
         Map stringObjectMap = entity.getStringObjectMap();
         int __id15 = stringObjectMap != null ? __ID_stringObjectMap : 0;
 
         collect430000(cursor, 0, 0,
                 __id8, simpleString, 0, null,
                 0, null, 0, null,
-                __id9, simpleByteArray, __id24, externalId,
+                __id9, simpleByteArray, __id25, externalId,
                 __id15, __id15 != 0 ? stringObjectMapConverter.convertToDatabaseValue(stringObjectMap) : null);
 
         Object flexProperty = entity.getFlexProperty();
         int __id16 = flexProperty != null ? __ID_flexProperty : 0;
         java.util.Date date = entity.getDate();
-        int __id23 = date != null ? __ID_date : 0;
+        int __id24 = date != null ? __ID_date : 0;
 
         collect313311(cursor, 0, 0,
                 0, null, 0, null,
                 0, null, __id16, __id16 != 0 ? flexPropertyConverter.convertToDatabaseValue(flexProperty) : null,
                 __ID_simpleLong, entity.getSimpleLong(), __ID_simpleLongU, entity.getSimpleLongU(),
-                __id23, __id23 != 0 ? date.getTime() : 0, INT_NULL_HACK ? 0 : __ID_simpleInt, entity.getSimpleInt(),
+                __id24, __id24 != 0 ? date.getTime() : 0, INT_NULL_HACK ? 0 : __ID_simpleInt, entity.getSimpleInt(),
                 __ID_simpleIntU, entity.getSimpleIntU(), __ID_simpleShort, entity.getSimpleShort(),
                 __ID_simpleFloat, entity.getSimpleFloat(), __ID_simpleDouble, entity.getSimpleDouble());
 

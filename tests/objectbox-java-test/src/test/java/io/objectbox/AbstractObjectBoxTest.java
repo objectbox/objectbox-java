@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -294,6 +294,7 @@ public abstract class AbstractObjectBoxTest {
         entityBuilder.property("flexProperty", PropertyType.Flex).id(TestEntity_.flexProperty.id, ++lastUid);
 
         // Integer and floating point arrays
+        entityBuilder.property("booleanArray", PropertyType.BoolVector).id(TestEntity_.booleanArray.id, ++lastUid);
         entityBuilder.property("shortArray", PropertyType.ShortVector).id(TestEntity_.shortArray.id, ++lastUid);
         entityBuilder.property("charArray", PropertyType.CharVector).id(TestEntity_.charArray.id, ++lastUid);
         entityBuilder.property("intArray", PropertyType.IntVector).id(TestEntity_.intArray.id, ++lastUid);
@@ -336,38 +337,46 @@ public abstract class AbstractObjectBoxTest {
     }
 
     protected TestEntity createTestEntity(@Nullable String simpleString, int nr) {
+        boolean simpleBoolean = nr % 2 == 0;
+        short simpleShort = (short) (100 + nr);
+        int simpleLong = 1000 + nr;
+        float simpleFloat = 200 + nr / 10f;
+        double simpleDouble = 2000 + nr / 100f;
+        byte[] simpleByteArray = {1, 2, (byte) nr};
+        String[] simpleStringArray = {simpleString};
+
         TestEntity entity = new TestEntity();
         entity.setSimpleString(simpleString);
         entity.setSimpleInt(nr);
         entity.setSimpleByte((byte) (10 + nr));
-        entity.setSimpleBoolean(nr % 2 == 0);
-        entity.setSimpleShort((short) (100 + nr));
-        entity.setSimpleLong(1000 + nr);
-        entity.setSimpleFloat(200 + nr / 10f);
-        entity.setSimpleDouble(2000 + nr / 100f);
-        entity.setSimpleByteArray(new byte[]{1, 2, (byte) nr});
-        String[] stringArray = {simpleString};
-        entity.setSimpleStringArray(stringArray);
-        entity.setSimpleStringList(Arrays.asList(stringArray));
-        entity.setSimpleShortU((short) (100 + nr));
+        entity.setSimpleBoolean(simpleBoolean);
+        entity.setSimpleShort(simpleShort);
+        entity.setSimpleLong(simpleLong);
+        entity.setSimpleFloat(simpleFloat);
+        entity.setSimpleDouble(simpleDouble);
+        entity.setSimpleByteArray(simpleByteArray);
+        entity.setSimpleStringArray(simpleStringArray);
+        entity.setSimpleStringList(Arrays.asList(simpleStringArray));
+        entity.setSimpleShortU(simpleShort);
         entity.setSimpleIntU(nr);
-        entity.setSimpleLongU(1000 + nr);
+        entity.setSimpleLongU(simpleLong);
         if (simpleString != null) {
             Map<String, Object> stringObjectMap = new HashMap<>();
             stringObjectMap.put(simpleString, simpleString);
             entity.setStringObjectMap(stringObjectMap);
         }
         entity.setFlexProperty(simpleString);
-        entity.setShortArray(new short[]{(short) -(100 + nr), entity.getSimpleShort()});
+        entity.setBooleanArray(new boolean[]{simpleBoolean, false, true});
+        entity.setShortArray(new short[]{(short) -(100 + nr), simpleShort});
         entity.setCharArray(simpleString != null ? simpleString.toCharArray() : null);
-        entity.setIntArray(new int[]{-entity.getSimpleInt(), entity.getSimpleInt()});
-        entity.setLongArray(new long[]{-entity.getSimpleLong(), entity.getSimpleLong()});
-        entity.setFloatArray(new float[]{-entity.getSimpleFloat(), entity.getSimpleFloat()});
-        entity.setDoubleArray(new double[]{-entity.getSimpleDouble(), entity.getSimpleDouble()});
-        entity.setDate(new Date(1000 + nr));
+        entity.setIntArray(new int[]{-nr, nr});
+        entity.setLongArray(new long[]{-simpleLong, simpleLong});
+        entity.setFloatArray(new float[]{-simpleFloat, simpleFloat});
+        entity.setDoubleArray(new double[]{-simpleDouble, simpleDouble});
+        entity.setDate(new Date(simpleLong));
         // Note: there is no way to test external type mapping works here. Instead, verify that
         // there are no side effects for put and get.
-        entity.setExternalId(entity.getSimpleByteArray());
+        entity.setExternalId(simpleByteArray);
         return entity;
     }
 

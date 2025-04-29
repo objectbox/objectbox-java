@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertEquals(1, entityRead.getStringObjectMap().size());
         assertEquals(simpleString, entityRead.getStringObjectMap().get(simpleString));
         assertEquals(simpleString, entityRead.getFlexProperty());
+        assertArrayEquals(new boolean[]{false, false, true}, entity.getBooleanArray());
         assertArrayEquals(new short[]{(short) -valShort, valShort}, entity.getShortArray());
         assertArrayEquals(simpleString.toCharArray(), entity.getCharArray());
         assertArrayEquals(new int[]{-simpleInt, simpleInt}, entity.getIntArray());
@@ -133,6 +134,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertEquals(0, defaultEntity.getSimpleLongU());
         assertNull(defaultEntity.getStringObjectMap());
         assertNull(defaultEntity.getFlexProperty());
+        assertNull(defaultEntity.getBooleanArray());
         assertNull(defaultEntity.getShortArray());
         assertNull(defaultEntity.getCharArray());
         assertNull(defaultEntity.getIntArray());
