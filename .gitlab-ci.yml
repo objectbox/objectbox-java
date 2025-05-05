@@ -1,6 +1,6 @@
 # Default image for linux builds
 # Using core instead of base to get access to ASAN from clang.
-image: objectboxio/buildenv-core:2023-07-28
+image: objectboxio/buildenv-core:2023-07-28 # Includes JDK 17.0.8
 
 # Assumes these environment variables are configured in GitLab CI/CD Settings:
 # - OBX_READ_PACKAGES_TOKEN
@@ -45,7 +45,10 @@ workflow:
 
 test:
   stage: test
-  tags: [ docker, linux, x64 ]
+  tags:
+    - docker
+    - linux # Select Docker host that can run the used Linux image
+    - x64
   variables:
     # Image defaults to POSIX (ASCII), set a compatible locale so UTF-8 tests that interact with the file system work.
     # Check with 'locale -a' for available locales.
@@ -85,19 +88,27 @@ test:
 test-windows:
   extends: .test-template
   needs: ["test"]
-  tags: [ windows ]
+  tags:
+    - windows-jdk
+    - x64
   script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
 
 test-macos:
   extends: .test-template
   needs: ["test"]
-  tags: [mac11+, x64]
+  tags:
+    - mac
+    - x64
+    - jdk
   script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
 
 # Address sanitizer is only available on Linux runners (see script).
 .test-asan-template:
   extends: .test-template
-  tags: [ docker, linux, x64 ]
+  tags:
+    - docker
+    - linux # Select Docker host that can run the used Linux image
+    - x64
   variables:
     # Image defaults to POSIX (ASCII), set a compatible locale so UTF-8 tests that interact with the file system work.
     # Check with 'locale -a' for available locales.
@@ -124,7 +135,9 @@ test-jdk-11:
 test-jdk-x86:
   extends: .test-template
   needs: ["test-windows"]
-  tags: [ windows ]
+  tags:
+    - windows-jdk
+    - x64
   variables:
     # TEST_WITH_JAVA_X86 makes objectbox-java-test use 32-bit java executable and therefore
     # 32-bit ObjectBox to run tests (see build.gradle file).
@@ -135,7 +148,10 @@ test-jdk-x86:
 # Publish Maven artifacts to internal Maven repo
 publish-maven-internal:
   stage: publish-maven-internal
-  tags: [ docker, x64 ]
+  tags:
+    - docker
+    - linux # Select Docker host that can run the used Linux image
+    - x64
   rules:
     # Not for main branch, doing so may duplicate release artifacts (uploaded from publish branch)
     - if: $CI_COMMIT_BRANCH == "main"
@@ -154,7 +170,10 @@ publish-maven-internal:
 # Publish Maven artifacts to public Maven repo at Central
 publish-maven-central:
   stage: publish-maven-central
-  tags: [ docker, x64 ]
+  tags:
+    - docker
+    - linux # Select Docker host that can run the used Linux image
+    - x64
   rules:
     # Only on publish branch, only if no previous stages failed
     - if: $CI_COMMIT_BRANCH == "publish"
@@ -172,7 +191,10 @@ publish-maven-central:
 # Create Java API docs archive
 package-api-docs:
   stage: package-api-docs
-  tags: [ docker, x64 ]
+  tags:
+    - docker
+    - linux # Select Docker host that can run the used Linux image
+    - x64
   rules:
     # Only on publish branch, only if no previous stages failed
     - if: $CI_COMMIT_BRANCH == "publish"
