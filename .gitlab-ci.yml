@@ -1,6 +1,8 @@
+# https://docs.gitlab.com/ci/yaml/
+
 # Default image for linux builds
 # Using core instead of base to get access to ASAN from clang.
-image: objectboxio/buildenv-core:2023-07-28 # Includes JDK 17.0.8
+image: objectboxio/buildenv-core:2023-07-28
 
 # Assumes these environment variables are configured in GitLab CI/CD Settings:
 # - OBX_READ_PACKAGES_TOKEN
@@ -47,7 +49,7 @@ test:
   stage: test
   tags:
     - docker
-    - linux # Select Docker host that can run the used Linux image
+    - linux
     - x64
   variables:
     # Image defaults to POSIX (ASCII), set a compatible locale so UTF-8 tests that interact with the file system work.
@@ -97,9 +99,9 @@ test-macos:
   extends: .test-template
   needs: ["test"]
   tags:
+    - jdk
     - mac
     - x64
-    - jdk
   script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
 
 # Address sanitizer is only available on Linux runners (see script).
@@ -107,7 +109,7 @@ test-macos:
   extends: .test-template
   tags:
     - docker
-    - linux # Select Docker host that can run the used Linux image
+    - linux
     - x64
   variables:
     # Image defaults to POSIX (ASCII), set a compatible locale so UTF-8 tests that interact with the file system work.
@@ -150,7 +152,7 @@ publish-maven-internal:
   stage: publish-maven-internal
   tags:
     - docker
-    - linux # Select Docker host that can run the used Linux image
+    - linux
     - x64
   rules:
     # Not for main branch, doing so may duplicate release artifacts (uploaded from publish branch)
@@ -172,7 +174,7 @@ publish-maven-central:
   stage: publish-maven-central
   tags:
     - docker
-    - linux # Select Docker host that can run the used Linux image
+    - linux
     - x64
   rules:
     # Only on publish branch, only if no previous stages failed
@@ -193,7 +195,7 @@ package-api-docs:
   stage: package-api-docs
   tags:
     - docker
-    - linux # Select Docker host that can run the used Linux image
+    - linux
     - x64
   rules:
     # Only on publish branch, only if no previous stages failed
