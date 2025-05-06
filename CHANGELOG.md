@@ -4,6 +4,10 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
+## 4.2.1 - in development
+
+- Basic support for boolean array properties (`boolean[]` in Java or `BooleanArray` in Kotlin).
+
 ## 4.2.0 - 2025-03-04
 
 - Add new query conditions `equalKeyValue`, `greaterKeyValue`, `lessKeyValue`, `lessOrEqualKeyValue`, and 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package io.objectbox;
 
+import java.io.Closeable;
+import java.util.List;
+
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.NotThreadSafe;
+
 import io.objectbox.annotation.apihint.Beta;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.internal.CursorFactory;
 import io.objectbox.relation.ToMany;
-
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.NotThreadSafe;
-import java.io.Closeable;
-import java.util.List;
 
 @SuppressWarnings({"unchecked", "SameParameterValue", "unused", "WeakerAccess", "UnusedReturnValue"})
 @Beta
@@ -115,6 +116,9 @@ public abstract class Cursor<T> implements Closeable {
     );
 
     // INTEGER ARRAYS
+    protected static native long collectBooleanArray(long cursor, long keyIfComplete, int flags,
+                                                   int propertyId, @Nullable boolean[] value);
+
     protected static native long collectShortArray(long cursor, long keyIfComplete, int flags,
                                                    int propertyId, @Nullable short[] value);
 

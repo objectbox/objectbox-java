@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ public class TestEntity {
     private long simpleLongU;
     private Map<String, Object> stringObjectMap;
     private Object flexProperty;
+    private boolean[] booleanArray;
     private short[] shortArray;
     private char[] charArray;
     private int[] intArray;
@@ -106,6 +107,7 @@ public class TestEntity {
                       long simpleLongU,
                       Map<String, Object> stringObjectMap,
                       Object flexProperty,
+                      boolean[] booleanArray,
                       short[] shortArray,
                       char[] charArray,
                       int[] intArray,
@@ -132,6 +134,7 @@ public class TestEntity {
         this.simpleLongU = simpleLongU;
         this.stringObjectMap = stringObjectMap;
         this.flexProperty = flexProperty;
+        this.booleanArray = booleanArray;
         this.shortArray = shortArray;
         this.charArray = charArray;
         this.intArray = intArray;
@@ -294,6 +297,16 @@ public class TestEntity {
     }
 
     @Nullable
+    public boolean[] getBooleanArray() {
+        return booleanArray;
+    }
+
+    public TestEntity setBooleanArray(@Nullable boolean[] booleanArray) {
+        this.booleanArray = booleanArray;
+        return this;
+    }
+
+    @Nullable
     public short[] getShortArray() {
         return shortArray;
     }
@@ -386,6 +399,7 @@ public class TestEntity {
                 ", simpleLongU=" + simpleLongU +
                 ", stringObjectMap=" + stringObjectMap +
                 ", flexProperty=" + flexProperty +
+                ", booleanArray=" + Arrays.toString(booleanArray) +
                 ", shortArray=" + Arrays.toString(shortArray) +
                 ", charArray=" + Arrays.toString(charArray) +
                 ", intArray=" + Arrays.toString(intArray) +

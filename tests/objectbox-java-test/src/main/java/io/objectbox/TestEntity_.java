@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,29 +103,32 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
     public final static io.objectbox.Property<TestEntity> flexProperty =
             new io.objectbox.Property<>(__INSTANCE, 16, 17, byte[].class, "flexProperty", false, "flexProperty", FlexObjectConverter.class, Object.class);
 
+    public final static io.objectbox.Property<TestEntity> booleanArray =
+            new io.objectbox.Property<>(__INSTANCE, 17, 26, boolean[].class, "booleanArray");
+
     public final static io.objectbox.Property<TestEntity> shortArray =
-            new io.objectbox.Property<>(__INSTANCE, 17, 18, short[].class, "shortArray");
+            new io.objectbox.Property<>(__INSTANCE, 18, 18, short[].class, "shortArray");
 
     public final static io.objectbox.Property<TestEntity> charArray =
-            new io.objectbox.Property<>(__INSTANCE, 18, 19, char[].class, "charArray");
+            new io.objectbox.Property<>(__INSTANCE, 19, 19, char[].class, "charArray");
 
     public final static io.objectbox.Property<TestEntity> intArray =
-            new io.objectbox.Property<>(__INSTANCE, 19, 20, int[].class, "intArray");
+            new io.objectbox.Property<>(__INSTANCE, 20, 20, int[].class, "intArray");
 
     public final static io.objectbox.Property<TestEntity> longArray =
-            new io.objectbox.Property<>(__INSTANCE, 20, 21, long[].class, "longArray");
+            new io.objectbox.Property<>(__INSTANCE, 21, 21, long[].class, "longArray");
 
     public final static io.objectbox.Property<TestEntity> floatArray =
-            new io.objectbox.Property<>(__INSTANCE, 21, 22, float[].class, "floatArray");
+            new io.objectbox.Property<>(__INSTANCE, 22, 22, float[].class, "floatArray");
 
     public final static io.objectbox.Property<TestEntity> doubleArray =
-            new io.objectbox.Property<>(__INSTANCE, 22, 23, double[].class, "doubleArray");
+            new io.objectbox.Property<>(__INSTANCE, 23, 23, double[].class, "doubleArray");
 
     public final static io.objectbox.Property<TestEntity> date =
-            new io.objectbox.Property<>(__INSTANCE, 23, 24, java.util.Date.class, "date");
+            new io.objectbox.Property<>(__INSTANCE, 24, 24, java.util.Date.class, "date");
 
     public final static io.objectbox.Property<TestEntity> externalId =
-            new io.objectbox.Property<>(__INSTANCE, 24, 25, byte[].class, "externalId");
+            new io.objectbox.Property<>(__INSTANCE, 25, 25, byte[].class, "externalId");
 
     @SuppressWarnings("unchecked")
     public final static io.objectbox.Property<TestEntity>[] __ALL_PROPERTIES = new io.objectbox.Property[]{
@@ -146,6 +149,7 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
             simpleLongU,
             stringObjectMap,
             flexProperty,
+            booleanArray,
             shortArray,
             charArray,
             intArray,

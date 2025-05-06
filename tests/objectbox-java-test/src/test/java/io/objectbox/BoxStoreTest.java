@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd. All rights reserved.
+ * Copyright 2017-2025 ObjectBox Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -325,7 +325,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         // Note: not implemented for in-memory, returns 0.
         // No limit.
         long validated = store.validate(0, true);
-        assertEquals(IN_MEMORY ? 0 : 14, validated);
+        assertEquals(IN_MEMORY ? 0 : 15, validated);
 
         // With limit.
         validated = store.validate(1, true);
