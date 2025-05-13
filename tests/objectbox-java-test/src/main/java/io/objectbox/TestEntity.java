@@ -245,45 +245,40 @@ public class TestEntity {
         return simpleStringList;
     }
 
-    public TestEntity setSimpleStringList(List<String> simpleStringList) {
+    public void setSimpleStringList(List<String> simpleStringList) {
         this.simpleStringList = simpleStringList;
-        return this;
     }
 
     public short getSimpleShortU() {
         return simpleShortU;
     }
 
-    public TestEntity setSimpleShortU(short simpleShortU) {
+    public void setSimpleShortU(short simpleShortU) {
         this.simpleShortU = simpleShortU;
-        return this;
     }
 
     public int getSimpleIntU() {
         return simpleIntU;
     }
 
-    public TestEntity setSimpleIntU(int simpleIntU) {
+    public void setSimpleIntU(int simpleIntU) {
         this.simpleIntU = simpleIntU;
-        return this;
     }
 
     public long getSimpleLongU() {
         return simpleLongU;
     }
 
-    public TestEntity setSimpleLongU(long simpleLongU) {
+    public void setSimpleLongU(long simpleLongU) {
         this.simpleLongU = simpleLongU;
-        return this;
     }
 
     public Map<String, Object> getStringObjectMap() {
         return stringObjectMap;
     }
 
-    public TestEntity setStringObjectMap(Map<String, Object> stringObjectMap) {
+    public void setStringObjectMap(Map<String, Object> stringObjectMap) {
         this.stringObjectMap = stringObjectMap;
-        return this;
     }
 
     @Nullable
@@ -291,9 +286,8 @@ public class TestEntity {
         return flexProperty;
     }
 
-    public TestEntity setFlexProperty(@Nullable Object flexProperty) {
+    public void setFlexProperty(@Nullable Object flexProperty) {
         this.flexProperty = flexProperty;
-        return this;
     }
 
     @Nullable
@@ -301,9 +295,8 @@ public class TestEntity {
         return booleanArray;
     }
 
-    public TestEntity setBooleanArray(@Nullable boolean[] booleanArray) {
+    public void setBooleanArray(@Nullable boolean[] booleanArray) {
         this.booleanArray = booleanArray;
-        return this;
     }
 
     @Nullable
@@ -373,10 +366,8 @@ public class TestEntity {
         return externalId;
     }
 
-    @Nullable
-    public TestEntity setExternalId(byte[] externalId) {
+    public void setExternalId(@Nullable byte[] externalId) {
         this.externalId = externalId;
-        return this;
     }
 
     @Override
