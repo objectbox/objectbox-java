@@ -92,27 +92,6 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertArrayEquals(valByteArray, entity.getExternalId());
     }
 
-    // Note: There is a similar test using the Cursor API directly (which is deprecated) in CursorTest.
-    @Test
-    public void testPut_notAssignedId_fails() {
-        TestEntity entity = new TestEntity();
-        // Set ID that was not assigned
-        entity.setId(1);
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> box.put(entity));
-        assertEquals("ID is higher or equal to internal ID sequence: 1 (vs. 1). Use ID 0 (zero) to insert new objects.", ex.getMessage());
-    }
-
-    @Test
-    public void testPut_assignedId_inserts() {
-        long id = box.put(new TestEntity());
-        box.remove(id);
-        // Put with previously assigned ID should insert
-        TestEntity entity = new TestEntity();
-        entity.setId(id);
-        box.put(entity);
-        assertEquals(1L, box.count());
-    }
-
     @Test
     public void testPutAndGet_defaultOrNullValues() {
         long id = box.put(new TestEntity());
@@ -143,6 +122,27 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertNull(defaultEntity.getDoubleArray());
         assertNull(defaultEntity.getDate());
         assertNull(defaultEntity.getExternalId());
+    }
+
+    // Note: There is a similar test using the Cursor API directly (which is deprecated) in CursorTest.
+    @Test
+    public void testPut_notAssignedId_fails() {
+        TestEntity entity = new TestEntity();
+        // Set ID that was not assigned
+        entity.setId(1);
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> box.put(entity));
+        assertEquals("ID is higher or equal to internal ID sequence: 1 (vs. 1). Use ID 0 (zero) to insert new objects.", ex.getMessage());
+    }
+
+    @Test
+    public void testPut_assignedId_inserts() {
+        long id = box.put(new TestEntity());
+        box.remove(id);
+        // Put with previously assigned ID should insert
+        TestEntity entity = new TestEntity();
+        entity.setId(id);
+        box.put(entity);
+        assertEquals(1L, box.count());
     }
 
     @Test
