@@ -80,7 +80,7 @@ public class BoxStore implements Closeable {
     public static final String JNI_VERSION = "4.2.0-2025-03-04";
 
     /** The ObjectBox database version this Java library is known to work with. */
-    private static final String VERSION = "4.2.0-2025-03-04";
+    private static final String VERSION = "4.3.0-2025-05-12";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
