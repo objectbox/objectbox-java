@@ -100,7 +100,17 @@ public final class ExternalPropertyType {
    * Representing type: String
    */
   public static final short JavaScript = 111;
-  public static final short Reserved5 = 112;
+  /**
+   * A JSON string that is converted to a native "complex" representation in the external system.
+   * For example in MongoDB, embedded/nested documents are converted to a JSON string in ObjectBox and vice versa.
+   * This allows a quick and simple way to work with non-normalized data from MongoDB in ObjectBox.
+   * Alternatively, you can use FlexMap and FlexVector to map to language primitives (e.g. maps with string keys;
+   * not supported by all ObjectBox languages yet).
+   * For MongoDB, (nested) documents and arrays are supported.
+   * Note that this is very close to the internal representation, e.g. the key order is preserved (unlike Flex).
+   * Representing type: String
+   */
+  public static final short JsonToNative = 112;
   public static final short Reserved6 = 113;
   public static final short Reserved7 = 114;
   public static final short Reserved8 = 115;
@@ -110,7 +120,7 @@ public final class ExternalPropertyType {
   public static final short Int128Vector = 116;
   public static final short Reserved9 = 117;
   /**
-   * A vector (array) of Int128 values
+   * A vector (array) of UUID values
    */
   public static final short UuidVector = 118;
   public static final short Reserved10 = 119;
@@ -144,7 +154,7 @@ public final class ExternalPropertyType {
    */
   public static final short MongoRegex = 127;
 
-  public static final String[] names = { "Unknown", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "Int128", "Reserved1", "Uuid", "Decimal128", "UuidString", "UuidV4", "UuidV4String", "FlexMap", "FlexVector", "Json", "Bson", "JavaScript", "Reserved5", "Reserved6", "Reserved7", "Reserved8", "Int128Vector", "Reserved9", "UuidVector", "Reserved10", "Reserved11", "Reserved12", "Reserved13", "MongoId", "MongoIdVector", "MongoTimestamp", "MongoBinary", "MongoRegex", };
+  public static final String[] names = { "Unknown", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "Int128", "Reserved1", "Uuid", "Decimal128", "UuidString", "UuidV4", "UuidV4String", "FlexMap", "FlexVector", "Json", "Bson", "JavaScript", "JsonToNative", "Reserved6", "Reserved7", "Reserved8", "Int128Vector", "Reserved9", "UuidVector", "Reserved10", "Reserved11", "Reserved12", "Reserved13", "MongoId", "MongoIdVector", "MongoTimestamp", "MongoBinary", "MongoRegex", };
 
   public static String name(int e) { return names[e]; }
 }

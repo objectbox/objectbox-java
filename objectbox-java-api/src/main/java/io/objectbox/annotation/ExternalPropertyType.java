@@ -113,6 +113,21 @@ public enum ExternalPropertyType {
      */
     JAVASCRIPT,
     /**
+     * A JSON string that is converted to a native "complex" representation in the external system.
+     * <p>
+     * For example in MongoDB, embedded/nested documents are converted to a JSON string in ObjectBox and vice versa.
+     * This allows a quick and simple way to work with non-normalized data from MongoDB in ObjectBox. Alternatively, you
+     * can use {@link #FLEX_MAP} and {@link #FLEX_VECTOR} to map to language primitives (e.g. maps with string keys; not
+     * supported by all ObjectBox languages yet).
+     * <p>
+     * For MongoDB, (nested) documents and arrays are supported.
+     * <p>
+     * Note that this is very close to the internal representation, e.g. the key order is preserved (unlike Flex).
+     * <p>
+     * Representing type: String
+     */
+    JSON_TO_NATIVE,
+    /**
      * A vector (array) of Int128 values.
      */
     INT_128_VECTOR,

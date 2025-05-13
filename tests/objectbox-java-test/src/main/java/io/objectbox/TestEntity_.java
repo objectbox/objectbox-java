@@ -130,6 +130,9 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
     public final static io.objectbox.Property<TestEntity> externalId =
             new io.objectbox.Property<>(__INSTANCE, 25, 25, byte[].class, "externalId");
 
+    public final static io.objectbox.Property<TestEntity> externalJsonToNative =
+            new io.objectbox.Property<>(__INSTANCE, 26, 27, String.class, "externalJsonToNative");
+
     @SuppressWarnings("unchecked")
     public final static io.objectbox.Property<TestEntity>[] __ALL_PROPERTIES = new io.objectbox.Property[]{
             id,
@@ -157,7 +160,8 @@ public final class TestEntity_ implements EntityInfo<TestEntity> {
             floatArray,
             doubleArray,
             date,
-            externalId
+            externalId,
+            externalJsonToNative
     };
 
     public final static io.objectbox.Property<TestEntity> __ID_PROPERTY = id;

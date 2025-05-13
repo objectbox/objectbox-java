@@ -76,9 +76,13 @@ public class TestEntity {
     private float[] floatArray;
     private double[] doubleArray;
     private Date date;
-    // Just smoke testing, also use UUID instead of the default Mongo ID
+    // Just smoke testing this property type (tests do not use Sync).
+    // Also use UUID instead of the default MONGO_ID.
     @ExternalType(ExternalPropertyType.UUID)
     private byte[] externalId;
+    // Just smoke testing this property type (tests do not use Sync).
+    @ExternalType(ExternalPropertyType.JSON_TO_NATIVE)
+    private String externalJsonToNative;
 
     transient boolean noArgsConstructorCalled;
 
@@ -115,7 +119,8 @@ public class TestEntity {
                       float[] floatArray,
                       double[] doubleArray,
                       Date date,
-                      byte[] externalId
+                      byte[] externalId,
+                      String externalJsonToNative
     ) {
         this.id = id;
         this.simpleBoolean = simpleBoolean;
@@ -143,6 +148,7 @@ public class TestEntity {
         this.doubleArray = doubleArray;
         this.date = date;
         this.externalId = externalId;
+        this.externalJsonToNative = externalJsonToNative;
         if (STRING_VALUE_THROW_IN_CONSTRUCTOR.equals(simpleString)) {
             throw new RuntimeException(EXCEPTION_IN_CONSTRUCTOR_MESSAGE);
         }
@@ -370,6 +376,15 @@ public class TestEntity {
         this.externalId = externalId;
     }
 
+    @Nullable
+    public String getExternalJsonToNative() {
+        return externalJsonToNative;
+    }
+
+    public void setExternalJsonToNative(@Nullable String externalJsonToNative) {
+        this.externalJsonToNative = externalJsonToNative;
+    }
+
     @Override
     public String toString() {
         return "TestEntity{" +
@@ -399,6 +414,7 @@ public class TestEntity {
                 ", doubleArray=" + Arrays.toString(doubleArray) +
                 ", date=" + date +
                 ", externalId=" + Arrays.toString(externalId) +
+                ", externalJsonToString='" + externalJsonToNative + '\'' +
                 ", noArgsConstructorCalled=" + noArgsConstructorCalled +
                 '}';
     }
