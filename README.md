@@ -29,32 +29,68 @@ Store and manage data effortlessly in your Android or JVM Linux, macOS or Window
 Easily manage vector data alongside your objects and perform superfast on-device vector search to empower your apps with RAG AI, generative AI, and similarity search.
 Enjoy exceptional speed, battery-friendly resource usage, and environmentally-friendly development. 💚
 
-## Demo code
+ObjectBox provides a store with boxes to put objects into:
+
+#### JVM + Java example
 
 ```java
-// Java
-Playlist playlist = new Playlist("My Favorites");
-playlist.songs.add(new Song("Lalala"));
-playlist.songs.add(new Song("Lololo"));
-box.put(playlist);
+// Annotate a class to create a Box
+@Entity
+public class Person {
+  private @Id long id;
+  private String firstName;
+  private String lastName;
+
+  // Constructor, getters and setters left out for simplicity
+}
+ 
+BoxStore store = MyObjectBox.builder()
+        .name("person-db")
+        .build();
+ 
+Box<Person> box = store.boxFor(Person.class);
+ 
+Person person = new Person("Joe", "Green");
+long id = box.put(person);    // Create
+person = box.get(id);         // Read
+person.setLastName("Black");
+box.put(person);              // Update
+box.remove(person);           // Delete
 ```
 
-➡️ [More details in the docs](https://docs.objectbox.io/)
+#### Android + Kotlin example
 
 ```kotlin
-// Kotlin
-val playlist = Playlist("My Favorites")
-playlist.songs.add(Song("Lalala"))
-playlist.songs.add(Song("Lololo"))
-box.put(playlist)
+// Annotate a class to create a Box
+@Entity
+data class Person(
+    @Id var id: Long = 0,
+    var firstName: String? = null,
+    var lastName: String? = null
+)
+ 
+val store = MyObjectBox.builder()
+                .androidContext(context)
+                .build()
+ 
+val box = store.boxFor(Person::class)
+ 
+var person = Person(firstName = "Joe", lastName = "Green")
+val id = box.put()   // Create
+person = box.get(id) // Read
+person.lastName = "Black"
+box.put(person)     // Update
+box.remove(person)  // Delete
 ```
+
+Continue with the ➡️ **[Getting Started guide](https://docs.objectbox.io/getting-started)**.
 
 ## Table of Contents
 
 - [Key Features](#key-features)
 - [Getting started](#getting-started)
   - [Gradle setup](#gradle-setup)
-  - [First steps](#first-steps)
+  - [Maven setup](#maven-setup)
 - [Why use ObjectBox?](#why-use-objectbox-for-java-data-management)
 - [Community and Support](#community-and-support)
 - [Changelog](#changelog)
@@ -73,11 +109,12 @@ box.put(playlist)
 
 ### Gradle setup
 
-For Android projects, add the ObjectBox Gradle plugin to your root `build.gradle`:
+For Gradle projects, add the ObjectBox Gradle plugin to your root Gradle script:
 
-```groovy
+```kotlin
+// build.gradle.kts
 buildscript {
-    ext.objectboxVersion = "4.2.0"
+    val objectboxVersion by extra("4.3.0")
     repositories {        
         mavenCentral()    
     }
@@ -87,47 +124,69 @@ buildscript {
 }
 ```
 
-And in your app's `build.gradle` apply the plugin:
-
-```groovy
-// Using plugins syntax:
-plugins {
-    id("io.objectbox") // Add after other plugins.
-}
-
-// Or using the old apply syntax:
-apply plugin: "io.objectbox" // Add after other plugins.
-```
-
-### First steps
-
-Create a data object class `@Entity`, for example "Playlist".
+<details><summary>Using plugins syntax</summary>
 
 ```kotlin
-// Kotlin
-@Entity data class Playlist( ... )
-
-// Java
-@Entity public class Playlist { ... }
+// build.gradle.kts
+plugins {
+    id("com.android.application") version "8.0.2" apply false // When used in an Android project
+    id("io.objectbox") version "4.3.0" apply false
+}
 ```
 
-Now build the project to let ObjectBox generate the class `MyObjectBox` for you.
-
-Prepare the BoxStore object once for your app, e.g. in `onCreate` in your Application class:
-
-```java
-boxStore = MyObjectBox.builder().androidContext(this).build();
+```kotlin
+// settings.gradle.kts
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "io.objectbox") {
+                useModule("io.objectbox:objectbox-gradle-plugin:${requested.version}")
+            }
+        }
+    }
+}
 ```
 
-Then get a `Box` class for the Playlist entity class:
+</details>
 
-```java
-Box<Playlist> box = boxStore.boxFor(Playlist.class);
+<details><summary>Using Groovy syntax</summary>
+
+```groovy
+// build.gradle
+buildscript {
+    ext.objectboxVersion = "4.3.0"
+    repositories {        
+        mavenCentral()    
+    }
+    dependencies {
+        classpath("io.objectbox:objectbox-gradle-plugin:$objectboxVersion")
+    }
+}
 ```
 
-The `Box` object gives you access to all major functions, like `put`, `get`, `remove`, and `query`.
+</details>
 
-For details please check the [docs](https://docs.objectbox.io).
+And in the Gradle script of your subproject apply the plugin:
+
+```kotlin
+// app/build.gradle.kts
+plugins {
+    id("com.android.application") // When used in an Android project
+    kotlin("android") // When used in an Android project
+    kotlin("kapt")
+    id("io.objectbox") // Add after other plugins
+}
+```
+
+Then sync the Gradle project with your IDE.
+
+Your project can now use ObjectBox, continue by [defining entity classes](https://docs.objectbox.io/getting-started#define-entity-classes).
+
+### Maven setup
+
+This is currently only supported for JVM projects.
+
+To set up a Maven project, see the [README of the Java Maven example project](https://github.com/objectbox/objectbox-examples/blob/main/java-main-maven/README.md).
 
 ## Why use ObjectBox for Java data management?
 
@@ -171,7 +230,7 @@ challenges in everyday app development?
 
 - Add [GitHub issues](https://github.com/ObjectBox/objectbox-java/issues)
 - Upvote important issues 👍
-- Drop us a line via [@ObjectBox_io](https://twitter.com/ObjectBox_io/) or contact[at]objectbox.io
+- Drop us a line via contact[at]objectbox.io
 - ⭐ us on GitHub if you like what you see!
 
 Thank you! Stay updated with our [blog](https://objectbox.io/blog).
@@ -185,10 +244,10 @@ For notable and important changes in new releases, read the [changelog](CHANGELO
 ObjectBox supports multiple platforms and languages.
 Besides JVM based languages like Java and Kotlin, ObjectBox also offers:
 
-- [Swift Database](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS)
-- [Dart/Flutter Database](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps
-- [Go Database](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications
-- [C and C++ Database](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
+- [C and C++ SDK](https://github.com/objectbox/objectbox-c): native speed with zero copy access to FlatBuffer objects
+- [Dart and Flutter SDK](https://github.com/objectbox/objectbox-dart): cross-platform for mobile and desktop apps
+- [Go SDK](https://github.com/objectbox/objectbox-go): great for data-driven tools and embedded server applications
+- [Swift SDK](https://github.com/objectbox/objectbox-swift): build fast mobile apps for iOS (and macOS)
 
 ## License
 
