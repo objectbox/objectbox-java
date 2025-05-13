@@ -90,6 +90,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertArrayEquals(new double[]{-valDouble, valDouble}, entity.getDoubleArray(), 0);
         assertEquals(new Date(1000 + simpleInt), entity.getDate());
         assertArrayEquals(valByteArray, entity.getExternalId());
+        assertEquals("{\"simpleString\":\"" + simpleString + "\"}", entity.getExternalJsonToNative());
     }
 
     @Test
@@ -122,6 +123,7 @@ public class BoxTest extends AbstractObjectBoxTest {
         assertNull(defaultEntity.getDoubleArray());
         assertNull(defaultEntity.getDate());
         assertNull(defaultEntity.getExternalId());
+        assertNull(defaultEntity.getExternalJsonToNative());
     }
 
     // Note: There is a similar test using the Cursor API directly (which is deprecated) in CursorTest.
