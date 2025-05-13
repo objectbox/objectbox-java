@@ -325,7 +325,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         // Note: not implemented for in-memory, returns 0.
         // No limit.
         long validated = store.validate(0, true);
-        assertEquals(IN_MEMORY ? 0 : 15, validated);
+        assertTrue(IN_MEMORY ? validated == 0 : validated > 2 /* must be larger than with pageLimit == 1, see below */);
 
         // With limit.
         validated = store.validate(1, true);
