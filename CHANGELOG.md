@@ -7,6 +7,21 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
 ## 4.3.0 - 2025-05-13
 
 - Basic support for boolean array properties (`boolean[]` in Java or `BooleanArray` in Kotlin).
+- The Windows database library now statically links the MSVC runtime to avoid crashes in incompatible `msvcp140.dll` 
+  shipped with some JDKs.
+- External property types (via [MongoDB connector](https://sync.objectbox.io/mongodb-sync-connector)):
+  - add `JSON_TO_NATIVE` to support sub (embedded/nested) documents/arrays in MongoDB
+  - support ID mapping to UUIDs (v4 and v7)
+- Admin: add class and dependency diagrams to the schema page (view and download).
+- Admin: improved data view for large vectors by displaying only the first elements and the full vector in a dialog.
+- Admin: detects images stored as bytes and shows them as such (PNG, GIF, JPEG, SVG, WEBP).
+
+### Sync
+
+- Add "Log Events" for important server events, which can be viewed on a new Admin page.
+- Detect and ignore changes for objects that were put but were unchanged.
+- The limit for message size was raised to 32 MB.
+- Transactions above the message size limit now already fail on the client (to better enforce the limit).
 
 ## 4.2.0 - 2025-03-04
 
