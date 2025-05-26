@@ -132,14 +132,18 @@ public class BoxStore implements Closeable {
         return existedBefore;
     }
 
-    /** Gets the Version of ObjectBox Java. */
+    /**
+     * Returns the version of this ObjectBox Java SDK.
+     */
     public static String getVersion() {
         return VERSION;
     }
 
     static native String nativeGetVersion();
 
-    /** Gets the Version of ObjectBox Core. */
+    /**
+     * Returns the version of the loaded ObjectBox database library.
+     */
     public static String getVersionNative() {
         NativeLibraryLoader.ensureLoaded();
         return nativeGetVersion();
