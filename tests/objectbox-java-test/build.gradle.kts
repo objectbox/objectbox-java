@@ -43,14 +43,12 @@ repositories {
 
 val obxJniLibVersion: String by rootProject.extra
 
-val kotlinVersion: String by rootProject.extra
 val coroutinesVersion: String by rootProject.extra
 val essentialsVersion: String by rootProject.extra
 val junitVersion: String by rootProject.extra
 
 dependencies {
     implementation(project(":objectbox-java"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation(project(":objectbox-kotlin"))
     implementation("org.greenrobot:essentials:$essentialsVersion")

@@ -58,10 +58,8 @@ val sourcesJar by tasks.registering(Jar::class) {
 }
 
 val coroutinesVersion: String by rootProject.extra
-val kotlinVersion: String by rootProject.extra
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     // Note: compileOnly as we do not want to require library users to use coroutines.
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
 

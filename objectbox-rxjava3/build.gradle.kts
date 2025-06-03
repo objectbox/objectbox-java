@@ -38,16 +38,13 @@ dokkaHtml.configure {
     }
 }
 
-val kotlinVersion: String by rootProject.extra
 val junitVersion: String by rootProject.extra
 val mockitoVersion: String by rootProject.extra
 
 dependencies {
     api(project(":objectbox-java"))
     api("io.reactivex.rxjava3:rxjava:3.0.11")
-    compileOnly("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
 
-    testImplementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     testImplementation("junit:junit:$junitVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
 }
