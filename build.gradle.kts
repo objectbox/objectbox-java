@@ -56,8 +56,8 @@ buildscript {
     // Check
     // - https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
     // - https://github.com/Kotlin/kotlinx.coroutines#readme
-    // Note: when updating to a new minor version also have to increase the minimum compiler version supported
-    // by consuming projects, see objectbox-kotlin/ build script.
+    // Note: when updating to a new minor version also have to increase the minimum compiler and standard library
+    // version supported by consuming projects, see objectbox-kotlin/ build script.
     val kotlinVersion by extra("2.0.21")
     val coroutinesVersion by extra("1.9.0")
     // Dokka includes its own version of the Kotlin compiler, so it must not match the used Kotlin version.
