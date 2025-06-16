@@ -64,7 +64,9 @@ test:
   script:
     # build to assemble, run tests and spotbugs
     # javadocForWeb to catch API docs errors before releasing
-    - ./scripts/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean build javadocForWeb
+    # Temporarily disable testing with Address Sanitizer until buildenv images are modernized, see #273
+    # - ./scripts/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean build javadocForWeb
+    - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build javadocForWeb
   artifacts:
     when: always
     paths:
@@ -117,7 +119,9 @@ test-macos:
     LC_ALL: "C.UTF-8"
   script:
     # Note: do not run check task as it includes SpotBugs.
-    - ./scripts/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean :tests:objectbox-java-test:test
+    # Temporarily disable testing with Address Sanitizer until buildenv images are modernized, see #273
+    # - ./scripts/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean :tests:objectbox-java-test:test
+    - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean :tests:objectbox-java-test:test
 
 # Test oldest supported and a recent JDK.
 # Note: can not run these in parallel using a matrix configuration as Gradle would step over itself.
