@@ -124,17 +124,8 @@ val javadocForWeb by tasks.registering(Javadoc::class) {
             .replace("#bb7a2a", "#E61955") // Hover
         stylesheetFile.writeText(replacedContent)
         // Note: in CSS stylesheets the last added rule wins, so append to default stylesheet.
-        // Code blocks
-        stylesheetFile.appendText("pre {\nwhite-space: normal;\noverflow-x: auto;\n}\n")
-        // Member summary tables
-        stylesheetFile.appendText(".memberSummary {\noverflow: auto;\n}\n")
-        // Descriptions and signatures
-        stylesheetFile.appendText(".block {\n" +
-                "    display:block;\n" +
-                "    margin:3px 10px 2px 0px;\n" +
-                "    color:#474747;\n" +
-                "    overflow:auto;\n" +
-                "}")
+        // Make code blocks scroll instead of stick out on small width
+        stylesheetFile.appendText("pre {\n    overflow-x: auto;\n}\n")
 
         println("Javadoc for web created at $destinationDir")
     }
