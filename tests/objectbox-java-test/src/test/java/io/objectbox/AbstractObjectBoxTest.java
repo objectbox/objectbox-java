@@ -99,11 +99,12 @@ public abstract class AbstractObjectBoxTest {
         if (!printedVersionsOnce) {
             printedVersionsOnce = true;
             printProcessId();
-            System.out.println("ObjectBox Java version: " + BoxStore.getVersion());
-            System.out.println("ObjectBox Core version: " + BoxStore.getVersionNative());
+            System.out.println("ObjectBox Java SDK version: " + BoxStore.getVersion());
+            System.out.println("ObjectBox Database version: " + BoxStore.getVersionNative());
             System.out.println("First DB dir: " + boxStoreDir);
             System.out.println("IN_MEMORY=" + IN_MEMORY);
             System.out.println("java.version=" + System.getProperty("java.version"));
+            System.out.println("java.vendor=" + System.getProperty("java.vendor"));
             System.out.println("file.encoding=" + System.getProperty("file.encoding"));
             System.out.println("sun.jnu.encoding=" + System.getProperty("sun.jnu.encoding"));
         }
