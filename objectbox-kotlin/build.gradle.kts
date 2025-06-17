@@ -1,8 +1,7 @@
 import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import java.net.URL
-
-val javadocDir = file("$buildDir/docs/javadoc")
 
 plugins {
     kotlin("jvm")
@@ -16,22 +15,34 @@ tasks.withType<JavaCompile> {
     options.release.set(8)
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        // Produce Java 8 byte code, would default to Java 6.
-        jvmTarget = "1.8"
-        // Allow consumers of this library to use an older version of the Kotlin compiler. By default only the version
-        // previous to the compiler used for this project typically works.
-        // Kotlin supports the development with at least three previous versions, so pick the oldest one possible.
-        // https://kotlinlang.org/docs/kotlin-evolution.html#evolving-the-binary-format
+kotlin {
+    compilerOptions {
+        // Produce Java 8 byte code, would default to Java 6
+        jvmTarget.set(JvmTarget.JVM_1_8)
+
+        // Allow consumers of this library to use the oldest possible Kotlin compiler and standard libraries.
         // https://kotlinlang.org/docs/compatibility-modes.html
-        apiVersion = "1.5"
-        languageVersion = "1.5"
+        // https://kotlinlang.org/docs/kotlin-evolution-principles.html#compatibility-tools
+
+        // Prevents using newer language features, sets this as the Kotlin version in produced metadata. So consumers
+        // can compile this with a Kotlin compiler down to one minor version before this.
+        // Pick the oldest not deprecated version.
+        languageVersion.set(KotlinVersion.KOTLIN_1_7)
+        // Prevents using newer APIs from the Kotlin standard library. So consumers can run this library with a Kotlin
+        // standard library down to this version.
+        // Pick the oldest not deprecated version.
+        apiVersion.set(KotlinVersion.KOTLIN_1_7)
+        // Depend on the oldest compatible Kotlin standard libraries (by default the Kotlin plugin coerces it to the one
+        // matching its version). So consumers can safely use this or any later Kotlin standard library.
+        // Pick the first release matching the versions above.
+        // Note: when changing, also update coroutines dependency version (as this does not set that).
+        coreLibrariesVersion = "1.7.0"
     }
 }
 
-tasks.named<DokkaTask>("dokkaHtml") {
-    outputDirectory.set(javadocDir)
+val dokkaHtml = tasks.named<DokkaTask>("dokkaHtml")
+dokkaHtml.configure {
+    outputDirectory.set(layout.buildDirectory.dir("docs/javadoc"))
 
     dokkaSourceSets.configureEach {
         // Fix "Can't find node by signature": have to manually point to dependencies.
@@ -46,10 +57,10 @@ tasks.named<DokkaTask>("dokkaHtml") {
 }
 
 val javadocJar by tasks.registering(Jar::class) {
-    dependsOn(tasks.named("dokkaHtml"))
+    dependsOn(dokkaHtml)
     group = "build"
     archiveClassifier.set("javadoc")
-    from(javadocDir)
+    from(dokkaHtml.get().outputDirectory)
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
@@ -58,13 +69,11 @@ val sourcesJar by tasks.registering(Jar::class) {
     from(sourceSets.main.get().allSource)
 }
 
-val coroutinesVersion: String by rootProject.extra
-val kotlinVersion: String by rootProject.extra
-
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    // Note: compileOnly as we do not want to require library users to use coroutines.
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+    // Note: compileOnly so consumers do not depend on the coroutines library unless they manually add it.
+    // Note: pick a version that depends on Kotlin standard library (org.jetbrains.kotlin:kotlin-stdlib) version
+    // coreLibrariesVersion (set above) or older.
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     api(project(":objectbox-java"))
 }

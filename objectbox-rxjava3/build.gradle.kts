@@ -1,8 +1,6 @@
 import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.net.URL
-
-val javadocDir = file("$buildDir/docs/javadoc")
 
 plugins {
     id("java-library")
@@ -17,15 +15,16 @@ tasks.withType<JavaCompile> {
     options.release.set(8)
 }
 
-// Produce Java 8 byte code, would default to Java 6.
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
+kotlin {
+    compilerOptions {
+        // Produce Java 8 byte code, would default to Java 6
+        jvmTarget.set(JvmTarget.JVM_1_8)
     }
 }
 
-tasks.named<DokkaTask>("dokkaHtml") {
-    outputDirectory.set(javadocDir)
+val dokkaHtml = tasks.named<DokkaTask>("dokkaHtml")
+dokkaHtml.configure {
+    outputDirectory.set(layout.buildDirectory.dir("docs/javadoc"))
 
     dokkaSourceSets.configureEach {
         // Fix "Can't find node by signature": have to manually point to dependencies.
@@ -39,25 +38,22 @@ tasks.named<DokkaTask>("dokkaHtml") {
     }
 }
 
-val kotlinVersion: String by rootProject.extra
 val junitVersion: String by rootProject.extra
 val mockitoVersion: String by rootProject.extra
 
 dependencies {
     api(project(":objectbox-java"))
     api("io.reactivex.rxjava3:rxjava:3.0.11")
-    compileOnly("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
 
-    testImplementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     testImplementation("junit:junit:$junitVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
 }
 
 val javadocJar by tasks.registering(Jar::class) {
-    dependsOn(tasks.named("dokkaHtml"))
+    dependsOn(dokkaHtml)
     group = "build"
     archiveClassifier.set("javadoc")
-    from(javadocDir)
+    from(dokkaHtml.get().outputDirectory)
 }
 
 val sourcesJar by tasks.registering(Jar::class) {

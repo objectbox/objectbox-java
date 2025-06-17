@@ -6,8 +6,10 @@
 // - sonatypePassword: Maven Central credential used by Nexus publishing.
 
 plugins {
+    // https://github.com/ben-manes/gradle-versions-plugin/releases
+    id("com.github.ben-manes.versions") version "0.51.0"
     // https://github.com/spotbugs/spotbugs-gradle-plugin/releases
-    id("com.github.spotbugs") version "5.0.14" apply false
+    id("com.github.spotbugs") version "6.0.26" apply false
     // https://github.com/gradle-nexus/publish-plugin/releases
     id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
@@ -50,14 +52,17 @@ buildscript {
     val essentialsVersion by extra("3.1.0")
     val junitVersion by extra("4.13.2")
     val mockitoVersion by extra("3.8.0")
-    // The versions of Kotlin, Kotlin Coroutines and Dokka must work together.
-    // Check https://github.com/Kotlin/kotlinx.coroutines#readme
-    // and https://github.com/Kotlin/dokka/releases
-    // Note: when updating might also have to increase the minimum compiler version supported
-    // by consuming projects, see objectbox-kotlin/ build script.
-    val kotlinVersion by extra("1.8.20")
-    val coroutinesVersion by extra("1.7.3")
-    val dokkaVersion by extra("1.8.20")
+    // The versions of Gradle, Kotlin and Kotlin Coroutines must work together.
+    // Check
+    // - https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+    // - https://github.com/Kotlin/kotlinx.coroutines#readme
+    // Note: when updating to a new minor version also have to increase the minimum compiler and standard library
+    // version supported by consuming projects, see objectbox-kotlin/ build script.
+    val kotlinVersion by extra("2.0.21")
+    val coroutinesVersion by extra("1.9.0")
+    // Dokka includes its own version of the Kotlin compiler, so it must not match the used Kotlin version.
+    // But it might not understand new language features.
+    val dokkaVersion by extra("1.9.20")
 
     repositories {
         mavenCentral()
@@ -93,6 +98,19 @@ allprojects {
         // Otherwise, it defaults to the system file encoding. This is required even though setting file.encoding
         // for the Gradle daemon (see gradle.properties) as Gradle does not pass it on to the javadoc tool.
         options.encoding = "UTF-8"
+    }
+}
+
+// Exclude pre-release versions from dependencyUpdates task
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
+}
+tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
+    rejectVersionIf {
+        isNonStable(candidate.version)
     }
 }
 

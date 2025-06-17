@@ -14,7 +14,7 @@ tasks.withType<JavaCompile> {
     options.release.set(8)
 }
 
-val javadocForWebDir = "$buildDir/docs/web-api-docs"
+val javadocForWebDir = layout.buildDirectory.dir("docs/web-api-docs")
 val essentialsVersion: String by rootProject.extra
 
 dependencies {
@@ -23,7 +23,7 @@ dependencies {
     api("com.google.code.findbugs:jsr305:3.0.2")
 
     // https://github.com/spotbugs/spotbugs/blob/master/CHANGELOG.md
-    compileOnly("com.github.spotbugs:spotbugs-annotations:4.7.3")
+    compileOnly("com.github.spotbugs:spotbugs-annotations:4.8.6")
 }
 
 spotbugs {
@@ -42,12 +42,14 @@ tasks.spotbugsMain {
 tasks.javadoc {
     // Internal Java APIs
     exclude("**/io/objectbox/Cursor.java")
+    exclude("**/io/objectbox/InternalAccess.java")
     exclude("**/io/objectbox/KeyValueCursor.java")
     exclude("**/io/objectbox/ModelBuilder.java")
     exclude("**/io/objectbox/Properties.java")
     exclude("**/io/objectbox/Transaction.java")
     exclude("**/io/objectbox/ideasonly/**")
     exclude("**/io/objectbox/internal/**")
+    exclude("**/io/objectbox/query/InternalAccess.java")
     exclude("**/io/objectbox/reactive/DataPublisherUtils.java")
     exclude("**/io/objectbox/reactive/WeakDataObserver.java")
     exclude("**/io/objectbox/sync/server/ClusterPeerInfo.java")
@@ -63,7 +65,7 @@ tasks.javadoc {
 }
 
 // Note: use packageJavadocForWeb to get as ZIP.
-tasks.register<Javadoc>("javadocForWeb") {
+val javadocForWeb by tasks.registering(Javadoc::class) {
     group = "documentation"
     description = "Builds Javadoc incl. objectbox-java-api classes with web tweaks."
 
@@ -78,12 +80,14 @@ tasks.register<Javadoc>("javadocForWeb") {
     val filteredSources = sourceSets.main.get().allJava.matching {
         // Internal Java APIs
         exclude("**/io/objectbox/Cursor.java")
+        exclude("**/io/objectbox/InternalAccess.java")
         exclude("**/io/objectbox/KeyValueCursor.java")
         exclude("**/io/objectbox/ModelBuilder.java")
         exclude("**/io/objectbox/Properties.java")
         exclude("**/io/objectbox/Transaction.java")
         exclude("**/io/objectbox/ideasonly/**")
         exclude("**/io/objectbox/internal/**")
+        exclude("**/io/objectbox/query/InternalAccess.java")
         exclude("**/io/objectbox/reactive/DataPublisherUtils.java")
         exclude("**/io/objectbox/reactive/WeakDataObserver.java")
         exclude("**/io/objectbox/sync/server/ClusterPeerInfo.java")
@@ -100,7 +104,7 @@ tasks.register<Javadoc>("javadocForWeb") {
     source = filteredSources + fileTree(srcApi)
 
     classpath = sourceSets.main.get().output + sourceSets.main.get().compileClasspath
-    setDestinationDir(file(javadocForWebDir))
+    setDestinationDir(javadocForWebDir.get().asFile)
 
     title = "ObjectBox Java ${project.version} API"
     (options as StandardJavadocDocletOptions).apply {
@@ -124,39 +128,31 @@ tasks.register<Javadoc>("javadocForWeb") {
             .replace("#bb7a2a", "#E61955") // Hover
         stylesheetFile.writeText(replacedContent)
         // Note: in CSS stylesheets the last added rule wins, so append to default stylesheet.
-        // Code blocks
-        stylesheetFile.appendText("pre {\nwhite-space: normal;\noverflow-x: auto;\n}\n")
-        // Member summary tables
-        stylesheetFile.appendText(".memberSummary {\noverflow: auto;\n}\n")
-        // Descriptions and signatures
-        stylesheetFile.appendText(".block {\n" +
-                "    display:block;\n" +
-                "    margin:3px 10px 2px 0px;\n" +
-                "    color:#474747;\n" +
-                "    overflow:auto;\n" +
-                "}")
+        // Make code blocks scroll instead of stick out on small width
+        stylesheetFile.appendText("pre {\n    overflow-x: auto;\n}\n")
 
         println("Javadoc for web created at $destinationDir")
     }
 }
 
 tasks.register<Zip>("packageJavadocForWeb") {
-    dependsOn("javadocForWeb")
+    dependsOn(javadocForWeb)
     group = "documentation"
     description = "Packages Javadoc incl. objectbox-java-api classes with web tweaks as ZIP."
 
     archiveFileName.set("objectbox-java-web-api-docs.zip")
-    destinationDirectory.set(file("$buildDir/dist"))
+    val distDir = layout.buildDirectory.dir("dist")
+    destinationDirectory.set(distDir)
 
     from(file(javadocForWebDir))
 
     doLast {
-        println("Javadoc for web packaged to ${file("$buildDir/dist/objectbox-java-web-api-docs.zip")}")
+        println("Javadoc for web packaged to ${distDir.get().file("objectbox-java-web-api-docs.zip")}")
     }
 }
 
 val javadocJar by tasks.registering(Jar::class) {
-    dependsOn("javadoc")
+    dependsOn(tasks.javadoc)
     archiveClassifier.set("javadoc")
     from("build/docs/javadoc")
 }

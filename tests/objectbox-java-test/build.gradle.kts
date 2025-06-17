@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("java-library")
@@ -12,10 +13,10 @@ tasks.withType<JavaCompile> {
     options.release.set(8)
 }
 
-// Produce Java 8 byte code, would default to Java 6.
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
+kotlin {
+    compilerOptions {
+        // Produce Java 8 byte code, would default to Java 6
+        jvmTarget.set(JvmTarget.JVM_1_8)
     }
 }
 
@@ -42,14 +43,12 @@ repositories {
 
 val obxJniLibVersion: String by rootProject.extra
 
-val kotlinVersion: String by rootProject.extra
 val coroutinesVersion: String by rootProject.extra
 val essentialsVersion: String by rootProject.extra
 val junitVersion: String by rootProject.extra
 
 dependencies {
     implementation(project(":objectbox-java"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation(project(":objectbox-kotlin"))
     implementation("org.greenrobot:essentials:$essentialsVersion")
@@ -86,12 +85,12 @@ tasks.withType<Test> {
         // To run tests with 32-bit ObjectBox
         // Note: 32-bit JDK is only available on Windows
         val javaExecutablePath = System.getenv("JAVA_HOME_X86") + "\\bin\\java.exe"
-        println("Will run tests with $javaExecutablePath")
+        println("$name: will run tests with $javaExecutablePath")
         executable = javaExecutablePath
     } else if (System.getenv("TEST_JDK") != null) {
         // To run tests on a different JDK, uses Gradle toolchains API (https://docs.gradle.org/current/userguide/toolchains.html)
         val sdkVersionInt = System.getenv("TEST_JDK").toInt()
-        println("Will run tests with JDK $sdkVersionInt")
+        println("$name: will run tests with JDK $sdkVersionInt")
         javaLauncher.set(javaToolchains.launcherFor {
             languageVersion.set(JavaLanguageVersion.of(sdkVersionInt))
         })
