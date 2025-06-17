@@ -42,12 +42,14 @@ tasks.spotbugsMain {
 tasks.javadoc {
     // Internal Java APIs
     exclude("**/io/objectbox/Cursor.java")
+    exclude("**/io/objectbox/InternalAccess.java")
     exclude("**/io/objectbox/KeyValueCursor.java")
     exclude("**/io/objectbox/ModelBuilder.java")
     exclude("**/io/objectbox/Properties.java")
     exclude("**/io/objectbox/Transaction.java")
     exclude("**/io/objectbox/ideasonly/**")
     exclude("**/io/objectbox/internal/**")
+    exclude("**/io/objectbox/query/InternalAccess.java")
     exclude("**/io/objectbox/reactive/DataPublisherUtils.java")
     exclude("**/io/objectbox/reactive/WeakDataObserver.java")
     exclude("**/io/objectbox/sync/server/ClusterPeerInfo.java")
@@ -78,12 +80,14 @@ val javadocForWeb by tasks.registering(Javadoc::class) {
     val filteredSources = sourceSets.main.get().allJava.matching {
         // Internal Java APIs
         exclude("**/io/objectbox/Cursor.java")
+        exclude("**/io/objectbox/InternalAccess.java")
         exclude("**/io/objectbox/KeyValueCursor.java")
         exclude("**/io/objectbox/ModelBuilder.java")
         exclude("**/io/objectbox/Properties.java")
         exclude("**/io/objectbox/Transaction.java")
         exclude("**/io/objectbox/ideasonly/**")
         exclude("**/io/objectbox/internal/**")
+        exclude("**/io/objectbox/query/InternalAccess.java")
         exclude("**/io/objectbox/reactive/DataPublisherUtils.java")
         exclude("**/io/objectbox/reactive/WeakDataObserver.java")
         exclude("**/io/objectbox/sync/server/ClusterPeerInfo.java")
