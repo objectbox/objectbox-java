@@ -175,6 +175,7 @@ public class Query<T> implements Closeable {
      * Calling any other methods of this afterwards will throw an {@link IllegalStateException}.
      */
     public synchronized void close() {
+        publisher.stopAndAwait();  // Ensure it is done so that the query is not used anymore
         if (handle != 0) {
             // Closeable recommendation: mark as "closed" before nativeDestroy could throw.
             long handleCopy = handle;
@@ -939,6 +940,7 @@ public class Query<T> implements Closeable {
      * See {@link SubscriptionBuilder#observer(DataObserver)} for additional details.
      *
      * @return A {@link SubscriptionBuilder} to build a subscription.
+     * @see #publish()
      */
     public SubscriptionBuilder<List<T>> subscribe() {
         checkOpen();
@@ -958,11 +960,15 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Publishes the current data to all subscribed @{@link DataObserver}s.
-     * This is useful triggering observers when new parameters have been set.
-     * Note, that setParameter methods will NOT be propagated to observers.
+     * Manually schedules publishing the current results of this query to all {@link #subscribe() subscribed}
+     * {@link DataObserver observers}, even if the underlying Boxes have not changed.
+     * <p>
+     * This is useful to publish new results after changing parameters of this query which would otherwise not trigger
+     * publishing of new results.
      */
     public void publish() {
+        // Do open check to not silently fail (publisher runnable would just not get scheduled if query is closed)
+        checkOpen();
         publisher.publish();
     }
 

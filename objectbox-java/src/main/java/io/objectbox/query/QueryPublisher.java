@@ -49,6 +49,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
     private final Set<DataObserver<List<T>>> observers = new CopyOnWriteArraySet<>();
     private final Deque<DataObserver<List<T>>> publishQueue = new ArrayDeque<>();
     private volatile boolean publisherRunning = false;
+    private volatile boolean publisherStopped = false;
 
     private static class SubscribedObservers<T> implements DataObserver<List<T>> {
         @Override
@@ -106,10 +107,39 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
      */
     private void queueObserverAndScheduleRun(DataObserver<List<T>> observer) {
         synchronized (publishQueue) {
+            // Check after obtaining the lock as the publisher may have been stopped while waiting on the lock
+            if (publisherStopped) {
+                return;
+            }
             publishQueue.add(observer);
             if (!publisherRunning) {
                 publisherRunning = true;
                 box.getStore().internalScheduleThread(this);
+            }
+        }
+    }
+
+    /**
+     * Marks this publisher as stopped and if it is currently running waits on it to complete.
+     * <p>
+     * After calling this, this publisher will no longer run, even if observers subscribe or publishing is requested.
+     */
+    void stopAndAwait() {
+        publisherStopped = true;
+        // Doing wait/notify waiting here; could also use the Future from BoxStore.internalScheduleThread() instead.
+        // The latter would require another member though, which seems redundant.
+        synchronized (this) {
+            while (publisherRunning) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    if (publisherRunning) {
+                        // When called by Query.close() throwing here will leak the query. But not throwing would allow
+                        // close() to proceed in destroying the native query while it may still be active (run() of this
+                        // is at the query.find() call), which would trigger a VM crash.
+                        throw new RuntimeException("Interrupted while waiting for publisher to finish", e);
+                    }
+                }
             }
         }
     }
@@ -123,7 +153,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
     @Override
     public void run() {
         try {
-            while (true) {
+            while (!publisherStopped) {
                 // Get all queued observer(s), stop processing if none.
                 List<DataObserver<List<T>>> singlePublishObservers = new ArrayList<>();
                 boolean notifySubscribedObservers = false;
@@ -143,6 +173,7 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
                 }
 
                 // Query.
+                if (publisherStopped) break;  // Check again to avoid running the query if possible
                 List<T> result = query.find();
 
                 // Notify observer(s).
@@ -160,6 +191,9 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
         } finally {
             // Re-set if wrapped code throws, otherwise this publisher can no longer publish.
             publisherRunning = false;
+            synchronized (this) {
+                this.notifyAll();
+            }
         }
     }
 
