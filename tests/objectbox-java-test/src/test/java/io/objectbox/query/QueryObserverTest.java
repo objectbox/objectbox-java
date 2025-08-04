@@ -235,6 +235,60 @@ public class QueryObserverTest extends AbstractObjectBoxTest {
         assertEquals(2, (int) placing.get(1));
     }
 
+    @Test
+    public void queryCloseWaitsOnPublisher() throws InterruptedException {
+        CountDownLatch beforeBlockPublisher = new CountDownLatch(1);
+        CountDownLatch blockPublisher = new CountDownLatch(1);
+        CountDownLatch beforeQueryClose = new CountDownLatch(1);
+        CountDownLatch afterQueryClose = new CountDownLatch(1);
+
+        AtomicBoolean publisherBlocked = new AtomicBoolean(false);
+        AtomicBoolean waitedBeforeQueryClose = new AtomicBoolean(false);
+
+        new Thread(() -> {
+            Query<TestEntity> query = box.query().build();
+            query.subscribe()
+                    .onlyChanges() // prevent initial publish call
+                    .observer(data -> {
+                beforeBlockPublisher.countDown();
+                try {
+                    publisherBlocked.set(blockPublisher.await(1, TimeUnit.SECONDS));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException("Observer was interrupted while waiting", e);
+                }
+            });
+
+            // Trigger the query publisher, prepare so it runs its loop, incl. the query, at least twice
+            // and block it from completing the first loop using the observer.
+            query.publish();
+            query.publish();
+
+            try {
+                waitedBeforeQueryClose.set(beforeQueryClose.await(1, TimeUnit.SECONDS));
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Thread was interrupted while waiting before closing query", e);
+            }
+            query.close();
+            afterQueryClose.countDown();
+        }).start();
+
+        // Wait for observer to block the publisher
+        assertTrue(beforeBlockPublisher.await(1, TimeUnit.SECONDS));
+        // Start closing the query
+        beforeQueryClose.countDown();
+
+        // While the publisher is blocked, the query close call should block
+        assertFalse(afterQueryClose.await(100, TimeUnit.MILLISECONDS));
+
+        // After the publisher is unblocked and can stop, the query close call should complete
+        blockPublisher.countDown();
+        assertTrue(afterQueryClose.await(100, TimeUnit.MILLISECONDS));
+
+        // Verify latches were triggered due to reaching 0, not due to timeout
+        assertTrue(publisherBlocked.get());
+        assertTrue(waitedBeforeQueryClose.get());
+    }
+
     private void putTestEntitiesScalars() {
         putTestEntities(10, null, 2000);
     }

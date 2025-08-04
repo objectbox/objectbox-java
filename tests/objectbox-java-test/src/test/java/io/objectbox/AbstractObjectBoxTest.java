@@ -45,6 +45,7 @@ import io.objectbox.config.DebugFlags;
 import io.objectbox.model.ExternalPropertyType;
 import io.objectbox.model.PropertyFlags;
 import io.objectbox.model.PropertyType;
+import io.objectbox.query.InternalAccess;
 
 
 import static org.junit.Assert.assertEquals;
@@ -92,6 +93,7 @@ public abstract class AbstractObjectBoxTest {
     public void setUp() throws IOException {
         Cursor.TRACK_CREATION_STACK = true;
         Transaction.TRACK_CREATION_STACK = true;
+        InternalAccess.queryPublisherLogStates();
 
         // Note: is logged, so create before logging.
         boxStoreDir = prepareTempDir("object-store-test");

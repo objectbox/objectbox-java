@@ -35,20 +35,32 @@ import io.objectbox.reactive.DataSubscription;
 import io.objectbox.reactive.SubscriptionBuilder;
 
 /**
- * A {@link DataPublisher} that subscribes to an ObjectClassPublisher if there is at least one observer.
- * Publishing is requested if the ObjectClassPublisher reports changes, a subscription is
- * {@link SubscriptionBuilder#observer(DataObserver) observed} or {@link Query#publish()} is called.
- * For publishing the query is re-run and the result delivered to the current observers.
- * Results are published on a single thread, one at a time, in the order publishing was requested.
+ * A {@link DataPublisher} that {@link BoxStore#subscribe(Class) subscribes to the Box} of its associated {@link Query}
+ * while there is at least one observer (see {@link #subscribe(DataObserver, Object)} and
+ * {@link #unsubscribe(DataObserver, Object)}).
+ * <p>
+ * Publishing is requested if the Box reports changes, a subscription is
+ * {@link SubscriptionBuilder#observer(DataObserver) observed} (if {@link #publishSingle(DataObserver, Object)} is
+ * called) or {@link Query#publish()} (calls {@link #publish()}) is called.
+ * <p>
+ * For publishing the query is re-run and the result data is delivered to the current observers.
+ * <p>
+ * Data is passed to observers on a single thread ({@link BoxStore#internalScheduleThread(Runnable)}), one at a time, in
+ * the order observers were added.
  */
 @Internal
 class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
 
+    /**
+     * If enabled, logs states of the publisher runnable. Useful to debug a query subscription.
+     */
+    public static boolean LOG_STATES = false;
     private final Query<T> query;
     private final Box<T> box;
     private final Set<DataObserver<List<T>>> observers = new CopyOnWriteArraySet<>();
     private final Deque<DataObserver<List<T>>> publishQueue = new ArrayDeque<>();
     private volatile boolean publisherRunning = false;
+    private volatile boolean publisherStopped = false;
 
     private static class SubscribedObservers<T> implements DataObserver<List<T>> {
         @Override
@@ -106,10 +118,39 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
      */
     private void queueObserverAndScheduleRun(DataObserver<List<T>> observer) {
         synchronized (publishQueue) {
+            // Check after obtaining the lock as the publisher may have been stopped while waiting on the lock
+            if (publisherStopped) {
+                return;
+            }
             publishQueue.add(observer);
             if (!publisherRunning) {
                 publisherRunning = true;
                 box.getStore().internalScheduleThread(this);
+            }
+        }
+    }
+
+    /**
+     * Marks this publisher as stopped and if it is currently running waits on it to complete.
+     * <p>
+     * After calling this, this publisher will no longer run, even if observers subscribe or publishing is requested.
+     */
+    void stopAndAwait() {
+        publisherStopped = true;
+        // Doing wait/notify waiting here; could also use the Future from BoxStore.internalScheduleThread() instead.
+        // The latter would require another member though, which seems redundant.
+        synchronized (this) {
+            while (publisherRunning) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    if (publisherRunning) {
+                        // When called by Query.close() throwing here will leak the query. But not throwing would allow
+                        // close() to proceed in destroying the native query while it may still be active (run() of this
+                        // is at the query.find() call), which would trigger a VM crash.
+                        throw new RuntimeException("Interrupted while waiting for publisher to finish", e);
+                    }
+                }
             }
         }
     }
@@ -122,9 +163,11 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
      */
     @Override
     public void run() {
+        log("started");
         try {
-            while (true) {
+            while (!publisherStopped) {
                 // Get all queued observer(s), stop processing if none.
+                log("checking for observers");
                 List<DataObserver<List<T>>> singlePublishObservers = new ArrayList<>();
                 boolean notifySubscribedObservers = false;
                 synchronized (publishQueue) {
@@ -143,9 +186,12 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
                 }
 
                 // Query.
+                log("running query");
+                if (publisherStopped) break;  // Check again to avoid running the query if possible
                 List<T> result = query.find();
 
                 // Notify observer(s).
+                log("notifying observers");
                 for (DataObserver<List<T>> observer : singlePublishObservers) {
                     observer.onData(result);
                 }
@@ -158,8 +204,12 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
                 }
             }
         } finally {
+            log("stopped");
             // Re-set if wrapped code throws, otherwise this publisher can no longer publish.
             publisherRunning = false;
+            synchronized (this) {
+                this.notifyAll();
+            }
         }
     }
 
@@ -170,6 +220,10 @@ class QueryPublisher<T> implements DataPublisher<List<T>>, Runnable {
             objectClassSubscription.cancel();
             objectClassSubscription = null;
         }
+    }
+
+    private static void log(String message) {
+        if (LOG_STATES) System.out.println("QueryPublisher: " + message);
     }
 
 }

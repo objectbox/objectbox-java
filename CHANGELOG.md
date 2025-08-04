@@ -7,6 +7,7 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
 ## 4.3.1 - in development
 
 - Requires at least Kotlin compiler and standard library 1.7.
+- Data Observers: closing a Query now waits on a running publisher to finish its query, preventing a VM crash. [#1147](https://github.com/objectbox/objectbox-java/issues/1147)
 
 ## 4.3.0 - 2025-05-13
 

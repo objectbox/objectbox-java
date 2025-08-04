@@ -29,4 +29,12 @@ public class InternalAccess {
         query.nativeFindFirst(query.handle, cursorHandle);
     }
 
+    /**
+     * See {@link QueryPublisher#LOG_STATES}.
+     */
+    @Internal
+    public static void queryPublisherLogStates() {
+        QueryPublisher.LOG_STATES = true;
+    }
+
 }
