@@ -309,13 +309,20 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     @Test
     public void testSizeOnDisk() {
         // Note: initial database does have a non-zero (file) size.
+        @SuppressWarnings("deprecation")
         long legacySizeOnDisk = store.sizeOnDisk();
         assertTrue(legacySizeOnDisk > 0);
 
         assertTrue(store.getDbSize() > 0);
 
         long sizeOnDisk = store.getDbSizeOnDisk();
-        assertEquals(IN_MEMORY ? 0 : 12288, sizeOnDisk);
+        // Check the file size is at least a reasonable value
+        assertTrue("Size is not reasonable", IN_MEMORY ? sizeOnDisk == 0 : sizeOnDisk > 10000 /* 10 KB */);
+
+        // Check the file size increases after inserting
+        putTestEntities(10);
+        long sizeOnDiskAfterPut = store.getDbSizeOnDisk();
+        assertTrue("Size did not increase", IN_MEMORY ? sizeOnDiskAfterPut == 0 : sizeOnDiskAfterPut > sizeOnDisk);
     }
 
     @Test

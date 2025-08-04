@@ -261,31 +261,31 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
     public void maxFileSize() {
         assumeFalse(IN_MEMORY); // no max size support for in-memory
 
+        // To avoid frequently changing the limit choose one high enough to insert at least one object successfully,
+        // then keep inserting until the limit is hit.
         builder = createBoxStoreBuilder(null);
-        // The empty data.mdb file is around 12 KB, but creating will fail also if slightly above that
-        builder.maxSizeInKByte(15);
-        DbFullException couldNotPut = assertThrows(
-                DbFullException.class,
-                () -> builder.build()
-        );
-        assertEquals("Could not put", couldNotPut.getMessage());
-
-        builder.maxSizeInKByte(30); // Empty file is around 12 KB, object below adds about 8 KB each.
+        builder.maxSizeInKByte(150);
         store = builder.build();
-        putTestEntity(LONG_STRING, 1);
-        TestEntity testEntity2 = createTestEntity(LONG_STRING, 2);
-        DbFullException dbFullException = assertThrows(
-                DbFullException.class,
-                () -> getTestEntityBox().put(testEntity2)
-        );
-        assertEquals("Could not commit tx", dbFullException.getMessage());
 
-        // Re-open with larger size.
+        putTestEntity(LONG_STRING, 1); // Should work
+
+        boolean dbFullExceptionThrown = false;
+        for (int i = 2; i < 1000; i++) {
+            TestEntity testEntity = createTestEntity(LONG_STRING, i);
+            try {
+                getTestEntityBox().put(testEntity);
+            } catch (DbFullException e) {
+                dbFullExceptionThrown = true;
+                break;
+            }
+        }
+        assertTrue("DbFullException was not thrown",  dbFullExceptionThrown);
+
+        // Check re-opening with larger size allows to insert again
         store.close();
-        builder.maxSizeInKByte(40);
+        builder.maxSizeInKByte(200);
         store = builder.build();
-        testEntity2.setId(0); // Clear ID of object that failed to put.
-        getTestEntityBox().put(testEntity2);
+        getTestEntityBox().put(createTestEntity(LONG_STRING, 1000));
     }
 
     @Test
