@@ -21,6 +21,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.objectbox.annotation.ExternalName;
+import io.objectbox.annotation.ExternalType;
 import io.objectbox.annotation.HnswIndex;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
@@ -123,6 +125,7 @@ public class ModelBuilder {
         private int indexId;
         private long indexUid;
         private int indexMaxValueLength;
+        private int externalNameOffset;
         private int externalType;
         private int hnswParamsOffset;
         private int flags;
@@ -166,9 +169,16 @@ public class ModelBuilder {
         }
 
         /**
-         * Sets the {@link ExternalPropertyType} constant for this.
-         *
-         * @return this builder.
+         * Sets the {@link ExternalName} of this property.
+         */
+        public PropertyBuilder externalName(String externalName) {
+            checkNotFinished();
+            externalNameOffset = getFbb().createString(externalName);
+            return this;
+        }
+
+        /**
+         * Sets the {@link ExternalType} of this property. Should be one of {@link ExternalPropertyType}.
          */
         public PropertyBuilder externalType(int externalType) {
             checkNotFinished();
@@ -247,6 +257,7 @@ public class ModelBuilder {
                 ModelProperty.addIndexId(fbb, indexIdOffset);
             }
             if (indexMaxValueLength > 0) ModelProperty.addMaxIndexValueLength(fbb, indexMaxValueLength);
+            if (externalNameOffset != 0) ModelProperty.addExternalName(fbb, externalNameOffset);
             if (externalType != 0) ModelProperty.addExternalType(fbb, externalType);
             if (hnswParamsOffset != 0) ModelProperty.addHnswParams(fbb, hnswParamsOffset);
             if (flags != 0) ModelProperty.addFlags(fbb, flags);
@@ -262,6 +273,7 @@ public class ModelBuilder {
         private final int targetEntityId;
         private final long targetEntityUid;
 
+        private int externalNameOffset;
         private int externalType;
 
         private RelationBuilder(FlatBufferBuilder fbb, String name, int relationId, long relationUid,
@@ -275,9 +287,16 @@ public class ModelBuilder {
         }
 
         /**
-         * Sets the {@link ExternalPropertyType} constant for this.
-         *
-         * @return this builder.
+         * Sets the {@link ExternalName} of this relation.
+         */
+        public RelationBuilder externalName(String externalName) {
+            checkNotFinished();
+            externalNameOffset = getFbb().createString(externalName);
+            return this;
+        }
+
+        /**
+         * Sets the {@link ExternalType} of this relation. Should be one of {@link ExternalPropertyType}.
          */
         public RelationBuilder externalType(int externalType) {
             checkNotFinished();
@@ -295,6 +314,7 @@ public class ModelBuilder {
             ModelRelation.addId(fbb, relationIdOffset);
             int targetEntityIdOffset = IdUid.createIdUid(fbb, targetEntityId, targetEntityUid);
             ModelRelation.addTargetEntityId(fbb, targetEntityIdOffset);
+            if (externalNameOffset != 0) ModelRelation.addExternalName(fbb, externalNameOffset);
             if (externalType != 0) ModelRelation.addExternalType(fbb, externalType);
             return ModelRelation.endModelRelation(fbb);
         }
@@ -311,6 +331,7 @@ public class ModelBuilder {
         private Long uid;
         private Integer lastPropertyId;
         private Long lastPropertyUid;
+        @Nullable private String externalName;
         private Integer flags;
         @Nullable private PropertyBuilder propertyBuilder;
         @Nullable private RelationBuilder relationBuilder;
@@ -332,6 +353,15 @@ public class ModelBuilder {
             checkNotFinished();
             this.lastPropertyId = lastPropertyId;
             this.lastPropertyUid = lastPropertyUid;
+            return this;
+        }
+
+        /**
+         * Sets the {@link ExternalName} of this entity.
+         */
+        public EntityBuilder externalName(String externalName) {
+            checkNotFinished();
+            this.externalName = externalName;
             return this;
         }
 
@@ -402,6 +432,7 @@ public class ModelBuilder {
         @Override
         public int createFlatBufferTable(FlatBufferBuilder fbb) {
             int nameOffset = fbb.createString(name);
+            int externalNameOffset = externalName != null ? fbb.createString(externalName) : 0;
             int propertiesOffset = model.createVector(propertyOffsets);
             int relationsOffset = relationOffsets.isEmpty() ? 0 : model.createVector(relationOffsets);
 
@@ -417,6 +448,7 @@ public class ModelBuilder {
                 int idOffset = IdUid.createIdUid(fbb, lastPropertyId, lastPropertyUid);
                 ModelEntity.addLastPropertyId(fbb, idOffset);
             }
+            if (externalNameOffset != 0) ModelEntity.addExternalName(fbb, externalNameOffset);
             if (flags != null) ModelEntity.addFlags(fbb, flags);
             return ModelEntity.endModelEntity(fbb);
         }
