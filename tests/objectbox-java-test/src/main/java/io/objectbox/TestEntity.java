@@ -24,17 +24,15 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import io.objectbox.annotation.Entity;
-import io.objectbox.annotation.ExternalPropertyType;
-import io.objectbox.annotation.ExternalType;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Unsigned;
 
 /**
- * The annotations in this class have no effect as the Gradle plugin is not configured in this project. However, test
- * code builds a model like if the annotations were processed.
+ * The annotations in this class have no effect as the Gradle plugin is not configured in this project. They are
+ * informational to help maintain the test code that builds a model for this entity (see AbstractObjectBoxTest).
  * <p>
- * There is a matching test in the internal integration test project where this is tested and model builder code can be
- * "stolen" from.
+ * To test annotations and correct code generation, add a test in the Gradle plugin project. To test related features
+ * with a database at runtime, add a test in the internal integration test project.
  */
 @Entity
 public class TestEntity {
@@ -76,13 +74,6 @@ public class TestEntity {
     private float[] floatArray;
     private double[] doubleArray;
     private Date date;
-    // Just smoke testing this property type (tests do not use Sync).
-    // Also use UUID instead of the default MONGO_ID.
-    @ExternalType(ExternalPropertyType.UUID)
-    private byte[] externalId;
-    // Just smoke testing this property type (tests do not use Sync).
-    @ExternalType(ExternalPropertyType.JSON_TO_NATIVE)
-    private String externalJsonToNative;
 
     transient boolean noArgsConstructorCalled;
 
@@ -118,9 +109,7 @@ public class TestEntity {
                       long[] longArray,
                       float[] floatArray,
                       double[] doubleArray,
-                      Date date,
-                      byte[] externalId,
-                      String externalJsonToNative
+                      Date date
     ) {
         this.id = id;
         this.simpleBoolean = simpleBoolean;
@@ -147,8 +136,6 @@ public class TestEntity {
         this.floatArray = floatArray;
         this.doubleArray = doubleArray;
         this.date = date;
-        this.externalId = externalId;
-        this.externalJsonToNative = externalJsonToNative;
         if (STRING_VALUE_THROW_IN_CONSTRUCTOR.equals(simpleString)) {
             throw new RuntimeException(EXCEPTION_IN_CONSTRUCTOR_MESSAGE);
         }
@@ -367,24 +354,6 @@ public class TestEntity {
         this.date = date;
     }
 
-    @Nullable
-    public byte[] getExternalId() {
-        return externalId;
-    }
-
-    public void setExternalId(@Nullable byte[] externalId) {
-        this.externalId = externalId;
-    }
-
-    @Nullable
-    public String getExternalJsonToNative() {
-        return externalJsonToNative;
-    }
-
-    public void setExternalJsonToNative(@Nullable String externalJsonToNative) {
-        this.externalJsonToNative = externalJsonToNative;
-    }
-
     @Override
     public String toString() {
         return "TestEntity{" +
@@ -413,8 +382,6 @@ public class TestEntity {
                 ", floatArray=" + Arrays.toString(floatArray) +
                 ", doubleArray=" + Arrays.toString(doubleArray) +
                 ", date=" + date +
-                ", externalId=" + Arrays.toString(externalId) +
-                ", externalJsonToString='" + externalJsonToNative + '\'' +
                 ", noArgsConstructorCalled=" + noArgsConstructorCalled +
                 '}';
     }

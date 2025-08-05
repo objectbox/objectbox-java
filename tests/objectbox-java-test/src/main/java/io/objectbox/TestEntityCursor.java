@@ -74,8 +74,6 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
     private final static int __ID_floatArray = TestEntity_.floatArray.id;
     private final static int __ID_doubleArray = TestEntity_.doubleArray.id;
     private final static int __ID_date = TestEntity_.date.id;
-    private final static int __ID_externalId = TestEntity_.externalId.id;
-    private final static int __ID_externalJsonToNative = TestEntity_.externalJsonToNative.id;
 
     public TestEntityCursor(io.objectbox.Transaction tx, long cursor, BoxStore boxStore) {
         super(tx, cursor, TestEntity_.__INSTANCE, boxStore);
@@ -150,29 +148,25 @@ public final class TestEntityCursor extends Cursor<TestEntity> {
 
         String simpleString = entity.getSimpleString();
         int __id8 = simpleString != null ? __ID_simpleString : 0;
-        String externalJsonToNative = entity.getExternalJsonToNative();
-        int __id26 = externalJsonToNative != null ? __ID_externalJsonToNative : 0;
         byte[] simpleByteArray = entity.getSimpleByteArray();
         int __id9 = simpleByteArray != null ? __ID_simpleByteArray : 0;
-        byte[] externalId = entity.getExternalId();
-        int __id25 = externalId != null ? __ID_externalId : 0;
         Map stringObjectMap = entity.getStringObjectMap();
         int __id15 = stringObjectMap != null ? __ID_stringObjectMap : 0;
-
-        collect430000(cursor, 0, 0,
-                __id8, simpleString, __id26, externalJsonToNative,
-                0, null, 0, null,
-                __id9, simpleByteArray, __id25, externalId,
-                __id15, __id15 != 0 ? stringObjectMapConverter.convertToDatabaseValue(stringObjectMap) : null);
-
         Object flexProperty = entity.getFlexProperty();
         int __id16 = flexProperty != null ? __ID_flexProperty : 0;
+
+        collect430000(cursor, 0, 0,
+                __id8, simpleString, 0, null,
+                0, null, 0, null,
+                __id9, simpleByteArray, __id15, __id15 != 0 ? stringObjectMapConverter.convertToDatabaseValue(stringObjectMap) : null,
+                __id16, __id16 != 0 ? flexPropertyConverter.convertToDatabaseValue(flexProperty) : null);
+
         java.util.Date date = entity.getDate();
         int __id24 = date != null ? __ID_date : 0;
 
         collect313311(cursor, 0, 0,
                 0, null, 0, null,
-                0, null, __id16, __id16 != 0 ? flexPropertyConverter.convertToDatabaseValue(flexProperty) : null,
+                0, null, 0, null,
                 __ID_simpleLong, entity.getSimpleLong(), __ID_simpleLongU, entity.getSimpleLongU(),
                 __id24, __id24 != 0 ? date.getTime() : 0, INT_NULL_HACK ? 0 : __ID_simpleInt, entity.getSimpleInt(),
                 __ID_simpleIntU, entity.getSimpleIntU(), __ID_simpleShort, entity.getSimpleShort(),

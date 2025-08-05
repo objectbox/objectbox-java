@@ -42,7 +42,6 @@ import io.objectbox.ModelBuilder.EntityBuilder;
 import io.objectbox.ModelBuilder.PropertyBuilder;
 import io.objectbox.annotation.IndexType;
 import io.objectbox.config.DebugFlags;
-import io.objectbox.model.ExternalPropertyType;
 import io.objectbox.model.PropertyFlags;
 import io.objectbox.model.PropertyType;
 import io.objectbox.query.InternalAccess;
@@ -307,15 +306,7 @@ public abstract class AbstractObjectBoxTest {
 
         // Date property
         entityBuilder.property("date", PropertyType.Date).id(TestEntity_.date.id, ++lastUid);
-
-        // External type property
-        // Note: there is no way to test external type mapping works here. Instead, verify passing a model with
-        // externalType(int) works.
-        entityBuilder.property("externalId", PropertyType.ByteVector).id(TestEntity_.externalId.id, ++lastUid)
-                .externalType(ExternalPropertyType.Uuid);
-        int lastId = TestEntity_.externalJsonToNative.id;
-        entityBuilder.property("externalJsonToNative", PropertyType.String).id(lastId, ++lastUid)
-                .externalType(ExternalPropertyType.JsonToNative);
+        int lastId = TestEntity_.date.id;
 
         entityBuilder.lastPropertyId(lastId, lastUid);
         addOptionalFlagsToTestEntity(entityBuilder);
@@ -378,10 +369,6 @@ public abstract class AbstractObjectBoxTest {
         entity.setFloatArray(new float[]{-simpleFloat, simpleFloat});
         entity.setDoubleArray(new double[]{-simpleDouble, simpleDouble});
         entity.setDate(new Date(simpleLong));
-        // Note: there is no way to test external type mapping works here. Instead, verify that
-        // there are no side effects for put and get.
-        entity.setExternalId(simpleByteArray);
-        entity.setExternalJsonToNative("{\"simpleString\":\"" + simpleString + "\"}");
         return entity;
     }
 
