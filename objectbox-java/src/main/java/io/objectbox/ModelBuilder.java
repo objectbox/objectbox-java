@@ -38,18 +38,19 @@ import io.objectbox.model.ModelRelation;
 // Note: IdUid is a struct, not a table, and thus must be inlined
 
 /**
- * Builds a flatbuffer representation of the database model to be passed when opening a store.
+ * Builds a flatbuffer representation of the database model to be passed to {@link BoxStoreBuilder}.
  * <p>
  * This is an internal API that should only be called by the generated MyObjectBox code.
  */
 @Internal
 public class ModelBuilder {
-    private static final int MODEL_VERSION = 2;
+    private static final String DEFAULT_MODEL_NAME = "default";
+    private static final int DEFAULT_MODEL_VERSION = 2;
 
     private final FlatBufferBuilder fbb = new FlatBufferBuilder();
     private final List<Integer> entityOffsets = new ArrayList<>();
 
-    private long version = 1;
+    private long version = DEFAULT_MODEL_VERSION;
 
     private Integer lastEntityId;
     private Long lastEntityUid;
@@ -104,28 +105,37 @@ public class ModelBuilder {
 
     public static class PropertyBuilder extends PartBuilder {
 
-        private final int type;
-        private final int virtualTargetOffset;
         private final int propertyNameOffset;
         private final int targetEntityOffset;
+        private final int virtualTargetOffset;
+        private final int type;
 
         private int secondaryNameOffset;
-        private int flags;
         private int id;
         private long uid;
         private int indexId;
         private long indexUid;
         private int indexMaxValueLength;
-        private int externalPropertyType;
+        private int externalType;
         private int hnswParamsOffset;
+        private int flags;
 
         private PropertyBuilder(FlatBufferBuilder fbb, String name, @Nullable String targetEntityName,
                                 @Nullable String virtualTarget, int type) {
             super(fbb);
-            this.type = type;
             propertyNameOffset = fbb.createString(name);
             targetEntityOffset = targetEntityName != null ? fbb.createString(targetEntityName) : 0;
             virtualTargetOffset = virtualTarget != null ? fbb.createString(virtualTarget) : 0;
+            this.type = type;
+        }
+
+        /**
+         * Sets the Java name of a renamed property when using {@link io.objectbox.annotation.NameInDb}.
+         */
+        public PropertyBuilder secondaryName(String secondaryName) {
+            checkNotFinished();
+            secondaryNameOffset = getFbb().createString(secondaryName);
+            return this;
         }
 
         public PropertyBuilder id(int id, long uid) {
@@ -153,9 +163,9 @@ public class ModelBuilder {
          *
          * @return this builder.
          */
-        public PropertyBuilder externalType(int externalPropertyType) {
+        public PropertyBuilder externalType(int externalType) {
             checkNotFinished();
-            this.externalPropertyType = externalPropertyType;
+            this.externalType = externalType;
             return this;
         }
 
@@ -204,15 +214,12 @@ public class ModelBuilder {
             return this;
         }
 
+        /**
+         * One or more of {@link io.objectbox.model.PropertyFlags}.
+         */
         public PropertyBuilder flags(int flags) {
             checkNotFinished();
             this.flags = flags;
-            return this;
-        }
-
-        public PropertyBuilder secondaryName(String secondaryName) {
-            checkNotFinished();
-            secondaryNameOffset = getFbb().createString(secondaryName);
             return this;
         }
 
@@ -220,15 +227,10 @@ public class ModelBuilder {
         public int createFlatBufferTable(FlatBufferBuilder fbb) {
             ModelProperty.startModelProperty(fbb);
             ModelProperty.addName(fbb, propertyNameOffset);
-            if (targetEntityOffset != 0) {
-                ModelProperty.addTargetEntity(fbb, targetEntityOffset);
-            }
-            if (virtualTargetOffset != 0) {
-                ModelProperty.addVirtualTarget(fbb, virtualTargetOffset);
-            }
-            if (secondaryNameOffset != 0) {
-                ModelProperty.addNameSecondary(fbb, secondaryNameOffset);
-            }
+            if (targetEntityOffset != 0) ModelProperty.addTargetEntity(fbb, targetEntityOffset);
+            if (virtualTargetOffset != 0) ModelProperty.addVirtualTarget(fbb, virtualTargetOffset);
+            ModelProperty.addType(fbb, type);
+            if (secondaryNameOffset != 0) ModelProperty.addNameSecondary(fbb, secondaryNameOffset);
             if (id != 0) {
                 int idOffset = IdUid.createIdUid(fbb, id, uid);
                 ModelProperty.addId(fbb, idOffset);
@@ -237,19 +239,10 @@ public class ModelBuilder {
                 int indexIdOffset = IdUid.createIdUid(fbb, indexId, indexUid);
                 ModelProperty.addIndexId(fbb, indexIdOffset);
             }
-            if (indexMaxValueLength > 0) {
-                ModelProperty.addMaxIndexValueLength(fbb, indexMaxValueLength);
-            }
-            if (externalPropertyType != 0) {
-                ModelProperty.addExternalType(fbb, externalPropertyType);
-            }
-            if (hnswParamsOffset != 0) {
-                ModelProperty.addHnswParams(fbb, hnswParamsOffset);
-            }
-            ModelProperty.addType(fbb, type);
-            if (flags != 0) {
-                ModelProperty.addFlags(fbb, flags);
-            }
+            if (indexMaxValueLength > 0) ModelProperty.addMaxIndexValueLength(fbb, indexMaxValueLength);
+            if (externalType != 0) ModelProperty.addExternalType(fbb, externalType);
+            if (hnswParamsOffset != 0) ModelProperty.addHnswParams(fbb, hnswParamsOffset);
+            if (flags != 0) ModelProperty.addFlags(fbb, flags);
             return ModelProperty.endModelProperty(fbb);
         }
     }
@@ -261,7 +254,8 @@ public class ModelBuilder {
         private final long relationUid;
         private final int targetEntityId;
         private final long targetEntityUid;
-        private int externalPropertyType;
+
+        private int externalType;
 
         private RelationBuilder(FlatBufferBuilder fbb, String name, int relationId, long relationUid,
                                 int targetEntityId, long targetEntityUid) {
@@ -278,9 +272,9 @@ public class ModelBuilder {
          *
          * @return this builder.
          */
-        public RelationBuilder externalType(int externalPropertyType) {
+        public RelationBuilder externalType(int externalType) {
             checkNotFinished();
-            this.externalPropertyType = externalPropertyType;
+            this.externalType = externalType;
             return this;
         }
 
@@ -294,9 +288,7 @@ public class ModelBuilder {
             ModelRelation.addId(fbb, relationIdOffset);
             int targetEntityIdOffset = IdUid.createIdUid(fbb, targetEntityId, targetEntityUid);
             ModelRelation.addTargetEntityId(fbb, targetEntityIdOffset);
-            if (externalPropertyType != 0) {
-                ModelRelation.addExternalType(fbb, externalPropertyType);
-            }
+            if (externalType != 0) ModelRelation.addExternalType(fbb, externalType);
             return ModelRelation.endModelRelation(fbb);
         }
     }
@@ -304,20 +296,19 @@ public class ModelBuilder {
     public static class EntityBuilder extends PartBuilder {
 
         private final ModelBuilder model;
-        final String name;
-        final List<Integer> propertyOffsets = new ArrayList<>();
-        final List<Integer> relationOffsets = new ArrayList<>();
+        private final String name;
+        private final List<Integer> propertyOffsets = new ArrayList<>();
+        private final List<Integer> relationOffsets = new ArrayList<>();
 
-        Integer id;
-        Long uid;
-        Integer flags;
-        Integer lastPropertyId;
-        Long lastPropertyUid;
-        @Nullable PropertyBuilder propertyBuilder;
-        @Nullable RelationBuilder relationBuilder;
-        boolean finished;
+        private Integer id;
+        private Long uid;
+        private Integer lastPropertyId;
+        private Long lastPropertyUid;
+        private Integer flags;
+        @Nullable private PropertyBuilder propertyBuilder;
+        @Nullable private RelationBuilder relationBuilder;
 
-        EntityBuilder(ModelBuilder model, FlatBufferBuilder fbb, String name) {
+        private EntityBuilder(ModelBuilder model, FlatBufferBuilder fbb, String name) {
             super(fbb);
             this.model = model;
             this.name = name;
@@ -337,6 +328,9 @@ public class ModelBuilder {
             return this;
         }
 
+        /**
+         * One or more of {@link io.objectbox.model.EntityFlags}.
+         */
         public EntityBuilder flags(int flags) {
             this.flags = flags;
             return this;
@@ -350,6 +344,14 @@ public class ModelBuilder {
             return property(name, targetEntityName, null, type);
         }
 
+        /**
+         * @param name The name of this property in the database.
+         * @param targetEntityName For {@link io.objectbox.model.PropertyType#Relation}, the name of the target entity.
+         * @param virtualTarget For {@link io.objectbox.model.PropertyType#Relation}, if this property does not really
+         * exist in the source code and is a virtual one, the name of the field this is based on that actually exists.
+         * Currently used for ToOne fields that create virtual target ID properties.
+         * @param type The {@link io.objectbox.model.PropertyType}.
+         */
         public PropertyBuilder property(String name, @Nullable String targetEntityName, @Nullable String virtualTarget,
                                         int type) {
             checkNotFinished();
@@ -392,12 +394,12 @@ public class ModelBuilder {
 
         @Override
         public int createFlatBufferTable(FlatBufferBuilder fbb) {
-            int testEntityNameOffset = fbb.createString(name);
+            int nameOffset = fbb.createString(name);
             int propertiesOffset = model.createVector(propertyOffsets);
             int relationsOffset = relationOffsets.isEmpty() ? 0 : model.createVector(relationOffsets);
 
             ModelEntity.startModelEntity(fbb);
-            ModelEntity.addName(fbb, testEntityNameOffset);
+            ModelEntity.addName(fbb, nameOffset);
             ModelEntity.addProperties(fbb, propertiesOffset);
             if (relationsOffset != 0) ModelEntity.addRelations(fbb, relationsOffset);
             if (id != null && uid != null) {
@@ -408,9 +410,7 @@ public class ModelBuilder {
                 int idOffset = IdUid.createIdUid(fbb, lastPropertyId, lastPropertyUid);
                 ModelEntity.addLastPropertyId(fbb, idOffset);
             }
-            if (flags != null) {
-                ModelEntity.addFlags(fbb, flags);
-            }
+            if (flags != null) ModelEntity.addFlags(fbb, flags);
             return ModelEntity.endModelEntity(fbb);
         }
 
@@ -452,11 +452,11 @@ public class ModelBuilder {
     }
 
     public byte[] build() {
-        int nameOffset = fbb.createString("default");
+        int nameOffset = fbb.createString(DEFAULT_MODEL_NAME);
         int entityVectorOffset = createVector(entityOffsets);
         Model.startModel(fbb);
         Model.addName(fbb, nameOffset);
-        Model.addModelVersion(fbb, MODEL_VERSION);
+        Model.addModelVersion(fbb, version);
         Model.addVersion(fbb, 1);
         Model.addEntities(fbb, entityVectorOffset);
         if (lastEntityId != null) {
