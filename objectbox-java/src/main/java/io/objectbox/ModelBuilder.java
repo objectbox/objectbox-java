@@ -44,13 +44,20 @@ import io.objectbox.model.ModelRelation;
  */
 @Internal
 public class ModelBuilder {
-    private static final String DEFAULT_MODEL_NAME = "default";
-    private static final int DEFAULT_MODEL_VERSION = 2;
+
+    /**
+     * The version of the model (structure). The database verifies it supports this version of a model.
+     * <p>
+     * Note this is different from the "modelVersion" in the model JSON file, which only refers to the JSON schema.
+     */
+    private static final int MODEL_VERSION = 2;
+    private static final String DEFAULT_NAME = "default";
+    private static final int DEFAULT_VERSION = 1;
 
     private final FlatBufferBuilder fbb = new FlatBufferBuilder();
     private final List<Integer> entityOffsets = new ArrayList<>();
 
-    private long version = DEFAULT_MODEL_VERSION;
+    private long version = DEFAULT_VERSION;
 
     private Integer lastEntityId;
     private Long lastEntityUid;
@@ -424,6 +431,11 @@ public class ModelBuilder {
         return fbb.createVectorOfTables(offsetArray);
     }
 
+    /**
+     * Sets the user-defined version of the schema this represents. Defaults to 1.
+     * <p>
+     * Currently unused.
+     */
     public ModelBuilder version(long version) {
         this.version = version;
         return this;
@@ -452,12 +464,12 @@ public class ModelBuilder {
     }
 
     public byte[] build() {
-        int nameOffset = fbb.createString(DEFAULT_MODEL_NAME);
+        int nameOffset = fbb.createString(DEFAULT_NAME);
         int entityVectorOffset = createVector(entityOffsets);
         Model.startModel(fbb);
         Model.addName(fbb, nameOffset);
-        Model.addModelVersion(fbb, version);
-        Model.addVersion(fbb, 1);
+        Model.addModelVersion(fbb, MODEL_VERSION);
+        Model.addVersion(fbb, version);
         Model.addEntities(fbb, entityVectorOffset);
         if (lastEntityId != null) {
             int idOffset = IdUid.createIdUid(fbb, lastEntityId, lastEntityUid);
