@@ -16,7 +16,6 @@
 
 package io.objectbox;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
@@ -175,24 +174,17 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         assertEquals(0, BoxStore.nativeGloballyActiveEntityTypes());
     }
 
-    @Ignore("Fails due to related issue")
     @Test
     public void openSamePath_closedByFinalizer_works() {
         System.out.println("Removing reference to " + store);
         store = null;
 
-        // TODO Can't, at least on a JVM 21, confirm that the gc and runFinalization calls are blocking close() from
-        //  accessing openFiles.
-        //  Instead, found another issue where openFiles appears to still contain the db directory on this thread but
-        //  not for the checker thread.
-
         // When another Store is still open using the same path, a checker thread is started that periodically triggers
         // garbage collection and finalization in the VM, which here should close store and allow store2 to be opened.
-        // Note that user code should not rely on this (for ex. finalizers on Android have a timeout, which might be
-        // exceeded if closing the store takes long, because it needs to wait on transactions to finish), the store
-        // should be explicitly closed instead.
+        // Note that user code should not rely on this, see notes on BoxStore.finalize().
         BoxStore store2 = createBoxStore();
         store2.close();
+        System.out.println("Closed " + store2);
     }
 
     @Test

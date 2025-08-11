@@ -359,16 +359,34 @@ public class BoxStore implements Closeable {
     }
 
     static void verifyNotAlreadyOpen(String canonicalPath) {
+        // Call isFileOpen before, but without checking the result, to try to close any unreferenced instances where
+        // it was forgotten to close them.
+        // Only obtain the lock on openFiles afterward as the checker thread created by isFileOpen needs to obtain it to
+        // do anything.
+        isFileOpen(canonicalPath);
         synchronized (openFiles) {
-            isFileOpen(canonicalPath); // for retries
             if (!openFiles.add(canonicalPath)) {
-                throw new DbException("Another BoxStore is still open for this directory: " + canonicalPath +
-                        ". Hint: for most apps it's recommended to keep a BoxStore for the app's life time.");
+                throw new DbException("Another BoxStore is still open for this directory (" + canonicalPath +
+                        "). Make sure the existing instance is explicitly closed before creating a new one.");
             }
         }
     }
 
-    /** Also retries up to 500ms to improve GC race condition situation. */
+    /**
+     * Returns if the given path is in {@link #openFiles}.
+     * <p>
+     * If it is, (creates and) briefly waits on an existing "checker" thread before checking again and returning the
+     * result.
+     * <p>
+     * The "checker" thread locks {@link #openFiles} while it triggers garbage collection and finalization in this Java
+     * Virtual Machine to try to close any unreferenced BoxStore instances. These might exist if it was forgotten to
+     * close them explicitly.
+     * <p>
+     * Note that the finalization mechanism relied upon here is scheduled for removal in future versions of Java and may
+     * already be disabled depending on JVM configuration.
+     *
+     * @see #finalize()
+     */
     static boolean isFileOpen(final String canonicalPath) {
         synchronized (openFiles) {
             if (!openFiles.contains(canonicalPath)) return false;
@@ -522,9 +540,13 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * Closes this if this is finalized.
+     * Calls {@link #close()}.
      * <p>
-     * Explicitly call {@link #close()} instead to avoid expensive finalization.
+     * It is strongly recommended to instead explicitly close a Store and not rely on finalization. For example, on
+     * Android finalization has a timeout that might be exceeded if closing needs to wait on transactions to finish.
+     * <p>
+     * Also finalization is scheduled for removal in future versions of Java and may already be disabled depending on
+     * JVM configuration (see documentation on super method).
      */
     @SuppressWarnings("deprecation") // finalize()
     @Override
