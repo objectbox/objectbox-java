@@ -358,10 +358,11 @@ public class BoxStore implements Closeable {
         }
     }
 
-    static void verifyNotAlreadyOpen(String canonicalPath) {
+    void verifyNotAlreadyOpen(String canonicalPath) {
         synchronized (openFiles) {
-            isFileOpen(canonicalPath); // for retries
+            boolean fileOpen = isFileOpen(canonicalPath); // for retries
             if (!openFiles.add(canonicalPath)) {
+                System.out.println("verifyNotAlreadyOpen failed for " + this + " (fileOpen=" + fileOpen + ")");
                 throw new DbException("Another BoxStore is still open for this directory: " + canonicalPath +
                         ". Hint: for most apps it's recommended to keep a BoxStore for the app's life time.");
             }
@@ -377,7 +378,8 @@ public class BoxStore implements Closeable {
         if (checkerThread == null || !checkerThread.isAlive()) {
             // Use a thread to avoid finalizers that block us
             checkerThread = new Thread(() -> {
-                isFileOpenSync(canonicalPath, true);
+                boolean fileOpen = isFileOpenSync(canonicalPath, true);
+                System.out.println("checkerThread retries completed (fileOpen=" + fileOpen + ")");
                 BoxStore.openFilesCheckerThread = null; // Clean ref to itself
             });
             checkerThread.setDaemon(true);
@@ -403,6 +405,7 @@ public class BoxStore implements Closeable {
             int tries = 0;
             while (tries < 5 && openFiles.contains(canonicalPath)) {
                 tries++;
+                System.out.println("isFileOpenSync calling System.gc() and System.runFinalization()");
                 System.gc();
                 if (runFinalization && tries > 1) System.runFinalization();
                 System.gc();
@@ -529,6 +532,7 @@ public class BoxStore implements Closeable {
     @SuppressWarnings("deprecation") // finalize()
     @Override
     protected void finalize() throws Throwable {
+        System.out.println("finalize() called for " + this + " by " + Thread.currentThread());
         close();
         super.finalize();
     }
@@ -654,6 +658,7 @@ public class BoxStore implements Closeable {
      * are properly finished.
      */
     public void close() {
+        System.out.println("close() called for " + this + " (handle=" + handle + ")");
         boolean oldClosedState;
         synchronized (this) {
             oldClosedState = closed;
@@ -716,6 +721,7 @@ public class BoxStore implements Closeable {
                 openFiles.notifyAll();
             }
         }
+        System.out.println("close() finished for " + this);
     }
 
     /** dump thread stacks if pool does not terminate promptly. */
