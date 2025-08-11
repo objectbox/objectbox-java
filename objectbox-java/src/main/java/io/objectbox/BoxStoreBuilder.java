@@ -679,7 +679,13 @@ public class BoxStoreBuilder {
      */
     public BoxStore buildDefault() {
         BoxStore store = build();
-        BoxStore.setDefault(store);
+        try {
+            BoxStore.setDefault(store);
+        } catch (IllegalStateException e) {
+            // Clean up the new store if it can't be set as default
+            store.close();
+            throw e;
+        }
         return store;
     }
 
