@@ -11,7 +11,7 @@ plugins {
     // https://github.com/spotbugs/spotbugs-gradle-plugin/releases
     id("com.github.spotbugs") version "6.0.26" apply false
     // https://github.com/gradle-nexus/publish-plugin/releases
-    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }
 
 buildscript {
@@ -118,22 +118,23 @@ tasks.wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-// Plugin to publish to Central https://github.com/gradle-nexus/publish-plugin/
+// Plugin to publish to Maven Central https://github.com/gradle-nexus/publish-plugin/
 // This plugin ensures a separate, named staging repo is created for each build when publishing.
-apply(plugin = "io.github.gradle-nexus.publish-plugin")
-configure<io.github.gradlenexus.publishplugin.NexusPublishExtension> {
+nexusPublishing {
     this.repositories {
         sonatype {
+            // Use the Portal OSSRH Staging API as this plugin does not support the new Portal API
+            // https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#configuring-your-plugin
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+
             if (project.hasProperty("sonatypeUsername") && project.hasProperty("sonatypePassword")) {
+                println("Publishing: Sonatype Maven Central credentials supplied.")
                 username.set(project.property("sonatypeUsername").toString())
                 password.set(project.property("sonatypePassword").toString())
-                println("Publishing: configured Maven Central repository")
             } else {
-                println("Publishing: Maven Central repository not configured")
+                println("Publishing: Sonatype Maven Central credentials NOT supplied.")
             }
         }
-    }
-    transitionCheckOptions {  // Maven Central may become very, very slow in extreme situations
-        maxRetries.set(900)  // with default delay of 10s, that's 150 minutes total; default is 60 (10 minutes)
     }
 }
