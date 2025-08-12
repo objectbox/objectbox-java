@@ -4,10 +4,11 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
-## 4.3.1 - in development
+## 4.3.1 - 2025-08-12
 
 - Requires at least Kotlin compiler and standard library 1.7.
 - Data Observers: closing a Query now waits on a running publisher to finish its query, preventing a VM crash. [#1147](https://github.com/objectbox/objectbox-java/issues/1147)
+- Update database libraries for Android and JVM to version `4.3.1` (include database version `4.3.1-2025-08-02`).
 
 ## 4.3.0 - 2025-05-13
 
