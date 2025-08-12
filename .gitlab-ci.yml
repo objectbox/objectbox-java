@@ -15,6 +15,13 @@ image: objectboxio/buildenv-core:2024-07-11 # With JDK 17
 # - ORG_GRADLE_PROJECT_signingPassword
 
 variables:
+  OBX_RELEASE:
+    value: "false"
+    options: [ "false", "true" ]
+    description: "Turns on the release flag in the Gradle root build script, which triggers building and publishing a
+                  release of Java libraries to the internal GitLab repository and Maven Central.
+                  Consult the release checklist before turning this on."
+
   # Disable the Gradle daemon. Gradle may run in a Docker container with a shared
   # Docker volume containing GRADLE_USER_HOME. If the container is stopped after a job
   # Gradle daemons may get killed, preventing proper clean-up of lock files in GRADLE_USER_HOME.
@@ -173,7 +180,7 @@ publish-maven-internal:
   script:
     - ./gradlew $GITLAB_REPO_ARGS $GITLAB_PUBLISH_ARGS $VERSION_ARGS publishMavenJavaPublicationToGitLabRepository
 
-# Publish Maven artifacts to public Maven repo at Central
+# Publish Maven artifacts to public Maven Central repo
 publish-maven-central:
   stage: publish-maven-central
   tags:
@@ -181,8 +188,8 @@ publish-maven-central:
     - linux
     - x64
   rules:
-    # Only on publish branch, only if no previous stages failed
-    - if: $CI_COMMIT_BRANCH == "publish"
+    # Only if release mode is on, only if no previous stages failed
+    - if: $OBX_RELEASE == "true"
       when: on_success
   before_script:
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java library:* job $CI_JOB_NAME from branch $CI_COMMIT_BRANCH ($CI_COMMIT_SHORT_SHA)..."
@@ -202,8 +209,8 @@ package-api-docs:
     - linux
     - x64
   rules:
-    # Only on publish branch, only if no previous stages failed
-    - if: $CI_COMMIT_BRANCH == "publish"
+    # Only if release mode is on, only if no previous stages failed
+    - if: $OBX_RELEASE == "true"
       when: on_success
   script:
     - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS :objectbox-java:packageJavadocForWeb
@@ -217,6 +224,9 @@ package-api-docs:
 trigger-plugin:
   stage: triggers
   rules:
+    # Not when publishing a release
+    - if: $OBX_RELEASE == "true"
+      when: never
     # Do not trigger publishing of plugin
     - if: $CI_COMMIT_BRANCH == "publish"
       when: never
