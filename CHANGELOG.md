@@ -3,6 +3,8 @@
 Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
+              
+## 4.3.2 - in development
 
 ## 4.3.1 - 2025-08-12
 
