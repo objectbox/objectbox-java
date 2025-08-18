@@ -47,7 +47,6 @@ import io.objectbox.internal.ToManyGetter;
 import io.objectbox.internal.ToOneGetter;
 import io.objectbox.query.QueryBuilder;
 import io.objectbox.query.QueryFilter;
-import io.objectbox.relation.ListFactory.CopyOnWriteArrayListFactory;
 
 import static java.lang.Boolean.TRUE;
 

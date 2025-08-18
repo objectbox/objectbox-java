@@ -24,24 +24,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import io.objectbox.annotation.apihint.Experimental;
 
 @Experimental
-public interface ListFactory extends Serializable {
-    <T> List<T> createList();
+public class ListFactory implements Serializable {
+    private final long serialVersionUID;
+    ListFactory(long serialVersionUID){
+        this.serialVersionUID = serialVersionUID;
 
-    class ArrayListFactory implements ListFactory {
-        private static final long serialVersionUID = 8247662514375611729L;
-
-        @Override
-        public <T> List<T> createList() {
-            return new ArrayList<>();
-        }
     }
 
-    class CopyOnWriteArrayListFactory implements ListFactory {
-        private static final long serialVersionUID = 1888039726372206411L;
-
-        @Override
-        public <T> List<T> createList() {
-            return new CopyOnWriteArrayList<>();
-        }
+    <T> List<T> createList(){
+        throw  new RuntimeException("Have to implement createList method");
     }
 }

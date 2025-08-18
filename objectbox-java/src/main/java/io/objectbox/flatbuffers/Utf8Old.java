@@ -24,33 +24,22 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.nio.charset.StandardCharsets;
 
+
 /**
  * This class implements the Utf8 API using the Java Utf8 encoder. Use
  * Utf8.setDefault(new Utf8Old()); to use it.
  */
 public class Utf8Old extends Utf8 {
 
-  private static class Cache {
-    final CharsetEncoder encoder;
-    final CharsetDecoder decoder;
-    CharSequence lastInput = null;
-    ByteBuffer lastOutput = null;
-
-    Cache() {
-      encoder = StandardCharsets.UTF_8.newEncoder();
-      decoder = StandardCharsets.UTF_8.newDecoder();
-    }
-  }
-
-  private static final ThreadLocal<Cache> CACHE =
-      ThreadLocal.withInitial(() -> new Cache());
+  private static final ThreadLocal<UTF8EncDecCache> CACHE =
+      ThreadLocal.withInitial(() -> new UTF8EncDecCache());
 
   // Play some games so that the old encoder doesn't pay twice for computing
   // the length of the encoded string.
 
   @Override
   public int encodedLength(CharSequence in) {
-    final Cache cache = CACHE.get();
+    final UTF8EncDecCache cache = CACHE.get();
     int estimated = (int) (in.length() * cache.encoder.maxBytesPerChar());
     if (cache.lastOutput == null || cache.lastOutput.capacity() < estimated) {
       cache.lastOutput = ByteBuffer.allocate(Math.max(128, estimated));
@@ -73,7 +62,7 @@ public class Utf8Old extends Utf8 {
 
   @Override
   public void encodeUtf8(CharSequence in, ByteBuffer out) {
-    final Cache cache = CACHE.get();
+    final UTF8EncDecCache cache = CACHE.get();
     if (cache.lastInput != in) {
       // Update the lastOutput to match our input, although flatbuffer should
       // never take this branch.

@@ -24,6 +24,16 @@ import io.objectbox.query.LogicQueryCondition.OrCondition;
  */
 abstract class QueryConditionImpl<T> implements QueryCondition<T> {
 
+    private String alias;
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
     @Override
     public QueryCondition<T> and(QueryCondition<T> queryCondition) {
         return new AndCondition<>(this, (QueryConditionImpl<T>) queryCondition);

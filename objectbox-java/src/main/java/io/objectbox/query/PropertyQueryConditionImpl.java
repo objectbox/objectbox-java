@@ -32,7 +32,6 @@ import io.objectbox.query.QueryBuilder.StringOrder;
 public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T> implements PropertyQueryCondition<T> {
     // Note: Expose for DAOcompat
     public final Property<T> property;
-    private String alias;
 
     PropertyQueryConditionImpl(Property<T> property) {
         this.property = property;
@@ -40,7 +39,7 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
 
     @Override
     public QueryCondition<T> alias(String name) {
-        this.alias = name;
+        setAlias(name);
         return this;
     }
 
@@ -48,7 +47,8 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
     @Override
     public void apply(QueryBuilder<T> builder) {
         applyCondition(builder);
-        if (alias != null && alias.length() != 0) {
+        String alias = getAlias();
+        if (alias != null && !alias.isEmpty()) {
             builder.parameterAlias(alias);
         }
     }
