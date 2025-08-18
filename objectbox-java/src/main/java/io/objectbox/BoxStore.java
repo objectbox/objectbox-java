@@ -35,6 +35,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -249,7 +250,7 @@ public class BoxStore implements Closeable {
     private final int[] allEntityTypeIds;
     private final Map<Class<?>, Box<?>> boxes = new ConcurrentHashMap<>();
     private final Set<Transaction> transactions = Collections.newSetFromMap(new WeakHashMap<>());
-    private final ExecutorService threadPool = new ObjectBoxThreadPool(this);
+    private final ExecutorService threadPool;
     private final ObjectClassPublisher objectClassPublisher;
     final boolean debugTxRead;
     final boolean debugTxWrite;
@@ -279,6 +280,8 @@ public class BoxStore implements Closeable {
     private SyncClient syncClient;
 
     BoxStore(BoxStoreBuilder builder) {
+        threadPool = Executors.unconfigurableExecutorService(
+            new ObjectBoxThreadPool(this, builder.executorServiceParallelism));
         context = builder.context;
         relinker = builder.relinker;
         NativeLibraryLoader.ensureLoaded();

@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -102,6 +103,8 @@ public class BoxStoreBuilder {
 
     int maxReaders;
     boolean noReaderThreadLocals;
+
+    int executorServiceParallelism = ForkJoinPool.getCommonPoolParallelism();
 
     int queryAttempts;
 
@@ -352,6 +355,15 @@ public class BoxStoreBuilder {
      */
     public BoxStoreBuilder noReaderThreadLocals() {
         this.noReaderThreadLocals = true;
+        return this;
+    }
+
+    /**
+     * Sets the maximum allowed level of parallelism allowed by executor service
+     * used by BoxStore. The default value is equal to {@ref ForkJoinPool#getCommonPoolParallelism())}
+     */
+    public BoxStoreBuilder executorServiceParallelism(int parallelism) {
+        this.executorServiceParallelism = parallelism;
         return this;
     }
 
