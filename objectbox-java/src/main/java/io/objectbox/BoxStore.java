@@ -82,6 +82,8 @@ public class BoxStore implements Closeable {
 
     /** The ObjectBox database version this Java library is known to work with. */
     private static final String VERSION = "4.3.1-2025-08-02";
+
+    private static final String OBJECTBOX_PACKAGE_NAME = "objectbox";
     private static BoxStore defaultStore;
 
     /** Currently used DB dirs with values from {@link #getCanonicalPath(File)}. */
@@ -753,14 +755,15 @@ public class BoxStore implements Closeable {
             if (!internalThreadPool().awaitTermination(1, TimeUnit.SECONDS)) {
                 getErrorOutput().println("ObjectBox thread pool not terminated in time." +
                         " Ensure all async calls have completed and subscriptions are cancelled before closing the Store." +
-                        "\nPrinting pool threads...");
+                        "\nDumping stack traces of threads on the pool and any using ObjectBox APIs:" +
+                        "\n=== BEGIN OF DUMP ===");
                 // Note: this may not print any pool threads if other threads are started while enumerating
                 // (and the pool threads do not make it into the threads array).
                 Thread[] threads = new Thread[Thread.activeCount()];
                 int count = Thread.enumerate(threads);
                 for (int i = 0; i < count; i++) {
                     Thread thread = threads[i];
-                    if (thread.getName().startsWith(ObjectBoxThreadPool.THREAD_NAME_PREFIX)) {
+                    if (shouldDumpThreadStackTrace(thread)) {
                         getErrorOutput().println("Thread: " + thread.getName());
                         StackTraceElement[] trace = thread.getStackTrace();
                         for (StackTraceElement traceElement : trace) {
@@ -768,11 +771,25 @@ public class BoxStore implements Closeable {
                         }
                     }
                 }
-                getErrorOutput().println("Printing pool threads...DONE");
+                getErrorOutput().println("=== END OF DUMP ===");
             }
         } catch (InterruptedException e) {
             e.printStackTrace(getErrorOutput());
         }
+    }
+
+    private boolean shouldDumpThreadStackTrace(Thread thread) {
+        // Dump any threads of the internal thread pool
+        if (thread.getName().startsWith(ObjectBoxThreadPool.THREAD_NAME_PREFIX)) return true;
+
+        // Any other thread might be blocking a thread on the internal pool, so also dump any that appear to use
+        // ObjectBox APIs.
+        StackTraceElement[] trace = thread.getStackTrace();
+        for (StackTraceElement traceElement : trace) {
+            if (traceElement.getClassName().contains(OBJECTBOX_PACKAGE_NAME)) return true;
+        }
+
+        return false;
     }
 
     /**

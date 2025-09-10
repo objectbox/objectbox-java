@@ -28,6 +28,7 @@ import io.objectbox.annotation.IndexType;
 
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Sets a custom error output stream to assert log messages of {@link BoxStore}.
@@ -65,13 +66,23 @@ public class BoxStoreLogTest extends AbstractObjectBoxTest {
 
         String errOutput = this.errOutput.toString("UTF-8");
         assertTrue(errOutput.contains("ObjectBox thread pool not terminated in time"));
-        assertTrue(errOutput.contains("Printing pool threads..."));
-        assertTrue(errOutput.contains("Printing pool threads...DONE"));
-        // Check that only ObjectBox threads are printed
+        assertTrue(errOutput.contains("=== BEGIN OF DUMP ==="));
+        assertTrue(errOutput.contains("=== END OF DUMP ==="));
+        // Check that only pool threads or threads with stack traces that contain the objectbox package are printed
         String[] lines = errOutput.split("\n");
+        String checkStackTrace = null;
         for (String line : lines) {
             if (line.startsWith("Thread:")) {
-                assertTrue("Expected thread name to start with 'ObjectBox-' but was: " + line, line.contains("ObjectBox-"));
+                if (checkStackTrace != null) {
+                    fail("Expected stack trace to contain class in objectbox package");
+                }
+                if (!line.contains("ObjectBox-")) {
+                    checkStackTrace = line;
+                }
+            } else if (checkStackTrace != null) {
+                if (line.contains("objectbox")) {
+                    checkStackTrace = null;
+                }
             }
         }
     }
