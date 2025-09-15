@@ -10,6 +10,8 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
   an "Another BoxStore is still open for this directory" exception. Note that calling `close()` *is recommended* before 
   creating a new instance. [#1201](https://github.com/objectbox/objectbox-java/issues/1201)
 - When using `BoxStoreBuilder.buildDefault()`, don't leak Store when setting as default fails.
+- To help diagnose, print stacks of all threads in the internal thread pool if shutting it down takes too long when
+  closing `BoxStore`.
 
 ## 4.3.1 - 2025-08-12
 
