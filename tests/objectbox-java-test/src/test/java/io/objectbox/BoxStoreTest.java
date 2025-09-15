@@ -175,6 +175,19 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     }
 
     @Test
+    public void openSamePath_closedByFinalizer_works() {
+        System.out.println("Removing reference to " + store);
+        store = null;
+
+        // When another Store is still open using the same path, a checker thread is started that periodically triggers
+        // garbage collection and finalization in the VM, which here should close store and allow store2 to be opened.
+        // Note that user code should not rely on this, see notes on BoxStore.finalize().
+        BoxStore store2 = createBoxStore();
+        store2.close();
+        System.out.println("Closed " + store2);
+    }
+
+    @Test
     public void testOpenTwoBoxStoreTwoFiles() {
         File boxStoreDir2 = new File(boxStoreDir.getAbsolutePath() + "-2");
         BoxStoreBuilder builder = createBuilderWithTestModel().directory(boxStoreDir2);

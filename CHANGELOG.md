@@ -6,6 +6,11 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
               
 ## 4.3.2 - in development
 
+- When re-creating a `BoxStore` for the same directory and `close()` wasn't called on the previous instance, don't throw
+  an "Another BoxStore is still open for this directory" exception. Note that calling `close()` *is recommended* before 
+  creating a new instance. [#1201](https://github.com/objectbox/objectbox-java/issues/1201)
+- When using `BoxStoreBuilder.buildDefault()`, don't leak Store when setting as default fails.
+
 ## 4.3.1 - 2025-08-12
 
 - Requires at least Kotlin compiler and standard library 1.7.
