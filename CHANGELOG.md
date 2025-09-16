@@ -21,6 +21,10 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
 - Remove deprecated `ValidateOnOpenMode` constants, use `ValidateOnOpenModePages` instead.
 - Remove deprecated DAOcompat compatibility query methods. Use the regular query API instead.           
 
+### Sync
+
+- Support configuring [Sync filter](https://sync.objectbox.io/sync-server/sync-filters) variables on a `SyncClient`.
+
 ## 4.3.1 - 2025-08-12
 
 - Requires at least Kotlin compiler and standard library 1.7.

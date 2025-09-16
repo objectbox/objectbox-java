@@ -128,6 +128,35 @@ public interface SyncClient extends Closeable {
     void setSyncTimeListener(@Nullable SyncTimeListener timeListener);
 
     /**
+     * Adds or replaces a Sync filter variable value for the given name.
+     * <p>
+     * Eventually, existing values for the same name are replaced.
+     * <p>
+     * Sync client filter variables can be used in server-side Sync filters to filter out objects that do not match the
+     * filter. Filter variables must be added before login, so before calling {@link #start()}.
+     *
+     * @see #removeFilterVariable
+     * @see #removeAllFilterVariables
+     */
+    void putFilterVariable(String name, String value);
+
+    /**
+     * Removes a previously added Sync filter variable value.
+     *
+     * @see #putFilterVariable
+     * @see #removeAllFilterVariables
+     */
+    void removeFilterVariable(String name);
+
+    /**
+     * Removes all previously added Sync filter variable values.
+     *
+     * @see #putFilterVariable
+     * @see #removeFilterVariable
+     */
+    void removeAllFilterVariables();
+
+    /**
      * Updates the credentials used to authenticate with the server. This should not be required during regular use.
      * The original credentials were passed when building sync client.
      */

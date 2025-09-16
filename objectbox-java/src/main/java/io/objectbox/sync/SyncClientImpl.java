@@ -187,6 +187,18 @@ public final class SyncClientImpl implements SyncClient {
         setSyncChangeListener(listener);
     }
 
+    public void putFilterVariable(String name, String value) {
+        nativePutFilterVariable(getHandle(), name, value);
+    }
+
+    public void removeFilterVariable(String name) {
+        nativeRemoveFilterVariable(getHandle(), name);
+    }
+
+    public void removeAllFilterVariables() {
+        nativeRemoveAllFilterVariables(getHandle());
+    }
+
     @Override
     public void setLoginCredentials(SyncCredentials credentials) {
         if (credentials == null) {
@@ -349,6 +361,15 @@ public final class SyncClientImpl implements SyncClient {
     private native void nativeStart(long handle);
 
     private native void nativeStop(long handle);
+
+    // extern "C" JNIEXPORT void JNICALL Java_io_objectbox_sync_SyncClientImpl_nativePutFilterVariable(JNIEnv* env, jobject, jlong handle, jstring name, jstring value)
+    private native void nativePutFilterVariable(long handle, String name, String value);
+
+    // extern "C" JNIEXPORT void JNICALL Java_io_objectbox_sync_SyncClientImpl_nativeRemoveFilterVariable(JNIEnv* env, jobject, jlong handle, jstring name)
+    private native void nativeRemoveFilterVariable(long handle, String name);
+
+    // extern "C" JNIEXPORT void JNICALL Java_io_objectbox_sync_SyncClientImpl_nativeRemoveAllFilterVariables(JNIEnv* env, jobject, jlong handle)
+    private native void nativeRemoveAllFilterVariables(long handle);
 
     private native void nativeSetLoginInfo(long handle, long credentialsType, @Nullable byte[] credentials);
 
