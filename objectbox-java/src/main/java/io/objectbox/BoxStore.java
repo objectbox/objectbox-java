@@ -514,17 +514,6 @@ public class BoxStore implements Closeable {
     }
 
     /**
-     * The size in bytes occupied by the data file on disk.
-     *
-     * @return 0 if the size could not be determined (does not throw unless this store was already closed)
-     * @deprecated Use {@link #getDbSize()} or {@link #getDbSizeOnDisk()} instead which properly handle in-memory databases.
-     */
-    @Deprecated
-    public long sizeOnDisk() {
-        return getDbSize();
-    }
-
-    /**
      * Get the size of this store. For a disk-based store type, this corresponds to the size on disk, and for the
      * in-memory store type, this is roughly the used memory bytes occupied by the data.
      *

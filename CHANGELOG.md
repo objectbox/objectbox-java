@@ -13,6 +13,7 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
 - To help diagnose, print stacks of all threads in the internal thread pool if shutting it down takes too long when
   closing `BoxStore`.
 - Remove deprecated `Box.removeByKeys`, use `Box.removeByIds` instead.
+- Remove deprecated `BoxStore.sizeOnDisk`, use `getDbSize` or `getDbSizeOnDisk` instead which properly handle in-memory databases.
 - Remove deprecated `SyncServerBuilder` `peer` configuration options, use the `clusterPeer` options instead.
 - Remove deprecated `io.objectbox.DebugFlags`, use `io.objectbox.config.DebugFlags` instead.
 - Remove deprecated `ValidateOnOpenMode` constants, use `ValidateOnOpenModePages` instead.

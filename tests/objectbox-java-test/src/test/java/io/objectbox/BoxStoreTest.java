@@ -113,7 +113,6 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
         store.setSyncClient(null);
 
         // Methods using the native store should throw.
-        assertThrowsStoreIsClosed(store::sizeOnDisk);
         assertThrowsStoreIsClosed(store::getDbSize);
         assertThrowsStoreIsClosed(store::getDbSizeOnDisk);
         assertThrowsStoreIsClosed(store::beginTx);
@@ -322,10 +321,6 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     @Test
     public void testSizeOnDisk() {
         // Note: initial database does have a non-zero (file) size.
-        @SuppressWarnings("deprecation")
-        long legacySizeOnDisk = store.sizeOnDisk();
-        assertTrue(legacySizeOnDisk > 0);
-
         assertTrue(store.getDbSize() > 0);
 
         long sizeOnDisk = store.getDbSizeOnDisk();
