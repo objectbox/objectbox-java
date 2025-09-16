@@ -18,6 +18,7 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
 - Remove deprecated `SyncServerBuilder` `peer` configuration options, use the `clusterPeer` options instead.
 - Remove deprecated `io.objectbox.DebugFlags`, use `io.objectbox.config.DebugFlags` instead.
 - Remove deprecated `ValidateOnOpenMode` constants, use `ValidateOnOpenModePages` instead.
+- Remove deprecated DAOcompat compatibility query methods. Use the regular query API instead.           
 
 ## 4.3.1 - 2025-08-12
 
