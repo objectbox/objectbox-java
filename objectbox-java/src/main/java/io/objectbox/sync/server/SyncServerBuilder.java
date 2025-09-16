@@ -172,22 +172,6 @@ public final class SyncServerBuilder {
     }
 
     /**
-     * @deprecated Use {@link #clusterPeer(String, SyncCredentials) clusterPeer(url, SyncCredentials.none())} instead.
-     */
-    @Deprecated
-    public SyncServerBuilder peer(String url) {
-        return clusterPeer(url, SyncCredentials.none());
-    }
-
-    /**
-     * @deprecated Use {@link #clusterPeer(String, SyncCredentials)} instead.
-     */
-    @Deprecated
-    public SyncServerBuilder peer(String url, SyncCredentials credentials) {
-        return clusterPeer(url, credentials);
-    }
-
-    /**
      * Adds a (remote) cluster peer, to which this server should connect to as a client using the given credentials.
      * <p>
      * To use this, must set a {@link #clusterId(String)}.

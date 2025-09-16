@@ -782,48 +782,6 @@ public class Query<T> implements Closeable {
 
     /**
      * Sets a parameter previously given to the {@link QueryBuilder} to new values.
-     *
-     * @deprecated Use {@link #setParameter(Property, int[])} instead.
-     */
-    @Deprecated
-    public Query<T> setParameters(Property<?> property, int[] values) {
-        return setParameter(property, values);
-    }
-
-    /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
-     *
-     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
-     * @deprecated Use {@link #setParameter(String, int[])} instead.
-     */
-    @Deprecated
-    public Query<T> setParameters(String alias, int[] values) {
-        return setParameter(alias, values);
-    }
-
-    /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
-     *
-     * @deprecated Use {@link #setParameter(Property, long[])} instead.
-     */
-    @Deprecated
-    public Query<T> setParameters(Property<?> property, long[] values) {
-        return setParameter(property, values);
-    }
-
-    /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
-     *
-     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
-     * @deprecated Use {@link #setParameter(String, long[])} instead.
-     */
-    @Deprecated
-    public Query<T> setParameters(String alias, long[] values) {
-        return setParameter(alias, values);
-    }
-
-    /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
      */
     public Query<T> setParameters(Property<?> property, double value1, double value2) {
         checkOpen();
@@ -842,27 +800,6 @@ public class Query<T> implements Closeable {
         checkOpen();
         nativeSetParameters(handle, 0, 0, alias, value1, value2);
         return this;
-    }
-
-    /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
-     *
-     * @deprecated Use {@link #setParameter(Property, String[])} instead.
-     */
-    @Deprecated
-    public Query<T> setParameters(Property<?> property, String[] values) {
-        return setParameter(property, values);
-    }
-
-    /**
-     * Sets a parameter previously given to the {@link QueryBuilder} to new values.
-     *
-     * @param alias as defined using {@link QueryBuilder#parameterAlias(String)}.
-     * @deprecated Use {@link #setParameter(String, String[])} instead.
-     */
-    @Deprecated
-    public Query<T> setParameters(String alias, String[] values) {
-        return setParameter(alias, values);
     }
 
     /**

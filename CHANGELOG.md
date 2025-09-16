@@ -12,6 +12,14 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
 - When using `BoxStoreBuilder.buildDefault()`, don't leak Store when setting as default fails.
 - To help diagnose, print stacks of all threads in the internal thread pool if shutting it down takes too long when
   closing `BoxStore`.
+- Remove deprecated `Query.setParameters` methods that set a single parameter, use the `setParameter` methods instead.
+- Remove deprecated `Box.removeByKeys`, use `Box.removeByIds` instead.
+- Remove deprecated `BoxStore.sizeOnDisk`, use `getDbSize` or `getDbSizeOnDisk` instead which properly handle in-memory databases.
+- Remove deprecated `BoxStoreBuilder.debugTransactions`, use `debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE)` instead.
+- Remove deprecated `SyncServerBuilder` `peer` configuration options, use the `clusterPeer` options instead.
+- Remove deprecated `io.objectbox.DebugFlags`, use `io.objectbox.config.DebugFlags` instead.
+- Remove deprecated `ValidateOnOpenMode` constants, use `ValidateOnOpenModePages` instead.
+- Remove deprecated DAOcompat compatibility query methods. Use the regular query API instead.           
 
 ## 4.3.1 - 2025-08-12
 

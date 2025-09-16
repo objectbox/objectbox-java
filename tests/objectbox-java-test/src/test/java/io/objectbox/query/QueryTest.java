@@ -162,7 +162,7 @@ public class QueryTest extends AbstractQueryTest {
     public void useAfterStoreClose_failsIfUsingStore() {
         Query<TestEntity> query = box.query(
                 simpleString.equal("")
-                        .and(stringObjectMap.containsKeyValue("", ""))
+                        .and(stringObjectMap.equalKeyValue("", "", StringOrder.CASE_SENSITIVE))
                         .and(simpleInt.equal(0))
                         .and(simpleInt.oneOf(new int[]{0}).alias("oneOf4"))
                         .and(simpleLong.oneOf(new long[]{0}).alias("oneOf8"))

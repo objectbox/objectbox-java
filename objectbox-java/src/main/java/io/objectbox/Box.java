@@ -486,14 +486,6 @@ public class Box<T> {
     }
 
     /**
-     * @deprecated use {@link #removeByIds(Collection)} instead.
-     */
-    @Deprecated
-    public void removeByKeys(@Nullable Collection<Long> ids) {
-        removeByIds(ids);
-    }
-
-    /**
      * Like {@link #remove(long)}, but removes multiple objects in a single transaction.
      */
     public void removeByIds(@Nullable Collection<Long> ids) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd.
+ * Copyright 2017-2025 ObjectBox Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -509,15 +509,6 @@ public class BoxStoreBuilder {
             throw new IllegalArgumentException("Must be one of ValidateOnOpenModeKv");
         }
         this.validateOnOpenModeKv = mode;
-        return this;
-    }
-
-    /**
-     * @deprecated Use {@link #debugFlags} instead.
-     */
-    @Deprecated
-    public BoxStoreBuilder debugTransactions() {
-        this.debugFlags |= DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE;
         return this;
     }
 
