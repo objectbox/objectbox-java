@@ -10,7 +10,7 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
   - Android: Prior to Android 8.0, don't crash when inserting objects with string lists whose size exceeds the local
     reference table size. [#1215](https://github.com/objectbox/objectbox-java/issues/1215) 
   - ToOne relations: when deleting an object with an ID larger than the maximum 32-bit unsigned integer 
-    (`4_294_967_295 + 1`) that is used as the target object of a ToOne, correctly re-set the target ID of the ToOne to
+    (`4_294_967_295`) that is used as the target object of a ToOne, correctly re-set the target ID of the ToOne to
     `0`. [objectbox-dart#740](https://github.com/objectbox/objectbox-dart/issues/740) 
 - When re-creating a `BoxStore` for the same directory and `close()` wasn't called on the previous instance, don't throw
   an "Another BoxStore is still open for this directory" exception. Note that calling `close()` *is recommended* before 
