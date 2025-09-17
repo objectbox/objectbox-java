@@ -3,27 +3,36 @@
 Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
-              
-## 4.3.2 - in development
 
+## 5.0.0 - 2025-09-17
+
+- Includes runtime libraries for Android and JVM with database version `5.0.0-2025-09-16`.
+  - Android: Prior to Android 8.0, don't crash when inserting objects with string lists whose size exceeds the local
+    reference table size. [#1215](https://github.com/objectbox/objectbox-java/issues/1215) 
+  - ToOne relations: when deleting an object with an ID larger than the maximum 32-bit unsigned integer 
+    (`4_294_967_295 + 1`) that is used as the target object of a ToOne, correctly re-set the target ID of the ToOne to
+    `0`. [objectbox-dart#740](https://github.com/objectbox/objectbox-dart/issues/740) 
 - When re-creating a `BoxStore` for the same directory and `close()` wasn't called on the previous instance, don't throw
   an "Another BoxStore is still open for this directory" exception. Note that calling `close()` *is recommended* before 
   creating a new instance. [#1201](https://github.com/objectbox/objectbox-java/issues/1201)
-- When using `BoxStoreBuilder.buildDefault()`, don't leak Store when setting as default fails.
+- When using `BoxStoreBuilder.buildDefault()`, don't leak the Store when setting it as default fails.
 - To help diagnose, print stacks of all threads in the internal thread pool if shutting it down takes too long when
   closing `BoxStore`.
-- Remove deprecated `Query.setParameters` methods that set a single parameter, use the `setParameter` methods instead.
-- Remove deprecated `Box.removeByKeys`, use `Box.removeByIds` instead.
-- Remove deprecated `BoxStore.sizeOnDisk`, use `getDbSize` or `getDbSizeOnDisk` instead which properly handle in-memory databases.
-- Remove deprecated `BoxStoreBuilder.debugTransactions`, use `debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE)` instead.
-- Remove deprecated `SyncServerBuilder` `peer` configuration options, use the `clusterPeer` options instead.
-- Remove deprecated `io.objectbox.DebugFlags`, use `io.objectbox.config.DebugFlags` instead.
-- Remove deprecated `ValidateOnOpenMode` constants, use `ValidateOnOpenModePages` instead.
-- Remove deprecated DAOcompat compatibility query methods. Use the regular query API instead.           
+- Remove deprecated APIs:
+  - `Query.setParameters` methods that set a single parameter, use the `setParameter` methods instead.
+  - `Box.removeByKeys`, use `Box.removeByIds` instead.
+  - `BoxStore.sizeOnDisk`, use `getDbSize` or `getDbSizeOnDisk` instead which properly handle in-memory databases.
+  - `BoxStoreBuilder.debugTransactions`, use `debugFlags(DebugFlags.LOG_TRANSACTIONS_READ | DebugFlags.LOG_TRANSACTIONS_WRITE)` instead.
+  - `SyncServerBuilder` `peer` configuration options, use the `clusterPeer` options instead.
+  - `io.objectbox.DebugFlags`, use `io.objectbox.config.DebugFlags` instead.
+  - `ValidateOnOpenMode` constants, use `ValidateOnOpenModePages` instead.
+  - DAOcompat compatibility query methods. Use the regular query API instead.           
 
 ### Sync
 
-- Support configuring [Sync filter](https://sync.objectbox.io/sync-server/sync-filters) variables on a `SyncClient`.
+- Support Sync server version 5.0.
+  - **User-Specific Data Sync**: support configuring [Sync filter](https://sync.objectbox.io/sync-server/sync-filters) 
+    variables on `SyncClient`.
 
 ## 4.3.1 - 2025-08-12
 

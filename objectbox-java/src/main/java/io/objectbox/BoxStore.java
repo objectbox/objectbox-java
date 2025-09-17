@@ -78,7 +78,7 @@ public class BoxStore implements Closeable {
      * ReLinker uses this as a suffix for the extracted shared library file. If different, it will update it. Should be
      * unique to avoid conflicts.
      */
-    public static final String JNI_VERSION = "4.3.1-2025-08-02";
+    public static final String JNI_VERSION = "5.0.0-2025-09-16";
 
     /** The ObjectBox database version this Java library is known to work with. */
     private static final String VERSION = "5.0.0-2025-09-16";

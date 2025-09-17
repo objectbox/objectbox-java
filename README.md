@@ -114,7 +114,7 @@ For Gradle projects, add the ObjectBox Gradle plugin to your root Gradle script:
 ```kotlin
 // build.gradle.kts
 buildscript {
-    val objectboxVersion by extra("4.3.1")
+    val objectboxVersion by extra("5.0.0")
     repositories {        
         mavenCentral()    
     }
@@ -130,7 +130,7 @@ buildscript {
 // build.gradle.kts
 plugins {
     id("com.android.application") version "8.0.2" apply false // When used in an Android project
-    id("io.objectbox") version "4.3.1" apply false
+    id("io.objectbox") version "5.0.0" apply false
 }
 ```
 
@@ -154,7 +154,7 @@ pluginManagement {
 ```groovy
 // build.gradle
 buildscript {
-    ext.objectboxVersion = "4.3.1"
+    ext.objectboxVersion = "5.0.0"
     repositories {        
         mavenCentral()    
     }

@@ -20,7 +20,7 @@ plugins {
 buildscript {
     // Version of Maven artifacts
     // Should only be changed as part of the release process, see the release checklist in the objectbox repo
-    val versionNumber = "4.3.2"
+    val versionNumber = "5.0.0"
 
     // Release mode should only be enabled when manually triggering a CI pipeline,
     // see the release checklist in the objectbox repo.
