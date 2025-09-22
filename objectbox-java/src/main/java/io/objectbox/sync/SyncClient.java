@@ -128,7 +128,8 @@ public interface SyncClient extends Closeable {
     void setSyncTimeListener(@Nullable SyncTimeListener timeListener);
 
     /**
-     * Adds or replaces a Sync filter variable value for the given name.
+     * Adds or replaces a <a href="https://sync.objectbox.io/sync-server/sync-filters">Sync filter</a> variable value
+     * for the given name.
      * <p>
      * Eventually, existing values for the same name are replaced.
      * <p>

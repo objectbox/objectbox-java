@@ -19,6 +19,8 @@ package io.objectbox.sync;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.annotation.Nullable;
 
@@ -57,6 +59,8 @@ public final class SyncBuilder {
     boolean uncommittedAcks;
 
     RequestUpdatesMode requestUpdatesMode = RequestUpdatesMode.AUTO;
+    // To be helpful when debugging, use a TreeMap so variables are eventually passed ordered by name to the native API
+    final Map<String, String> filterVariables = new TreeMap<>();
 
     public enum RequestUpdatesMode {
         /**
@@ -135,6 +139,22 @@ public final class SyncBuilder {
     String serverUrl() {
         checkNotNull(url, "Sync Server URL is null.");
         return url;
+    }
+
+    /**
+     * Adds or replaces a <a href="https://sync.objectbox.io/sync-server/sync-filters">Sync filter</a> variable value
+     * for the given name.
+     * <p>
+     * Sync client filter variables can be used in server-side Sync filters to filter out objects that do not match the
+     * filter.
+     *
+     * @see SyncClient#putFilterVariable
+     */
+    public SyncBuilder filterVariable(String name, String value) {
+        checkNotNull(name, "Filter variable name is null.");
+        checkNotNull(value, "Filter variable value is null.");
+        filterVariables.put(name, value);
+        return this;
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package io.objectbox.sync;
 
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -70,6 +71,10 @@ public final class SyncClientImpl implements SyncClient {
             throw new RuntimeException("Failed to create sync client: handle is zero.");
         }
         this.handle = handle;
+
+        for (Map.Entry<String, String> entry : builder.filterVariables.entrySet()) {
+            putFilterVariable(entry.getKey(), entry.getValue());
+        }
 
         // Only change setting if not default (automatic sync updates and push subscription enabled).
         if (builder.requestUpdatesMode != RequestUpdatesMode.AUTO) {
