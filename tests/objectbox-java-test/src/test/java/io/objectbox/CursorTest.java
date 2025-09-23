@@ -16,7 +16,6 @@
 
 package io.objectbox;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
@@ -228,7 +227,6 @@ public class CursorTest extends AbstractObjectBoxTest {
         }
     }
 
-    @Ignore("Temporarily ignore until objectbox-java#282 is resolved")
     @Test
     public void testWriteTxBlocksOtherWriteTx() throws InterruptedException {
         long time = System.currentTimeMillis();
