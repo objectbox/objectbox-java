@@ -4,6 +4,8 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
+## 5.0.1 - in development
+
 ## 5.0.0 - 2025-09-17
 
 - Includes runtime libraries for Android and JVM with database version `5.0.0-2025-09-16`.
