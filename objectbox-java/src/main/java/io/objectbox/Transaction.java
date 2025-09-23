@@ -101,7 +101,8 @@ public class Transaction implements Closeable {
             closed = true;
             store.unregisterTransaction(this);
 
-            if (!nativeIsOwnerThread(transaction)) {
+            boolean isOwnerThread = nativeIsOwnerThread(transaction);
+            if (!isOwnerThread) {
                 boolean isActive = nativeIsActive(transaction);
                 boolean isRecycled = nativeIsRecycled(transaction);
                 if (isActive || isRecycled) {
@@ -126,6 +127,27 @@ public class Transaction implements Closeable {
             // TODO not destroying is probably only a small leak on rare occasions, but still could be fixed
             if (!store.isNativeStoreClosed()) {
                 nativeDestroy(transaction);
+            } else {
+                String threadType = isOwnerThread ? "owner thread" : "non-owner thread";
+                if (readOnly) {
+                    // Minor leak, but still print it so we can check logs: it should only happen occasionally.
+                    // We cannot rely on the store waiting for read transactions; it only waits for a limited time.
+                    System.out.println("Info: closing read transaction after store was closed (should be avoided) in " +
+                            threadType);
+                    System.out.flush();
+                } else {  // write transaction
+                    System.out.println("WARN: closing write transaction after store was closed (must be avoided) in " +
+                            threadType);
+                    System.out.flush();
+                    if (store.isNativeStoreDestroyed()) {
+                        // This is an internal validation: if this is a write-TX,
+                        // the (native) store will always wait for it, so it must not be destroyed yet.
+                        // If this ever happens, the above assumption is wrong, and it probably prevents a SIGSEGV.
+                        throw new IllegalStateException(
+                                "Cannot destroy write transaction for an already destroyed store");
+                    }
+                    nativeDestroy(transaction);
+                }
             }
         }
     }
