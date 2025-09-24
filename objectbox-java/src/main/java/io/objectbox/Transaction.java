@@ -103,6 +103,7 @@ public class Transaction implements Closeable {
 
             boolean isOwnerThread = nativeIsOwnerThread(transaction);
             if (!isOwnerThread) {
+                // Note: don't use isActive(), it returns false here because closed == true already
                 boolean isActive = nativeIsActive(transaction);
                 boolean isRecycled = nativeIsRecycled(transaction);
                 if (isActive || isRecycled) {
@@ -128,23 +129,31 @@ public class Transaction implements Closeable {
             if (!store.isNativeStoreClosed()) {
                 nativeDestroy(transaction);
             } else {
-                String threadType = isOwnerThread ? "owner thread" : "non-owner thread";
-                String activeInfo = isActive() ? " (active TX)" : " (inactive TX)";
+                // Note: don't use isActive(), it returns false here because closed == true already
+                boolean isActive = nativeIsActive(transaction);
                 if (readOnly) {
-                    // Minor leak if TX is active, but still log so we can check logs that it only happens occasionally.
-                    // We cannot rely on the native and Java stores waiting briefly for read transactions.
-                    System.out.println("Info: closing read transaction after store was closed (should be avoided) in " +
-                            threadType + activeInfo);
+                    // Minor leak if TX is active, but still log so the ObjectBox team can check that it only happens
+                    // occasionally.
+                    // Note this cannot assume the store isn't destroyed, yet. The native and Java stores may at best
+                    // briefly wait for read transactions.
+                    System.out.printf(
+                            "Info: closing read transaction after store was closed (isActive=%s, isOwnerThread=%s), this should be avoided.%n",
+                            isActive, isOwnerThread);
                     System.out.flush();
 
-                    if (!isActive()) {  // Note: call "isActive()" for fresh value (do not cache it)
+                    // Note: get fresh active state
+                    if (!nativeIsActive(transaction)) {
                         nativeDestroy(transaction);
                     }
-                } else {  // write transaction
-                    System.out.println("WARN: closing write transaction after store was closed (must be avoided) in " +
-                            threadType + activeInfo);
+                } else {
+                    // write transaction
+                    System.out.printf(
+                            "WARN: closing write transaction after store was closed (isActive=%s, isOwnerThread=%s), this must be avoided.%n",
+                            isActive, isOwnerThread);
                     System.out.flush();
-                    if (isActive() && store.isNativeStoreDestroyed()) { // Note: call "isActive()" for fresh value
+
+                    // Note: get fresh active state
+                    if (nativeIsActive(transaction) && store.isNativeStoreDestroyed()) {
                         // This is an internal validation: if this is an active write-TX,
                         // the (native) store will always wait for it, so it must not be destroyed yet.
                         // If this ever happens, the above assumption is wrong, and throwing likely prevents a SIGSEGV.
