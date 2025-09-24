@@ -1409,9 +1409,11 @@ public class BoxStore implements Closeable {
     /**
      * For internal use only. This API might change or be removed with a future release.
      * <p>
-     * Returns if the native Store was closed.
+     * Returns {@code true} once the native Store is about to be destroyed.
      * <p>
      * This is {@code true} shortly after {@link #close()} was called and {@link #isClosed()} returns {@code true}.
+     *
+     * @see #isNativeStoreDestroyed()
      */
     @Internal
     public boolean isNativeStoreClosed() {
@@ -1421,9 +1423,11 @@ public class BoxStore implements Closeable {
     /**
      * For internal use only. This API might change or be removed with a future release.
      * <p>
-     * Returns if the native Store was completely destroyed.
+     * Returns {@code true} once the native Store was destroyed.
      * <p>
-     * This is {@code true} shortly after {@link #close()} was called and {@link #isClosed()} returns {@code true}.
+     * This is {@code true} shortly after {@link #isNativeStoreClosed()} returns {@code true}.
+     *
+     * @see #isNativeStoreClosed()
      */
     @Internal
     public boolean isNativeStoreDestroyed() {

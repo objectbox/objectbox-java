@@ -131,7 +131,8 @@ public class Transaction implements Closeable {
                 String threadType = isOwnerThread ? "owner thread" : "non-owner thread";
                 if (readOnly) {
                     // Minor leak, but still print it so we can check logs: it should only happen occasionally.
-                    // We cannot rely on the store waiting for read transactions; it only waits for a limited time.
+                    // Note that BoxStore.close() won't (briefly) wait on this transaction as isActive() already returns
+                    // false (and unregisterTransaction(this) was called) at this point.
                     System.out.println("Info: closing read transaction after store was closed (should be avoided) in " +
                             threadType);
                     System.out.flush();
@@ -143,8 +144,9 @@ public class Transaction implements Closeable {
                         // This is an internal validation: if this is a write-TX,
                         // the (native) store will always wait for it, so it must not be destroyed yet.
                         // If this ever happens, the above assumption is wrong, and it probably prevents a SIGSEGV.
-                        throw new IllegalStateException(
-                                "Cannot destroy write transaction for an already destroyed store");
+                        // Note that BoxStore.close() won't (briefly) wait on this transaction as isActive() already
+                        // returns false (and unregisterTransaction(this) was called).
+                        throw new IllegalStateException("Cannot close write transaction for an already closed store");
                     }
                     nativeDestroy(transaction);
                 }
@@ -152,6 +154,9 @@ public class Transaction implements Closeable {
         }
     }
 
+    /**
+     * For a write transaction commits the changes. For a read transaction throws.
+     */
     public void commit() {
         checkOpen();
         int[] entityTypeIdsAffected = nativeCommit(transaction);
@@ -163,6 +168,9 @@ public class Transaction implements Closeable {
         close();
     }
 
+    /**
+     * For a read or write transaction, aborts it.
+     */
     public void abort() {
         checkOpen();
         nativeAbort(transaction);
@@ -214,6 +222,12 @@ public class Transaction implements Closeable {
         return store;
     }
 
+    /**
+     * A transaction is active after it was created until {@link #close()} or {@link #abort()} or for a write
+     * transaction also until {@link #commit()} is called.
+     *
+     * @return If this transaction is active.
+     */
     public boolean isActive() {
         return !closed && nativeIsActive(transaction);
     }
