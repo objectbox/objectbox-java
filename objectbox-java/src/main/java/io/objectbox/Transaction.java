@@ -129,25 +129,30 @@ public class Transaction implements Closeable {
                 nativeDestroy(transaction);
             } else {
                 String threadType = isOwnerThread ? "owner thread" : "non-owner thread";
+                String activeInfo = isActive() ? " (active TX)" : " (inactive TX)";
                 if (readOnly) {
-                    // Minor leak, but still print it so we can check logs: it should only happen occasionally.
-                    // Note that BoxStore.close() won't (briefly) wait on this transaction as isActive() already returns
-                    // false (and unregisterTransaction(this) was called) at this point.
+                    // Minor leak if TX is active, but still log so we can check logs that it only happens occasionally.
+                    // We cannot rely on the native and Java stores waiting briefly for read transactions.
                     System.out.println("Info: closing read transaction after store was closed (should be avoided) in " +
-                            threadType);
+                            threadType + activeInfo);
                     System.out.flush();
+
+                    if (!isActive()) {  // Note: call "isActive()" for fresh value (do not cache it)
+                        nativeDestroy(transaction);
+                    }
                 } else {  // write transaction
                     System.out.println("WARN: closing write transaction after store was closed (must be avoided) in " +
-                            threadType);
+                            threadType + activeInfo);
                     System.out.flush();
-                    if (store.isNativeStoreDestroyed()) {
-                        // This is an internal validation: if this is a write-TX,
+                    if (isActive() && store.isNativeStoreDestroyed()) { // Note: call "isActive()" for fresh value
+                        // This is an internal validation: if this is an active write-TX,
                         // the (native) store will always wait for it, so it must not be destroyed yet.
-                        // If this ever happens, the above assumption is wrong, and it probably prevents a SIGSEGV.
-                        // Note that BoxStore.close() won't (briefly) wait on this transaction as isActive() already
-                        // returns false (and unregisterTransaction(this) was called).
-                        throw new IllegalStateException("Cannot close write transaction for an already closed store");
+                        // If this ever happens, the above assumption is wrong, and throwing likely prevents a SIGSEGV.
+                        throw new IllegalStateException(
+                                "Internal error: cannot close active write transaction for an already destroyed store");
                     }
+                    // Note: inactive transactions are always safe to destroy, regardless of store state and thread.
+                    // Note: the current native impl panics if the transaction is active AND created in another thread.
                     nativeDestroy(transaction);
                 }
             }
@@ -223,8 +228,8 @@ public class Transaction implements Closeable {
     }
 
     /**
-     * A transaction is active after it was created until {@link #close()} or {@link #abort()} or for a write
-     * transaction also until {@link #commit()} is called.
+     * A transaction is active after it was created until {@link #close()}, {@link #abort()}, or, for write
+     * transactions only, {@link #commit()} is called.
      *
      * @return If this transaction is active.
      */
