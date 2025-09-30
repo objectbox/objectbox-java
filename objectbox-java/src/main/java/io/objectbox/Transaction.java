@@ -101,7 +101,9 @@ public class Transaction implements Closeable {
             closed = true;
             store.unregisterTransaction(this);
 
-            if (!nativeIsOwnerThread(transaction)) {
+            boolean isOwnerThread = nativeIsOwnerThread(transaction);
+            if (!isOwnerThread) {
+                // Note: don't use isActive(), it returns false here because closed == true already
                 boolean isActive = nativeIsActive(transaction);
                 boolean isRecycled = nativeIsRecycled(transaction);
                 if (isActive || isRecycled) {
@@ -126,10 +128,49 @@ public class Transaction implements Closeable {
             // TODO not destroying is probably only a small leak on rare occasions, but still could be fixed
             if (!store.isNativeStoreClosed()) {
                 nativeDestroy(transaction);
+            } else {
+                // Note: don't use isActive(), it returns false here because closed == true already
+                boolean isActive = nativeIsActive(transaction);
+                if (readOnly) {
+                    // Minor leak if TX is active, but still log so the ObjectBox team can check that it only happens
+                    // occasionally.
+                    // Note this cannot assume the store isn't destroyed, yet. The native and Java stores may at best
+                    // briefly wait for read transactions.
+                    System.out.printf(
+                            "Info: closing read transaction after store was closed (isActive=%s, isOwnerThread=%s), this should be avoided.%n",
+                            isActive, isOwnerThread);
+                    System.out.flush();
+
+                    // Note: get fresh active state
+                    if (!nativeIsActive(transaction)) {
+                        nativeDestroy(transaction);
+                    }
+                } else {
+                    // write transaction
+                    System.out.printf(
+                            "WARN: closing write transaction after store was closed (isActive=%s, isOwnerThread=%s), this must be avoided.%n",
+                            isActive, isOwnerThread);
+                    System.out.flush();
+
+                    // Note: get fresh active state
+                    if (nativeIsActive(transaction) && store.isNativeStoreDestroyed()) {
+                        // This is an internal validation: if this is an active write-TX,
+                        // the (native) store will always wait for it, so it must not be destroyed yet.
+                        // If this ever happens, the above assumption is wrong, and throwing likely prevents a SIGSEGV.
+                        throw new IllegalStateException(
+                                "Internal error: cannot close active write transaction for an already destroyed store");
+                    }
+                    // Note: inactive transactions are always safe to destroy, regardless of store state and thread.
+                    // Note: the current native impl panics if the transaction is active AND created in another thread.
+                    nativeDestroy(transaction);
+                }
             }
         }
     }
 
+    /**
+     * For a write transaction commits the changes. For a read transaction throws.
+     */
     public void commit() {
         checkOpen();
         int[] entityTypeIdsAffected = nativeCommit(transaction);
@@ -141,6 +182,9 @@ public class Transaction implements Closeable {
         close();
     }
 
+    /**
+     * For a read or write transaction, aborts it.
+     */
     public void abort() {
         checkOpen();
         nativeAbort(transaction);
@@ -192,6 +236,12 @@ public class Transaction implements Closeable {
         return store;
     }
 
+    /**
+     * A transaction is active after it was created until {@link #close()}, {@link #abort()}, or, for write
+     * transactions only, {@link #commit()} is called.
+     *
+     * @return If this transaction is active.
+     */
     public boolean isActive() {
         return !closed && nativeIsActive(transaction);
     }

@@ -16,10 +16,10 @@
 
 package io.objectbox;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import io.objectbox.annotation.IndexType;
@@ -228,18 +228,37 @@ public class CursorTest extends AbstractObjectBoxTest {
         }
     }
 
-    @Ignore("Temporarily ignore until objectbox-java#282 is resolved")
+    /**
+     * Begin the first write-TX and ensure the second one blocks until the first one is closed.
+     * A secondary test goal is to check races of a closing TX and a closing store.
+     */
     @Test
     public void testWriteTxBlocksOtherWriteTx() throws InterruptedException {
+        // To change the likelihood of the TX vs store closing race, close the store using one of 3 different variants.
+        // Assign and print the randomly chosen variant beforehand so it does not mess with thread timings later.
+        // Warning: test variant 2 only manually, it will close the write-TX from a non-owner thread (in BoxStore.close)
+        // where the native database is expected to panic.
+        int closeStoreVariant = ThreadLocalRandom.current().nextInt(2 /* 3 - test variant 2 manually, see above */);
+        System.out.println("Closing store variant: " + closeStoreVariant);
+
         long time = System.currentTimeMillis();
         Transaction tx = store.beginTx();
         long duration = System.currentTimeMillis() - time; // Usually 0 on desktop
         final CountDownLatch latchBeforeBeginTx = new CountDownLatch(1);
         final CountDownLatch latchAfterBeginTx = new CountDownLatch(1);
+        final CountDownLatch latchCloseStoreInMainThread = closeStoreVariant != 0 ? new CountDownLatch(1) : null;
         new Thread(() -> {
             latchBeforeBeginTx.countDown();
             Transaction tx2 = store.beginTx();
             latchAfterBeginTx.countDown();
+
+            if (closeStoreVariant != 0) {
+                try {
+                    assertTrue(latchCloseStoreInMainThread.await(5, TimeUnit.SECONDS));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException("Interrupted", e);
+                }
+            }
             tx2.close();
         }).start();
         assertTrue(latchBeforeBeginTx.await(1, TimeUnit.SECONDS));
@@ -247,6 +266,16 @@ public class CursorTest extends AbstractObjectBoxTest {
         assertFalse(latchAfterBeginTx.await(waitTime, TimeUnit.MILLISECONDS));
         tx.close();
         assertTrue(latchAfterBeginTx.await(waitTime * 2, TimeUnit.MILLISECONDS));
+
+        // closeStoreVariant == 0: not latch waiting, close store when tearing down test
+        if (closeStoreVariant == 1) {
+            // This variant tries to close the store and the TX at the same time.
+            latchCloseStoreInMainThread.countDown();
+            store.close();  // Maybe this runs a tiny bit before the close() in teardown(?)
+        } else if (closeStoreVariant == 2) {
+            store.close();  // Enforces closing the store before the TX.
+            latchCloseStoreInMainThread.countDown();
+        }
     }
 
     @Test

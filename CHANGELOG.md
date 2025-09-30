@@ -5,7 +5,10 @@ Notable changes to the ObjectBox Java library.
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
 ## 5.0.1 - in development
-                     
+
+- Fixed a race condition with a closing store and still active transactions that kept the store from closing.
+  For Android this may fix some rare ANR issues.
+
 ### Sync
 
 - Add `filterVariables` option to `SyncClient` builder.

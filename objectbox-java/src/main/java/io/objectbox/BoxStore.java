@@ -244,8 +244,11 @@ public class BoxStore implements Closeable {
     private final PrintStream errorOutputStream;
     private final File directory;
     private final String canonicalPath;
+
     /** Reference to the native store. Should probably get through {@link #getNativeStore()} instead. */
     volatile private long handle;
+    volatile private boolean nativeStoreDestroyed = false;
+
     private final Map<Class<?>, String> dbNameByClass = new HashMap<>();
     private final Map<Class<?>, Integer> entityTypeIdByClass = new HashMap<>();
     private final Map<Class<?>, EntityInfo<?>> propertiesByClass = new HashMap<>();
@@ -724,6 +727,7 @@ public class BoxStore implements Closeable {
                 handle = 0;
                 if (handleToDelete != 0) { // failed before native handle was created?
                     nativeDelete(handleToDelete);
+                    nativeStoreDestroyed = true;
                 }
             }
         }
@@ -1405,13 +1409,29 @@ public class BoxStore implements Closeable {
     /**
      * For internal use only. This API might change or be removed with a future release.
      * <p>
-     * Returns if the native Store was closed.
+     * Returns {@code true} once the native Store is about to be destroyed.
      * <p>
      * This is {@code true} shortly after {@link #close()} was called and {@link #isClosed()} returns {@code true}.
+     *
+     * @see #isNativeStoreDestroyed()
      */
     @Internal
     public boolean isNativeStoreClosed() {
         return handle == 0;
+    }
+
+    /**
+     * For internal use only. This API might change or be removed with a future release.
+     * <p>
+     * Returns {@code true} once the native Store was destroyed.
+     * <p>
+     * This is {@code true} shortly after {@link #isNativeStoreClosed()} returns {@code true}.
+     *
+     * @see #isNativeStoreClosed()
+     */
+    @Internal
+    public boolean isNativeStoreDestroyed() {
+        return nativeStoreDestroyed;
     }
 
     /**
