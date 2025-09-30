@@ -11,7 +11,8 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
 
 ### Sync
 
-- Add `filterVariables` option to `SyncClient` builder.
+- Add `filterVariables` option to `SyncClient` builder for [Sync filters](https://sync.objectbox.io/sync-server/sync-filters)
+  introduced in version 5.0.
 
 ## 5.0.0 - 2025-09-17
 
