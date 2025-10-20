@@ -22,8 +22,25 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Defines the property serving as the target ID of a ToOne.
- * This allows exposing an explicit property, which may be convenient for other parsers/serializers (e.g. JSON).
+ * For a ToOne, changes the name of the property to store the target object ID in from the default name:
+ * <p>
+ * <pre>{@code
+ * @Entity
+ * public class Order {
+ *     @TargetIdProperty("customerRenamedTargetId")
+ *     ToOne<Customer> customer;
+ *     long customerRenamedTargetId;
+ * }
+ * }</pre>
+ * <p>
+ * By default, a target ID property named like the ToOne property with the suffix "Id" is created implicitly (so without
+ * defining it in the @Entity class). Using the example above, without the annotation a "virtual" property named
+ * {@code long customerId} would be created.
+ * <p>
+ * Exposing the target ID as an actual field (so not necessarily renamed using this annotation) can be useful for other
+ * parsers or serializers, like for JSON.
+ * <p>
+ * See the <a href="https://docs.objectbox.io/relations">relations documentation</a> for details.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target({ElementType.FIELD, ElementType.TYPE})
