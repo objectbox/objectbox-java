@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 ObjectBox Ltd.
+ * Copyright © 2016 ObjectBox Ltd. <https://objectbox.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,10 +221,10 @@ public class QueryTest extends AbstractQueryTest {
     public void testNullNotNull() {
         List<TestEntity> scalars = putTestEntitiesScalars();
         List<TestEntity> strings = putTestEntitiesStrings();
-        try (Query<TestEntity> notNull = box.query().notNull(simpleString).build()) {
+        try (Query<TestEntity> notNull = box.query(simpleString.notNull()).build()) {
             assertEquals(strings.size(), notNull.count());
         }
-        try (Query<TestEntity> isNull = box.query().isNull(simpleString).build()) {
+        try (Query<TestEntity> isNull = box.query(simpleString.isNull()).build()) {
             assertEquals(scalars.size(), isNull.count());
         }
     }
