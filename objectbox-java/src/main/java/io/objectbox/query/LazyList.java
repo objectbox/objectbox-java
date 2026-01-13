@@ -278,6 +278,9 @@ public class LazyList<E> implements List<E> {
 
     @Override
     public ListIterator<E> listIterator(int location) {
+        if (location < 0 || location > size) {
+            throw new IndexOutOfBoundsException("Index: " + location + ", Size: " + size);
+        }
         return new LazyIterator(location);
     }
 

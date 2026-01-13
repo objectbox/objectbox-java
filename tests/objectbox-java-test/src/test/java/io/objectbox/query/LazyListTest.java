@@ -176,6 +176,29 @@ public class LazyListTest extends AbstractObjectBoxTest {
         }
     }
 
+    @Test
+    public void listIterator_indexOutOfBounds_throws() {
+        putTestEntities(3);
+        LazyList<TestEntity> listLazy = getTestEntityBox().query().build().findLazyCached();
+        int size = listLazy.size();
+
+        try {
+            listLazy.listIterator(-1);
+            fail("listIterator should throw for negative index");
+        } catch (IndexOutOfBoundsException expected) {
+            // Expected, OK
+        }
+
+        try {
+            listLazy.listIterator(size + 1);
+            fail("listIterator should throw for index larger than size");
+        } catch (IndexOutOfBoundsException expected) {
+            // Expected, OK
+        }
+
+        assertNotNull(listLazy.listIterator(size));
+    }
+
 
     protected void assertIds(List<TestEntity> list, List<TestEntity> list2) {
         for (int i = 0; i < list.size(); i++) {
