@@ -422,12 +422,41 @@ public class TransactionTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testRunInReadTxAndThenPut() {
+    public void testRunInReadTx_closesActiveTxCursor() {
         final Box<TestEntity> box = getTestEntityBox();
-        store.runInReadTx(box::count);
-        // Verify that box does not hang on to the read-only TX by doing a put
+        store.runInReadTx(box::count); // Call Box API that creates a reader/activeTxCursor
+        // Verify that box does not hang on to the read-only TX: if it would, count() would re-use the cursor/tx from
+        // above and not see the put object.
+        putTestEntityAndExpectCount(1);
+
+        // Verify the same in case the runnable throws
+        assertThrows(IllegalStateException.class, () -> store.runInReadTx(() -> {
+            box.count();
+            throw new IllegalStateException("Throw in transaction");
+        }));
+        putTestEntityAndExpectCount(2);
+    }
+
+    @Test
+    public void testCallInReadTx_closesActiveTxCursor() {
+        final Box<TestEntity> box = getTestEntityBox();
+        store.callInReadTx(box::count); // Call Box API that creates a reader/activeTxCursor
+        // Verify that box does not hang on to the read-only TX: if it would, count() would re-use the cursor/tx from
+        // above and not see the put object.
+        putTestEntityAndExpectCount(1);
+
+        // Verify the same in case the callable throws
+        assertThrows(IllegalStateException.class, () -> store.callInReadTx(() -> {
+            box.count();
+            throw new IllegalStateException("Throw in transaction");
+        }));
+        putTestEntityAndExpectCount(2);
+    }
+
+    private void putTestEntityAndExpectCount(int expectedCount) {
+        Box<TestEntity> box = getTestEntityBox();
         box.put(new TestEntity());
-        assertEquals(1, box.count());
+        assertEquals(expectedCount, box.count());
     }
 
     @Test
