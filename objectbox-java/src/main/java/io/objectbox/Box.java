@@ -88,13 +88,6 @@ public class Box<T> {
         return cursor;
     }
 
-    /**
-     * Returns if for the calling thread this has a Cursor, if any, for the currently active transaction.
-     */
-    boolean hasActiveTxCursorForCurrentThread() {
-        return activeTxCursor.get() != null;
-    }
-
     Cursor<T> getActiveTxCursor() {
         Transaction activeTx = store.activeTx.get();
         if (activeTx != null) {
@@ -173,6 +166,13 @@ public class Box<T> {
     }
 
     /**
+     * Returns if for the calling thread this has a reader Cursor.
+     */
+    boolean hasReaderCursorForCurrentThread() {
+        return threadLocalReader.get() != null;
+    }
+
+    /**
      * If there is one, and it was created using the given {@code tx}, removes and closes the {@link #activeTxCursor}
      * for the current thread.
      * <p>
@@ -187,6 +187,13 @@ public class Box<T> {
             activeTxCursor.remove();
             cursor.close();
         }
+    }
+
+    /**
+     * Returns if for the calling thread this has a Cursor, if any, for the currently active transaction.
+     */
+    boolean hasActiveTxCursorForCurrentThread() {
+        return activeTxCursor.get() != null;
     }
 
     /** Used by tests */

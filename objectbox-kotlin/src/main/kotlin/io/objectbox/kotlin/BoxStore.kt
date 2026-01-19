@@ -18,7 +18,9 @@ package io.objectbox.kotlin
 
 import io.objectbox.Box
 import io.objectbox.BoxStore
+import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.Callable
+import java.util.concurrent.ThreadFactory
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -51,3 +53,42 @@ suspend fun <V : Any> BoxStore.awaitCallInTx(callable: Callable<V?>): V? {
         }
     }
 }
+
+/**
+ * Creates a coroutine dispatcher backed by a thread pool created with [BoxStore.newCachedThreadPoolExecutor] that
+ * automatically cleans up thread-local ObjectBox resources after each task.
+ *
+ * @return a [kotlinx.coroutines.CoroutineDispatcher] backed by an ObjectBox-aware cached thread pool
+ * @see BoxStore.newCachedThreadPoolExecutor
+ */
+fun BoxStore.newCachedThreadPoolDispatcher() = newCachedThreadPoolExecutor().asCoroutineDispatcher()
+
+/**
+ * Creates a coroutine dispatcher backed by a thread pool created with [BoxStore.newCachedThreadPoolExecutor] that
+ * automatically cleans up thread-local ObjectBox resources after each task.
+ *
+ * @return a [kotlinx.coroutines.CoroutineDispatcher] backed by an ObjectBox-aware cached thread pool
+ * @see BoxStore.newCachedThreadPoolExecutor
+ */
+fun BoxStore.newCachedThreadPoolDispatcher(threadFactory: ThreadFactory) =
+    newCachedThreadPoolExecutor(threadFactory).asCoroutineDispatcher()
+
+/**
+ * Creates a coroutine dispatcher backed by a thread pool created with [BoxStore.newFixedThreadPoolExecutor] that
+ * automatically cleans up thread-local ObjectBox resources after each task.
+ *
+ * @return a [kotlinx.coroutines.CoroutineDispatcher] backed by an ObjectBox-aware fixed thread pool
+ * @see BoxStore.newFixedThreadPoolExecutor
+ */
+fun BoxStore.newFixedThreadPoolDispatcher(nThreads: Int) =
+    newFixedThreadPoolExecutor(nThreads).asCoroutineDispatcher()
+
+/**
+ * Creates a coroutine dispatcher backed by a thread pool created with [BoxStore.newFixedThreadPoolExecutor] that
+ * automatically cleans up thread-local ObjectBox resources after each task.
+ *
+ * @return a [kotlinx.coroutines.CoroutineDispatcher] backed by an ObjectBox-aware fixed thread pool
+ * @see BoxStore.newFixedThreadPoolExecutor
+ */
+fun BoxStore.newFixedThreadPoolDispatcher(nThreads: Int, threadFactory: ThreadFactory) =
+    newFixedThreadPoolExecutor(nThreads, threadFactory).asCoroutineDispatcher()

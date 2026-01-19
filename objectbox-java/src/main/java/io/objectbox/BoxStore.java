@@ -36,7 +36,11 @@ import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
@@ -1337,6 +1341,59 @@ public class BoxStore implements Closeable {
      */
     public void setDbExceptionListener(@Nullable DbExceptionListener dbExceptionListener) {
         nativeSetDbExceptionListener(getNativeStore(), dbExceptionListener);
+    }
+
+    /**
+     * Like {@link Executors#newCachedThreadPool()} but uses {@link ObjectBoxThreadPoolExecutor} to ensure proper
+     * cleanup of thread-local resources.
+     *
+     * @return a new {@link ObjectBoxThreadPoolExecutor}
+     */
+    public ObjectBoxThreadPoolExecutor newCachedThreadPoolExecutor() {
+        return new ObjectBoxThreadPoolExecutor(this, 0, Integer.MAX_VALUE,
+                60L, TimeUnit.SECONDS,
+                new SynchronousQueue<>());
+    }
+
+    /**
+     * Like {@link Executors#newCachedThreadPool(ThreadFactory)} but uses {@link ObjectBoxThreadPoolExecutor} to ensure
+     * proper cleanup of thread-local resources.
+     *
+     * @return a new {@link ObjectBoxThreadPoolExecutor}
+     */
+    public ObjectBoxThreadPoolExecutor newCachedThreadPoolExecutor(ThreadFactory threadFactory) {
+        return new ObjectBoxThreadPoolExecutor(this, 0, Integer.MAX_VALUE,
+                60L, TimeUnit.SECONDS,
+                new SynchronousQueue<>(),
+                threadFactory);
+    }
+
+    /**
+     * Like {@link Executors#newFixedThreadPool(int)} but uses {@link ObjectBoxThreadPoolExecutor} to ensure proper
+     * cleanup of thread-local resources.
+     *
+     * @param nThreads the number of threads in the pool
+     * @return a new {@link ObjectBoxThreadPoolExecutor}
+     */
+    public ObjectBoxThreadPoolExecutor newFixedThreadPoolExecutor(int nThreads) {
+        return new ObjectBoxThreadPoolExecutor(this, nThreads, nThreads,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>());
+    }
+
+    /**
+     * Like {@link Executors#newFixedThreadPool(int, ThreadFactory)} but uses {@link ObjectBoxThreadPoolExecutor} to
+     * ensure proper cleanup of thread-local resources.
+     *
+     * @param nThreads the number of threads in the pool
+     * @param threadFactory the factory to use when creating new threads
+     * @return a new {@link ObjectBoxThreadPoolExecutor}
+     */
+    public ObjectBoxThreadPoolExecutor newFixedThreadPoolExecutor(int nThreads, ThreadFactory threadFactory) {
+        return new ObjectBoxThreadPoolExecutor(this, nThreads, nThreads,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                threadFactory);
     }
 
     @Internal

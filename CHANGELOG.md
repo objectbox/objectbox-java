@@ -6,6 +6,12 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
 
 ## Next release
 
+- Add [ObjectBoxThreadPoolExecutor](objectbox-java/src/main/java/io/objectbox/ObjectBoxThreadPoolExecutor.java), a
+  default implementation of a `ThreadPoolExecutor` that properly cleans up thread-local Box resources.
+- Add methods `newCachedThreadPoolExecutor()` and `newFixedThreadPoolExecutor()` to `BoxStore` to help create instances
+  of `ObjectBoxThreadPoolExecutor` for common uses.
+- Add methods `newCachedThreadPoolDispatcher()` and `newFixedThreadPoolDispatcher()` to the Kotlin extension functions
+  for `BoxStore` to help create common coroutine dispatchers backed by an `ObjectBoxThreadPoolExecutor`.
 - `BoxStore.runInTx` and `callInTx` close a write cursor even if the runnable or callable throws. This would previously
   result in cursor not closed warnings when the cursor was closed by the finalizer daemon. 
 
