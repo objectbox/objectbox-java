@@ -89,6 +89,13 @@ public class Box<T> {
         return cursor;
     }
 
+    /**
+     * Returns if for the calling thread this has a Cursor, if any, for the currently active transaction.
+     */
+    boolean hasActiveTxCursorForCurrentThread() {
+        return activeTxCursor.get() != null;
+    }
+
     Cursor<T> getActiveTxCursor() {
         Transaction activeTx = store.activeTx.get();
         if (activeTx != null) {
