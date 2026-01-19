@@ -4,7 +4,10 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
-## 5.0.2 - in development
+## Next release
+
+- `BoxStore.runInTx` and `callInTx` close a write cursor even if the runnable or callable throws. This would previously
+  result in cursor not closed warnings when the cursor was closed by the finalizer daemon. 
 
 ## 5.0.1 - 2025-09-30
 

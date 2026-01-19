@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
@@ -173,20 +172,16 @@ public class Box<T> {
         }
     }
 
-    void txCommitted(Transaction tx) {
-        // Thread local readers will be renewed on next get, so we do not need clean them up
-
-        Cursor<T> cursor = activeTxCursor.get();
-        if (cursor != null) {
-            activeTxCursor.remove();
-            cursor.close();
-        }
-    }
-
     /**
-     * Called by {@link BoxStore#callInReadTx(Callable)} - does not throw so caller does not need try/finally.
+     * If there is one, and it was created using the given {@code tx}, removes and closes the {@link #activeTxCursor}
+     * for the current thread.
+     * <p>
+     * This should be called before the active transaction is closed to clean up native resources.
+     * <p>
+     * Note: {@link #threadLocalReader} is either renewed by the next call to {@link #getReader()} or cleaned up by
+     * {@link #closeThreadResources()}.
      */
-    void readTxFinished(Transaction tx) {
+    void closeActiveTxCursorForCurrentThread(Transaction tx) {
         Cursor<T> cursor = activeTxCursor.get();
         if (cursor != null && cursor.getTx() == tx) {
             activeTxCursor.remove();
