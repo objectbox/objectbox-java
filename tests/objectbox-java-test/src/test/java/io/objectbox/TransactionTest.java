@@ -30,6 +30,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -422,12 +423,90 @@ public class TransactionTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testRunInReadTxAndThenPut() {
+    public void testRunInTx_closesActiveTxCursor() {
         final Box<TestEntity> box = getTestEntityBox();
-        store.runInReadTx(box::count);
-        // Verify that box does not hang on to the read-only TX by doing a put
+        AtomicBoolean hasCursorInTx = new AtomicBoolean(false);
+        store.runInTx(() -> {
+            box.count(); // Call Box API that creates a reader/activeTxCursor
+            hasCursorInTx.set(box.hasActiveTxCursorForCurrentThread());
+        });
+        // Verify a cursor for the active tx was created
+        assertTrue(hasCursorInTx.get());
+        // Check it was released
+        assertFalse(box.hasActiveTxCursorForCurrentThread());
+
+        // Verify the same in case the runnable throws
+        try {
+            store.runInTx(() -> {
+                box.count();
+                throw new IllegalStateException("Throw in transaction");
+            });
+        } catch (IllegalStateException ignored) {}
+        assertFalse(box.hasActiveTxCursorForCurrentThread());
+    }
+
+    @Test
+    public void testCallInTx_closesActiveTxCursor() throws Exception {
+        final Box<TestEntity> box = getTestEntityBox();
+        Boolean hasCursorInTx = store.callInTx(() -> {
+            box.count(); // Call Box API that creates a reader/activeTxCursor
+            return box.hasActiveTxCursorForCurrentThread();
+        });
+        // Verify a cursor for the active tx was created
+        assertTrue(hasCursorInTx);
+        // Check it was released
+        assertFalse(box.hasActiveTxCursorForCurrentThread());
+
+        // Verify the same in case the callable throws
+        try {
+            store.callInTx(() -> {
+                box.count();
+                throw new IllegalStateException("Throw in transaction");
+            });
+        } catch (IllegalStateException ignored) {}
+        assertFalse(box.hasActiveTxCursorForCurrentThread());
+    }
+
+    @Test
+    public void testRunInReadTx_closesActiveTxCursor() {
+        final Box<TestEntity> box = getTestEntityBox();
+        store.runInReadTx(box::count); // Call Box API that creates a reader/activeTxCursor
+        // Verify that box does not hang on to the read-only TX: if it would, count() would re-use the cursor/tx from
+        // above and not see the put object.
+        putTestEntityAndExpectCount(1);
+        assertFalse(box.hasActiveTxCursorForCurrentThread());
+
+        // Verify the same in case the runnable throws
+        assertThrows(IllegalStateException.class, () -> store.runInReadTx(() -> {
+            box.count();
+            throw new IllegalStateException("Throw in transaction");
+        }));
+        putTestEntityAndExpectCount(2);
+        assertFalse(box.hasActiveTxCursorForCurrentThread());
+    }
+
+    @Test
+    public void testCallInReadTx_closesActiveTxCursor() {
+        final Box<TestEntity> box = getTestEntityBox();
+        store.callInReadTx(box::count); // Call Box API that creates a reader/activeTxCursor
+        // Verify that box does not hang on to the read-only TX: if it would, count() would re-use the cursor/tx from
+        // above and not see the put object.
+        putTestEntityAndExpectCount(1);
+        assertFalse(box.hasActiveTxCursorForCurrentThread());
+
+        // Verify the same in case the callable throws
+        assertThrows(IllegalStateException.class, () -> store.callInReadTx(() -> {
+            box.count();
+            throw new IllegalStateException("Throw in transaction");
+        }));
+        putTestEntityAndExpectCount(2);
+        assertFalse(box.hasActiveTxCursorForCurrentThread());
+    }
+
+    private void putTestEntityAndExpectCount(int expectedCount) {
+        Box<TestEntity> box = getTestEntityBox();
         box.put(new TestEntity());
-        assertEquals(1, box.count());
+        assertEquals(expectedCount, box.count());
     }
 
     @Test

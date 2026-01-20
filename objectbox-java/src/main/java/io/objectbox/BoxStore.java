@@ -926,12 +926,17 @@ public class BoxStore implements Closeable {
             }
         }
 
-        for (Box<?> box : boxes.values()) {
-            box.txCommitted(tx);
-        }
-
         if (entityTypeIdsAffected != null) {
             objectClassPublisher.publish(entityTypeIdsAffected);
+        }
+    }
+
+    /**
+     * For all boxes, calls {@link Box#closeActiveTxCursorForCurrentThread(Transaction)}.
+     */
+    void closeActiveTxCursorsForCurrentThread(Transaction tx) {
+        for (Box<?> box : boxes.values()) {
+            box.closeActiveTxCursorForCurrentThread(tx);
         }
     }
 
@@ -977,6 +982,7 @@ public class BoxStore implements Closeable {
                 tx.commit();
             } finally {
                 activeTx.remove();
+                closeActiveTxCursorsForCurrentThread(tx);
                 tx.close();
             }
         } else {
@@ -1003,13 +1009,9 @@ public class BoxStore implements Closeable {
                 runnable.run();
             } finally {
                 activeTx.remove();
-
                 // TODO That's rather a quick fix, replace with a more general solution
                 // (that could maybe be a TX listener with abort callback?)
-                for (Box<?> box : boxes.values()) {
-                    box.readTxFinished(tx);
-                }
-
+                closeActiveTxCursorsForCurrentThread(tx);
                 tx.close();
             }
         } else {
@@ -1089,10 +1091,7 @@ public class BoxStore implements Closeable {
 
                 // TODO That's rather a quick fix, replace with a more general solution
                 // (that could maybe be a TX listener with abort callback?)
-                for (Box<?> box : boxes.values()) {
-                    box.readTxFinished(tx);
-                }
-
+                closeActiveTxCursorsForCurrentThread(tx);
                 tx.close();
             }
         } else {
@@ -1119,6 +1118,7 @@ public class BoxStore implements Closeable {
                 return result;
             } finally {
                 activeTx.remove();
+                closeActiveTxCursorsForCurrentThread(tx);
                 tx.close();
             }
         } else {
