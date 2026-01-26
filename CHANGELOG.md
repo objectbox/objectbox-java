@@ -4,7 +4,7 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
-## Next release
+## 5.1.0 - 2026-01-26
 
 - Add [ObjectBoxThreadPoolExecutor](objectbox-java/src/main/java/io/objectbox/ObjectBoxThreadPoolExecutor.java), a
   default implementation of a `ThreadPoolExecutor` that properly cleans up thread-local Box resources.
@@ -14,6 +14,18 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
   for `BoxStore` to help create common coroutine dispatchers backed by an `ObjectBoxThreadPoolExecutor`.
 - `BoxStore.runInTx` and `callInTx` close a write cursor even if the runnable or callable throws. This would previously
   result in cursor not closed warnings when the cursor was closed by the finalizer daemon. 
+- `BoxStore` no longer gets stuck while closing when deleting transactions created in other threads with open relation
+  cursors.
+- Admin: the Schema view now shows if external name of types and properties if configured.
+- Admin: the Schema view now shows the type as text (e.g. "String") instead of the internal type ID.
+                          
+### Sync
+
+- New Sync protocol V8: using new clients also requires a server update
+- Remove superfluous sync listener triggers when sync filters "report updates" (SKIP_TX)
+- Sync clients compress earlier: reduces disk storage for outgoing data
+- Reworked certificates for Apple platforms
+- Removed support for older Sync protocol versions before 2024-09; protocol V5+ is now required.
 
 ## 5.0.1 - 2025-09-30
 
