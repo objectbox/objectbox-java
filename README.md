@@ -83,12 +83,10 @@ box.put(person)     // Update
 box.remove(person)  // Delete
 ```
 
-Continue with the ➡️ **[Getting Started guide](https://docs.objectbox.io/getting-started)**.
-
 ## Table of Contents
 
 - [Key Features](#key-features)
-- [Getting started](#getting-started)
+- [Getting Started](#getting-started)
   - [Gradle setup](#gradle-setup)
   - [Maven setup](#maven-setup)
 - [Why use ObjectBox?](#why-use-objectbox-for-java-data-management)
@@ -105,32 +103,75 @@ Continue with the ➡️ **[Getting Started guide](https://docs.objectbox.io/get
 🔗 **[Built-in Object Relations](https://docs.objectbox.io/relations):** built-in support for object relations, allowing you to easily establish and manage relationships between objects.\
 👌 **Ease of use:** concise API that eliminates the need for complex SQL queries, saving you time and effort during development.
 
-## Getting started
+## Getting Started
+
+> [!NOTE]
+> Prefer to look at example code? Check out [our examples repository](https://github.com/objectbox/objectbox-examples).
+
+You can add the ObjectBox Java SDK to your project using:
+
+- a [Gradle setup](#gradle-setup)
+- a [Maven setup](#maven-setup)
+
+ObjectBox tools and dependencies are available on [the Maven Central repository](https://central.sonatype.com/namespace/io.objectbox).
+
+The database libraries available for the ObjectBox Java SDK support:
+
+- JVM 8 or newer
+  - Linux (x64, arm64, armv7)
+  - macOS (x64, arm64)
+  - Windows (x64)
+- Android 5.0 (API level 21) or newer
+
+The APIs and tools of the ObjectBox Java SDK support:
+
+- Java 8 or newer
+- Kotlin 1.7 or newer
+- Android Gradle Plugin 8.0 or newer
 
 ### Gradle setup
 
-For Gradle projects, add the ObjectBox Gradle plugin to your root Gradle script:
+For Gradle projects, add the ObjectBox Gradle plugin to your root Gradle script.
+
+When using a TOML version catalog and plugins syntax (for alternatives see below):
+          
+```toml
+# gradle/libs.versions.toml
+[versions]
+objectbox = "5.1.0"
+
+[plugins]
+objectbox = { id = "io.objectbox", version.ref = "objectbox" }
+```
 
 ```kotlin
 // build.gradle.kts
-buildscript {
-    val objectboxVersion by extra("5.0.1")
-    repositories {        
-        mavenCentral()    
-    }
-    dependencies {
-        classpath("io.objectbox:objectbox-gradle-plugin:$objectboxVersion")
+plugins {
+    alias(libs.plugins.objectbox) apply false
+}
+```
+
+```kotlin
+// settings.gradle.kts
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "io.objectbox") {
+                useModule("io.objectbox:objectbox-gradle-plugin:${requested.version}")
+            }
+        }
     }
 }
 ```
+
+Alternatives:
 
 <details><summary>Using plugins syntax</summary>
 
 ```kotlin
 // build.gradle.kts
 plugins {
-    id("com.android.application") version "8.0.2" apply false // When used in an Android project
-    id("io.objectbox") version "5.0.1" apply false
+    id("io.objectbox") version "5.1.0" apply false
 }
 ```
 
@@ -149,12 +190,12 @@ pluginManagement {
 
 </details>
 
-<details><summary>Using Groovy syntax</summary>
+<details><summary>Using buildscript syntax (KTS)</summary>
 
-```groovy
-// build.gradle
+```kotlin
+// build.gradle.kts
 buildscript {
-    ext.objectboxVersion = "5.0.1"
+    val objectboxVersion by extra("5.1.0")
     repositories {        
         mavenCentral()    
     }
@@ -166,19 +207,50 @@ buildscript {
 
 </details>
 
-And in the Gradle script of your subproject apply the plugin:
+<details><summary>Using buildscript syntax (Groovy)</summary>
+
+```groovy
+// build.gradle
+buildscript {
+    ext.objectboxVersion = "5.1.0"
+    repositories {        
+        mavenCentral()    
+    }
+    dependencies {
+        classpath("io.objectbox:objectbox-gradle-plugin:$objectboxVersion")
+    }
+}
+```
+
+</details>
+
+Then, in the Gradle script of your subproject apply the plugin:
+
+```kotlin
+// app/build.gradle.kts
+plugins {
+    alias(libs.plugins.android.application) // When used in an Android project
+    alias(libs.plugins.kotlin.android) // When used in an Android project
+    alias(libs.plugins.kotlin.kapt) // When used in an Android or Kotlin project
+    alias(libs.plugins.objectbox) // Add after other plugins
+}
+```
+
+<details><summary>Alternative: when not using a version catalog, using the plugin id</summary>
 
 ```kotlin
 // app/build.gradle.kts
 plugins {
     id("com.android.application") // When used in an Android project
     kotlin("android") // When used in an Android project
-    kotlin("kapt")
+    kotlin("kapt") // When used in an Android or Kotlin project
     id("io.objectbox") // Add after other plugins
 }
 ```
 
-Then sync the Gradle project with your IDE.
+</details>
+
+Finally, sync the Gradle project with your IDE (for ex. using "Sync Project with Gradle Files" in Android Studio).
 
 Your project can now use ObjectBox, continue by [defining entity classes](https://docs.objectbox.io/getting-started#define-entity-classes).
 
@@ -187,6 +259,10 @@ Your project can now use ObjectBox, continue by [defining entity classes](https:
 This is currently only supported for JVM projects.
 
 To set up a Maven project, see the [README of the Java Maven example project](https://github.com/objectbox/objectbox-examples/blob/main/java-main-maven/README.md).
+
+## Frequently Asked Questions and Troubleshooting
+
+If you encounter any problems, check out the [FAQ](https://docs.objectbox.io/faq) and [Troubleshooting](https://docs.objectbox.io/troubleshooting) pages.
 
 ## Why use ObjectBox for Java data management?
 
