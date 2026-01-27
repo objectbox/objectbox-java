@@ -4,6 +4,8 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
+## Next release
+
 ## 5.1.0 - 2026-01-26
 
 - Add [ObjectBoxThreadPoolExecutor](objectbox-java/src/main/java/io/objectbox/ObjectBoxThreadPoolExecutor.java), a
