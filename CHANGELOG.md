@@ -6,6 +6,9 @@ For more insights into what changed in the ObjectBox C++ core, [check the Object
 
 ## Next release
 
+- The [ObjectBox Gradle plugin](https://github.com/objectbox/objectbox-java-generator) requires JDK 11 and Android
+  Gradle Plugin 8.1 or newer.
+
 ## 5.1.0 - 2026-01-26
 
 - Add [ObjectBoxThreadPoolExecutor](objectbox-java/src/main/java/io/objectbox/ObjectBoxThreadPoolExecutor.java), a
