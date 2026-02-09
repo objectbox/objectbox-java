@@ -18,6 +18,8 @@ package io.objectbox.sync;
 
 import org.junit.Test;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import io.objectbox.sync.listener.SyncChangeListener;
@@ -111,6 +113,11 @@ public class ConnectivityMonitorTest {
 
         @Override
         public String getServerUrl() {
+            return null;
+        }
+
+        @Override
+        public List<String> getUrls() {
             return null;
         }
 

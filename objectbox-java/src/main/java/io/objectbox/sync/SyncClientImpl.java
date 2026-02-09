@@ -16,6 +16,7 @@
 
 package io.objectbox.sync;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +44,7 @@ public final class SyncClientImpl implements SyncClient {
 
     @Nullable
     private BoxStore boxStore;
-    private final String serverUrl;
+    private final List<String> urls;
     private final InternalSyncClientListener internalListener;
     @Nullable
     private final ConnectivityMonitor connectivityMonitor;
@@ -62,7 +63,7 @@ public final class SyncClientImpl implements SyncClient {
 
     SyncClientImpl(SyncBuilder builder) {
         this.boxStore = builder.boxStore;
-        this.serverUrl = builder.serverUrl();
+        this.urls = builder.urls;
         this.connectivityMonitor = builder.platform.getConnectivityMonitor();
 
         // Build the options
@@ -71,8 +72,10 @@ public final class SyncClientImpl implements SyncClient {
             throw new RuntimeException("Failed to create Sync client options: handle is zero.");
         }
         try {
-            // Add server URL
-            nativeSyncOptAddUrl(optHandle, serverUrl);
+            // Add all server URLs
+            for (String url : urls) {
+                nativeSyncOptAddUrl(optHandle, url);
+            }
 
             // Add trusted certificate paths if provided
             if (builder.trustedCertPaths != null) {
@@ -144,7 +147,13 @@ public final class SyncClientImpl implements SyncClient {
 
     @Override
     public String getServerUrl() {
-        return serverUrl;
+        // nativeSyncOptCreateClient guarantees there is at least one URL
+        return getUrls().get(0);
+    }
+
+    @Override
+    public List<String> getUrls() {
+        return urls;
     }
 
     @Override

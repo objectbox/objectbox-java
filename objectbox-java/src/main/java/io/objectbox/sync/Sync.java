@@ -16,6 +16,9 @@
 
 package io.objectbox.sync;
 
+import java.util.Collections;
+import java.util.List;
+
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
 import io.objectbox.sync.server.SyncServer;
@@ -51,6 +54,43 @@ public final class Sync {
     }
 
     /**
+     * Starts building a {@link SyncClient} for the given {@link BoxStore} and server URL.
+     * <p>
+     * This does not initiate any connection attempts yet: call {@link SyncBuilder#buildAndStart()} to do so. Before,
+     * you must configure credentials via {@link SyncBuilder#credentials(SyncCredentials)}.
+     * <p>
+     * By default, a Sync client automatically receives updates from the server once login succeeded. To configure this
+     * differently, call {@link SyncBuilder#requestUpdatesMode(SyncBuilder.RequestUpdatesMode)} with the wanted mode.
+     *
+     * @param boxStore The {@link BoxStore} the client should use.
+     * @param url The URL of the Sync server on which the Sync protocol is exposed. This is typically a WebSockets URL
+     * starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
+     * {@code ws://127.0.0.1:9999}.
+     * @return a builder to configure the Sync client
+     * @see #client(BoxStore, List)
+     */
+    public static SyncBuilder client(BoxStore boxStore, String url) {
+        return client(boxStore, Collections.singletonList(url));
+    }
+
+    /**
+     * Like {@link #client(BoxStore, String)}, but supports passing multiple URLs.
+     * <p>
+     * Passing multiple URLs allows high availability and load balancing (i.e. using an ObjectBox Sync Server Cluster).
+     * <p>
+     * A random URL is selected for each connection attempt.
+     *
+     * @param boxStore The {@link BoxStore} the client should use.
+     * @param urls A list of URLs of Sync servers on which the Sync protocol is exposed. These are typically WebSockets
+     * URLs starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
+     * {@code ws://127.0.0.1:9999}.
+     * @return a builder to configure the Sync client
+     */
+    public static SyncBuilder client(BoxStore boxStore, List<String> urls) {
+        return new SyncBuilder(boxStore, urls);
+    }
+
+    /**
      * Starts building a {@link SyncClient}. Once done, complete with {@link SyncBuilder#build() build()}.
      *
      * @param boxStore The {@link BoxStore} the client should use.
@@ -58,18 +98,31 @@ public final class Sync {
      * starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
      * {@code ws://127.0.0.1:9999}.
      * @param credentials {@link SyncCredentials} to authenticate with the server.
+     * @deprecated Use {@link #client(BoxStore, String)} and {@link SyncBuilder#credentials(SyncCredentials)} instead.
      */
+    @Deprecated
     public static SyncBuilder client(BoxStore boxStore, String url, SyncCredentials credentials) {
-        return new SyncBuilder(boxStore, url, credentials);
+        SyncBuilder builder = client(boxStore, url);
+        builder.credentials(credentials);
+        return builder;
     }
 
     /**
      * Like {@link #client(BoxStore, String, SyncCredentials)}, but supports passing a set of authentication methods.
      *
      * @param multipleCredentials An array of {@link SyncCredentials} to be used to authenticate with the server.
+     * @deprecated Use {@link #client(BoxStore, String)} and {@link SyncBuilder#credentials(SyncCredentials)} instead.
      */
+    @Deprecated
     public static SyncBuilder client(BoxStore boxStore, String url, SyncCredentials[] multipleCredentials) {
-        return new SyncBuilder(boxStore, url, multipleCredentials);
+        SyncBuilder builder = client(boxStore, url);
+        //noinspection ConstantValue
+        if (multipleCredentials != null) {
+            for (SyncCredentials credentials : multipleCredentials) {
+                builder.credentials(credentials);
+            }
+        }
+        return builder;
     }
 
     /**

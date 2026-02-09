@@ -18,17 +18,15 @@
  * <a href="https://objectbox.io/sync/">ObjectBox Sync</a> allows to automatically synchronize local data with a sync
  * destination (e.g. a sync server) and vice versa. This is the sync <b>client</b> package.
  * <p>
- * These are the typical steps to setup a sync client:
+ * These are the typical steps to set up a sync client:
  * <ol>
  *     <li>Create a BoxStore as usual (using MyObjectBox).</li>
- *     <li>Get a {@link io.objectbox.sync.SyncBuilder} using
- *     {@link io.objectbox.sync.Sync#client(io.objectbox.BoxStore, java.lang.String, io.objectbox.sync.SyncCredentials) Sync.client(boxStore, url, credentials)}.
- *     Here you need to pass the {@link io.objectbox.BoxStore BoxStore}, along with an URL to the sync destination (server),
- *     and credentials. For demo set ups, you could start with {@link io.objectbox.sync.SyncCredentials#none()}
- *     credentials.</li>
+ *     <li>Build a {@link io.objectbox.sync.SyncClient} using
+ *     {@link io.objectbox.sync.Sync#client(io.objectbox.BoxStore, java.lang.String) Sync.client(boxStore, url)} and at
+ *     least one set of credentials with {@link io.objectbox.sync.SyncBuilder#credentials(io.objectbox.sync.SyncCredentials)}.</li>
  *     <li>Optional: use the {@link io.objectbox.sync.SyncBuilder} instance from the last step to configure the sync
  *     client and set initial listeners.</li>
- *     <li>Call {@link io.objectbox.sync.SyncBuilder#build()} to get an instance of
+ *     <li>Call {@link io.objectbox.sync.SyncBuilder#buildAndStart()} to get an instance of
  *     {@link io.objectbox.sync.SyncClient} (and hold on to it). Synchronization is now active.</li>
  *     <li>Optional: Interact with {@link io.objectbox.sync.SyncClient}.</li>
  * </ol>

@@ -16,8 +16,8 @@
 
 package io.objectbox.sync;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -44,8 +44,13 @@ public final class SyncBuilder {
 
     final Platform platform;
     final BoxStore boxStore;
-    @Nullable private String url;
-    final List<SyncCredentials> credentials;
+    /**
+     * The server URLs this client may connect to.
+     * <p>
+     * See {@link Sync#client(BoxStore, List)} for notes on multiple URLs.
+     */
+    final List<String> urls = new ArrayList<>();
+    final List<SyncCredentials> credentials = new ArrayList<>();
 
     @Nullable SyncLoginListener loginListener;
     @Nullable SyncCompletedListener completedListener;
@@ -98,47 +103,40 @@ public final class SyncBuilder {
         }
     }
 
-    private SyncBuilder(BoxStore boxStore, @Nullable String url, @Nullable List<SyncCredentials> credentials) {
-        checkNotNull(boxStore, "BoxStore is required.");
-        checkNotNull(credentials, "Sync credentials are required.");
+    /**
+     * Creates a builder for a {@link SyncClient}.
+     * <p>
+     * Don't use this directly, use the {@link Sync#client} methods instead.
+     */
+    SyncBuilder(BoxStore boxStore, List<String> urls) {
+        checkNotNull(boxStore, "boxStore");
+        checkNotNull(urls, "urls");
         this.boxStore = boxStore;
-        this.url = url;
-        this.credentials = credentials;
+        // For SyncHybridBuilder, delay validating there is a URL until the build call
+        for (String url : urls) {
+            url(url);
+        }
         checkSyncFeatureAvailable();
         this.platform = Platform.findPlatform(); // Requires APIs only present in Android Sync library
-    }
-
-    @Internal
-    public SyncBuilder(BoxStore boxStore, String url, @Nullable SyncCredentials credentials) {
-        this(boxStore, url, credentials == null ? null : Collections.singletonList(credentials));
-    }
-
-    @Internal
-    public SyncBuilder(BoxStore boxStore, String url, @Nullable SyncCredentials[] multipleCredentials) {
-        this(boxStore, url, multipleCredentials == null ? null : Arrays.asList(multipleCredentials));
-    }
-
-    /**
-     * When using this constructor, make sure to set the server URL before starting.
-     */
-    @Internal
-    public SyncBuilder(BoxStore boxStore, @Nullable SyncCredentials credentials) {
-        this(boxStore, null, credentials == null ? null : Collections.singletonList(credentials));
     }
 
     /**
      * Allows internal code to set the Sync server URL after creating this builder.
      */
     @Internal
-    SyncBuilder serverUrl(String url) {
-        this.url = url;
+    SyncBuilder url(String url) {
+        checkNotNull(url, "url");
+        this.urls.add(url);
         return this;
     }
 
-    @Internal
-    String serverUrl() {
-        checkNotNull(url, "Sync Server URL is null.");
-        return url;
+    /**
+     * Adds {@link SyncCredentials} to authenticate the client with the server.
+     */
+    public SyncBuilder credentials(SyncCredentials credentials) {
+        checkNotNull(credentials, "credentials");
+        this.credentials.add(credentials);
+        return this;
     }
 
     /**
@@ -151,8 +149,8 @@ public final class SyncBuilder {
      * @see SyncClient#putFilterVariable
      */
     public SyncBuilder filterVariable(String name, String value) {
-        checkNotNull(name, "Filter variable name is null.");
-        checkNotNull(value, "Filter variable value is null.");
+        checkNotNull(name, "name");
+        checkNotNull(value, "value");
         filterVariables.put(name, value);
         return this;
     }
@@ -265,12 +263,11 @@ public final class SyncBuilder {
         if (boxStore.getSyncClient() != null) {
             throw new IllegalStateException("The given store is already associated with a Sync client, close it first.");
         }
-        checkNotNull(url, "Sync Server URL is required.");
         return new SyncClientImpl(this);
     }
 
     /**
-     * Builds, {@link SyncClient#start() starts} and returns a Sync client.
+     * {@link #build() Builds}, {@link SyncClient#start() starts} and returns a Sync client.
      */
     public SyncClient buildAndStart() {
         SyncClient syncClient = build();
@@ -278,10 +275,13 @@ public final class SyncBuilder {
         return syncClient;
     }
 
-    private void checkNotNull(@Nullable Object object, String message) {
-        //noinspection ConstantConditions Non-null annotation does not enforce, so check for null.
+    /**
+     * Nullness annotations are only a hint in Java, so explicitly check nonnull annotated parameters
+     * (see package-info.java for package settings).
+     */
+    private void checkNotNull(@Nullable Object object, String name) {
         if (object == null) {
-            throw new IllegalArgumentException(message);
+            throw new IllegalArgumentException(name + " must not be null.");
         }
     }
 

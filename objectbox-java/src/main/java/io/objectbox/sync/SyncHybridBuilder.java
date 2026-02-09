@@ -16,6 +16,8 @@
 
 package io.objectbox.sync;
 
+import java.util.Collections;
+
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
 import io.objectbox.InternalAccess;
@@ -46,7 +48,7 @@ public final class SyncHybridBuilder {
         boxStore = storeBuilder.build();
         boxStoreServer = storeBuilderServer.build();
         SyncCredentials clientCredentials = authenticatorCredentials.createClone();
-        clientBuilder = new SyncBuilder(boxStore, clientCredentials);  // Do not yet set URL, port may be dynamic
+        clientBuilder = new SyncBuilder(boxStore, Collections.emptyList()).credentials(clientCredentials);  // Do not yet set URL, port may be dynamic
         serverBuilder = new SyncServerBuilder(boxStoreServer, url, authenticatorCredentials);
     }
 
@@ -75,7 +77,7 @@ public final class SyncHybridBuilder {
         SyncServer server = serverBuilder.buildAndStart();
 
         SyncClient client = clientBuilder
-                .serverUrl(server.getUrl())
+                .url(server.getUrl())
                 .buildAndStart();
 
         return new SyncHybrid(boxStore, client, boxStoreServer, server);
