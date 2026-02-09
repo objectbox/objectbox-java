@@ -108,10 +108,10 @@ box.remove(person)  // Delete
 > [!NOTE]
 > Prefer to look at example code? Check out [our examples repository](https://github.com/objectbox/objectbox-examples).
 
-You can add the ObjectBox Java SDK to your project using:
+You can add the ObjectBox Java SDK using a:
 
-- a [Gradle setup](#gradle-setup)
-- a [Maven setup](#maven-setup)
+- [Gradle setup](#gradle-setup)
+- [Maven setup](#maven-setup)
 
 ObjectBox tools and dependencies are available on [the Maven Central repository](https://central.sonatype.com/namespace/io.objectbox).
 
@@ -131,31 +131,68 @@ The APIs and tools of the ObjectBox Java SDK support:
 
 ### Gradle setup
 
-For Gradle projects, add the ObjectBox Gradle plugin to your root Gradle script.
+For Gradle projects, add the required plugins to your root Gradle script.
 
-When using a TOML version catalog and plugins syntax (for alternatives see below):
+When using a [TOML version catalog](https://docs.gradle.org/current/userguide/version_catalogs.html) and plugins syntax 
+(for alternatives see below):
           
 ```toml
 # gradle/libs.versions.toml
+
 [versions]
+# Define a variable for the version of the plugin
 objectbox = "5.1.0"
 
+# For an Android project
+agp = "<AGP_VERSION>"
+
+# If using Kotlin
+kotlin = "<KOTLIN_VERSION>"
+
 [plugins]
+# Add an alias for the plugin
 objectbox = { id = "io.objectbox", version.ref = "objectbox" }
+
+# For an Android project
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+
+# For a JVM project, if using Kotlin 
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 ```
 
 ```kotlin
 // build.gradle.kts
+
 plugins {
+    // Add the plugin
     alias(libs.plugins.objectbox) apply false
+
+    // For an Android project
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.kapt) apply false
+
+    // For a JVM project, if using Kotlin
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.kapt) apply false
 }
 ```
 
 ```kotlin
 // settings.gradle.kts
+
 pluginManagement {
+    repositories {
+        // Add the Maven Central repository
+        mavenCentral()
+    }
+    
     resolutionStrategy {
         eachPlugin {
+            // Map the plugin ID to the Maven artifact
             if (requested.id.id == "io.objectbox") {
                 useModule("io.objectbox:objectbox-gradle-plugin:${requested.version}")
             }
@@ -164,22 +201,57 @@ pluginManagement {
 }
 ```
 
-Alternatives:
+Then, in the Gradle script of your subproject apply the necessary plugins:
 
-<details><summary>Using plugins syntax</summary>
+```kotlin
+// app/build.gradle.kts
+
+plugins {
+    // For an Android project
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    
+    // For a JVM project
+    id("application") // or id("java-library")
+    // Optional, if using Kotlin
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.kapt)
+
+    // Finally, apply the plugin
+    alias(libs.plugins.objectbox)
+}
+```
+
+Finally, sync the Gradle project with your IDE (for ex. using "Sync Project with Gradle Files" in Android Studio).
+
+Your project can now use ObjectBox, continue by [defining entity classes](https://docs.objectbox.io/getting-started#define-entity-classes).
+
+#### Alternatives
+
+<details><summary>Using plugins syntax with plugin IDs</summary>
 
 ```kotlin
 // build.gradle.kts
+
 plugins {
+    // Add the plugin
     id("io.objectbox") version "5.1.0" apply false
 }
 ```
 
 ```kotlin
 // settings.gradle.kts
+
 pluginManagement {
+    repositories {
+        // Add the Maven Central repository
+        mavenCentral()
+    }
+
     resolutionStrategy {
         eachPlugin {
+            // Map the plugin ID to the Maven artifact
             if (requested.id.id == "io.objectbox") {
                 useModule("io.objectbox:objectbox-gradle-plugin:${requested.version}")
             }
@@ -194,12 +266,18 @@ pluginManagement {
 
 ```kotlin
 // build.gradle.kts
+
 buildscript {
+    // Define a variable for the plugin version
     val objectboxVersion by extra("5.1.0")
-    repositories {        
+  
+    repositories { 
+        // Add the Maven Central repository       
         mavenCentral()    
     }
+  
     dependencies {
+        // Add the plugin
         classpath("io.objectbox:objectbox-gradle-plugin:$objectboxVersion")
     }
 }
@@ -211,12 +289,18 @@ buildscript {
 
 ```groovy
 // build.gradle
+
 buildscript {
+    // Define a variable for the plugin version
     ext.objectboxVersion = "5.1.0"
+  
     repositories {        
+        // Add the Maven Central repository
         mavenCentral()    
     }
+  
     dependencies {
+        // Add the plugin
         classpath("io.objectbox:objectbox-gradle-plugin:$objectboxVersion")
     }
 }
@@ -224,35 +308,27 @@ buildscript {
 
 </details>
 
-Then, in the Gradle script of your subproject apply the plugin:
+Then, in the Gradle script of your subproject apply the necessary plugins using their IDs:
 
 ```kotlin
 // app/build.gradle.kts
+
 plugins {
-    alias(libs.plugins.android.application) // When used in an Android project
-    alias(libs.plugins.kotlin.android) // When used in an Android project
-    alias(libs.plugins.kotlin.kapt) // When used in an Android or Kotlin project
-    alias(libs.plugins.objectbox) // Add after other plugins
+    // For an Android project
+    id("com.android.application") // or id("com.android.library")
+    id("org.jetbrains.kotlin.android") // or kotlin("android")
+    id("org.jetbrains.kotlin.kapt") // or kotlin("kapt")  
+  
+    // For a JVM project
+    id("application") // or id("java-library")
+    // Optional, if using Kotlin
+    id("org.jetbrains.kotlin.jvm") // or kotlin("jvm")
+    id("org.jetbrains.kotlin.kapt") // or kotlin("kapt")  
+
+    // Finally, apply the plugin
+    id("io.objectbox")
 }
 ```
-
-<details><summary>Alternative: when not using a version catalog, using the plugin id</summary>
-
-```kotlin
-// app/build.gradle.kts
-plugins {
-    id("com.android.application") // When used in an Android project
-    kotlin("android") // When used in an Android project
-    kotlin("kapt") // When used in an Android or Kotlin project
-    id("io.objectbox") // Add after other plugins
-}
-```
-
-</details>
-
-Finally, sync the Gradle project with your IDE (for ex. using "Sync Project with Gradle Files" in Android Studio).
-
-Your project can now use ObjectBox, continue by [defining entity classes](https://docs.objectbox.io/getting-started#define-entity-classes).
 
 ### Maven setup
 
