@@ -65,10 +65,31 @@ public final class SyncClientImpl implements SyncClient {
         this.serverUrl = builder.serverUrl();
         this.connectivityMonitor = builder.platform.getConnectivityMonitor();
 
-        long boxStoreHandle = builder.boxStore.getNativeStore();
-        long handle = nativeCreate(boxStoreHandle, serverUrl, builder.trustedCertPaths);
+        // Build the options
+        long optHandle = nativeSyncOptCreate(builder.boxStore.getNativeStore());
+        if (optHandle == 0) {
+            throw new RuntimeException("Failed to create Sync client options: handle is zero.");
+        }
+        try {
+            // Add server URL
+            nativeSyncOptAddUrl(optHandle, serverUrl);
+
+            // Add trusted certificate paths if provided
+            if (builder.trustedCertPaths != null) {
+                for (String certPath : builder.trustedCertPaths) {
+                    nativeSyncOptAddCertPath(optHandle, certPath);
+                }
+            }
+        } catch (Exception e) {
+            // Free the options if any option method call failed (like due to invalid arguments)
+            nativeSyncOptFree(optHandle);
+            throw e;
+        }
+
+        // Create the sync client (this frees the options in any case)
+        long handle = nativeSyncOptCreateClient(optHandle);
         if (handle == 0) {
-            throw new RuntimeException("Failed to create sync client: handle is zero.");
+            throw new RuntimeException("Failed to create Sync client: handle is zero.");
         }
         this.handle = handle;
 
@@ -356,10 +377,61 @@ public final class SyncClientImpl implements SyncClient {
     }
 
     /**
-     * Creates a native sync client for the given store handle ready to connect to the server at the given URI.
-     * Uses certificate authorities trusted by the host if no trusted certificate paths are passed.
+     * Creates a sync client options object for the given store.
+     * <p>
+     * The options must be configured (at least one URL) and then used with {@link #nativeSyncOptCreateClient}.
+     *
+     * @return handle to the options object, or 0 on error
      */
-    private static native long nativeCreate(long storeHandle, String uri, @Nullable String[] certificateDirsOrPaths);
+    private static native long nativeSyncOptCreate(long storeHandle);
+
+    /**
+     * Adds a server URL to the sync options; at least one URL must be added before creating the sync client.
+     * <p>
+     * Passing multiple URLs allows high availability and load balancing (i.e. using an ObjectBox Sync Server Cluster).
+     * <p>
+     * A random URL is selected for each connection attempt.
+     */
+    private static native void nativeSyncOptAddUrl(long optHandle, String url);
+
+    /**
+     * Adds a certificate path to the sync options.
+     * <p>
+     * This allows to pass certificate paths referring to the local file system.
+     * <p>
+     * Example use cases are using self-signed certificates in a local development environment and custom certificate
+     * authorities.
+     */
+    private static native void nativeSyncOptAddCertPath(long optHandle, String certPath);
+
+    /**
+     * Sets sync flags to adjust sync behavior; see SyncFlags for available flags.
+     * <p>
+     * Combine multiple flags using bitwise OR.
+     */
+    private static native void nativeSyncOptFlags(long optHandle, int flags);
+
+    /**
+     * Creates a sync client with the given options.
+     * <p>
+     * This does not initiate any connection attempts yet: call {@link #nativeStart} to do so. Before nativeStart(), you
+     * must configure credentials via {@link #nativeSetLoginInfo} or {@link #nativeAddLoginCredentials}.
+     * <p>
+     * By default, a sync client automatically receives updates from the server once login succeeded. To configure this
+     * differently, call {@link #nativeSetRequestUpdatesMode} with the wanted mode.
+     * <p>
+     * Note: the given options are always freed by this function, including when an error occurs.
+     *
+     * @return handle to the sync client, or 0 on error
+     */
+    private static native long nativeSyncOptCreateClient(long optHandle);
+
+    /**
+     * Frees the sync options object.
+     * <p>
+     * Note: Only free *unused* options; {@link #nativeSyncOptCreateClient} frees the options internally.
+     */
+    private static native void nativeSyncOptFree(long optHandle);
 
     private native void nativeDelete(long handle);
 
