@@ -153,7 +153,11 @@ kotlin = "<KOTLIN_VERSION>"
 # Add an alias for the plugin
 objectbox = { id = "io.objectbox", version.ref = "objectbox" }
 
-# For an Android project
+# For an Android project, using Android Gradle Plugin 9.0 or newer
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-kapt = { id = "com.android.legacy-kapt", version.ref = "agp" }
+
+# For an Android project, using Android Gradle Plugin 8.13 or older
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
@@ -170,7 +174,11 @@ plugins {
     // Add the plugin
     alias(libs.plugins.objectbox) apply false
 
-    // For an Android project
+    // For an Android project, using Android Gradle Plugin 9.0 or newer
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.kapt) apply false  
+  
+    // For an Android project, using Android Gradle Plugin 8.13 or older
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.kapt) apply false
@@ -207,7 +215,11 @@ Then, in the Gradle script of your subproject apply the necessary plugins:
 // app/build.gradle.kts
 
 plugins {
-    // For an Android project
+    // For an Android project, using Android Gradle Plugin 9.0 or newer
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.kapt)
+    
+    // For an Android project, using Android Gradle Plugin 8.13 or older
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
@@ -314,7 +326,11 @@ Then, in the Gradle script of your subproject apply the necessary plugins using 
 // app/build.gradle.kts
 
 plugins {
-    // For an Android project
+    // For an Android project, using Android Gradle Plugin 9.0 or newer
+    id("com.android.application") // or id("com.android.library")
+    id("com.android.legacy-kapt") 
+  
+    // For an Android project, using Android Gradle Plugin 8.13 or older
     id("com.android.application") // or id("com.android.library")
     id("org.jetbrains.kotlin.android") // or kotlin("android")
     id("org.jetbrains.kotlin.kapt") // or kotlin("kapt")  
