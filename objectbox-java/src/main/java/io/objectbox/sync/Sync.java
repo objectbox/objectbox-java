@@ -16,6 +16,8 @@
 
 package io.objectbox.sync;
 
+import java.util.Arrays;
+
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
 import io.objectbox.sync.server.SyncServer;
@@ -97,9 +99,7 @@ public final class Sync {
         SyncBuilder builder = client(boxStore).url(url);
         //noinspection ConstantValue
         if (multipleCredentials != null) {
-            for (SyncCredentials credentials : multipleCredentials) {
-                builder.credentials(credentials);
-            }
+            builder.credentials(Arrays.asList(multipleCredentials));
         }
         return builder;
     }

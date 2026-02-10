@@ -130,13 +130,7 @@ public final class SyncClientImpl implements SyncClient {
         this.internalListener = new InternalSyncClientListener();
         nativeSetListener(handle, internalListener);
 
-        if (builder.credentials.size() == 1) {
-            setLoginCredentials(builder.credentials.get(0));
-        } else if (builder.credentials.size() > 1) {
-            setLoginCredentials(builder.credentials.toArray(new SyncCredentials[0]));
-        } else {
-            throw new IllegalArgumentException("No credentials provided");
-        }
+        setLoginCredentials(builder.credentials);
 
         // If created successfully, let store keep a reference so the caller does not have to.
         InternalAccess.setSyncClient(builder.boxStore, this);
@@ -237,6 +231,17 @@ public final class SyncClientImpl implements SyncClient {
 
     public void removeAllFilterVariables() {
         nativeRemoveAllFilterVariables(getHandle());
+    }
+
+    @Override
+    public void setLoginCredentials(List<SyncCredentials> credentials) {
+        if (credentials.size() == 1) {
+            setLoginCredentials(credentials.get(0));
+        } else if (credentials.size() > 1) {
+            setLoginCredentials(credentials.toArray(new SyncCredentials[0]));
+        } else {
+            throw new IllegalArgumentException("Credentials must be provided");
+        }
     }
 
     @Override

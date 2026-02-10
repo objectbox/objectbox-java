@@ -192,6 +192,10 @@ public class ConnectivityMonitorTest {
         }
 
         @Override
+        public void setLoginCredentials(List<SyncCredentials> credentials) {
+        }
+
+        @Override
         public void setLoginCredentials(SyncCredentials[] multipleCredentials) {
         }
 

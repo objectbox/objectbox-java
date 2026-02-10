@@ -145,10 +145,31 @@ public final class SyncBuilder {
 
     /**
      * Adds {@link SyncCredentials} to authenticate the client with the server.
+     * <p>
+     * The accepted credentials types depend on your Sync server configuration.
+     *
+     * @param credentials credentials created using a {@link SyncCredentials} factory method, for example
+     * {@code SyncCredentials.jwtIdToken(idToken)}.
+     * @see #credentials(List)
      */
     public SyncBuilder credentials(SyncCredentials credentials) {
         checkNotNull(credentials, "credentials");
         this.credentials.add(credentials);
+        return this;
+    }
+
+    /**
+     * Like {@link #credentials(SyncCredentials)}, but accepts a list of credentials.
+     *
+     * @param credentials a list of credentials where each element is created using a {@link SyncCredentials} factory
+     * method, for example {@code SyncCredentials.jwtIdToken(idToken)}.
+     * @return this builder for chaining
+     */
+    public SyncBuilder credentials(List<SyncCredentials> credentials) {
+        checkNotNull(credentials, "credentials");
+        for (SyncCredentials credential : credentials) {
+            credentials(credential);
+        }
         return this;
     }
 
