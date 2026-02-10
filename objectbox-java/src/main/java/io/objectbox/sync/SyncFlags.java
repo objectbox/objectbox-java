@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. https://objectbox.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,5 +37,26 @@ public final class SyncFlags {
    * Client-only: setting this flag for Sync server has no effect.
    */
   public static final int ClientKeepDataOnSyncError = 2;
+  /**
+   * Logs sync filter variables used for each client, e.g. values provided by JWT or the client's login message.
+   * Server-only: setting this flag for Sync client has no effect.
+   */
+  public static final int DebugLogFilterVariables = 4;
+  /**
+   * When set, remove operations will include the full object data in the TX log (REMOVE_OBJECT command).
+   * This allows sync filters to filter out remove operations based on the object content.
+   * Without this flag, remove operations only contain the object ID and cannot be filtered.
+   * Note: this increases the size of TX logs for remove operations.
+   */
+  public static final int RemoveWithObjectData = 8;
+  /**
+   * Enables debug logging of TX log processing.
+   * For now, this only has an effect on SyncClients (Sync Server has extensive debug logs already).
+   */
+  public static final int DebugLogTxLogs = 16;
+  /**
+   * Skips invalid (put object) operations in the TX log instead of failing.
+   */
+  public static final int SkipInvalidTxOps = 32;
 }
 
