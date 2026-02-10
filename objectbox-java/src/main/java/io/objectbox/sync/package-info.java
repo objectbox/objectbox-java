@@ -22,8 +22,9 @@
  * <ol>
  *     <li>Create a BoxStore as usual (using MyObjectBox).</li>
  *     <li>Build a {@link io.objectbox.sync.SyncClient} using
- *     {@link io.objectbox.sync.Sync#client(io.objectbox.BoxStore, java.lang.String) Sync.client(boxStore, url)} and at
- *     least one set of credentials with {@link io.objectbox.sync.SyncBuilder#credentials(io.objectbox.sync.SyncCredentials)}.</li>
+ *     {@link io.objectbox.sync.Sync#client(io.objectbox.BoxStore) Sync.client(boxStore)}, a
+ *     {@link io.objectbox.sync.SyncBuilder#url(java.lang.String)} and at least one set of credentials with
+ *     {@link io.objectbox.sync.SyncBuilder#credentials(io.objectbox.sync.SyncCredentials)}.</li>
  *     <li>Optional: use the {@link io.objectbox.sync.SyncBuilder} instance from the last step to configure the sync
  *     client and set initial listeners.</li>
  *     <li>Call {@link io.objectbox.sync.SyncBuilder#buildAndStart()} to get an instance of

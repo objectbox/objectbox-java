@@ -21,7 +21,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.sync.SyncBuilder.RequestUpdatesMode;
 import io.objectbox.sync.listener.SyncChangeListener;
@@ -53,7 +52,7 @@ public interface SyncClient extends Closeable {
     /**
      * Gets the sync server URLs this client may connect to.
      * <p>
-     * See {@link Sync#client(BoxStore, List)} for notes on multiple URLs.
+     * See {@link SyncBuilder#url(String)} for notes on multiple URLs.
      */
     List<String> getUrls();
 

@@ -60,7 +60,7 @@ public class SyncTest extends AbstractObjectBoxTest {
         // If no Sync feature is available
         FeatureNotAvailableException exception = assertThrows(
                 FeatureNotAvailableException.class,
-                () -> Sync.client(store, SERVER_URL)
+                () -> Sync.client(store)
         );
         String message = exception.getMessage();
         assertTrue(message, message.contains("does not include ObjectBox Sync") &&

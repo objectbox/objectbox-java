@@ -25,7 +25,6 @@ import java.util.TreeMap;
 import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
-import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.FeatureNotAvailableException;
 import io.objectbox.sync.internal.Platform;
 import io.objectbox.sync.listener.SyncChangeListener;
@@ -36,19 +35,13 @@ import io.objectbox.sync.listener.SyncLoginListener;
 import io.objectbox.sync.listener.SyncTimeListener;
 
 /**
- * A builder to create a {@link SyncClient}; the builder itself should be created via
- * {@link Sync#client(BoxStore, String, SyncCredentials)}.
+ * A builder to create a {@link SyncClient}; the builder itself should be created via {@link Sync#client(BoxStore)}.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class SyncBuilder {
 
     final Platform platform;
     final BoxStore boxStore;
-    /**
-     * The server URLs this client may connect to.
-     * <p>
-     * See {@link Sync#client(BoxStore, List)} for notes on multiple URLs.
-     */
     final List<String> urls = new ArrayList<>();
     final List<SyncCredentials> credentials = new ArrayList<>();
 
@@ -107,27 +100,46 @@ public final class SyncBuilder {
     /**
      * Creates a builder for a {@link SyncClient}.
      * <p>
-     * Don't use this directly, use the {@link Sync#client} methods instead.
+     * Don't use this directly, use the {@link Sync#client} method instead.
      */
-    SyncBuilder(BoxStore boxStore, List<String> urls) {
+    SyncBuilder(BoxStore boxStore) {
         checkNotNull(boxStore, "boxStore");
-        checkNotNull(urls, "urls");
         this.boxStore = boxStore;
-        // For SyncHybridBuilder, delay validating there is a URL until the build call
-        for (String url : urls) {
-            url(url);
-        }
         checkSyncFeatureAvailable();
         this.platform = Platform.findPlatform(); // Requires APIs only present in Android Sync library
     }
 
     /**
-     * Allows internal code to set the Sync server URL after creating this builder.
+     * Adds a Sync server URL the client should connect to.
+     * <p>
+     * This is typically a WebSockets URL starting with {@code ws://} or {@code wss://} (for encrypted connections), for
+     * example if the server is running on localhost {@code ws://127.0.0.1:9999}.
+     * <p>
+     * Can be called multiple times to add multiple URLs for high availability and load balancing (like when using an
+     * ObjectBox Sync Server Cluster). A random URL is selected for each connection attempt.
+     *
+     * @param url The URL of the Sync server on which the Sync protocol is exposed.
+     * @return this builder for chaining
+     * @see #urls(List)
      */
-    @Internal
-    SyncBuilder url(String url) {
+    public SyncBuilder url(String url) {
         checkNotNull(url, "url");
         this.urls.add(url);
+        return this;
+    }
+
+    /**
+     * Like {@link #url(String)}, but accepts a list of URLs.
+     *
+     * @param urls A list of URLs of Sync servers on which the Sync protocol is exposed.
+     * @return this builder for chaining
+     * @see #url(String)
+     */
+    public SyncBuilder urls(List<String> urls) {
+        checkNotNull(urls, "urls");
+        for (String url : urls) {
+            url(url);
+        }
         return this;
     }
 
