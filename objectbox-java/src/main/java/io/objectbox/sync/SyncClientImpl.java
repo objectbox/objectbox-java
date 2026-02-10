@@ -83,6 +83,11 @@ public final class SyncClientImpl implements SyncClient {
                     nativeSyncOptAddCertPath(optHandle, certPath);
                 }
             }
+
+            // Add Sync flags if set
+            if (builder.flags != 0) {
+                nativeSyncOptFlags(optHandle, builder.flags);
+            }
         } catch (Exception e) {
             // Free the options if any option method call failed (like due to invalid arguments)
             nativeSyncOptFree(optHandle);

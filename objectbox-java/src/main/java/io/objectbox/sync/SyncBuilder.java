@@ -61,6 +61,7 @@ public final class SyncBuilder {
 
     @Nullable
     String[] trustedCertPaths;
+    int flags;
     boolean uncommittedAcks;
 
     RequestUpdatesMode requestUpdatesMode = RequestUpdatesMode.AUTO;
@@ -165,6 +166,16 @@ public final class SyncBuilder {
     public SyncBuilder trustedCertificates(String[] paths) {
         // Copy to prevent external modification.
         this.trustedCertPaths = Arrays.copyOf(paths, paths.length);
+        return this;
+    }
+
+    /**
+     * Sets bit flags to adjust Sync behavior, like additional logging.
+     *
+     * @param flags One or multiple {@link SyncFlags}, combined with bitwise or.
+     */
+    public SyncBuilder flags(int flags) {
+        this.flags = flags;
         return this;
     }
 
