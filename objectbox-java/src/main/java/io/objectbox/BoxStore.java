@@ -84,8 +84,15 @@ public class BoxStore implements Closeable {
      */
     public static final String JNI_VERSION = "5.1.0-2026-01-19";
 
-    /** The ObjectBox database version this Java library is known to work with. */
-    private static final String VERSION = "5.1.1-dev-2026-01-21";
+    /**
+     * The ObjectBox database version this Java library is known to work with.
+     * <p>
+     * This should be a version number followed by a date (MAJOR.MINOR.PATCH-YYYY-MM-DD).
+     * <p>
+     * This is used (currently only in tests) to make sure a database library has a compatible JNI API by checking the
+     * version number matches exactly and the date is the same or newer.
+     */
+    private static final String VERSION = "5.1.1-2026-01-21";
 
     private static final String OBJECTBOX_PACKAGE_NAME = "objectbox";
     private static BoxStore defaultStore;
