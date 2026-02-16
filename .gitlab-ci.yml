@@ -2,7 +2,7 @@
 
 # Default image for linux builds
 # This should match the image used to build the JVM database libraries (so Address Sanitizer library matches)
-image: objectboxio/buildenv-core:2024-07-11 # With JDK 17
+image: objectboxio/buildenv-core:2025-07-03 # With JDK 21
 
 # Assumes these environment variables are configured in GitLab CI/CD Settings:
 # - OBX_READ_PACKAGES_TOKEN
