@@ -26,7 +26,8 @@ buildscript {
     // see the release checklist in the objectbox repo.
     // If true won't build snapshots and removes version post fix (e.g. "-dev-SNAPSHOT"),
     // uses release versions of dependencies.
-    val isRelease = System.getenv("OBX_RELEASE") == "true"
+    // val isRelease = System.getenv("OBX_RELEASE") == "true"
+    val isRelease = true // On (public) main branch don't use snapshots (publishing is disabled in CI for main branch)
 
     // version post fix: "-<value>" or "" if not defined; e.g. used by CI to pass in branch name
     val versionPostFixValue = project.findProperty("versionPostFix")
