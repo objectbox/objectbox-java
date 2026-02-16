@@ -17,6 +17,7 @@
 package io.objectbox.sync;
 
 import java.io.Closeable;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -42,8 +43,18 @@ public interface SyncClient extends Closeable {
 
     /**
      * Gets the sync server URL this client is connected to.
+     *
+     * @deprecated Use {@link #getUrls()}
      */
+    @Deprecated
     String getServerUrl();
+
+    /**
+     * Gets the sync server URLs this client may connect to.
+     * <p>
+     * See {@link SyncBuilder#url(String)} for notes on multiple URLs.
+     */
+    List<String> getUrls();
 
     /**
      * Flag indicating if the sync client was started.
@@ -158,13 +169,34 @@ public interface SyncClient extends Closeable {
     void removeAllFilterVariables();
 
     /**
-     * Updates the credentials used to authenticate with the server. This should not be required during regular use.
-     * The original credentials were passed when building sync client.
+     * Sets credentials to authenticate the client with the server.
+     * <p>
+     * Any credentials that were set before are replaced.
+     * <p>
+     * Usually, credentials are passed via {@link SyncBuilder#credentials(SyncCredentials)}, but this can be used to
+     * update them later, such as when a token expires.
+     * <p>
+     * The accepted credentials type depends on your Sync server configuration.
+     *
+     * @param credentials credentials created using a {@link SyncCredentials} factory method, for example
+     * {@code SyncCredentials.jwtIdToken(idToken)}.
+     * @see #setLoginCredentials(List)
      */
     void setLoginCredentials(SyncCredentials credentials);
 
     /**
-     * Like {@link #setLoginCredentials(SyncCredentials)}, but allows setting multiple credentials.
+     * Like {@link #setLoginCredentials(SyncCredentials)}, but accepts a list of credentials.
+     *
+     * @param credentials a list of credentials where each element is created using a {@link SyncCredentials} factory
+     * method, for example {@code SyncCredentials.jwtIdToken(idToken)}.
+     */
+    void setLoginCredentials(List<SyncCredentials> credentials);
+
+    /**
+     * Like {@link #setLoginCredentials(SyncCredentials)}, but accepts an array of credentials.
+     *
+     * @param multipleCredentials an array of credentials where each element is created using a {@link SyncCredentials}
+     * factory method, for example {@code SyncCredentials.jwtIdToken(idToken)}.
      */
     void setLoginCredentials(SyncCredentials[] multipleCredentials);
 

@@ -46,7 +46,8 @@ public final class SyncHybridBuilder {
         boxStore = storeBuilder.build();
         boxStoreServer = storeBuilderServer.build();
         SyncCredentials clientCredentials = authenticatorCredentials.createClone();
-        clientBuilder = new SyncBuilder(boxStore, clientCredentials);  // Do not yet set URL, port may be dynamic
+        // Do not yet set URL, port may only be chosen once server is started, see buildAndStart()
+        clientBuilder = new SyncBuilder(boxStore).credentials(clientCredentials);
         serverBuilder = new SyncServerBuilder(boxStoreServer, url, authenticatorCredentials);
     }
 
@@ -75,7 +76,7 @@ public final class SyncHybridBuilder {
         SyncServer server = serverBuilder.buildAndStart();
 
         SyncClient client = clientBuilder
-                .serverUrl(server.getUrl())
+                .url(server.getUrl())
                 .buildAndStart();
 
         return new SyncHybrid(boxStore, client, boxStoreServer, server);
