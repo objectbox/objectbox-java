@@ -154,12 +154,6 @@ agp = "<AGP_VERSION>"
 # If using Kotlin
 kotlin = "<KOTLIN_VERSION>"
 
-# For an Android project
-agp = "<AGP_VERSION>"
-
-# If using Kotlin
-kotlin = "<KOTLIN_VERSION>"
-
 [plugins]
 # Add an alias for the plugin
 objectbox = { id = "io.objectbox", version.ref = "objectbox" }
