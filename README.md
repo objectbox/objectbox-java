@@ -123,11 +123,16 @@ The database libraries available for the ObjectBox Java SDK support:
   - Windows (x64)
 - Android 5.0 (API level 21) or newer
 
-The APIs and tools of the ObjectBox Java SDK support:
+The ObjectBox Java SDK supports:
 
 - Java 8 or newer
 - Kotlin 1.7 or newer
-- Android Gradle Plugin 8.0 or newer
+
+The [ObjectBox Gradle plugin](https://github.com/objectbox/objectbox-java-generator) supports:
+
+- Gradle 7.0 or newer
+- Android Gradle Plugin 8.1 or newer
+- JDK 11 or newer
 
 ### Gradle setup
 
@@ -141,7 +146,13 @@ When using a [TOML version catalog](https://docs.gradle.org/current/userguide/ve
 
 [versions]
 # Define a variable for the version of the plugin
-objectbox = "5.1.0"
+objectbox = "5.2.0"
+
+# For an Android project
+agp = "<AGP_VERSION>"
+
+# If using Kotlin
+kotlin = "<KOTLIN_VERSION>"
 
 # For an Android project
 agp = "<AGP_VERSION>"
@@ -248,7 +259,7 @@ Your project can now use ObjectBox, continue by [defining entity classes](https:
 
 plugins {
     // Add the plugin
-    id("io.objectbox") version "5.1.0" apply false
+    id("io.objectbox") version "5.2.0" apply false
 }
 ```
 
@@ -281,7 +292,7 @@ pluginManagement {
 
 buildscript {
     // Define a variable for the plugin version
-    val objectboxVersion by extra("5.1.0")
+    val objectboxVersion by extra("5.2.0")
   
     repositories { 
         // Add the Maven Central repository       
@@ -304,7 +315,7 @@ buildscript {
 
 buildscript {
     // Define a variable for the plugin version
-    ext.objectboxVersion = "5.1.0"
+    ext.objectboxVersion = "5.2.0"
   
     repositories {        
         // Add the Maven Central repository

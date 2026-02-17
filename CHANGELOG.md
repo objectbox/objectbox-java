@@ -4,6 +4,19 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the ObjectBox C++ core, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
+## 5.2.0 - 2026-02-16
+
+- The [ObjectBox Gradle plugin](https://github.com/objectbox/objectbox-java-generator) requires JDK 11 and Android
+  Gradle Plugin 8.1 or newer.
+- Update database libraries for Android and JVM to database version `5.1.1-pre-2026-02-16`.
+
+### Sync
+
+- Add simplified `Sync.client(boxStore)` helper method. Move URL and credentials options to builder, add variants that 
+  accept multiple URLs and credentials. Deprecate the existing helper methods.
+- Add Sync client builder option to configure Sync behavior using 
+  [SyncFlags](objectbox-java/src/main/java/io/objectbox/sync/SyncFlags.java).
+
 ## 5.1.0 - 2026-01-26
 
 - Add [ObjectBoxThreadPoolExecutor](objectbox-java/src/main/java/io/objectbox/ObjectBoxThreadPoolExecutor.java), a

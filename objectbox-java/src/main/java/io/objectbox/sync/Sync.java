@@ -16,6 +16,8 @@
 
 package io.objectbox.sync;
 
+import java.util.Arrays;
+
 import io.objectbox.BoxStore;
 import io.objectbox.BoxStoreBuilder;
 import io.objectbox.sync.server.SyncServer;
@@ -51,6 +53,23 @@ public final class Sync {
     }
 
     /**
+     * Starts building a {@link SyncClient} for the given {@link BoxStore}.
+     * <p>
+     * This does not initiate any connection attempts yet: call {@link SyncBuilder#buildAndStart()} to do so. Before,
+     * you must configure the server URL via {@link SyncBuilder#url(String)} and add credentials via
+     * {@link SyncBuilder#credentials(SyncCredentials)}.
+     * <p>
+     * By default, a Sync client automatically receives updates from the server once login succeeded. To configure this
+     * differently, call {@link SyncBuilder#requestUpdatesMode(SyncBuilder.RequestUpdatesMode)} with the wanted mode.
+     *
+     * @param boxStore The {@link BoxStore} the client should use.
+     * @return a builder to configure the Sync client
+     */
+    public static SyncBuilder client(BoxStore boxStore) {
+        return new SyncBuilder(boxStore);
+    }
+
+    /**
      * Starts building a {@link SyncClient}. Once done, complete with {@link SyncBuilder#build() build()}.
      *
      * @param boxStore The {@link BoxStore} the client should use.
@@ -58,18 +77,31 @@ public final class Sync {
      * starting with {@code ws://} or {@code wss://} (for encrypted connections), for example
      * {@code ws://127.0.0.1:9999}.
      * @param credentials {@link SyncCredentials} to authenticate with the server.
+     * @deprecated Use {@link #client(BoxStore)}, {@link SyncBuilder#url(String)} and
+     * {@link SyncBuilder#credentials(SyncCredentials)} instead.
      */
+    @Deprecated
     public static SyncBuilder client(BoxStore boxStore, String url, SyncCredentials credentials) {
-        return new SyncBuilder(boxStore, url, credentials);
+        return client(boxStore)
+                .url(url)
+                .credentials(credentials);
     }
 
     /**
      * Like {@link #client(BoxStore, String, SyncCredentials)}, but supports passing a set of authentication methods.
      *
      * @param multipleCredentials An array of {@link SyncCredentials} to be used to authenticate with the server.
+     * @deprecated Use {@link #client(BoxStore)}, {@link SyncBuilder#url(String)} and
+     * {@link SyncBuilder#credentials(SyncCredentials)} instead.
      */
+    @Deprecated
     public static SyncBuilder client(BoxStore boxStore, String url, SyncCredentials[] multipleCredentials) {
-        return new SyncBuilder(boxStore, url, multipleCredentials);
+        SyncBuilder builder = client(boxStore).url(url);
+        //noinspection ConstantValue
+        if (multipleCredentials != null) {
+            builder.credentials(Arrays.asList(multipleCredentials));
+        }
+        return builder;
     }
 
     /**

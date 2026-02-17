@@ -16,8 +16,8 @@
 
 package io.objectbox.sync;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -25,7 +25,6 @@ import java.util.TreeMap;
 import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
-import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.FeatureNotAvailableException;
 import io.objectbox.sync.internal.Platform;
 import io.objectbox.sync.listener.SyncChangeListener;
@@ -36,16 +35,15 @@ import io.objectbox.sync.listener.SyncLoginListener;
 import io.objectbox.sync.listener.SyncTimeListener;
 
 /**
- * A builder to create a {@link SyncClient}; the builder itself should be created via
- * {@link Sync#client(BoxStore, String, SyncCredentials)}.
+ * A builder to create a {@link SyncClient}; the builder itself should be created via {@link Sync#client(BoxStore)}.
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class SyncBuilder {
 
     final Platform platform;
     final BoxStore boxStore;
-    @Nullable private String url;
-    final List<SyncCredentials> credentials;
+    final List<String> urls = new ArrayList<>();
+    final List<SyncCredentials> credentials = new ArrayList<>();
 
     @Nullable SyncLoginListener loginListener;
     @Nullable SyncCompletedListener completedListener;
@@ -56,6 +54,7 @@ public final class SyncBuilder {
 
     @Nullable
     String[] trustedCertPaths;
+    int flags;
     boolean uncommittedAcks;
 
     RequestUpdatesMode requestUpdatesMode = RequestUpdatesMode.AUTO;
@@ -98,47 +97,80 @@ public final class SyncBuilder {
         }
     }
 
-    private SyncBuilder(BoxStore boxStore, @Nullable String url, @Nullable List<SyncCredentials> credentials) {
-        checkNotNull(boxStore, "BoxStore is required.");
-        checkNotNull(credentials, "Sync credentials are required.");
+    /**
+     * Creates a builder for a {@link SyncClient}.
+     * <p>
+     * Don't use this directly, use the {@link Sync#client} method instead.
+     */
+    SyncBuilder(BoxStore boxStore) {
+        checkNotNull(boxStore, "boxStore");
         this.boxStore = boxStore;
-        this.url = url;
-        this.credentials = credentials;
         checkSyncFeatureAvailable();
         this.platform = Platform.findPlatform(); // Requires APIs only present in Android Sync library
     }
 
-    @Internal
-    public SyncBuilder(BoxStore boxStore, String url, @Nullable SyncCredentials credentials) {
-        this(boxStore, url, credentials == null ? null : Collections.singletonList(credentials));
-    }
-
-    @Internal
-    public SyncBuilder(BoxStore boxStore, String url, @Nullable SyncCredentials[] multipleCredentials) {
-        this(boxStore, url, multipleCredentials == null ? null : Arrays.asList(multipleCredentials));
-    }
-
     /**
-     * When using this constructor, make sure to set the server URL before starting.
+     * Adds a Sync server URL the client should connect to.
+     * <p>
+     * This is typically a WebSockets URL starting with {@code ws://} or {@code wss://} (for encrypted connections), for
+     * example if the server is running on localhost {@code ws://127.0.0.1:9999}.
+     * <p>
+     * Can be called multiple times to add multiple URLs for high availability and load balancing (like when using an
+     * ObjectBox Sync Server Cluster). A random URL is selected for each connection attempt.
+     *
+     * @param url The URL of the Sync server on which the Sync protocol is exposed.
+     * @return this builder for chaining
+     * @see #urls(List)
      */
-    @Internal
-    public SyncBuilder(BoxStore boxStore, @Nullable SyncCredentials credentials) {
-        this(boxStore, null, credentials == null ? null : Collections.singletonList(credentials));
-    }
-
-    /**
-     * Allows internal code to set the Sync server URL after creating this builder.
-     */
-    @Internal
-    SyncBuilder serverUrl(String url) {
-        this.url = url;
+    public SyncBuilder url(String url) {
+        checkNotNull(url, "url");
+        this.urls.add(url);
         return this;
     }
 
-    @Internal
-    String serverUrl() {
-        checkNotNull(url, "Sync Server URL is null.");
-        return url;
+    /**
+     * Like {@link #url(String)}, but accepts a list of URLs.
+     *
+     * @param urls A list of URLs of Sync servers on which the Sync protocol is exposed.
+     * @return this builder for chaining
+     * @see #url(String)
+     */
+    public SyncBuilder urls(List<String> urls) {
+        checkNotNull(urls, "urls");
+        for (String url : urls) {
+            url(url);
+        }
+        return this;
+    }
+
+    /**
+     * Adds {@link SyncCredentials} to authenticate the client with the server.
+     * <p>
+     * The accepted credentials types depend on your Sync server configuration.
+     *
+     * @param credentials credentials created using a {@link SyncCredentials} factory method, for example
+     * {@code SyncCredentials.jwtIdToken(idToken)}.
+     * @see #credentials(List)
+     */
+    public SyncBuilder credentials(SyncCredentials credentials) {
+        checkNotNull(credentials, "credentials");
+        this.credentials.add(credentials);
+        return this;
+    }
+
+    /**
+     * Like {@link #credentials(SyncCredentials)}, but accepts a list of credentials.
+     *
+     * @param credentials a list of credentials where each element is created using a {@link SyncCredentials} factory
+     * method, for example {@code SyncCredentials.jwtIdToken(idToken)}.
+     * @return this builder for chaining
+     */
+    public SyncBuilder credentials(List<SyncCredentials> credentials) {
+        checkNotNull(credentials, "credentials");
+        for (SyncCredentials credential : credentials) {
+            credentials(credential);
+        }
+        return this;
     }
 
     /**
@@ -151,8 +183,8 @@ public final class SyncBuilder {
      * @see SyncClient#putFilterVariable
      */
     public SyncBuilder filterVariable(String name, String value) {
-        checkNotNull(name, "Filter variable name is null.");
-        checkNotNull(value, "Filter variable value is null.");
+        checkNotNull(name, "name");
+        checkNotNull(value, "value");
         filterVariables.put(name, value);
         return this;
     }
@@ -167,6 +199,16 @@ public final class SyncBuilder {
     public SyncBuilder trustedCertificates(String[] paths) {
         // Copy to prevent external modification.
         this.trustedCertPaths = Arrays.copyOf(paths, paths.length);
+        return this;
+    }
+
+    /**
+     * Sets bit flags to adjust Sync behavior, like additional logging.
+     *
+     * @param flags One or multiple {@link SyncFlags}, combined with bitwise or.
+     */
+    public SyncBuilder flags(int flags) {
+        this.flags = flags;
         return this;
     }
 
@@ -265,12 +307,11 @@ public final class SyncBuilder {
         if (boxStore.getSyncClient() != null) {
             throw new IllegalStateException("The given store is already associated with a Sync client, close it first.");
         }
-        checkNotNull(url, "Sync Server URL is required.");
         return new SyncClientImpl(this);
     }
 
     /**
-     * Builds, {@link SyncClient#start() starts} and returns a Sync client.
+     * {@link #build() Builds}, {@link SyncClient#start() starts} and returns a Sync client.
      */
     public SyncClient buildAndStart() {
         SyncClient syncClient = build();
@@ -278,10 +319,13 @@ public final class SyncBuilder {
         return syncClient;
     }
 
-    private void checkNotNull(@Nullable Object object, String message) {
-        //noinspection ConstantConditions Non-null annotation does not enforce, so check for null.
+    /**
+     * Nullness annotations are only a hint in Java, so explicitly check nonnull annotated parameters
+     * (see package-info.java for package settings).
+     */
+    private void checkNotNull(@Nullable Object object, String name) {
         if (object == null) {
-            throw new IllegalArgumentException(message);
+            throw new IllegalArgumentException(name + " must not be null.");
         }
     }
 

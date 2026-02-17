@@ -57,14 +57,10 @@ public class SyncTest extends AbstractObjectBoxTest {
 
     @Test
     public void creatingSyncClient_throws() {
-        // If no credentials are passed
-        assertThrows(IllegalArgumentException.class, () -> Sync.client(store, SERVER_URL, (SyncCredentials) null));
-        assertThrows(IllegalArgumentException.class, () -> Sync.client(store, SERVER_URL, (SyncCredentials[]) null));
-
         // If no Sync feature is available
         FeatureNotAvailableException exception = assertThrows(
                 FeatureNotAvailableException.class,
-                () -> Sync.client(store, SERVER_URL, SyncCredentials.none())
+                () -> Sync.client(store)
         );
         String message = exception.getMessage();
         assertTrue(message, message.contains("does not include ObjectBox Sync") &&
