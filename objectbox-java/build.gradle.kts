@@ -1,7 +1,3 @@
-import kotlin.io.path.appendText
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
-
 plugins {
     id("java-library")
     id("objectbox-publish")
@@ -69,9 +65,20 @@ val javadocForWeb by tasks.registering(Javadoc::class) {
     group = "documentation"
     description = "Builds Javadoc incl. objectbox-java-api classes with web tweaks."
 
+    // Register used files as inputs so task is re-run if they change
+    // https://docs.gradle.org/current/userguide/incremental_build.html
+    val customOverview = layout.projectDirectory.file("src/web/overview.html")
+    inputs.file(customOverview)
+        .withPropertyName("customOverview")
+        .withPathSensitivity(PathSensitivity.NONE)
+    val customStylesheet = layout.projectDirectory.file("src/web/objectbox-stylesheet.css")
+    inputs.file(customStylesheet)
+        .withPropertyName("customStylesheet")
+        .withPathSensitivity(PathSensitivity.NONE)
+
     javadocTool.set(javaToolchains.javadocToolFor {
-        // Note: the style changes only work if using JDK 10+, 17 is the LTS release used to publish this
-        languageVersion.set(JavaLanguageVersion.of(17))
+        // Note: the style changes only work if using JDK 10+, 21 is the LTS release used to publish this
+        languageVersion.set(JavaLanguageVersion.of(21))
     })
 
     val srcApi = project(":objectbox-java-api").file("src/main/java/")
@@ -104,33 +111,18 @@ val javadocForWeb by tasks.registering(Javadoc::class) {
     source = filteredSources + fileTree(srcApi)
 
     classpath = sourceSets.main.get().output + sourceSets.main.get().compileClasspath
-    setDestinationDir(javadocForWebDir.get().asFile)
+    destinationDir = javadocForWebDir.get().asFile
 
     title = "ObjectBox Java ${project.version} API"
     (options as StandardJavadocDocletOptions).apply {
-        overview = "$projectDir/src/web/overview.html"
-        bottom = "Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017-2025 <a href=\"https://objectbox.io/\">ObjectBox Ltd</a>. All Rights Reserved.</i>"
+        overview = customOverview.toString()
+        bottom = "Available under the Apache License, Version 2.0 - <i>Copyright &#169; 2017-2026 <a href=\"https://objectbox.io/\">ObjectBox Ltd</a>. All Rights Reserved.</i>"
+        // Customize the default stylesheet https://docs.oracle.com/en/java/javase/21/javadoc/javadoc-css-themes.html
+        // Note: the javadoc option is "--add-stylesheet", but addStringOption already ads a single dash ("-")
+        addStringOption("-add-stylesheet", customStylesheet.toString())
     }
 
     doLast {
-        // Note: frequently check the vanilla stylesheet.css if values still match.
-        val stylesheetPath = "$destinationDir/stylesheet.css"
-
-        // Adjust the CSS stylesheet
-
-        // Change some color values
-        // The stylesheet file should be megabytes at most, so read it as a whole
-        val stylesheetFile = kotlin.io.path.Path(stylesheetPath)
-        val originalContent = stylesheetFile.readText()
-        val replacedContent = originalContent
-            .replace("#4D7A97", "#17A6A6") // Primary background
-            .replace("#F8981D", "#7DDC7D") // "Active" background
-            .replace("#bb7a2a", "#E61955") // Hover
-        stylesheetFile.writeText(replacedContent)
-        // Note: in CSS stylesheets the last added rule wins, so append to default stylesheet.
-        // Make code blocks scroll instead of stick out on small width
-        stylesheetFile.appendText("pre {\n    overflow-x: auto;\n}\n")
-
         println("Javadoc for web created at $destinationDir")
     }
 }

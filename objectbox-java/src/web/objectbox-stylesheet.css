@@ -1,0 +1,61 @@
+/*
+CSS variables to override, taken from the default stylesheet generated in build/docs/javadoc/stylesheet.css
+They are also documented at https://docs.oracle.com/en/java/javase/21/javadoc/javadoc-css-themes.html
+*/
+:root {
+    /*!* body, block and code fonts *!*/
+    /*--body-font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;*/
+    /*--block-font-family: 'DejaVu Serif', Georgia, "Times New Roman", Times, serif;*/
+    /*--code-font-family: 'DejaVu Sans Mono', monospace;*/
+    /*!* Base font sizes for body and code elements *!*/
+    /*--body-font-size: 14px;*/
+    /*--code-font-size: 14px;*/
+    /*!* Text colors for body and block elements *!*/
+    /*--body-text-color: #353833;*/
+    /*--block-text-color: #474747;*/
+    /* Background colors for various structural elements */
+    /*--body-background-color: #ffffff;*/
+    /*--section-background-color: #f8f8f8;*/
+    /*--detail-background-color: #ffffff;*/
+    /* Colors for navigation bar and table captions */
+    --navbar-background-color: #17A6A6;
+    /*--navbar-text-color: #ffffff;*/
+    /* Background color for subnavigation and various headers */
+    /*--subnav-background-color: #dee3e9;*/
+    /* Background and text colors for selected tabs and navigation items */
+    --selected-background-color: #7DDC7D;
+    /*--selected-text-color: #253441;*/
+    /*--selected-link-color: #1f389c;*/
+    /* Background colors for generated tables */
+    /*--even-row-color: #ffffff;*/
+    /*--odd-row-color: #eeeeef;*/
+    /* Text color for page title */
+    /*--title-color: #2c4557;*/
+    /* Text colors for links */
+    /*--link-color: #4A6782;*/
+    --link-color-active: #E61955;
+    /* Snippet colors */
+    /*--snippet-background-color: #ebecee;*/
+    /*--snippet-text-color: var(--block-text-color);*/
+    /*--snippet-highlight-color: #f7c590;*/
+    /* Border colors for structural elements and user defined tables */
+    /*--border-color: #ededed;*/
+    /*--table-border-color: #000000;*/
+    /* Search input colors */
+    /*--search-input-background-color: #ffffff;*/
+    /*--search-input-text-color: #000000;*/
+    /*--search-input-placeholder-color: #909090;*/
+    /* Highlight color for active search tag target */
+    /*--search-tag-highlight-color: #ffff00;*/
+    /* Adjustments for icon and active background colors of copy-to-clipboard buttons */
+    /*--copy-icon-brightness: 100%;*/
+    /*--copy-button-background-color-active: rgba(168, 168, 176, 0.3);*/
+    /* Colors for invalid tag notifications */
+    /*--invalid-tag-background-color: #ffe6e6;*/
+    /*--invalid-tag-text-color: #000000;*/
+}
+
+/* Make code blocks scroll instead of stick out on small width */
+pre {
+    overflow-x: auto;
+}
