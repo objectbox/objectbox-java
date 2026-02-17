@@ -192,6 +192,13 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.kapt) apply false
 }
+
+allprojects {
+    repositories {
+        // Add Maven Central to the dependency repositories
+        mavenCentral()
+    }
+}
 ```
 
 ```kotlin
@@ -199,7 +206,7 @@ plugins {
 
 pluginManagement {
     repositories {
-        // Add the Maven Central repository
+        // Add Maven Central to the plugin repositories
         mavenCentral()
     }
     
@@ -255,6 +262,13 @@ plugins {
     // Add the plugin
     id("io.objectbox") version "5.2.0" apply false
 }
+
+allprojects {
+    repositories {
+        // Add Maven Central to the dependency repositories
+        mavenCentral()
+    }
+}
 ```
 
 ```kotlin
@@ -262,7 +276,7 @@ plugins {
 
 pluginManagement {
     repositories {
-        // Add the Maven Central repository
+        // Add Maven Central to the plugin repositories
         mavenCentral()
     }
 
@@ -288,14 +302,21 @@ buildscript {
     // Define a variable for the plugin version
     val objectboxVersion by extra("5.2.0")
   
-    repositories { 
-        // Add the Maven Central repository       
+    repositories {
+        // Add Maven Central to the plugin repositories     
         mavenCentral()    
     }
   
     dependencies {
         // Add the plugin
         classpath("io.objectbox:objectbox-gradle-plugin:$objectboxVersion")
+    }
+}
+
+allprojects {
+    repositories {
+        // Add Maven Central to the dependency repositories
+        mavenCentral()
     }
 }
 ```
@@ -312,13 +333,20 @@ buildscript {
     ext.objectboxVersion = "5.2.0"
   
     repositories {        
-        // Add the Maven Central repository
+        // Add Maven Central to the plugin repositories
         mavenCentral()    
     }
   
     dependencies {
         // Add the plugin
         classpath("io.objectbox:objectbox-gradle-plugin:$objectboxVersion")
+    }
+}
+
+allprojects {
+    repositories {
+        // Add Maven Central to the dependency repositories
+        mavenCentral()
     }
 }
 ```
