@@ -111,7 +111,6 @@ test-macos:
   tags:
     - jdk
     - mac
-    - x64
   script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
 
 # Address sanitizer is only available on Linux runners (see script).
