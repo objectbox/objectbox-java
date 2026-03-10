@@ -4,12 +4,78 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the database libraries, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
-## Next release
+## 5.3.0 - 2026-03-10
+
+- Gradle plugin: to apply the plugin, it is no longer necessary to add a manual mapping of the plugin ID in your
+  projects Gradle settings file. This was resolved by publishing Gradle plugin marker artifacts.
+  [#960](https://github.com/objectbox/objectbox-java/issues/960)
+- Gradle plugin: it is no longer necessary to apply the plugin after the dependencies block when manually including
+  ObjectBox dependencies.
+- (Minor) performance improvements of HNSW vector search on Linux ARM targets
                     
 ### Sync
 
+- Sync protocol version 10
 - SyncClient: support updating filter variables. After login, stage updates using put and remove, then schedule to send
   them to the server with `applyFilterVariables()`.
+- Update client sync filters variables when online
+- Clients report errors to the server
+
+### Migration instructions
+
+#### Drop the Gradle plugin ID mapping
+
+If your `settings.gradle.kts` or `settings.gradle` file contains lines similar to:
+
+```kotlin
+pluginManagement {
+    repositories {
+        mavenCentral()
+    }
+    
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "io.objectbox") {
+                useModule("io.objectbox:objectbox-gradle-plugin:${requested.version}")
+            }
+        }
+    }
+}
+```
+
+Update them to remove the plugin mapping configuration:
+
+```kotlin
+pluginManagement {
+    repositories {
+        mavenCentral()
+    }
+}
+```
+
+#### Apply the plugin using plugins syntax
+
+If your build scripts are applying the plugin after the dependencies block similar to:
+
+```kotlin
+dependencies {
+    // ...  
+} 
+
+apply(plugin = "io.objectbox")
+```
+
+Change them to apply the plugin using plugins syntax:
+
+```kotlin
+plugins {
+    id("io.objectbox")
+}
+
+dependencies {
+    // ...  
+}
+```
 
 ## 5.2.0 - 2026-02-16
 
