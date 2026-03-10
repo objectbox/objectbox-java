@@ -145,19 +145,15 @@ When using a [TOML version catalog](https://docs.gradle.org/current/userguide/ve
 # gradle/libs.versions.toml
 
 [versions]
-# Define a variable for the version of the plugin
+# For an Android project
+agp = "AGP_VERSION"
+# If using Kotlin
+kotlin = "KOTLIN_VERSION"
+
+# Define a variable for the version of the ObjectBox plugin
 objectbox = "5.2.0"
 
-# For an Android project
-agp = "<AGP_VERSION>"
-
-# If using Kotlin
-kotlin = "<KOTLIN_VERSION>"
-
 [plugins]
-# Add an alias for the plugin
-objectbox = { id = "io.objectbox", version.ref = "objectbox" }
-
 # For an Android project, using Android Gradle Plugin 9.0 or newer
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-kapt = { id = "com.android.legacy-kapt", version.ref = "agp" }
@@ -170,15 +166,15 @@ kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 # For a JVM project, if using Kotlin 
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+
+# Add an alias for the ObjectBox plugin
+objectbox = { id = "io.objectbox", version.ref = "objectbox" }
 ```
 
 ```kotlin
 // build.gradle.kts
 
 plugins {
-    // Add the plugin
-    alias(libs.plugins.objectbox) apply false
-
     // For an Android project, using Android Gradle Plugin 9.0 or newer
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.kapt) apply false  
@@ -191,13 +187,9 @@ plugins {
     // For a JVM project, if using Kotlin
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.kapt) apply false
-}
-
-allprojects {
-    repositories {
-        // Add Maven Central to the dependency repositories
-        mavenCentral()
-    }
+  
+    // Add the ObjectBox plugin
+    alias(libs.plugins.objectbox) apply false  
 }
 ```
 
@@ -209,14 +201,13 @@ pluginManagement {
         // Add Maven Central to the plugin repositories
         mavenCentral()
     }
-    
-    resolutionStrategy {
-        eachPlugin {
-            // Map the plugin ID to the Maven artifact
-            if (requested.id.id == "io.objectbox") {
-                useModule("io.objectbox:objectbox-gradle-plugin:${requested.version}")
-            }
-        }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        // Add Maven Central to the dependency repositories
+        mavenCentral()
     }
 }
 ```
@@ -242,7 +233,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.kapt)
 
-    // Finally, apply the plugin
+    // Finally, apply the ObjectBox plugin
     alias(libs.plugins.objectbox)
 }
 ```
@@ -259,15 +250,8 @@ Your project can now use ObjectBox, continue by [defining entity classes](https:
 // build.gradle.kts
 
 plugins {
-    // Add the plugin
+    // Add the ObjectBox plugin
     id("io.objectbox") version "5.2.0" apply false
-}
-
-allprojects {
-    repositories {
-        // Add Maven Central to the dependency repositories
-        mavenCentral()
-    }
 }
 ```
 
@@ -279,14 +263,13 @@ pluginManagement {
         // Add Maven Central to the plugin repositories
         mavenCentral()
     }
+}
 
-    resolutionStrategy {
-        eachPlugin {
-            // Map the plugin ID to the Maven artifact
-            if (requested.id.id == "io.objectbox") {
-                useModule("io.objectbox:objectbox-gradle-plugin:${requested.version}")
-            }
-        }
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        // Add Maven Central to the dependency repositories
+        mavenCentral()
     }
 }
 ```
@@ -299,7 +282,7 @@ pluginManagement {
 // build.gradle.kts
 
 buildscript {
-    // Define a variable for the plugin version
+    // Define a variable for the ObjectBox plugin version
     val objectboxVersion by extra("5.2.0")
   
     repositories {
@@ -308,7 +291,7 @@ buildscript {
     }
   
     dependencies {
-        // Add the plugin
+        // Add the ObjectBox plugin
         classpath("io.objectbox:objectbox-gradle-plugin:$objectboxVersion")
     }
 }
@@ -329,7 +312,7 @@ allprojects {
 // build.gradle
 
 buildscript {
-    // Define a variable for the plugin version
+    // Define a variable for the ObjectBox plugin version
     ext.objectboxVersion = "5.2.0"
   
     repositories {        
@@ -338,7 +321,7 @@ buildscript {
     }
   
     dependencies {
-        // Add the plugin
+        // Add the ObjectBox plugin
         classpath("io.objectbox:objectbox-gradle-plugin:$objectboxVersion")
     }
 }
@@ -374,7 +357,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm") // or kotlin("jvm")
     id("org.jetbrains.kotlin.kapt") // or kotlin("kapt")  
 
-    // Finally, apply the plugin
+    // Finally, apply the ObjectBox plugin
     id("io.objectbox")
 }
 ```
