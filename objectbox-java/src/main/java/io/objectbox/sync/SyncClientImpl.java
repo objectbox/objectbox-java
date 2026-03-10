@@ -233,6 +233,10 @@ public final class SyncClientImpl implements SyncClient {
         nativeRemoveAllFilterVariables(getHandle());
     }
 
+    public void applyFilterVariables() {
+        nativeApplyFilterVariables(getHandle());
+    }
+
     @Override
     public void setLoginCredentials(List<SyncCredentials> credentials) {
         if (credentials.size() == 1) {
@@ -466,6 +470,9 @@ public final class SyncClientImpl implements SyncClient {
 
     // extern "C" JNIEXPORT void JNICALL Java_io_objectbox_sync_SyncClientImpl_nativeRemoveAllFilterVariables(JNIEnv* env, jobject, jlong handle)
     private native void nativeRemoveAllFilterVariables(long handle);
+
+    // extern "C" JNIEXPORT void JNICALL Java_io_objectbox_sync_SyncClientImpl_nativeApplyFilterVariables(JNIEnv* env, jobject, jlong handle)
+    private native void nativeApplyFilterVariables(long handle);
 
     private native void nativeSetLoginInfo(long handle, long credentialsType, @Nullable byte[] credentials);
 

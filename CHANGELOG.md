@@ -5,6 +5,11 @@ Notable changes to the ObjectBox Java library.
 For more insights into what changed in the database libraries, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
 ## Next release
+                    
+### Sync
+
+- SyncClient: support updating filter variables. After login, stage updates using put and remove, then schedule to send
+  them to the server with `applyFilterVariables()`.
 
 ## 5.2.0 - 2026-02-16
 

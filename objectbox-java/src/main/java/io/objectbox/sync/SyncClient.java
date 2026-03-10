@@ -145,15 +145,25 @@ public interface SyncClient extends Closeable {
      * Eventually, existing values for the same name are replaced.
      * <p>
      * Sync client filter variables can be used in server-side Sync filters to filter out objects that do not match the
-     * filter. Filter variables must be added before login, so before calling {@link #start()}.
+     * filter.
+     * <p>
+     * Filter variables can be set in two states:
+     * <ol>
+     *   <li>Before login (e.g. before calling {@link #start()} or setting credentials): no
+     *       {@link #applyFilterVariables()} call required.</li>
+     *   <li>After login: updates are staged as "pending" until {@link #applyFilterVariables()} is called.</li>
+     * </ol>
      *
      * @see #removeFilterVariable
      * @see #removeAllFilterVariables
+     * @see #applyFilterVariables()
      */
     void putFilterVariable(String name, String value);
 
     /**
      * Removes a previously added Sync filter variable value.
+     * <p>
+     * If used after login, see {@link #putFilterVariable} for notes about {@link #applyFilterVariables}.
      *
      * @see #putFilterVariable
      * @see #removeAllFilterVariables
@@ -162,11 +172,26 @@ public interface SyncClient extends Closeable {
 
     /**
      * Removes all previously added Sync filter variable values.
+     * <p>
+     * If used after login, see {@link #putFilterVariable} for notes about {@link #applyFilterVariables}.
      *
      * @see #putFilterVariable
      * @see #removeFilterVariable
      */
     void removeAllFilterVariables();
+
+    /**
+     * Applies all pending Sync filter variable updates (from {@link #putFilterVariable} and
+     * {@link #removeFilterVariable} calls).
+     * <p>
+     * If the client is connected, sends the updated variables to the server. If the client is not connected,
+     * the updated variables will be included in the next login message.
+     *
+     * @see #putFilterVariable
+     * @see #removeFilterVariable
+     * @see #removeAllFilterVariables
+     */
+    void applyFilterVariables();
 
     /**
      * Sets credentials to authenticate the client with the server.
