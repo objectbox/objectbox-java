@@ -142,28 +142,26 @@ public interface SyncClient extends Closeable {
      * Adds or replaces a <a href="https://sync.objectbox.io/sync-server/sync-filters">Sync filter</a> variable value
      * for the given name.
      * <p>
+     * Note: If the client is already logged in, this change is not applied until {@link #applyFilterVariables()} is
+     * called. This allows to put or remove multiple variables before applying all changes. Filter variables set before
+     * login (before calling {@link #start()}) are automatically applied.
+     * <p>
      * Eventually, existing values for the same name are replaced.
      * <p>
      * Sync client filter variables can be used in server-side Sync filters to filter out objects that do not match the
      * filter.
-     * <p>
-     * Filter variables can be set in two states:
-     * <ol>
-     *   <li>Before login (e.g. before calling {@link #start()} or setting credentials): no
-     *       {@link #applyFilterVariables()} call required.</li>
-     *   <li>After login: updates are staged as "pending" until {@link #applyFilterVariables()} is called.</li>
-     * </ol>
      *
      * @see #removeFilterVariable
      * @see #removeAllFilterVariables
-     * @see #applyFilterVariables()
+     * @see #applyFilterVariables
      */
     void putFilterVariable(String name, String value);
 
     /**
      * Removes a previously added Sync filter variable value.
      * <p>
-     * If used after login, see {@link #putFilterVariable} for notes about {@link #applyFilterVariables}.
+     * Note: If the client is already logged in, this change is not applied until {@link #applyFilterVariables()} is
+     * called. See {@link #putFilterVariable} for details.
      *
      * @see #putFilterVariable
      * @see #removeAllFilterVariables
@@ -173,7 +171,8 @@ public interface SyncClient extends Closeable {
     /**
      * Removes all previously added Sync filter variable values.
      * <p>
-     * If used after login, see {@link #putFilterVariable} for notes about {@link #applyFilterVariables}.
+     * Note: If the client is already logged in, this change is not applied until {@link #applyFilterVariables()} is
+     * called. See {@link #putFilterVariable} for details.
      *
      * @see #putFilterVariable
      * @see #removeFilterVariable
