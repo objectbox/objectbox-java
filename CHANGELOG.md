@@ -11,6 +11,7 @@ For more insights into what changed in the database libraries, [check the Object
   [#960](https://github.com/objectbox/objectbox-java/issues/960)
 - Gradle plugin: it is no longer necessary to apply the plugin after the dependencies block when manually including
   ObjectBox dependencies.
+- Update database libraries for Android and JVM to database version `5.2.0-next-2026-03-10`
 - (Minor) performance improvements of HNSW vector search on Linux ARM targets
                     
 ### Sync
