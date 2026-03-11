@@ -191,13 +191,6 @@ plugins {
     // Add the ObjectBox plugin
     alias(libs.plugins.objectbox) apply false  
 }
-
-allprojects {
-    repositories {
-        // Add Maven Central to the dependency repositories
-        mavenCentral()
-    }
-}
 ```
 
 ```kotlin
@@ -259,13 +252,6 @@ Your project can now use ObjectBox, continue by [defining entity classes](https:
 plugins {
     // Add the ObjectBox plugin
     id("io.objectbox") version "5.3.0" apply false
-}
-
-allprojects {
-    repositories {
-        // Add Maven Central to the dependency repositories
-        mavenCentral()
-    }
 }
 ```
 
