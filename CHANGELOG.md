@@ -4,6 +4,8 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the database libraries, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
+## Next release
+
 ## 5.3.0 - 2026-03-10
 
 - Gradle plugin: to apply the plugin, it is no longer necessary to add a manual mapping of the plugin ID in your
