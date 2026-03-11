@@ -290,12 +290,11 @@ public class BoxStoreBuilderTest extends AbstractObjectBoxTest {
 
     @Test
     public void maxDataSize() {
-        // Put until max data size is reached, but still below max database size.
         builder = createBoxStoreBuilder(null);
-        builder.maxSizeInKByte(50); // Empty file is around 12 KB, each put adds about 8 KB.
         builder.maxDataSizeInKByte(1);
         store = builder.build();
 
+        // Put until max data size is reached
         TestEntity testEntity1 = putTestEntity(LONG_STRING, 1);
         TestEntity testEntity2 = createTestEntity(LONG_STRING, 2);
         DbMaxDataSizeExceededException maxDataExc = assertThrows(

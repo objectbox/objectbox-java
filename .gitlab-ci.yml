@@ -1,8 +1,9 @@
 # https://docs.gitlab.com/ci/yaml/
 
-# Default image for linux builds
-# This should match the image used to build the JVM database libraries (so Address Sanitizer library matches)
-image: objectboxio/buildenv-core:2024-07-11 # With JDK 17
+# Default Docker image (currently only supporting Docker Linux containers)
+# This should match the image used to build the JVM database libraries (so Address Sanitizer library matches).
+# When updating, check if the test-jdk jobs need changing.
+image: objectboxio/buildenv-core:2025-07-03 # With JDK 21
 
 # Assumes these environment variables are configured in GitLab CI/CD Settings:
 # - OBX_READ_PACKAGES_TOKEN
@@ -110,7 +111,6 @@ test-macos:
   tags:
     - jdk
     - mac
-    - x64
   script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
 
 # Address sanitizer is only available on Linux runners (see script).
@@ -138,12 +138,12 @@ test-jdk-8:
   variables:
     TEST_JDK: 8
 
-# JDK 17 is the default of the current build image, so test the latest LTS JDK 21
-test-jdk-21:
+# JDK 21 is the default of the current build image, so test the latest LTS JDK 25
+test-jdk-25:
   extends: .test-asan-template
   needs: ["test-jdk-8"]
   variables:
-    TEST_JDK: 21
+    TEST_JDK: 25
 
 test-jdk-x86:
   extends: .test-template

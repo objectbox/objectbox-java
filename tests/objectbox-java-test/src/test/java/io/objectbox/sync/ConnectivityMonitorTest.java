@@ -188,6 +188,10 @@ public class ConnectivityMonitorTest {
         }
 
         @Override
+        public void applyFilterVariables() {
+        }
+
+        @Override
         public void setLoginCredentials(SyncCredentials credentials) {
         }
 
