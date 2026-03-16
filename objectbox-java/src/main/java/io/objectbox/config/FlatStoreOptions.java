@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,6 +180,11 @@ public final class FlatStoreOptions extends Table {
    * Flags to change the default behavior for restoring backups, e.g. what should happen to existing data.
    */
   public long backupRestoreFlags() { int o = __offset(38); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  /**
+   * Options for write-ahead logging (WAL)
+   */
+  public WalOptions walOptions() { return walOptions(new WalOptions()); }
+  public WalOptions walOptions(WalOptions obj) { int o = __offset(40); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
 
   public static int createFlatStoreOptions(FlatBufferBuilder builder,
       int directoryPathOffset,
@@ -199,11 +204,13 @@ public final class FlatStoreOptions extends Table {
       long maxDataSizeInKbyte,
       int validateOnOpenKv,
       int backupFileOffset,
-      long backupRestoreFlags) {
-    builder.startTable(18);
+      long backupRestoreFlags,
+      int walOptionsOffset) {
+    builder.startTable(19);
     FlatStoreOptions.addMaxDataSizeInKbyte(builder, maxDataSizeInKbyte);
     FlatStoreOptions.addValidateOnOpenPageLimit(builder, validateOnOpenPageLimit);
     FlatStoreOptions.addMaxDbSizeInKbyte(builder, maxDbSizeInKbyte);
+    FlatStoreOptions.addWalOptions(builder, walOptionsOffset);
     FlatStoreOptions.addBackupRestoreFlags(builder, backupRestoreFlags);
     FlatStoreOptions.addBackupFile(builder, backupFileOffset);
     FlatStoreOptions.addDebugFlags(builder, debugFlags);
@@ -222,7 +229,7 @@ public final class FlatStoreOptions extends Table {
     return FlatStoreOptions.endFlatStoreOptions(builder);
   }
 
-  public static void startFlatStoreOptions(FlatBufferBuilder builder) { builder.startTable(18); }
+  public static void startFlatStoreOptions(FlatBufferBuilder builder) { builder.startTable(19); }
   public static void addDirectoryPath(FlatBufferBuilder builder, int directoryPathOffset) { builder.addOffset(0, directoryPathOffset, 0); }
   public static void addModelBytes(FlatBufferBuilder builder, int modelBytesOffset) { builder.addOffset(1, modelBytesOffset, 0); }
   public static int createModelBytesVector(FlatBufferBuilder builder, byte[] data) { return builder.createByteVector(data); }
@@ -244,6 +251,7 @@ public final class FlatStoreOptions extends Table {
   public static void addValidateOnOpenKv(FlatBufferBuilder builder, int validateOnOpenKv) { builder.addShort(15, (short) validateOnOpenKv, (short) 0); }
   public static void addBackupFile(FlatBufferBuilder builder, int backupFileOffset) { builder.addOffset(16, backupFileOffset, 0); }
   public static void addBackupRestoreFlags(FlatBufferBuilder builder, long backupRestoreFlags) { builder.addInt(17, (int) backupRestoreFlags, (int) 0L); }
+  public static void addWalOptions(FlatBufferBuilder builder, int walOptionsOffset) { builder.addOffset(18, walOptionsOffset, 0); }
   public static int endFlatStoreOptions(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;
