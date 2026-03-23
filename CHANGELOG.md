@@ -6,6 +6,11 @@ For more insights into what changed in the database libraries, [check the Object
 
 ## Next release
 
+### Sync
+
+- Conflict resolution via the new annotations `@SyncClock` and `@SyncPrecedence` (allows last win with custom conflict
+  resolution)
+
 ## 5.3.0 - 2026-03-10
 
 - Gradle plugin: to apply the plugin, it is no longer necessary to add a manual mapping of the plugin ID in your
