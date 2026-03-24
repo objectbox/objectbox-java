@@ -6,6 +6,16 @@ For more insights into what changed in the database libraries, [check the Object
 
 ## Next release
 
+- Update Android and JVM libraries to database version `5.3.0-2026-03-23`
+- Admin: Status tab "Count and Sizes" and "System and Info" improved
+
+### Sync
+
+- Conflict resolution via the new annotations `@SyncClock` and `@SyncPrecedence` (allows last win with custom conflict
+  resolution)
+- Fix bad Sync client state after multiple full sync messages were interrupted
+- Fix adding indexes to Sync types
+
 ## 5.3.0 - 2026-03-10
 
 - Gradle plugin: to apply the plugin, it is no longer necessary to add a manual mapping of the plugin ID in your
