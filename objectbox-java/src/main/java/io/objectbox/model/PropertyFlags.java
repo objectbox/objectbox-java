@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,5 +103,29 @@ public final class PropertyFlags {
    * However, the deletion process can be triggered by an API call.
    */
   public static final int EXPIRATION_TIME = 65536;
+  /**
+   * Marks a Long (64-bit integer) property as a the sync clock, a "hybrid logical clock" to resolve Sync conflicts.
+   * These clock values allow "last write wins" conflict resolution.
+   * There can be only one sync clock per sync entity type; which is also recommended for basic conflict resolution.
+   * For new objects, initialize a property value to 0 to reserve "a slot" in the object data.
+   * ObjectBox Sync will update this property automatically on put operations.
+   * As a hybrid clock, it combines a wall clock with a logical counter to compensate for some clock skew effects.
+   */
+  public static final int SYNC_CLOCK = 131072;
+  /**
+   * Marks a Long (64-bit integer) property as a the "sync precedence" to customize Sync conflict resolution.
+   * Developer-assigned precedence values are then used to resolve conflicts via "higher precedence wins".
+   * Defining and assigning precedence values are completely in the hands of the developer (the ObjectBox user).
+   * There can be only one sync precedence per sync entity type.
+   * Typically, it is combined with a sync clock, with the latter being the tie-breaker for equal precedence values.
+   * This can be used to model some business logic use cases, for example:
+   *   - Setting an object a special state, e.g. a final/closed state, which may not be overwritten by a lesser state
+   *   - Multiple workflow states that occur linearly (i.e. using an increasing precedence value)
+   *   - Role based, e.g. only admins set or increment the precedence..
+   *   - “Checkpoint timestamps:” e.g. when some changes are “checked” as in approved/applied,
+   *     the precedence is updated to the current timestamp.
+   *     “Non-checked” or previously checkpointed changes are disregarded.
+   */
+  public static final int SYNC_PRECEDENCE = 262144;
 }
 
