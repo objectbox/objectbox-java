@@ -4,7 +4,7 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the database libraries, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
-## Next release
+## 5.4.0 - 2026-03-24
 
 - Update Android and JVM libraries to database version `5.3.0-2026-03-23`
 - Admin: Status tab "Count and Sizes" and "System and Info" improved
