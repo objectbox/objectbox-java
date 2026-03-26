@@ -4,7 +4,11 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the database libraries, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
-## Next release
+## 5.4.1 - 2026-03-26
+
+### Sync
+
+- Critical fix for sync clock property handling
 
 ## 5.4.0 - 2026-03-24
 
