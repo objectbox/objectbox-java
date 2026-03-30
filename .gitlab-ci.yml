@@ -16,12 +16,16 @@ image: objectboxio/buildenv-core:2025-07-03 # With JDK 21
 # - ORG_GRADLE_PROJECT_signingPassword
 
 variables:
-  OBX_RELEASE:
+  OBX_PUBLISH_RELEASE:
     value: "false"
     options: [ "false", "true" ]
-    description: "Turns on the release flag in the Gradle root build script, which triggers building and publishing a
-                  release of Java libraries to the internal GitLab repository and Maven Central.
+    description: "If enabled, builds and depends on release versions and triggers publishing a
+                  release of the Java library artifacts to the internal GitLab repository and Maven Central.
+                  Don't run multiple times to avoid duplicate artifacts in the GitLab repository.
                   Consult the release checklist before turning this on."
+  # If enabled, builds and depends on release versions. Doesn't publish a release.
+  # See the root Gradle build script for details.
+  OBX_RELEASE: "false"
 
   # Disable the Gradle daemon. Gradle may run in a Docker container with a shared
   # Docker volume containing GRADLE_USER_HOME. If the container is stopped after a job
@@ -50,6 +54,14 @@ workflow:
     # Never create a pipeline when a tag is pushed (to simplify version computation in root build script)
     - if: $CI_COMMIT_TAG
       when: never
+    # On main branch, always use release versions as old snapshots of dependencies are deleted
+    - if: $CI_COMMIT_REF_NAME == "main"
+      variables:
+        OBX_RELEASE: "true"
+    # To publish a release must use release versions
+    - if: $OBX_PUBLISH_RELEASE == "true"
+      variables:
+        OBX_RELEASE: "true"
     # In all other cases, create a pipeline
     - when: always
 
@@ -166,8 +178,9 @@ publish-maven-internal:
     - linux
     - x64
   rules:
-    # Not for main branch, doing so may duplicate release artifacts (uploaded from publish branch)
-    - if: $CI_COMMIT_BRANCH == "main"
+    # Not when using release versions and not publishing a release to avoid duplicate artifacts
+    # (GitLab would allow to upload duplicates for a release version)
+    - if: $OBX_RELEASE == "true" && $OBX_PUBLISH_RELEASE != "true"
       when: never
     # Not if triggered by upstream project to save on disk space
     - if: $CI_PIPELINE_SOURCE == "pipeline"
@@ -188,8 +201,8 @@ publish-maven-central:
     - linux
     - x64
   rules:
-    # Only if release mode is on, only if no previous stages failed
-    - if: $OBX_RELEASE == "true"
+    # Only if publishing a release, only if no previous stages failed
+    - if: $OBX_PUBLISH_RELEASE == "true"
       when: on_success
   before_script:
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java library:* job $CI_JOB_NAME from branch $CI_COMMIT_BRANCH ($CI_COMMIT_SHORT_SHA)..."
@@ -209,8 +222,8 @@ package-api-docs:
     - linux
     - x64
   rules:
-    # Only if release mode is on, only if no previous stages failed
-    - if: $OBX_RELEASE == "true"
+    # Only if publishing a release, only if no previous stages failed
+    - if: $OBX_PUBLISH_RELEASE == "true"
       when: on_success
   script:
     - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS :objectbox-java:packageJavadocForWeb
@@ -225,7 +238,7 @@ trigger-plugin:
   stage: triggers
   rules:
     # Not when publishing a release
-    - if: $OBX_RELEASE == "true"
+    - if: $OBX_PUBLISH_RELEASE == "true"
       when: never
     # Do not trigger publishing of plugin
     - if: $CI_COMMIT_BRANCH == "publish"
