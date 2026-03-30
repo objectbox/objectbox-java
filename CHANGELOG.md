@@ -6,6 +6,8 @@ For more insights into what changed in the database libraries, [check the Object
 
 ## 5.4.1 - 2026-03-26
 
+- Update Android and JVM libraries to database version `5.3.1-2026-03-26`
+
 ### Sync
 
 - Critical fix for sync clock property handling
