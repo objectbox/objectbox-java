@@ -5,8 +5,7 @@
 // - sonatypeUsername: Maven Central credential used by Nexus publishing.
 // - sonatypePassword: Maven Central credential used by Nexus publishing.
 // This script supports the following environment variables:
-// - OBX_RELEASE: If set to "true" builds release versions without version postfix.
-//   Otherwise, will build snapshot versions.
+// - OBX_RELEASE: If set to "true" builds and depends on release versions, without branch name and snapshot suffix.
 
 plugins {
     // https://github.com/ben-manes/gradle-versions-plugin/releases
@@ -22,10 +21,10 @@ buildscript {
     // Should only be changed as part of the release process, see the release checklist in the objectbox repo
     val versionNumber = "5.4.2"
 
-    // Release mode should only be enabled when manually triggering a CI pipeline,
-    // see the release checklist in the objectbox repo.
-    // If true won't build snapshots and removes version post fix (e.g. "-dev-SNAPSHOT"),
-    // uses release versions of dependencies.
+    // If OBX_RELEASE is set, build and depend on release versions. Doesn't publish a release.
+    // See the release checklist in the objectbox repo on how to publish a release.
+    // If true, Maven artifacts use a release version, so without branch name and snapshot suffix
+    // (such as "-dev-SNAPSHOT"), including for dependencies (such as objectbox-java).
     val isRelease = System.getenv("OBX_RELEASE") == "true"
 
     // version post fix: "-<value>" or "" if not defined; e.g. used by CI to pass in branch name
@@ -47,14 +46,6 @@ buildscript {
 
     println("version=$obxJavaVersion")
     println("objectboxNativeDependency=$obxJniLibVersion")
-
-    // To avoid duplicate release artifacts on the internal repository,
-    // prevent publishing from branches other than publish, and main (for which publishing is turned off).
-    val isCI = System.getenv("CI") == "true"
-    val branchOrTag = System.getenv("CI_COMMIT_REF_NAME")
-    if (isCI && isRelease && !("publish" == branchOrTag || "main" == branchOrTag)) {
-        throw GradleException("isRelease = true only allowed on publish or main branch, but is $branchOrTag")
-    }
 
     // Versions for third party dependencies and plugins
     val essentialsVersion by extra("3.1.0")
