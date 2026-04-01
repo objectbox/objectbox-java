@@ -63,13 +63,6 @@ buildscript {
     // But it might not understand new language features.
     val dokkaVersion by extra("1.9.20")
 
-    repositories {
-        mavenCentral()
-        maven {
-            url = uri("https://plugins.gradle.org/m2/")
-        }
-    }
-
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
@@ -80,10 +73,6 @@ allprojects {
     group = "io.objectbox"
     val obxJavaVersion: String by rootProject.extra
     version = obxJavaVersion
-
-    repositories {
-        mavenCentral()
-    }
 
     configurations.all {
         // Projects are using snapshot dependencies that may update more often than 24 hours.
