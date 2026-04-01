@@ -13,12 +13,13 @@
 // - signingPassword
 
 // Gradle properties
-val propertyGitlabUrl = "gitlabUrl"
-val propertyGitlabPublishToken = "gitlabPublishToken"
-val propertyPublishTokenName = "gitlabPublishTokenName"
-val propertySigningKeyFile = "signingKeyFile"
-val propertySigningKeyId = "signingKeyId"
-val propertySigningPassword = "signingPassword"
+val gitlabUrl = providers.gradleProperty("gitlabUrl")
+val gitlabPublishToken = providers.gradleProperty("gitlabPublishToken")
+val gitlabPublishTokenName = providers.gradleProperty("gitlabPublishTokenName")
+// The following properties are used for signing in CI using a key file
+val signingKeyFile = providers.gradleProperty("signingKeyFile")
+val signingKeyId = providers.gradleProperty("signingKeyId")
+val signingPassword = providers.gradleProperty("signingPassword")
 
 plugins {
     id("maven-publish")
@@ -27,22 +28,23 @@ plugins {
 
 publishing {
     repositories {
+        // If the applied to project has the required properties, configures the "GitLab" repository for publishing
+        // (Note: always adding it, even without credentials, so it's possible to see the tasks created for it.)
         maven {
             name = "GitLab"
-            if (project.hasProperty(propertyGitlabUrl) && project.hasProperty(propertyGitlabPublishToken)) {
+            if (gitlabUrl.isPresent && gitlabPublishToken.isPresent) {
                 // "https://gitlab.example.com/api/v4/projects/<PROJECT_ID>/packages/maven"
-                val gitlabUrl = project.property(propertyGitlabUrl)
-                url = uri("$gitlabUrl/api/v4/projects/14/packages/maven")
+                url = uri("${gitlabUrl.get()}/api/v4/projects/14/packages/maven")
                 credentials(HttpHeaderCredentials::class) {
-                    name = project.findProperty(propertyPublishTokenName)?.toString() ?: "Private-Token"
-                    value = project.property(propertyGitlabPublishToken).toString()
+                    name = gitlabPublishTokenName.orNull ?: "Private-Token"
+                    value = gitlabPublishToken.get()
                 }
                 authentication {
                     create<HttpHeaderAuthentication>("header")
                 }
                 println("Publishing: configured GitLab repository $url")
             } else {
-                println("Publishing: GitLab repository not configured")
+                println("Publishing: GitLab repository NOT configured, see publishing-conventions plugin for required project properties")
             }
         }
         // Note: Sonatype repo created by publish-plugin, see root build.gradle.kts.
@@ -86,24 +88,15 @@ publishing {
 }
 
 signing {
-    if (hasSigningProperties()) {
+    if (signingKeyFile.isPresent && signingKeyId.isPresent && signingPassword.isPresent) {
         // Sign using an ASCII-armored key read from a file
         // https://docs.gradle.org/current/userguide/signing_plugin.html#using_in_memory_ascii_armored_openpgp_subkeys
-        val signingKey = File(project.property(propertySigningKeyFile).toString()).readText()
-        useInMemoryPgpKeys(
-            project.property(propertySigningKeyId).toString(),
-            signingKey,
-            project.property(propertySigningPassword).toString()
-        )
-        println("Publishing: configured signing with key file")
+        val keyFilePath = signingKeyFile.get()
+        val signingKey = File(keyFilePath).readText()
+        useInMemoryPgpKeys(signingKeyId.get(), signingKey, signingPassword.get())
+        println("Publishing: signing configured with key file $keyFilePath")
     } else {
         isRequired = false // Don't run sign tasks
-        println("Publishing: signing not configured")
+        println("Publishing: signing NOT configured, see publishing-conventions plugin for required project properties")
     }
-}
-
-private fun hasSigningProperties(): Boolean {
-    return (project.hasProperty(propertySigningKeyId)
-            && project.hasProperty(propertySigningKeyFile)
-            && project.hasProperty(propertySigningPassword))
 }

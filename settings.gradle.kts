@@ -16,16 +16,16 @@ dependencyResolutionManagement {
         google() // For Android dependencies
 
         // Internal ObjectBox repo to get snapshot versions of dependencies
-        val gitlabUrl: String? by settings
-        if (gitlabUrl != null) {
+        val gitlabUrl = providers.gradleProperty("gitlabUrl")
+        val gitlabPrivateTokenName = providers.gradleProperty("gitlabPrivateTokenName")
+        val gitlabPrivateToken = providers.gradleProperty("gitlabPrivateToken")
+        if (gitlabUrl.isPresent) {
             maven {
-                url = uri("$gitlabUrl/api/v4/groups/objectbox/-/packages/maven")
                 name = "GitLab"
-                val gitlabPrivateTokenName: String? by settings
-                val gitlabPrivateToken: String? by settings
+                url = uri("${gitlabUrl.get()}/api/v4/groups/objectbox/-/packages/maven")
                 credentials(HttpHeaderCredentials::class) {
-                    name = gitlabPrivateTokenName ?: "Private-Token"
-                    value = gitlabPrivateToken
+                    name = gitlabPrivateTokenName.orNull ?: "Private-Token"
+                    value = gitlabPrivateToken.get()
                 }
                 authentication {
                     create<HttpHeaderAuthentication>("header")
@@ -33,7 +33,7 @@ dependencyResolutionManagement {
                 println("Dependencies: added GitLab repository at $url")
             }
         } else {
-            println("Dependencies: GitLab repository not added. To resolve dependencies from the GitLab Package registry, set Gradle properties gitlabUrl and gitlabPrivateToken.")
+            println("Dependencies: GitLab repository NOT added, see settings file for required project properties")
         }
     }
 }
