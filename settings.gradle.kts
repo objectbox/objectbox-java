@@ -51,6 +51,7 @@ include(":objectbox-java")
 include(":objectbox-kotlin")
 include(":objectbox-rxjava")
 include(":objectbox-rxjava3")
+include(":objectbox-android")
 
 include(":tests:objectbox-java-test")
 include(":tests:test-proguard")
