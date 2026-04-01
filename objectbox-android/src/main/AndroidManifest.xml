@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Note that the objectbox-android-objectbrowser AAR ships a different manifest! -->
+
+    <!-- Required for Android library https://developer.android.com/studio/projects/android-library#aar-contents -->
+
+    <!-- Note: do no longer set extractNativeLibs="false", let Android plugin disable it based on minSdk >= 23 (Android 6.0/M). -->
+
 </manifest>
