@@ -18,6 +18,7 @@ plugins {
     id("com.github.spotbugs") version "6.0.26" apply false
     // https://github.com/gradle-nexus/publish-plugin/releases
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+    alias(libs.plugins.android.library) apply false
 }
 
 buildscript {
