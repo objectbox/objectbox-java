@@ -3,6 +3,7 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         mavenCentral() // For dokka plugin
+        google() // For Android dependencies
     }
 }
 
@@ -12,6 +13,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         mavenCentral()
+        google() // For Android dependencies
 
         // Internal ObjectBox repo to get snapshot versions of dependencies
         val gitlabUrl: String? by settings
