@@ -1,10 +1,5 @@
 # https://docs.gitlab.com/ci/yaml/
 
-# Default Docker image (currently only supporting Docker Linux containers)
-# This should match the image used to build the JVM database libraries (so Address Sanitizer library matches).
-# When updating, check if the test-jdk jobs need changing.
-image: objectboxio/buildenv-core:2025-07-03 # With JDK 21
-
 # Assumes these environment variables are configured in GitLab CI/CD Settings:
 # - OBX_READ_PACKAGES_TOKEN
 # - SONATYPE_USER
@@ -65,28 +60,45 @@ workflow:
     # In all other cases, create a pipeline
     - when: always
 
-test:
-  stage: test
+.docker_linux_x64_android: &docker_linux_x64_android
   tags:
     - docker
     - linux
     - x64
+  image: objectboxio/buildenv-android:2024-12-09 # With JDK 21, Android build-tools;35.0.0 and platforms;android-35 pre-installed
   variables:
     # Image defaults to POSIX (ASCII), set a compatible locale so UTF-8 tests that interact with the file system work.
     # Check with 'locale -a' for available locales.
     LC_ALL: "C.UTF-8"
+
+.test_base:
   before_script:
     # Print Gradle and JVM version info
     - ./gradlew -version
     # Remove any previous JVM (Hotspot) crash log.
     # "|| true" for an OK exit code if no file is found
     - rm **/hs_err_pid*.log || true
+  script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
+  artifacts:
+    when: always
+    paths:
+      - "**/hs_err_pid*.log" # Only on JVM (Hotspot) crash
+    reports:
+      junit: "**/build/test-results/**/TEST-*.xml"
+
+test:
+  <<: *docker_linux_x64_android
+  extends: .test_base
+  stage: test
+  # Overwrite script key to run through ASAN script, also run javadocForWeb task.
+  # Note: Address sanitizer is only available on Linux runners (see script).
   script:
     # build to assemble, run tests and spotbugs
     # javadocForWeb to catch API docs errors before releasing
     # Temporarily disable testing with Address Sanitizer until buildenv images are modernized, see #273
     # - ./scripts/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean build javadocForWeb
     - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build javadocForWeb
+  # Overwrite artifacts key to archive spotbugs reports
   artifacts:
     when: always
     paths:
@@ -95,49 +107,13 @@ test:
     reports:
       junit: "**/build/test-results/**/TEST-*.xml"
 
-.test-template:
-  before_script:
-    # Print Gradle and JVM version info
-    - ./gradlew -version
-    # Remove any previous JVM (Hotspot) crash log.
-    # "|| true" for an OK exit code if no file is found
-    - rm **/hs_err_pid*.log || true
-  artifacts:
-    when: always
-    paths:
-      - "**/hs_err_pid*.log" # Only on JVM (Hotspot) crash.
-    reports:
-      junit: "**/build/test-results/**/TEST-*.xml"
-
-test-windows:
-  extends: .test-template
-  needs: ["test"]
-  tags:
-    - windows-jdk
-    - x64
-  script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
-
-test-macos:
-  extends: .test-template
-  needs: ["test"]
-  tags:
-    - jdk
-    - mac
-  script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
-
-# Address sanitizer is only available on Linux runners (see script).
-.test-asan-template:
-  extends: .test-template
-  tags:
-    - docker
-    - linux
-    - x64
-  variables:
-    # Image defaults to POSIX (ASCII), set a compatible locale so UTF-8 tests that interact with the file system work.
-    # Check with 'locale -a' for available locales.
-    LC_ALL: "C.UTF-8"
+.test_jdks:
+  <<: *docker_linux_x64_android
+  extends: .test_base
+  # Overwrite script key to run through ASAN script and to run test task directly to avoid
+  # running SpotBugs (build runs check runs SpotBugs tasks).
+  # Note: Address sanitizer is only available on Linux runners (see script).
   script:
-    # Note: do not run check task as it includes SpotBugs.
     # Temporarily disable testing with Address Sanitizer until buildenv images are modernized, see #273
     # - ./scripts/test-with-asan.sh $GITLAB_REPO_ARGS $VERSION_ARGS clean :tests:objectbox-java-test:test
     - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean :tests:objectbox-java-test:test
@@ -145,38 +121,51 @@ test-macos:
 # Test oldest supported and a recent JDK.
 # Note: can not run these in parallel using a matrix configuration as Gradle would step over itself.
 test-jdk-8:
-  extends: .test-asan-template
+  extends: .test_jdks
   needs: ["test"]
   variables:
     TEST_JDK: 8
 
 # JDK 21 is the default of the current build image, so test the latest LTS JDK 25
 test-jdk-25:
-  extends: .test-asan-template
+  extends: .test_jdks
   needs: ["test-jdk-8"]
   variables:
     TEST_JDK: 25
 
-test-jdk-x86:
-  extends: .test-template
-  needs: ["test-windows"]
+# Disabled: currently there is no macOS shell runner with Android SDK available
+#test-macos:
+#  extends: .test_base
+#  needs: ["test"]
+#  tags:
+#    - android
+#    - jdk
+#    - mac
+
+test-windows:
+  extends: .test_base
+  needs: ["test"]
   tags:
+    - android
     - windows-jdk
     - x64
+
+test-windows-jdk-x86:
+  extends: .test_base
+  needs: ["test-windows"]
+  tags:
+    - android
+    - windows-jdk-x86
   variables:
     # TEST_WITH_JAVA_X86 makes objectbox-java-test use 32-bit java executable and therefore
     # 32-bit ObjectBox to run tests (see build.gradle file).
     # Note: assumes JAVA_HOME_X86 is set to 32-bit JDK path.
     TEST_WITH_JAVA_X86: "true"
-  script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
 
 # Publish Maven artifacts to internal Maven repo
 publish-maven-internal:
+  <<: *docker_linux_x64_android
   stage: publish-maven-internal
-  tags:
-    - docker
-    - linux
-    - x64
   rules:
     # Not when using release versions and not publishing a release to avoid duplicate artifacts
     # (GitLab would allow to upload duplicates for a release version)
@@ -191,36 +180,30 @@ publish-maven-internal:
     # Otherwise, only if no previous stages failed
     - when: on_success
   script:
-    - ./gradlew $GITLAB_REPO_ARGS $GITLAB_PUBLISH_ARGS $VERSION_ARGS publishMavenJavaPublicationToGitLabRepository
+    - ./gradlew $GITLAB_REPO_ARGS $GITLAB_PUBLISH_ARGS $VERSION_ARGS publishAllPublicationsToGitLabRepository
 
 # Publish Maven artifacts to public Maven Central repo
 publish-maven-central:
+  <<: *docker_linux_x64_android
   stage: publish-maven-central
-  tags:
-    - docker
-    - linux
-    - x64
   rules:
     # Only if publishing a release, only if no previous stages failed
     - if: $OBX_PUBLISH_RELEASE == "true"
       when: on_success
   before_script:
-    - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java library:* job $CI_JOB_NAME from branch $CI_COMMIT_BRANCH ($CI_COMMIT_SHORT_SHA)..."
+    - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java libraries to Maven Central:* job $CI_JOB_NAME from branch $CI_COMMIT_BRANCH ($CI_COMMIT_SHORT_SHA)..."
   script:
-    # Note: supply internal repo as tests use native dependencies that might not be published, yet.
-    - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS $CENTRAL_PUBLISH_ARGS publishMavenJavaPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+    # Note: supply internal repo as tests use native dependencies that might not be available publicly, yet.
+    - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS $CENTRAL_PUBLISH_ARGS publishAllPublicationsToSonatypeRepository closeAndReleaseSonatypeStagingRepository
   after_script:
     # Also runs on failure, so show CI_JOB_STATUS.
-    - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java library:* *$CI_JOB_STATUS* for $CI_JOB_NAME"
+    - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java libraries to Maven Central:* *$CI_JOB_STATUS* for $CI_JOB_NAME"
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "Check https://repo1.maven.org/maven2/io/objectbox/ in a few minutes."
 
 # Create Java API docs archive
 package-api-docs:
+  <<: *docker_linux_x64_android
   stage: package-api-docs
-  tags:
-    - docker
-    - linux
-    - x64
   rules:
     # Only if publishing a release, only if no previous stages failed
     - if: $OBX_PUBLISH_RELEASE == "true"
