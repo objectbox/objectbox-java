@@ -1,8 +1,20 @@
+import org.gradle.kotlin.dsl.support.uppercaseFirstChar
+
+
 plugins {
     alias(libs.plugins.android.library)
-    id("maven-publish")
-    id("signing")
+    id("objectbox.publishing-conventions")
 }
+
+val flavorAdminExcluded = "adminExcluded"
+val flavorAdminIncluded = "adminIncluded"
+val flavorBasic = "basic"
+val flavorSync = "sync"
+// Note: build variant names also match names of created components
+val variantAdminExcludedBasicRelease = "${flavorAdminExcluded}${flavorBasic.uppercaseFirstChar()}Release"
+val variantAdminIncludedBasicRelease = "${flavorAdminIncluded}${flavorBasic.uppercaseFirstChar()}Release"
+val variantAdminExcludedSyncRelease = "${flavorAdminExcluded}${flavorSync.uppercaseFirstChar()}Release"
+val variantAdminIncludedSyncRelease = "${flavorAdminIncluded}${flavorSync.uppercaseFirstChar()}Release"
 
 android {
     namespace = "io.objectbox.android"
@@ -35,29 +47,51 @@ android {
         }
     }
 
-    // https://developer.android.com/studio/build/build-variants#product-flavors
-    // Common configuration for flavors. Dimensions are used to enable a matrix configuration.
+    // Configure a flavor dimension based on if Admin is included in the Android database library.
+    // The Admin included flavor adds additional source files, resources and a different Android
+    // manifest to help using Admin. The excluded flavor adds source files with no-op Admin APIs.
+    // See the directories in "src/" named like the flavors.
+    // Configure another flavor dimension purely to add a regular or a Sync variant of the Android
+    // database library dependency. See the dependencies block.
     // Note: common configuration defined in defaultConfig and buildTypes blocks above.
-    // Note: depending on if the Admin feature is enabled different (re)sources are included
-    // (see src/dbOnly and src/dbAndAdmin which must be named like the flavor).
-    flavorDimensions += listOf("sources")
+    // https://developer.android.com/studio/build/build-variants#product-flavors
+    val dimensionAdmin = "admin"
+    val dimensionDatabase = "database"
+    flavorDimensions += listOf(dimensionAdmin, dimensionDatabase)
     productFlavors {
-        create("dbOnly") {
-            dimension = "sources"
+        create(flavorAdminExcluded) {
+            dimension = dimensionAdmin
         }
-        create("dbAndAdmin") {
-            dimension = "sources"
+        create(flavorAdminIncluded) {
+            dimension = dimensionAdmin
+            // Set Admin included flavor as default in Android Studio as it's most likely to display
+            // errors on breaking changes to the Java API dependency.
+            isDefault = true
+        }
+        create(flavorBasic) {
+            dimension = dimensionDatabase
+        }
+        create(flavorSync) {
+            dimension = dimensionDatabase
         }
     }
 
+    // Publish the release variants (variant = flavor combination + build type)
     // https://developer.android.com/studio/publish-library/configure-pub-variants
-    // Pick variants (variant = flavor + build type) to publish.
     publishing {
-        singleVariant("dbOnlyRelease") {
+        singleVariant(variantAdminExcludedBasicRelease) {
             withJavadocJar()
             withSourcesJar()
         }
-        singleVariant("dbAndAdminRelease") {
+        singleVariant(variantAdminIncludedBasicRelease) {
+            withJavadocJar()
+            withSourcesJar()
+        }
+        singleVariant(variantAdminExcludedSyncRelease) {
+            withJavadocJar()
+            withSourcesJar()
+        }
+        singleVariant(variantAdminIncludedSyncRelease) {
             withJavadocJar()
             withSourcesJar()
         }
@@ -76,8 +110,29 @@ android {
     }
 }
 
+// Must manually create configurations for flavor combinations to add dependencies
+// (they are still used automatically by the Android plugin).
+// https://developer.android.com/build/dependencies#configure_dependencies_for_a_specific_build_variant
+val adminExcludedBasicImplementation by configurations.creating
+val adminIncludedBasicImplementation by configurations.creating
+val adminExcludedSyncImplementation by configurations.creating
+val adminIncludedSyncImplementation by configurations.creating
+
 dependencies {
+    // Use "api" to add the Java library as a "compile" dependency in the POM as this library
+    // exposes APIs from it (such as Scheduler in AndroidScheduler, BoxStore in Admin). Regardless,
+    // it is expected that most consumers (or the Gradle plugin) add the Java library as a direct
+    // dependency.
     api(project(":objectbox-java"))
+    // Use "implementation" to add the database library as a "runtime" dependency in the POM as it
+    // has no Java APIs to expose.
+    // TODO Pull versions up to root build script
+    val objectboxAndroidDbVersion = "5.4.2-android-db-only-artifact-SNAPSHOT"
+    adminExcludedBasicImplementation("io.objectbox:objectbox-android-db:$objectboxAndroidDbVersion")
+    adminIncludedBasicImplementation("io.objectbox:objectbox-android-db-admin:$objectboxAndroidDbVersion")
+    val objectboxAndroidDbSyncVersion = "5.4.2-android-db-only-artifact-sync-SNAPSHOT"
+    adminExcludedSyncImplementation("io.objectbox:objectbox-sync-android-db:$objectboxAndroidDbSyncVersion")
+    adminIncludedSyncImplementation("io.objectbox:objectbox-sync-android-db-admin:$objectboxAndroidDbSyncVersion")
 
     // Use "compileOnly" to not add these as dependencies in the POM to avoid consumer projects
     // pulling in unused dependencies. It is expected that consumers did already add these
@@ -85,7 +140,7 @@ dependencies {
     compileOnly(libs.androidx.lifecycle.livedata)
     compileOnly(libs.androidx.paging.runtime)
 
-    // Sync: add dependencies for local unit tests.
+    // Dependencies for unit tests running on the JVM (so not on an Android device/emulator)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.rules)
     testImplementation(libs.junit)
@@ -93,78 +148,78 @@ dependencies {
     testImplementation(libs.robolectric)
 }
 
-// FIXME
-//publishing {
-//    addObxGitLabRepoIfConfigured(project)
-//
-//    publications {
-//        // Sync: add -sync to artifact name, use Sync components.
-//        create<MavenPublication>("mavenJava") {
-//            artifactId = "objectbox-sync-android"
-//
-//            // Because the Android components are created during the evaluation phase,
-//            // can only use them in the afterEvaluate() lifecycle method.
-//            afterEvaluate {
-//                from(components["dbOnlySyncClientRelease"])
-//            }
-//
-//            pom {
-//                name.set("ObjectBox Android")
-//                packaging = "aar"
-//
-//                setCommonObxProperties()
-//                setObxNativeLicenses()
-//            }
-//        }
-//        // Sync: add -sync to artifact name, use Sync components.
-//        create<MavenPublication>("mavenJavaBrowser") {
-//            artifactId = "objectbox-sync-android-objectbrowser"
-//
-//            // Because the Android components are created during the evaluation phase,
-//            // can only use them in the afterEvaluate() lifecycle method.
-//            afterEvaluate {
-//                from(components["dbAndAdminSyncClientAndAdminRelease"])
-//            }
-//
-//            // Note: as publication name is different POM properties are not inherited.
-//            pom {
-//                name.set("ObjectBox Android with Admin")
-//                packaging = "aar"
-//
-//                setCommonObxProperties()
-//                setObxNativeLicenses()
-//            }
-//        }
-//        // Sync: add server publication.
-//        if (buildSyncServer) {
-//            create<MavenPublication>("mavenJavaServer") {
-//                artifactId = "objectbox-sync-server-android"
-//
-//                // Because the Android components are created during the evaluation phase,
-//                // can only use them in the afterEvaluate() lifecycle method.
-//                afterEvaluate {
-//                    from(components["dbAndAdminSyncServerRelease"])
-//                }
-//
-//                pom {
-//                    name.set("ObjectBox Android with Sync Server")
-//                    packaging = "aar"
-//
-//                    setCommonObxProperties()
-//                    setObxNativeLicenses()
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//signing {
-//    signIfConfigured(project) {
-//        sign(publishing.publications["mavenJava"])
-//        sign(publishing.publications["mavenJavaBrowser"])
-//        // Sync: sign server publication.
-//        if (buildSyncServer) {
-//            sign(publishing.publications["mavenJavaServer"])
-//        }
-//    }
-//}
+// Note: common settings applied by objectbox.publishing-conventions plugin
+val publicationObjectboxAndroid = "objectboxAndroid"
+val publicationObjectboxAndroidObjectbrowser = "objectboxAndroidObjectbrowser"
+val publicationObjectboxSyncAndroid = "objectboxSyncAndroid"
+val publicationObjectboxSyncAndroidObjectbrowser = "objectboxSyncAndroidObjectbrowser"
+publishing {
+    publications {
+        create<MavenPublication>(publicationObjectboxAndroid) {
+            artifactId = "objectbox-android"
+
+            // Because the Android components are created during the evaluation phase,
+            // can only use them in the afterEvaluate() lifecycle method.
+            afterEvaluate {
+                from(components[variantAdminExcludedBasicRelease])
+            }
+
+            pom {
+                name.set("ObjectBox Android")
+            }
+        }
+        create<MavenPublication>(publicationObjectboxAndroidObjectbrowser) {
+            artifactId = "objectbox-android-objectbrowser"
+
+            // Because the Android components are created during the evaluation phase,
+            // can only use them in the afterEvaluate() lifecycle method.
+            afterEvaluate {
+                from(components[variantAdminIncludedBasicRelease])
+            }
+
+            pom {
+                name.set("ObjectBox Android with Admin")
+            }
+        }
+        create<MavenPublication>(publicationObjectboxSyncAndroid) {
+            artifactId = "objectbox-sync-android"
+
+            // Because the Android components are created during the evaluation phase,
+            // can only use them in the afterEvaluate() lifecycle method.
+            afterEvaluate {
+                from(components[variantAdminExcludedSyncRelease])
+            }
+
+            pom {
+                name.set("ObjectBox Android with Sync")
+            }
+        }
+        create<MavenPublication>(publicationObjectboxSyncAndroidObjectbrowser) {
+            artifactId = "objectbox-sync-android-objectbrowser"
+
+            // Because the Android components are created during the evaluation phase,
+            // can only use them in the afterEvaluate() lifecycle method.
+            afterEvaluate {
+                from(components[variantAdminIncludedSyncRelease])
+            }
+
+            pom {
+                name.set("ObjectBox Android with Admin and Sync")
+            }
+        }
+        // Additional common configuration for all Maven publications
+        withType<MavenPublication> {
+            pom {
+                description.set("ObjectBox is a fast NoSQL database for Objects")
+                packaging = "aar"
+            }
+        }
+    }
+}
+
+signing {
+    sign(publishing.publications[publicationObjectboxAndroid])
+    sign(publishing.publications[publicationObjectboxAndroidObjectbrowser])
+    sign(publishing.publications[publicationObjectboxSyncAndroid])
+    sign(publishing.publications[publicationObjectboxSyncAndroidObjectbrowser])
+}
