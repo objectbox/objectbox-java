@@ -79,16 +79,18 @@ android {
 dependencies {
     api(project(":objectbox-java"))
 
-    compileOnly("androidx.lifecycle:lifecycle-livedata:2.6.1")
-    // Note: Paging v3 requires Kotlin.
-    compileOnly("androidx.paging:paging-runtime:2.1.2")
+    // Use "compileOnly" to not add these as dependencies in the POM to avoid consumer projects
+    // pulling in unused dependencies. It is expected that consumers did already add these
+    // dependencies when using related classes of this library.
+    compileOnly(libs.androidx.lifecycle.livedata)
+    compileOnly(libs.androidx.paging.runtime)
 
     // Sync: add dependencies for local unit tests.
-    testImplementation("androidx.test:core:1.5.0")
-    testImplementation("androidx.test:rules:1.5.0")
-    testImplementation("androidx.test.ext:junit:1.1.5")
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.robolectric:robolectric:4.10.3")
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.rules)
+    testImplementation(libs.junit)
+    testImplementation(libs.androidx.test.junit)
+    testImplementation(libs.robolectric)
 }
 
 // FIXME
