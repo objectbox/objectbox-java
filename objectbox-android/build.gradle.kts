@@ -114,7 +114,7 @@ val versionDatabaseLibraryAndroid: String by rootProject.extra
 val versionDatabaseLibraryAndroidSync: String by rootProject.extra
 
 // Must manually create configurations for flavor combinations to add dependencies
-// (they are still used automatically by the Android plugin).
+// (they are still picked up automatically by the Android plugin).
 // https://developer.android.com/build/dependencies#configure_dependencies_for_a_specific_build_variant
 val adminExcludedBasicImplementation by configurations.creating
 val adminIncludedBasicImplementation by configurations.creating
