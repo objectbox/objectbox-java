@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         gradlePluginPortal()
         mavenCentral() // For dokka plugin
@@ -40,6 +41,8 @@ plugins {
     // https://docs.gradle.org/8.0/userguide/toolchains.html#sub:download_repositories
     id("org.gradle.toolchains.foojay-resolver-convention") version ("0.4.0")
 }
+
+rootProject.name = "objectbox-java"
 
 include(":objectbox-java-api")
 include(":objectbox-java")

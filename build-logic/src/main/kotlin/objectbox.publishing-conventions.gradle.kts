@@ -1,4 +1,4 @@
-// This script requires some Gradle project properties to be set
+// This convention plugin expects some Gradle project properties to be set
 // (to set as environment variable prefix with ORG_GRADLE_PROJECT_):
 // https://docs.gradle.org/current/userguide/build_environment.html#sec:project_properties
 //
@@ -12,6 +12,14 @@
 // - signingKeyId
 // - signingPassword
 
+// Gradle properties
+val propertyGitlabUrl = "gitlabUrl"
+val propertyGitlabPublishToken = "gitlabPublishToken"
+val propertyPublishTokenName = "gitlabPublishTokenName"
+val propertySigningKeyFile = "signingKeyFile"
+val propertySigningKeyId = "signingKeyId"
+val propertySigningPassword = "signingPassword"
+
 plugins {
     id("maven-publish")
     id("signing")
@@ -21,13 +29,13 @@ publishing {
     repositories {
         maven {
             name = "GitLab"
-            if (project.hasProperty("gitlabUrl") && project.hasProperty("gitlabPublishToken")) {
+            if (project.hasProperty(propertyGitlabUrl) && project.hasProperty(propertyGitlabPublishToken)) {
                 // "https://gitlab.example.com/api/v4/projects/<PROJECT_ID>/packages/maven"
-                val gitlabUrl = project.property("gitlabUrl")
+                val gitlabUrl = project.property(propertyGitlabUrl)
                 url = uri("$gitlabUrl/api/v4/projects/14/packages/maven")
                 credentials(HttpHeaderCredentials::class) {
-                    name = project.findProperty("gitlabPublishTokenName")?.toString() ?: "Private-Token"
-                    value = project.property("gitlabPublishToken").toString()
+                    name = project.findProperty(propertyPublishTokenName)?.toString() ?: "Private-Token"
+                    value = project.property(propertyGitlabPublishToken).toString()
                 }
                 authentication {
                     create<HttpHeaderAuthentication>("header")
@@ -41,10 +49,10 @@ publishing {
     }
 
     publications {
-        create<MavenPublication>("mavenJava") {
+        // Common settings for all Maven publications
+        withType<MavenPublication> {
             // Note: Projects set additional specific properties.
             pom {
-                packaging = "jar"
                 url.set("https://objectbox.io")
                 licenses {
                     license {
@@ -81,21 +89,21 @@ signing {
     if (hasSigningProperties()) {
         // Sign using an ASCII-armored key read from a file
         // https://docs.gradle.org/current/userguide/signing_plugin.html#using_in_memory_ascii_armored_openpgp_subkeys
-        val signingKey = File(project.property("signingKeyFile").toString()).readText()
+        val signingKey = File(project.property(propertySigningKeyFile).toString()).readText()
         useInMemoryPgpKeys(
-            project.property("signingKeyId").toString(),
+            project.property(propertySigningKeyId).toString(),
             signingKey,
-            project.property("signingPassword").toString()
+            project.property(propertySigningPassword).toString()
         )
-        sign(publishing.publications["mavenJava"])
         println("Publishing: configured signing with key file")
     } else {
+        isRequired = false // Don't run sign tasks
         println("Publishing: signing not configured")
     }
 }
 
-fun hasSigningProperties(): Boolean {
-    return (project.hasProperty("signingKeyId")
-            && project.hasProperty("signingKeyFile")
-            && project.hasProperty("signingPassword"))
+private fun hasSigningProperties(): Boolean {
+    return (project.hasProperty(propertySigningKeyId)
+            && project.hasProperty(propertySigningKeyFile)
+            && project.hasProperty(propertySigningPassword))
 }
