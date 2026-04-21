@@ -20,7 +20,7 @@ kotlin {
     }
 }
 
-val obxJniLibVersion: String by rootProject.extra
+val versionDatabaseLibraryJvm: String by rootProject.extra
 
 val coroutinesVersion: String by rootProject.extra
 val essentialsVersion: String by rootProject.extra
@@ -31,15 +31,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation(project(":objectbox-kotlin"))
     implementation("org.greenrobot:essentials:$essentialsVersion")
-
-    // Check flag to use locally compiled version to avoid dependency cycles
-    if (!project.hasProperty("noObjectBoxTestDepencies")
-        || project.property("noObjectBoxTestDepencies") == false) {
-        println("Using $obxJniLibVersion")
-        implementation(obxJniLibVersion)
-    } else {
-        println("Did NOT add native dependency")
-    }
+    implementation("io.objectbox:objectbox-linux:$versionDatabaseLibraryJvm")
+    implementation("io.objectbox:objectbox-macos:$versionDatabaseLibraryJvm")
+    implementation("io.objectbox:objectbox-windows:$versionDatabaseLibraryJvm")
 
     testImplementation("junit:junit:$junitVersion")
     // To test Coroutines

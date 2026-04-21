@@ -8,21 +8,15 @@ tasks.withType<JavaCompile> {
     options.release.set(8)
 }
 
-val obxJniLibVersion: String by rootProject.extra
+val versionDatabaseLibraryJvm: String by rootProject.extra
 
 val junitVersion: String by rootProject.extra
 
 dependencies {
     implementation(project(":objectbox-java"))
-
-    // Check flag to use locally compiled version to avoid dependency cycles
-    if (!project.hasProperty("noObjectBoxTestDepencies")
-        || project.property("noObjectBoxTestDepencies") == false) {
-        println("Using $obxJniLibVersion")
-        implementation(obxJniLibVersion)
-    } else {
-        println("Did NOT add native dependency")
-    }
+    implementation("io.objectbox:objectbox-linux:$versionDatabaseLibraryJvm")
+    implementation("io.objectbox:objectbox-macos:$versionDatabaseLibraryJvm")
+    implementation("io.objectbox:objectbox-windows:$versionDatabaseLibraryJvm")
 
     testImplementation("junit:junit:$junitVersion")
 }

@@ -110,6 +110,9 @@ android {
     }
 }
 
+val versionDatabaseLibraryAndroid: String by rootProject.extra
+val versionDatabaseLibraryAndroidSync: String by rootProject.extra
+
 // Must manually create configurations for flavor combinations to add dependencies
 // (they are still used automatically by the Android plugin).
 // https://developer.android.com/build/dependencies#configure_dependencies_for_a_specific_build_variant
@@ -126,13 +129,10 @@ dependencies {
     api(project(":objectbox-java"))
     // Use "implementation" to add the database library as a "runtime" dependency in the POM as it
     // has no Java APIs to expose.
-    // TODO Pull versions up to root build script
-    val objectboxAndroidDbVersion = "5.4.2-android-db-only-artifact-SNAPSHOT"
-    adminExcludedBasicImplementation("io.objectbox:objectbox-android-db:$objectboxAndroidDbVersion")
-    adminIncludedBasicImplementation("io.objectbox:objectbox-android-db-admin:$objectboxAndroidDbVersion")
-    val objectboxAndroidDbSyncVersion = "5.4.2-android-db-only-artifact-sync-SNAPSHOT"
-    adminExcludedSyncImplementation("io.objectbox:objectbox-sync-android-db:$objectboxAndroidDbSyncVersion")
-    adminIncludedSyncImplementation("io.objectbox:objectbox-sync-android-db-admin:$objectboxAndroidDbSyncVersion")
+    adminExcludedBasicImplementation("io.objectbox:objectbox-android-db:$versionDatabaseLibraryAndroid")
+    adminIncludedBasicImplementation("io.objectbox:objectbox-android-db-admin:$versionDatabaseLibraryAndroid")
+    adminExcludedSyncImplementation("io.objectbox:objectbox-sync-android-db:$versionDatabaseLibraryAndroidSync")
+    adminIncludedSyncImplementation("io.objectbox:objectbox-sync-android-db-admin:$versionDatabaseLibraryAndroidSync")
 
     // Use "compileOnly" to not add these as dependencies in the POM to avoid consumer projects
     // pulling in unused dependencies. It is expected that consumers did already add these

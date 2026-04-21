@@ -41,21 +41,20 @@ buildscript {
     val versionSuffixValue = project.findProperty(propertyVersionSuffix)
     val versionSuffix = if (versionSuffixValue != null) "-$versionSuffixValue" else ""
     val obxJavaVersion by extra(versionNumber + (if (isRelease) "" else "$versionSuffix-SNAPSHOT"))
+    println("Publishing: version = $obxJavaVersion")
 
-    // Native library version for tests
-    // Be careful to diverge here; easy to forget and hard to find JNI problems
-    val nativeVersion = versionNumber + (if (isRelease) "" else "-dev-SNAPSHOT")
-    val osName = System.getProperty("os.name").lowercase()
-    val objectboxPlatform = when {
-        osName.contains("linux") -> "linux"
-        osName.contains("windows") -> "windows"
-        osName.contains("mac") -> "macos"
-        else -> "unsupported"
-    }
-    val obxJniLibVersion by extra("io.objectbox:objectbox-$objectboxPlatform:$nativeVersion")
+    // JVM and Android database library versions
+    val versionDbJvm = if (isRelease) versionNumber else "$versionNumber-dev-SNAPSHOT"
+    val versionDbAndroid = if (isRelease) versionNumber else "$versionNumber-dev-SNAPSHOT"
+    val versionDbAndroidSync = if (isRelease) versionNumber else "$versionNumber-sync-SNAPSHOT"
 
-    println("version=$obxJavaVersion")
-    println("objectboxNativeDependency=$obxJniLibVersion")
+    println("Database dependencies (JVM) = $versionDbJvm")
+    println("Database dependencies (Android) = $versionDbAndroid")
+    println("Database dependencies (Android + Sync) = $versionDbAndroidSync")
+
+    val versionDatabaseLibraryJvm by extra(versionDbJvm)
+    val versionDatabaseLibraryAndroid by extra(versionDbAndroid)
+    val versionDatabaseLibraryAndroidSync by extra(versionDbAndroidSync)
 
     // Versions for third party dependencies and plugins
     val essentialsVersion by extra("3.1.0")
