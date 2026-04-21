@@ -137,14 +137,12 @@ test-jdk-25:
 
 test-macos:
   extends: .test_base
-  needs: ["test"]
   tags:
     - jdk
     - mac
 
 test-windows:
   extends: .test_base
-  needs: ["test"]
   tags:
     - windows-jdk
     - x64
