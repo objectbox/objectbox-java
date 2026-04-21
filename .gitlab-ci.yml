@@ -36,7 +36,7 @@ variables:
   GITLAB_PUBLISH_ARGS: "-PgitlabPublishTokenName=Job-Token -PgitlabPublishToken=$CI_JOB_TOKEN"
   CENTRAL_PUBLISH_ARGS: "-PsonatypeUsername=$SONATYPE_USER -PsonatypePassword=$SONATYPE_PWD"
   # CI_COMMIT_REF_SLUG is the branch or tag name, but web-safe (only 0-9, a-z)
-  VERSION_ARGS: "-PversionPostFix=$CI_COMMIT_REF_SLUG"
+  VERSION_ARGS: "-PversionSuffix=$CI_COMMIT_REF_SLUG"
 
 # Using multiple test stages to avoid running some things in parallel (see job notes).
 stages:

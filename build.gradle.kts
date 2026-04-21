@@ -1,11 +1,15 @@
 // This script supports some Gradle project properties:
 // https://docs.gradle.org/current/userguide/build_environment.html#sec:project_properties
-// - versionPostFix: appended to snapshot version number, e.g. "1.2.3-<versionPostFix>-SNAPSHOT".
+// - versionSuffix: appended to snapshot version number, e.g. "1.2.3-<versionSuffix>-SNAPSHOT".
 //   Use to create different versions based on branch/tag.
 // - sonatypeUsername: Maven Central credential used by Nexus publishing.
 // - sonatypePassword: Maven Central credential used by Nexus publishing.
 // This script supports the following environment variables:
 // - OBX_RELEASE: If set to "true" builds and depends on release versions, without branch name and snapshot suffix.
+
+// Gradle properties (more defined in buildscript block below)
+val propertySonatypeUsername = "sonatypeUsername"
+val propertySonatypePassword = "sonatypePassword"
 
 plugins {
     // https://github.com/ben-manes/gradle-versions-plugin/releases
@@ -17,6 +21,11 @@ plugins {
 }
 
 buildscript {
+    // Environment variables
+    val envRelease = "OBX_RELEASE"
+    // Gradle properties
+    val propertyVersionSuffix = "versionSuffix"
+
     // Version of Maven artifacts
     // Should only be changed as part of the release process, see the release checklist in the objectbox repo
     val versionNumber = "5.4.2"
@@ -25,12 +34,12 @@ buildscript {
     // See the release checklist in the objectbox repo on how to publish a release.
     // If true, Maven artifacts use a release version, so without branch name and snapshot suffix
     // (such as "-dev-SNAPSHOT"), including for dependencies (such as objectbox-java).
-    val isRelease = System.getenv("OBX_RELEASE") == "true"
+    val isRelease = System.getenv(envRelease) == "true"
 
-    // version post fix: "-<value>" or "" if not defined; e.g. used by CI to pass in branch name
-    val versionPostFixValue = project.findProperty("versionPostFix")
-    val versionPostFix = if (versionPostFixValue != null) "-$versionPostFixValue" else ""
-    val obxJavaVersion by extra(versionNumber + (if (isRelease) "" else "$versionPostFix-SNAPSHOT"))
+    // version suffix: "-<value>" or "" if not defined; e.g. used by CI to pass in branch name
+    val versionSuffixValue = project.findProperty(propertyVersionSuffix)
+    val versionSuffix = if (versionSuffixValue != null) "-$versionSuffixValue" else ""
+    val obxJavaVersion by extra(versionNumber + (if (isRelease) "" else "$versionSuffix-SNAPSHOT"))
 
     // Native library version for tests
     // Be careful to diverge here; easy to forget and hard to find JNI problems
@@ -116,10 +125,10 @@ nexusPublishing {
             nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
             snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
 
-            if (project.hasProperty("sonatypeUsername") && project.hasProperty("sonatypePassword")) {
+            if (project.hasProperty(propertySonatypeUsername) && project.hasProperty(propertySonatypePassword)) {
                 println("Publishing: Sonatype Maven Central credentials supplied.")
-                username.set(project.property("sonatypeUsername").toString())
-                password.set(project.property("sonatypePassword").toString())
+                username.set(project.property(propertySonatypeUsername).toString())
+                password.set(project.property(propertySonatypePassword).toString())
             } else {
                 println("Publishing: Sonatype Maven Central credentials NOT supplied.")
             }
