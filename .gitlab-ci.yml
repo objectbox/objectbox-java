@@ -78,7 +78,9 @@ workflow:
     # Remove any previous JVM (Hotspot) crash log.
     # "|| true" for an OK exit code if no file is found
     - rm **/hs_err_pid*.log || true
-  script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build
+  # By default, don't compile and test the Android APIs (only do in test job), there is currently no benefit to test
+  # them using multiple platforms or JDKs.
+  script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build -PexcludeAndroid=true
   artifacts:
     when: always
     paths:
@@ -90,7 +92,7 @@ test:
   <<: *docker_linux_x64_android
   extends: .test_base
   stage: test
-  # Overwrite script key to run through ASAN script, also run javadocForWeb task.
+  # Overwrite script key to run through ASAN script, compile and test Android APIs and test build of Web API docs.
   # Note: Address sanitizer is only available on Linux runners (see script).
   script:
     # build to assemble, run tests and spotbugs
@@ -137,17 +139,13 @@ test-macos:
   extends: .test_base
   needs: ["test"]
   tags:
-#    - android # Currently there is no macOS shell runner with Android SDK available
     - jdk
     - mac
-  # Overwrite script key to exclude projects that require the Android SDK
-  script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build -PexcludeAndroid=true
 
 test-windows:
   extends: .test_base
   needs: ["test"]
   tags:
-    - android
     - windows-jdk
     - x64
 
@@ -155,7 +153,6 @@ test-windows-jdk-x86:
   extends: .test_base
   needs: ["test-windows"]
   tags:
-    - android
     - windows-jdk-x86
   variables:
     # TEST_WITH_JAVA_X86 makes objectbox-java-test use 32-bit java executable and therefore
