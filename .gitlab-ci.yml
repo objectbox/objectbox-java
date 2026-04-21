@@ -133,14 +133,15 @@ test-jdk-25:
   variables:
     TEST_JDK: 25
 
-# Disabled: currently there is no macOS shell runner with Android SDK available
-#test-macos:
-#  extends: .test_base
-#  needs: ["test"]
-#  tags:
-#    - android
-#    - jdk
-#    - mac
+test-macos:
+  extends: .test_base
+  needs: ["test"]
+  tags:
+#    - android # Currently there is no macOS shell runner with Android SDK available
+    - jdk
+    - mac
+  # Overwrite script key to exclude projects that require the Android SDK
+  script: ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean build -PexcludeAndroid=true
 
 test-windows:
   extends: .test_base

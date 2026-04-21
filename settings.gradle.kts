@@ -51,7 +51,12 @@ include(":objectbox-java")
 include(":objectbox-kotlin")
 include(":objectbox-rxjava")
 include(":objectbox-rxjava3")
-include(":objectbox-android")
+
+// Allow to conditionally exclude projects that require the Android SDK to build
+val excludeAndroid: String? by settings
+if (excludeAndroid == null) {
+    include(":objectbox-android")
+}
 
 include(":tests:objectbox-java-test")
 include(":tests:test-proguard")
