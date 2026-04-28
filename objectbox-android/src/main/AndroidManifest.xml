@@ -5,6 +5,4 @@
 
     <!-- Required for Android library https://developer.android.com/studio/projects/android-library#aar-contents -->
 
-    <!-- Note: do no longer set extractNativeLibs="false", let Android plugin disable it based on minSdk >= 23 (Android 6.0/M). -->
-
 </manifest>
