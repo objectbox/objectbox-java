@@ -1,9 +1,16 @@
 pluginManagement {
     includeBuild("build-logic")
     repositories {
-        gradlePluginPortal()
+        // Google: for Android plugin
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral() // For dokka plugin
-        google() // For Android dependencies
+        gradlePluginPortal()
     }
 }
 
@@ -12,8 +19,8 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        mavenCentral()
         google() // For Android dependencies
+        mavenCentral()
 
         // Internal ObjectBox repo to get snapshot versions of dependencies
         val gitlabUrl = providers.gradleProperty("gitlabUrl")
