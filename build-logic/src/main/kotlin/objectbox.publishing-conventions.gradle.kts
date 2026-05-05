@@ -1,4 +1,4 @@
-// This script requires some Gradle project properties to be set
+// This convention plugin expects some Gradle project properties to be set
 // (to set as environment variable prefix with ORG_GRADLE_PROJECT_):
 // https://docs.gradle.org/current/userguide/build_environment.html#sec:project_properties
 //
@@ -12,6 +12,15 @@
 // - signingKeyId
 // - signingPassword
 
+// Gradle properties
+val gitlabUrl = providers.gradleProperty("gitlabUrl")
+val gitlabPublishToken = providers.gradleProperty("gitlabPublishToken")
+val gitlabPublishTokenName = providers.gradleProperty("gitlabPublishTokenName")
+// The following properties are used for signing in CI using a key file
+val signingKeyFile = providers.gradleProperty("signingKeyFile")
+val signingKeyId = providers.gradleProperty("signingKeyId")
+val signingPassword = providers.gradleProperty("signingPassword")
+
 plugins {
     id("maven-publish")
     id("signing")
@@ -19,32 +28,33 @@ plugins {
 
 publishing {
     repositories {
+        // If the applied to project has the required properties, configures the "GitLab" repository for publishing
+        // (Note: always adding it, even without credentials, so it's possible to see the tasks created for it.)
         maven {
             name = "GitLab"
-            if (project.hasProperty("gitlabUrl") && project.hasProperty("gitlabPublishToken")) {
+            if (gitlabUrl.isPresent && gitlabPublishToken.isPresent) {
                 // "https://gitlab.example.com/api/v4/projects/<PROJECT_ID>/packages/maven"
-                val gitlabUrl = project.property("gitlabUrl")
-                url = uri("$gitlabUrl/api/v4/projects/14/packages/maven")
+                url = uri("${gitlabUrl.get()}/api/v4/projects/14/packages/maven")
                 credentials(HttpHeaderCredentials::class) {
-                    name = project.findProperty("gitlabPublishTokenName")?.toString() ?: "Private-Token"
-                    value = project.property("gitlabPublishToken").toString()
+                    name = gitlabPublishTokenName.orNull ?: "Private-Token"
+                    value = gitlabPublishToken.get()
                 }
                 authentication {
                     create<HttpHeaderAuthentication>("header")
                 }
                 println("Publishing: configured GitLab repository $url")
             } else {
-                println("Publishing: GitLab repository not configured")
+                println("Publishing: GitLab repository NOT configured, see publishing-conventions plugin for required project properties")
             }
         }
         // Note: Sonatype repo created by publish-plugin, see root build.gradle.kts.
     }
 
     publications {
-        create<MavenPublication>("mavenJava") {
+        // Common settings for all Maven publications
+        withType<MavenPublication> {
             // Note: Projects set additional specific properties.
             pom {
-                packaging = "jar"
                 url.set("https://objectbox.io")
                 licenses {
                     license {
@@ -78,24 +88,15 @@ publishing {
 }
 
 signing {
-    if (hasSigningProperties()) {
+    if (signingKeyFile.isPresent && signingKeyId.isPresent && signingPassword.isPresent) {
         // Sign using an ASCII-armored key read from a file
         // https://docs.gradle.org/current/userguide/signing_plugin.html#using_in_memory_ascii_armored_openpgp_subkeys
-        val signingKey = File(project.property("signingKeyFile").toString()).readText()
-        useInMemoryPgpKeys(
-            project.property("signingKeyId").toString(),
-            signingKey,
-            project.property("signingPassword").toString()
-        )
-        sign(publishing.publications["mavenJava"])
-        println("Publishing: configured signing with key file")
+        val keyFilePath = signingKeyFile.get()
+        val signingKey = File(keyFilePath).readText()
+        useInMemoryPgpKeys(signingKeyId.get(), signingKey, signingPassword.get())
+        println("Publishing: signing configured with key file $keyFilePath")
     } else {
-        println("Publishing: signing not configured")
+        isRequired = false // Don't run sign tasks
+        println("Publishing: signing NOT configured, see publishing-conventions plugin for required project properties")
     }
-}
-
-fun hasSigningProperties(): Boolean {
-    return (project.hasProperty("signingKeyId")
-            && project.hasProperty("signingKeyFile")
-            && project.hasProperty("signingPassword"))
 }

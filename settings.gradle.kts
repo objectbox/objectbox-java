@@ -1,14 +1,69 @@
+pluginManagement {
+    includeBuild("build-logic")
+    repositories {
+        // Google: for Android plugin
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral() // For dokka plugin
+        gradlePluginPortal()
+    }
+}
+
+// While this is an incubating API, it is the recommended way of declaring repositories:
+// https://docs.gradle.org/current/userguide/best_practices_dependencies.html#set_up_repositories_in_settings
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google() // For Android dependencies
+        mavenCentral()
+
+        // Internal ObjectBox repo to get snapshot versions of dependencies
+        val gitlabUrl = providers.gradleProperty("gitlabUrl")
+        val gitlabPrivateTokenName = providers.gradleProperty("gitlabPrivateTokenName")
+        val gitlabPrivateToken = providers.gradleProperty("gitlabPrivateToken")
+        if (gitlabUrl.isPresent) {
+            maven {
+                name = "GitLab"
+                url = uri("${gitlabUrl.get()}/api/v4/groups/objectbox/-/packages/maven")
+                credentials(HttpHeaderCredentials::class) {
+                    name = gitlabPrivateTokenName.orNull ?: "Private-Token"
+                    value = gitlabPrivateToken.get()
+                }
+                authentication {
+                    create<HttpHeaderAuthentication>("header")
+                }
+                println("Dependencies: added GitLab repository at $url")
+            }
+        } else {
+            println("Dependencies: GitLab repository NOT added, see settings file for required project properties")
+        }
+    }
+}
+
 plugins {
     // Supports resolving toolchains for JVM projects
     // https://docs.gradle.org/8.0/userguide/toolchains.html#sub:download_repositories
-    id("org.gradle.toolchains.foojay-resolver-convention") version("0.4.0")
+    id("org.gradle.toolchains.foojay-resolver-convention") version ("0.4.0")
 }
+
+rootProject.name = "objectbox-java"
 
 include(":objectbox-java-api")
 include(":objectbox-java")
 include(":objectbox-kotlin")
 include(":objectbox-rxjava")
 include(":objectbox-rxjava3")
+
+// Allow to conditionally exclude projects that require the Android SDK to build
+val excludeAndroid: String? by settings
+if (excludeAndroid == null) {
+    include(":objectbox-android")
+}
 
 include(":tests:objectbox-java-test")
 include(":tests:test-proguard")

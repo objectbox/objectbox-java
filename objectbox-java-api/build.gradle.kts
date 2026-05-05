@@ -1,6 +1,6 @@
 plugins {
     id("java-library")
-    id("objectbox-publish")
+    id("objectbox.publishing-conventions")
 }
 
 // Note: use release flag instead of sourceCompatibility and targetCompatibility to ensure only JDK 8 API is used.
@@ -20,17 +20,26 @@ val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
 }
 
-// Set project-specific properties.
+// Note: common settings applied by objectbox.publishing-conventions plugin
+val publicationObjectboxJavaApi = "objectboxJavaApi"
 publishing {
     publications {
-        getByName<MavenPublication>("mavenJava") {
+        create<MavenPublication>(publicationObjectboxJavaApi) {
+            artifactId = "objectbox-java-api"
+
             from(components["java"])
             artifact(sourcesJar)
             artifact(javadocJar)
+
             pom {
-                name.set("ObjectBox API")
+                name.set("ObjectBox Java Annotations")
                 description.set("ObjectBox is a fast NoSQL database for Objects")
+                packaging = "jar"
             }
         }
     }
+}
+
+signing {
+    sign(publishing.publications[publicationObjectboxJavaApi])
 }

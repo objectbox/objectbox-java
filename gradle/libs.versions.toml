@@ -1,0 +1,21 @@
+[versions]
+agp = "8.13.2" # https://developer.android.com/build/releases/gradle-plugin
+androidxLifecycle = "2.6.1" # https://developer.android.com/jetpack/androidx/releases/lifecycle
+# Not using Paging v3 as it pulls in Kotlin
+androidxPaging = "2.1.2" # https://developer.android.com/jetpack/androidx/releases/paging
+androidxTest = "1.5.0" # https://developer.android.com/jetpack/androidx/releases/test
+androidxTestJunit = "1.1.5" # https://developer.android.com/jetpack/androidx/releases/test
+junit = "4.13.2"
+robolectric = "4.10.3" # https://github.com/robolectric/robolectric/releases
+
+[libraries]
+androidx-lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata", version.ref = "androidxLifecycle" }
+androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "androidxPaging" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTest" }
+androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestJunit" }
+androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidxTest" }
+junit = { module = "junit:junit", version.ref = "junit" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+
+[plugins]
+android-library = { id = "com.android.library", version.ref = "agp" }

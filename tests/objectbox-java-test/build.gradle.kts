@@ -20,28 +20,7 @@ kotlin {
     }
 }
 
-repositories {
-    // Native lib might be deployed only in internal repo
-    if (project.hasProperty("gitlabUrl")) {
-        val gitlabUrl = project.property("gitlabUrl")
-        maven {
-            url = uri("$gitlabUrl/api/v4/groups/objectbox/-/packages/maven")
-            name = "GitLab"
-            credentials(HttpHeaderCredentials::class) {
-                name = project.findProperty("gitlabPrivateTokenName")?.toString() ?: "Private-Token"
-                value = project.property("gitlabPrivateToken").toString()
-            }
-            authentication {
-                create<HttpHeaderAuthentication>("header")
-            }
-            println("Dependencies: added GitLab repository $url")
-        }
-    } else {
-        println("Dependencies: GitLab repository not added. To resolve dependencies from the GitLab Package Repository, set gitlabUrl and gitlabPrivateToken.")
-    }
-}
-
-val obxJniLibVersion: String by rootProject.extra
+val versionDatabaseLibraryJvm: String by rootProject.extra
 
 val coroutinesVersion: String by rootProject.extra
 val essentialsVersion: String by rootProject.extra
@@ -52,15 +31,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation(project(":objectbox-kotlin"))
     implementation("org.greenrobot:essentials:$essentialsVersion")
-
-    // Check flag to use locally compiled version to avoid dependency cycles
-    if (!project.hasProperty("noObjectBoxTestDepencies")
-        || project.property("noObjectBoxTestDepencies") == false) {
-        println("Using $obxJniLibVersion")
-        implementation(obxJniLibVersion)
-    } else {
-        println("Did NOT add native dependency")
-    }
+    implementation("io.objectbox:objectbox-linux:$versionDatabaseLibraryJvm")
+    implementation("io.objectbox:objectbox-macos:$versionDatabaseLibraryJvm")
+    implementation("io.objectbox:objectbox-windows:$versionDatabaseLibraryJvm")
 
     testImplementation("junit:junit:$junitVersion")
     // To test Coroutines

@@ -1,6 +1,6 @@
 plugins {
     id("java-library")
-    id("objectbox-publish")
+    id("objectbox.publishing-conventions")
 }
 
 // Note: use release flag instead of sourceCompatibility and targetCompatibility to ensure only JDK 8 API is used.
@@ -31,17 +31,26 @@ val sourcesJar by tasks.registering(Jar::class) {
     from(sourceSets.main.get().allSource)
 }
 
-// Set project-specific properties.
+// Note: common settings applied by objectbox.publishing-conventions plugin
+val publicationObjectboxRxjava = "objectboxRxjava"
 publishing {
     publications {
-        getByName<MavenPublication>("mavenJava") {
+        create<MavenPublication>(publicationObjectboxRxjava) {
+            artifactId = "objectbox-rxjava"
+
             from(components["java"])
             artifact(sourcesJar)
             artifact(javadocJar)
+
             pom {
                 name.set("ObjectBox RxJava API")
                 description.set("RxJava extension for ObjectBox")
+                packaging = "jar"
             }
         }
     }
+}
+
+signing {
+    sign(publishing.publications[publicationObjectboxRxjava])
 }
