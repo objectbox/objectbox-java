@@ -143,13 +143,15 @@ test-macos:
 test-windows:
   extends: .test_base
   tags:
-    - windows-jdk
+    - jdk
+    - windows
     - x64
 
 test-windows-jdk-x86:
   extends: .test_base
   tags:
-    - windows-jdk-x86
+    - jdk-x86
+    - windows
   variables:
     # TEST_WITH_JAVA_X86 makes objectbox-java-test use 32-bit java executable and therefore
     # 32-bit ObjectBox to run tests (see build.gradle file).
