@@ -121,7 +121,6 @@ test:
     - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS clean :tests:objectbox-java-test:test
 
 # Test oldest supported and a recent JDK.
-# Note: can not run these in parallel using a matrix configuration as Gradle would step over itself.
 test-jdk-8:
   extends: .test_jdks
   needs: ["test"]
@@ -131,7 +130,7 @@ test-jdk-8:
 # JDK 21 is the default of the current build image, so test the latest LTS JDK 25
 test-jdk-25:
   extends: .test_jdks
-  needs: ["test-jdk-8"]
+  needs: ["test"]
   variables:
     TEST_JDK: 25
 
@@ -149,7 +148,6 @@ test-windows:
 
 test-windows-jdk-x86:
   extends: .test_base
-  needs: ["test-windows"]
   tags:
     - windows-jdk-x86
   variables:
