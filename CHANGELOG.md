@@ -6,7 +6,7 @@ For more insights into what changed in the database libraries, [check the Object
 
 ## 5.4.2-preview1 - 2026-04-28
 
-- Update Android and JVM libraries to database version `5.3.1-next-2026-04-24`
+- Update Android and JVM libraries to database version `5.3.2-2026-05-05`
 
 ## 5.4.1 - 2026-03-26
 

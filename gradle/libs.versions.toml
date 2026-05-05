@@ -1,7 +1,8 @@
 [versions]
 agp = "8.13.2" # https://developer.android.com/build/releases/gradle-plugin
 androidxLifecycle = "2.6.1" # https://developer.android.com/jetpack/androidx/releases/lifecycle
-androidxPaging = "2.1.2" # Not using Paging v3 as it pulls in Kotlin
+# Not using Paging v3 as it pulls in Kotlin
+androidxPaging = "2.1.2" # https://developer.android.com/jetpack/androidx/releases/paging
 androidxTest = "1.5.0" # https://developer.android.com/jetpack/androidx/releases/test
 androidxTestJunit = "1.1.5" # https://developer.android.com/jetpack/androidx/releases/test
 junit = "4.13.2"

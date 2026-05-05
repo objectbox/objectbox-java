@@ -25,18 +25,39 @@ for arg in "$@"; do
     esac
 done
 
-buildScriptFile="../build.gradle.kts"
-propVersionNumber="versionNumber"
+# macOS includes BSD versions of sed and grep, which have different options and syntax than the
+# expected GNU versions. So require users of this script to install gsed and ggrep.
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  if ! command -v gsed &>/dev/null; then
+    echo "Error: gsed is required but not installed. Install it, for example using 'brew install gnu-sed'."
+    exit 1
+  fi
+  if ! command -v ggrep &>/dev/null; then
+    echo "Error: ggrep is required but not installed. Install it, for example using 'brew install grep'."
+    exit 1
+  fi
+  sed="gsed"
+  grep="ggrep"
+else
+  sed="sed"
+  grep="grep"
+fi
 
-boxStorePath="$(dirname "$0")/../objectbox-java/src/main/java/io/objectbox/BoxStore.java"
-readmePath="$(dirname "$0")/../README.md"
-changelogPath="$(dirname "$0")/../CHANGELOG.md"
+scriptDir="$(dirname "$0")"
+
+propVersionNumber="versionNumber"
+buildScriptFile="../build.gradle.kts"
+buildScriptPath="$scriptDir/$buildScriptFile"
+
+boxStorePath="$scriptDir/../objectbox-java/src/main/java/io/objectbox/BoxStore.java"
+readmePath="$scriptDir/../README.md"
+changelogPath="$scriptDir/../CHANGELOG.md"
 nextReleaseHeading="## Next release"
 
 # Extract the value of `versionNumber` in build.gradle.kts and store it in the versionCurrent variable
 buildScriptPath="$(dirname "$0")/$buildScriptFile"
 # Regex matches 'versionNumber = "..."', \K to only capture the version string inside the quotes
-versionCurrent=$(grep --only-matching --perl-regexp "$propVersionNumber"' = "\K[^"]+' "$buildScriptPath" || true)
+versionCurrent=$($grep --only-matching --perl-regexp "$propVersionNumber"' = "\K[^"]+' "$buildScriptPath" || true)
 if [[ -z "$versionCurrent" ]]; then
     echo "Error: could not find '$propVersionNumber' in '$buildScriptFile'"
     exit 1
@@ -71,40 +92,40 @@ fi
 echo "Version will be $versionNew"
 
 # Change the value of `versionNumber` in build.gradle.kts to the value of versionNew
-sed --in-place "s/$propVersionNumber = \"$versionCurrent\"/$propVersionNumber = \"$versionNew\"/" "$buildScriptPath"
+$sed --in-place "s/$propVersionNumber = \"$versionCurrent\"/$propVersionNumber = \"$versionNew\"/" "$buildScriptPath"
 
 if $releaseFlag; then
     # In BoxStore.java set JNI_VERSION to the value of VERSION (not using versionNew!) and print the used value
     # Regex matches 'String VERSION = "...", \K to only capture the version string inside the quotes
-    versionJni=$(grep --only-matching --perl-regexp 'String VERSION = "\K[^"]+' "$boxStorePath" || true)
+    versionJni=$($grep --only-matching --perl-regexp 'String VERSION = "\K[^"]+' "$boxStorePath" || true)
     if [[ -z "$versionJni" ]]; then
         echo "Error: could not find VERSION in BoxStore.java"
         exit 1
     fi
     echo "Release: setting BoxStore.JNI_VERSION to $versionJni"
-    sed --in-place "s/String JNI_VERSION = \".*\"/String JNI_VERSION = \"$versionJni\"/" "$boxStorePath"
+    $sed --in-place "s/String JNI_VERSION = \".*\"/String JNI_VERSION = \"$versionJni\"/" "$boxStorePath"
 
     # Change version strings in README.md to versionNew
     echo "Release: updating README.md version strings"
-    sed --in-place "s/objectbox = \".*\"/objectbox = \"$versionNew\"/g" "$readmePath"
-    sed --in-place "s/id(\"io.objectbox\") version \".*\"/id(\"io.objectbox\") version \"$versionNew\"/g" "$readmePath"
-    sed --in-place "s/val objectboxVersion by extra(\".*\")/val objectboxVersion by extra(\"$versionNew\")/g" "$readmePath"
-    sed --in-place "s/ext.objectboxVersion = \".*\"/ext.objectboxVersion = \"$versionNew\"/g" "$readmePath"
+    $sed --in-place "s/objectbox = \".*\"/objectbox = \"$versionNew\"/g" "$readmePath"
+    $sed --in-place "s/id(\"io.objectbox\") version \".*\"/id(\"io.objectbox\") version \"$versionNew\"/g" "$readmePath"
+    $sed --in-place "s/val objectboxVersion by extra(\".*\")/val objectboxVersion by extra(\"$versionNew\")/g" "$readmePath"
+    $sed --in-place "s/ext.objectboxVersion = \".*\"/ext.objectboxVersion = \"$versionNew\"/g" "$readmePath"
 
     # Change header "Next release" in CHANGELOG.md to "versionNew - YYYY-MM-DD"
     echo "Release: updating CHANGELOG.md heading"
     today=$(date +"%Y-%m-%d")
-    if grep --quiet "^$nextReleaseHeading" "$changelogPath"; then
-        sed --in-place "s/^$nextReleaseHeading/## $versionNew - $today/" "$changelogPath"
+    if $grep --quiet "^$nextReleaseHeading" "$changelogPath"; then
+        $sed --in-place "s/^$nextReleaseHeading/## $versionNew - $today/" "$changelogPath"
     else
         echo "⚠️ '$nextReleaseHeading' heading not found in CHANGELOG.md, check it contains changes for this release!"
     fi
 else
     # In CHANGELOG.md, if the first secondary heading is not "## Next release", add it
-    firstHeading=$(grep --max-count=1 "^## " "$changelogPath" || true)
+    firstHeading=$($grep --max-count=1 "^## " "$changelogPath" || true)
     if [[ "$firstHeading" != "$nextReleaseHeading" ]]; then
         echo "Adding '$nextReleaseHeading' to CHANGELOG.md"
-        sed --in-place "0,/^## /{s/^## /$nextReleaseHeading\n\n## /}" "$changelogPath"
+        $sed --in-place "0,/^## /{s/^## /$nextReleaseHeading\n\n## /}" "$changelogPath"
     fi
 fi
 

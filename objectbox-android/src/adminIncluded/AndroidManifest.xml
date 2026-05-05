@@ -4,14 +4,13 @@
     <!-- Note that the objectbox-android AAR ships a different manifest! -->
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- When targeting API level 28 or higher to run data browser foreground service -->
+    <!-- When targeting API level 28 or higher to run ObjectBox Admin foreground service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!-- When targeting API level 33 or higher to post the initial Admin notification -->
+    <!-- When targeting API level 33 or higher to post the initial ObjectBox Admin notification -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
-    <!-- Note: do no longer set extractNativeLibs="false", let Android plugin disable it based on minSdk >= 23 (Android 6.0/M). -->
     <application>
-        <!-- Data Browser -->
+        <!-- ObjectBox Admin -->
         <service
             android:name=".AdminKeepAliveService"
             android:exported="false" />

@@ -1,15 +1,19 @@
-// This script supports some Gradle project properties:
-// https://docs.gradle.org/current/userguide/build_environment.html#sec:project_properties
-// - versionSuffix: appended to snapshot version number, e.g. "1.2.3-<versionSuffix>-SNAPSHOT".
-//   Use to create different versions based on branch/tag.
-// - sonatypeUsername: Maven Central credential used by Nexus publishing.
-// - sonatypePassword: Maven Central credential used by Nexus publishing.
-// This script supports the following environment variables:
-// - OBX_RELEASE: If set to "true" builds and depends on release versions, without branch name and snapshot suffix.
+/*
+ * This script supports some Gradle project properties:
+ *
+ * - versionSuffix: appended to snapshot version number, e.g. "1.2.3-<versionSuffix>-SNAPSHOT".
+ * Use to create different versions based on branch/tag.
+ * - sonatypeUsername: Maven Central credential used by Nexus publishing.
+ * - sonatypePassword: Maven Central credential used by Nexus publishing.
+ *
+ * This script supports the following environment variables:
+ *
+ * - OBX_RELEASE: If set to "true" builds and depends on release versions, without branch name and snapshot suffix.
+ */
 
 // Gradle properties (more defined in buildscript block below)
-val propertySonatypeUsername = "sonatypeUsername"
-val propertySonatypePassword = "sonatypePassword"
+val propertySonatypeUsername = providers.gradleProperty("sonatypeUsername")
+val propertySonatypePassword = providers.gradleProperty("sonatypePassword")
 
 plugins {
     // https://github.com/ben-manes/gradle-versions-plugin/releases
@@ -22,10 +26,10 @@ plugins {
 }
 
 buildscript {
-    // Environment variables
-    val envRelease = "OBX_RELEASE"
-    // Gradle properties
-    val propertyVersionSuffix = "versionSuffix"
+    // Environment variables (see notes at the top of this file)
+    val envRelease: String? = System.getenv("OBX_RELEASE")
+    // Gradle properties (see notes at the top of this file)
+    val propertyVersionSuffix = providers.gradleProperty("versionSuffix")
 
     // Version of Maven artifacts
     // Should only be changed as part of the release process, see the release checklist in the objectbox repo
@@ -35,11 +39,10 @@ buildscript {
     // See the release checklist in the objectbox repo on how to publish a release.
     // If true, Maven artifacts use a release version, so without branch name and snapshot suffix
     // (such as "-dev-SNAPSHOT"), including for dependencies (such as objectbox-java).
-    val isRelease = System.getenv(envRelease) == "true"
+    val isRelease = envRelease == "true"
 
     // version suffix: "-<value>" or "" if not defined; e.g. used by CI to pass in branch name
-    val versionSuffixValue = project.findProperty(propertyVersionSuffix)
-    val versionSuffix = if (versionSuffixValue != null) "-$versionSuffixValue" else ""
+    val versionSuffix = if (propertyVersionSuffix.isPresent) "-${propertyVersionSuffix.get()}" else ""
     val obxJavaVersion by extra(versionNumber + (if (isRelease) "" else "$versionSuffix-SNAPSHOT"))
     println("Publishing: version = $obxJavaVersion")
 
@@ -125,12 +128,12 @@ nexusPublishing {
             nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
             snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
 
-            if (project.hasProperty(propertySonatypeUsername) && project.hasProperty(propertySonatypePassword)) {
-                println("Publishing: Sonatype Maven Central credentials supplied.")
-                username.set(project.property(propertySonatypeUsername).toString())
-                password.set(project.property(propertySonatypePassword).toString())
+            if (propertySonatypeUsername.isPresent && propertySonatypePassword.isPresent) {
+                println("Publishing: Maven Central credentials supplied")
+                username.set(propertySonatypeUsername.get())
+                password.set(propertySonatypePassword.get())
             } else {
-                println("Publishing: Sonatype Maven Central credentials NOT supplied.")
+                println("Publishing: Maven Central credentials NOT supplied, see root build script for required project properties")
             }
         }
     }
