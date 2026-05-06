@@ -6,7 +6,7 @@ String buildsToKeep = '500'
 
 String gradleArgs = '--stacktrace'
 boolean isPublish = BRANCH_NAME == 'publish'
-String versionPostfix = isPublish ? '' : BRANCH_NAME // Build script detects empty string as not set.
+String versionSuffix = isPublish ? '' : BRANCH_NAME // Build script detects empty string as not set.
 
 // Note: using single quotes to avoid Groovy String interpolation leaking secrets.
 def signingArgs = '-PsigningKeyFile=$SIGNING_FILE -PsigningKeyId=$SIGNING_ID -PsigningPassword=$SIGNING_PWD'
@@ -107,7 +107,7 @@ pipeline {
 
         stage('upload-to-internal') {
             steps {
-                sh "./gradlew $gradleArgs $signingArgs $gitlabRepoArgs -PversionPostFix=$versionPostfix publishMavenJavaPublicationToGitLabRepository"
+                sh "./gradlew $gradleArgs $signingArgs $gitlabRepoArgs -PversionSuffix=$versionSuffix publishMavenJavaPublicationToGitLabRepository"
             }
         }
 

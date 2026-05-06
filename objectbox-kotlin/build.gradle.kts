@@ -6,7 +6,7 @@ import java.net.URL
 plugins {
     kotlin("jvm")
     id("org.jetbrains.dokka")
-    id("objectbox-publish")
+    id("objectbox.publishing-conventions")
 }
 
 // Note: use release flag instead of sourceCompatibility and targetCompatibility to ensure only JDK 8 API is used.
@@ -78,17 +78,26 @@ dependencies {
     api(project(":objectbox-java"))
 }
 
-// Set project-specific properties.
+// Note: common settings applied by objectbox.publishing-conventions plugin
+val publicationObjectboxKotlin = "objectboxKotlin"
 publishing {
     publications {
-        getByName<MavenPublication>("mavenJava") {
+        create<MavenPublication>(publicationObjectboxKotlin) {
+            artifactId = "objectbox-kotlin"
+
             from(components["java"])
             artifact(sourcesJar)
             artifact(javadocJar)
+
             pom {
-                name.set("ObjectBox Kotlin")
+                name.set("ObjectBox Kotlin API")
                 description.set("ObjectBox is a fast NoSQL database for Objects")
+                packaging = "jar"
             }
         }
     }
+}
+
+signing {
+    sign(publishing.publications[publicationObjectboxKotlin])
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="objectbox_objectBrowserNotificationTitle">ObjectBox Admin</string>
+    <!-- Text should not be too long, or it is cut off. -->
+    <string name="objectbox_objectBrowserNotificationText">Running on port %1$d. Tap to open and keep app running.</string>
+</resources>

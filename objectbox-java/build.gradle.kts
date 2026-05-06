@@ -1,6 +1,6 @@
 plugins {
     id("java-library")
-    id("objectbox-publish")
+    id("objectbox.publishing-conventions")
     id("com.github.spotbugs")
 }
 
@@ -154,17 +154,26 @@ val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
 }
 
-// Set project-specific properties.
+// Note: common settings applied by objectbox.publishing-conventions plugin
+val publicationObjectboxJava = "objectboxJava"
 publishing {
     publications {
-        getByName<MavenPublication>("mavenJava") {
+        create<MavenPublication>(publicationObjectboxJava) {
+            artifactId = "objectbox-java"
+
             from(components["java"])
             artifact(sourcesJar)
             artifact(javadocJar)
+
             pom {
-                name.set("ObjectBox Java (only)")
+                name.set("ObjectBox Java API")
                 description.set("ObjectBox is a fast NoSQL database for Objects")
+                packaging = "jar"
             }
         }
     }
+}
+
+signing {
+    sign(publishing.publications[publicationObjectboxJava])
 }
