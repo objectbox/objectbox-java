@@ -150,51 +150,51 @@ public final class SyncClientImpl implements SyncClient {
      * The native library validates the configuration when the sync client is created.
      */
     private static void applyMeshConfig(long syncOptHandle, MeshConfig config) {
-        long meshOptHandle = nativeMeshOptCreate(config.getMeshId());
+        long meshOptHandle = nativeMeshOptCreate(config.meshId);
         if (meshOptHandle == 0) {
             throw new RuntimeException("Failed to create mesh options: handle is zero.");
         }
         try {
-            if (config.getMaxConnectionCount() != null) {
-                nativeMeshOptMaxConnectionCount(meshOptHandle, config.getMaxConnectionCount());
+            if (config.maxConnectionCount != null) {
+                nativeMeshOptMaxConnectionCount(meshOptHandle, config.maxConnectionCount);
             }
-            if (config.getBackoffMillis() != null) {
-                nativeMeshOptBackoffMillis(meshOptHandle, config.getBackoffMillis());
+            if (config.backoffMillis != null) {
+                nativeMeshOptBackoffMillis(meshOptHandle, config.backoffMillis);
             }
-            if (config.getEvictionBackoffMillis() != null) {
-                nativeMeshOptEvictionBackoffMillis(meshOptHandle, config.getEvictionBackoffMillis());
+            if (config.evictionBackoffMillis != null) {
+                nativeMeshOptEvictionBackoffMillis(meshOptHandle, config.evictionBackoffMillis);
             }
-            if (config.getRandomSeed() != null) {
-                nativeMeshOptRandomSeed(meshOptHandle, config.getRandomSeed());
+            if (config.randomSeed != null) {
+                nativeMeshOptRandomSeed(meshOptHandle, config.randomSeed);
             }
-            if (config.getRequestTimeoutMillis() != null) {
-                nativeMeshOptRequestTimeoutMillis(meshOptHandle, config.getRequestTimeoutMillis());
+            if (config.requestTimeoutMillis != null) {
+                nativeMeshOptRequestTimeoutMillis(meshOptHandle, config.requestTimeoutMillis);
             }
-            if (config.getAdvertisingDelayMillis() != null) {
-                nativeMeshOptAdvertisingDelayMillis(meshOptHandle, config.getAdvertisingDelayMillis());
+            if (config.advertisingDelayMillis != null) {
+                nativeMeshOptAdvertisingDelayMillis(meshOptHandle, config.advertisingDelayMillis);
             }
-            if (config.getConnectDelayMillis() != null) {
-                nativeMeshOptConnectDelayMillis(meshOptHandle, config.getConnectDelayMillis());
+            if (config.connectDelayMillis != null) {
+                nativeMeshOptConnectDelayMillis(meshOptHandle, config.connectDelayMillis);
             }
-            if (config.getInitialDiscoveryDurationSeconds() != null) {
-                nativeMeshOptInitialDiscoveryDurationSeconds(meshOptHandle, config.getInitialDiscoveryDurationSeconds());
+            if (config.initialDiscoveryDurationSeconds != null) {
+                nativeMeshOptInitialDiscoveryDurationSeconds(meshOptHandle, config.initialDiscoveryDurationSeconds);
             }
-            if (config.getDiscoveryDurationSeconds() != null) {
-                nativeMeshOptDiscoveryDurationSeconds(meshOptHandle, config.getDiscoveryDurationSeconds());
+            if (config.discoveryDurationSeconds != null) {
+                nativeMeshOptDiscoveryDurationSeconds(meshOptHandle, config.discoveryDurationSeconds);
             }
-            if (config.getDiscoveryPauseSeconds() != null) {
-                nativeMeshOptDiscoveryPauseSeconds(meshOptHandle, config.getDiscoveryPauseSeconds());
+            if (config.discoveryPauseSeconds != null) {
+                nativeMeshOptDiscoveryPauseSeconds(meshOptHandle, config.discoveryPauseSeconds);
             }
-            if (config.getDiscoveryPauseJitterSeconds() != null) {
-                nativeMeshOptDiscoveryPauseJitterSeconds(meshOptHandle, config.getDiscoveryPauseJitterSeconds());
+            if (config.discoveryPauseJitterSeconds != null) {
+                nativeMeshOptDiscoveryPauseJitterSeconds(meshOptHandle, config.discoveryPauseJitterSeconds);
             }
-            if (config.getTxLogBatchSizeKb() != null) {
-                nativeMeshOptTxLogBatchSizeKb(meshOptHandle, config.getTxLogBatchSizeKb());
+            if (config.txLogBatchSizeKb != null) {
+                nativeMeshOptTxLogBatchSizeKb(meshOptHandle, config.txLogBatchSizeKb);
             }
-            if (config.getTxLogBatchMaxCount() != null) {
-                nativeMeshOptTxLogBatchMaxCount(meshOptHandle, config.getTxLogBatchMaxCount());
+            if (config.txLogBatchMaxCount != null) {
+                nativeMeshOptTxLogBatchMaxCount(meshOptHandle, config.txLogBatchMaxCount);
             }
-            for (long networkInternalHandle : config.getNetworkInternalHandles()) {
+            for (long networkInternalHandle : config.networkInternalHandles) {
                 nativeMeshOptNetworkInternal(meshOptHandle, networkInternalHandle);
             }
         } catch (Exception e) {

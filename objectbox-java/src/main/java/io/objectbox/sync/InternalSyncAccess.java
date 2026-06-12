@@ -26,19 +26,21 @@ import io.objectbox.annotation.apihint.Internal;
 public final class InternalSyncAccess {
 
     /**
-     * Creates a builder for a mesh sync configuration. See {@link MeshConfig} for details on each option.
+     * Creates a mesh sync configuration. See the {@link MeshConfig} setters for details on each option.
+     *
+     * @param meshId The mesh network identifier (required); nodes with different IDs ignore each other.
      */
-    public static MeshConfig.Builder createMeshConfigBuilder(String meshId) {
-        return new MeshConfig.Builder(meshId);
+    public static MeshConfig createMeshConfig(String meshId) {
+        return new MeshConfig(meshId);
     }
 
     /**
-     * Adds a platform-specific native network (transport) to a mesh config builder.
+     * Adds a platform-specific native network (transport) to a mesh config.
      *
      * @param networkInternalHandle an internal handle to a native mesh network created by a platform library.
      */
-    public static void addNetworkInternalHandle(MeshConfig.Builder builder, long networkInternalHandle) {
-        builder.addNetworkInternalHandle(networkInternalHandle);
+    public static void addNetworkInternalHandle(MeshConfig config, long networkInternalHandle) {
+        config.networkInternalHandles.add(networkInternalHandle);
     }
 
     private InternalSyncAccess() {

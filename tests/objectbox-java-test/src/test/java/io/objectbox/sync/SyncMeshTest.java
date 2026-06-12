@@ -37,8 +37,8 @@ import static org.junit.Assume.assumeTrue;
 public class SyncMeshTest extends AbstractObjectBoxTest {
 
     @Test
-    public void meshConfigBuilder_setsAllValues() {
-        MeshConfig.Builder builder = InternalSyncAccess.createMeshConfigBuilder("test-mesh")
+    public void meshConfig_setsAllValues() {
+        MeshConfig config = InternalSyncAccess.createMeshConfig("test-mesh")
                 .maxConnectionCount(4)
                 .backoffMillis(5000)
                 .evictionBackoffMillis(20000)
@@ -52,53 +52,52 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
                 .discoveryPauseJitterSeconds(10)
                 .txLogBatchSizeKb(50)
                 .txLogBatchMaxCount(500);
-        InternalSyncAccess.addNetworkInternalHandle(builder, 12345);
-        MeshConfig config = builder.build();
+        InternalSyncAccess.addNetworkInternalHandle(config, 12345);
 
-        assertEquals("test-mesh", config.getMeshId());
-        assertEquals(Integer.valueOf(4), config.getMaxConnectionCount());
-        assertEquals(Integer.valueOf(5000), config.getBackoffMillis());
-        assertEquals(Integer.valueOf(20000), config.getEvictionBackoffMillis());
-        assertEquals(Long.valueOf(42), config.getRandomSeed());
-        assertEquals(Integer.valueOf(3000), config.getRequestTimeoutMillis());
-        assertEquals(Integer.valueOf(1000), config.getAdvertisingDelayMillis());
-        assertEquals(Integer.valueOf(500), config.getConnectDelayMillis());
-        assertEquals(Integer.valueOf(20), config.getInitialDiscoveryDurationSeconds());
-        assertEquals(Integer.valueOf(10), config.getDiscoveryDurationSeconds());
-        assertEquals(Integer.valueOf(30), config.getDiscoveryPauseSeconds());
-        assertEquals(Integer.valueOf(10), config.getDiscoveryPauseJitterSeconds());
-        assertEquals(Integer.valueOf(50), config.getTxLogBatchSizeKb());
-        assertEquals(Integer.valueOf(500), config.getTxLogBatchMaxCount());
-        assertEquals(1, config.getNetworkInternalHandles().size());
-        assertEquals(Long.valueOf(12345), config.getNetworkInternalHandles().get(0));
+        assertEquals("test-mesh", config.meshId);
+        assertEquals(Integer.valueOf(4), config.maxConnectionCount);
+        assertEquals(Integer.valueOf(5000), config.backoffMillis);
+        assertEquals(Integer.valueOf(20000), config.evictionBackoffMillis);
+        assertEquals(Long.valueOf(42), config.randomSeed);
+        assertEquals(Integer.valueOf(3000), config.requestTimeoutMillis);
+        assertEquals(Integer.valueOf(1000), config.advertisingDelayMillis);
+        assertEquals(Integer.valueOf(500), config.connectDelayMillis);
+        assertEquals(Integer.valueOf(20), config.initialDiscoveryDurationSeconds);
+        assertEquals(Integer.valueOf(10), config.discoveryDurationSeconds);
+        assertEquals(Integer.valueOf(30), config.discoveryPauseSeconds);
+        assertEquals(Integer.valueOf(10), config.discoveryPauseJitterSeconds);
+        assertEquals(Integer.valueOf(50), config.txLogBatchSizeKb);
+        assertEquals(Integer.valueOf(500), config.txLogBatchMaxCount);
+        assertEquals(1, config.networkInternalHandles.size());
+        assertEquals(Long.valueOf(12345), config.networkInternalHandles.get(0));
     }
 
     @Test
-    public void meshConfigBuilder_defaultsToNoValues() {
-        MeshConfig config = InternalSyncAccess.createMeshConfigBuilder("test-mesh").build();
+    public void meshConfig_defaultsToNoValues() {
+        MeshConfig config = InternalSyncAccess.createMeshConfig("test-mesh");
 
-        assertEquals("test-mesh", config.getMeshId());
-        assertNull(config.getMaxConnectionCount());
-        assertNull(config.getBackoffMillis());
-        assertNull(config.getEvictionBackoffMillis());
-        assertNull(config.getRandomSeed());
-        assertNull(config.getRequestTimeoutMillis());
-        assertNull(config.getAdvertisingDelayMillis());
-        assertNull(config.getConnectDelayMillis());
-        assertNull(config.getInitialDiscoveryDurationSeconds());
-        assertNull(config.getDiscoveryDurationSeconds());
-        assertNull(config.getDiscoveryPauseSeconds());
-        assertNull(config.getDiscoveryPauseJitterSeconds());
-        assertNull(config.getTxLogBatchSizeKb());
-        assertNull(config.getTxLogBatchMaxCount());
-        assertEquals(0, config.getNetworkInternalHandles().size());
+        assertEquals("test-mesh", config.meshId);
+        assertNull(config.maxConnectionCount);
+        assertNull(config.backoffMillis);
+        assertNull(config.evictionBackoffMillis);
+        assertNull(config.randomSeed);
+        assertNull(config.requestTimeoutMillis);
+        assertNull(config.advertisingDelayMillis);
+        assertNull(config.connectDelayMillis);
+        assertNull(config.initialDiscoveryDurationSeconds);
+        assertNull(config.discoveryDurationSeconds);
+        assertNull(config.discoveryPauseSeconds);
+        assertNull(config.discoveryPauseJitterSeconds);
+        assertNull(config.txLogBatchSizeKb);
+        assertNull(config.txLogBatchMaxCount);
+        assertEquals(0, config.networkInternalHandles.size());
     }
 
     @Test
-    public void meshConfigBuilder_emptyMeshId_throws() {
-        assertThrows(IllegalArgumentException.class, () -> InternalSyncAccess.createMeshConfigBuilder(""));
+    public void meshConfig_emptyMeshId_throws() {
+        assertThrows(IllegalArgumentException.class, () -> InternalSyncAccess.createMeshConfig(""));
         //noinspection DataFlowIssue
-        assertThrows(IllegalArgumentException.class, () -> InternalSyncAccess.createMeshConfigBuilder(null));
+        assertThrows(IllegalArgumentException.class, () -> InternalSyncAccess.createMeshConfig(null));
     }
 
     @Test
@@ -117,7 +116,7 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
     public void clientWithMesh_getMeshWorks() {
         assumeTrue(Sync.isAvailable());
 
-        MeshConfig config = InternalSyncAccess.createMeshConfigBuilder("test-mesh").build();
+        MeshConfig config = InternalSyncAccess.createMeshConfig("test-mesh");
         SyncClient client = null;
         try {
             client = Sync.client(store)
