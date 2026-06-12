@@ -25,6 +25,7 @@ import java.util.TreeMap;
 import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
+import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.exception.FeatureNotAvailableException;
 import io.objectbox.sync.internal.Platform;
 import io.objectbox.sync.listener.SyncChangeListener;
@@ -55,6 +56,7 @@ public final class SyncBuilder {
     @Nullable
     String[] trustedCertPaths;
     int flags;
+    @Nullable MeshConfig meshConfig;
     boolean uncommittedAcks;
 
     RequestUpdatesMode requestUpdatesMode = RequestUpdatesMode.AUTO;
@@ -221,6 +223,21 @@ public final class SyncBuilder {
      */
     public SyncBuilder requestUpdatesMode(RequestUpdatesMode requestUpdatesMode) {
         this.requestUpdatesMode = requestUpdatesMode;
+        return this;
+    }
+
+    /**
+     * Attaches a peer-to-peer mesh sync configuration to the client.
+     * <p>
+     * A mesh sync is then created together with the client; it starts and stops together with the client.
+     * Query the running mesh via {@link SyncClient#getMesh()}.
+     * <p>
+     * See {@link MeshConfig} for how to obtain a configuration.
+     */
+    @Experimental
+    public SyncBuilder mesh(MeshConfig meshConfig) {
+        checkNotNull(meshConfig, "meshConfig");
+        this.meshConfig = meshConfig;
         return this;
     }
 

@@ -57,6 +57,17 @@ public interface SyncClient extends Closeable {
     List<String> getUrls();
 
     /**
+     * Returns the running peer-to-peer mesh sync attached to this client, or {@code null} if no {@link MeshConfig}
+     * was passed via {@link SyncBuilder#mesh(MeshConfig)}.
+     * <p>
+     * The mesh starts and stops together with this client. The returned object is owned by this client and valid
+     * until the client is closed.
+     */
+    @Experimental
+    @Nullable
+    MeshSync getMesh();
+
+    /**
      * Flag indicating if the sync client was started.
      * Started clients try to connect, login, and sync with the sync destination.
      */

@@ -117,6 +117,11 @@ public class ConnectivityMonitorTest {
         }
 
         @Override
+        public MeshSync getMesh() {
+            return null;
+        }
+
+        @Override
         public List<String> getUrls() {
             return null;
         }

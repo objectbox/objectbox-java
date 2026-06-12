@@ -60,6 +60,8 @@ public final class SyncClientImpl implements SyncClient {
     private volatile SyncTimeListener timeListener;
     private volatile long lastLoginCode;
     private volatile boolean started;
+    @Nullable
+    private volatile MeshSync mesh;
 
     SyncClientImpl(SyncBuilder builder) {
         this.boxStore = builder.boxStore;
@@ -87,6 +89,11 @@ public final class SyncClientImpl implements SyncClient {
             // Add Sync flags if set
             if (builder.flags != 0) {
                 nativeSyncOptFlags(optHandle, builder.flags);
+            }
+
+            // Attach a mesh sync configuration if set
+            if (builder.meshConfig != null) {
+                applyMeshConfig(optHandle, builder.meshConfig);
             }
         } catch (Exception e) {
             // Free the options if any option method call failed (like due to invalid arguments)
@@ -136,12 +143,87 @@ public final class SyncClientImpl implements SyncClient {
         InternalAccess.setSyncClient(builder.boxStore, this);
     }
 
+    /**
+     * Builds native mesh options from the given config and attaches them to the sync options.
+     * <p>
+     * Only options with a value are passed to the native API, so the native defaults stay authoritative.
+     * The native library validates the configuration when the sync client is created.
+     */
+    private static void applyMeshConfig(long syncOptHandle, MeshConfig config) {
+        long meshOptHandle = nativeMeshOptCreate(config.getMeshId());
+        if (meshOptHandle == 0) {
+            throw new RuntimeException("Failed to create mesh options: handle is zero.");
+        }
+        try {
+            if (config.getMaxConnectionCount() != null) {
+                nativeMeshOptMaxConnectionCount(meshOptHandle, config.getMaxConnectionCount());
+            }
+            if (config.getBackoffMillis() != null) {
+                nativeMeshOptBackoffMillis(meshOptHandle, config.getBackoffMillis());
+            }
+            if (config.getEvictionBackoffMillis() != null) {
+                nativeMeshOptEvictionBackoffMillis(meshOptHandle, config.getEvictionBackoffMillis());
+            }
+            if (config.getRandomSeed() != null) {
+                nativeMeshOptRandomSeed(meshOptHandle, config.getRandomSeed());
+            }
+            if (config.getRequestTimeoutMillis() != null) {
+                nativeMeshOptRequestTimeoutMillis(meshOptHandle, config.getRequestTimeoutMillis());
+            }
+            if (config.getAdvertisingDelayMillis() != null) {
+                nativeMeshOptAdvertisingDelayMillis(meshOptHandle, config.getAdvertisingDelayMillis());
+            }
+            if (config.getConnectDelayMillis() != null) {
+                nativeMeshOptConnectDelayMillis(meshOptHandle, config.getConnectDelayMillis());
+            }
+            if (config.getInitialDiscoveryDurationSeconds() != null) {
+                nativeMeshOptInitialDiscoveryDurationSeconds(meshOptHandle, config.getInitialDiscoveryDurationSeconds());
+            }
+            if (config.getDiscoveryDurationSeconds() != null) {
+                nativeMeshOptDiscoveryDurationSeconds(meshOptHandle, config.getDiscoveryDurationSeconds());
+            }
+            if (config.getDiscoveryPauseSeconds() != null) {
+                nativeMeshOptDiscoveryPauseSeconds(meshOptHandle, config.getDiscoveryPauseSeconds());
+            }
+            if (config.getDiscoveryPauseJitterSeconds() != null) {
+                nativeMeshOptDiscoveryPauseJitterSeconds(meshOptHandle, config.getDiscoveryPauseJitterSeconds());
+            }
+            if (config.getTxLogBatchSizeKb() != null) {
+                nativeMeshOptTxLogBatchSizeKb(meshOptHandle, config.getTxLogBatchSizeKb());
+            }
+            if (config.getTxLogBatchMaxCount() != null) {
+                nativeMeshOptTxLogBatchMaxCount(meshOptHandle, config.getTxLogBatchMaxCount());
+            }
+            for (long networkInternalHandle : config.getNetworkInternalHandles()) {
+                nativeMeshOptNetworkInternal(meshOptHandle, networkInternalHandle);
+            }
+        } catch (Exception e) {
+            // Free the mesh options if any option method call failed (like due to invalid arguments)
+            nativeMeshOptFree(meshOptHandle);
+            throw e;
+        }
+        // Attaches and consumes the mesh options (they are freed in any case, also on error)
+        nativeSyncOptMesh(syncOptHandle, meshOptHandle);
+    }
+
     private long getHandle() {
         long handle = this.handle;
         if (handle == 0) {
             throw new IllegalStateException("SyncClient already closed");
         }
         return handle;
+    }
+
+    @Override
+    @Nullable
+    public synchronized MeshSync getMesh() {
+        MeshSync mesh = this.mesh;
+        if (mesh != null) return mesh;
+        long meshHandle = nativeGetMesh(getHandle());
+        if (meshHandle == 0) return null;
+        mesh = new MeshSync(meshHandle);
+        this.mesh = mesh;
+        return mesh;
     }
 
     @Override
@@ -338,6 +420,14 @@ public final class SyncClientImpl implements SyncClient {
                 this.boxStore = null;
             }
 
+            // The native mesh is owned by the client and freed with it; invalidate any MeshSync wrapper so later
+            // access throws instead of using a dangling pointer.
+            MeshSync mesh = this.mesh;
+            if (mesh != null) {
+                mesh.invalidate();
+                this.mesh = null;
+            }
+
             handleToDelete = this.handle;
             handle = 0;
         }
@@ -455,6 +545,77 @@ public final class SyncClientImpl implements SyncClient {
      * Note: Only free *unused* options; {@link #nativeSyncOptCreateClient} frees the options internally.
      */
     private static native void nativeSyncOptFree(long optHandle);
+
+    /**
+     * Creates a mesh options object used to configure a peer-to-peer mesh sync.
+     * <p>
+     * Pass it to {@link #nativeSyncOptMesh} to attach it to the sync options; that call frees the mesh options.
+     *
+     * @param meshId the mesh network identifier (required); nodes with different IDs ignore each other.
+     * @return handle to the mesh options object, or 0 on error
+     */
+    private static native long nativeMeshOptCreate(String meshId);
+
+    /**
+     * Frees the mesh options object.
+     * <p>
+     * Note: Only free *unused* options; {@link #nativeSyncOptMesh} frees the mesh options internally.
+     */
+    private static native void nativeMeshOptFree(long meshOptHandle);
+
+    private static native void nativeMeshOptMaxConnectionCount(long meshOptHandle, int count);
+
+    private static native void nativeMeshOptBackoffMillis(long meshOptHandle, int millis);
+
+    private static native void nativeMeshOptEvictionBackoffMillis(long meshOptHandle, int millis);
+
+    private static native void nativeMeshOptRandomSeed(long meshOptHandle, long seed);
+
+    private static native void nativeMeshOptRequestTimeoutMillis(long meshOptHandle, int millis);
+
+    private static native void nativeMeshOptAdvertisingDelayMillis(long meshOptHandle, int millis);
+
+    private static native void nativeMeshOptConnectDelayMillis(long meshOptHandle, int millis);
+
+    private static native void nativeMeshOptInitialDiscoveryDurationSeconds(long meshOptHandle, int seconds);
+
+    private static native void nativeMeshOptDiscoveryDurationSeconds(long meshOptHandle, int seconds);
+
+    private static native void nativeMeshOptDiscoveryPauseSeconds(long meshOptHandle, int seconds);
+
+    private static native void nativeMeshOptDiscoveryPauseJitterSeconds(long meshOptHandle, int seconds);
+
+    private static native void nativeMeshOptTxLogBatchSizeKb(long meshOptHandle, int sizeKb);
+
+    private static native void nativeMeshOptTxLogBatchMaxCount(long meshOptHandle, int count);
+
+    /**
+     * Registers an internal mesh network (transport) implementation with the mesh options.
+     * <p>
+     * Networks are platform-specific (e.g. Android Nearby) and are created by ObjectBox platform libraries.
+     *
+     * @param networkInternalHandle an internal handle to a native mesh network.
+     */
+    private static native void nativeMeshOptNetworkInternal(long meshOptHandle, long networkInternalHandle);
+
+    /**
+     * Attaches a mesh sync configuration to the sync options.
+     * <p>
+     * When the sync client is created ({@link #nativeSyncOptCreateClient}), a mesh sync is created from this
+     * configuration and attached to the client; it starts and stops together with the client. Use
+     * {@link #nativeGetMesh} to query the running mesh.
+     * <p>
+     * Note: the given mesh options are always freed by this function, including when an error occurs.
+     */
+    private static native void nativeSyncOptMesh(long optHandle, long meshOptHandle);
+
+    /**
+     * Returns a handle to the mesh sync attached to the sync client (configured via {@link #nativeSyncOptMesh}),
+     * or 0 if no mesh sync is attached.
+     * <p>
+     * The mesh sync is owned by the sync client; the handle is valid as long as the sync client is not closed.
+     */
+    private native long nativeGetMesh(long handle);
 
     private native void nativeDelete(long handle);
 
