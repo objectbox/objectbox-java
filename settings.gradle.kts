@@ -64,6 +64,7 @@ include(":objectbox-rxjava3")
 val excludeAndroid: String? by settings
 if (excludeAndroid == null) {
     include(":objectbox-android")
+    include(":objectbox-meshsync-android")
 }
 
 include(":tests:objectbox-java-test")
