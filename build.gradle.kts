@@ -46,10 +46,13 @@ buildscript {
     println("Publishing: version = $obxJavaVersion")
 
     // JVM and Android database library versions
+    // FIXME Test with 5.4.3-mesh-sync-SNAPSHOT
     val versionDbJvm = if (isRelease) versionNumber else "$versionNumber-dev-SNAPSHOT"
-    val versionDbJvmSync = if (isRelease) versionNumber else "$versionNumber-sync-SNAPSHOT"
+//    val versionDbJvmSync = if (isRelease) versionNumber else "$versionNumber-sync-SNAPSHOT"
+    val versionDbJvmSync = "5.4.3-mesh-sync-SNAPSHOT"
     val versionDbAndroid = if (isRelease) versionNumber else "$versionNumber-dev-SNAPSHOT"
-    val versionDbAndroidSync = if (isRelease) versionNumber else "$versionNumber-sync-SNAPSHOT"
+//    val versionDbAndroidSync = if (isRelease) versionNumber else "$versionNumber-sync-SNAPSHOT"
+    val versionDbAndroidSync = "5.4.3-mesh-sync-SNAPSHOT"
 
     println("Database dependencies (JVM) = $versionDbJvm")
     println("Database dependencies (JVM + Sync) = $versionDbJvmSync")
