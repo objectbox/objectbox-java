@@ -25,7 +25,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeNoException;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -124,19 +123,12 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
         assumeTrue(Sync.isAvailable());
 
         MeshConfig config = InternalSyncAccess.createMeshConfig(TEST_MESH_ID);
-        SyncClient client;
-        try {
-            client = Sync.client(store)
-                    .url(TEST_SERVER_URL)
-                    .credentials(SyncCredentials.none())
-                    .mesh(config)
-                    .build();
-        } catch (UnsatisfiedLinkError e) {
-            assumeNoException("Native library does not include the mesh sync API", e);
-            return;
-        }
 
-        try {
+        try (SyncClient client = Sync.client(store)
+                .url(TEST_SERVER_URL)
+                .credentials(SyncCredentials.none())
+                .mesh(config)
+                .build()) {
             MeshSync mesh = client.getMesh();
             assertNotNull(mesh);
 
@@ -151,8 +143,6 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
             // The mesh is owned by the client, accessing it after close should throw
             assertThrows(IllegalStateException.class, mesh::getState);
             assertNull(this.store.getSyncClient());
-        } finally {
-            client.close();
         }
     }
 
@@ -165,8 +155,6 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
                 .credentials(SyncCredentials.none())
                 .build()) {
             assertNull(client.getMesh());
-        } catch (UnsatisfiedLinkError e) {
-            assumeNoException("Native library does not include the mesh sync API", e);
         }
     }
 
