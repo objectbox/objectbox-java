@@ -78,7 +78,7 @@ public final class MeshConfig {
     }
 
     /**
-     * Max number of simultaneous connections a peer can have to other peers (default: 3).
+     * Maximum number of simultaneous connections a peer can have to other peers (default: 3).
      * <p>
      * The default of 3 already provides mesh resilience through alternative paths. 4 may give
      * better fault tolerance, but at the cost of more radio activity. Values above 4 are not
@@ -101,8 +101,9 @@ public final class MeshConfig {
     /**
      * Backoff time in milliseconds between peer evictions (default: 30000).
      * <p>
-     * When an incoming peer has 0 connections but we are full, we evict one existing peer to make
-     * room. This backoff prevents frequent evictions.
+     * When an incoming peer has 0 connections, but this peer is at
+     * {@link #maxConnectionCount(int)}, this peer ends a connection to an existing peer, it
+     * "evicts" that peer, to make room. This backoff prevents frequent evictions.
      */
     public MeshConfig evictionBackoffMillis(int evictionBackoffMillis) {
         this.evictionBackoffMillis = evictionBackoffMillis;
@@ -147,6 +148,8 @@ public final class MeshConfig {
     /**
      * Duration in seconds of the initial discovery phase (default: 30; 0 means never stop by
      * time).
+     *
+     * @see #discoveryDurationSeconds(int)
      */
     public MeshConfig initialDiscoveryDurationSeconds(int initialDiscoveryDurationSeconds) {
         this.initialDiscoveryDurationSeconds = initialDiscoveryDurationSeconds;
@@ -156,6 +159,8 @@ public final class MeshConfig {
     /**
      * Duration in seconds of a standard (non-initial) discovery phase (default: 15; 0 means never
      * stop by time).
+     *
+     * @see #initialDiscoveryDurationSeconds(int)
      */
     public MeshConfig discoveryDurationSeconds(int discoveryDurationSeconds) {
         this.discoveryDurationSeconds = discoveryDurationSeconds;
@@ -189,8 +194,8 @@ public final class MeshConfig {
     }
 
     /**
-     * Max number of TX logs to batch into a single TxLogData message (default: 1000). Must be in
-     * the range (0, 100000].
+     * Maximum number of TX logs to batch into a single TxLogData message (default: 1000). Must be
+     * in the range (0, 100000].
      */
     public MeshConfig txLogBatchMaxCount(int txLogBatchMaxCount) {
         this.txLogBatchMaxCount = txLogBatchMaxCount;
