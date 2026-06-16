@@ -53,7 +53,7 @@ import io.objectbox.sync.SyncClient;
  *     <li>The app must use the Sync variant of the ObjectBox Android library (e.g. {@code objectbox-sync-android}),
  *     which includes the native mesh sync code.</li>
  *     <li>This library adds the permissions required by Nearby Connections to the app manifest. However, the app
- *     must request the dangerous (runtime) permissions, like location and the newer Bluetooth/WiFi permissions,
+ *     must request the dangerous (runtime) permissions, like location and the newer Bluetooth/Wi-Fi permissions,
  *     before starting the sync client.</li>
  * </ul>
  */
