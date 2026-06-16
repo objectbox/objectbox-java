@@ -20,16 +20,16 @@ kotlin {
     }
 }
 
-val versionDatabaseLibraryJvm: String by rootProject.extra
+val versionDatabaseLibraryJvmSync: String by rootProject.extra
 
 dependencies {
     implementation(project(":objectbox-java"))
     implementation(libs.kotlin.coroutines.core)
     implementation(project(":objectbox-kotlin"))
     implementation(libs.essentials)
-    implementation("io.objectbox:objectbox-linux:$versionDatabaseLibraryJvm")
-    implementation("io.objectbox:objectbox-macos:$versionDatabaseLibraryJvm")
-    implementation("io.objectbox:objectbox-windows:$versionDatabaseLibraryJvm")
+    implementation("io.objectbox:objectbox-sync-linux:$versionDatabaseLibraryJvmSync")
+    implementation("io.objectbox:objectbox-sync-macos:$versionDatabaseLibraryJvmSync")
+    implementation("io.objectbox:objectbox-sync-windows:$versionDatabaseLibraryJvmSync")
 
     testImplementation(libs.junit)
     // To test Coroutines

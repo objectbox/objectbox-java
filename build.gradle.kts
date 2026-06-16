@@ -47,14 +47,17 @@ buildscript {
 
     // JVM and Android database library versions
     val versionDbJvm = if (isRelease) versionNumber else "$versionNumber-dev-SNAPSHOT"
+    val versionDbJvmSync = if (isRelease) versionNumber else "$versionNumber-sync-SNAPSHOT"
     val versionDbAndroid = if (isRelease) versionNumber else "$versionNumber-dev-SNAPSHOT"
     val versionDbAndroidSync = if (isRelease) versionNumber else "$versionNumber-sync-SNAPSHOT"
 
     println("Database dependencies (JVM) = $versionDbJvm")
+    println("Database dependencies (JVM + Sync) = $versionDbJvmSync")
     println("Database dependencies (Android) = $versionDbAndroid")
     println("Database dependencies (Android + Sync) = $versionDbAndroidSync")
 
     val versionDatabaseLibraryJvm by extra(versionDbJvm)
+    val versionDatabaseLibraryJvmSync by extra(versionDbJvmSync)
     val versionDatabaseLibraryAndroid by extra(versionDbAndroid)
     val versionDatabaseLibraryAndroidSync by extra(versionDbAndroidSync)
 }
