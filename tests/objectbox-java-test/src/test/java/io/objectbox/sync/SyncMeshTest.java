@@ -25,14 +25,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeTrue;
 
 /**
- * Tests the peer-to-peer mesh sync API.
- * <p>
- * Tests that require the Sync feature are skipped when the native library does not include it (like
- * the one tests run against by default). They are mirrored in objectbox-integration-test sync
- * tests, where Sync is available.
+ * Does basic tests of the peer-to-peer mesh sync API.
  */
 public class SyncMeshTest extends AbstractObjectBoxTest {
 
@@ -120,8 +115,6 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
 
     @Test
     public void clientWithMesh_getMeshWorks() {
-        assumeTrue(Sync.isAvailable());
-
         MeshConfig config = InternalSyncAccess.createMeshConfig(TEST_MESH_ID);
 
         try (SyncClient client = Sync.client(store)
@@ -148,8 +141,6 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
 
     @Test
     public void clientWithoutMesh_getMeshReturnsNull() {
-        assumeTrue(Sync.isAvailable());
-
         try (SyncClient client = Sync.client(store)
                 .url(TEST_SERVER_URL)
                 .credentials(SyncCredentials.none())
