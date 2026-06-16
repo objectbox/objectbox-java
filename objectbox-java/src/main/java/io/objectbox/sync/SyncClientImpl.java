@@ -217,11 +217,14 @@ public final class SyncClientImpl implements SyncClient {
     @Override
     @Nullable
     public synchronized MeshSync getMesh() {
-        MeshSync mesh = this.mesh;
-        if (mesh != null) return mesh;
+        MeshSync existingMesh = this.mesh;
+        if (existingMesh != null) {
+            return existingMesh;
+        }
+
         long meshHandle = nativeGetMesh(getHandle());
         if (meshHandle == 0) return null;
-        mesh = new MeshSync(meshHandle);
+        MeshSync mesh = new MeshSync(meshHandle);
         this.mesh = mesh;
         return mesh;
     }
