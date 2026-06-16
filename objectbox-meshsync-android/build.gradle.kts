@@ -53,8 +53,9 @@ dependencies {
     // exposes APIs from it (MeshConfig). Regardless, it is expected that most consumers (or the
     // Gradle plugin) add the Java library as a direct dependency.
     api(project(":objectbox-java"))
-    // Use "implementation" to bundle the Nearby Connections dependency for consumers (it is
-    // required at runtime), but not expose any of its types via this library's API.
+    // Use "implementation" to add the Nearby Connections library as a "runtime" dependency in the
+    // POM for consumers (it is required at runtime), but not expose any of its types via this
+    // library's API.
     implementation(libs.play.services.nearby)
 
     // Note: this library does not depend on an ObjectBox Android database library; consumers must
