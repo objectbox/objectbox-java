@@ -3,6 +3,8 @@ plugins {
     id("objectbox.publishing-conventions")
 }
 
+val variantRelease = "release"
+
 android {
     namespace = "io.objectbox.meshsync.android"
     compileSdk = 35 // Android 15 (Vanilla Ice Cream)
@@ -25,7 +27,7 @@ android {
     // variant to avoid multiplying the variant matrix; it contains no native or Admin code).
     // https://developer.android.com/studio/publish-library/configure-pub-variants
     publishing {
-        singleVariant("release") {
+        singleVariant(variantRelease) {
             withJavadocJar()
             withSourcesJar()
         }
@@ -77,7 +79,7 @@ publishing {
             // Because the Android components are created during the evaluation phase,
             // can only use them in the afterEvaluate() lifecycle method.
             afterEvaluate {
-                from(components["release"])
+                from(components[variantRelease])
             }
 
             pom {
