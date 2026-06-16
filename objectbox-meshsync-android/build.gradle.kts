@@ -1,9 +1,16 @@
+import org.gradle.kotlin.dsl.support.uppercaseFirstChar
+
 plugins {
     alias(libs.plugins.android.library)
     id("objectbox.publishing-conventions")
 }
 
-val variantRelease = "release"
+val flavorAdminExcluded = "adminExcluded"
+val flavorAdminIncluded = "adminIncluded"
+// Note: build variant names also match names of created components
+val buildTypeRelease = "release"
+val variantAdminExcludedRelease = "${flavorAdminExcluded}${buildTypeRelease.uppercaseFirstChar()}"
+val variantAdminIncludedRelease = "${flavorAdminIncluded}${buildTypeRelease.uppercaseFirstChar()}"
 
 android {
     namespace = "io.objectbox.meshsync.android"
@@ -13,6 +20,10 @@ android {
         minSdk = 21 // Android 5.0 (Lollipop), like objectbox-android
 
         consumerProguardFiles("consumer-proguard-rules.pro")
+
+        // Dependencies: objectbox-android also has a "database" dimension,
+        // always pick its "sync" flavor.
+        missingDimensionStrategy("database", "sync")
     }
 
     buildTypes {
@@ -23,11 +34,31 @@ android {
         }
     }
 
-    // Publish the release variant (note: unlike objectbox-android, this library has a single
-    // variant to avoid multiplying the variant matrix; it contains no native or Admin code).
+    // Configure a flavor dimension based on if Admin is included in the Android database library.
+    // Note: common configuration defined in defaultConfig and buildTypes blocks above.
+    // https://developer.android.com/studio/build/build-variants#product-flavors
+    // Note: the name of this flavor should match the one of the depended on objectbox-android
+    // subproject, otherwise, additonal configuration is necessary to depend on the correct variant
+    // of it.
+    val dimensionAdmin = "admin"
+    flavorDimensions += listOf(dimensionAdmin)
+    productFlavors {
+        create(flavorAdminExcluded) {
+            dimension = dimensionAdmin
+        }
+        create(flavorAdminIncluded) {
+            dimension = dimensionAdmin
+        }
+    }
+
+    // Publish the release variants (variant = flavor combination + build type)
     // https://developer.android.com/studio/publish-library/configure-pub-variants
     publishing {
-        singleVariant(variantRelease) {
+        singleVariant(variantAdminExcludedRelease) {
+            withJavadocJar()
+            withSourcesJar()
+        }
+        singleVariant(variantAdminIncludedRelease) {
             withJavadocJar()
             withSourcesJar()
         }
@@ -58,8 +89,9 @@ dependencies {
     // library's API.
     implementation(libs.play.services.nearby)
 
-    // Note: this library does not depend on an ObjectBox Android database library; consumers must
-    // use the Sync variant (e.g. objectbox-sync-android) which includes the native mesh sync code.
+    // Use "api" to add the Android API library as a "compile" dependency in the POM for consumers
+    // to expose its APIs.
+    api(project(":objectbox-android"))
 
     // Dependencies for unit tests running on the JVM (so not on an Android device/emulator)
     testImplementation(libs.junit)
@@ -72,6 +104,7 @@ dependencies {
 
 // Note: common settings applied by objectbox.publishing-conventions plugin
 val publicationMeshSyncAndroid = "objectboxMeshSyncAndroid"
+val publicationMeshSyncAndroidAdmin = "objectboxMeshSyncAndroidAdmin"
 publishing {
     publications {
         create<MavenPublication>(publicationMeshSyncAndroid) {
@@ -80,11 +113,29 @@ publishing {
             // Because the Android components are created during the evaluation phase,
             // can only use them in the afterEvaluate() lifecycle method.
             afterEvaluate {
-                from(components[variantRelease])
+                from(components[variantAdminExcludedRelease])
             }
 
             pom {
                 name.set("ObjectBox Mesh Sync for Android")
+            }
+        }
+        create<MavenPublication>(publicationMeshSyncAndroidAdmin) {
+            artifactId = "objectbox-meshsync-android-admin"
+
+            // Because the Android components are created during the evaluation phase,
+            // can only use them in the afterEvaluate() lifecycle method.
+            afterEvaluate {
+                from(components[variantAdminIncludedRelease])
+            }
+
+            pom {
+                name.set("ObjectBox Mesh Sync with Admin for Android")
+            }
+        }
+        // Additional common configuration for all Maven publications
+        withType<MavenPublication> {
+            pom {
                 description.set("Peer-to-peer mesh sync for ObjectBox Sync on Android using Google Nearby Connections")
                 packaging = "aar"
             }
@@ -94,4 +145,5 @@ publishing {
 
 signing {
     sign(publishing.publications[publicationMeshSyncAndroid])
+    sign(publishing.publications[publicationMeshSyncAndroidAdmin])
 }
