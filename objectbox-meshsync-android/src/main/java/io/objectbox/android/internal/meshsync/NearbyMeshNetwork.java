@@ -34,6 +34,7 @@ import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
+import io.objectbox.meshsync.android.AndroidMeshSync;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -46,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Life-cycle note: stop() must be called to release native resources;
  * this typically happens from the native side when the native component is stopped.
  *
- * <p>Internal class - do not use directly.</p>
+ * <p>Internal class, use {@link AndroidMeshSync} instead.</p>
  */
 public class NearbyMeshNetwork {
     private static final String TAG = "ObxMesh";
@@ -82,12 +83,12 @@ public class NearbyMeshNetwork {
     private final ConnectionLifecycleCallback connectionLifecycleCallback = new ConnectionLifecycleCallback() {
         /**
          * <a href="https://developers.google.com/android/reference/com/google/android/gms/nearby/connection/ConnectionLifecycleCallback#onConnectionInitiated(java.lang.String,%20com.google.android.gms.nearby.connection.ConnectionInfo)">ConnectionLifecycleCallback.onConnectionInitiated</a>:
-         * A basic encrypted channel has been created between you and the endpoint.
+         * A basic encrypted channel has been created between this and the remote endpoint.
          * Both sides are now asked if they wish to accept or reject the connection before
          * any data can be sent over this channel.
          * <p>
-         * This called when receiving an incoming connection request based on this client advertising (see
-         * {@link NearbyMeshNetwork#startAdvertising}), and also after this client discovers an advertiser when
+         * This is called when receiving an incoming connection request based on this endpoint advertising (see
+         * {@link NearbyMeshNetwork#startAdvertising}), and also after this endpoint discovers an advertiser when
          * requesting an outgoing connection (see {@link NearbyMeshNetwork#requestConnection}).
          */
         @Override
