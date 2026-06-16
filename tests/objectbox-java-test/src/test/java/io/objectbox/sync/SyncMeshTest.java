@@ -105,15 +105,18 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void meshState_fromId_mapsAllValues() {
-        assertEquals(MeshState.UNKNOWN, MeshState.fromId(0));
-        assertEquals(MeshState.CREATED, MeshState.fromId(1));
-        assertEquals(MeshState.DISCOVERING, MeshState.fromId(2));
-        assertEquals(MeshState.FULLY_CONNECTED, MeshState.fromId(3));
-        assertEquals(MeshState.STOPPED, MeshState.fromId(4));
-        assertEquals(MeshState.DEAD, MeshState.fromId(5));
+    public void meshState_fromId_mapsKnownValues() {
+        MeshState[] states = MeshState.values();
+        for (MeshState state : states) {
+            assertEquals(state, MeshState.fromId(state.id));
+        }
+    }
+
+    @Test
+    public void meshState_fromId_mapsUnknownValues() {
         assertEquals(MeshState.UNKNOWN, MeshState.fromId(-1));
-        assertEquals(MeshState.UNKNOWN, MeshState.fromId(42));
+        MeshState[] states = MeshState.values();
+        assertEquals(MeshState.UNKNOWN, MeshState.fromId(states[states.length - 1].id + 1));
     }
 
     @Test
