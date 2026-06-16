@@ -160,13 +160,10 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
         try (SyncClient client = Sync.client(store)
                 .url(TEST_SERVER_URL)
                 .credentials(SyncCredentials.none())
-                .build();
-        try {
+                .build()) {
             assertNull(client.getMesh());
         } catch (UnsatisfiedLinkError e) {
             assumeNoException("Native library does not include the mesh sync API", e);
-        } finally {
-            client.close();
         }
     }
 
