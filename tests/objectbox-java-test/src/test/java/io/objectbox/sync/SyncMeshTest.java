@@ -37,9 +37,12 @@ import static org.junit.Assume.assumeTrue;
  */
 public class SyncMeshTest extends AbstractObjectBoxTest {
 
+    private static final String TEST_MESH_ID = "test-mesh";
+    private static final String TEST_SERVER_URL = "ws://127.0.0.1:9999";
+
     @Test
     public void meshConfig_setsAllValues() {
-        MeshConfig config = InternalSyncAccess.createMeshConfig("test-mesh")
+        MeshConfig config = InternalSyncAccess.createMeshConfig(TEST_MESH_ID)
                 .maxConnectionCount(4)
                 .backoffMillis(5000)
                 .evictionBackoffMillis(20000)
@@ -55,7 +58,7 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
                 .txLogBatchMaxCount(500);
         InternalSyncAccess.addNetworkInternalHandle(config, 12345);
 
-        assertEquals("test-mesh", config.meshId);
+        assertEquals(TEST_MESH_ID, config.meshId);
         assertEquals(Integer.valueOf(4), config.maxConnectionCount);
         assertEquals(Integer.valueOf(5000), config.backoffMillis);
         assertEquals(Integer.valueOf(20000), config.evictionBackoffMillis);
@@ -75,9 +78,9 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
 
     @Test
     public void meshConfig_defaultsToNoValues() {
-        MeshConfig config = InternalSyncAccess.createMeshConfig("test-mesh");
+        MeshConfig config = InternalSyncAccess.createMeshConfig(TEST_MESH_ID);
 
-        assertEquals("test-mesh", config.meshId);
+        assertEquals(TEST_MESH_ID, config.meshId);
         assertNull(config.maxConnectionCount);
         assertNull(config.backoffMillis);
         assertNull(config.evictionBackoffMillis);
@@ -117,11 +120,11 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
     public void clientWithMesh_getMeshWorks() {
         assumeTrue(Sync.isAvailable());
 
-        MeshConfig config = InternalSyncAccess.createMeshConfig("test-mesh");
+        MeshConfig config = InternalSyncAccess.createMeshConfig(TEST_MESH_ID);
         SyncClient client = null;
         try {
             client = Sync.client(store)
-                    .url("ws://127.0.0.1:9999")
+                    .url(TEST_SERVER_URL)
                     .credentials(SyncCredentials.none())
                     .mesh(config)
                     .build();
@@ -153,8 +156,8 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
     public void clientWithoutMesh_getMeshReturnsNull() {
         assumeTrue(Sync.isAvailable());
 
-        SyncClient client = Sync.client(store)
-                .url("ws://127.0.0.1:9999")
+        try (SyncClient client = Sync.client(store)
+                .url(TEST_SERVER_URL)
                 .credentials(SyncCredentials.none())
                 .build();
         try {
