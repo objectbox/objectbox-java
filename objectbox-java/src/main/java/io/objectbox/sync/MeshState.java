@@ -40,7 +40,8 @@ public enum MeshState {
     DISCOVERING(2),
 
     /**
-     * Fully connected (enough peers connected).
+     * Fully connected: the maximum number of peers (see {@link MeshConfig#maxConnectionCount(int)})
+     * is connected.
      */
     FULLY_CONNECTED(3),
 
@@ -50,7 +51,9 @@ public enum MeshState {
     STOPPED(4),
 
     /**
-     * Stopped and being torn down.
+     * Stopped and native resources have been released.
+     * <p>
+     * Note that checks in the Java API should prevent this state from ever getting returned.
      */
     DEAD(5);
 
