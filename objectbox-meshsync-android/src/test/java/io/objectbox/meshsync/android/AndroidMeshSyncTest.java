@@ -16,36 +16,30 @@
 
 package io.objectbox.meshsync.android;
 
-import android.content.Context;
-
-import androidx.test.core.app.ApplicationProvider;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import android.content.Context;
+import androidx.test.core.app.ApplicationProvider;
 import io.objectbox.exception.FeatureNotAvailableException;
 
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
 
 /**
- * Tests run on the JVM using Robolectric against the JVM native library (which does not include
- * Sync).
+ * Tests run on the JVM using Robolectric against a JVM database library which does not include
+ * Sync.
  * <p>
- * Tests requiring the Sync feature and the Nearby Connections API run as instrumented tests against
- * the Android native library (currently in the internal repository).
+ * The internal objectbox repository has instrumented tests requiring the Sync feature and the
+ * Nearby Connections API run against the Android database library.
  */
 @RunWith(RobolectricTestRunner.class)
 public class AndroidMeshSyncTest {
 
     @Test
     public void createConfig_withoutSyncLibrary_throws() {
-        // The JVM test library does not include Sync
-        assumeFalse(io.objectbox.BoxStore.isSyncAvailable());
-
         Context context = ApplicationProvider.getApplicationContext();
         FeatureNotAvailableException exception = assertThrows(
                 FeatureNotAvailableException.class,
