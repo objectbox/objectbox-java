@@ -32,8 +32,8 @@ public final class InternalSyncAccess {
      * @param meshId The mesh network identifier (required); nodes with different IDs ignore each
      * other.
      */
-    public static MeshConfig createMeshConfig(String meshId) {
-        return new MeshConfig(meshId);
+    public static MeshConfigImpl createMeshConfig(String meshId) {
+        return new MeshConfigImpl(meshId);
     }
 
     /**
@@ -42,7 +42,7 @@ public final class InternalSyncAccess {
      * @param networkInternalHandle an internal handle to a native mesh network created by a
      * platform library.
      */
-    public static void addNetworkInternalHandle(MeshConfig config, long networkInternalHandle) {
+    public static void addNetworkInternalHandle(MeshConfigImpl config, long networkInternalHandle) {
         config.networkInternalHandles.add(networkInternalHandle);
     }
 

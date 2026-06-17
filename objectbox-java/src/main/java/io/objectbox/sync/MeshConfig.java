@@ -16,11 +16,6 @@
 
 package io.objectbox.sync;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import io.objectbox.annotation.apihint.Experimental;
 
 /**
@@ -32,8 +27,8 @@ import io.objectbox.annotation.apihint.Experimental;
  * {@link SyncClient#getMesh()}.
  * <p>
  * A mesh requires at least one platform-specific network (transport); networks are registered by
- * ObjectBox platform libraries (e.g. for Android), which also create this configuration. Thus, this
- * class can not be created directly; see the documentation of the platform library for how to
+ * ObjectBox platform libraries (e.g. for Android), which also create this configuration. Thus,
+ * instances can not be created directly; see the documentation of the platform library for how to
  * obtain a mesh configuration.
  * <p>
  * Only the mesh ID is required; all other values are optional and fall back to the defaults of the
@@ -41,41 +36,7 @@ import io.objectbox.annotation.apihint.Experimental;
  * which is also when the native library validates them.
  */
 @Experimental
-public final class MeshConfig {
-
-    final String meshId;
-    @Nullable Integer maxConnectionCount;
-    @Nullable Integer backoffMillis;
-    @Nullable Integer evictionBackoffMillis;
-    @Nullable Long randomSeed;
-    @Nullable Integer requestTimeoutMillis;
-    @Nullable Integer advertisingDelayMillis;
-    @Nullable Integer connectDelayMillis;
-    @Nullable Integer initialDiscoveryDurationSeconds;
-    @Nullable Integer discoveryDurationSeconds;
-    @Nullable Integer discoveryPauseSeconds;
-    @Nullable Integer discoveryPauseJitterSeconds;
-    @Nullable Integer txLogBatchSizeKb;
-    @Nullable Integer txLogBatchMaxCount;
-
-    /**
-     * Handles to platform-specific native networks (transports) to register with the mesh sync,
-     * added via {@link InternalSyncAccess#addNetworkInternalHandle(MeshConfig, long)}.
-     */
-    final List<Long> networkInternalHandles = new ArrayList<>();
-
-    /**
-     * Use {@link InternalSyncAccess#createMeshConfig(String)} instead.
-     *
-     * @param meshId The mesh network identifier (required); nodes with different IDs ignore each
-     * other.
-     */
-    MeshConfig(String meshId) {
-        if (meshId == null || meshId.isEmpty()) {
-            throw new IllegalArgumentException("meshId must not be null or empty.");
-        }
-        this.meshId = meshId;
-    }
+public interface MeshConfig {
 
     /**
      * Maximum number of simultaneous connections a peer can have to other peers (default: 3).
@@ -85,18 +46,12 @@ public final class MeshConfig {
      * recommended. 2 is typically not recommended unless you run into severe radio limitations. 1
      * would be a rare special case if you only want to create pairs, not a mesh.
      */
-    public MeshConfig maxConnectionCount(int maxConnectionCount) {
-        this.maxConnectionCount = maxConnectionCount;
-        return this;
-    }
+    MeshConfig maxConnectionCount(int maxConnectionCount);
 
     /**
      * Backoff time in milliseconds before retrying a failed connection (default: 10000).
      */
-    public MeshConfig backoffMillis(int backoffMillis) {
-        this.backoffMillis = backoffMillis;
-        return this;
-    }
+    MeshConfig backoffMillis(int backoffMillis);
 
     /**
      * Backoff time in milliseconds between peer evictions (default: 30000).
@@ -105,45 +60,25 @@ public final class MeshConfig {
      * {@link #maxConnectionCount(int)}, this peer ends a connection to an existing peer, it
      * "evicts" that peer, to make room. This backoff prevents frequent evictions.
      */
-    public MeshConfig evictionBackoffMillis(int evictionBackoffMillis) {
-        this.evictionBackoffMillis = evictionBackoffMillis;
-        return this;
-    }
-
-    /**
-     * Seed for the random engine; 0 means use the current time (default: 0).
-     */
-    public MeshConfig randomSeed(long randomSeed) {
-        this.randomSeed = randomSeed;
-        return this;
-    }
+    MeshConfig evictionBackoffMillis(int evictionBackoffMillis);
 
     /**
      * Timeout in milliseconds for a TX request from a peer before retrying from another (default:
      * 5000).
      */
-    public MeshConfig requestTimeoutMillis(int requestTimeoutMillis) {
-        this.requestTimeoutMillis = requestTimeoutMillis;
-        return this;
-    }
+    MeshConfig requestTimeoutMillis(int requestTimeoutMillis);
 
     /**
      * Delay in milliseconds before advertising starts after the mesh sync starts (default: 2000).
      * <p>
      * Discovery always starts immediately; advertising is delayed to "stretch out" radio activity.
      */
-    public MeshConfig advertisingDelayMillis(int advertisingDelayMillis) {
-        this.advertisingDelayMillis = advertisingDelayMillis;
-        return this;
-    }
+    MeshConfig advertisingDelayMillis(int advertisingDelayMillis);
 
     /**
      * Minimum delay in milliseconds between two outgoing connection attempts (default: 1000).
      */
-    public MeshConfig connectDelayMillis(int connectDelayMillis) {
-        this.connectDelayMillis = connectDelayMillis;
-        return this;
-    }
+    MeshConfig connectDelayMillis(int connectDelayMillis);
 
     /**
      * Duration in seconds of the initial discovery phase (default: 30; 0 means never stop by
@@ -151,10 +86,7 @@ public final class MeshConfig {
      *
      * @see #discoveryDurationSeconds(int)
      */
-    public MeshConfig initialDiscoveryDurationSeconds(int initialDiscoveryDurationSeconds) {
-        this.initialDiscoveryDurationSeconds = initialDiscoveryDurationSeconds;
-        return this;
-    }
+    MeshConfig initialDiscoveryDurationSeconds(int initialDiscoveryDurationSeconds);
 
     /**
      * Duration in seconds of a standard (non-initial) discovery phase (default: 15; 0 means never
@@ -162,44 +94,29 @@ public final class MeshConfig {
      *
      * @see #initialDiscoveryDurationSeconds(int)
      */
-    public MeshConfig discoveryDurationSeconds(int discoveryDurationSeconds) {
-        this.discoveryDurationSeconds = discoveryDurationSeconds;
-        return this;
-    }
+    MeshConfig discoveryDurationSeconds(int discoveryDurationSeconds);
 
     /**
      * Pause in seconds between two discovery phases (default: 45).
      */
-    public MeshConfig discoveryPauseSeconds(int discoveryPauseSeconds) {
-        this.discoveryPauseSeconds = discoveryPauseSeconds;
-        return this;
-    }
+    MeshConfig discoveryPauseSeconds(int discoveryPauseSeconds);
 
     /**
      * Random +/- jitter in seconds applied to the discovery pause (default: 15; must be &lt;=
      * pause). 0 disables jitter.
      */
-    public MeshConfig discoveryPauseJitterSeconds(int discoveryPauseJitterSeconds) {
-        this.discoveryPauseJitterSeconds = discoveryPauseJitterSeconds;
-        return this;
-    }
+    MeshConfig discoveryPauseJitterSeconds(int discoveryPauseJitterSeconds);
 
     /**
      * Soft cap in KB for the total TX log payload batched into a single TxLogData message (default:
      * 100).
      */
-    public MeshConfig txLogBatchSizeKb(int txLogBatchSizeKb) {
-        this.txLogBatchSizeKb = txLogBatchSizeKb;
-        return this;
-    }
+    MeshConfig txLogBatchSizeKb(int txLogBatchSizeKb);
 
     /**
      * Maximum number of TX logs to batch into a single TxLogData message (default: 1000). Must be
      * in the range (0, 100000].
      */
-    public MeshConfig txLogBatchMaxCount(int txLogBatchMaxCount) {
-        this.txLogBatchMaxCount = txLogBatchMaxCount;
-        return this;
-    }
+    MeshConfig txLogBatchMaxCount(int txLogBatchMaxCount);
 
 }

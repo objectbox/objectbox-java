@@ -24,6 +24,7 @@ import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.exception.FeatureNotAvailableException;
 import io.objectbox.sync.InternalSyncAccess;
 import io.objectbox.sync.MeshConfig;
+import io.objectbox.sync.MeshConfigImpl;
 import io.objectbox.sync.SyncBuilder;
 import io.objectbox.sync.SyncClient;
 
@@ -86,7 +87,7 @@ public final class AndroidMeshSync {
                             "Please visit https://objectbox.io/sync/ for options.");
         }
         // Create the config first: it validates meshId, avoiding the creation of a native network for bad input.
-        MeshConfig config = InternalSyncAccess.createMeshConfig(meshId);
+        MeshConfigImpl config = InternalSyncAccess.createMeshConfig(meshId);
         // Create the Nearby network (Java + paired native object) and register it with the config. The native
         // network is owned by the MeshSync once the sync client is created; see NearbyMeshNetwork.stop().
         NearbyMeshNetwork network = new NearbyMeshNetwork(context.getApplicationContext(), meshId);
