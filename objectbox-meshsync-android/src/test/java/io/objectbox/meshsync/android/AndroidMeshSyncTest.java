@@ -46,8 +46,7 @@ public class AndroidMeshSyncTest {
                 () -> AndroidMeshSync.createConfig(context, "test-mesh")
         );
         String message = exception.getMessage();
-        assertTrue(message, message.contains("objectbox-sync-android")
-                && message.contains("https://objectbox.io/sync"));
+        assertTrue(message, message.contains("does not include the Sync feature"));
     }
 
     @Test

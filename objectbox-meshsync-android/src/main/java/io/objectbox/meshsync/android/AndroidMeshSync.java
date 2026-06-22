@@ -18,14 +18,13 @@ package io.objectbox.meshsync.android;
 
 import android.content.Context;
 
-import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Experimental;
-import io.objectbox.exception.FeatureNotAvailableException;
 import io.objectbox.meshsync.android.internal.NearbyMeshNetwork;
 import io.objectbox.sync.InternalSyncAccess;
 import io.objectbox.sync.MeshConfig;
 import io.objectbox.sync.SyncBuilder;
 import io.objectbox.sync.SyncClient;
+import io.objectbox.sync.internal.SyncUtils;
 
 /**
  * Peer-to-peer mesh sync for Android using
@@ -79,12 +78,8 @@ public final class AndroidMeshSync {
         if (context == null) {
             throw new IllegalArgumentException("context must not be null.");
         }
-        if (!BoxStore.isSyncAvailable()) {
-            throw new FeatureNotAvailableException(
-                    "This library does not include ObjectBox Sync, which mesh sync requires. " +
-                            "Update your dependencies to use the Sync variant (like objectbox-sync-android). " +
-                            "Please visit https://objectbox.io/sync/ for options.");
-        }
+        SyncUtils.checkSyncFeatureAvailable();
+
         // Create the config first: it validates meshId, avoiding the creation of a native network for bad input.
         MeshConfig config = InternalSyncAccess.createMeshConfig(meshId);
         // Create the Nearby network (Java + paired native object) and register it with the config. The native

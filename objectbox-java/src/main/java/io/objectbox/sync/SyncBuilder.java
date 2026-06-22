@@ -26,8 +26,8 @@ import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Experimental;
-import io.objectbox.exception.FeatureNotAvailableException;
 import io.objectbox.sync.internal.Platform;
+import io.objectbox.sync.internal.SyncUtils;
 import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.listener.SyncCompletedListener;
 import io.objectbox.sync.listener.SyncConnectionListener;
@@ -91,14 +91,6 @@ public final class SyncBuilder {
         AUTO_NO_PUSHES
     }
 
-    private static void checkSyncFeatureAvailable() {
-        if (!BoxStore.isSyncAvailable()) {
-            throw new FeatureNotAvailableException(
-                    "This library does not include ObjectBox Sync. " +
-                            "Please visit https://objectbox.io/sync/ for options.");
-        }
-    }
-
     /**
      * Creates a builder for a {@link SyncClient}.
      * <p>
@@ -107,7 +99,7 @@ public final class SyncBuilder {
     SyncBuilder(BoxStore boxStore) {
         checkNotNull(boxStore, "boxStore");
         this.boxStore = boxStore;
-        checkSyncFeatureAvailable();
+        SyncUtils.checkSyncFeatureAvailable();
         this.platform = Platform.findPlatform(); // Requires APIs only present in Android Sync library
     }
 
