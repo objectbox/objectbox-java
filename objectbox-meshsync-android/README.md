@@ -30,6 +30,6 @@ SyncClient syncClient = Sync.client(boxStore)
 MeshSync mesh = syncClient.getMesh(); // state, connected peer count, stats
 ```
 
-Note: `io.objectbox.android.internal.meshsync.NearbyMeshNetwork` must keep its package and member names,
+Note: `io.objectbox.meshsync.android.internal.NearbyMeshNetwork` must keep its package and member names,
 as they must match the JNI exports of the native library (`AndroidMeshNetworkJni.cpp` in the internal
 repository, which also contains instrumented tests for it).

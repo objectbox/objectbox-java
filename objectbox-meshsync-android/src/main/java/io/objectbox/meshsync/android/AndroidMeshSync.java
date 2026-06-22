@@ -19,9 +19,9 @@ package io.objectbox.meshsync.android;
 import android.content.Context;
 
 import io.objectbox.BoxStore;
-import io.objectbox.android.internal.meshsync.NearbyMeshNetwork;
 import io.objectbox.annotation.apihint.Experimental;
 import io.objectbox.exception.FeatureNotAvailableException;
+import io.objectbox.meshsync.android.internal.NearbyMeshNetwork;
 import io.objectbox.sync.InternalSyncAccess;
 import io.objectbox.sync.MeshConfig;
 import io.objectbox.sync.SyncBuilder;

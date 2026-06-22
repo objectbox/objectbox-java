@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.objectbox.android.internal.meshsync;
+package io.objectbox.meshsync.android.internal;
 
 import android.content.Context;
 import android.util.Log;
