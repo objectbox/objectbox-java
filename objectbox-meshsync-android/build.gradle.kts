@@ -89,9 +89,14 @@ dependencies {
     // library's API.
     implementation(libs.play.services.nearby)
 
-    // Use "api" to add the Android API library as a "compile" dependency in the POM for consumers
-    // to expose its APIs.
-    api(project(":objectbox-android"))
+    // With Gradle, it is currently not possible to select between Maven coordinates of multiple
+    // publications (https://github.com/gradle/gradle/issues/12324) of objectbox-android that this
+    // projects variants depend on (Sync with Admin and without Admin).
+    // As a workaround, manually modify the POM XML for each publication (see publications block) to
+    // add the correct dependency. And instead of "api" use "compileOnly" here to avoid Gradle
+    // adding the dependency to the POM, but still allow code in this project to use APIs from
+    // objectbox-android.
+    compileOnly(project(":objectbox-android"))
 
     // Dependencies for unit tests running on the JVM (so not on an Android device/emulator)
     testImplementation(libs.junit)
@@ -118,6 +123,12 @@ publishing {
 
             pom {
                 name.set("ObjectBox Mesh Sync for Android")
+
+                // Workaround to depend on specific publication of subproject objectbox-android, see
+                // notes in dependencies block above.
+                // The groupId, artifactId and version must match with that of a publication of
+                // objectbox-android.
+                addCompileDependency(groupId, "objectbox-sync-android", version)
             }
         }
         create<MavenPublication>(publicationMeshSyncAndroidAdmin) {
@@ -131,6 +142,12 @@ publishing {
 
             pom {
                 name.set("ObjectBox Mesh Sync with Admin for Android")
+
+                // Workaround to depend on specific publication of subproject objectbox-android, see
+                // notes in dependencies block above.
+                // The groupId, artifactId and version must match with that of a publication of
+                // objectbox-android.
+                addCompileDependency(groupId, "objectbox-sync-android-objectbrowser", version)
             }
         }
         // Additional common configuration for all Maven publications
@@ -140,6 +157,32 @@ publishing {
                 packaging = "aar"
             }
         }
+    }
+}
+
+/**
+ * Manually adds a "compile" dependency to the POM.
+ *
+ * Note that this is a workaround and typically dependencies should be added via configurations.
+ */
+private fun MavenPom.addCompileDependency(groupId: String, artifactId: String, version: String) {
+    withXml {
+        val root = this.asElement()
+        val document = root.ownerDocument
+        val dependenciesNode = checkNotNull(
+            root.getElementsByTagName("dependencies").item(0)
+        ) {
+            "Expected existing <dependencies> node in generated POM"
+        }
+        val dependencyNode = dependenciesNode.appendChild(document.createElement("dependency"))
+        dependencyNode.appendChild(document.createElement("groupId"))
+            .textContent = groupId
+        dependencyNode.appendChild(document.createElement("artifactId"))
+            .textContent = artifactId
+        dependencyNode.appendChild(document.createElement("version"))
+            .textContent = version
+        dependencyNode.appendChild(document.createElement("scope"))
+            .textContent = "compile"
     }
 }
 
