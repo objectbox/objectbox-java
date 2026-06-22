@@ -65,7 +65,7 @@ workflow:
     - docker
     - linux
     - x64
-  image: objectboxio/buildenv-android:2024-12-09 # With JDK 21, Android build-tools;35.0.0 and platforms;android-35 pre-installed
+  image: objectboxio/buildenv-android:2026-05-12 # With JDK 21, Android build-tools;35.0.0 and platforms;android-35 pre-installed
   variables:
     # Image defaults to POSIX (ASCII), set a compatible locale so UTF-8 tests that interact with the file system work.
     # Check with 'locale -a' for available locales.
