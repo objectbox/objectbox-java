@@ -9,7 +9,7 @@ junit = "4.13.2"
 publish-plugin = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
 robolectric = "4.10.3" # https://github.com/robolectric/robolectric/releases
 spotbugs-plugin = "6.0.26" # https://github.com/spotbugs/spotbugs-gradle-plugin/releases
-versions = "0.51.0" # https://github.com/ben-manes/gradle-versions-plugin/releases
+versions = "0.54.0" # https://github.com/ben-manes/gradle-versions-plugin/releases
 
 [libraries]
 androidx-lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata", version.ref = "androidxLifecycle" }
