@@ -16,12 +16,9 @@ val propertySonatypeUsername = providers.gradleProperty("sonatypeUsername")
 val propertySonatypePassword = providers.gradleProperty("sonatypePassword")
 
 plugins {
-    // https://github.com/ben-manes/gradle-versions-plugin/releases
-    id("com.github.ben-manes.versions") version "0.51.0"
-    // https://github.com/spotbugs/spotbugs-gradle-plugin/releases
-    id("com.github.spotbugs") version "6.0.26" apply false
-    // https://github.com/gradle-nexus/publish-plugin/releases
-    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+    alias(libs.plugins.versions)
+    alias(libs.plugins.spotbugs) apply false
+    alias(libs.plugins.publish)
     alias(libs.plugins.android.library) apply false
 }
 

@@ -1,7 +1,7 @@
 plugins {
     id("java-library")
     id("objectbox.publishing-conventions")
-    id("com.github.spotbugs")
+    alias(libs.plugins.spotbugs)
 }
 
 // Note: use release flag instead of sourceCompatibility and targetCompatibility to ensure only JDK 8 API is used.
