@@ -93,9 +93,10 @@ dependencies {
     // publications (https://github.com/gradle/gradle/issues/12324) of objectbox-android that this
     // projects variants depend on (Sync with Admin and without Admin).
     // As a workaround, manually modify the POM XML for each publication (see publications block) to
-    // add the correct dependency. And instead of "api" use "compileOnly" here to avoid Gradle
-    // adding the dependency to the POM, but still allow code in this project to use APIs from
-    // objectbox-android.
+    // add the correct dependency and ensure consuming projects use the POM instead of the Gradle
+    // module metadata file (see turned off GenerateModuleMetadata task).
+    // And instead of "api" use "compileOnly" here to avoid Gradle adding the dependency to the POM,
+    // but still allow code in this project to use APIs from objectbox-android.
     compileOnly(project(":objectbox-android"))
 
     // Dependencies for unit tests running on the JVM (so not on an Android device/emulator)
@@ -105,6 +106,13 @@ dependencies {
     testImplementation("io.objectbox:objectbox-linux:${versionDatabaseLibraryJvm}")
     testImplementation("io.objectbox:objectbox-macos:${versionDatabaseLibraryJvm}")
     testImplementation("io.objectbox:objectbox-windows:${versionDatabaseLibraryJvm}")
+}
+
+// Don't publish Gradle Module Metadata (.module file and marker in POM file) to ensure consuming
+// projects always use the POM file to resolve dependencies. See notes in dependencies block.
+// https://docs.gradle.org/current/userguide/publishing_gradle_module_metadata.html#sub:disabling-gmm-publication
+tasks.withType<GenerateModuleMetadata> {
+    enabled = false
 }
 
 // Note: common settings applied by objectbox.publishing-conventions plugin
