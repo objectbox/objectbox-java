@@ -8,7 +8,7 @@ androidxTestJunit = "1.1.5" # https://developer.android.com/jetpack/androidx/rel
 junit = "4.13.2"
 publish-plugin = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
 robolectric = "4.10.3" # https://github.com/robolectric/robolectric/releases
-spotbugs-plugin = "6.0.26" # https://github.com/spotbugs/spotbugs-gradle-plugin/releases
+spotbugs-plugin = "6.5.8" # https://github.com/spotbugs/spotbugs-gradle-plugin/releases
 versions = "0.54.0" # https://github.com/ben-manes/gradle-versions-plugin/releases
 
 [libraries]
