@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import java.net.URL
 
 plugins {
-    kotlin("jvm")
-    id("org.jetbrains.dokka")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.dokka)
     id("objectbox.publishing-conventions")
 }
 
@@ -70,10 +70,9 @@ val sourcesJar by tasks.registering(Jar::class) {
 }
 
 dependencies {
-    // Note: compileOnly so consumers do not depend on the coroutines library unless they manually add it.
-    // Note: pick a version that depends on Kotlin standard library (org.jetbrains.kotlin:kotlin-stdlib) version
-    // coreLibrariesVersion (set above) or older.
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    // Note: compileOnly so consumers do not depend on the coroutines library unless they manually
+    // add it.
+    compileOnly(libs.kotlin.coroutines.core.compat)
 
     api(project(":objectbox-java"))
 }

@@ -4,8 +4,8 @@ import java.net.URL
 
 plugins {
     id("java-library")
-    kotlin("jvm")
-    id("org.jetbrains.dokka")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.dokka)
     id("objectbox.publishing-conventions")
 }
 

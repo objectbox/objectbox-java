@@ -22,13 +22,12 @@ kotlin {
 
 val versionDatabaseLibraryJvm: String by rootProject.extra
 
-val coroutinesVersion: String by rootProject.extra
 val essentialsVersion: String by rootProject.extra
 val junitVersion: String by rootProject.extra
 
 dependencies {
     implementation(project(":objectbox-java"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+    implementation(libs.kotlin.coroutines.core)
     implementation(project(":objectbox-kotlin"))
     implementation("org.greenrobot:essentials:$essentialsVersion")
     implementation("io.objectbox:objectbox-linux:$versionDatabaseLibraryJvm")
@@ -37,7 +36,7 @@ dependencies {
 
     testImplementation("junit:junit:$junitVersion")
     // To test Coroutines
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
+    testImplementation(libs.kotlin.coroutines.test)
     // To test Kotlin Flow
     testImplementation("app.cash.turbine:turbine:0.5.2")
 }

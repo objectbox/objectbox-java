@@ -1,5 +1,22 @@
 [versions]
+# The versions of Gradle, Kotlin, Kotlin Coroutines and Android Gradle Plugin must be compatible.
+# Check
+# - https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+# - https://github.com/Kotlin/kotlinx.coroutines#readme
+# Note: when updating to a new minor version also have to increase the minimum
+# compiler and standard library version supported by consuming projects, see
+# objectbox-kotlin/ build script.
 agp = "8.13.2" # https://developer.android.com/build/releases/gradle-plugin
+kotlin = "2.0.21"
+kotlin-coroutines = "1.9.0"
+# For objectbox-kotlin: a version of coroutines that depends on the same or older version of the
+# Kotlin standard library (org.jetbrains.kotlin:kotlin-stdlib) set as coreLibrariesVersion in its
+# build script.
+kotlin-coroutines-compat = "1.6.4"
+# Dokka includes its own version of the Kotlin compiler, so it must not match
+# the used Kotlin version. But it might not understand new language features.
+kotlin-dokka = "1.9.20"
+
 androidxLifecycle = "2.6.1" # https://developer.android.com/jetpack/androidx/releases/lifecycle
 # Not using Paging v3 as it pulls in Kotlin
 androidxPaging = "2.1.2" # https://developer.android.com/jetpack/androidx/releases/paging
@@ -18,10 +35,17 @@ androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTes
 androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestJunit" }
 androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidxTest" }
 junit = { module = "junit:junit", version.ref = "junit" }
+#noinspection SimilarGradleDependency
+kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
+#noinspection SimilarGradleDependency
+kotlin-coroutines-core-compat = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines-compat" }
+kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlin-coroutines" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-dokka = { id = "org.jetbrains.dokka", version.ref = "kotlin-dokka" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "publish-plugin" }
 spotbugs = { id = "com.github.spotbugs", version.ref = "spotbugs-plugin" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }

@@ -16,6 +16,8 @@ val propertySonatypeUsername = providers.gradleProperty("sonatypeUsername")
 val propertySonatypePassword = providers.gradleProperty("sonatypePassword")
 
 plugins {
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.dokka) apply false
     alias(libs.plugins.versions)
     alias(libs.plugins.spotbugs) apply false
     alias(libs.plugins.publish)
@@ -60,22 +62,6 @@ buildscript {
     val essentialsVersion by extra("3.1.0")
     val junitVersion by extra("4.13.2")
     val mockitoVersion by extra("3.8.0")
-    // The versions of Gradle, Kotlin and Kotlin Coroutines must work together.
-    // Check
-    // - https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
-    // - https://github.com/Kotlin/kotlinx.coroutines#readme
-    // Note: when updating to a new minor version also have to increase the minimum compiler and standard library
-    // version supported by consuming projects, see objectbox-kotlin/ build script.
-    val kotlinVersion by extra("2.0.21")
-    val coroutinesVersion by extra("1.9.0")
-    // Dokka includes its own version of the Kotlin compiler, so it must not match the used Kotlin version.
-    // But it might not understand new language features.
-    val dokkaVersion by extra("1.9.20")
-
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-        classpath("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
-    }
 }
 
 allprojects {
