@@ -7,12 +7,13 @@
 # compiler and standard library version supported by consuming projects, see
 # objectbox-kotlin/ build script.
 agp = "8.13.2" # https://developer.android.com/build/releases/gradle-plugin
-kotlin = "2.0.21"
-kotlin-coroutines = "1.9.0"
+kotlin = "2.4.0"
+kotlin-coroutines = "1.11.0"
 # For objectbox-kotlin: a version of coroutines that depends on the same or older version of the
 # Kotlin standard library (org.jetbrains.kotlin:kotlin-stdlib) set as coreLibrariesVersion in its
-# build script.
-kotlin-coroutines-compat = "1.6.4"
+# build script. To find a suitable version, maybe use
+# https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
+kotlin-coroutines-compat = "1.10.2" # 1.11.0 requires stdlib 2.2.20, so use 1.10.2
 # Dokka includes its own version of the Kotlin compiler, so it must not match
 # the used Kotlin version. But it might not understand new language features.
 kotlin-dokka = "1.9.20"

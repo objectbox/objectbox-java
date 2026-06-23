@@ -6,6 +6,8 @@ For more insights into what changed in the database libraries, [check the Object
 
 ## Next release
 
+- Requires at least Kotlin compiler and standard library 2.2.0.
+
 ## 5.4.2 - 2026-05-05
 
 - Update Android and JVM libraries to database version `5.3.2-2026-05-05`
