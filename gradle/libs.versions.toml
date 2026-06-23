@@ -14,9 +14,9 @@ kotlin-coroutines = "1.11.0"
 # build script. To find a suitable version, maybe use
 # https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
 kotlin-coroutines-compat = "1.10.2" # 1.11.0 requires stdlib 2.2.20, so use 1.10.2
-# Dokka includes its own version of the Kotlin compiler, so it must not match
-# the used Kotlin version. But it might not understand new language features.
-kotlin-dokka = "1.9.20"
+# Dokka includes its own version of the Kotlin compiler, so it does not have to match the used
+# Kotlin version. But it might not understand new language features.
+kotlin-dokka = "2.2.0" # https://github.com/Kotlin/dokka/releases
 
 androidxLifecycle = "2.6.1" # https://developer.android.com/jetpack/androidx/releases/lifecycle
 # Not using Paging v3 as it pulls in Kotlin
@@ -57,6 +57,9 @@ rxjava2 = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava2" }
 rxjava3 = { module = "io.reactivex.rxjava3:rxjava", version.ref = "rxjava3" }
 spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugs-annotations" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+
+# build-logic dependencies
+buildLogic-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "kotlin-dokka" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }
