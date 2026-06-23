@@ -19,8 +19,6 @@ android {
     defaultConfig {
         minSdk = 21 // Android 5.0 (Lollipop), like objectbox-android
 
-        consumerProguardFiles("consumer-proguard-rules.pro")
-
         // Dependencies: objectbox-android also has a "database" dimension,
         // always pick its "sync" flavor.
         missingDimensionStrategy("database", "sync")
@@ -78,6 +76,10 @@ android {
 }
 
 val versionDatabaseLibraryJvm: String by rootProject.extra
+val versionDatabaseLibraryAndroidSync: String by rootProject.extra
+
+val adminExcludedImplementation by configurations.getting
+val adminIncludedImplementation by configurations.getting
 
 dependencies {
     // Use "api" to add the Java library as a "compile" dependency in the POM as this library
@@ -89,15 +91,13 @@ dependencies {
     // library's API.
     implementation(libs.play.services.nearby)
 
-    // With Gradle, it is currently not possible to select between Maven coordinates of multiple
-    // publications (https://github.com/gradle/gradle/issues/12324) of objectbox-android that this
-    // projects variants depend on (Sync with Admin and without Admin).
-    // As a workaround, manually modify the POM XML for each publication (see publications block) to
-    // add the correct dependency and ensure consuming projects use the POM instead of the Gradle
-    // module metadata file (see turned off GenerateModuleMetadata task).
-    // And instead of "api" use "compileOnly" here to avoid Gradle adding the dependency to the POM,
-    // but still allow code in this project to use APIs from objectbox-android.
-    compileOnly(project(":objectbox-android"))
+    // Use "implementation" to add the Android database library as a "runtime" dependency in the
+    // POM for consumers as it is required at runtime, but doesn't expose any APIs.
+    // Note: as the artifacts produced by this project are also used by the ObjectBox Flutter
+    // package, don't add a dependency on objectbox-android to make it easier to release for Flutter
+    // only (and to avoid Flutter projects pulling in unused code and resources, such as for Admin).
+    adminExcludedImplementation("io.objectbox:objectbox-sync-android-db:$versionDatabaseLibraryAndroidSync")
+    adminIncludedImplementation("io.objectbox:objectbox-sync-android-db-admin:$versionDatabaseLibraryAndroidSync")
 
     // Dependencies for unit tests running on the JVM (so not on an Android device/emulator)
     testImplementation(libs.junit)
@@ -106,13 +106,6 @@ dependencies {
     testImplementation("io.objectbox:objectbox-linux:${versionDatabaseLibraryJvm}")
     testImplementation("io.objectbox:objectbox-macos:${versionDatabaseLibraryJvm}")
     testImplementation("io.objectbox:objectbox-windows:${versionDatabaseLibraryJvm}")
-}
-
-// Don't publish Gradle Module Metadata (.module file and marker in POM file) to ensure consuming
-// projects always use the POM file to resolve dependencies. See notes in dependencies block.
-// https://docs.gradle.org/current/userguide/publishing_gradle_module_metadata.html#sub:disabling-gmm-publication
-tasks.withType<GenerateModuleMetadata> {
-    enabled = false
 }
 
 // Note: common settings applied by objectbox.publishing-conventions plugin
@@ -131,12 +124,6 @@ publishing {
 
             pom {
                 name.set("ObjectBox Mesh Sync for Android")
-
-                // Workaround to depend on specific publication of subproject objectbox-android, see
-                // notes in dependencies block above.
-                // The groupId, artifactId and version must match with that of a publication of
-                // objectbox-android.
-                addCompileDependency(groupId, "objectbox-sync-android", version)
             }
         }
         create<MavenPublication>(publicationMeshSyncAndroidAdmin) {
@@ -150,12 +137,6 @@ publishing {
 
             pom {
                 name.set("ObjectBox Mesh Sync with Admin for Android")
-
-                // Workaround to depend on specific publication of subproject objectbox-android, see
-                // notes in dependencies block above.
-                // The groupId, artifactId and version must match with that of a publication of
-                // objectbox-android.
-                addCompileDependency(groupId, "objectbox-sync-android-objectbrowser", version)
             }
         }
         // Additional common configuration for all Maven publications
@@ -165,32 +146,6 @@ publishing {
                 packaging = "aar"
             }
         }
-    }
-}
-
-/**
- * Manually adds a "compile" dependency to the POM.
- *
- * Note that this is a workaround and typically dependencies should be added via configurations.
- */
-private fun MavenPom.addCompileDependency(groupId: String, artifactId: String, version: String) {
-    withXml {
-        val root = this.asElement()
-        val document = root.ownerDocument
-        val dependenciesNode = checkNotNull(
-            root.getElementsByTagName("dependencies").item(0)
-        ) {
-            "Expected existing <dependencies> node in generated POM"
-        }
-        val dependencyNode = dependenciesNode.appendChild(document.createElement("dependency"))
-        dependencyNode.appendChild(document.createElement("groupId"))
-            .textContent = groupId
-        dependencyNode.appendChild(document.createElement("artifactId"))
-            .textContent = artifactId
-        dependencyNode.appendChild(document.createElement("version"))
-            .textContent = version
-        dependencyNode.appendChild(document.createElement("scope"))
-            .textContent = "compile"
     }
 }
 
