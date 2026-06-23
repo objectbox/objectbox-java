@@ -33,7 +33,7 @@ rxjava2 = "2.2.21"
 rxjava3 = "3.0.11"
 spotbugs-annotations = "4.8.6" # https://github.com/spotbugs/spotbugs/blob/master/CHANGELOG.md
 spotbugs-plugin = "6.5.8" # https://github.com/spotbugs/spotbugs-gradle-plugin/releases
-turbine = "0.5.2"
+turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 versions = "0.54.0" # https://github.com/ben-manes/gradle-versions-plugin/releases
 
 [libraries]

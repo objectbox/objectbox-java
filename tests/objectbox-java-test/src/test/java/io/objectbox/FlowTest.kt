@@ -18,10 +18,10 @@ class FlowTest : AbstractObjectBoxTest() {
     fun flow_box() {
         runBlocking {
             store.flow(TestEntity::class.java).test {
-                assertEquals(TestEntity::class.java, expectItem())
+                assertEquals(TestEntity::class.java, awaitItem())
                 putTestEntities(1)
-                // Note: expectItem suspends until event, so no need to wait on OBX publisher thread.
-                assertEquals(TestEntity::class.java, expectItem())
+                // Note: awaitItem suspends until event, so no need to wait on OBX publisher thread.
+                assertEquals(TestEntity::class.java, awaitItem())
                 cancel() // expect no more events
             }
         }
@@ -33,10 +33,10 @@ class FlowTest : AbstractObjectBoxTest() {
     fun flow_query() {
         runBlocking {
             testEntityBox.query {}.flow().test {
-                assertEquals(0, expectItem().size)
+                assertEquals(0, awaitItem().size)
                 putTestEntities(1)
-                // Note: expectItem suspends until event, so no need to wait on OBX publisher thread.
-                assertEquals(1, expectItem().size)
+                // Note: awaitItem suspends until event, so no need to wait on OBX publisher thread.
+                assertEquals(1, awaitItem().size)
                 cancel() // expect no more events
             }
         }
