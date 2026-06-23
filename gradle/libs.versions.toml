@@ -26,7 +26,8 @@ androidxTestJunit = "1.1.5" # https://developer.android.com/jetpack/androidx/rel
 essentials = "3.1.0"
 jsr305 = "3.0.2"
 junit = "4.13.2"
-mockito = "3.8.0"
+# Mockito 5 requires Java 11: this is fine as CI doesn't run RxJava tests with older JDKs
+mockito = "5.23.0" # https://github.com/mockito/mockito/releases/
 publish-plugin = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
 robolectric = "4.10.3" # https://github.com/robolectric/robolectric/releases
 rxjava2 = "2.2.21"
