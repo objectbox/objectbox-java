@@ -38,15 +38,12 @@ dokkaHtml.configure {
     }
 }
 
-val junitVersion: String by rootProject.extra
-val mockitoVersion: String by rootProject.extra
-
 dependencies {
     api(project(":objectbox-java"))
-    api("io.reactivex.rxjava3:rxjava:3.0.11")
+    api(libs.rxjava3)
 
-    testImplementation("junit:junit:$junitVersion")
-    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito)
 }
 
 val javadocJar by tasks.registering(Jar::class) {

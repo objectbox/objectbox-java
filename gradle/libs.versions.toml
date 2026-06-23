@@ -22,10 +22,17 @@ androidxLifecycle = "2.6.1" # https://developer.android.com/jetpack/androidx/rel
 androidxPaging = "2.1.2" # https://developer.android.com/jetpack/androidx/releases/paging
 androidxTest = "1.5.0" # https://developer.android.com/jetpack/androidx/releases/test
 androidxTestJunit = "1.1.5" # https://developer.android.com/jetpack/androidx/releases/test
+essentials = "3.1.0"
+jsr305 = "3.0.2"
 junit = "4.13.2"
+mockito = "3.8.0"
 publish-plugin = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
 robolectric = "4.10.3" # https://github.com/robolectric/robolectric/releases
+rxjava2 = "2.2.21"
+rxjava3 = "3.0.11"
+spotbugs-annotations = "4.8.6" # https://github.com/spotbugs/spotbugs/blob/master/CHANGELOG.md
 spotbugs-plugin = "6.5.8" # https://github.com/spotbugs/spotbugs-gradle-plugin/releases
+turbine = "0.5.2"
 versions = "0.54.0" # https://github.com/ben-manes/gradle-versions-plugin/releases
 
 [libraries]
@@ -34,13 +41,20 @@ androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.r
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTest" }
 androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestJunit" }
 androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidxTest" }
+essentials = { module = "org.greenrobot:essentials", version.ref = "essentials" }
+jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
 junit = { module = "junit:junit", version.ref = "junit" }
 #noinspection SimilarGradleDependency
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
 #noinspection SimilarGradleDependency
 kotlin-coroutines-core-compat = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines-compat" }
 kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlin-coroutines" }
+mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+rxjava2 = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava2" }
+rxjava3 = { module = "io.reactivex.rxjava3:rxjava", version.ref = "rxjava3" }
+spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugs-annotations" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }

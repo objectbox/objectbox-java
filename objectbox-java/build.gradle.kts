@@ -11,15 +11,13 @@ tasks.withType<JavaCompile> {
 }
 
 val javadocForWebDir = layout.buildDirectory.dir("docs/web-api-docs")
-val essentialsVersion: String by rootProject.extra
 
 dependencies {
     api(project(":objectbox-java-api"))
-    implementation("org.greenrobot:essentials:$essentialsVersion")
-    api("com.google.code.findbugs:jsr305:3.0.2")
+    implementation(libs.essentials)
+    api(libs.jsr305)
 
-    // https://github.com/spotbugs/spotbugs/blob/master/CHANGELOG.md
-    compileOnly("com.github.spotbugs:spotbugs-annotations:4.8.6")
+    compileOnly(libs.spotbugs.annotations)
 }
 
 spotbugs {

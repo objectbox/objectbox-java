@@ -57,11 +57,6 @@ buildscript {
     val versionDatabaseLibraryJvm by extra(versionDbJvm)
     val versionDatabaseLibraryAndroid by extra(versionDbAndroid)
     val versionDatabaseLibraryAndroidSync by extra(versionDbAndroidSync)
-
-    // Versions for third party dependencies and plugins
-    val essentialsVersion by extra("3.1.0")
-    val junitVersion by extra("4.13.2")
-    val mockitoVersion by extra("3.8.0")
 }
 
 allprojects {

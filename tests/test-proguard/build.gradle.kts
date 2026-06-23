@@ -10,13 +10,11 @@ tasks.withType<JavaCompile> {
 
 val versionDatabaseLibraryJvm: String by rootProject.extra
 
-val junitVersion: String by rootProject.extra
-
 dependencies {
     implementation(project(":objectbox-java"))
     implementation("io.objectbox:objectbox-linux:$versionDatabaseLibraryJvm")
     implementation("io.objectbox:objectbox-macos:$versionDatabaseLibraryJvm")
     implementation("io.objectbox:objectbox-windows:$versionDatabaseLibraryJvm")
 
-    testImplementation("junit:junit:$junitVersion")
+    testImplementation(libs.junit)
 }
