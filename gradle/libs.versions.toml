@@ -21,15 +21,15 @@ kotlin-dokka = "1.9.20"
 androidxLifecycle = "2.6.1" # https://developer.android.com/jetpack/androidx/releases/lifecycle
 # Not using Paging v3 as it pulls in Kotlin
 androidxPaging = "2.1.2" # https://developer.android.com/jetpack/androidx/releases/paging
-androidxTest = "1.5.0" # https://developer.android.com/jetpack/androidx/releases/test
-androidxTestJunit = "1.1.5" # https://developer.android.com/jetpack/androidx/releases/test
+androidxTest = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test
+androidxTestJunit = "1.3.0" # https://developer.android.com/jetpack/androidx/releases/test
 essentials = "3.1.0"
 jsr305 = "3.0.2"
 junit = "4.13.2"
 # Mockito 5 requires Java 11: this is fine as CI doesn't run RxJava tests with older JDKs
 mockito = "5.23.0" # https://github.com/mockito/mockito/releases/
 publish-plugin = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
-robolectric = "4.10.3" # https://github.com/robolectric/robolectric/releases
+robolectric = "4.16.1" # https://github.com/robolectric/robolectric/releases
 rxjava2 = "2.2.21"
 rxjava3 = "3.0.11"
 spotbugs-annotations = "4.10.2" # https://github.com/spotbugs/spotbugs/blob/master/CHANGELOG.md
