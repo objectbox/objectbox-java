@@ -5,7 +5,6 @@ import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.newCachedThreadPoolDispatcher
 import io.objectbox.kotlin.newFixedThreadPoolDispatcher
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import org.junit.Assert.*
@@ -29,7 +28,6 @@ class BoxStoreTestK : AbstractObjectBoxTest() {
         assertEquals(boxJavaApi, box2)
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun awaitCallInTx() {
         val box = store.boxFor<TestEntity>()

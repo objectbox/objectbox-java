@@ -3,7 +3,6 @@ package io.objectbox.kotlin
 import io.objectbox.BoxStore
 import io.objectbox.query.Query
 import io.objectbox.reactive.SubscriptionBuilder
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +23,6 @@ import kotlinx.coroutines.flow.callbackFlow
  * box.query().subscribe().toFlow()
  * ```
  */
-@ExperimentalCoroutinesApi
 fun <T> SubscriptionBuilder<T>.toFlow(): Flow<T> = callbackFlow {
     val subscription = this@toFlow.observer {
             trySendBlocking(it)
@@ -33,13 +31,12 @@ fun <T> SubscriptionBuilder<T>.toFlow(): Flow<T> = callbackFlow {
 }
 
 /**
- * Shortcut for `BoxStore.subscribe(forClass).toFlow()`, see [BoxStore.subscribe] and [toFlow] for details.
+ * Shortcut for `BoxStore.subscribe(forClass).toFlow()`, see [BoxStore.subscribe] and [toFlow] for
+ * details.
  */
-@ExperimentalCoroutinesApi
 fun <T> BoxStore.flow(forClass: Class<T>): Flow<Class<T>> = this.subscribe(forClass).toFlow()
 
 /**
  * Shortcut for `query.subscribe().toFlow()`, see [Query.subscribe] and [toFlow] for details.
  */
-@ExperimentalCoroutinesApi
 fun <T> Query<T>.flow(): Flow<MutableList<T>> = this@flow.subscribe().toFlow()

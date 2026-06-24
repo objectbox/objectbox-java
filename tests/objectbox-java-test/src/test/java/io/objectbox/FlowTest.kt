@@ -3,17 +3,13 @@ package io.objectbox
 import app.cash.turbine.test
 import io.objectbox.kotlin.flow
 import io.objectbox.kotlin.query
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import kotlin.time.ExperimentalTime
 
 
 class FlowTest : AbstractObjectBoxTest() {
 
-    @ExperimentalTime
-    @ExperimentalCoroutinesApi
     @Test
     fun flow_box() {
         runBlocking {
@@ -27,8 +23,6 @@ class FlowTest : AbstractObjectBoxTest() {
         }
     }
 
-    @ExperimentalTime
-    @ExperimentalCoroutinesApi
     @Test
     fun flow_query() {
         runBlocking {
