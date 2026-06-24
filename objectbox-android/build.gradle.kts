@@ -20,10 +20,6 @@ android {
     namespace = "io.objectbox.android"
     // Note: increasing compile SDK also signals this library is compatible with any changes in that
     // API level, see "behavior changes" for each Android version at https://developer.android.com/about/versions
-    // Due to an oversight previous versions of this library relied on the ignored, now removed,
-    // target SDK property. So this library actually only supports up to Android 13. But as only
-    // the Admin foreground helper service is broken (on Android 14 and up, see objectbox-java#226)
-    // keeping at SDK 35.
     compileSdk = 35 // Android 15 (Vanilla Ice Cream)
 
     // Not using Kotlin source code, so prevent the Kotlin standard library from getting added,
@@ -110,12 +106,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    lint {
-        // Due to an oversight (see notes on compileSdk above) AdminKeepAliveService is not
-        // compatible with Android 14, temporarily ignore the error lint produces as a result.
-        disable += "ForegroundServiceType"
     }
 
     // For local unit tests enable use of Android framework with Robolectric

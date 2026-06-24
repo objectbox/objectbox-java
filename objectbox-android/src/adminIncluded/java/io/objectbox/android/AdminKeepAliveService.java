@@ -16,6 +16,8 @@
 
 package io.objectbox.android;
 
+import javax.annotation.Nullable;
+
 import android.app.Notification;
 import android.app.Notification.Action.Builder;
 import android.app.NotificationManager;
@@ -23,12 +25,8 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
 import android.util.Log;
-
-import javax.annotation.Nullable;
 
 /**
  * Foreground service to keep app alive which displays a notification to view {@link Admin} URL or stop this service.
