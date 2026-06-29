@@ -1,48 +1,52 @@
-package io.objectbox.objectbox_sync_flutter_libs
+/*
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.objectbox.meshsync.android
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
-import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.flutter.plugin.common.PluginRegistry
 
 /**
  * Handles requesting Android runtime permissions required for Mesh Sync.
+ *
+ * Usage:
+ * 1. Create an instance and keep it for the lifetime of the Activity.
+ * 2. Call [requestIfMissing] with the Activity and a callback to run once permissions are handled.
+ * 3. Forward [Activity.onRequestPermissionsResult] results to [onRequestPermissionsResult].
+ *
+ * If your app already [requests permissions](https://developer.android.com/training/permissions/requesting)
+ * for other purposes, it might want to use [missingRuntimePermissions] or [runtimePermissions]
+ * instead.
  */
-internal class MeshSyncPermissions(private val applicationContext: Context) :
-    PluginRegistry.RequestPermissionsResultListener {
+class MeshSyncPermissions {
+
     private val pendingCallbacks = mutableListOf<() -> Unit>()
-    private var activity: Activity? = null
-    private var activityBinding: ActivityPluginBinding? = null
 
-    fun onAttachedToActivity(binding: ActivityPluginBinding) {
-        activityBinding = binding
-        activity = binding.activity
-        binding.addRequestPermissionsResultListener(this)
-    }
-
-    fun onDetachedFromActivity() {
-        activityBinding?.removeRequestPermissionsResultListener(this)
-        activityBinding = null
-        activity = null
-    }
-
-    fun requestIfMissing(callback: () -> Unit) {
-        val missingPermissions = missingRuntimePermissions()
+    /**
+     * Requests any missing Mesh Sync runtime permissions, then invokes [callback].
+     *
+     * If all permissions are already granted, [callback] is invoked immediately.
+     * If a permission request is already in flight, [callback] is queued and invoked
+     * together with the other pending callbacks once the result arrives.
+     */
+    fun requestIfMissing(activity: Activity, callback: () -> Unit) {
+        val missingPermissions = missingRuntimePermissions(activity)
         if (missingPermissions.isEmpty()) {
-            callback()
-            return
-        }
-
-        val currentActivity = activity
-        if (currentActivity == null) {
-            Log.w(
-                logTag,
-                "Android Mesh Sync runtime permissions are missing, but no Activity is attached"
-            )
             callback()
             return
         }
@@ -50,17 +54,27 @@ internal class MeshSyncPermissions(private val applicationContext: Context) :
         pendingCallbacks += callback
         if (pendingCallbacks.size > 1) return
 
-        currentActivity.requestPermissions(
-            missingPermissions.toTypedArray(), meshPermissionsRequestCode
-        )
+        // Before M, missingRuntimePermissions above would return an empty list
+        // and avoid calling this. But guard additionally for safety and to
+        // avoid a Lint error.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            activity.requestPermissions(missingPermissions.toTypedArray(), PERMISSIONS_REQUEST_CODE)
+        }
     }
 
-    override fun onRequestPermissionsResult(
+    /**
+     * Forward the result of [Activity.onRequestPermissionsResult] to this method.
+     *
+     * Returns `true` if the request code matches and callbacks were triggered.
+     *
+     * Note: this doesn't check if permissions were granted or if a rationale should be shown.
+     */
+    fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ): Boolean {
-        if (requestCode != meshPermissionsRequestCode) return false
+        if (requestCode != PERMISSIONS_REQUEST_CODE) return false
 
         val callbacks = pendingCallbacks.toList()
         pendingCallbacks.clear()
@@ -68,14 +82,22 @@ internal class MeshSyncPermissions(private val applicationContext: Context) :
         return true
     }
 
-    private fun missingRuntimePermissions(): List<String> {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return emptyList()
+    /**
+     * Returns the list of Mesh Sync runtime permissions that have not yet been granted.
+     */
+    fun missingRuntimePermissions(activity: Activity): List<String> {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return emptyList() // No runtime permissions before API 23
+        }
 
         return runtimePermissions()
-            .filter { applicationContext.checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+            .filter { activity.checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
     }
 
-    private fun runtimePermissions(): List<String> {
+    /**
+     * Returns the full list of runtime permissions required for Mesh Sync on the current device.
+     */
+    fun runtimePermissions(): List<String> {
         val permissions = mutableListOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -92,8 +114,8 @@ internal class MeshSyncPermissions(private val applicationContext: Context) :
         return permissions
     }
 
-    private companion object {
-        const val logTag = "ObjectBoxSyncFlutterLibsPlugin"
-        const val meshPermissionsRequestCode = 0x0B09
+    companion object {
+        /** Request code used when calling [Activity.requestPermissions]. */
+        const val PERMISSIONS_REQUEST_CODE = 0x0B09
     }
 }
