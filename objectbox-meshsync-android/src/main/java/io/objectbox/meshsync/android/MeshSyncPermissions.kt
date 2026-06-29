@@ -35,7 +35,7 @@ import android.os.Build
  */
 class MeshSyncPermissions {
 
-    private val pendingCallbacks = mutableListOf<() -> Unit>()
+    private val pendingCallbacks = mutableListOf<Runnable>()
 
     /**
      * Requests any missing Mesh Sync runtime permissions, then invokes [callback].
@@ -44,10 +44,10 @@ class MeshSyncPermissions {
      * If a permission request is already in flight, [callback] is queued and invoked
      * together with the other pending callbacks once the result arrives.
      */
-    fun requestIfMissing(activity: Activity, callback: () -> Unit) {
+    fun requestIfMissing(activity: Activity, callback: Runnable) {
         val missingPermissions = missingRuntimePermissions(activity)
         if (missingPermissions.isEmpty()) {
-            callback()
+            callback.run()
             return
         }
 
@@ -78,7 +78,7 @@ class MeshSyncPermissions {
 
         val callbacks = pendingCallbacks.toList()
         pendingCallbacks.clear()
-        callbacks.forEach { it() }
+        callbacks.forEach { it.run() }
         return true
     }
 
