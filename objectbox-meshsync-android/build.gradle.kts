@@ -18,10 +18,6 @@ android {
     // API level, see "behavior changes" for each Android version at https://developer.android.com/about/versions
     compileSdk = 35 // Android 15 (Vanilla Ice Cream)
 
-    // Not using Kotlin source code, so prevent the Kotlin standard library from getting added,
-    // avoid Kotlin compiler task run.
-    enableKotlin = false
-
     defaultConfig {
         minSdk = 21 // Android 5.0 (Lollipop), like objectbox-android
 
