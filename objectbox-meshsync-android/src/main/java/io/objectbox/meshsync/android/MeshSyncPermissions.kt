@@ -29,7 +29,7 @@ import io.objectbox.sync.SyncClient
  * Usage:
  *
  * 1. Create an instance in the [Activity] that should be used to request permissions.
- * 2. Override [Activity.onRequestPermissionsResult] and call [retryNetworksIfPermissionsGranted].
+ * 2. Override [Activity.onRequestPermissionsResult] and call [notifyMeshIfPermissionsGranted].
  * 3. Call [requestIfMissing] to show permissions requests to the user.
  *
  * If your app already [requests permissions](https://developer.android.com/training/permissions/requesting)
@@ -66,12 +66,13 @@ class MeshSyncPermissions(
      * Returns `true` if the request code matches, all required permissions are granted and
      * [MeshSync.retryNetworks] was called.
      *
-     * Call this from [Activity.onRequestPermissionsResult] and pass the received [requestCode].
+     * Call this from [Activity.onRequestPermissionsResult] and pass the received [requestCode]
+     * and [SyncClient.getMesh] for [meshSync].
      *
-     * Note: your code can also check itself if all [missingRuntimePermissions] are granted and then
-     * call [MeshSync.retryNetworks] (or create a [SyncClient]) itself.
+     * Alternatively, your code can check itself if all [missingRuntimePermissions] are granted and
+     * then call [MeshSync.retryNetworks] (or create a [SyncClient]) itself.
      */
-    fun retryNetworksIfPermissionsGranted(
+    fun notifyMeshIfPermissionsGranted(
         requestCode: Int,
         meshSync: MeshSync?
     ): Boolean {

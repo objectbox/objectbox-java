@@ -71,53 +71,53 @@ class MeshSyncPermissionsTest {
         )
     }
 
-    private fun assertRetryNetworksIfPermissionsGranted(
+    private fun assertNotifyMeshIfPermissionsGranted(
         requestCode: Int = MeshSyncPermissions.PERMISSIONS_REQUEST_CODE,
         expectedHandled: Boolean,
         expectRetryNetworksCalled: Boolean
     ) {
         val meshSync = mock(MeshSync::class.java)
-        val handled = meshSyncPermissions.retryNetworksIfPermissionsGranted(requestCode, meshSync)
+        val handled = meshSyncPermissions.notifyMeshIfPermissionsGranted(requestCode, meshSync)
         assertEquals(expectedHandled, handled)
         if (expectRetryNetworksCalled) verify(meshSync).retryNetworks()
         else verify(meshSync, never()).retryNetworks()
     }
 
     @Test
-    fun retryNetworksIfPermissionsGranted_allGranted_retryNetworksCalled() {
+    fun notifyMeshIfPermissionsGranted_allGranted_retryNetworksCalled() {
         grantAllPermissions()
 
-        assertRetryNetworksIfPermissionsGranted(
+        assertNotifyMeshIfPermissionsGranted(
             expectedHandled = true,
             expectRetryNetworksCalled = true
         )
     }
 
     @Test
-    fun retryNetworksIfPermissionsGranted_oneGranted_retryNetworksCalled() {
+    fun notifyMeshIfPermissionsGranted_oneGranted_retryNetworksCalled() {
         shadowOf(RuntimeEnvironment.getApplication())
             .grantPermissions(Manifest.permission.NEARBY_WIFI_DEVICES)
 
-        assertRetryNetworksIfPermissionsGranted(
+        assertNotifyMeshIfPermissionsGranted(
             expectedHandled = true,
             expectRetryNetworksCalled = true
         )
     }
 
     @Test
-    fun retryNetworksIfPermissionsGranted_noneGranted_returnsFalse() {
-        assertRetryNetworksIfPermissionsGranted(
+    fun notifyMeshIfPermissionsGranted_noneGranted_returnsFalse() {
+        assertNotifyMeshIfPermissionsGranted(
             expectedHandled = false,
             expectRetryNetworksCalled = false
         )
     }
 
     @Test
-    fun retryNetworksIfPermissionsGranted_wrongCode_returnsFalse() {
+    fun notifyMeshIfPermissionsGranted_wrongCode_returnsFalse() {
         // Not required with the current implementation, but things might change
         grantAllPermissions()
 
-        assertRetryNetworksIfPermissionsGranted(
+        assertNotifyMeshIfPermissionsGranted(
             requestCode = 0x1234,
             expectedHandled = false,
             expectRetryNetworksCalled = false
