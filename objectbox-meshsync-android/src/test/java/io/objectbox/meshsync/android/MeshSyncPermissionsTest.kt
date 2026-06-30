@@ -16,6 +16,7 @@
 
 package io.objectbox.meshsync.android
 
+import android.Manifest
 import android.app.Activity
 import io.objectbox.sync.MeshSync
 import org.junit.Assert.*
@@ -71,7 +72,7 @@ class MeshSyncPermissionsTest {
     }
 
     private fun assertRetryNetworksIfPermissionsGranted(
-        requestCode: Int,
+        requestCode: Int = MeshSyncPermissions.PERMISSIONS_REQUEST_CODE,
         expectedHandled: Boolean,
         expectRetryNetworksCalled: Boolean
     ) {
@@ -83,20 +84,29 @@ class MeshSyncPermissionsTest {
     }
 
     @Test
-    fun retryNetworksIfPermissionsGranted_correctCodeAllGranted_retryNetworksCalled() {
+    fun retryNetworksIfPermissionsGranted_allGranted_retryNetworksCalled() {
         grantAllPermissions()
 
         assertRetryNetworksIfPermissionsGranted(
-            requestCode = MeshSyncPermissions.PERMISSIONS_REQUEST_CODE,
             expectedHandled = true,
             expectRetryNetworksCalled = true
         )
     }
 
     @Test
-    fun retryNetworksIfPermissionsGranted_correctCodeMissingPermissions_returnsFalse() {
+    fun retryNetworksIfPermissionsGranted_oneGranted_retryNetworksCalled() {
+        shadowOf(RuntimeEnvironment.getApplication())
+            .grantPermissions(Manifest.permission.NEARBY_WIFI_DEVICES)
+
         assertRetryNetworksIfPermissionsGranted(
-            requestCode = MeshSyncPermissions.PERMISSIONS_REQUEST_CODE,
+            expectedHandled = true,
+            expectRetryNetworksCalled = true
+        )
+    }
+
+    @Test
+    fun retryNetworksIfPermissionsGranted_noneGranted_returnsFalse() {
+        assertRetryNetworksIfPermissionsGranted(
             expectedHandled = false,
             expectRetryNetworksCalled = false
         )

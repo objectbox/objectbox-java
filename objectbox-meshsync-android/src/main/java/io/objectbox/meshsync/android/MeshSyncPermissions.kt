@@ -78,11 +78,11 @@ class MeshSyncPermissions(
         if (requestCode != PERMISSIONS_REQUEST_CODE) {
             return false // Don't handle other requests
         }
-        if (missingRuntimePermissions().isNotEmpty()) {
-            return false // Required permissions not granted
+        if (missingRuntimePermissions().size == runtimePermissions().size) {
+            return false // None of the requested runtime permissions granted
         }
 
-        // Immediately retry
+        // Immediately retry if any permission was granted
         meshSync?.retryNetworks()
         return true
     }
