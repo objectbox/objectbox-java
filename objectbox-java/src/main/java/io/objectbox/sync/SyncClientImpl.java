@@ -170,6 +170,12 @@ public final class SyncClientImpl implements SyncClient {
             if (config.advertisingDelayMillis != null) {
                 nativeMeshOptAdvertisingDelayMillis(meshOptHandle, config.advertisingDelayMillis);
             }
+            if (config.advertisingRetryMillis != null) {
+                nativeMeshOptAdvertisingRetryMillis(meshOptHandle, config.advertisingRetryMillis);
+            }
+            if (config.advertisingRetryMaxMillis != null) {
+                nativeMeshOptAdvertisingRetryMaxMillis(meshOptHandle, config.advertisingRetryMaxMillis);
+            }
             if (config.connectDelayMillis != null) {
                 nativeMeshOptConnectDelayMillis(meshOptHandle, config.connectDelayMillis);
             }
@@ -572,6 +578,10 @@ public final class SyncClientImpl implements SyncClient {
     private static native void nativeMeshOptRequestTimeoutMillis(long meshOptHandle, int millis);
 
     private static native void nativeMeshOptAdvertisingDelayMillis(long meshOptHandle, int millis);
+
+    private static native void nativeMeshOptAdvertisingRetryMillis(long meshOptHandle, int millis);
+
+    private static native void nativeMeshOptAdvertisingRetryMaxMillis(long meshOptHandle, int millis);
 
     private static native void nativeMeshOptConnectDelayMillis(long meshOptHandle, int millis);
 

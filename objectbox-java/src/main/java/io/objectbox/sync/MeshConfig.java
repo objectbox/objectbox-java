@@ -49,6 +49,8 @@ public final class MeshConfig {
     @Nullable Integer evictionBackoffMillis;
     @Nullable Integer requestTimeoutMillis;
     @Nullable Integer advertisingDelayMillis;
+    @Nullable Integer advertisingRetryMillis;
+    @Nullable Integer advertisingRetryMaxMillis;
     @Nullable Integer connectDelayMillis;
     @Nullable Integer initialDiscoveryDurationSeconds;
     @Nullable Integer discoveryDurationSeconds;
@@ -125,6 +127,29 @@ public final class MeshConfig {
      */
     public MeshConfig advertisingDelayMillis(int advertisingDelayMillis) {
         this.advertisingDelayMillis = advertisingDelayMillis;
+        return this;
+    }
+
+    /**
+     * Base delay in milliseconds before retrying advertising after a network failed to start it
+     * (default: 5000).
+     * <p>
+     * A network may fail to start advertising (e.g. missing permissions); advertising is then
+     * retried with exponential backoff (doubling up to {@link #advertisingRetryMaxMillis(int)}),
+     * because the required permissions may be granted later at runtime. Must be positive.
+     */
+    public MeshConfig advertisingRetryMillis(int advertisingRetryMillis) {
+        this.advertisingRetryMillis = advertisingRetryMillis;
+        return this;
+    }
+
+    /**
+     * Upper bound in milliseconds for the advertising retry backoff (default: 60000).
+     * <p>
+     * Must be greater than or equal to {@link #advertisingRetryMillis(int)}.
+     */
+    public MeshConfig advertisingRetryMaxMillis(int advertisingRetryMaxMillis) {
+        this.advertisingRetryMaxMillis = advertisingRetryMaxMillis;
         return this;
     }
 

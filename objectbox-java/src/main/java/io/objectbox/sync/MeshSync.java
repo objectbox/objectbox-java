@@ -82,6 +82,18 @@ public final class MeshSync {
     }
 
     /**
+     * Requests an immediate retry of the network radios: advertising (bypassing the current retry
+     * backoff) and discovery (restarting the current phase).
+     * <p>
+     * Call this when conditions that may have prevented the radios from starting have changed, e.g.
+     * the user just granted the required permissions. Thread-safe; the actual retry happens on the
+     * mesh sync thread shortly after.
+     */
+    public void retryNetworks() {
+        nativeRetryNetworks(getHandle());
+    }
+
+    /**
      * Returns the current {@link MeshState} value.
      */
     private static native int nativeGetState(long handle);
@@ -89,6 +101,8 @@ public final class MeshSync {
     private static native String nativeGetStateString(long handle);
 
     private static native long nativeGetConnectedPeerCount(long handle);
+
+    private static native void nativeRetryNetworks(long handle);
 
     /**
      * @param counterType One of the {@link MeshStats} IDs.
