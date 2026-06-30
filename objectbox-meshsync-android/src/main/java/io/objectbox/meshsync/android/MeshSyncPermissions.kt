@@ -20,39 +20,39 @@ import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
+import io.objectbox.sync.MeshSync
+import io.objectbox.sync.SyncClient
 
 /**
- * Handles requesting Android runtime permissions required for Mesh Sync.
+ * Helps to request Android runtime permissions required for Mesh Sync.
  *
  * Usage:
- * 1. Create an instance and keep it for the lifetime of the Activity.
- * 2. Call [requestIfMissing] with the Activity and a callback to run once permissions are handled.
- * 3. Forward [Activity.onRequestPermissionsResult] results to [onRequestPermissionsResult].
+ *
+ * 1. Create an instance in the [Activity] that should be used to request permissions.
+ * 2. Override [Activity.onRequestPermissionsResult] and call [retryNetworksIfPermissionsGranted].
+ * 3. Call [requestIfMissing] to show permissions requests to the user.
  *
  * If your app already [requests permissions](https://developer.android.com/training/permissions/requesting)
  * for other purposes, it might want to use [missingRuntimePermissions] or [runtimePermissions]
  * instead.
  */
-class MeshSyncPermissions {
-
-    private val pendingCallbacks = mutableListOf<Runnable>()
+class MeshSyncPermissions(
+    private val activity: Activity
+) {
 
     /**
-     * Requests any missing Mesh Sync runtime permissions, then invokes [callback].
+     * Requests any missing runtime permissions for Mesh Sync using the request code
+     * [PERMISSIONS_REQUEST_CODE].
      *
-     * If all permissions are already granted, [callback] is invoked immediately.
-     * If a permission request is already in flight, [callback] is queued and invoked
-     * together with the other pending callbacks once the result arrives.
+     * Note: before calling this, your code might want to check [Activity.shouldShowRequestPermissionRationale]
+     * if a rationale UI should be shown first. See how to
+     * [request permissions](https://developer.android.com/training/permissions/requesting).
      */
-    fun requestIfMissing(activity: Activity, callback: Runnable) {
-        val missingPermissions = missingRuntimePermissions(activity)
+    fun requestIfMissing() {
+        val missingPermissions = missingRuntimePermissions()
         if (missingPermissions.isEmpty()) {
-            callback.run()
             return
         }
-
-        pendingCallbacks += callback
-        if (pendingCallbacks.size > 1) return
 
         // Before M, missingRuntimePermissions above would return an empty list
         // and avoid calling this. But guard additionally for safety and to
@@ -63,29 +63,34 @@ class MeshSyncPermissions {
     }
 
     /**
-     * Forward the result of [Activity.onRequestPermissionsResult] to this method.
+     * Returns `true` if the request code matches, all required permissions are granted and
+     * [MeshSync.retryNetworks] was called.
      *
-     * Returns `true` if the request code matches and callbacks were triggered.
+     * Call this from [Activity.onRequestPermissionsResult] and pass the received [requestCode].
      *
-     * Note: this doesn't check if permissions were granted or if a rationale should be shown.
+     * Note: your code can also check itself if all [missingRuntimePermissions] are granted and then
+     * call [MeshSync.retryNetworks] (or create a [SyncClient]) itself.
      */
-    fun onRequestPermissionsResult(
+    fun retryNetworksIfPermissionsGranted(
         requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+        meshSync: MeshSync?
     ): Boolean {
-        if (requestCode != PERMISSIONS_REQUEST_CODE) return false
+        if (requestCode != PERMISSIONS_REQUEST_CODE) {
+            return false // Don't handle other requests
+        }
+        if (missingRuntimePermissions().isNotEmpty()) {
+            return false // Required permissions not granted
+        }
 
-        val callbacks = pendingCallbacks.toList()
-        pendingCallbacks.clear()
-        callbacks.forEach { it.run() }
+        // Immediately retry
+        meshSync?.retryNetworks()
         return true
     }
 
     /**
      * Returns the list of Mesh Sync runtime permissions that have not yet been granted.
      */
-    fun missingRuntimePermissions(activity: Activity): List<String> {
+    fun missingRuntimePermissions(): List<String> {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return emptyList() // No runtime permissions before API 23
         }
@@ -94,28 +99,27 @@ class MeshSyncPermissions {
             .filter { activity.checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
     }
 
-    /**
-     * Returns the full list of runtime permissions required for Mesh Sync on the current device.
-     */
-    fun runtimePermissions(): List<String> {
-        val permissions = mutableListOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        )
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            permissions += Manifest.permission.BLUETOOTH_ADVERTISE
-            permissions += Manifest.permission.BLUETOOTH_CONNECT
-            permissions += Manifest.permission.BLUETOOTH_SCAN
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissions += Manifest.permission.NEARBY_WIFI_DEVICES
-        }
-        return permissions
-    }
-
     companion object {
         /** Request code used when calling [Activity.requestPermissions]. */
         const val PERMISSIONS_REQUEST_CODE = 0x0B09
+
+        /**
+         * Returns the full list of runtime permissions required for Mesh Sync on the current device.
+         */
+        fun runtimePermissions(): List<String> {
+            val permissions = mutableListOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                permissions += Manifest.permission.BLUETOOTH_ADVERTISE
+                permissions += Manifest.permission.BLUETOOTH_CONNECT
+                permissions += Manifest.permission.BLUETOOTH_SCAN
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissions += Manifest.permission.NEARBY_WIFI_DEVICES
+            }
+            return permissions
+        }
     }
 }

@@ -108,6 +108,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.robolectric)
+    testImplementation(libs.mockito.kotlin)
     testImplementation("io.objectbox:objectbox-linux:${versionDatabaseLibraryJvm}")
     testImplementation("io.objectbox:objectbox-macos:${versionDatabaseLibraryJvm}")
     testImplementation("io.objectbox:objectbox-windows:${versionDatabaseLibraryJvm}")

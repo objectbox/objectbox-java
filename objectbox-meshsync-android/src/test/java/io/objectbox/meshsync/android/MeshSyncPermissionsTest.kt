@@ -17,10 +17,12 @@
 package io.objectbox.meshsync.android
 
 import android.app.Activity
+import io.objectbox.sync.MeshSync
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.*
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -35,37 +37,29 @@ class MeshSyncPermissionsTest {
     @Before
     fun setUp() {
         activity = Robolectric.buildActivity(Activity::class.java).create().get()
-        meshSyncPermissions = MeshSyncPermissions()
+        meshSyncPermissions = MeshSyncPermissions(activity)
+    }
+
+    private fun grantAllPermissions() {
+        shadowOf(RuntimeEnvironment.getApplication())
+            .grantPermissions(*MeshSyncPermissions.runtimePermissions().toTypedArray())
     }
 
     @Test
-    fun requestIfMissing_allGranted_callbackInvokedImmediately() {
-        shadowOf(RuntimeEnvironment.getApplication())
-            .grantPermissions(*meshSyncPermissions.runtimePermissions().toTypedArray())
+    fun requestIfMissing_allGranted_permissionsNotRequested() {
+        grantAllPermissions()
 
-        var callbackInvoked = false
-        meshSyncPermissions.requestIfMissing(activity) { callbackInvoked = true }
+        meshSyncPermissions.requestIfMissing()
 
-        assertTrue(
-            "Callback should be invoked immediately when all permissions are granted",
-            callbackInvoked
-        )
         assertNull(
-            "requestPermissions should not have been called",
+            "requestPermissions should not have been called when all permissions are granted",
             shadowOf(activity).lastRequestedPermission
         )
     }
 
     @Test
-    fun requestIfMissing_missing_requestedAndCallbacksInvokedOnResult() {
-        var callback1Invoked = false
-        var callback2Invoked = false
-        meshSyncPermissions.requestIfMissing(activity) { callback1Invoked = true }
-        meshSyncPermissions.requestIfMissing(activity) { callback2Invoked = true }
-
-        // Neither callback should fire until signaling permission result
-        assertFalse(callback1Invoked)
-        assertFalse(callback2Invoked)
+    fun requestIfMissing_missing_requestsPermissions() {
+        meshSyncPermissions.requestIfMissing()
 
         val lastRequest = shadowOf(activity).lastRequestedPermission
         assertNotNull("requestPermissions should have been called on the Activity", lastRequest)
@@ -74,29 +68,50 @@ class MeshSyncPermissionsTest {
             MeshSyncPermissions.PERMISSIONS_REQUEST_CODE,
             lastRequest!!.requestCode
         )
+    }
 
-        // Signal permission result
-        val handled = meshSyncPermissions.onRequestPermissionsResult(
-            MeshSyncPermissions.PERMISSIONS_REQUEST_CODE,
-            emptyArray(),
-            intArrayOf()
-        )
-
-        assertTrue(handled)
-        assertTrue("First callback should be invoked", callback1Invoked)
-        assertTrue("Second callback should be invoked", callback2Invoked)
+    private fun assertRetryNetworksIfPermissionsGranted(
+        requestCode: Int,
+        expectedHandled: Boolean,
+        expectRetryNetworksCalled: Boolean
+    ) {
+        val meshSync = mock(MeshSync::class.java)
+        val handled = meshSyncPermissions.retryNetworksIfPermissionsGranted(requestCode, meshSync)
+        assertEquals(expectedHandled, handled)
+        if (expectRetryNetworksCalled) verify(meshSync).retryNetworks()
+        else verify(meshSync, never()).retryNetworks()
     }
 
     @Test
-    fun onRequestPermissionsResult_wrongRequestCode_callbacksNotInvoked() {
-        var callbackInvoked = false
-        meshSyncPermissions.requestIfMissing(activity) { callbackInvoked = true }
+    fun retryNetworksIfPermissionsGranted_correctCodeAllGranted_retryNetworksCalled() {
+        grantAllPermissions()
 
-        val handled =
-            meshSyncPermissions.onRequestPermissionsResult(0x1234, emptyArray(), intArrayOf())
-
-        assertFalse(handled)
-        assertFalse(callbackInvoked)
+        assertRetryNetworksIfPermissionsGranted(
+            requestCode = MeshSyncPermissions.PERMISSIONS_REQUEST_CODE,
+            expectedHandled = true,
+            expectRetryNetworksCalled = true
+        )
     }
-}
 
+    @Test
+    fun retryNetworksIfPermissionsGranted_correctCodeMissingPermissions_returnsFalse() {
+        assertRetryNetworksIfPermissionsGranted(
+            requestCode = MeshSyncPermissions.PERMISSIONS_REQUEST_CODE,
+            expectedHandled = false,
+            expectRetryNetworksCalled = false
+        )
+    }
+
+    @Test
+    fun retryNetworksIfPermissionsGranted_wrongCode_returnsFalse() {
+        // Not required with the current implementation, but things might change
+        grantAllPermissions()
+
+        assertRetryNetworksIfPermissionsGranted(
+            requestCode = 0x1234,
+            expectedHandled = false,
+            expectRetryNetworksCalled = false
+        )
+    }
+
+}
