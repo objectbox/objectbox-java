@@ -164,9 +164,6 @@ public final class SyncClientImpl implements SyncClient {
             if (config.evictionBackoffMillis != null) {
                 nativeMeshOptEvictionBackoffMillis(meshOptHandle, config.evictionBackoffMillis);
             }
-            if (config.randomSeed != null) {
-                nativeMeshOptRandomSeed(meshOptHandle, config.randomSeed);
-            }
             if (config.requestTimeoutMillis != null) {
                 nativeMeshOptRequestTimeoutMillis(meshOptHandle, config.requestTimeoutMillis);
             }
@@ -571,8 +568,6 @@ public final class SyncClientImpl implements SyncClient {
     private static native void nativeMeshOptBackoffMillis(long meshOptHandle, int millis);
 
     private static native void nativeMeshOptEvictionBackoffMillis(long meshOptHandle, int millis);
-
-    private static native void nativeMeshOptRandomSeed(long meshOptHandle, long seed);
 
     private static native void nativeMeshOptRequestTimeoutMillis(long meshOptHandle, int millis);
 

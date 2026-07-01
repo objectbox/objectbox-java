@@ -40,7 +40,6 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
                 .maxConnectionCount(4)
                 .backoffMillis(5000)
                 .evictionBackoffMillis(20000)
-                .randomSeed(42)
                 .requestTimeoutMillis(3000)
                 .advertisingDelayMillis(1000)
                 .connectDelayMillis(500)
@@ -56,7 +55,6 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
         assertEquals(Integer.valueOf(4), config.maxConnectionCount);
         assertEquals(Integer.valueOf(5000), config.backoffMillis);
         assertEquals(Integer.valueOf(20000), config.evictionBackoffMillis);
-        assertEquals(Long.valueOf(42), config.randomSeed);
         assertEquals(Integer.valueOf(3000), config.requestTimeoutMillis);
         assertEquals(Integer.valueOf(1000), config.advertisingDelayMillis);
         assertEquals(Integer.valueOf(500), config.connectDelayMillis);
@@ -78,7 +76,6 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
         assertNull(config.maxConnectionCount);
         assertNull(config.backoffMillis);
         assertNull(config.evictionBackoffMillis);
-        assertNull(config.randomSeed);
         assertNull(config.requestTimeoutMillis);
         assertNull(config.advertisingDelayMillis);
         assertNull(config.connectDelayMillis);

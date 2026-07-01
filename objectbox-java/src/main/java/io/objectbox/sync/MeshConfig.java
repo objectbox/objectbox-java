@@ -47,7 +47,6 @@ public final class MeshConfig {
     @Nullable Integer maxConnectionCount;
     @Nullable Integer backoffMillis;
     @Nullable Integer evictionBackoffMillis;
-    @Nullable Long randomSeed;
     @Nullable Integer requestTimeoutMillis;
     @Nullable Integer advertisingDelayMillis;
     @Nullable Integer connectDelayMillis;
@@ -107,14 +106,6 @@ public final class MeshConfig {
      */
     public MeshConfig evictionBackoffMillis(int evictionBackoffMillis) {
         this.evictionBackoffMillis = evictionBackoffMillis;
-        return this;
-    }
-
-    /**
-     * Seed for the random engine; 0 means use the current time (default: 0).
-     */
-    public MeshConfig randomSeed(long randomSeed) {
-        this.randomSeed = randomSeed;
         return this;
     }
 
