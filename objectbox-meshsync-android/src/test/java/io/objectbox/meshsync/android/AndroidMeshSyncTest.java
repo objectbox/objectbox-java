@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,17 @@ import org.robolectric.RobolectricTestRunner;
 
 import io.objectbox.exception.FeatureNotAvailableException;
 
+
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
 /**
- * Tests run on the JVM using Robolectric against the JVM native library (which does not include Sync).
+ * Tests run on the JVM using Robolectric against the JVM native library (which does not include
+ * Sync).
  * <p>
- * Tests requiring the Sync feature and the Nearby Connections API run as instrumented tests against the
- * Android native library (currently in the internal repository).
+ * Tests requiring the Sync feature and the Nearby Connections API run as instrumented tests against
+ * the Android native library (currently in the internal repository).
  */
 @RunWith(RobolectricTestRunner.class)
 public class AndroidMeshSyncTest {

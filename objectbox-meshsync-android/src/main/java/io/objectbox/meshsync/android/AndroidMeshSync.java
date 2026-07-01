@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,11 @@ import io.objectbox.sync.SyncClient;
 
 /**
  * Peer-to-peer mesh sync for Android using
- * <a href="https://developers.google.com/nearby/connections/overview">Google Nearby Connections</a>.
+ * <a href="https://developers.google.com/nearby/connections/overview">Google Nearby
+ * Connections</a>.
  * <p>
- * Use {@link #createConfig(Context, String)} to create a {@link MeshConfig} with the Android mesh network attached,
- * then pass it to {@link SyncBuilder#mesh(MeshConfig)}:
+ * Use {@link #createConfig(Context, String)} to create a {@link MeshConfig} with the Android mesh
+ * network attached, then pass it to {@link SyncBuilder#mesh(MeshConfig)}:
  *
  * <pre>
  * MeshConfig meshConfig = AndroidMeshSync.createConfig(context, "com.myapp.mesh");
@@ -43,8 +44,9 @@ import io.objectbox.sync.SyncClient;
  *         .mesh(meshConfig)
  *         .buildAndStart();
  * </pre>
- *
- * The mesh starts and stops together with the sync client; query the running mesh via {@link SyncClient#getMesh()}.
+ * <p>
+ * The mesh starts and stops together with the sync client; query the running mesh via
+ * {@link SyncClient#getMesh()}.
  * <p>
  * Requirements:
  * <ul>
@@ -59,16 +61,19 @@ import io.objectbox.sync.SyncClient;
 public final class AndroidMeshSync {
 
     /**
-     * Creates a mesh sync configuration with an Android (Nearby Connections) mesh network attached.
+     * Creates a mesh sync configuration with an Android (Nearby Connections) mesh network
+     * attached.
      * <p>
-     * Configure optional settings on the returned {@link MeshConfig} (chainable setters), then pass it to
-     * {@link SyncBuilder#mesh(MeshConfig)}. See the {@link AndroidMeshSync class documentation} for an example.
+     * Configure optional settings on the returned {@link MeshConfig} (chainable setters), then pass
+     * it to {@link SyncBuilder#mesh(MeshConfig)}. See the
+     * {@link AndroidMeshSync class documentation} for an example.
      *
      * @param context Android context (the application context is used internally).
-     * @param meshId The mesh network identifier; nodes with different IDs ignore each other. Also used as the
-     * Nearby Connections service ID, so it should be unique to your application, for example based on your
-     * application ID (like {@code "com.myapp.mesh"}).
-     * @return a {@link MeshConfig} to optionally configure further and pass to {@link SyncBuilder#mesh(MeshConfig)}.
+     * @param meshId The mesh network identifier; nodes with different IDs ignore each other. Also
+     * used as the Nearby Connections service ID, so it should be unique to your application, for
+     * example based on your application ID (like {@code "com.myapp.mesh"}).
+     * @return a {@link MeshConfig} to optionally configure further and pass to
+     * {@link SyncBuilder#mesh(MeshConfig)}.
      */
     public static MeshConfig createConfig(Context context, String meshId) {
         if (context == null) {

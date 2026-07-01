@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,19 @@ import io.objectbox.annotation.apihint.Experimental;
 /**
  * Configuration of a peer-to-peer mesh sync.
  * <p>
- * A mesh sync enables peer-to-peer (P2P) synchronization between sync clients without a central server. Pass an
- * instance to {@link SyncBuilder#mesh(MeshConfig)} to attach a mesh sync to the client; it starts and stops together
- * with the client. Query the running mesh via {@link SyncClient#getMesh()}.
+ * A mesh sync enables peer-to-peer (P2P) synchronization between sync clients without a central
+ * server. Pass an instance to {@link SyncBuilder#mesh(MeshConfig)} to attach a mesh sync to the
+ * client; it starts and stops together with the client. Query the running mesh via
+ * {@link SyncClient#getMesh()}.
  * <p>
- * A mesh requires at least one platform-specific network (transport); networks are registered by ObjectBox platform
- * libraries (e.g. for Android), which also create this configuration. Thus, this class can not be created directly;
- * see the documentation of the platform library for how to obtain a mesh configuration.
+ * A mesh requires at least one platform-specific network (transport); networks are registered by
+ * ObjectBox platform libraries (e.g. for Android), which also create this configuration. Thus, this
+ * class can not be created directly; see the documentation of the platform library for how to
+ * obtain a mesh configuration.
  * <p>
- * Only the mesh ID is required; all other values are optional and fall back to the defaults of the ObjectBox native
- * library when not set. The values are read once when the sync client is created, which is also when the native
- * library validates them.
+ * Only the mesh ID is required; all other values are optional and fall back to the defaults of the
+ * ObjectBox native library when not set. The values are read once when the sync client is created,
+ * which is also when the native library validates them.
  */
 @Experimental
 public final class MeshConfig {
@@ -65,7 +67,8 @@ public final class MeshConfig {
     /**
      * Use {@link InternalSyncAccess#createMeshConfig(String)} instead.
      *
-     * @param meshId The mesh network identifier (required); nodes with different IDs ignore each other.
+     * @param meshId The mesh network identifier (required); nodes with different IDs ignore each
+     * other.
      */
     MeshConfig(String meshId) {
         if (meshId == null || meshId.isEmpty()) {
@@ -77,10 +80,10 @@ public final class MeshConfig {
     /**
      * Max number of simultaneous connections a peer can have to other peers (default: 3).
      * <p>
-     * The default of 3 already provides mesh resilience through alternative paths. 4 may give better fault
-     * tolerance, but at the cost of more radio activity. Values above 4 are not recommended. 2 is typically not
-     * recommended unless you run into severe radio limitations. 1 would be a rare special case if you only want to
-     * create pairs, not a mesh.
+     * The default of 3 already provides mesh resilience through alternative paths. 4 may give
+     * better fault tolerance, but at the cost of more radio activity. Values above 4 are not
+     * recommended. 2 is typically not recommended unless you run into severe radio limitations. 1
+     * would be a rare special case if you only want to create pairs, not a mesh.
      */
     public MeshConfig maxConnectionCount(int maxConnectionCount) {
         this.maxConnectionCount = maxConnectionCount;
@@ -98,8 +101,8 @@ public final class MeshConfig {
     /**
      * Backoff time in milliseconds between peer evictions (default: 30000).
      * <p>
-     * When an incoming peer has 0 connections but we are full, we evict one existing peer to make room. This
-     * backoff prevents frequent evictions.
+     * When an incoming peer has 0 connections but we are full, we evict one existing peer to make
+     * room. This backoff prevents frequent evictions.
      */
     public MeshConfig evictionBackoffMillis(int evictionBackoffMillis) {
         this.evictionBackoffMillis = evictionBackoffMillis;
@@ -115,7 +118,8 @@ public final class MeshConfig {
     }
 
     /**
-     * Timeout in milliseconds for a TX request from a peer before retrying from another (default: 5000).
+     * Timeout in milliseconds for a TX request from a peer before retrying from another (default:
+     * 5000).
      */
     public MeshConfig requestTimeoutMillis(int requestTimeoutMillis) {
         this.requestTimeoutMillis = requestTimeoutMillis;
@@ -141,7 +145,8 @@ public final class MeshConfig {
     }
 
     /**
-     * Duration in seconds of the initial discovery phase (default: 30; 0 means never stop by time).
+     * Duration in seconds of the initial discovery phase (default: 30; 0 means never stop by
+     * time).
      */
     public MeshConfig initialDiscoveryDurationSeconds(int initialDiscoveryDurationSeconds) {
         this.initialDiscoveryDurationSeconds = initialDiscoveryDurationSeconds;
@@ -149,7 +154,8 @@ public final class MeshConfig {
     }
 
     /**
-     * Duration in seconds of a standard (non-initial) discovery phase (default: 15; 0 means never stop by time).
+     * Duration in seconds of a standard (non-initial) discovery phase (default: 15; 0 means never
+     * stop by time).
      */
     public MeshConfig discoveryDurationSeconds(int discoveryDurationSeconds) {
         this.discoveryDurationSeconds = discoveryDurationSeconds;
@@ -165,8 +171,8 @@ public final class MeshConfig {
     }
 
     /**
-     * Random +/- jitter in seconds applied to the discovery pause (default: 15; must be &lt;= pause).
-     * 0 disables jitter.
+     * Random +/- jitter in seconds applied to the discovery pause (default: 15; must be &lt;=
+     * pause). 0 disables jitter.
      */
     public MeshConfig discoveryPauseJitterSeconds(int discoveryPauseJitterSeconds) {
         this.discoveryPauseJitterSeconds = discoveryPauseJitterSeconds;
@@ -174,7 +180,8 @@ public final class MeshConfig {
     }
 
     /**
-     * Soft cap in KB for the total TX log payload batched into a single TxLogData message (default: 100).
+     * Soft cap in KB for the total TX log payload batched into a single TxLogData message (default:
+     * 100).
      */
     public MeshConfig txLogBatchSizeKb(int txLogBatchSizeKb) {
         this.txLogBatchSizeKb = txLogBatchSizeKb;
@@ -182,8 +189,8 @@ public final class MeshConfig {
     }
 
     /**
-     * Max number of TX logs to batch into a single TxLogData message (default: 1000).
-     * Must be in the range (0, 100000].
+     * Max number of TX logs to batch into a single TxLogData message (default: 1000). Must be in
+     * the range (0, 100000].
      */
     public MeshConfig txLogBatchMaxCount(int txLogBatchMaxCount) {
         this.txLogBatchMaxCount = txLogBatchMaxCount;

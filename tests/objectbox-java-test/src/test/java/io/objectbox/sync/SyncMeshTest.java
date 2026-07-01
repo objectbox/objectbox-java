@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.junit.Test;
 
 import io.objectbox.AbstractObjectBoxTest;
 
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -30,9 +31,9 @@ import static org.junit.Assume.assumeTrue;
 /**
  * Tests the peer-to-peer mesh sync API.
  * <p>
- * Tests that require the Sync feature are skipped when the native library does not include it
- * (like the one tests run against by default). They are mirrored in objectbox-integration-test
- * sync tests, where Sync is available.
+ * Tests that require the Sync feature are skipped when the native library does not include it (like
+ * the one tests run against by default). They are mirrored in objectbox-integration-test sync
+ * tests, where Sync is available.
  */
 public class SyncMeshTest extends AbstractObjectBoxTest {
 
