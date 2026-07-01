@@ -93,7 +93,7 @@ public final class SyncClientImpl implements SyncClient {
 
             // Attach a mesh sync configuration if set
             if (builder.meshConfig != null) {
-                applyMeshConfig(optHandle, (MeshConfigImpl) builder.meshConfig);
+                applyMeshConfig(optHandle, builder.meshConfig);
             }
         } catch (Exception e) {
             // Free the options if any option method call failed (like due to invalid arguments)
@@ -149,7 +149,7 @@ public final class SyncClientImpl implements SyncClient {
      * Only options with a value are passed to the native API, so the native defaults stay authoritative.
      * The native library validates the configuration when the sync client is created.
      */
-    private static void applyMeshConfig(long syncOptHandle, MeshConfigImpl config) {
+    private static void applyMeshConfig(long syncOptHandle, MeshConfig config) {
         long meshOptHandle = nativeMeshOptCreate(config.meshId);
         if (meshOptHandle == 0) {
             throw new RuntimeException("Failed to create mesh options: handle is zero.");

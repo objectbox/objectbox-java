@@ -36,10 +36,11 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
 
     @Test
     public void meshConfig_setsAllValues() {
-        MeshConfig configPublic = InternalSyncAccess.createMeshConfig(TEST_MESH_ID)
+        MeshConfig config = InternalSyncAccess.createMeshConfig(TEST_MESH_ID)
                 .maxConnectionCount(4)
                 .backoffMillis(5000)
                 .evictionBackoffMillis(20000)
+                .randomSeed(42)
                 .requestTimeoutMillis(3000)
                 .advertisingDelayMillis(1000)
                 .connectDelayMillis(500)
@@ -49,8 +50,6 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
                 .discoveryPauseJitterSeconds(10)
                 .txLogBatchSizeKb(50)
                 .txLogBatchMaxCount(500);
-        MeshConfigImpl config = (MeshConfigImpl) configPublic;
-        config.randomSeed(42);
         InternalSyncAccess.addNetworkInternalHandle(config, 12345);
 
         assertEquals(TEST_MESH_ID, config.meshId);
@@ -73,7 +72,7 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
 
     @Test
     public void meshConfig_defaultsToNoValues() {
-        MeshConfigImpl config = InternalSyncAccess.createMeshConfig(TEST_MESH_ID);
+        MeshConfig config = InternalSyncAccess.createMeshConfig(TEST_MESH_ID);
 
         assertEquals(TEST_MESH_ID, config.meshId);
         assertNull(config.maxConnectionCount);
