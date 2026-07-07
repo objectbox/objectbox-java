@@ -32,6 +32,29 @@ import io.objectbox.sync.SyncClient
  * 2. Override [Activity.onRequestPermissionsResult] and call [notifyMeshIfPermissionsGranted].
  * 3. Call [requestIfMissing] to show permission requests to the user.
  *
+ * ```
+ * class ExampleSetupActivity : Activity() {
+ *
+ *     private val meshSyncPermissions = MeshSyncPermissions(this)
+ *
+ *     override fun onRequestPermissionsResult(
+ *         requestCode: Int,
+ *         permissions: Array<out String>,
+ *         grantResults: IntArray
+ *     ) {
+ *         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+ *         meshSyncPermissions.notifyMeshIfPermissionsGranted(
+ *             requestCode,
+ *             syncClient.mesh
+ *         )
+ *     }
+ *
+ *     fun onRequestPermissionsButtonClick() {
+ *         meshSyncPermissions.requestIfMissing()
+ *     }
+ * }
+ * ```
+ *
  * If your app already [requests permissions](https://developer.android.com/training/permissions/requesting)
  * for other purposes, it might want to use [missingRuntimePermissions] or [runtimePermissions]
  * instead.

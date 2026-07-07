@@ -35,7 +35,8 @@ in your app's manifest, for example:
 ```
 
 Also note that your app must [request any dangerous (runtime) permissions](https://developer.android.com/training/permissions/requesting) 
-at runtime when needed.
+at runtime when needed. This library provides a [MeshSyncPermissions](src/main/java/io/objectbox/meshsync/android/MeshSyncPermissions.kt)
+helper class to request the permissions included by default.
 
 ## Usage
 
