@@ -12,11 +12,32 @@ What this library provides:
 
 - `AndroidMeshSync.createConfig(context, meshId)` creating a `MeshConfig` (see `objectbox-java`) with the
   Nearby Connections mesh network attached, to pass to `SyncBuilder.mesh()`.
-- The permissions required by Nearby Connections, merged into the app manifest
-  (see `src/main/AndroidManifest.xml`). Apps must still request the dangerous (runtime) permissions.
+- The permissions that may be required by Nearby Connections, merged into the app manifest 
+  (see [AndroidManifest.xml](src/main/AndroidManifest.xml)).
 - The `play-services-nearby` dependency.
 
-Usage:
+## Permissions
+
+Note that not all permissions this library adds may be required. Depending on a device's Android SDK
+version and your app's needs, only some of them may actually be necessary. For example, location 
+permissions are typically not required for Nearby Connections on recent Android releases.
+
+To remove them as needed, use [merge rule markers](https://developer.android.com/build/manage-manifests) 
+in your app's manifest, for example:
+
+```xml
+<uses-permission
+    android:name="android.permission.ACCESS_COARSE_LOCATION"
+    tools:node="remove" />
+<uses-permission
+    android:name="android.permission.ACCESS_FINE_LOCATION"
+    tools:node="remove" />
+```
+
+Also note that your app must [request any dangerous (runtime) permissions](https://developer.android.com/training/permissions/requesting) 
+at runtime when needed.
+
+## Usage
 
 ```java
 MeshConfig meshConfig = AndroidMeshSync.createConfig(context, "com.myapp.mesh");

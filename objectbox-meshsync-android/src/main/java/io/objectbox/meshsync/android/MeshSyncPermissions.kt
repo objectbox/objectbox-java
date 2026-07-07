@@ -24,17 +24,22 @@ import io.objectbox.sync.MeshSync
 import io.objectbox.sync.SyncClient
 
 /**
- * Helps to request Android runtime permissions required for Mesh Sync.
+ * Helps to request Android runtime permissions for Mesh Sync.
  *
  * Usage:
  *
  * 1. Create an instance in the [Activity] that should be used to request permissions.
  * 2. Override [Activity.onRequestPermissionsResult] and call [notifyMeshIfPermissionsGranted].
- * 3. Call [requestIfMissing] to show permissions requests to the user.
+ * 3. Call [requestIfMissing] to show permission requests to the user.
  *
  * If your app already [requests permissions](https://developer.android.com/training/permissions/requesting)
  * for other purposes, it might want to use [missingRuntimePermissions] or [runtimePermissions]
  * instead.
+ *
+ * Note that not all permissions this requests (as returned by [runtimePermissions] and declared in
+ * the included manifest) may be required. Depending on a device's Android SDK version and your
+ * app's needs, only some of them may actually be necessary. For example, location permissions are
+ * typically not required for Nearby Connections on recent Android releases.
  */
 class MeshSyncPermissions(
     private val activity: Activity
@@ -105,7 +110,10 @@ class MeshSyncPermissions(
         const val PERMISSIONS_REQUEST_CODE = 0x0B09
 
         /**
-         * Returns the full list of runtime permissions required for Mesh Sync on the current device.
+         * Returns dangerous (runtime) permissions that may be required for Mesh Sync on the current
+         * device, depending on its Android SDK version.
+         *
+         * See [MeshSyncPermissions] for additional notes on permissions.
          */
         fun runtimePermissions(): List<String> {
             val permissions = mutableListOf(
