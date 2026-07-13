@@ -95,6 +95,9 @@ dependencies {
     // Use "implementation" to add the Nearby Connections library as a "runtime" dependency in the
     // POM for consumers (it is required at runtime), but not expose any of its types via this
     // library's API.
+    // Note: this library doesn't use Nearby APIs, but the Android database library it depends on
+    // does. Its artifact doesn't add the Nearby dependency as it's also used if not using mesh
+    // sync.
     implementation(libs.play.services.nearby)
 
     // Use "implementation" to add the Android database library as a "runtime" dependency in the
