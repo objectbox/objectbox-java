@@ -26,8 +26,8 @@ import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Experimental;
+import io.objectbox.internal.NativeLibraryUtils;
 import io.objectbox.sync.internal.Platform;
-import io.objectbox.sync.internal.SyncUtils;
 import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.listener.SyncCompletedListener;
 import io.objectbox.sync.listener.SyncConnectionListener;
@@ -99,7 +99,7 @@ public final class SyncBuilder {
     SyncBuilder(BoxStore boxStore) {
         checkNotNull(boxStore, "boxStore");
         this.boxStore = boxStore;
-        SyncUtils.checkSyncFeatureAvailable();
+        NativeLibraryUtils.checkHasFeature();
         this.platform = Platform.findPlatform(); // Requires APIs only present in Android Sync library
     }
 

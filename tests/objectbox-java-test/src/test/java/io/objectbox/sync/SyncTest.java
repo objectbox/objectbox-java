@@ -68,8 +68,8 @@ public class SyncTest extends AbstractObjectBoxTest {
                 () -> Sync.server(store, TEST_SERVER_URL, SyncCredentials.none())
         );
         String message = exception.getMessage();
-        assertTrue(message, message.contains("does not include ObjectBox Sync Server") &&
-                message.contains("https://objectbox.io/sync"));
+        assertTrue(message, message.contains("does not include the Sync Server feature")
+                && message.contains("https://objectbox.io/sync/"));
     }
 
     /**

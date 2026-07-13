@@ -17,12 +17,13 @@ package io.objectbox.meshsync.android
 
 import android.content.Context
 import io.objectbox.annotation.apihint.Experimental
+import io.objectbox.internal.NativeLibraryUtils
+import io.objectbox.meshsync.android.AndroidMeshSync.createConfig
 import io.objectbox.meshsync.android.internal.NearbyMeshNetwork
 import io.objectbox.sync.InternalSyncAccess
 import io.objectbox.sync.MeshConfig
 import io.objectbox.sync.SyncBuilder
 import io.objectbox.sync.SyncClient
-import io.objectbox.sync.internal.SyncUtils
 
 /**
  * Peer-to-peer mesh sync for Android using [Google Nearby Connections](https://developers.google.com/nearby/connections/overview).
@@ -71,7 +72,7 @@ object AndroidMeshSync {
      */
     @JvmStatic
     fun createConfig(context: Context, meshId: String): MeshConfig {
-        SyncUtils.checkSyncFeatureAvailable()
+        NativeLibraryUtils.checkHasFeature()
 
         // Create the config first: it validates meshId, avoiding the creation of a native network
         // for bad input.

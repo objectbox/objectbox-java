@@ -228,6 +228,11 @@ public class BoxStore implements Closeable {
 
     private static native boolean nativeHasFeature(int feature);
 
+    /**
+     * Returns if the loaded database library supports the given feature.
+     *
+     * @param feature the feature to check for
+     */
     public static boolean hasFeature(Feature feature) {
         try {
             NativeLibraryLoader.ensureLoaded();

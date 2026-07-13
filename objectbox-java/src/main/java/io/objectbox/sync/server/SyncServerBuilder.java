@@ -25,8 +25,8 @@ import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
 import io.objectbox.annotation.apihint.Internal;
-import io.objectbox.exception.FeatureNotAvailableException;
 import io.objectbox.flatbuffers.FlatBufferBuilder;
+import io.objectbox.internal.NativeLibraryUtils;
 import io.objectbox.sync.Credentials;
 import io.objectbox.sync.Sync;
 import io.objectbox.sync.SyncCredentials;
@@ -60,14 +60,6 @@ public final class SyncServerBuilder {
     private @Nullable String jwtClaimIss;
     private @Nullable String jwtClaimAud;
 
-    private static void checkFeatureSyncServerAvailable() {
-        if (!BoxStore.isSyncServerAvailable()) {
-            throw new FeatureNotAvailableException(
-                    "This library does not include ObjectBox Sync Server. " +
-                            "Please visit https://objectbox.io/sync/ for options.");
-        }
-    }
-
     /**
      * Use {@link Sync#server(BoxStore, String, SyncCredentials)} instead.
      */
@@ -76,7 +68,7 @@ public final class SyncServerBuilder {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(url, "Sync server URL is required.");
         checkNotNull(authenticatorCredentials, "Authenticator credentials are required.");
-        checkFeatureSyncServerAvailable();
+        NativeLibraryUtils.checkHasSyncServerFeature();
         this.boxStore = boxStore;
         try {
             this.url = new URI(url);
@@ -94,7 +86,7 @@ public final class SyncServerBuilder {
         checkNotNull(boxStore, "BoxStore is required.");
         checkNotNull(url, "Sync server URL is required.");
         checkNotNull(multipleAuthenticatorCredentials, "Authenticator credentials are required.");
-        checkFeatureSyncServerAvailable();
+        NativeLibraryUtils.checkHasSyncServerFeature();
         this.boxStore = boxStore;
         try {
             this.url = new URI(url);
