@@ -40,14 +40,14 @@ helper class to request the permissions included by default.
 
 ## Usage
 
-```java
-MeshConfig meshConfig = AndroidMeshSync.createConfig(context, "example.myapp.mesh");
+```kotlin
+val meshConfig: MeshConfig = AndroidMeshSync.createConfig(context, "example.myapp.mesh")
 
-SyncClient syncClient = Sync.client(boxStore)
+val syncClient: SyncClient = Sync.client(boxStore)
         .url(SYNC_SERVER_URL)
         .credentials(credentials)
         .mesh(meshConfig)
-        .buildAndStart();
+        .buildAndStart()
 
-MeshSync mesh = syncClient.getMesh(); // state, connected peer count, stats
+val mesh: MeshSync? = syncClient.getMesh() // state, connected peer count, stats
 ```
