@@ -41,10 +41,10 @@ helper class to request the permissions included by default.
 ## Usage
 
 ```java
-MeshConfig meshConfig = AndroidMeshSync.createConfig(context, "com.myapp.mesh");
+MeshConfig meshConfig = AndroidMeshSync.createConfig(context, "example.myapp.mesh");
 
 SyncClient syncClient = Sync.client(boxStore)
-        .url("ws://server:9999")
+        .url(SYNC_SERVER_URL)
         .credentials(credentials)
         .mesh(meshConfig)
         .buildAndStart();
