@@ -1,0 +1,87 @@
+/*
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.objectbox.meshsync.android
+
+import android.content.Context
+import io.objectbox.annotation.apihint.Experimental
+import io.objectbox.meshsync.android.internal.NearbyMeshNetwork
+import io.objectbox.sync.InternalSyncAccess
+import io.objectbox.sync.MeshConfig
+import io.objectbox.sync.SyncBuilder
+import io.objectbox.sync.SyncClient
+import io.objectbox.sync.internal.SyncUtils
+
+/**
+ * Peer-to-peer mesh sync for Android using [Google Nearby Connections](https://developers.google.com/nearby/connections/overview).
+ * 
+ * Use [createConfig] to create a [MeshConfig] with the Android mesh
+ * network attached, then pass it to [SyncBuilder.mesh]:
+ * 
+ * ```
+ * val meshConfig: MeshConfig = AndroidMeshSync.createConfig(context, "example.myapp.mesh")
+ * 
+ * val syncClient: SyncClient = Sync.client(boxStore)
+ *     .url(SYNC_SERVER_URL)
+ *     .credentials(credentials)
+ *     .mesh(meshConfig)
+ *     .buildAndStart()
+ * ```
+ * 
+ * The mesh starts and stops together with the sync client; query the running mesh via
+ * [SyncClient.getMesh].
+ *
+ * Requirements:
+ * 
+ * * The app must use the Sync variant of the ObjectBox Android library (such as
+ *   `objectbox-sync-android`), which includes the native mesh sync code.
+ * * This library adds the permissions required by Nearby Connections to the app manifest. However,
+ *   the app must request the dangerous (runtime) permissions, like location and the newer
+ *   Bluetooth/Wi-Fi permissions, before starting the sync client. [MeshSyncPermissions] may help
+ *   with that.
+ * 
+ */
+@Experimental
+object AndroidMeshSync {
+
+    /**
+     * Creates a mesh sync configuration with an Android (Nearby Connections) mesh network
+     * attached.
+     *
+     * Configure optional settings on the returned [MeshConfig] (chainable setters), then pass
+     * it to [SyncBuilder.mesh]. See the [class documentation][AndroidMeshSync] for an example.
+     * 
+     * @param context Android context (the application context is used internally).
+     * @param meshId The mesh network identifier; nodes with different IDs ignore each other. Also
+     * used as the Nearby Connections service ID, so it should be unique to your application, for
+     * example, based on your application ID (like `example.myapp.mesh`).
+     * @return a [MeshConfig] to optionally configure further and pass to [SyncBuilder.mesh].
+     */
+    @JvmStatic
+    fun createConfig(context: Context, meshId: String): MeshConfig {
+        SyncUtils.checkSyncFeatureAvailable()
+
+        // Create the config first: it validates meshId, avoiding the creation of a native network
+        // for bad input.
+        val config = InternalSyncAccess.createMeshConfig(meshId)
+        // Create the Nearby network (Java + paired native object) and register it with the config.
+        // The native network is owned by the MeshSync once the sync client is created;
+        // see NearbyMeshNetwork.stop().
+        val network = NearbyMeshNetwork(context.applicationContext, meshId)
+        InternalSyncAccess.addNetworkInternalHandle(config, network.nativeHandle)
+        return config
+    }
+
+}
