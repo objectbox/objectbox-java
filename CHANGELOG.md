@@ -8,6 +8,12 @@ For more insights into what changed in the database libraries, [check the Object
 
 - Requires at least Kotlin compiler and standard library 2.2.0.
 
+### Sync
+
+- Preview peer-to-peer mesh sync API: attach a `MeshConfig` via `SyncBuilder.mesh()` and query the running mesh via `SyncClient.getMesh()` (state, connected peer count, statistics counters).
+  Mesh configurations are created by ObjectBox platform libraries that provide a mesh network (transport).
+- New artifact `objectbox-meshsync-android`: provides the mesh network for Android using Google Nearby Connections. Add it next to the Sync variant of the Android library (like `objectbox-sync-android`) and create a mesh configuration with `AndroidMeshSync.createConfig(context, meshId)`. It includes the permissions required by Nearby Connections and the `play-services-nearby` dependency.
+
 ## 5.4.2 - 2026-05-05
 
 - Update Android and JVM libraries to database version `5.3.2-2026-05-05`

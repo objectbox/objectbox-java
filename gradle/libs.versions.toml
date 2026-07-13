@@ -30,6 +30,7 @@ jsr305 = "3.0.2"
 junit = "4.13.2"
 # Mockito 5 requires Java 11: this is fine as CI doesn't run RxJava tests with older JDKs
 mockito = "5.23.0" # https://github.com/mockito/mockito/releases/
+playServicesNearby = "19.3.0" # https://developers.google.com/android/guides/releases
 publish-plugin = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
 robolectric = "4.16.1" # https://github.com/robolectric/robolectric/releases
 rxjava2 = "2.2.21"
@@ -54,6 +55,7 @@ kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-co
 kotlin-coroutines-core-compat = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines-compat" }
 kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlin-coroutines" }
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+play-services-nearby = { module = "com.google.android.gms:play-services-nearby", version.ref = "playServicesNearby" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 rxjava2 = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava2" }
 rxjava3 = { module = "io.reactivex.rxjava3:rxjava", version.ref = "rxjava3" }
