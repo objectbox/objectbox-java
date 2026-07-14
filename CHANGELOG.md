@@ -4,15 +4,21 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the database libraries, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
-## Next release
+## 6.0.0-beta - 2026-07-14
 
-- Requires at least Kotlin compiler and standard library 2.2.0.
+* Requires at least Kotlin compiler and standard library 2.2.0.
+* Update Android and JVM libraries to database version `6.0.0-beta-2026-07-13`
+  * Admin: modernized user interface based on Vue.js 3 and Material Design 3
+  * Admin: optimized pages now loading faster
+  * Android: log messages now use the logcat tag "ObjectBox" (previously "Box")
+  * Internal fixes and improvements
 
 ### Sync
 
-- Preview peer-to-peer mesh sync API: attach a `MeshConfig` via `SyncBuilder.mesh()` and query the running mesh via `SyncClient.getMesh()` (state, connected peer count, statistics counters).
-  Mesh configurations are created by ObjectBox platform libraries that provide a mesh network (transport).
-- New artifact `objectbox-meshsync-android`: provides the mesh network for Android using Google Nearby Connections. Add it next to the Sync variant of the Android library (like `objectbox-sync-android`) and create a mesh configuration with `AndroidMeshSync.createConfig(context, meshId)`. It includes the permissions required by Nearby Connections and the `play-services-nearby` dependency.
+* **New** [Mesh Sync API](https://sync.objectbox.io/mesh-sync): peer-to-peer (P2P) synchronization between sync clients without a central server.  
+  * Attach a `MeshConfig` via `SyncBuilder.mesh()` and query the running mesh via `SyncClient.getMesh()` (state, connected peer count, statistics counters). 
+    Mesh configurations are created by ObjectBox platform libraries that provide a mesh network (transport).
+  * New artifact `objectbox-meshsync-android`: provides the mesh network for Android using Google Nearby Connections. Add it next to the Sync variant of the Android library (like `objectbox-sync-android`) and create a mesh configuration with `AndroidMeshSync.createConfig(context, meshId)`. It includes the permissions required by Nearby Connections and the `play-services-nearby` dependency. See [its README for details](objectbox-meshsync-android/README.md).
 
 ## 5.4.2 - 2026-05-05
 
