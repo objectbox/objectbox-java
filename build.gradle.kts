@@ -26,9 +26,12 @@ plugins {
 
 buildscript {
     // Environment variables (see notes at the top of this file)
+    // https://docs.gitlab.com/ci/variables/predefined_variables/
+    val envIsCI: Boolean = System.getenv("CI") == "true"
     val envRelease: String? = System.getenv("OBX_RELEASE")
     // Gradle properties (see notes at the top of this file)
-    val propertyVersionSuffix = providers.gradleProperty("versionSuffix")
+    val propertyVersionSuffixName = "versionSuffix"
+    val propertyVersionSuffix = providers.gradleProperty(propertyVersionSuffixName)
 
     // Version of Maven artifacts
     // Should only be changed as part of the release process, see the release checklist in the objectbox repo
@@ -39,6 +42,10 @@ buildscript {
     // If true, Maven artifacts use a release version, so without branch name and snapshot suffix
     // (such as "-dev-SNAPSHOT"), including for dependencies (such as objectbox-java).
     val isRelease = envRelease == "true"
+
+    if (!isRelease && envIsCI) {
+        throw GradleException("Publishing: property $propertyVersionSuffixName must be set in CI to calculate version suffix.")
+    }
 
     // version suffix: "-<value>" or "" if not defined; e.g. used by CI to pass in branch name
     val versionSuffix = if (propertyVersionSuffix.isPresent) "-${propertyVersionSuffix.get()}" else ""
