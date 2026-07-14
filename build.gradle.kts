@@ -43,13 +43,21 @@ buildscript {
     // (such as "-dev-SNAPSHOT"), including for dependencies (such as objectbox-java).
     val isRelease = envRelease == "true"
 
-    if (!isRelease && envIsCI) {
-        throw GradleException("Publishing: property $propertyVersionSuffixName must be set in CI to calculate version suffix.")
+    // If not releasing, produce snapshot artifacts and add the branch name to the version string
+    // (passed in by CI through the versionSuffix property).
+    val versionSuffix = if (isRelease) {
+        ""
+    } else if (propertyVersionSuffix.isPresent) {
+        "-${propertyVersionSuffix.get()}-SNAPSHOT"
+    } else {
+        if (envIsCI) {
+            throw GradleException("Publishing: property $propertyVersionSuffixName must be set in CI to calculate version suffix.")
+        }
+        println("WARNING: Publishing: property $propertyVersionSuffixName not set, using '-dev-SNAPSHOT' version suffix.")
+        "-dev-SNAPSHOT"
     }
 
-    // version suffix: "-<value>" or "" if not defined; e.g. used by CI to pass in branch name
-    val versionSuffix = if (propertyVersionSuffix.isPresent) "-${propertyVersionSuffix.get()}" else ""
-    val obxJavaVersion by extra(versionNumber + (if (isRelease) "" else "$versionSuffix-SNAPSHOT"))
+    val obxJavaVersion by extra(versionNumber + versionSuffix)
     println("Publishing: version = $obxJavaVersion")
 
     // JVM and Android database library versions
