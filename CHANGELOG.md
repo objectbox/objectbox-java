@@ -4,6 +4,8 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the database libraries, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
+## Next release
+
 ## 6.0.0-beta - 2026-07-14
 
 * Requires at least Kotlin compiler and standard library 2.2.0.
