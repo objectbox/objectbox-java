@@ -46,9 +46,6 @@ workflow:
     # Disable merge request pipelines https://docs.gitlab.com/ci/jobs/job_rules/#ci_pipeline_source-predefined-variable
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
-    # Never create a pipeline when a tag is pushed (to simplify version computation in root build script)
-    - if: $CI_COMMIT_TAG
-      when: never
     # On main branch, always use release versions as old snapshots of dependencies are deleted
     - if: $CI_COMMIT_REF_NAME == "main"
       variables:
@@ -65,7 +62,7 @@ workflow:
     - docker
     - linux
     - x64
-  image: objectboxio/buildenv-android:2024-12-09 # With JDK 21, Android build-tools;35.0.0 and platforms;android-35 pre-installed
+  image: objectboxio/buildenv-android:2026-05-12 # With JDK 21, Android build-tools;35.0.0 and platforms;android-35 pre-installed
   variables:
     # Image defaults to POSIX (ASCII), set a compatible locale so UTF-8 tests that interact with the file system work.
     # Check with 'locale -a' for available locales.
@@ -163,6 +160,9 @@ publish-maven-internal:
   <<: *docker_linux_x64_android
   stage: publish-maven-internal
   rules:
+    # Not for tag pipelines (Maven artifact snapshots are versioned using the branch name)
+    - if: $CI_COMMIT_TAG
+      when: never
     # Not when using release versions and not publishing a release to avoid duplicate artifacts
     # (GitLab would allow to upload duplicates for a release version)
     - if: $OBX_RELEASE == "true" && $OBX_PUBLISH_RELEASE != "true"
@@ -187,13 +187,13 @@ publish-maven-central:
     - if: $OBX_PUBLISH_RELEASE == "true"
       when: on_success
   before_script:
-    - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java libraries to Maven Central:* job $CI_JOB_NAME from branch $CI_COMMIT_BRANCH ($CI_COMMIT_SHORT_SHA)..."
+    - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java libraries (job = $CI_JOB_NAME, ref = $CI_COMMIT_REF_NAME, commit = $CI_COMMIT_SHORT_SHA) ..."
   script:
     # Note: supply internal repo as tests use native dependencies that might not be available publicly, yet.
-    - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS $CENTRAL_PUBLISH_ARGS publishAllPublicationsToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+    - ./gradlew $GITLAB_REPO_ARGS $CENTRAL_PUBLISH_ARGS publishAllPublicationsToSonatypeRepository closeAndReleaseSonatypeStagingRepository
   after_script:
-    # Also runs on failure, so show CI_JOB_STATUS.
-    - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java libraries to Maven Central:* *$CI_JOB_STATUS* for $CI_JOB_NAME"
+    # Also runs on failure, so print CI_JOB_STATUS
+    - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java libraries (job = $CI_JOB_NAME, ref = $CI_COMMIT_REF_NAME, commit = $CI_COMMIT_SHORT_SHA) job status = *$CI_JOB_STATUS*"
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "Check https://repo1.maven.org/maven2/io/objectbox/ in a few minutes."
 
 # Create Java API docs archive
@@ -205,7 +205,7 @@ package-api-docs:
     - if: $OBX_PUBLISH_RELEASE == "true"
       when: on_success
   script:
-    - ./gradlew $GITLAB_REPO_ARGS $VERSION_ARGS :objectbox-java:packageJavadocForWeb
+    - ./gradlew $GITLAB_REPO_ARGS :objectbox-java:packageJavadocForWeb
   after_script:
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "API docs for web available as job artifact $CI_JOB_URL"
   artifacts:
@@ -216,6 +216,9 @@ package-api-docs:
 trigger-plugin:
   stage: triggers
   rules:
+    # Not for tag pipelines
+    - if: $CI_COMMIT_TAG
+    - when: never
     # Not when publishing a release
     - if: $OBX_PUBLISH_RELEASE == "true"
       when: never

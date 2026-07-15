@@ -47,8 +47,9 @@ dependencyResolutionManagement {
 
 plugins {
     // Supports resolving toolchains for JVM projects
-    // https://docs.gradle.org/8.0/userguide/toolchains.html#sub:download_repositories
-    id("org.gradle.toolchains.foojay-resolver-convention") version ("0.4.0")
+    // https://docs.gradle.org/9.5.1/userguide/toolchains.html#sub:download_repositories
+    // https://github.com/gradle/foojay-toolchains/blob/main/CHANGELOG.md
+    id("org.gradle.toolchains.foojay-resolver-convention") version ("1.0.0")
 }
 
 rootProject.name = "objectbox-java"
@@ -63,6 +64,7 @@ include(":objectbox-rxjava3")
 val excludeAndroid: String? by settings
 if (excludeAndroid == null) {
     include(":objectbox-android")
+    include(":objectbox-meshsync-android")
 }
 
 include(":tests:objectbox-java-test")

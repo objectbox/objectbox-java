@@ -37,7 +37,7 @@ import io.objectbox.annotation.apihint.Internal;
 @Internal
 public class ObjectBoxThreadPool extends ThreadPoolExecutor {
 
-    public static String THREAD_NAME_PREFIX = "ObjectBox-";
+    public static final String THREAD_NAME_PREFIX = "ObjectBox-";
     private final BoxStore boxStore;
 
     public ObjectBoxThreadPool(BoxStore boxStore) {

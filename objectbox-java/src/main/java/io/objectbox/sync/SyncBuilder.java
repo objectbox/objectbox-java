@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import java.util.TreeMap;
 import javax.annotation.Nullable;
 
 import io.objectbox.BoxStore;
-import io.objectbox.exception.FeatureNotAvailableException;
+import io.objectbox.annotation.apihint.Experimental;
+import io.objectbox.internal.NativeLibraryUtils;
 import io.objectbox.sync.internal.Platform;
 import io.objectbox.sync.listener.SyncChangeListener;
 import io.objectbox.sync.listener.SyncCompletedListener;
@@ -55,6 +56,7 @@ public final class SyncBuilder {
     @Nullable
     String[] trustedCertPaths;
     int flags;
+    @Nullable MeshConfig meshConfig;
     boolean uncommittedAcks;
 
     RequestUpdatesMode requestUpdatesMode = RequestUpdatesMode.AUTO;
@@ -89,14 +91,6 @@ public final class SyncBuilder {
         AUTO_NO_PUSHES
     }
 
-    private static void checkSyncFeatureAvailable() {
-        if (!BoxStore.isSyncAvailable()) {
-            throw new FeatureNotAvailableException(
-                    "This library does not include ObjectBox Sync. " +
-                            "Please visit https://objectbox.io/sync/ for options.");
-        }
-    }
-
     /**
      * Creates a builder for a {@link SyncClient}.
      * <p>
@@ -105,7 +99,7 @@ public final class SyncBuilder {
     SyncBuilder(BoxStore boxStore) {
         checkNotNull(boxStore, "boxStore");
         this.boxStore = boxStore;
-        checkSyncFeatureAvailable();
+        NativeLibraryUtils.checkHasFeature();
         this.platform = Platform.findPlatform(); // Requires APIs only present in Android Sync library
     }
 
@@ -221,6 +215,21 @@ public final class SyncBuilder {
      */
     public SyncBuilder requestUpdatesMode(RequestUpdatesMode requestUpdatesMode) {
         this.requestUpdatesMode = requestUpdatesMode;
+        return this;
+    }
+
+    /**
+     * Attaches a peer-to-peer mesh sync configuration to the client.
+     * <p>
+     * A mesh sync is then created together with the client; it starts and stops together with the client.
+     * Query the running mesh via {@link SyncClient#getMesh()}.
+     * <p>
+     * See {@link MeshConfig} for how to obtain a configuration.
+     */
+    @Experimental
+    public SyncBuilder mesh(MeshConfig meshConfig) {
+        checkNotNull(meshConfig, "meshConfig");
+        this.meshConfig = meshConfig;
         return this;
     }
 

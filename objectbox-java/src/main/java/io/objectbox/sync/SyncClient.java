@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,17 @@ public interface SyncClient extends Closeable {
      * See {@link SyncBuilder#url(String)} for notes on multiple URLs.
      */
     List<String> getUrls();
+
+    /**
+     * Returns the running peer-to-peer mesh sync attached to this client, or {@code null} if no {@link MeshConfig}
+     * was passed via {@link SyncBuilder#mesh(MeshConfig)}.
+     * <p>
+     * The mesh starts and stops together with this client. The returned object is owned by this client and valid
+     * until the client is closed.
+     */
+    @Experimental
+    @Nullable
+    MeshSync getMesh();
 
     /**
      * Flag indicating if the sync client was started.

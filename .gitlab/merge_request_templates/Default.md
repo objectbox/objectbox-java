@@ -9,6 +9,7 @@ TODO Briefly list what this merge request is about
 - [ ] This merge request fully addresses the requirements of the associated task
 - [ ] I did a self-review of the changes and did not spot any issues, among others:
   - I added unit tests for new or changed behavior; existing and new tests pass
+  - I checked the SpotBugs report for new issues
   - My code conforms to our coding standards and guidelines
   - My changes are prepared (focused commits, good messages) so reviewing them is easy for the reviewer
 - [ ] I amended the [changelog](/CHANGELOG.md) if this affects users in any way

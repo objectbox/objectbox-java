@@ -9,15 +9,12 @@ tasks.withType<JavaCompile> {
     options.release.set(8)
 }
 
-val junitVersion: String by rootProject.extra
-val mockitoVersion: String by rootProject.extra
-
 dependencies {
     api(project(":objectbox-java"))
-    api("io.reactivex.rxjava2:rxjava:2.2.21")
+    api(libs.rxjava2)
 
-    testImplementation("junit:junit:$junitVersion")
-    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito)
 }
 
 val javadocJar by tasks.registering(Jar::class) {

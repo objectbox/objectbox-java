@@ -82,7 +82,7 @@ public class BoxStore implements Closeable {
      * ReLinker uses this as a suffix for the extracted shared library file. If different, it will update it. Should be
      * unique to avoid conflicts.
      */
-    public static final String JNI_VERSION = "5.3.2-2026-05-05";
+    public static final String JNI_VERSION = "6.0.0-2026-07-13";
 
     /**
      * The ObjectBox database version this Java library is known to work with.
@@ -92,7 +92,7 @@ public class BoxStore implements Closeable {
      * This is used (currently only in tests) to make sure a database library has a compatible JNI API by checking the
      * version number matches exactly and the date is the same or newer.
      */
-    private static final String VERSION = "5.3.2-2026-05-05";
+    private static final String VERSION = "6.0.0-2026-07-13";
 
     private static final String OBJECTBOX_PACKAGE_NAME = "objectbox";
     private static BoxStore defaultStore;
@@ -228,6 +228,11 @@ public class BoxStore implements Closeable {
 
     private static native boolean nativeHasFeature(int feature);
 
+    /**
+     * Returns if the loaded database library supports the given feature.
+     *
+     * @param feature the feature to check for
+     */
     public static boolean hasFeature(Feature feature) {
         try {
             NativeLibraryLoader.ensureLoaded();

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+      Permissions that may be needed by the Nearby Connections API; these are merged into the
+      manifest of apps using this library.
+
+      Note that not all permissions may be required. Depending on a device's Android SDK version and
+      your app's needs, only some of them may actually be necessary. For example, location
+      permissions are typically not required for Nearby Connections on recent Android releases.
+
+      To remove them as needed, use [merge rule markers](https://developer.android.com/build/manage-manifests)
+      in your app's manifest, for example:
+
+      <uses-permission
+          android:name="android.permission.ACCESS_COARSE_LOCATION"
+          tools:node="remove" />
+      <uses-permission
+          android:name="android.permission.ACCESS_FINE_LOCATION"
+          tools:node="remove" />
+
+      Note that maxSdkVersion restrictions should not be added to the Wi-Fi or Bluetooth
+      permissions; the Nearby API appears to require them on all SDK versions.
+
+      Also note that your app must request any dangerous (runtime) permissions at runtime when
+      needed.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="tiramisu" />
+
+</manifest>

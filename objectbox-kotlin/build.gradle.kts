@@ -1,11 +1,10 @@
-import org.jetbrains.dokka.gradle.DokkaTask
+
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-import java.net.URL
 
 plugins {
-    kotlin("jvm")
-    id("org.jetbrains.dokka")
+    alias(libs.plugins.kotlin.jvm)
+    id("objectbox.dokka-conventions")
     id("objectbox.publishing-conventions")
 }
 
@@ -27,40 +26,17 @@ kotlin {
         // Prevents using newer language features, sets this as the Kotlin version in produced metadata. So consumers
         // can compile this with a Kotlin compiler down to one minor version before this.
         // Pick the oldest not deprecated version.
-        languageVersion.set(KotlinVersion.KOTLIN_1_7)
+        languageVersion.set(KotlinVersion.KOTLIN_2_2)
         // Prevents using newer APIs from the Kotlin standard library. So consumers can run this library with a Kotlin
         // standard library down to this version.
         // Pick the oldest not deprecated version.
-        apiVersion.set(KotlinVersion.KOTLIN_1_7)
+        apiVersion.set(KotlinVersion.KOTLIN_2_2)
         // Depend on the oldest compatible Kotlin standard libraries (by default the Kotlin plugin coerces it to the one
         // matching its version). So consumers can safely use this or any later Kotlin standard library.
         // Pick the first release matching the versions above.
         // Note: when changing, also update coroutines dependency version (as this does not set that).
-        coreLibrariesVersion = "1.7.0"
+        coreLibrariesVersion = "2.2.0"
     }
-}
-
-val dokkaHtml = tasks.named<DokkaTask>("dokkaHtml")
-dokkaHtml.configure {
-    outputDirectory.set(layout.buildDirectory.dir("docs/javadoc"))
-
-    dokkaSourceSets.configureEach {
-        // Fix "Can't find node by signature": have to manually point to dependencies.
-        // https://github.com/Kotlin/dokka/wiki/faq#dokka-complains-about-cant-find-node-by-signature-
-        externalDocumentationLink {
-            // Point to web javadoc for objectbox-java packages.
-            url.set(URL("https://objectbox.io/docfiles/java/current/"))
-            // Note: Using JDK 9+ package-list is now called element-list.
-            packageListUrl.set(URL("https://objectbox.io/docfiles/java/current/element-list"))
-        }
-    }
-}
-
-val javadocJar by tasks.registering(Jar::class) {
-    dependsOn(dokkaHtml)
-    group = "build"
-    archiveClassifier.set("javadoc")
-    from(dokkaHtml.get().outputDirectory)
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
@@ -70,10 +46,9 @@ val sourcesJar by tasks.registering(Jar::class) {
 }
 
 dependencies {
-    // Note: compileOnly so consumers do not depend on the coroutines library unless they manually add it.
-    // Note: pick a version that depends on Kotlin standard library (org.jetbrains.kotlin:kotlin-stdlib) version
-    // coreLibrariesVersion (set above) or older.
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    // Note: compileOnly so consumers do not depend on the coroutines library unless they manually
+    // add it.
+    compileOnly(libs.kotlin.coroutines.core.compat)
 
     api(project(":objectbox-java"))
 }
@@ -87,7 +62,8 @@ publishing {
 
             from(components["java"])
             artifact(sourcesJar)
-            artifact(javadocJar)
+            // Note: the javadocJar task is created by the objectbox.dokka-conventions plugin
+            artifact(tasks.named("javadocJar"))
 
             pom {
                 name.set("ObjectBox Kotlin API")
