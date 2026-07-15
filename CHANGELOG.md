@@ -8,12 +8,12 @@ For more insights into what changed in the database libraries, [check the Object
 
 ## 6.0.0-beta - 2026-07-14
 
-* Requires at least Kotlin compiler and standard library 2.2.0.
 * Update Android and JVM libraries to database version `6.0.0-beta-2026-07-13`
   * Admin: modernized user interface based on Vue.js 3 and Material Design 3
   * Admin: optimized pages now loading faster
   * Android: log messages now use the logcat tag "ObjectBox" (previously "Box")
   * Internal fixes and improvements
+* objectbox-kotlin: requires at least Kotlin compiler and standard library 2.2.0
 
 ### Sync
 
