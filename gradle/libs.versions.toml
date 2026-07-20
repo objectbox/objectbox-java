@@ -5,7 +5,7 @@
 # - https://github.com/Kotlin/kotlinx.coroutines#readme
 # Note: when updating to a new minor version also have to increase the minimum
 # compiler and standard library version supported by consuming projects, see
-# objectbox-kotlin/ build script.
+# objectbox.kotlin-conventions plugin script.
 # Note: if AGP Upgrade Assitant doesn't open, temporarily change to the com.android.application
 # plugin below. Also be aware that the latest version is likely not supported by IntelliJ IDEA.
 agp = "9.0.1" # https://developer.android.com/build/releases/gradle-plugin
@@ -66,6 +66,7 @@ turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 # build-logic dependencies
 buildLogic-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "kotlin-dokka" }
+buildLogic-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }

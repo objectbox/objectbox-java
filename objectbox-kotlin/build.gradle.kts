@@ -1,9 +1,7 @@
-
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-
 plugins {
+    id("java-library")
     alias(libs.plugins.kotlin.jvm)
+    id("objectbox.kotlin-conventions")
     id("objectbox.dokka-conventions")
     id("objectbox.publishing-conventions")
 }
@@ -12,31 +10,6 @@ plugins {
 // https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation
 tasks.withType<JavaCompile> {
     options.release.set(8)
-}
-
-kotlin {
-    compilerOptions {
-        // Produce Java 8 byte code, would default to Java 6
-        jvmTarget.set(JvmTarget.JVM_1_8)
-
-        // Allow consumers of this library to use the oldest possible Kotlin compiler and standard libraries.
-        // https://kotlinlang.org/docs/compatibility-modes.html
-        // https://kotlinlang.org/docs/kotlin-evolution-principles.html#compatibility-tools
-
-        // Prevents using newer language features, sets this as the Kotlin version in produced metadata. So consumers
-        // can compile this with a Kotlin compiler down to one minor version before this.
-        // Pick the oldest not deprecated version.
-        languageVersion.set(KotlinVersion.KOTLIN_2_2)
-        // Prevents using newer APIs from the Kotlin standard library. So consumers can run this library with a Kotlin
-        // standard library down to this version.
-        // Pick the oldest not deprecated version.
-        apiVersion.set(KotlinVersion.KOTLIN_2_2)
-        // Depend on the oldest compatible Kotlin standard libraries (by default the Kotlin plugin coerces it to the one
-        // matching its version). So consumers can safely use this or any later Kotlin standard library.
-        // Pick the first release matching the versions above.
-        // Note: when changing, also update coroutines dependency version (as this does not set that).
-        coreLibrariesVersion = "2.2.0"
-    }
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
