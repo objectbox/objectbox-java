@@ -6,6 +6,8 @@ For more insights into what changed in the database libraries, [check the Object
 
 ## Next release
 
+* objectbox-rxjava3 and objectbox-meshsync-android: require only Kotlin compiler and standard library 2.2.0 to match objectbox-kotlin.
+
 ## 6.0.0-beta - 2026-07-14
 
 * Update Android and JVM libraries to database version `6.0.0-beta-2026-07-13`
