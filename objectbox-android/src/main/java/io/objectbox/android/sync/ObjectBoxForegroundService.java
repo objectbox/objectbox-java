@@ -28,6 +28,10 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+// This was added to help developers using an Android Sync server to keep their
+// app running in the background. Internally, besides a proposed integration
+// test (objectbox-integration-test!44), this isn't currently used anywhere.
+
 /**
  * A no-op foreground {@link Service} to make it less likely an app is killed by the system.
  * Use {@link #start} and {@link #stop} to control the service.
