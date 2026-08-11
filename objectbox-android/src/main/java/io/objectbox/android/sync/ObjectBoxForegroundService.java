@@ -36,6 +36,10 @@ import io.objectbox.android.internal.ServiceCompat;
 /**
  * A no-op foreground {@link Service} to make it less likely an app is killed by the system.
  * Use {@link #start} and {@link #stop} to control the service.
+ * <p>
+ * To use this service, add {@link Manifest.permission#FOREGROUND_SERVICE} to the consuming
+ * application's manifest. On Android 14 (API level 34) or higher, also add
+ * {@link Manifest.permission#FOREGROUND_SERVICE_SPECIAL_USE}.
  */
 public class ObjectBoxForegroundService extends Service {
 
@@ -53,6 +57,13 @@ public class ObjectBoxForegroundService extends Service {
                 && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
             // SecurityException if no FOREGROUND_SERVICE permission
             context.enforcePermission(Manifest.permission.FOREGROUND_SERVICE, Process.myPid(), Process.myUid(), null);
+        }
+        // Require FOREGROUND_SERVICE_SPECIAL_USE permission on Android 14 (API level 34)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            // SecurityException if no FOREGROUND_SERVICE_SPECIAL_USE permission
+            context.enforcePermission(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE,
+                    Process.myPid(), Process.myUid(), null);
         }
 
         ObjectBoxForegroundService.notificationId = notificationId;
