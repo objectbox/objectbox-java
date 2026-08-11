@@ -24,8 +24,9 @@
                 android:name=".AdminKeepAliveService"
                 android:foregroundServiceType="specialUse"
                 android:exported="false">
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                      android:value="keep_alive_service"/>
+            <property
+                    android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                    android:value="admin_keep_alive_service"/>
         </service>
 
         <receiver

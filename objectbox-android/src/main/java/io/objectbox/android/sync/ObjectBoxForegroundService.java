@@ -27,6 +27,7 @@ import android.os.Process;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import io.objectbox.android.internal.ServiceCompat;
 
 // This was added to help developers using an Android Sync server to keep their
 // app running in the background. Internally, besides a proposed integration
@@ -79,7 +80,7 @@ public class ObjectBoxForegroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (ACTION_STOP.equals(intent.getAction())) {
             Log.d(TAG, "Stopping...");
-            stopForeground(true);
+            ServiceCompat.stopForeground(this);
             stopSelf();
             return START_NOT_STICKY;
         } else if (ACTION_START.equals(intent.getAction())) {
@@ -89,7 +90,7 @@ public class ObjectBoxForegroundService extends Service {
             if (notificationId == 0 || notification == null) {
                 throw new IllegalArgumentException("No arguments given: notificationId or notification not set.");
             }
-            startForeground(notificationId, notification);
+            ServiceCompat.startForeground(this, notificationId, notification);
             // Note: with START_STICKY would not get intent on restart.
             return START_REDELIVER_INTENT;
         } else {
@@ -103,4 +104,5 @@ public class ObjectBoxForegroundService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
 }

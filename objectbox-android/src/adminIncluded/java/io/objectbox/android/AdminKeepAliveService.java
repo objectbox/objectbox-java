@@ -28,6 +28,8 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+import io.objectbox.android.internal.ServiceCompat;
+
 /**
  * Foreground service to keep app alive which displays a notification to view {@link Admin} URL or stop this service.
  */
@@ -45,7 +47,7 @@ public class AdminKeepAliveService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (ACTION_STOP.equals(intent.getAction())) {
             Log.d(TAG, "Stopping");
-            stopForeground(true);
+            ServiceCompat.stopForeground(this);
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -69,7 +71,7 @@ public class AdminKeepAliveService extends Service {
             builder.setDeleteIntent(stopPendingIntent);
             builder.addAction(new Builder(R.drawable.objectbox_stop, "Stop", stopPendingIntent).build());
 
-            startForeground(notificationId, builder.getNotification());
+            ServiceCompat.startForeground(this, notificationId, builder.build());
             Log.d(TAG, "Started");
             return START_REDELIVER_INTENT; // with START_STICKY would not get intent on restart
         } else {
@@ -83,4 +85,5 @@ public class AdminKeepAliveService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
 }
