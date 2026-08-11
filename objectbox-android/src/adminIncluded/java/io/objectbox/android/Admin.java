@@ -55,7 +55,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
  */
 public class Admin {
 
-    private static final String TAG = "ObjectBoxAdmin";
+    private static final String TAG = "ObjectBox";
     private static final String NOTIFICATION_CHANNEL_ID = "objectbox-browser";
 
     private final BoxStore boxStore;
@@ -137,10 +137,10 @@ public class Admin {
             // developers need to turn on notifications for the app through system settings
             // or request the permission from the user.
             // https://developer.android.com/develop/ui/views/notifications/notification-permission
-            // Already on Android 7 or newer, notifications can been turned off in system settings. This may happen
-            // while developers are testing an app, so also warn in this case.
+            // Already on Android 7 or newer, notifications can be turned off in system settings.
+            // This may happen while developers are testing an app, so also warn in this case.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !manager.areNotificationsEnabled()) {
-                Log.w(TAG, "To use the ObjectBox Admin keep-alive notification turn on notifications for this app");
+                Log.w(TAG, "To use the ObjectBox Admin keep-alive service turn on notifications for this app");
             }
             Notification.Builder builder = buildBaseNotification(context, port, manager);
             builder.setContentIntent(pendingIntent);
