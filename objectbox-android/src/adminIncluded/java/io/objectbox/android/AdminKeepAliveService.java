@@ -69,7 +69,10 @@ public class AdminKeepAliveService extends Service {
             builder.setContentIntent(pendingIntent);
             // Actually useless because Foreground notifications cannot be deleted
             builder.setDeleteIntent(stopPendingIntent);
-            builder.addAction(new Builder(R.drawable.objectbox_stop, "Stop", stopPendingIntent).build());
+            builder.addAction(new Builder(R.drawable.objectbox_stop,
+                    getString(R.string.objectbox_adminNotificationActionStop),
+                    stopPendingIntent)
+                    .build());
 
             ServiceCompat.startForeground(this, notificationId, builder.build());
             Log.d(TAG, "Started");

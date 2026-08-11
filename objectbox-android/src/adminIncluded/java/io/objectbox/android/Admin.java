@@ -154,7 +154,7 @@ public class Admin {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Note: IMPORTANCE_LOW so no sound is played to avoid distractions while testing.
             NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID,
-                    "ObjectBox Admin", NotificationManager.IMPORTANCE_LOW);
+                    context.getString(R.string.objectbox_adminNotificationTitle), NotificationManager.IMPORTANCE_LOW);
             // if channel already exists, create call will be ignored
             manager.createNotificationChannel(channel);
         }
@@ -166,8 +166,8 @@ public class Admin {
             builder = new Notification.Builder(context);
         }
 
-        builder.setContentTitle(context.getString(R.string.objectbox_objectBrowserNotificationTitle))
-                .setContentText(context.getString(R.string.objectbox_objectBrowserNotificationText, port))
+        builder.setContentTitle(context.getString(R.string.objectbox_adminNotificationTitle))
+                .setContentText(context.getString(R.string.objectbox_adminNotificationText, port))
                 .setSmallIcon(R.drawable.objectbox_notification);
 
         return builder;
