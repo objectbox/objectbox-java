@@ -33,7 +33,8 @@ import io.objectbox.BoxStore;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
- * A helper class to start the ObjectBox Admin web app used to browse and gain insights into the database.
+ * A helper class to start the ObjectBox Admin web app used to browse and gain insights into the
+ * database.
  * <p>
  * Usage requires manually configuring some ObjectBox dependencies, see the
  * <a href="https://docs.objectbox.io/data-browser">documentation</a> for more details.
@@ -44,9 +45,9 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
  *     Log.i("ObjectBoxAdmin", "Started: " + started);
  * }
  * </pre>
- * After {@link #start} is called a notification is displayed. Tap it to open this Admin URL on the device.
- * Alternatively, look for a logcat message from Admin to obtain the URL. Use {@code adb forward} to access
- * the URL on your development machine.
+ * After {@link #start} is called a notification is displayed. Tap it to open this Admin URL on the
+ * device. Alternatively, look for a logcat message from Admin to obtain the URL. Use
+ * {@code adb forward} to access the URL on your development machine.
  * <p>
  * Tapping the notification starts a foreground service to keep this app running in the background.
  * Stop this keep-alive service from the notification.
@@ -159,18 +160,23 @@ public class Admin {
             manager.createNotificationChannel(channel);
         }
 
-        Notification.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder = new Notification.Builder(context, NOTIFICATION_CHANNEL_ID);
-        } else {
-            builder = new Notification.Builder(context);
-        }
-
-        builder.setContentTitle(context.getString(R.string.objectbox_adminNotificationTitle))
+        return buildNotificationCompat(context)
+                .setContentTitle(context.getString(R.string.objectbox_adminNotificationTitle))
                 .setContentText(context.getString(R.string.objectbox_adminNotificationText, port))
                 .setSmallIcon(R.drawable.objectbox_notification);
+    }
 
-        return builder;
+    private static Notification.Builder buildNotificationCompat(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return new Notification.Builder(context, NOTIFICATION_CHANNEL_ID);
+        } else {
+            return buildNotificationLegacy(context);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private static Notification.Builder buildNotificationLegacy(Context context) {
+        return new Notification.Builder(context);
     }
 
     static Intent viewIntent(String url) {
