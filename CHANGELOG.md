@@ -9,6 +9,7 @@ For more insights into what changed in the database libraries, [check the Object
 * ObjectBox Gradle plugin: requires at least Gradle 8.3.
 * ObjectBox Gradle plugin: when using built-in Kotlin with Android Gradle Plugin 9, applies AGPs custom kapt plugin or suggests to add it, adds the ObjectBox Kotlin dependency.
 * objectbox-rxjava3 and objectbox-meshsync-android: require only Kotlin compiler and standard library 2.2.0 to match objectbox-kotlin.
+* Admin: make keep-alive service compatible with Android 14 and newer.
 
 ## 6.0.0-beta - 2026-07-14
 

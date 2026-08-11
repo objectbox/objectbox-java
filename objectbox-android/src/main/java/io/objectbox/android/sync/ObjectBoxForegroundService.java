@@ -27,10 +27,37 @@ import android.os.Process;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import io.objectbox.android.internal.ServiceCompat;
+
+// This was added to help developers using an Android Sync server to keep their
+// app running in the background. Internally, besides a proposed integration
+// test (objectbox-integration-test!44), this isn't currently used anywhere.
+// Therefore, this also isn't registered by default in the manifest to avoid
+// issues during Play Store review for apps that don't use it.
 
 /**
  * A no-op foreground {@link Service} to make it less likely an app is killed by the system.
  * Use {@link #start} and {@link #stop} to control the service.
+ * <p>
+ * To use this service, declare it and its required permissions in the consuming application's
+ * manifest:
+ * <pre>{@code
+ * <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+ *     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+ *     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+ *
+ *     <application>
+ *         <service
+ *                 android:name="io.objectbox.android.sync.ObjectBoxForegroundService"
+ *                 android:foregroundServiceType="specialUse"
+ *                 android:exported="false">
+ *             <property
+ *                     android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+ *                     android:value="server_keep_alive_service"/>
+ *         </service>
+ *     </application>
+ * </manifest>
+ * }</pre>
  */
 public class ObjectBoxForegroundService extends Service {
 
@@ -48,6 +75,13 @@ public class ObjectBoxForegroundService extends Service {
                 && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
             // SecurityException if no FOREGROUND_SERVICE permission
             context.enforcePermission(Manifest.permission.FOREGROUND_SERVICE, Process.myPid(), Process.myUid(), null);
+        }
+        // Require FOREGROUND_SERVICE_SPECIAL_USE permission on Android 14 (API level 34)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            // SecurityException if no FOREGROUND_SERVICE_SPECIAL_USE permission
+            context.enforcePermission(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE,
+                    Process.myPid(), Process.myUid(), null);
         }
 
         ObjectBoxForegroundService.notificationId = notificationId;
@@ -75,7 +109,7 @@ public class ObjectBoxForegroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (ACTION_STOP.equals(intent.getAction())) {
             Log.d(TAG, "Stopping...");
-            stopForeground(true);
+            ServiceCompat.stopForeground(this);
             stopSelf();
             return START_NOT_STICKY;
         } else if (ACTION_START.equals(intent.getAction())) {
@@ -85,7 +119,7 @@ public class ObjectBoxForegroundService extends Service {
             if (notificationId == 0 || notification == null) {
                 throw new IllegalArgumentException("No arguments given: notificationId or notification not set.");
             }
-            startForeground(notificationId, notification);
+            ServiceCompat.startForeground(this, notificationId, notification);
             // Note: with START_STICKY would not get intent on restart.
             return START_REDELIVER_INTENT;
         } else {
@@ -99,4 +133,5 @@ public class ObjectBoxForegroundService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
 }
