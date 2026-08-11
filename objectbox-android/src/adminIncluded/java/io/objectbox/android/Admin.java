@@ -181,7 +181,8 @@ public class Admin {
 
     /**
      * Targeting Android 12 requires to mark PendingIntents explicitly as immutable or mutable.
-     * https://developer.android.com/about/versions/12/behavior-changes-12#pending-intent-mutability
+     * <p>
+     * <a href="https://developer.android.com/about/versions/12/behavior-changes-12#pending-intent-mutability">Pending intents mutability</a>
      */
     static int buildPendingIntentFlags(int flags) {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
