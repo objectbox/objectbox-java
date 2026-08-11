@@ -3,25 +3,6 @@
 
     <!-- Note that the objectbox-android-objectbrowser AAR ships a different manifest! -->
 
-    <application>
-
-        <!-- Convenience when using Sync server. -->
-        <!--
-        Since Android 14 (API 34) it is required to specify a foreground service type. None of the
-        standard types fit so declare a specialUse type (that would have to be approved during Play
-        Store review).
-        https://developer.android.com/develop/background-work/services/fgs/declare
-        https://developer.android.com/develop/background-work/services/fgs/service-types
-        -->
-        <service
-                android:name=".sync.ObjectBoxForegroundService"
-                android:foregroundServiceType="specialUse"
-                android:exported="false">
-            <property
-                    android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                    android:value="server_keep_alive_service"/>
-        </service>
-
-    </application>
+    <!-- Required for Android library https://developer.android.com/studio/projects/android-library#aar-contents -->
 
 </manifest>

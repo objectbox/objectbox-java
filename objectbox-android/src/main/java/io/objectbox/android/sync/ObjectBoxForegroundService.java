@@ -32,14 +32,32 @@ import io.objectbox.android.internal.ServiceCompat;
 // This was added to help developers using an Android Sync server to keep their
 // app running in the background. Internally, besides a proposed integration
 // test (objectbox-integration-test!44), this isn't currently used anywhere.
+// Therefore, this also isn't registered by default in the manifest to avoid
+// issues during Play Store review for apps that don't use it.
 
 /**
  * A no-op foreground {@link Service} to make it less likely an app is killed by the system.
  * Use {@link #start} and {@link #stop} to control the service.
  * <p>
- * To use this service, add {@link Manifest.permission#FOREGROUND_SERVICE} to the consuming
- * application's manifest. On Android 14 (API level 34) or higher, also add
- * {@link Manifest.permission#FOREGROUND_SERVICE_SPECIAL_USE}.
+ * To use this service, declare it and its required permissions in the consuming application's
+ * manifest:
+ * <pre>{@code
+ * <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+ *     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+ *     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+ *
+ *     <application>
+ *         <service
+ *                 android:name="io.objectbox.android.sync.ObjectBoxForegroundService"
+ *                 android:foregroundServiceType="specialUse"
+ *                 android:exported="false">
+ *             <property
+ *                     android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+ *                     android:value="server_keep_alive_service"/>
+ *         </service>
+ *     </application>
+ * </manifest>
+ * }</pre>
  */
 public class ObjectBoxForegroundService extends Service {
 
