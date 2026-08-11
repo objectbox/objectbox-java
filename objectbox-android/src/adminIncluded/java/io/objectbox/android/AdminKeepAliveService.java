@@ -25,13 +25,16 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Icon;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
 import io.objectbox.android.internal.ServiceCompat;
 
 /**
- * Foreground service to keep app alive which displays a notification to view {@link Admin} URL or stop this service.
+ * Foreground service to keep app alive which displays a notification to view {@link Admin} URL or
+ * stop this service.
  */
 public class AdminKeepAliveService extends Service {
 
@@ -69,10 +72,11 @@ public class AdminKeepAliveService extends Service {
             builder.setContentIntent(pendingIntent);
             // Actually useless because Foreground notifications cannot be deleted
             builder.setDeleteIntent(stopPendingIntent);
-            builder.addAction(new Builder(R.drawable.objectbox_stop,
-                    getString(R.string.objectbox_adminNotificationActionStop),
-                    stopPendingIntent)
-                    .build());
+            builder.addAction(
+                    buildNotificationActionCompat(R.drawable.objectbox_stop,
+                            getString(R.string.objectbox_adminNotificationActionStop),
+                            stopPendingIntent)
+            );
 
             ServiceCompat.startForeground(this, notificationId, builder.build());
             Log.d(TAG, "Started");
@@ -87,6 +91,22 @@ public class AdminKeepAliveService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private Notification.Action buildNotificationActionCompat(int iconResId, CharSequence title,
+                                                              PendingIntent intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return new Builder(Icon.createWithResource(this, iconResId), title, intent).build();
+        } else {
+            return buildNotificationActionLegacy(iconResId, title, intent);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private static Notification.Action buildNotificationActionLegacy(int iconResId,
+                                                                     CharSequence title,
+                                                                     PendingIntent intent) {
+        return new Builder(iconResId, title, intent).build();
     }
 
 }
