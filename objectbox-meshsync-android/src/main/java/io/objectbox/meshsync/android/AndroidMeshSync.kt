@@ -18,7 +18,6 @@ package io.objectbox.meshsync.android
 import android.content.Context
 import io.objectbox.annotation.apihint.Experimental
 import io.objectbox.internal.NativeLibraryUtils
-import io.objectbox.meshsync.android.AndroidMeshSync.createConfig
 import io.objectbox.meshsync.android.internal.NearbyMeshNetwork
 import io.objectbox.sync.InternalSyncAccess
 import io.objectbox.sync.MeshConfig
@@ -72,7 +71,7 @@ object AndroidMeshSync {
      */
     @JvmStatic
     fun createConfig(context: Context, meshId: String): MeshConfig {
-        NativeLibraryUtils.checkHasFeature()
+        NativeLibraryUtils.checkHasSyncFeature()
 
         // Create the config first: it validates meshId, avoiding the creation of a native network
         // for bad input.
