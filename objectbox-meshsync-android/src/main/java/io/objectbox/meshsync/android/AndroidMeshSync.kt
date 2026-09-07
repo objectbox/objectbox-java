@@ -79,7 +79,7 @@ object AndroidMeshSync {
         // Create the Nearby network (Java + paired native object) and register it with the config.
         // The native network is owned by the MeshSync once the sync client is created;
         // see NearbyMeshNetwork.stop().
-        val network = NearbyMeshNetwork(context.applicationContext, meshId)
+        val network = NearbyMeshNetwork(context.applicationContext)
         InternalSyncAccess.addNetworkInternalHandle(config, network.nativeHandle)
         return config
     }
