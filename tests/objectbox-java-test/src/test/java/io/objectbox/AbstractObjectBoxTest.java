@@ -156,6 +156,11 @@ public abstract class AbstractObjectBoxTest {
         return builder;
     }
 
+    /** Override to set {@link io.objectbox.model.EntityFlags} on TestEntity, e.g. SYNC_ENABLED. */
+    protected int testEntityFlags() {
+        return 0;
+    }
+
     protected Box<TestEntity> getTestEntityBox() {
         return store.boxFor(TestEntity.class);
     }
@@ -252,6 +257,7 @@ public abstract class AbstractObjectBoxTest {
     private void addTestEntity(ModelBuilder modelBuilder, @Nullable IndexType simpleStringIndexType) {
         lastEntityUid = ++lastUid;
         EntityBuilder entityBuilder = modelBuilder.entity("TestEntity").id(++lastEntityId, lastEntityUid);
+        if (testEntityFlags() != 0) entityBuilder.flags(testEntityFlags());
         entityBuilder.property("id", PropertyType.Long).id(TestEntity_.id.id, ++lastUid)
                 .flags(PropertyFlags.ID | (areIdsAssignable() ? PropertyFlags.ID_SELF_ASSIGNABLE : 0));
         entityBuilder.property("simpleBoolean", PropertyType.Bool).id(TestEntity_.simpleBoolean.id, ++lastUid);

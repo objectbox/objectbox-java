@@ -326,6 +326,34 @@ public class SyncTest extends AbstractObjectBoxTest {
                 .build().close();
     }
 
+    /**
+     * A Sync client can be started only once: a second {@code start()}, also after {@code stop()},
+     * throws. The Java API docs only say that a closed client cannot be re-used; the exception and
+     * its message come from the native state machine and are not a spec. Pinned because re-using a
+     * stopped client is a natural thing to try, and the answer is to build a new client.
+     */
+    @Test
+    public void clientStart_twiceOrAfterStop_throws() {
+        try (SyncClient syncClient = clientBuilder().build()) {
+            syncClient.start();
+            assertTrue(syncClient.isStarted());
+            // Note: with no server the state may already have moved on from STARTED (e.g. DISCONNECTED).
+
+            // A started client can not be started again.
+            IllegalStateException startedTwice = assertThrows(IllegalStateException.class, syncClient::start);
+            assertTrue(startedTwice.getMessage(), startedTwice.getMessage().contains("startedOnce"));
+            assertTrue(syncClient.isStarted());
+
+            // Neither can a stopped one: build a new client instead. Stopping again is fine.
+            syncClient.stop();
+            assertFalse(syncClient.isStarted());
+            IllegalStateException restarted = assertThrows(IllegalStateException.class, syncClient::start);
+            assertTrue(restarted.getMessage(), restarted.getMessage().contains("startedOnce"));
+            assertFalse(syncClient.isStarted());
+            syncClient.stop();
+        }
+    }
+
     private void assertThrowsIsNull(ThrowingRunnable runnable) {
         IllegalArgumentException isNullEx = assertThrows(IllegalArgumentException.class, runnable);
         assertTrue(isNullEx.getMessage().contains("must not be null"));
