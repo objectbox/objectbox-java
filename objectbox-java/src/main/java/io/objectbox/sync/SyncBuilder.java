@@ -99,7 +99,7 @@ public final class SyncBuilder {
     SyncBuilder(BoxStore boxStore) {
         checkNotNull(boxStore, "boxStore");
         this.boxStore = boxStore;
-        NativeLibraryUtils.checkHasFeature();
+        NativeLibraryUtils.checkHasSyncFeature();
         this.platform = Platform.findPlatform(); // Requires APIs only present in Android Sync library
     }
 

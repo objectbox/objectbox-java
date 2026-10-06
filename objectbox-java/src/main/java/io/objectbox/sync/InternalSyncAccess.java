@@ -38,6 +38,8 @@ public final class InternalSyncAccess {
 
     /**
      * Adds a platform-specific native network (transport) to a mesh config.
+     * <p>
+     * At most one network per transport type can be added (native library rejects duplicates).
      *
      * @param networkInternalHandle an internal handle to a native mesh network created by a
      * platform library.

@@ -52,12 +52,12 @@ public class NativeLibraryUtils {
     /**
      * Calls {@link #checkHasFeature} with {@link Feature#SYNC}.
      */
-    public static void checkHasFeature() {
+    public static void checkHasSyncFeature() {
         checkHasFeature(Feature.SYNC, "Sync", URL_SYNC_LANDING_PAGE);
     }
 
     /**
-     * Calls {@link #checkHasFeature} with {@link Feature#SYNC_SERVER}.
+     * Calls {@link #checkHasSyncFeature} with {@link Feature#SYNC_SERVER}.
      */
     public static void checkHasSyncServerFeature() {
         checkHasFeature(Feature.SYNC_SERVER, "Sync Server", URL_SYNC_LANDING_PAGE);

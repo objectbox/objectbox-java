@@ -91,14 +91,15 @@ class MeshSyncPermissions(
     }
 
     /**
-     * Returns `true` if the request code matches, all required permissions are granted and
+     * Returns `true` if the request code matches, any of the required permissions are granted and
      * [MeshSync.retryNetworks] was called.
      *
      * Call this from [Activity.onRequestPermissionsResult] and pass the received [requestCode]
      * and [SyncClient.getMesh] for [meshSync].
      *
-     * Alternatively, your code can check itself if all [missingRuntimePermissions] are granted and
-     * then call [MeshSync.retryNetworks] (or create a [SyncClient]) itself.
+     * Alternatively, your code can check itself if any [missingRuntimePermissions] are granted
+     * (compare to [runtimePermissions]) and then call [MeshSync.retryNetworks] (or create a
+     * [SyncClient]) itself.
      */
     fun notifyMeshIfPermissionsGranted(
         requestCode: Int,

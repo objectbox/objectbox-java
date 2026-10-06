@@ -3,23 +3,37 @@
 
     <!-- Note that the objectbox-android AAR ships a different manifest! -->
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- When targeting API level 28 or higher to run ObjectBox Admin foreground service -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <!-- When targeting API level 34 or higher to run ObjectBox Admin foreground service -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
     <!-- When targeting API level 33 or higher to post the initial ObjectBox Admin notification -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application>
         <!-- ObjectBox Admin -->
+        <!--
+        Since Android 14 (API 34) it is required to specify a foreground service type. None of the
+        standard types fit and as this is only intended for debugging, declare a specialUse type
+        (that would have to be approved during Play Store review, but again, this is for debugging).
+        https://developer.android.com/develop/background-work/services/fgs/declare
+        https://developer.android.com/develop/background-work/services/fgs/service-types
+        -->
         <service
-            android:name=".AdminKeepAliveService"
-            android:exported="false" />
+                android:name=".AdminKeepAliveService"
+                android:foregroundServiceType="specialUse"
+                android:exported="false">
+            <property
+                    android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                    android:value="admin_keep_alive_service"/>
+        </service>
 
         <receiver
-            android:name=".AdminNotificationReceiver"
-            android:exported="false">
+                android:name=".AdminNotificationReceiver"
+                android:exported="false">
             <intent-filter>
-                <action android:name="io.objectbox.action.KEEP_ALIVE" />
+                <action android:name="io.objectbox.action.KEEP_ALIVE"/>
             </intent-filter>
         </receiver>
     </application>

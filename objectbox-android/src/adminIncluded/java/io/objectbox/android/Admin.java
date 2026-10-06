@@ -33,7 +33,8 @@ import io.objectbox.BoxStore;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
- * A helper class to start the ObjectBox Admin web app used to browse and gain insights into the database.
+ * A helper class to start the ObjectBox Admin web app used to browse and gain insights into the
+ * database.
  * <p>
  * Usage requires manually configuring some ObjectBox dependencies, see the
  * <a href="https://docs.objectbox.io/data-browser">documentation</a> for more details.
@@ -44,9 +45,9 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
  *     Log.i("ObjectBoxAdmin", "Started: " + started);
  * }
  * </pre>
- * After {@link #start} is called a notification is displayed. Tap it to open this Admin URL on the device.
- * Alternatively, look for a logcat message from Admin to obtain the URL. Use {@code adb forward} to access
- * the URL on your development machine.
+ * After {@link #start} is called a notification is displayed. Tap it to open this Admin URL on the
+ * device. Alternatively, look for a logcat message from Admin to obtain the URL. Use
+ * {@code adb forward} to access the URL on your development machine.
  * <p>
  * Tapping the notification starts a foreground service to keep this app running in the background.
  * Stop this keep-alive service from the notification.
@@ -55,7 +56,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
  */
 public class Admin {
 
-    private static final String TAG = "ObjectBoxAdmin";
+    private static final String TAG = "ObjectBox";
     private static final String NOTIFICATION_CHANNEL_ID = "objectbox-browser";
 
     private final BoxStore boxStore;
@@ -137,10 +138,10 @@ public class Admin {
             // developers need to turn on notifications for the app through system settings
             // or request the permission from the user.
             // https://developer.android.com/develop/ui/views/notifications/notification-permission
-            // Already on Android 7 or newer, notifications can been turned off in system settings. This may happen
-            // while developers are testing an app, so also warn in this case.
+            // Already on Android 7 or newer, notifications can be turned off in system settings.
+            // This may happen while developers are testing an app, so also warn in this case.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !manager.areNotificationsEnabled()) {
-                Log.w(TAG, "To use the ObjectBox Admin keep-alive notification turn on notifications for this app");
+                Log.w(TAG, "To use the ObjectBox Admin keep-alive service turn on notifications for this app");
             }
             Notification.Builder builder = buildBaseNotification(context, port, manager);
             builder.setContentIntent(pendingIntent);
@@ -154,23 +155,28 @@ public class Admin {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Note: IMPORTANCE_LOW so no sound is played to avoid distractions while testing.
             NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID,
-                    "ObjectBox Admin", NotificationManager.IMPORTANCE_LOW);
+                    context.getString(R.string.objectbox_adminNotificationTitle), NotificationManager.IMPORTANCE_LOW);
             // if channel already exists, create call will be ignored
             manager.createNotificationChannel(channel);
         }
 
-        Notification.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder = new Notification.Builder(context, NOTIFICATION_CHANNEL_ID);
-        } else {
-            builder = new Notification.Builder(context);
-        }
-
-        builder.setContentTitle(context.getString(R.string.objectbox_objectBrowserNotificationTitle))
-                .setContentText(context.getString(R.string.objectbox_objectBrowserNotificationText, port))
+        return buildNotificationCompat(context)
+                .setContentTitle(context.getString(R.string.objectbox_adminNotificationTitle))
+                .setContentText(context.getString(R.string.objectbox_adminNotificationText, port))
                 .setSmallIcon(R.drawable.objectbox_notification);
+    }
 
-        return builder;
+    private static Notification.Builder buildNotificationCompat(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return new Notification.Builder(context, NOTIFICATION_CHANNEL_ID);
+        } else {
+            return buildNotificationLegacy(context);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private static Notification.Builder buildNotificationLegacy(Context context) {
+        return new Notification.Builder(context);
     }
 
     static Intent viewIntent(String url) {
@@ -181,7 +187,8 @@ public class Admin {
 
     /**
      * Targeting Android 12 requires to mark PendingIntents explicitly as immutable or mutable.
-     * https://developer.android.com/about/versions/12/behavior-changes-12#pending-intent-mutability
+     * <p>
+     * <a href="https://developer.android.com/about/versions/12/behavior-changes-12#pending-intent-mutability">Pending intents mutability</a>
      */
     static int buildPendingIntentFlags(int flags) {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("java-library")
     alias(libs.plugins.kotlin.jvm)
+    id("objectbox.kotlin-conventions")
     id("objectbox.dokka-conventions")
     id("objectbox.publishing-conventions")
 }

@@ -2,6 +2,7 @@ import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
 plugins {
     alias(libs.plugins.android.library)
+    id("objectbox.kotlin-conventions")
     id("objectbox.publishing-conventions")
 }
 
