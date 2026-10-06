@@ -6,6 +6,8 @@ For more insights into what changed in the database libraries, [check the Object
 
 ## Next release
 
+* Update Android and JVM libraries to database version `6.0.0-beta-2026-10-05`.
+  * Closing a store with an open transaction created in the same thread is more robust now: the transaction gets aborted with a warning instead of entering an infinite loop state (note that this is still a programming error and should be avoided in the first place).
 * ObjectBox Gradle plugin: requires at least Gradle 8.3.
 * ObjectBox Gradle plugin: when using built-in Kotlin with Android Gradle Plugin 9, applies AGPs custom kapt plugin or suggests to add it, adds the ObjectBox Kotlin dependency.
 * objectbox-rxjava3 and objectbox-meshsync-android: require only Kotlin compiler and standard library 2.2.0 to match objectbox-kotlin.
