@@ -4,7 +4,7 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the database libraries, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
-## Next release
+## 6.0.0-beta2 - 2026-10-06
 
 * Update Android and JVM libraries to database version `6.0.0-beta-2026-10-05`.
   * Closing a store with an open transaction created in the same thread is more robust now: the transaction gets aborted with a warning instead of entering an infinite loop state (note that this is still a programming error and should be avoided in the first place).

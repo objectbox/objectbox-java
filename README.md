@@ -151,7 +151,7 @@ agp = "AGP_VERSION"
 kotlin = "KOTLIN_VERSION"
 
 # Define a variable for the version of the ObjectBox plugin
-objectbox = "6.0.0-beta"
+objectbox = "6.0.0-beta2"
 
 [plugins]
 # For an Android project, using Android Gradle Plugin 9.0 or newer
@@ -251,7 +251,7 @@ Your project can now use ObjectBox, continue by [defining entity classes](https:
 
 plugins {
     // Add the ObjectBox plugin
-    id("io.objectbox") version "6.0.0-beta" apply false
+    id("io.objectbox") version "6.0.0-beta2" apply false
 }
 ```
 
@@ -283,7 +283,7 @@ dependencyResolutionManagement {
 
 buildscript {
     // Define a variable for the ObjectBox plugin version
-    val objectboxVersion by extra("6.0.0-beta")
+    val objectboxVersion by extra("6.0.0-beta2")
   
     repositories {
         // Add Maven Central to the plugin repositories     
@@ -313,7 +313,7 @@ allprojects {
 
 buildscript {
     // Define a variable for the ObjectBox plugin version
-    ext.objectboxVersion = "6.0.0-beta"
+    ext.objectboxVersion = "6.0.0-beta2"
   
     repositories {        
         // Add Maven Central to the plugin repositories
