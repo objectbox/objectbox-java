@@ -6,6 +6,8 @@ For more insights into what changed in the database libraries, [check the Object
 
 ## Next release
 
+* ObjectBox Gradle plugin: error when an index or a relation uses an existing UID, prevent creating duplicate UIDs for them.
+
 ## 6.0.0-beta2 - 2026-10-06
 
 * Update Android and JVM libraries to database version `6.0.0-beta-2026-10-05`.
