@@ -179,9 +179,8 @@ publish-maven-internal:
   script:
     - ./gradlew $GITLAB_REPO_ARGS $GITLAB_PUBLISH_ARGS $VERSION_ARGS publishAllPublicationsToGitLabRepository
 
-# FIXME Temporarily turn off to only publish to GitLab repo
 # Publish Maven artifacts to public Maven Central repo
-.publish-maven-central:
+publish-maven-central:
   <<: *docker_linux_x64_android
   stage: publish-maven-central
   rules:
@@ -198,9 +197,8 @@ publish-maven-internal:
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "*Releasing Java libraries* (job = $CI_JOB_NAME, ref = $CI_COMMIT_REF_NAME, commit = $CI_COMMIT_SHORT_SHA) job status = *$CI_JOB_STATUS*"
     - ci/send-to-gchat.sh "$GOOGLE_CHAT_WEBHOOK_JAVA_CI" --thread $CI_COMMIT_SHA "Check https://repo1.maven.org/maven2/io/objectbox/ in a few minutes."
 
-# FIXME Temporarily turn off to only publish to GitLab repo
 # Create Java API docs archive
-.package-api-docs:
+package-api-docs:
   <<: *docker_linux_x64_android
   stage: package-api-docs
   rules:
