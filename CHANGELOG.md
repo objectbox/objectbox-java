@@ -6,32 +6,40 @@ For more insights into what changed in the database libraries, [check the Object
 
 ## Next release
 
-* ObjectBox Gradle plugin: error when an index or a relation uses an existing UID, prevent creating duplicate UIDs for them.
+- ObjectBox Gradle plugin
+  - **Experimental support for KSP**: when the plugin detects the [KSP plugin](https://kotlinlang.org/docs/ksp-quickstart.html) (`com.google.devtools.ksp`), it will configure the new experimental KSP processor [#1075](https://github.com/objectbox/objectbox-java/issues/1075)
+  - Error when an index or a relation uses an existing UID, prevent creating duplicate UIDs for them
 
 ## 6.0.0-beta2 - 2026-10-06
 
-* Update Android and JVM libraries to database version `6.0.0-beta-2026-10-05`.
-  * Closing a store with an open transaction created in the same thread is more robust now: the transaction gets aborted with a warning instead of entering an infinite loop state (note that this is still a programming error and should be avoided in the first place).
-* ObjectBox Gradle plugin: requires at least Gradle 8.3.
-* ObjectBox Gradle plugin: when using built-in Kotlin with Android Gradle Plugin 9, applies AGPs custom kapt plugin or suggests to add it, adds the ObjectBox Kotlin dependency.
-* objectbox-rxjava3 and objectbox-meshsync-android: require only Kotlin compiler and standard library 2.2.0 to match objectbox-kotlin.
-* Admin: make keep-alive service compatible with Android 14 and newer.
-
-## 6.0.0-beta - 2026-07-14
-
-* Update Android and JVM libraries to database version `6.0.0-beta-2026-07-13`
-  * Admin: modernized user interface based on Vue.js 3 and Material Design 3
-  * Admin: optimized pages now loading faster
-  * Android: log messages now use the logcat tag "ObjectBox" (previously "Box")
-  * Internal fixes and improvements
-* objectbox-kotlin: requires at least Kotlin compiler and standard library 2.2.0
+- Update Android and JVM libraries to database version `6.0.0-beta-2026-10-05`.
+  - Closing a store with an open transaction created in the same thread is more robust now: the transaction gets aborted with a warning instead of entering an infinite loop state (note that this is still a programming error and should be avoided in the first place).
+- ObjectBox Gradle plugin: requires at least Gradle 8.3.
+- ObjectBox Gradle plugin: when using built-in Kotlin with Android Gradle Plugin 9, applies AGPs custom kapt plugin or suggests to add it, adds the ObjectBox Kotlin dependency.
+- objectbox-rxjava3 and objectbox-meshsync-android: require only Kotlin compiler and standard library 2.2.0 to match objectbox-kotlin
+- Admin: make keep-alive service compatible with Android 14 and newer.
 
 ### Sync
 
-* **New** [Mesh Sync API](https://sync.objectbox.io/mesh-sync): peer-to-peer (P2P) synchronization between sync clients without a central server.  
-  * Attach a `MeshConfig` via `SyncBuilder.mesh()` and query the running mesh via `SyncClient.getMesh()` (state, connected peer count, statistics counters). 
+- Requires a server that supports Sync protocol version 12
+- Changed sync filters (e.g. changed filter variables) to resync instead of reset the client's data (V12 servers); `applyFilterVariables()` reconnects to apply changed variables
+
+## 6.0.0-beta - 2026-07-14
+
+- Update Android and JVM libraries to database version `6.0.0-beta-2026-07-13`
+  - Admin: modernized user interface based on Vue.js 3 and Material Design 3
+  - Admin: optimized pages now loading faster
+  - Android: log messages now use the logcat tag "ObjectBox" (previously "Box")
+  - Internal fixes and improvements
+- objectbox-kotlin: requires at least Kotlin compiler and standard library 2.2.0
+
+### Sync
+
+- Requires a server that supports Sync protocol version 11
+- **New** [Mesh Sync API](https://sync.objectbox.io/mesh-sync): peer-to-peer (P2P) synchronization between sync clients without a central server.  
+  - Attach a `MeshConfig` via `SyncBuilder.mesh()` and query the running mesh via `SyncClient.getMesh()` (state, connected peer count, statistics counters). 
     Mesh configurations are created by ObjectBox platform libraries that provide a mesh network (transport).
-  * New artifact `objectbox-meshsync-android`: provides the mesh network for Android using Google Nearby Connections. Add it next to the Sync variant of the Android library (like `objectbox-sync-android`) and create a mesh configuration with `AndroidMeshSync.createConfig(context, meshId)`. It includes the permissions required by Nearby Connections and the `play-services-nearby` dependency. See [its README for details](objectbox-meshsync-android/README.md).
+  - New artifact `objectbox-meshsync-android`: provides the mesh network for Android using Google Nearby Connections. Add it next to the Sync variant of the Android library (like `objectbox-sync-android`) and create a mesh configuration with `AndroidMeshSync.createConfig(context, meshId)`. It includes the permissions required by Nearby Connections and the `play-services-nearby` dependency. See [its README for details](objectbox-meshsync-android/README.md).
 
 ## 5.4.2 - 2026-05-05
 
