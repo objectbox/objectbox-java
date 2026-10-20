@@ -169,7 +169,7 @@ fi
 currentBranch=$(git rev-parse --abbrev-ref HEAD)
 echo ""
 echo "Suggested commands to push these changes:"
-echo "  git push origin $currentBranch --push-option=ci.skip"
+echo "  git push origin $currentBranch --set-upstream --push-option=ci.skip"
 if $releaseFlag; then
     echo "  git push origin $tagRelease --push-option=ci.skip"
 fi
