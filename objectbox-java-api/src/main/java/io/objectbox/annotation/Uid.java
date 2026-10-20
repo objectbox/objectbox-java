@@ -23,23 +23,26 @@ import java.lang.annotation.Target;
 
 
 /**
- * UIDs identify entities (and properties) uniquely in the meta object model file (objectbox-model/default.json).
- * With UIDs you can map entities to their meta model representation in a stable way without its name.
- * Once a UID is set, you can rename the entity as often as you like - ObjectBox keeps track of it automatically.
- * Thus, it is advisable to lookup the UID in objectbox-model/default.json and use it here before renaming a entity.
+ * UIDs identify entities (and properties and relations) uniquely in the meta object model file
+ * (objectbox-model/default.json). With UIDs entities can be mapped to their meta model
+ * representation in a stable way without their name. Once a UID is set, the entity can be renamed
+ * as often as you like - ObjectBox keeps track of it automatically. Thus, it is advisable to look
+ * up the UID in the model file and use it here before renaming an entity.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target({ElementType.FIELD, ElementType.TYPE})
 public @interface Uid {
     /**
-     * The UID associated with an entity/property.
+     * The UID associated with an entity, property or relation, as found in the model file.
      * <p>
      * Special values:
      * <ul>
-     * <li>empty (or zero): and the ObjectBox Gradle plugin will set it automatically to the current value.</li>
-     * <li>-1: will assign a new ID and UID forcing the property/entity to be treated as new
-     * (for entities: all property IDs and UIDs will be renewed too)</li>
+     * <li>no value, 0 or -1: the build fails with a message that shows the UID operations for this
+     * entity, property or relation.</li>
      * </ul>
+     * <p>
+     * See the <a href="https://docs.objectbox.io/advanced/data-model-updates">Data Model Updates</a>
+     * documentation for details.
      */
     long value() default 0;
 }
