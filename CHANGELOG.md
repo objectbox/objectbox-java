@@ -10,6 +10,7 @@ For more insights into what changed in the database libraries, [check the Object
 - ObjectBox Gradle plugin
   - **Experimental support for KSP**: when the plugin detects the [KSP plugin](https://kotlinlang.org/docs/ksp-quickstart.html) (`com.google.devtools.ksp`), it will configure the new experimental KSP processor [#1075](https://github.com/objectbox/objectbox-java/issues/1075)
   - Error when an index or a relation uses an existing UID, prevent creating duplicate UIDs for them
+- ObjectBox Maven plugin: release `1.4.0-beta.1`, supports transforming entity classes with Java 11 byte code (class file major version 55).
 
 ## 6.0.0-beta2 - 2026-10-06
 
