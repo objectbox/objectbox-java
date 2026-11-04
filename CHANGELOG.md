@@ -5,6 +5,8 @@ Notable changes to the ObjectBox Java library.
 For more insights into what changed in the database libraries, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
 ## Next release
+                 
+- The Android database libraries no longer prevent R8 from minifying an Android app build ("Missing classes detected while running R8.").
 
 ## 6.0.0-beta3 - 2026-10-20
 

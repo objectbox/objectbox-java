@@ -25,6 +25,8 @@ android {
         // Dependencies: objectbox-android also has a "database" dimension,
         // always pick its "sync" flavor.
         missingDimensionStrategy("database", "sync")
+
+        consumerProguardFiles("consumer-proguard-rules.pro")
     }
 
     buildTypes {
