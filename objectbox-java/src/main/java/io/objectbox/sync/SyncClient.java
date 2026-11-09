@@ -74,7 +74,7 @@ public interface SyncClient extends Closeable {
     boolean isStarted();
 
     /**
-     * Flag indicating if the sync client was started.
+     * Flag indicating if the sync client was logged in.
      * Logged in clients can sync with the sync destination to exchange data.
      */
     boolean isLoggedIn();
@@ -93,10 +93,9 @@ public interface SyncClient extends Closeable {
     long getServerTimeNanos();
 
     /**
-     * Returns the estimated difference in nanoseconds between the server time and the local timestamp.
-     * urns the difference in nanoseconds between the current local time of this client
-     * Equivalent to calculating {@link #getServerTimeNanos()} - "current time" (nanos since epoch),
-     * except for when the server time is unknown, then the result is zero.
+     * Returns the estimated difference in nanoseconds between the server time and the local
+     * timestamp. Equivalent to calculating {@link #getServerTimeNanos()} - "current time" (nanos
+     * since epoch), except for when the server time is unknown, then the result is zero.
      *
      * @return time difference in nanoseconds; e.g. positive if server time is ahead of local time;
      * or 0 if there has not been a server contact yet and thus the server's time is unknown
