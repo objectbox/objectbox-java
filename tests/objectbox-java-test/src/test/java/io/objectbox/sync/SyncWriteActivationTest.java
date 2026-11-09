@@ -23,17 +23,21 @@ import io.objectbox.Box;
 import io.objectbox.TestEntity;
 import io.objectbox.model.EntityFlags;
 
+
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Writes to a sync-enabled entity type are rejected until a Sync client has been started for the store.
+ * Writes to a sync-enabled entity type are rejected until a Sync client has been started for the
+ * store.
  * <p>
- * This is native behavior the Java docs do not spell out; the message text is asserted because it is
- * what users see and search for. That {@code stop()} leaves writes activated while {@code close()}
- * deactivates them again is more a quirk than intended behavior, but still documented here.
+ * This is native behavior the Java docs do not spell out; the message text is asserted because it
+ * is what users see and search for. That {@code stop()} leaves writes activated while
+ * {@code close()} deactivates them again is more a quirk than intended behavior, but still
+ * documented here.
  * <p>
- * Note: the client is built for a loopback URL nothing listens on; it does not have to reach a server.
+ * Note: the client is built for a loopback URL nothing listens on; it does not have to reach a
+ * server.
  */
 public class SyncWriteActivationTest extends AbstractObjectBoxTest {
 
@@ -43,9 +47,12 @@ public class SyncWriteActivationTest extends AbstractObjectBoxTest {
     }
 
     private void assertPutRejected(Box<TestEntity> box) {
-        IllegalStateException e = assertThrows(IllegalStateException.class, () -> box.put(createTestEntity("x", 1)));
-        assertTrue(e.getMessage(), e.getMessage().contains("Can not modify object of sync-enabled type \"TestEntity\""));
-        assertTrue(e.getMessage(), e.getMessage().contains("because sync has not been activated for this store"));
+        IllegalStateException e = assertThrows(IllegalStateException.class,
+                () -> box.put(createTestEntity("x", 1)));
+        assertTrue(e.getMessage(), e.getMessage().contains(
+                "Can not modify object of sync-enabled type \"TestEntity\""));
+        assertTrue(e.getMessage(),
+                e.getMessage().contains("because sync has not been activated for this store"));
     }
 
     @Test
@@ -55,11 +62,10 @@ public class SyncWriteActivationTest extends AbstractObjectBoxTest {
         // No client: rejected.
         assertPutRejected(box);
 
-        SyncClient client = Sync.client(store)
+        try (SyncClient client = Sync.client(store)
                 .url("ws://127.0.0.1")
                 .credentials(SyncCredentials.none())
-                .build();
-        try {
+                .build()) {
             // Built, but not started: still rejected.
             assertPutRejected(box);
 
@@ -70,8 +76,6 @@ public class SyncWriteActivationTest extends AbstractObjectBoxTest {
             // Stopped: writes stay activated.
             client.stop();
             assertTrue(box.put(createTestEntity("y", 2)) > 0);
-        } finally {
-            client.close();
         }
 
         // Closed: deactivated again.
