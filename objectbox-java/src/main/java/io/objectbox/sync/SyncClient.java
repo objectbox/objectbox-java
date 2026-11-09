@@ -246,7 +246,16 @@ public interface SyncClient extends Closeable {
     boolean awaitFirstLogin(long millisToWait);
 
     /**
-     * Starts the client. It will connect to the server, log in (authenticate) and start syncing.
+     * Starts this Sync client to initiate synchronization.
+     * <p>
+     * This method triggers communication in the background and will return immediately. If the
+     * synchronization destination is reachable, this client's background thread will connect to the
+     * server, log in (authenticate) and, depending on "update request mode"
+     * ({@link SyncBuilder#requestUpdatesMode(RequestUpdatesMode)}), start syncing data. If the
+     * device, network or server is currently offline, connection attempts will be retried later
+     * using increasing backoff intervals.
+     * <p>
+     * A Sync client may be started only once (subsequent calls will likely throw).
      */
     void start();
 
