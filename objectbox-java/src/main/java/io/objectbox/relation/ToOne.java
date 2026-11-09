@@ -280,8 +280,9 @@ public class ToOne<TARGET> implements Serializable {
         ensureBoxes(target);
         if (target != null) {
             boxStore.runInTx(() -> {
-                long targetKey = targetBox.put(target);
-                setResolvedTarget(target, targetKey);
+                long targetId = targetBox.put(target);
+                setTargetId(targetId);
+                setResolvedTarget(target, targetId);
                 entityBox.put(entity);
             });
         } else {

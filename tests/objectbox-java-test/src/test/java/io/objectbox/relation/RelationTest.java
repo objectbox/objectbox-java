@@ -177,10 +177,7 @@ public class RelationTest extends AbstractRelationTest {
 
     /**
      * Per the {@code setAndPutTarget()} javadoc a target that was not put yet is put before the
-     * source. Currently FAILS: {@code setAndPutTargetAlways()} puts the target but never sets the
-     * target ID on the source, so the source is stored with target ID 0 and its ToOne is left
-     * inconsistent ({@code getTargetId()} is 0, {@code getTarget()} throws "Illegal ID value: 0").
-     * Calling {@code setTarget(target)} before, or putting the source with {@code box.put()}, works.
+     * source, and the source points to it.
      */
     @Test
     public void setAndPutTarget_newSource_newTarget() {
