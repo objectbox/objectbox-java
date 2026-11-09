@@ -191,7 +191,8 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
      */
     @Test
     public void storeClose_observerStillRunning_warnsAfterOneSecond() throws InterruptedException {
-        // The store captures the error stream when it is created, so create a new one after redirecting it.
+        // Use a custom error stream to assert messages the native store writes. As the native store
+        // only captures the standard error stream when it is created, close and re-create it.
         store.close();
         ByteArrayOutputStream errBytes = new ByteArrayOutputStream();
         PrintStream originalErr = System.err;
