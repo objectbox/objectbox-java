@@ -68,7 +68,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testCloseThreadResources() {
+    public void storeCloseThreadResources() {
         Box<TestEntity> box = store.boxFor(TestEntity.class);
         Cursor<TestEntity> reader = box.getReader();
         box.releaseReader(reader);
@@ -84,7 +84,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testClose() {
+    public void storeClose() {
         // This test suite uses a single entity (TestEntity) by default
         // and all other tests close the store after being done. So should be 1.
         assertEquals(1, BoxStore.nativeGloballyActiveEntityTypes());
