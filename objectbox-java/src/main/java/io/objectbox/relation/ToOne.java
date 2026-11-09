@@ -164,8 +164,7 @@ public class ToOne<TARGET> implements Serializable {
                         boxStore = (BoxStore) boxStoreField.get(target);
                     }
                     if (boxStore == null) {
-                        throw new DbDetachedException("Cannot resolve relation for detached entities, " +
-                                "call box.attach(entity) beforehand.");
+                        throw new DbDetachedException();
                     }
                 }
                 debugRelations = boxStore.isDebugRelations();

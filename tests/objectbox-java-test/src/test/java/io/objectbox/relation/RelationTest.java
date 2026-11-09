@@ -17,6 +17,7 @@
 package io.objectbox.relation;
 
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import java.util.Comparator;
 import java.util.List;
@@ -114,7 +115,7 @@ public class RelationTest extends AbstractRelationTest {
     /**
      * Resolving a relation of an object that is neither put nor attached throws
      * {@link DbDetachedException}, as documented. The message text is asserted as well because it
-     * tells users the fix ({@code box.attach(entity)}).
+     * tells users the fix ({@code box.attach(object)}).
      */
     @Test
     public void toOne_getTarget_detachedEntity_throws() {
@@ -122,16 +123,14 @@ public class RelationTest extends AbstractRelationTest {
         Order order = new Order(); // Not put, so not attached to a store.
         order.getCustomer().setTargetId(customer.getId());
 
-        DbDetachedException e = assertThrows(DbDetachedException.class, () -> order.getCustomer().getTarget());
-        assertEquals("Cannot resolve relation for detached entities, call box.attach(entity) beforehand.",
-                e.getMessage());
+        assertThrowsDetached(() -> order.getCustomer().getTarget());
 
         orderBox.attach(order);
         assertEquals(customer.getId(), order.getCustomer().getTarget().getId());
     }
 
     /**
-     * Same as {@link #toOne_getTarget_detachedEntity_throws()} for ToMany, which has its own message.
+     * Same as {@link #toOne_getTarget_detachedEntity_throws()} for ToMany.
      */
     @Test
     public void toMany_detachedEntity_throws() {
@@ -140,7 +139,11 @@ public class RelationTest extends AbstractRelationTest {
         Customer detached = new Customer();
         detached.setId(customer.getId());
 
-        DbDetachedException e = assertThrows(DbDetachedException.class, () -> detached.getOrders().size());
+        assertThrowsDetached(() -> detached.getOrders().size());
+    }
+
+    private static void assertThrowsDetached(ThrowingRunnable runnable) {
+        DbDetachedException e = assertThrows(DbDetachedException.class, runnable);
         assertEquals("Cannot resolve relation for detached objects, call box.attach(object) beforehand.",
                 e.getMessage());
     }
