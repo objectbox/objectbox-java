@@ -19,11 +19,16 @@ package io.objectbox;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import io.objectbox.exception.DbException;
+import io.objectbox.query.Query;
 
 
 import static org.junit.Assert.assertEquals;
@@ -63,7 +68,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testCloseThreadResources() {
+    public void storeCloseThreadResources() {
         Box<TestEntity> box = store.boxFor(TestEntity.class);
         Cursor<TestEntity> reader = box.getReader();
         box.releaseReader(reader);
@@ -79,7 +84,7 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     }
 
     @Test
-    public void testClose() {
+    public void storeClose() {
         // This test suite uses a single entity (TestEntity) by default
         // and all other tests close the store after being done. So should be 1.
         assertEquals(1, BoxStore.nativeGloballyActiveEntityTypes());
@@ -153,6 +158,76 @@ public class BoxStoreTest extends AbstractObjectBoxTest {
     private void assertThrowsStoreIsClosed(ThrowingRunnable runnable) {
         IllegalStateException ex = assertThrows(IllegalStateException.class, runnable);
         assertEquals("Store is closed", ex.getMessage());
+    }
+
+    /**
+     * A subscription that is registered but idle does not delay {@link BoxStore#close()}: the
+     * one-second wait (and the warning of the next test) is about tasks still running on the
+     * internal thread pool. Not behavior to rely on, the advice remains to cancel subscriptions
+     * before closing; this documents what the warning is actually about.
+     */
+    @Test
+    public void storeClose_idleSubscription_doesNotWait() {
+        Query<TestEntity> query = getTestEntityBox().query().build();
+        CountDownLatch initialPublish = new CountDownLatch(1);
+        query.subscribe().observer(data -> initialPublish.countDown());
+        assertLatchCountedDown(initialPublish, 5); // Initial publish is done, the thread pool is idle.
+
+        // Subscription and query are deliberately not cancelled or closed.
+        long start = System.currentTimeMillis();
+        store.close();
+        long duration = System.currentTimeMillis() - start;
+
+        // close() only waits (up to one second) for tasks still running on the internal thread pool.
+        assertTrue("close() took " + duration + " ms", duration < 999);
+        assertTrue(store.internalThreadPool().isTerminated());
+    }
+
+    /**
+     * An observer still running when the store is closed makes {@link BoxStore#close()} wait one
+     * second and print a warning. The timeout and the message text are implementation details, not
+     * API; they are asserted because users search for exactly this message, so it (and the advice
+     * in it) should not change unnoticed.
+     */
+    @Test
+    public void storeClose_observerStillRunning_warnsAfterOneSecond() throws InterruptedException {
+        // Use a custom error stream to assert messages the native store writes. As the native store
+        // only captures the standard error stream when it is created, close and re-create it.
+        store.close();
+        ByteArrayOutputStream errBytes = new ByteArrayOutputStream();
+        PrintStream originalErr = System.err;
+        System.setErr(new PrintStream(errBytes, true));
+        try {
+            store = createBoxStore();
+        } finally {
+            System.setErr(originalErr);
+        }
+
+        CountDownLatch observerEntered = new CountDownLatch(1);
+        CountDownLatch releaseObserver = new CountDownLatch(1);
+        Query<TestEntity> query = getTestEntityBox().query().build();
+        query.subscribe().observer(data -> {
+            observerEntered.countDown();
+            try {
+                releaseObserver.await(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        assertTrue(observerEntered.await(5, TimeUnit.SECONDS));
+
+        long start = System.currentTimeMillis();
+        try {
+            store.close();
+        } finally {
+            releaseObserver.countDown();
+        }
+        long duration = System.currentTimeMillis() - start;
+
+        assertTrue("close() took " + duration + " ms", duration >= 1000);
+        String err = errBytes.toString();
+        assertTrue(err, err.contains("ObjectBox thread pool not terminated in time."));
+        assertTrue(err, err.contains("Ensure all async calls have completed and subscriptions are cancelled"));
     }
 
     @Test

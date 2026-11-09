@@ -74,7 +74,7 @@ public interface SyncClient extends Closeable {
     boolean isStarted();
 
     /**
-     * Flag indicating if the sync client was started.
+     * Flag indicating if the sync client was logged in.
      * Logged in clients can sync with the sync destination to exchange data.
      */
     boolean isLoggedIn();
@@ -93,10 +93,9 @@ public interface SyncClient extends Closeable {
     long getServerTimeNanos();
 
     /**
-     * Returns the estimated difference in nanoseconds between the server time and the local timestamp.
-     * urns the difference in nanoseconds between the current local time of this client
-     * Equivalent to calculating {@link #getServerTimeNanos()} - "current time" (nanos since epoch),
-     * except for when the server time is unknown, then the result is zero.
+     * Returns the estimated difference in nanoseconds between the server time and the local
+     * timestamp. Equivalent to calculating {@link #getServerTimeNanos()} - "current time" (nanos
+     * since epoch), except for when the server time is unknown, then the result is zero.
      *
      * @return time difference in nanoseconds; e.g. positive if server time is ahead of local time;
      * or 0 if there has not been a server contact yet and thus the server's time is unknown
@@ -246,7 +245,16 @@ public interface SyncClient extends Closeable {
     boolean awaitFirstLogin(long millisToWait);
 
     /**
-     * Starts the client. It will connect to the server, log in (authenticate) and start syncing.
+     * Starts this Sync client to initiate synchronization.
+     * <p>
+     * This method triggers communication in the background and will return immediately. If the
+     * synchronization destination is reachable, this client's background thread will connect to the
+     * server, log in (authenticate) and, depending on "update request mode"
+     * ({@link SyncBuilder#requestUpdatesMode(RequestUpdatesMode)}), start syncing data. If the
+     * device, network or server is currently offline, connection attempts will be retried later
+     * using increasing backoff intervals.
+     * <p>
+     * A Sync client may be started only once (subsequent calls will likely throw).
      */
     void start();
 

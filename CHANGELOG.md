@@ -7,6 +7,7 @@ For more insights into what changed in the database libraries, [check the Object
 ## Next release
                  
 - The Android database libraries no longer prevent R8 from minifying an Android app build ("Missing classes detected while running R8.").
+- ToOne: `setAndPutTarget()` and `setAndPutTargetAlways()` actually create the relation to the source object when the target object is new (its ID is 0).
 
 ## 6.0.0-beta3 - 2026-10-20
 

@@ -25,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
@@ -37,6 +38,9 @@ import io.objectbox.reactive.DataSubscription;
 import static io.objectbox.TestEntity_.simpleInt;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 public class QueryObserverTest extends AbstractObjectBoxTest {
@@ -287,6 +291,75 @@ public class QueryObserverTest extends AbstractObjectBoxTest {
         // Verify latches were triggered due to reaching 0, not due to timeout
         assertTrue(publisherBlocked.get());
         assertTrue(waitedBeforeQueryClose.get());
+    }
+
+    /**
+     * Observers are notified on any change of the box, not only if the query result changed.
+     * This is more a quirk than actually intended behavior, but still "documenting" this behavior.
+     **/
+    @Test
+    public void observer_changeNotMatchingQuery_stillNotified() {
+        Query<TestEntity> query = box.query(simpleInt.equal(42)).build();
+        TestObserver<List<TestEntity>> observer = new TestObserver<>();
+        DataSubscription subscription = query.subscribe().onlyChanges().observer(observer);
+
+        // Put an object that does not match the query condition.
+        putTestEntity("does not match", 1);
+
+        observer.assertLatchCountedDown();
+        assertEquals(1, observer.receivedChanges.size());
+        assertEquals(0, observer.receivedChanges.get(0).size());
+
+        subscription.cancel();
+        query.close();
+    }
+
+    /**
+     * Observers are called on a background thread unless a scheduler is set with {@code on(Scheduler)}.
+     */
+    @Test
+    public void observer_runsOnBackgroundThread() {
+        Thread testThread = Thread.currentThread();
+        AtomicReference<Thread> observerThread = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        Query<TestEntity> query = box.query().build();
+        DataSubscription subscription = query.subscribe().observer(data -> {
+            observerThread.set(Thread.currentThread());
+            latch.countDown();
+        });
+
+        assertLatchCountedDown(latch, 5);
+        assertNotNull(observerThread.get());
+        assertNotSame(testThread, observerThread.get());
+
+        subscription.cancel();
+        query.close();
+    }
+
+    /**
+     * Cancelling a subscription does not close its query; the query has its own {@link Query#close()}.
+     * The docs do not spell this out, but it follows from the two having separate lifecycles, and
+     * code that re-uses a query after cancelling (or forgets to close it) relies on it.
+     */
+    @Test
+    public void subscriptionCancel_doesNotCloseQuery() {
+        Query<TestEntity> query = box.query().build();
+        DataSubscription subscription = query.subscribe().observer(data -> {
+        });
+        subscription.cancel();
+        assertTrue(subscription.isCanceled());
+
+        // The query is still usable and can be subscribed to again.
+        putTestEntity("after cancel", 1);
+        assertEquals(1, query.count());
+        TestObserver<List<TestEntity>> observer = new TestObserver<>();
+        DataSubscription subscription2 = query.subscribe().observer(observer);
+        observer.assertLatchCountedDown();
+        assertEquals(1, observer.receivedChanges.get(0).size());
+
+        subscription2.cancel();
+        query.close();
+        assertThrows(IllegalStateException.class, query::count);
     }
 
     private void putTestEntitiesScalars() {

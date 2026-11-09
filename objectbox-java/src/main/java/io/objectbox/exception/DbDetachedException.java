@@ -32,7 +32,7 @@ package io.objectbox.exception;
 public class DbDetachedException extends DbException {
 
     public DbDetachedException() {
-        this("Entity must be attached to a Box.");
+        this("Cannot resolve relation for detached objects, call box.attach(object) beforehand.");
     }
 
     public DbDetachedException(String message) {
