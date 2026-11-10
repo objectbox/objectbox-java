@@ -2,7 +2,7 @@ import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
 
 plugins {
-    alias(libs.plugins.android.library)
+    id("objectbox.android-conventions")
     id("objectbox.publishing-conventions")
 }
 
@@ -16,20 +16,15 @@ val variantAdminIncludedBasicRelease = "${flavorAdminIncluded}${flavorBasic.uppe
 val variantAdminExcludedSyncRelease = "${flavorAdminExcluded}${flavorSync.uppercaseFirstChar()}Release"
 val variantAdminIncludedSyncRelease = "${flavorAdminIncluded}${flavorSync.uppercaseFirstChar()}Release"
 
+// Note: common settings applied by objectbox.android-conventions plugin
 android {
     namespace = "io.objectbox.android"
-    // Note: increasing compile SDK also signals this library is compatible with any changes in that
-    // API level, see "behavior changes" for each Android version at https://developer.android.com/about/versions
-    compileSdk = 36 // Android 16 (BAKLAVA)
 
     // Not using Kotlin source code, so prevent the Kotlin standard library from getting added,
     // avoid Kotlin compiler task run.
     enableKotlin = false
 
-    // Common configuration for all variants (variant = flavor + build type).
     defaultConfig {
-        minSdk = 21 // Android 5.0 (Lollipop), the minimum of NDK r27 used by the database library
-
         consumerProguardFiles("consumer-proguard-rules.pro")
     }
 
@@ -39,25 +34,13 @@ android {
         }
     }
 
-    // https://developer.android.com/studio/build/build-variants#build-types
-    // Common configuration for release build types (debug currently left at default).
-    buildTypes {
-        release {
-            // Currently not obfuscating/minifying with ProGuard/R8.
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Just to use without checkjni
-            signingConfig = signingConfigs.getByName("debug")
-        }
-    }
-
     // Configure a flavor dimension based on if Admin is included in the Android database library.
     // The Admin included flavor adds additional source files, resources and a different Android
     // manifest to help using Admin. The excluded flavor adds source files with no-op Admin APIs.
     // See the directories in "src/" named like the flavors.
     // Configure another flavor dimension purely to add a regular or a Sync variant of the Android
     // database library dependency. See the dependencies block.
-    // Note: common configuration defined in defaultConfig and buildTypes blocks above.
+    // Note: common configuration defined in defaultConfig and buildTypes blocks.
     // https://developer.android.com/studio/build/build-variants#product-flavors
     val dimensionAdmin = "admin"
     val dimensionDatabase = "database"
@@ -98,32 +81,6 @@ android {
         singleVariant(variantAdminIncludedSyncRelease) {
             withJavadocJar()
             withSourcesJar()
-        }
-    }
-
-    // Java 8 features support https://developer.android.com/studio/write/java8-support
-    // Note: this requires consuming projects to also enable this.
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    testOptions {
-        // Robolectric: for local unit tests enable use of Android framework
-        unitTests.isIncludeAndroidResources = true
-        // Robolectric: for local unit tests open internal JDK classes
-        unitTests.all {
-            it.jvmArgs(
-                "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                "--add-opens=java.base/java.util=ALL-UNNAMED",
-                "--add-opens=java.base/java.io=ALL-UNNAMED",
-                "--add-opens=java.base/java.net=ALL-UNNAMED",
-                "--add-opens=java.base/java.security=ALL-UNNAMED",
-                "--add-opens=java.base/java.text=ALL-UNNAMED",
-                "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
-                "--add-opens=java.desktop/java.awt.font=ALL-UNNAMED",
-                "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
-            )
         }
     }
 }

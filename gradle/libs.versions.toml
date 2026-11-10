@@ -65,6 +65,7 @@ spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", ve
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 # build-logic dependencies
+buildLogic-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 buildLogic-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "kotlin-dokka" }
 buildLogic-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
