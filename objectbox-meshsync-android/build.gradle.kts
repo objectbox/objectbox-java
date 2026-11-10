@@ -17,7 +17,7 @@ android {
     namespace = "io.objectbox.meshsync.android"
     // Note: increasing compile SDK also signals this library is compatible with any changes in that
     // API level, see "behavior changes" for each Android version at https://developer.android.com/about/versions
-    compileSdk = 35 // Android 15 (Vanilla Ice Cream)
+    compileSdk = 36 // Android 16 (BAKLAVA)
 
     defaultConfig {
         minSdk = 21 // Android 5.0 (Lollipop), like objectbox-android
