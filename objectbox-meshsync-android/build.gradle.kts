@@ -74,9 +74,23 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    // For local unit tests enable use of Android framework with Robolectric
     testOptions {
+        // Robolectric: for local unit tests enable use of Android framework
         unitTests.isIncludeAndroidResources = true
+        // Robolectric: for local unit tests open internal JDK classes
+        unitTests.all {
+            it.jvmArgs(
+                "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                "--add-opens=java.base/java.util=ALL-UNNAMED",
+                "--add-opens=java.base/java.io=ALL-UNNAMED",
+                "--add-opens=java.base/java.net=ALL-UNNAMED",
+                "--add-opens=java.base/java.security=ALL-UNNAMED",
+                "--add-opens=java.base/java.text=ALL-UNNAMED",
+                "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
+                "--add-opens=java.desktop/java.awt.font=ALL-UNNAMED",
+                "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+            )
+        }
     }
 }
 
