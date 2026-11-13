@@ -201,6 +201,9 @@ public final class SyncClientImpl implements SyncClient {
             if (config.txLogBatchMaxCount != null) {
                 nativeMeshOptTxLogBatchMaxCount(meshOptHandle, config.txLogBatchMaxCount);
             }
+            if (config.txLogMaxAgeSeconds != null) {
+                nativeMeshOptTxLogMaxAgeSeconds(meshOptHandle, config.txLogMaxAgeSeconds);
+            }
             for (long networkInternalHandle : config.networkInternalHandles) {
                 nativeMeshOptNetworkInternal(meshOptHandle, networkInternalHandle);
             }
@@ -616,6 +619,8 @@ public final class SyncClientImpl implements SyncClient {
     private static native void nativeMeshOptTxLogBatchSizeKb(long meshOptHandle, int sizeKb);
 
     private static native void nativeMeshOptTxLogBatchMaxCount(long meshOptHandle, int count);
+
+    private static native void nativeMeshOptTxLogMaxAgeSeconds(long meshOptHandle, long seconds);
 
     /**
      * Registers an internal mesh network (transport) implementation with the mesh options.

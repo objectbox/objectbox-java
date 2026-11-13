@@ -61,6 +61,7 @@ For more insights into what changed in the database libraries, [check the Object
   `SyncClient.setResyncAssumedChanges()`.
 - Changed sync filters (e.g. changed filter variables) now resync instead of resetting the client's data (with servers
   supporting Sync protocol version 12).
+- Mesh Sync: new `MeshConfig` option `txLogMaxAgeSeconds()` (age-based pruning of the local TX logs; default: 8 hours).
 
 ## 6.0.0-beta3 - 2026-10-20
 

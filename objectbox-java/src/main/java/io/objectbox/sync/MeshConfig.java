@@ -58,6 +58,7 @@ public final class MeshConfig {
     @Nullable Integer discoveryPauseJitterSeconds;
     @Nullable Integer txLogBatchSizeKb;
     @Nullable Integer txLogBatchMaxCount;
+    @Nullable Long txLogMaxAgeSeconds;
 
     /**
      * Handles to platform-specific native networks (transports) to register with the mesh sync,
@@ -215,6 +216,15 @@ public final class MeshConfig {
      */
     public MeshConfig txLogBatchMaxCount(int txLogBatchMaxCount) {
         this.txLogBatchMaxCount = txLogBatchMaxCount;
+        return this;
+    }
+
+    /**
+     * Maximum age in seconds of TX logs kept in the local mesh storage (default: 28800, i.e. 8 hours); older TX logs
+     * are pruned. Must not be negative; 0 disables the age-based pruning.
+     */
+    public MeshConfig txLogMaxAgeSeconds(long txLogMaxAgeSeconds) {
+        this.txLogMaxAgeSeconds = txLogMaxAgeSeconds;
         return this;
     }
 
