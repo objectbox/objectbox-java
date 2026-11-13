@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import io.objectbox.HnswIndexParams;
 import io.objectbox.annotation.VectorSearchLevel;
 import io.objectbox.query.ObjectWithScore;
 import io.objectbox.query.Query;
@@ -166,6 +167,27 @@ public class VectorQueryParametersTest extends AbstractVectorTest {
             results = query.findWithScores();
             assertEquals(3, results.size());
             assertExactDistances(false, 42.2f, results);
+        }
+    }
+
+    @Test
+    public void setParameterFilteredSearchMaxNodes_belowNeeded_findsFewer() {
+        // Relies on a particular graph: in some random graphs, a node near the query links to the far objects, so the
+        // search finds them within the limit; thus, re-index the objects with a seed
+        reopenStore(new HnswIndexParams(DIMENSIONS).randomSeed(42));
+
+        // The name has no index, so there is no brute force: the graph search explores nodes from the query on
+        try (Query<VectorEntity> query = vectorBox()
+                .query(VectorEntity_.vector.nearestNeighbors(vector(1), 3).alias(ALIAS)
+                        .and(VectorEntity_.name.oneOf(new String[]{"98", "99", "100"}))) // Far from the query
+                .build()) {
+            assertEquals(asList("98", "99", "100"), names(query.findWithScores())); // The index's limit: 25,000
+
+            query.setParameterFilteredSearchMaxNodes(VectorEntity_.vector, 10);
+            assertEquals(0, query.findWithScores().size());
+
+            query.setParameterFilteredSearchMaxNodes(ALIAS, 1000);
+            assertEquals(asList("98", "99", "100"), names(query.findWithScores()));
         }
     }
 
