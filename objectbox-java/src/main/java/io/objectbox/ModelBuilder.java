@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,6 +228,18 @@ public class ModelBuilder {
                 HnswParams.addVectorCacheHintSizeKb(fbb, vectorCacheHintSizeKb);
             }
             hnswParamsOffset = HnswParams.endHnswParams(fbb);
+            return this;
+        }
+
+        /**
+         * Set parameters for {@link HnswIndex}, including the ones the other {@code hnswParams} method does not
+         * support, like the {@link HnswIndex#quantization()}.
+         *
+         * @return this builder.
+         */
+        public PropertyBuilder hnswParams(HnswIndexParams params) {
+            checkNotFinished();
+            hnswParamsOffset = params.addTo(getFbb());
             return this;
         }
 
