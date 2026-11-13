@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. https://objectbox.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,18 @@ public final class HnswFlags {
    */
   public static final int VectorCacheSimdPaddingOff = 4;
   /**
-   * If the speed of removing nodes becomes a concern in your use case, you can speed it up by setting this flag.
-   * By default, repairing the graph after node removals creates more connections to improve the graph's quality.
-   * The extra costs for this are relatively low (e.g. vs. regular indexing), and thus the default is recommended.
+   * No longer used (ignored): removals are fast without it. Stored schemas may still have it set: do not reuse.
    */
   public static final int ReparationLimitCandidates = 8;
+  /**
+   * Allows indexing vectors whose dimensions (and other index parameters) are only known at runtime, not at build
+   * time; e.g. if the embedding model is chosen at runtime.
+   * The index parameters are given after the store was opened ("late"), via an init call before the index is used.
+   * Without other values, the parameters are "hollow": the index is not initialized yet, and using it throws
+   * (e.g. putting objects of the type); reading objects works. The parameters are persisted, and later sessions
+   * use them (an init call with the same parameters changes nothing); other parameters are accepted by an init call
+   * before the index is used in that session.
+   */
+  public static final int LateInit = 16;
 }
 
