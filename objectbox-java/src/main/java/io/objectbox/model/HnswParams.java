@@ -141,6 +141,16 @@ public final class HnswParams extends Table {
    * Changing this value causes re-indexing (if the resolved values change).
    */
   public int buildLevel() { int o = __offset(30); return o != 0 ? bb.get(o + bb_pos) & 0xFF : 0; }
+  /**
+   * Seeds the random levels of new graph nodes (0/absent: a random seed, the default), e.g. for reproducible tests:
+   * putting the same objects in the same order builds the same graph.
+   * Each store opening restarts the random sequence, transactions do not.
+   * The seed semantics may change in future versions;
+   * currently, seeds up to 32 bits give the same levels on all platforms (larger seeds may not).
+   * Graphs may still differ between platforms, as distance calculations depend on the CPU and SIMD instructions.
+   * Changing this value causes re-indexing.
+   */
+  public long randomSeed() { int o = __offset(32); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
 
   public static int createHnswParams(FlatBufferBuilder builder,
       long dimensions,
@@ -156,8 +166,10 @@ public final class HnswParams extends Table {
       int searchLevel,
       long bruteForceMaxCandidates,
       long filteredSearchMaxNodes,
-      int buildLevel) {
-    builder.startTable(14);
+      int buildLevel,
+      long randomSeed) {
+    builder.startTable(15);
+    HnswParams.addRandomSeed(builder, randomSeed);
     HnswParams.addVectorCacheHintSizeKb(builder, vectorCacheHintSizeKb);
     HnswParams.addFilteredSearchMaxNodes(builder, filteredSearchMaxNodes);
     HnswParams.addBruteForceMaxCandidates(builder, bruteForceMaxCandidates);
@@ -175,7 +187,7 @@ public final class HnswParams extends Table {
     return HnswParams.endHnswParams(builder);
   }
 
-  public static void startHnswParams(FlatBufferBuilder builder) { builder.startTable(14); }
+  public static void startHnswParams(FlatBufferBuilder builder) { builder.startTable(15); }
   public static void addDimensions(FlatBufferBuilder builder, long dimensions) { builder.addInt(0, (int) dimensions, (int) 0L); }
   public static void addNeighborsPerNode(FlatBufferBuilder builder, long neighborsPerNode) { builder.addInt(1, (int) neighborsPerNode, (int) 0L); }
   public static void addIndexingSearchCount(FlatBufferBuilder builder, long indexingSearchCount) { builder.addInt(2, (int) indexingSearchCount, (int) 0L); }
@@ -190,6 +202,7 @@ public final class HnswParams extends Table {
   public static void addBruteForceMaxCandidates(FlatBufferBuilder builder, long bruteForceMaxCandidates) { builder.addInt(11, (int) bruteForceMaxCandidates, (int) 0L); }
   public static void addFilteredSearchMaxNodes(FlatBufferBuilder builder, long filteredSearchMaxNodes) { builder.addInt(12, (int) filteredSearchMaxNodes, (int) 0L); }
   public static void addBuildLevel(FlatBufferBuilder builder, int buildLevel) { builder.addByte(13, (byte) buildLevel, (byte) 0); }
+  public static void addRandomSeed(FlatBufferBuilder builder, long randomSeed) { builder.addLong(14, randomSeed, 0L); }
   public static int endHnswParams(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;

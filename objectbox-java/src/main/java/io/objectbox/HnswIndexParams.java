@@ -54,6 +54,7 @@ public class HnswIndexParams {
     private VectorBuildLevel buildLevel = VectorBuildLevel.DEFAULT;
     private long bruteForceMaxCandidates;
     private long filteredSearchMaxNodes;
+    private long randomSeed;
 
     /**
      * See {@link HnswIndex#dimensions()}.
@@ -170,6 +171,22 @@ public class HnswIndexParams {
         return this;
     }
 
+    /**
+     * Seeds the random levels of new graph nodes (0, the default: a random seed), e.g. for reproducible tests:
+     * putting the same objects in the same order builds the same graph. Each store opening restarts the random
+     * sequence, transactions do not.
+     * <p>
+     * The seed semantics may change in future versions; currently, seeds up to 32 bits give the same levels on all
+     * platforms (larger seeds may not). Graphs may still differ between platforms, as distance calculations depend on
+     * the CPU and SIMD instructions.
+     * <p>
+     * Changing this value causes re-indexing.
+     */
+    public HnswIndexParams randomSeed(long randomSeed) {
+        this.randomSeed = randomSeed;
+        return this;
+    }
+
     public long getDimensions() {
         return dimensions;
     }
@@ -226,6 +243,10 @@ public class HnswIndexParams {
         return filteredSearchMaxNodes;
     }
 
+    public long getRandomSeed() {
+        return randomSeed;
+    }
+
     @Override
     public String toString() {
         return "HnswIndexParams{dimensions=" + dimensions
@@ -241,7 +262,8 @@ public class HnswIndexParams {
                 + ", searchLevel=" + searchLevel
                 + ", buildLevel=" + buildLevel
                 + ", bruteForceMaxCandidates=" + bruteForceMaxCandidates
-                + ", filteredSearchMaxNodes=" + filteredSearchMaxNodes + "}";
+                + ", filteredSearchMaxNodes=" + filteredSearchMaxNodes
+                + ", randomSeed=" + randomSeed + "}";
     }
 
     /**
@@ -259,7 +281,8 @@ public class HnswIndexParams {
                 .quantizationOversample(table.quantizationOversample())
                 .quantizationRescoreFactor(table.quantizationRescoreFactor())
                 .bruteForceMaxCandidates(table.bruteForceMaxCandidates())
-                .filteredSearchMaxNodes(table.filteredSearchMaxNodes());
+                .filteredSearchMaxNodes(table.filteredSearchMaxNodes())
+                .randomSeed(table.randomSeed());
         params.distanceType = toVectorDistanceType(table.distanceType());
         params.quantization = toVectorQuantization(table.quantization());
         int searchLevel = table.searchLevel();
@@ -333,6 +356,7 @@ public class HnswIndexParams {
         HnswParams.addBuildLevel(fbb, buildLevel.ordinal()); // The ordinal is the level (DEFAULT: 0)
         HnswParams.addBruteForceMaxCandidates(fbb, bruteForceMaxCandidates);
         HnswParams.addFilteredSearchMaxNodes(fbb, filteredSearchMaxNodes);
+        HnswParams.addRandomSeed(fbb, randomSeed);
         return HnswParams.endHnswParams(fbb);
     }
 

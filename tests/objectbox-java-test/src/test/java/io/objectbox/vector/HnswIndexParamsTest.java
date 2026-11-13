@@ -18,7 +18,9 @@ package io.objectbox.vector;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import io.objectbox.HnswIndexParams;
 import io.objectbox.annotation.VectorBuildLevel;
@@ -61,7 +63,8 @@ public class HnswIndexParamsTest extends AbstractVectorTest {
                 .buildLevel(VectorBuildLevel.L2_VERY_FAST)
                 .neighborsPerNode(16) // Takes precedence over the build level
                 .bruteForceMaxCandidates(100)
-                .filteredSearchMaxNodes(1000));
+                .filteredSearchMaxNodes(1000)
+                .randomSeed(1));
         putVectorEntities(100);
 
         try (Query<VectorEntity> query = vectorBox()
@@ -92,6 +95,7 @@ public class HnswIndexParamsTest extends AbstractVectorTest {
         assertEquals(VectorBuildLevel.DEFAULT, params.getBuildLevel());
         assertEquals(0, params.getBruteForceMaxCandidates());
         assertEquals(0, params.getFilteredSearchMaxNodes());
+        assertEquals(0, params.getRandomSeed()); // A random seed
     }
 
     @Test
@@ -108,7 +112,8 @@ public class HnswIndexParamsTest extends AbstractVectorTest {
                 .buildLevel(VectorBuildLevel.L2_VERY_FAST) // M 20 / efConstruction 64
                 .neighborsPerNode(16) // Takes precedence over the build level
                 .bruteForceMaxCandidates(100)
-                .filteredSearchMaxNodes(1000));
+                .filteredSearchMaxNodes(1000)
+                .randomSeed(0x123456789ABCDEF0L)); // More than 32 bits
 
         HnswIndexParams params = store.getHnswIndexParams(VectorEntity_.vector);
         assertEquals(DIMENSIONS, params.getDimensions());
@@ -125,6 +130,46 @@ public class HnswIndexParamsTest extends AbstractVectorTest {
         assertEquals(VectorBuildLevel.DEFAULT, params.getBuildLevel()); // Resolved, not stored
         assertEquals(100, params.getBruteForceMaxCandidates());
         assertEquals(1000, params.getFilteredSearchMaxNodes());
+        assertEquals(0x123456789ABCDEF0L, params.getRandomSeed());
+    }
+
+    @Test
+    public void randomSeed_sameObjectsInSameOrder_sameResults() {
+        // A new store with the same seed and objects builds the same graph: approximate results (here: random vectors
+        // and the fastest search level) are the same
+        HnswIndexParams seeded = new HnswIndexParams(DIMENSIONS).randomSeed(42);
+        reopenStore(seeded);
+        List<String> results = putRandomVectorsAndSearch();
+        store.close();
+        store.deleteAllFiles();
+        store = createVectorStore(seeded);
+        assertEquals(results, putRandomVectorsAndSearch());
+    }
+
+    private List<String> putRandomVectorsAndSearch() {
+        Random random = new Random(1);
+        List<VectorEntity> entities = new ArrayList<>();
+        for (int i = 1; i <= 1000; i++) {
+            float[] vector = new float[DIMENSIONS];
+            for (int d = 0; d < DIMENSIONS; d++) {
+                vector[d] = random.nextFloat();
+            }
+            entities.add(new VectorEntity(String.valueOf(i), i % 10, vector));
+        }
+        vectorBox().put(entities);
+
+        float[] queryVector = new float[DIMENSIONS];
+        for (int d = 0; d < DIMENSIONS; d++) {
+            queryVector[d] = random.nextFloat();
+        }
+        try (Query<VectorEntity> query = vectorBox()
+                .query(VectorEntity_.vector.nearestNeighbors(queryVector, 10)
+                        .searchLevel(VectorSearchLevel.L1_FASTEST))
+                .build()) {
+            List<ObjectWithScore<VectorEntity>> results = query.findWithScores();
+            assertEquals(10, results.size());
+            return names(results);
+        }
     }
 
     @Test

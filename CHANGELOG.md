@@ -40,6 +40,8 @@ For more insights into what changed in the database libraries, [check the Object
   and set its parameters after opening the store with `BoxStore.initHnswIndex(property, HnswIndexParams, HnswInitMode)`;
   they are persisted and can be changed later (e.g. for another embedding model). `BoxStore.getHnswIndexParams()`
   returns the parameters in effect.
+- Reproducible graph builds, e.g. for tests: `HnswIndexParams.randomSeed()` seeds the random levels of new graph nodes
+  (default: a random seed).
 - Nearest neighbor search with other conditions now returns the nearest among the matching objects (previously: the
   nearest of all objects, of which only the matching ones remained, often fewer than requested). Few candidates are
   searched by brute force; otherwise, the graph search accepts only matching objects. Both limits are tunable per
