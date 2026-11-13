@@ -19,11 +19,18 @@ package io.objectbox.vector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import io.objectbox.AbstractObjectBoxTest;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.HnswIndexParams;
+import io.objectbox.query.ObjectWithScore;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Tests with {@link VectorEntity}, which has an HNSW index on its vector property.
@@ -73,9 +80,34 @@ public abstract class AbstractVectorTest extends AbstractObjectBoxTest {
         return vector;
     }
 
+    protected static List<String> names(List<ObjectWithScore<VectorEntity>> results) {
+        return results.stream().map(result -> result.get().getName()).collect(Collectors.toList());
+    }
+
+    /**
+     * Asserts that all results carry exact distances (e.g. rescored or found by brute force) or that all carry
+     * estimated distances (quantization without rescoring) to {@code vector(queryValue)}.
+     */
+    protected static void assertExactDistances(boolean exact, float queryValue,
+                                               List<ObjectWithScore<VectorEntity>> results) {
+        assertFalse(results.isEmpty());
+        for (ObjectWithScore<VectorEntity> result : results) {
+            float[] vector = result.get().getVector();
+            assertNotNull(vector);
+            double difference = vector[0] - queryValue;
+            double exactDistance = DIMENSIONS * difference * difference; // Euclidean squared
+            double delta = 0.0001 * Math.max(1, exactDistance);
+            if (exact) {
+                assertEquals(names(results).toString(), exactDistance, result.getScore(), delta);
+            } else {
+                assertNotEquals(names(results).toString(), exactDistance, result.getScore(), delta);
+            }
+        }
+    }
+
     /**
      * Puts objects with the vectors 1 to {@code count} (see {@link #vector(float)}), named by their value (e.g. "1");
-     * their category is the value modulo 10.
+     * their category (indexed) is the value modulo 10.
      */
     protected List<VectorEntity> putVectorEntities(int count) {
         List<VectorEntity> entities = new ArrayList<>();

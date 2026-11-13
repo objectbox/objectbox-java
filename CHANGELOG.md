@@ -22,18 +22,19 @@ For more insights into what changed in the database libraries, [check the Object
   `VectorQuantization`. Existing indexes keep running without quantization, unless they set one or are re-indexed.
 - Simplified configuration: instead of tuning HNSW parameters like `neighborsPerNode` and `indexingSearchCount`
   yourself, choose one of 10 levels from fast to high quality (recall).
-  - Search levels trade search speed for quality: set the default level of an index with
-    `@HnswIndex(searchLevel = ...)` (default: `VectorSearchLevel.L4_BALANCED`).
+  - Search levels trade search speed for quality: per query with `Query.setParameterSearchLevel()` or set the default
+    level of an index with `@HnswIndex(searchLevel = ...)` (default: `VectorSearchLevel.L4_BALANCED`).
   - Build levels trade indexing time and memory for graph quality, for data that does not reach your recall target at
     the highest search levels: `@HnswIndex(buildLevel = ...)`, see `VectorBuildLevel`.
-  - The individual parameters remain available for fine-tuning; new are the oversample and rescore factors of the
-    quantization, e.g. `@HnswIndex(quantizationRescoreFactor = ...)`.
+  - The individual parameters remain available for fine-tuning; new are oversampling and rescoring, per query (e.g.
+    `Query.setParameterRescoreFactor()`) and per index (e.g. `@HnswIndex(quantizationRescoreFactor = ...)`).
 - Late init for HNSW indexes with dimensions known only at runtime, e.g. if the embedding model is chosen at runtime:
   `@HnswFlags(lateInit = true)` makes `@HnswIndex(dimensions)` optional.
 - Nearest neighbor search with other conditions now returns the nearest among the matching objects (previously: the
   nearest of all objects, of which only the matching ones remained, often fewer than requested). Few candidates are
   searched by brute force; otherwise, the graph search accepts only matching objects. Both limits are tunable per
-  index: `@HnswIndex(bruteForceMaxCandidates = ..., filteredSearchMaxNodes = ...)`.
+  index (`@HnswIndex(bruteForceMaxCandidates = ..., filteredSearchMaxNodes = ...)`) and per query
+  (`Query.setParameterBruteForceMaxCandidates()` and `Query.setParameterFilteredSearchMaxNodes()`).
 - Faster vector search, also without quantization, faster index builds and much faster removal of objects.
 - The default `indexingSearchCount` (efConstruction) is now 128 instead of 100. Existing indexes keep their value and
   are not re-indexed.

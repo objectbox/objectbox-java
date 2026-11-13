@@ -39,7 +39,7 @@ public class MyObjectBox {
     private static byte[] getModel(HnswIndexParams hnswParams) {
         ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.lastEntityId(1, 2463384912471361436L);
-        modelBuilder.lastIndexId(1, 6744158617463510301L);
+        modelBuilder.lastIndexId(2, 4815162342108151622L);
 
         EntityBuilder entityBuilder;
 
@@ -49,7 +49,7 @@ public class MyObjectBox {
                 .flags(PropertyFlags.ID);
         entityBuilder.property("name", PropertyType.String).id(2, 8197456108213947762L);
         entityBuilder.property("category", PropertyType.Int).id(3, 1265924017408521609L)
-                .flags(PropertyFlags.NOT_NULL);
+                .flags(PropertyFlags.NOT_NULL | PropertyFlags.INDEXED).indexId(2, 4815162342108151622L);
         entityBuilder.property("vector", PropertyType.FloatVector).id(4, 3542316524183911735L)
                 .flags(PropertyFlags.INDEXED).indexId(1, 6744158617463510301L)
                 .hnswParams(hnswParams);
