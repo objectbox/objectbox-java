@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 import io.objectbox.Box;
 import io.objectbox.EntityInfo;
 import io.objectbox.Property;
+import io.objectbox.annotation.VectorSearchLevel;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.exception.DbException;
 import io.objectbox.relation.RelationInfo;
@@ -123,6 +124,11 @@ public class QueryBuilder<T> {
      * Holds on to last property condition to use with {@link #parameterAlias(String)}
      */
     private long lastPropertyCondition;
+    /**
+     * Holds on to the last nearest neighbor condition to use with the vector search modifiers,
+     * like {@link #vectorSearchLevel(VectorSearchLevel)}.
+     */
+    private long lastNearestNeighborCondition;
     private Operator combineNextWith = Operator.NONE;
 
     @Nullable
@@ -225,6 +231,16 @@ public class QueryBuilder<T> {
     private native long nativeBetween(long handle, int propertyId, double value1, double value2);
 
     private native long nativeNearestNeighborsF32(long handle, int propertyId, float[] queryVector, int maxResultCount);
+
+    private native void nativeVectorSearchLevel(long conditionHandle, int level);
+
+    private native void nativeVectorOversampleFactor(long conditionHandle, float value);
+
+    private native void nativeVectorRescoreFactor(long conditionHandle, float value);
+
+    private native void nativeVectorBruteForceMaxCandidates(long conditionHandle, int value);
+
+    private native void nativeVectorFilteredSearchMaxNodes(long conditionHandle, int value);
 
     private native long nativeEqualKeyValue(long handle, int propertyId, String key, double value);
 
@@ -1234,7 +1250,86 @@ public class QueryBuilder<T> {
      */
     public QueryBuilder<T> nearestNeighbors(Property<T> property, float[] queryVector, int maxResultCount) {
         verifyHandle();
-        checkCombineCondition(nativeNearestNeighborsF32(handle, property.getId(), queryVector, maxResultCount));
+        long condition = nativeNearestNeighborsF32(handle, property.getId(), queryVector, maxResultCount);
+        checkCombineCondition(condition);
+        lastNearestNeighborCondition = condition;
+        return this;
+    }
+
+    /**
+     * The handle of the previous condition, which must be a nearest neighbor condition, for vector search modifiers.
+     */
+    private long previousNearestNeighborCondition() {
+        verifyHandle();
+        if (lastNearestNeighborCondition == 0 || lastNearestNeighborCondition != lastPropertyCondition) {
+            throw new IllegalStateException("Vector search modifiers must directly follow a nearest neighbor condition.");
+        }
+        return lastNearestNeighborCondition;
+    }
+
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
+     * Sets the search level of the previous {@link #nearestNeighbors(Property, float[], int) nearest neighbor
+     * condition}; see {@link NearestNeighborQueryCondition#searchLevel(VectorSearchLevel)}.
+     * <p>
+     * This and the other vector search modifiers must directly follow the nearest neighbor condition (the search level
+     * before the others, as it replaces the oversample and rescore parameters).
+     */
+    public QueryBuilder<T> vectorSearchLevel(VectorSearchLevel level) {
+        nativeVectorSearchLevel(previousNearestNeighborCondition(), Query.searchLevelNumber(level));
+        return this;
+    }
+
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
+     * For the previous nearest neighbor condition, see
+     * {@link NearestNeighborQueryCondition#oversampleFactor(float)}. Like {@link #vectorSearchLevel(VectorSearchLevel)},
+     * must directly follow the condition.
+     */
+    public QueryBuilder<T> vectorOversampleFactor(float factor) {
+        nativeVectorOversampleFactor(previousNearestNeighborCondition(), factor);
+        return this;
+    }
+
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
+     * For the previous nearest neighbor condition, see {@link NearestNeighborQueryCondition#rescoreFactor(float)}. Like
+     * {@link #vectorSearchLevel(VectorSearchLevel)}, must directly follow the condition.
+     */
+    public QueryBuilder<T> vectorRescoreFactor(float factor) {
+        nativeVectorRescoreFactor(previousNearestNeighborCondition(), factor);
+        return this;
+    }
+
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
+     * For the previous nearest neighbor condition, see
+     * {@link NearestNeighborQueryCondition#bruteForceMaxCandidates(int)}. Like
+     * {@link #vectorSearchLevel(VectorSearchLevel)}, must directly follow the condition.
+     */
+    public QueryBuilder<T> vectorBruteForceMaxCandidates(int maxCandidates) {
+        nativeVectorBruteForceMaxCandidates(previousNearestNeighborCondition(), maxCandidates);
+        return this;
+    }
+
+    /**
+     * <b>Note:</b> New code should use the {@link Box#query(QueryCondition) new query API}. Existing code can continue
+     * to use this, there are currently no plans to remove the old query API.
+     * <p>
+     * For the previous nearest neighbor condition, see
+     * {@link NearestNeighborQueryCondition#filteredSearchMaxNodes(int)}. Like
+     * {@link #vectorSearchLevel(VectorSearchLevel)}, must directly follow the condition.
+     */
+    public QueryBuilder<T> vectorFilteredSearchMaxNodes(int maxNodes) {
+        nativeVectorFilteredSearchMaxNodes(previousNearestNeighborCondition(), maxNodes);
         return this;
     }
 

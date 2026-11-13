@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@ package io.objectbox.query;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.Property;
+import io.objectbox.annotation.VectorSearchLevel;
 import io.objectbox.query.QueryBuilder.StringOrder;
 
 /**
@@ -559,10 +562,17 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
     /**
      * Conditions for properties with an {@link io.objectbox.annotation.HnswIndex}.
      */
-    public static class NearestNeighborCondition<T> extends PropertyQueryConditionImpl<T> {
+    public static class NearestNeighborCondition<T> extends PropertyQueryConditionImpl<T>
+            implements NearestNeighborQueryCondition<T> {
 
         private final float[] queryVector;
         private final int maxResultCount;
+        // Optional search parameters; null: not set
+        @Nullable private VectorSearchLevel searchLevel;
+        @Nullable private Float oversampleFactor;
+        @Nullable private Float rescoreFactor;
+        @Nullable private Integer bruteForceMaxCandidates;
+        @Nullable private Integer filteredSearchMaxNodes;
 
         public NearestNeighborCondition(Property<T> property, float[] queryVector, int maxResultCount) {
             super(property);
@@ -571,8 +581,51 @@ public abstract class PropertyQueryConditionImpl<T> extends QueryConditionImpl<T
         }
 
         @Override
+        public NearestNeighborQueryCondition<T> searchLevel(VectorSearchLevel level) {
+            Query.searchLevelNumber(level); // Fail early for DEFAULT
+            this.searchLevel = level;
+            return this;
+        }
+
+        @Override
+        public NearestNeighborQueryCondition<T> oversampleFactor(float factor) {
+            this.oversampleFactor = factor;
+            return this;
+        }
+
+        @Override
+        public NearestNeighborQueryCondition<T> rescoreFactor(float factor) {
+            this.rescoreFactor = factor;
+            return this;
+        }
+
+        @Override
+        public NearestNeighborQueryCondition<T> bruteForceMaxCandidates(int maxCandidates) {
+            this.bruteForceMaxCandidates = maxCandidates;
+            return this;
+        }
+
+        @Override
+        public NearestNeighborQueryCondition<T> filteredSearchMaxNodes(int maxNodes) {
+            this.filteredSearchMaxNodes = maxNodes;
+            return this;
+        }
+
+        @Override
+        public NearestNeighborQueryCondition<T> alias(String name) {
+            super.alias(name);
+            return this;
+        }
+
+        @Override
         void applyCondition(QueryBuilder<T> builder) {
             builder.nearestNeighbors(property, queryVector, maxResultCount);
+            // The search level first: it replaces the oversample and rescore parameters
+            if (searchLevel != null) builder.vectorSearchLevel(searchLevel);
+            if (oversampleFactor != null) builder.vectorOversampleFactor(oversampleFactor);
+            if (rescoreFactor != null) builder.vectorRescoreFactor(rescoreFactor);
+            if (bruteForceMaxCandidates != null) builder.vectorBruteForceMaxCandidates(bruteForceMaxCandidates);
+            if (filteredSearchMaxNodes != null) builder.vectorFilteredSearchMaxNodes(filteredSearchMaxNodes);
         }
     }
 }

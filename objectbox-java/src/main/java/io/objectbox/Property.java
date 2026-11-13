@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,11 @@ import java.util.Date;
 import javax.annotation.Nullable;
 
 import io.objectbox.annotation.HnswIndex;
+import io.objectbox.annotation.VectorSearchLevel;
 import io.objectbox.annotation.apihint.Internal;
 import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbException;
+import io.objectbox.query.NearestNeighborQueryCondition;
 import io.objectbox.query.PropertyQueryCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.ByteArrayCondition;
 import io.objectbox.query.PropertyQueryConditionImpl.DoubleCondition;
@@ -313,15 +315,16 @@ public class Property<ENTITY> implements Serializable {
      * <p>
      * The dimensions of the query vector should be at least the dimensions of this vector property.
      * <p>
-     * Use {@code maxResultCount} to set the maximum number of objects to return by the ANN condition. Hint: it can also
-     * be used as the "ef" HNSW parameter to increase the search quality in combination with a query limit. For example,
-     * use maxResultCount of 100 with a Query limit of 10 to have 10 results that are of potentially better quality than
-     * just passing in 10 for maxResultCount (quality/performance tradeoff).
+     * Use {@code maxResultCount} to set the maximum number of objects to return by the ANN condition; typically the
+     * query limit. The search explores a multiple of this count, as defined by the search level. To trade search speed
+     * for quality, use a search level (see {@link NearestNeighborQueryCondition#searchLevel(VectorSearchLevel)}) instead
+     * of a larger count with a query limit (the way before 6.0; now, the search explores a multiple of it).
      * <p>
      * To change the given parameters after building the query, use {@link Query#setParameter(Property, float[])} and
-     * {@link Query#setParameter(Property, long)} or their alias equivalent.
+     * {@link Query#setParameter(Property, long)} or their alias equivalent. To change the search parameters, use e.g.
+     * {@link Query#setParameterSearchLevel(Property, VectorSearchLevel)}.
      */
-    public PropertyQueryCondition<ENTITY> nearestNeighbors(float[] queryVector, int maxResultCount) {
+    public NearestNeighborQueryCondition<ENTITY> nearestNeighbors(float[] queryVector, int maxResultCount) {
         return new NearestNeighborCondition<>(this, queryVector, maxResultCount);
     }
 

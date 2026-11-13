@@ -868,23 +868,25 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * For the nearest neighbor search of {@code property}: sets the {@link VectorSearchLevel search level}, the
-     * preferred way to trade search speed for quality (recall). Without it, the search uses the level of the index
-     * ({@link HnswIndex#searchLevel()}).
+     * For vector search: sets the {@link VectorSearchLevel search level} of the nearest neighbor condition
+     * ({@link Property#nearestNeighbors(float[], int)}) of the given vector property, the preferred way to trade search
+     * speed for quality (recall). Without it, the search uses the level of the index ({@link HnswIndex#searchLevel()}).
      * <p>
      * The level replaces the oversample and rescore parameters set before; it keeps the limits for searches with other
      * conditions ({@link #setParameterBruteForceMaxCandidates(Property, int)} and
      * {@link #setParameterFilteredSearchMaxNodes(Property, int)}).
      * <p>
-     * The other {@code setParameter} methods for a nearest neighbor search set single search parameters instead. They
-     * are for power users who tune the search for their data (e.g. by measuring recall and speed on a representative
-     * set of queries); the search levels suit most uses. They change one value each, e.g. to adjust a level; a search
-     * starts with the values of the search level of the index. A search explores {@code maxResultCount * oversample
-     * factor * quantization oversample} candidates (rounded, at least maxResultCount); without quantization, the
-     * quantization oversample does not apply.
+     * The other {@code setParameter} methods for vector search set single search parameters instead. They are for
+     * power users who tune the search for their data (e.g. by measuring recall and speed on a representative set of
+     * queries); the search levels suit most uses. They change one value each, e.g. to adjust a level; a search starts
+     * with the values of the search level of the index. A search explores {@code maxResultCount * oversample factor *
+     * quantization oversample} candidates (rounded, at least maxResultCount); without quantization, the quantization
+     * oversample does not apply.
      *
-     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param property The vector property (a float vector property with an {@link HnswIndex}) of a nearest neighbor
+     * condition of this query, like {@code Example_.embedding}.
      * @param level The search level; not {@link VectorSearchLevel#DEFAULT}.
+     * @throws IllegalArgumentException if this query has no nearest neighbor condition for the property.
      */
     public Query<T> setParameterSearchLevel(Property<?> property, VectorSearchLevel level) {
         checkOpen();
@@ -894,10 +896,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Like {@link #setParameterSearchLevel(Property, VectorSearchLevel)}, but for the condition with the matching
-     * {@code alias}.
+     * Like {@link #setParameterSearchLevel(Property, VectorSearchLevel)}, but for the nearest neighbor condition with
+     * the matching {@code alias}.
      *
-     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param alias as defined using {@link NearestNeighborQueryCondition#alias(String)}.
      */
     public Query<T> setParameterSearchLevel(String alias, VectorSearchLevel level) {
         checkOpen();
@@ -906,11 +908,13 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * For power users (prefer {@link #setParameterSearchLevel(Property, VectorSearchLevel)}): for the nearest neighbor
-     * search of {@code property}, sets how many candidates are explored per result for a higher recall, independent of
-     * quantization (at least 1).
+     * For vector search: sets how many candidates the nearest neighbor search of the given vector property explores
+     * per result for a higher recall, independent of quantization (at least 1). For power users; prefer
+     * {@link #setParameterSearchLevel(Property, VectorSearchLevel)}.
      *
-     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param property The vector property (a float vector property with an {@link HnswIndex}) of a nearest neighbor
+     * condition of this query, like {@code Example_.embedding}.
+     * @throws IllegalArgumentException if this query has no nearest neighbor condition for the property.
      */
     public Query<T> setParameterOversampleFactor(Property<?> property, float factor) {
         checkOpen();
@@ -919,10 +923,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Like {@link #setParameterOversampleFactor(Property, float)}, but for the condition with the matching
-     * {@code alias}.
+     * Like {@link #setParameterOversampleFactor(Property, float)}, but for the nearest neighbor condition with the
+     * matching {@code alias}.
      *
-     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param alias as defined using {@link NearestNeighborQueryCondition#alias(String)}.
      */
     public Query<T> setParameterOversampleFactor(String alias, float factor) {
         checkOpen();
@@ -931,11 +935,14 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * For power users (prefer {@link #setParameterSearchLevel(Property, VectorSearchLevel)}): for the nearest neighbor
-     * search of {@code property} with quantization, sets the oversample factor that corrects for the quantization error
-     * only (0 or at least 1); 0 uses the one of the index ({@link HnswIndex#quantizationOversample()}).
+     * For vector search with quantization: sets the oversample factor of the nearest neighbor search of the given
+     * vector property that corrects for the quantization error only (0 or at least 1); 0 uses the one of the index
+     * ({@link HnswIndex#quantizationOversample()}). For power users; prefer
+     * {@link #setParameterSearchLevel(Property, VectorSearchLevel)}.
      *
-     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param property The vector property (a float vector property with an {@link HnswIndex}) of a nearest neighbor
+     * condition of this query, like {@code Example_.embedding}.
+     * @throws IllegalArgumentException if this query has no nearest neighbor condition for the property.
      */
     public Query<T> setParameterQuantizationOversample(Property<?> property, float factor) {
         checkOpen();
@@ -944,10 +951,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Like {@link #setParameterQuantizationOversample(Property, float)}, but for the condition with the matching
-     * {@code alias}.
+     * Like {@link #setParameterQuantizationOversample(Property, float)}, but for the nearest neighbor condition with
+     * the matching {@code alias}.
      *
-     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param alias as defined using {@link NearestNeighborQueryCondition#alias(String)}.
      */
     public Query<T> setParameterQuantizationOversample(String alias, float factor) {
         checkOpen();
@@ -956,15 +963,17 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * For power users (prefer {@link #setParameterSearchLevel(Property, VectorSearchLevel)}): for the nearest neighbor
-     * search of {@code property} with quantization, sets whether the candidates are rescored with the full-precision
-     * vectors read from the objects (exact result distances and higher recall levels), or the nearest are returned by
-     * their quantized distance estimates (faster; the result distances are estimates).
+     * For vector search with quantization: sets whether the nearest neighbor search of the given vector property
+     * rescores the candidates with the full-precision vectors read from the objects (exact result distances and higher
+     * recall levels), or returns the nearest by their quantized distance estimates (faster; the result distances are
+     * estimates). For power users; prefer {@link #setParameterSearchLevel(Property, VectorSearchLevel)}.
      * <p>
      * A non-zero rescore factor ({@link #setParameterRescoreFactor(Property, float)}) also turns rescoring on; the last
      * call wins, e.g. this turns rescoring off after a factor was set.
      *
-     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param property The vector property (a float vector property with an {@link HnswIndex}) of a nearest neighbor
+     * condition of this query, like {@code Example_.embedding}.
+     * @throws IllegalArgumentException if this query has no nearest neighbor condition for the property.
      */
     public Query<T> setParameterRescore(Property<?> property, boolean rescore) {
         checkOpen();
@@ -973,9 +982,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Like {@link #setParameterRescore(Property, boolean)}, but for the condition with the matching {@code alias}.
+     * Like {@link #setParameterRescore(Property, boolean)}, but for the nearest neighbor condition with the matching
+     * {@code alias}.
      *
-     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param alias as defined using {@link NearestNeighborQueryCondition#alias(String)}.
      */
     public Query<T> setParameterRescore(String alias, boolean rescore) {
         checkOpen();
@@ -984,12 +994,17 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * For power users (prefer {@link #setParameterSearchLevel(Property, VectorSearchLevel)}): for the nearest neighbor
-     * search of {@code property} with quantization and rescoring, sets how many candidates are rescored: this factor
-     * times maxResultCount candidates with the nearest estimates (0 or at least 1; capped at the explored candidates);
-     * 0 uses the one of the index ({@link HnswIndex#quantizationRescoreFactor()}).
+     * For vector search with quantization: sets how many candidates the nearest neighbor search of the given vector
+     * property rescores: this factor times maxResultCount candidates with the nearest estimates (0 or at least 1;
+     * capped at the explored candidates); 0 uses the one of the index ({@link HnswIndex#quantizationRescoreFactor()}).
+     * Like {@link NearestNeighborQueryCondition#rescoreFactor(float)}, a non-zero factor also turns rescoring on
+     * ({@link #setParameterRescore(Property, boolean)}), e.g. for the search levels that do not rescore otherwise
+     * (1-3); 0 keeps the rescore setting. For power users; prefer
+     * {@link #setParameterSearchLevel(Property, VectorSearchLevel)}.
      *
-     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param property The vector property (a float vector property with an {@link HnswIndex}) of a nearest neighbor
+     * condition of this query, like {@code Example_.embedding}.
+     * @throws IllegalArgumentException if this query has no nearest neighbor condition for the property.
      */
     public Query<T> setParameterRescoreFactor(Property<?> property, float factor) {
         checkOpen();
@@ -998,10 +1013,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Like {@link #setParameterRescoreFactor(Property, float)}, but for the condition with the matching
-     * {@code alias}.
+     * Like {@link #setParameterRescoreFactor(Property, float)}, but for the nearest neighbor condition with the
+     * matching {@code alias}.
      *
-     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param alias as defined using {@link NearestNeighborQueryCondition#alias(String)}.
      */
     public Query<T> setParameterRescoreFactor(String alias, float factor) {
         checkOpen();
@@ -1010,16 +1025,18 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * For the nearest neighbor search of {@code property} with other conditions: sets up to how many candidates of
-     * their lookups (indexes and relations) the nearest neighbors are found by brute force (exact without quantization)
-     * instead of by a graph search with a filter; overrides the value of the index
+     * For vector search with other conditions: sets up to how many candidates of their lookups (indexes and relations)
+     * the nearest neighbor search of the given vector property finds the nearest neighbors by brute force (exact
+     * without quantization) instead of by a graph search with a filter; overrides the value of the index
      * ({@link HnswIndex#bruteForceMaxCandidates()}), 0 uses it.
      * <p>
      * Higher values let more queries use brute force, but its costs grow with the candidates, while the graph search
      * gets cheaper the more objects match (e.g. on 290k objects, the graph search was faster from about 15k
      * candidates, or from about 5k if the other conditions need to be checked on the objects).
      *
-     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param property The vector property (a float vector property with an {@link HnswIndex}) of a nearest neighbor
+     * condition of this query, like {@code Example_.embedding}.
+     * @throws IllegalArgumentException if this query has no nearest neighbor condition for the property.
      */
     public Query<T> setParameterBruteForceMaxCandidates(Property<?> property, int maxCandidates) {
         checkOpen();
@@ -1029,10 +1046,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Like {@link #setParameterBruteForceMaxCandidates(Property, int)}, but for the condition with the matching
-     * {@code alias}.
+     * Like {@link #setParameterBruteForceMaxCandidates(Property, int)}, but for the nearest neighbor condition with the
+     * matching {@code alias}.
      *
-     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param alias as defined using {@link NearestNeighborQueryCondition#alias(String)}.
      */
     public Query<T> setParameterBruteForceMaxCandidates(String alias, int maxCandidates) {
         checkOpen();
@@ -1041,14 +1058,16 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * For the nearest neighbor search of {@code property} with other conditions: sets how many nodes the graph search
-     * (with a filter for the matching objects) explores at most; overrides the value of the index
-     * ({@link HnswIndex#filteredSearchMaxNodes()}), 0 uses it.
+     * For vector search with other conditions: sets how many nodes the nearest neighbor search of the given vector
+     * property explores at most in a graph search with a filter (for the matching objects); overrides the value of the
+     * index ({@link HnswIndex#filteredSearchMaxNodes()}), 0 uses it.
      * <p>
      * Higher values increase the recall if few objects match, at the cost of speed; at the limit, fewer than
      * maxResultCount objects may be found.
      *
-     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param property The vector property (a float vector property with an {@link HnswIndex}) of a nearest neighbor
+     * condition of this query, like {@code Example_.embedding}.
+     * @throws IllegalArgumentException if this query has no nearest neighbor condition for the property.
      */
     public Query<T> setParameterFilteredSearchMaxNodes(Property<?> property, int maxNodes) {
         checkOpen();
@@ -1058,10 +1077,10 @@ public class Query<T> implements Closeable {
     }
 
     /**
-     * Like {@link #setParameterFilteredSearchMaxNodes(Property, int)}, but for the condition with the matching
-     * {@code alias}.
+     * Like {@link #setParameterFilteredSearchMaxNodes(Property, int)}, but for the nearest neighbor condition with the
+     * matching {@code alias}.
      *
-     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param alias as defined using {@link NearestNeighborQueryCondition#alias(String)}.
      */
     public Query<T> setParameterFilteredSearchMaxNodes(String alias, int maxNodes) {
         checkOpen();
