@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,6 +213,47 @@ public class FlexQueryTest extends AbstractQueryTest {
         assertQueryCondition(stringObjectMap.greaterKeyValue("key-long", 234234234L));
         assertQueryCondition(stringObjectMap.greaterKeyValue("key-double", 0.0d), Apple, pineapple);
         assertQueryCondition(stringObjectMap.greaterKeyValue("key-double", 1234.56d));
+    }
+
+    @Test
+    public void keyValue_setParametersLongAndDouble_works() {
+        List<TestEntity> objects = createObjectsWithStringObjectMap();
+        box.put(objects);
+        long apple = objects.get(0).getId();
+        long Cherry = objects.get(1).getId();
+        long Apple = objects.get(2).getId();
+        long pineapple = objects.get(3).getId();
+
+        try (Query<TestEntity> query = box.query(stringObjectMap.greaterKeyValue("key-long", 0L).alias("long"))
+                .build()) {
+            assertResultIds(new long[]{Cherry, Apple}, query.find());
+
+            query.setParameters(stringObjectMap, "key-long", -2L);
+            assertResultIds(new long[]{apple, Cherry, Apple}, query.find());
+
+            query.setParameters("long", "key-long", 3L);
+            assertResultIds(new long[]{Apple}, query.find());
+        }
+
+        try (Query<TestEntity> query = box.query(stringObjectMap.greaterKeyValue("key-double", 0.0d).alias("double"))
+                .build()) {
+            assertResultIds(new long[]{Apple, pineapple}, query.find());
+
+            query.setParameters(stringObjectMap, "key-double", -1.0d);
+            assertResultIds(new long[]{apple, Apple, pineapple}, query.find());
+
+            query.setParameters("double", "key-double", 1000.0d);
+            assertResultIds(new long[]{Apple}, query.find());
+        }
+
+        // Changes the key and the value type; the condition then only matches values of the new type
+        try (Query<TestEntity> query = box.query(stringObjectMap.greaterKeyValue("key-long", 0L)).build()) {
+            query.setParameters(stringObjectMap, "key-double", 0.0d);
+            assertResultIds(new long[]{Apple, pineapple}, query.find());
+
+            query.setParameters(stringObjectMap, "key-double", 0L); // Integer: matches no floating point values
+            assertResultIds(new long[]{}, query.find());
+        }
     }
 
     @Test

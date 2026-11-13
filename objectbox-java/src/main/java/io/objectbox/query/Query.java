@@ -92,6 +92,12 @@ public class Query<T> implements Closeable {
     private native void nativeSetParameters(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
                                             String value, String value2);
 
+    native void nativeSetParameters(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
+                                    String key, long value);
+
+    native void nativeSetParameters(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
+                                    String key, double value);
+
     native void nativeSetParameter(long handle, int entityId, int propertyId, @Nullable String parameterAlias,
                                    long value);
 
@@ -841,6 +847,74 @@ public class Query<T> implements Closeable {
      * @param value The second value to use for the query condition.
      */
     public Query<T> setParameters(String alias, String key, String value) {
+        checkOpen();
+        nativeSetParameters(handle, 0, 0, alias, key, value);
+        return this;
+    }
+
+    /**
+     * Changes the parameters of the key/value condition for {@code property} to the new key and integer value, e.g. of
+     * a {@link Property#equalKeyValue(String, long)} condition.
+     * <p>
+     * The condition then only matches integer map values (not floating point ones); so for a condition with a floating
+     * point value, use {@link #setParameters(Property, String, double)}, e.g. pass {@code 1.0} instead of {@code 1}.
+     *
+     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param key The new key to use for the query condition.
+     * @param value The new value to use for the query condition.
+     */
+    public Query<T> setParameters(Property<?> property, String key, long value) {
+        checkOpen();
+        nativeSetParameters(handle, property.getEntityId(), property.getId(), null, key, value);
+        return this;
+    }
+
+    /**
+     * Changes the parameters of the key/value condition with the matching {@code alias} to the new key and integer
+     * value, e.g. of a {@link Property#equalKeyValue(String, long)} condition.
+     * <p>
+     * The condition then only matches integer map values (not floating point ones); so for a condition with a floating
+     * point value, use {@link #setParameters(String, String, double)}, e.g. pass {@code 1.0} instead of {@code 1}.
+     *
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param key The new key to use for the query condition.
+     * @param value The new value to use for the query condition.
+     */
+    public Query<T> setParameters(String alias, String key, long value) {
+        checkOpen();
+        nativeSetParameters(handle, 0, 0, alias, key, value);
+        return this;
+    }
+
+    /**
+     * Changes the parameters of the key/value condition for {@code property} to the new key and floating point value,
+     * e.g. of a {@link Property#greaterKeyValue(String, double)} condition.
+     * <p>
+     * The condition then only matches floating point map values (not integer ones); so for a condition with an integer
+     * value, use {@link #setParameters(Property, String, long)}.
+     *
+     * @param property Property reference from generated entity underscore class, like {@code Example_.example}.
+     * @param key The new key to use for the query condition.
+     * @param value The new value to use for the query condition.
+     */
+    public Query<T> setParameters(Property<?> property, String key, double value) {
+        checkOpen();
+        nativeSetParameters(handle, property.getEntityId(), property.getId(), null, key, value);
+        return this;
+    }
+
+    /**
+     * Changes the parameters of the key/value condition with the matching {@code alias} to the new key and floating
+     * point value, e.g. of a {@link Property#greaterKeyValue(String, double)} condition.
+     * <p>
+     * The condition then only matches floating point map values (not integer ones); so for a condition with an integer
+     * value, use {@link #setParameters(String, String, long)}.
+     *
+     * @param alias as defined using {@link PropertyQueryCondition#alias(String)}.
+     * @param key The new key to use for the query condition.
+     * @param value The new value to use for the query condition.
+     */
+    public Query<T> setParameters(String alias, String key, double value) {
         checkOpen();
         nativeSetParameters(handle, 0, 0, alias, key, value);
         return this;
