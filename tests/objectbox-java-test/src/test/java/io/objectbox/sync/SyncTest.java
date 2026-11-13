@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,6 +161,8 @@ public class SyncTest extends AbstractObjectBoxTest {
         assertThrows(IllegalStateException.class, syncClient::requestUpdates);
         assertThrows(IllegalStateException.class, syncClient::requestUpdatesOnce);
         assertThrows(IllegalStateException.class, syncClient::cancelUpdates);
+        assertThrows(IllegalStateException.class, syncClient::requestResync);
+        assertThrows(IllegalStateException.class, () -> syncClient.setResyncAssumedChanges(100));
         assertThrows(IllegalStateException.class, syncClient::notifyConnectionAvailable);
 
         // Calling close again shouldn't call native method again, so shouldn't throw.
@@ -324,6 +326,32 @@ public class SyncTest extends AbstractObjectBoxTest {
                         | SyncFlags.DebugLogTxLogs
                         | SyncFlags.SkipInvalidTxOps)
                 .build().close();
+    }
+
+    @Test
+    public void syncClient_resyncAssumedChanges() {
+        clientBuilder()
+                .resyncAssumedChanges(1000)
+                .build()
+                .close();
+
+        assertThrows(IllegalArgumentException.class, () -> clientBuilder().resyncAssumedChanges(0));
+        assertThrows(IllegalArgumentException.class, () -> clientBuilder().resyncAssumedChanges(-1));
+
+        try (SyncClient syncClient = clientBuilder().build()) {
+            syncClient.setResyncAssumedChanges(50);
+            assertThrows(IllegalArgumentException.class, () -> syncClient.setResyncAssumedChanges(0));
+        }
+    }
+
+    @Test
+    public void syncClient_requestResync_notLoggedIn_returnsFalse() {
+        try (SyncClient syncClient = clientBuilder().build()) {
+            assertFalse(syncClient.requestResync()); // Not started
+
+            syncClient.start(); // No server: does not log in
+            assertFalse(syncClient.requestResync());
+        }
     }
 
     /**

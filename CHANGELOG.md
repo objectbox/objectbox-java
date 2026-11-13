@@ -52,6 +52,15 @@ For more insights into what changed in the database libraries, [check the Object
   are not re-indexed.
 - `@HnswFlags(reparationLimitCandidates)` is deprecated and ignored: removals are fast now.
 
+### Sync
+
+- New resync: `SyncClient.requestResync()` reconciles a client with the server while keeping its local data and only
+  transferring the differences (compares object IDs and content hashes; requires a server supporting Sync protocol
+  version 12). Advanced tuning (typically not needed): `SyncBuilder.resyncAssumedChanges()` and
+  `SyncClient.setResyncAssumedChanges()`.
+- Changed sync filters (e.g. changed filter variables) now resync instead of resetting the client's data (with servers
+  supporting Sync protocol version 12).
+
 ## 6.0.0-beta3 - 2026-10-20
 
 - Update Android and JVM libraries to database version `6.0.0-beta-2026-10-16`

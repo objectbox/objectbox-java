@@ -246,6 +246,15 @@ public class ConnectivityMonitorTest {
         }
 
         @Override
+        public boolean requestResync() {
+            return false;
+        }
+
+        @Override
+        public void setResyncAssumedChanges(int count) {
+        }
+
+        @Override
         public void notifyConnectionAvailable() {
             notifyConnectionAvailableCalled += 1;
         }
