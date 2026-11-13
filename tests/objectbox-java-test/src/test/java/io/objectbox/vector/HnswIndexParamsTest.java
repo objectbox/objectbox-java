@@ -25,6 +25,7 @@ import io.objectbox.annotation.VectorBuildLevel;
 import io.objectbox.annotation.VectorDistanceType;
 import io.objectbox.annotation.VectorQuantization;
 import io.objectbox.annotation.VectorSearchLevel;
+import io.objectbox.model.HnswFlags;
 import io.objectbox.query.ObjectWithScore;
 import io.objectbox.query.Query;
 
@@ -72,6 +73,63 @@ public class HnswIndexParamsTest extends AbstractVectorTest {
             assertEquals("43", results.get(1).get().getName());
             assertEquals("41", results.get(2).get().getName());
         }
+    }
+
+    @Test
+    public void getHnswIndexParams_defaults() {
+        HnswIndexParams params = store.getHnswIndexParams(VectorEntity_.vector);
+        assertEquals(DIMENSIONS, params.getDimensions());
+        assertEquals(30, params.getNeighborsPerNode());
+        assertEquals(0, params.getIndexingSearchCount()); // Not set: the default (currently 128)
+        assertEquals(0, params.getFlags());
+        assertEquals(VectorDistanceType.EUCLIDEAN, params.getDistanceType());
+        assertEquals(1.0f, params.getReparationBacklinkProbability(), 0);
+        assertEquals(0, params.getVectorCacheHintSizeKb());
+        assertEquals(VectorQuantization.TURBO_QUANT_4, params.getQuantization()); // At least 32 dimensions
+        assertEquals(0, params.getQuantizationOversample(), 0);
+        assertEquals(0, params.getQuantizationRescoreFactor(), 0);
+        assertEquals(VectorSearchLevel.DEFAULT, params.getSearchLevel());
+        assertEquals(VectorBuildLevel.DEFAULT, params.getBuildLevel());
+        assertEquals(0, params.getBruteForceMaxCandidates());
+        assertEquals(0, params.getFilteredSearchMaxNodes());
+    }
+
+    @Test
+    public void getHnswIndexParams_allSet_returnsThem() {
+        reopenStore(new HnswIndexParams(DIMENSIONS)
+                .flags(HnswFlags.VectorCacheSimdPaddingOff)
+                .distanceType(VectorDistanceType.COSINE)
+                .reparationBacklinkProbability(0.9f)
+                .vectorCacheHintSizeKb(100 * 1024)
+                .quantization(VectorQuantization.SCALAR_QUANT_8)
+                .quantizationOversample(2.0f)
+                .quantizationRescoreFactor(1.5f)
+                .searchLevel(VectorSearchLevel.L6_QUALITY)
+                .buildLevel(VectorBuildLevel.L2_VERY_FAST) // M 20 / efConstruction 64
+                .neighborsPerNode(16) // Takes precedence over the build level
+                .bruteForceMaxCandidates(100)
+                .filteredSearchMaxNodes(1000));
+
+        HnswIndexParams params = store.getHnswIndexParams(VectorEntity_.vector);
+        assertEquals(DIMENSIONS, params.getDimensions());
+        assertEquals(16, params.getNeighborsPerNode());
+        assertEquals(64, params.getIndexingSearchCount());
+        assertEquals(HnswFlags.VectorCacheSimdPaddingOff, params.getFlags());
+        assertEquals(VectorDistanceType.COSINE, params.getDistanceType());
+        assertEquals(0.9f, params.getReparationBacklinkProbability(), 0);
+        assertEquals(100 * 1024, params.getVectorCacheHintSizeKb());
+        assertEquals(VectorQuantization.SCALAR_QUANT_8, params.getQuantization());
+        assertEquals(2.0f, params.getQuantizationOversample(), 0);
+        assertEquals(1.5f, params.getQuantizationRescoreFactor(), 0);
+        assertEquals(VectorSearchLevel.L6_QUALITY, params.getSearchLevel());
+        assertEquals(VectorBuildLevel.DEFAULT, params.getBuildLevel()); // Resolved, not stored
+        assertEquals(100, params.getBruteForceMaxCandidates());
+        assertEquals(1000, params.getFilteredSearchMaxNodes());
+    }
+
+    @Test
+    public void getHnswIndexParams_noHnswIndex_throws() {
+        assertThrows(IllegalArgumentException.class, () -> store.getHnswIndexParams(VectorEntity_.name));
     }
 
     @Test

@@ -35,8 +35,11 @@ For more insights into what changed in the database libraries, [check the Object
   - `Property.nearestNeighbors()` now returns `NearestNeighborQueryCondition`, which offers these search parameters.
     Code compiled against a previous version needs to be recompiled. The old query API (`QueryBuilder`) offers them
     as e.g. `vectorSearchLevel()`.
-- Late init for HNSW indexes with dimensions known only at runtime, e.g. if the embedding model is chosen at runtime:
-  `@HnswFlags(lateInit = true)` makes `@HnswIndex(dimensions)` optional.
+- Late init for HNSW indexes with dimensions (and other parameters) known only at runtime, e.g. if the embedding model
+  is chosen at runtime: flag the index with `@HnswFlags(lateInit = true)` (makes `@HnswIndex(dimensions)` optional)
+  and set its parameters after opening the store with `BoxStore.initHnswIndex(property, HnswIndexParams, HnswInitMode)`;
+  they are persisted and can be changed later (e.g. for another embedding model). `BoxStore.getHnswIndexParams()`
+  returns the parameters in effect.
 - Nearest neighbor search with other conditions now returns the nearest among the matching objects (previously: the
   nearest of all objects, of which only the matching ones remained, often fewer than requested). Few candidates are
   searched by brute force; otherwise, the graph search accepts only matching objects. Both limits are tunable per

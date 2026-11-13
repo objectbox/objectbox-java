@@ -16,6 +16,8 @@
 
 package io.objectbox;
 
+import java.nio.ByteBuffer;
+
 import javax.annotation.Nullable;
 
 import io.objectbox.annotation.HnswIndex;
@@ -32,6 +34,9 @@ import io.objectbox.model.HnswQuantization;
  * The parameters of an HNSW index (vector search), like the ones of {@link HnswIndex}; see there for details.
  * <p>
  * Values that are not set (e.g. 0) use the defaults.
+ * <p>
+ * Used for the late init of an index ({@link BoxStore#initHnswIndex(Property, HnswIndexParams, HnswInitMode)}), and
+ * returned by {@link BoxStore#getHnswIndexParams(Property)}.
  */
 public class HnswIndexParams {
 
@@ -163,6 +168,147 @@ public class HnswIndexParams {
     public HnswIndexParams filteredSearchMaxNodes(long filteredSearchMaxNodes) {
         this.filteredSearchMaxNodes = filteredSearchMaxNodes;
         return this;
+    }
+
+    public long getDimensions() {
+        return dimensions;
+    }
+
+    public long getNeighborsPerNode() {
+        return neighborsPerNode;
+    }
+
+    public long getIndexingSearchCount() {
+        return indexingSearchCount;
+    }
+
+    public int getFlags() {
+        return flags;
+    }
+
+    public VectorDistanceType getDistanceType() {
+        return distanceType;
+    }
+
+    public float getReparationBacklinkProbability() {
+        return reparationBacklinkProbability;
+    }
+
+    public long getVectorCacheHintSizeKb() {
+        return vectorCacheHintSizeKb;
+    }
+
+    public VectorQuantization getQuantization() {
+        return quantization;
+    }
+
+    public float getQuantizationOversample() {
+        return quantizationOversample;
+    }
+
+    public float getQuantizationRescoreFactor() {
+        return quantizationRescoreFactor;
+    }
+
+    public VectorSearchLevel getSearchLevel() {
+        return searchLevel;
+    }
+
+    public VectorBuildLevel getBuildLevel() {
+        return buildLevel;
+    }
+
+    public long getBruteForceMaxCandidates() {
+        return bruteForceMaxCandidates;
+    }
+
+    public long getFilteredSearchMaxNodes() {
+        return filteredSearchMaxNodes;
+    }
+
+    @Override
+    public String toString() {
+        return "HnswIndexParams{dimensions=" + dimensions
+                + ", neighborsPerNode=" + neighborsPerNode
+                + ", indexingSearchCount=" + indexingSearchCount
+                + ", flags=" + flags
+                + ", distanceType=" + distanceType
+                + ", reparationBacklinkProbability=" + reparationBacklinkProbability
+                + ", vectorCacheHintSizeKb=" + vectorCacheHintSizeKb
+                + ", quantization=" + quantization
+                + ", quantizationOversample=" + quantizationOversample
+                + ", quantizationRescoreFactor=" + quantizationRescoreFactor
+                + ", searchLevel=" + searchLevel
+                + ", buildLevel=" + buildLevel
+                + ", bruteForceMaxCandidates=" + bruteForceMaxCandidates
+                + ", filteredSearchMaxNodes=" + filteredSearchMaxNodes + "}";
+    }
+
+    /**
+     * Reads the parameters of a {@link HnswParams} table, e.g. from the database; values unknown to this version
+     * (e.g. a quantization added later) are read as DEFAULT.
+     */
+    static HnswIndexParams fromFlatBuffers(byte[] bytes) {
+        HnswParams table = HnswParams.getRootAsHnswParams(ByteBuffer.wrap(bytes));
+        HnswIndexParams params = new HnswIndexParams(table.dimensions())
+                .neighborsPerNode(table.neighborsPerNode())
+                .indexingSearchCount(table.indexingSearchCount())
+                .flags((int) table.flags())
+                .reparationBacklinkProbability(table.reparationBacklinkProbability())
+                .vectorCacheHintSizeKb(table.vectorCacheHintSizeKb())
+                .quantizationOversample(table.quantizationOversample())
+                .quantizationRescoreFactor(table.quantizationRescoreFactor())
+                .bruteForceMaxCandidates(table.bruteForceMaxCandidates())
+                .filteredSearchMaxNodes(table.filteredSearchMaxNodes());
+        params.distanceType = toVectorDistanceType(table.distanceType());
+        params.quantization = toVectorQuantization(table.quantization());
+        int searchLevel = table.searchLevel();
+        if (searchLevel < VectorSearchLevel.values().length) {
+            params.searchLevel = VectorSearchLevel.values()[searchLevel]; // The ordinal is the level (DEFAULT: 0)
+        }
+        int buildLevel = table.buildLevel();
+        if (buildLevel < VectorBuildLevel.values().length) {
+            params.buildLevel = VectorBuildLevel.values()[buildLevel]; // The ordinal is the level (DEFAULT: 0)
+        }
+        return params;
+    }
+
+    private static VectorDistanceType toVectorDistanceType(int distanceType) {
+        switch (distanceType) {
+            case HnswDistanceType.Euclidean:
+                return VectorDistanceType.EUCLIDEAN;
+            case HnswDistanceType.Cosine:
+                return VectorDistanceType.COSINE;
+            case HnswDistanceType.DotProduct:
+                return VectorDistanceType.DOT_PRODUCT;
+            case HnswDistanceType.Geo:
+                return VectorDistanceType.GEO;
+            case HnswDistanceType.DotProductNonNormalized:
+                return VectorDistanceType.DOT_PRODUCT_NON_NORMALIZED;
+            default:
+                return VectorDistanceType.DEFAULT;
+        }
+    }
+
+    private static VectorQuantization toVectorQuantization(int quantization) {
+        switch (quantization) {
+            case HnswQuantization.None:
+                return VectorQuantization.NONE;
+            case HnswQuantization.TurboQuant1:
+                return VectorQuantization.TURBO_QUANT_1;
+            case HnswQuantization.TurboQuant1_5:
+                return VectorQuantization.TURBO_QUANT_1_5;
+            case HnswQuantization.TurboQuant2:
+                return VectorQuantization.TURBO_QUANT_2;
+            case HnswQuantization.TurboQuant3:
+                return VectorQuantization.TURBO_QUANT_3;
+            case HnswQuantization.TurboQuant4:
+                return VectorQuantization.TURBO_QUANT_4;
+            case HnswQuantization.ScalarQuant8:
+                return VectorQuantization.SCALAR_QUANT_8;
+            default:
+                return VectorQuantization.DEFAULT;
+        }
     }
 
     /**

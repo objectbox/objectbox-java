@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import io.objectbox.converter.PropertyConverter;
 import io.objectbox.exception.DbException;
 import io.objectbox.exception.DbExceptionListener;
 import io.objectbox.exception.DbSchemaException;
+import io.objectbox.flatbuffers.FlatBufferBuilder;
 import io.objectbox.internal.Feature;
 import io.objectbox.internal.NativeLibraryLoader;
 import io.objectbox.internal.ObjectBoxThreadPool;
@@ -256,6 +257,18 @@ public class BoxStore implements Closeable {
     }
 
     native long nativePanicModeRemoveAllObjects(long store, int entityId);
+
+    /**
+     * @param hnswParams FlatBuffers HnswParams (the full set; the dimensions are required)
+     * @param mode see {@link HnswInitMode}
+     * @return two values: the result flags and the number of indexed or removed objects
+     */
+    static native long[] nativeInitHnswIndex(long store, int entityId, int propertyId, byte[] hnswParams, int mode);
+
+    /**
+     * @return FlatBuffers HnswParams
+     */
+    static native byte[] nativeHnswIndexParams(long store, int entityId, int propertyId);
 
     private final PrintStream errorOutputStream;
     private final File directory;
@@ -1197,6 +1210,64 @@ public class BoxStore implements Closeable {
                 }
             }
         });
+    }
+
+    /**
+     * Initializes the HNSW index of a property with late init ({@link io.objectbox.annotation.HnswFlags#lateInit()})
+     * with parameters only known at runtime, e.g. the dimensions of an embedding model chosen at runtime.
+     * <p>
+     * Call it after opening the store; until the first call, putting objects of the type and nearest neighbor queries
+     * throw. The first call indexes the existing objects of the type (in a write transaction) or removes them (see
+     * {@link HnswInitMode}). The parameters are persisted, and later sessions use them without another call.
+     * <p>
+     * Intended use: call it once after each opening of the store (e.g. at each app start) with the parameters the app
+     * wants; this works regardless of whether a previous session already initialized the index. A call with the
+     * parameters in effect changes nothing (except for {@link HnswInitMode#REMOVE_ALL_OBJECTS_ALWAYS}); thus, further
+     * calls in the same session are not needed, but harmless.
+     * <p>
+     * Other parameters (e.g. a higher indexing search count or another embedding model) are accepted only until the
+     * index is used in this session (putting or removing objects of the type, or a nearest neighbor query); call it
+     * right after opening the store. Then, the objects are re-indexed (or removed; see {@link HnswInitMode}) if the
+     * parameters require it (e.g. other dimensions); some parameters do not (e.g. the search level).
+     * <p>
+     * Warning: during a call setting parameters, the type must not be used concurrently, and no other process may use
+     * the store; transactions begun before the call cannot use the index afterwards ({@link IllegalStateException}).
+     * <p>
+     * Caution with Sync: for a sync-enabled type, the removing modes remove the objects like other changes do, so if a
+     * sync client is running, the removals are synced to the server (and thus to other clients).
+     *
+     * @param property the property with the HNSW index, e.g. {@code Example_.embedding}.
+     * @param params the full set of parameters: values not given use their defaults; the dimensions are required.
+     * @param mode what to do with the existing objects of the type; {@link HnswInitMode#KEEP_OBJECTS} to keep them.
+     * @return what was done, e.g. to recompute the vectors of the objects if they were removed.
+     * @throws IllegalArgumentException if the property has no HNSW index with late init or for invalid parameters.
+     * @throws IllegalStateException for other parameters than in effect if the index was already used in this
+     * session.
+     */
+    public HnswInitResult initHnswIndex(Property<?> property, HnswIndexParams params, HnswInitMode mode) {
+        if (params == null) throw new IllegalArgumentException("params must not be null.");
+        if (mode == null) throw new IllegalArgumentException("mode must not be null.");
+        FlatBufferBuilder fbb = new FlatBufferBuilder();
+        fbb.finish(params.addTo(fbb));
+        long[] result = nativeInitHnswIndex(getNativeStore(), property.getEntityId(), property.getId(),
+                fbb.sizedByteArray(), mode.ordinal() /* The ordinal is the native value */);
+        return new HnswInitResult(result[0], result[1]);
+    }
+
+    /**
+     * Gets the parameters in effect of the HNSW index of the given property, e.g. to check if an index with late init
+     * still needs its init (then, the {@link HnswIndexParams#getDimensions() dimensions} are 0) or which dimensions a
+     * previous session gave it (see {@link #initHnswIndex(Property, HnswIndexParams, HnswInitMode)}).
+     * <p>
+     * Values that are not set may be returned as such (e.g. an indexing search count of 0 selects the default). The
+     * build level is not returned, but the neighbors per node and indexing search count it resolved to.
+     *
+     * @param property the property with the HNSW index, e.g. {@code Example_.embedding}.
+     * @throws IllegalArgumentException if the property has no HNSW index.
+     */
+    public HnswIndexParams getHnswIndexParams(Property<?> property) {
+        byte[] params = nativeHnswIndexParams(getNativeStore(), property.getEntityId(), property.getId());
+        return HnswIndexParams.fromFlatBuffers(params);
     }
 
     /**
