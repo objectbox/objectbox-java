@@ -19,6 +19,7 @@
 ## Coding Style & Naming Conventions
 - No repo-wide formatter config is present; follow existing Java/Kotlin style in the touched files and keep changes minimal.
 - Use 4-space indentation and standard Java/Kotlin naming conventions; prefer package naming under `io.objectbox`.
+- When changing a file, update its copyright notice to the current year (only the year, no range) with the link, e.g. `Copyright 2017-2025 ObjectBox Ltd.` -> `Copyright 2026 ObjectBox Ltd. <https://objectbox.io>`; new files use the same form. Keep the header of FlatBuffers generated files as the generator script writes it (`Copyright 2026 ObjectBox Ltd. https://objectbox.io`).
 - New tests in `tests/objectbox-java-test` should name methods as `{attribute}_{queryCondition}_{expectation}` (see `tests/README.md`).
 
 ## Testing Guidelines
