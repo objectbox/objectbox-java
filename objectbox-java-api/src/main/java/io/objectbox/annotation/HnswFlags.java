@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. <https://objectbox.io>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,23 @@ public @interface HnswFlags {
     boolean vectorCacheSimdPaddingOff() default false;
 
     /**
-     * If the speed of removing nodes becomes a concern in your use case, you can speed it up by setting this flag. By
-     * default, repairing the graph after node removals creates more connections to improve the graph's quality. The
-     * extra costs for this are relatively low (e.g. vs. regular indexing), and thus the default is recommended.
+     * No longer has any effect: since 6.0, removing objects is fast without it.
+     *
+     * @deprecated Ignored since 6.0; just remove it.
      */
+    @Deprecated
     boolean reparationLimitCandidates() default false;
+
+    /**
+     * Late init: for vectors whose dimensions (and other index parameters) are only known at runtime, e.g. if the
+     * embedding model is chosen at runtime.
+     * <p>
+     * With this flag, the {@link HnswIndex#dimensions()} are optional; without them, the index is not initialized:
+     * putting objects of the type throws, while reading them works. Set the index parameters after opening the store,
+     * before the index is used (e.g. before putting objects of the type), with {@code BoxStore.initHnswIndex()}.
+     * The parameters are persisted, so later sessions use them, and can be changed later (e.g. for another embedding
+     * model).
+     */
+    boolean lateInit() default false;
 
 }

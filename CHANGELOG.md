@@ -13,6 +13,45 @@ For more insights into what changed in the database libraries, [check the Object
   - Add back support for inline value classes like `UInt`.
   - Support `@get:JvmName` to rename the getter of a property used in generated code.
 
+### Vector search
+
+- Vector quantization with TurboQuant enables much faster searches while preserving quality.
+  New indexes with at least 32 dimensions hold their vectors in memory as TurboQuant4 by default, which takes 1/8 of the
+  memory of full-precision vectors. The stored vectors remain unchanged: changing the quantization requires no data
+  migration and no re-indexing. To use another quantization, set `@HnswIndex(quantization = ...)`, see
+  `VectorQuantization`. Existing indexes keep running without quantization, unless they set one or are re-indexed.
+- Simplified configuration: instead of tuning HNSW parameters like `neighborsPerNode` and `indexingSearchCount`
+  yourself, choose one of 10 levels from fast to high quality (recall).
+  - Search levels trade search speed for quality: per query, e.g.
+    `Doc_.embedding.nearestNeighbors(vector, 10).searchLevel(VectorSearchLevel.L6_QUALITY)` or
+    `Query.setParameterSearchLevel()`, or set the default level of an index with `@HnswIndex(searchLevel = ...)`
+    (default: `VectorSearchLevel.L4_BALANCED`).
+    Previously, the advice was to search for more results than needed to improve quality; prefer a search level instead.
+  - Build levels trade indexing time and memory for graph quality, for data that does not reach your recall target at
+    the highest search levels: `@HnswIndex(buildLevel = ...)`, see `VectorBuildLevel`.
+  - The individual parameters remain available for fine-tuning; new are oversampling and rescoring, per query (e.g.
+    `nearestNeighbors(...).rescoreFactor(...)` or `Query.setParameterRescoreFactor()`) and per index (e.g.
+    `@HnswIndex(quantizationRescoreFactor = ...)`).
+  - `Property.nearestNeighbors()` now returns `NearestNeighborQueryCondition`, which offers these search parameters.
+    Code compiled against a previous version needs to be recompiled. The old query API (`QueryBuilder`) offers them
+    as e.g. `vectorSearchLevel()`.
+- Late init for HNSW indexes with dimensions (and other parameters) known only at runtime, e.g. if the embedding model
+  is chosen at runtime: flag the index with `@HnswFlags(lateInit = true)` (makes `@HnswIndex(dimensions)` optional)
+  and set its parameters after opening the store with `BoxStore.initHnswIndex(property, HnswIndexParams, HnswInitMode)`;
+  they are persisted and can be changed later (e.g. for another embedding model). `BoxStore.getHnswIndexParams()`
+  returns the parameters in effect.
+- Reproducible graph builds, e.g. for tests: `HnswIndexParams.randomSeed()` seeds the random levels of new graph nodes
+  (default: a random seed).
+- Nearest neighbor search with other conditions now returns the nearest among the matching objects (previously: the
+  nearest of all objects, of which only the matching ones remained, often fewer than requested). Few candidates are
+  searched by brute force; otherwise, the graph search accepts only matching objects. Both limits are tunable per
+  index (`@HnswIndex(bruteForceMaxCandidates = ..., filteredSearchMaxNodes = ...)`) and per query (e.g.
+  `nearestNeighbors(...).bruteForceMaxCandidates(...)` or `Query.setParameterBruteForceMaxCandidates()`).
+- Faster vector search, also without quantization, faster index builds and much faster removal of objects.
+- The default `indexingSearchCount` (efConstruction) is now 128 instead of 100. Existing indexes keep their value and
+  are not re-indexed.
+- `@HnswFlags(reparationLimitCandidates)` is deprecated and ignored: removals are fast now.
+
 ## 6.0.0-beta3 - 2026-10-20
 
 - Update Android and JVM libraries to database version `6.0.0-beta-2026-10-16`
