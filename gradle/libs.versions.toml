@@ -9,7 +9,7 @@
 # Note: if AGP Upgrade Assitant doesn't open, temporarily change to the com.android.application
 # plugin below. Also be aware that the latest version is likely not supported by IntelliJ IDEA.
 agp = "9.0.1" # https://developer.android.com/build/releases/gradle-plugin
-kotlin = "2.4.0"
+kotlin = "2.4.21"
 kotlin-coroutines = "1.11.0"
 # For objectbox-kotlin: a version of coroutines that depends on the same or older version of the
 # Kotlin standard library (org.jetbrains.kotlin:kotlin-stdlib) set as coreLibrariesVersion in its
@@ -18,7 +18,7 @@ kotlin-coroutines = "1.11.0"
 kotlin-coroutines-compat = "1.10.2" # 1.11.0 requires stdlib 2.2.20, so use 1.10.2
 # Dokka includes its own version of the Kotlin compiler, so it does not have to match the used
 # Kotlin version. But it might not understand new language features.
-kotlin-dokka = "2.2.0" # https://github.com/Kotlin/dokka/releases
+kotlin-dokka = "2.3.0" # https://github.com/Kotlin/dokka/releases
 
 androidx-lifecycle = "2.6.1" # https://developer.android.com/jetpack/androidx/releases/lifecycle
 # Not using Paging v3 as it pulls in Kotlin
@@ -29,17 +29,17 @@ essentials = "3.1.0"
 jsr305 = "3.0.2"
 junit = "4.13.2"
 # Mockito 5 requires Java 11: this is fine as CI doesn't run RxJava tests with older JDKs
-mockito = "5.23.0" # https://github.com/mockito/mockito/releases/
-mockito-kotlin = "6.3.0" # https://github.com/mockito/mockito-kotlin/releases
+mockito = "5.24.0" # https://github.com/mockito/mockito/releases/
+mockito-kotlin = "6.4.0" # https://github.com/mockito/mockito-kotlin/releases
 play-services-nearby = "19.3.0" # https://developers.google.com/android/guides/releases
 publish-plugin = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
-robolectric = "4.17" # https://github.com/robolectric/robolectric/releases
+robolectric = "4.18" # https://github.com/robolectric/robolectric/releases
 rxjava2 = "2.2.21"
 rxjava3 = "3.0.11"
-spotbugs-annotations = "4.10.2" # https://github.com/spotbugs/spotbugs/blob/master/CHANGELOG.md
-spotbugs-plugin = "6.5.8" # https://github.com/spotbugs/spotbugs-gradle-plugin/releases
+spotbugs-annotations = "4.10.5" # https://github.com/spotbugs/spotbugs/blob/master/CHANGELOG.md
+spotbugs-plugin = "6.5.13" # https://github.com/spotbugs/spotbugs-gradle-plugin/releases
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
-versions = "0.54.0" # https://github.com/ben-manes/gradle-versions-plugin/releases
+versions = "0.67.0" # https://github.com/ben-manes/gradle-versions-plugin/releases
 
 [libraries]
 androidx-lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata", version.ref = "androidx-lifecycle" }
@@ -75,4 +75,4 @@ kotlin-dokka = { id = "org.jetbrains.dokka", version.ref = "kotlin-dokka" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "publish-plugin" }
 spotbugs = { id = "com.github.spotbugs", version.ref = "spotbugs-plugin" }
-versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }
+versions = { id = "io.github.ben-manes.versions", version.ref = "versions" }
