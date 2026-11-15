@@ -51,6 +51,10 @@ public class HnswLateInitTest extends AbstractVectorTest {
         return lateInitParams();
     }
 
+    private HnswInitResult initHnswIndex(HnswIndexParams params) {
+        return store.initHnswIndex(VectorEntity_.vector, params);
+    }
+
     private HnswInitResult initHnswIndex(HnswIndexParams params, HnswInitMode mode) {
         return store.initHnswIndex(VectorEntity_.vector, params, mode);
     }
@@ -73,7 +77,7 @@ public class HnswLateInitTest extends AbstractVectorTest {
 
     @Test
     public void initHnswIndex_first_paramsSetAndPersisted() {
-        HnswInitResult result = initHnswIndex(new HnswIndexParams(DIMENSIONS), HnswInitMode.KEEP_OBJECTS);
+        HnswInitResult result = initHnswIndex(new HnswIndexParams(DIMENSIONS));
         assertTrue(result.isParamsChanged());
         assertFalse(result.isObjectsIndexed()); // No objects yet
         assertFalse(result.isObjectsRemoved());
@@ -88,7 +92,7 @@ public class HnswLateInitTest extends AbstractVectorTest {
         assertEquals(asList("42", "43", "41"), findNearest3Names());
 
         // The parameters in effect: nothing to do, also after the index was used
-        assertTrue(initHnswIndex(new HnswIndexParams(DIMENSIONS), HnswInitMode.KEEP_OBJECTS).isUnchanged());
+        assertTrue(initHnswIndex(new HnswIndexParams(DIMENSIONS)).isUnchanged());
 
         // A later session uses the persisted parameters without init
         reopenStore(lateInitParams());
@@ -98,13 +102,13 @@ public class HnswLateInitTest extends AbstractVectorTest {
 
     @Test
     public void initHnswIndex_otherParams_indexesOrRemovesObjects() {
-        initHnswIndex(new HnswIndexParams(DIMENSIONS), HnswInitMode.KEEP_OBJECTS);
+        initHnswIndex(new HnswIndexParams(DIMENSIONS));
         putVectorEntities(100);
 
-        // Re-indexes for another indexing search count
+        // Re-indexes for another indexing search count (without a mode, keeps the objects)
         reopenStore(lateInitParams());
         HnswIndexParams params = new HnswIndexParams(DIMENSIONS).indexingSearchCount(64);
-        HnswInitResult result = initHnswIndex(params, HnswInitMode.KEEP_OBJECTS);
+        HnswInitResult result = initHnswIndex(params);
         assertTrue(result.isParamsChanged());
         assertTrue(result.isObjectsIndexed());
         assertEquals(100, result.getObjectCount());
@@ -139,7 +143,7 @@ public class HnswLateInitTest extends AbstractVectorTest {
 
     @Test
     public void initHnswIndex_otherParamsAfterIndexUsed_throws() {
-        initHnswIndex(new HnswIndexParams(DIMENSIONS), HnswInitMode.KEEP_OBJECTS);
+        initHnswIndex(new HnswIndexParams(DIMENSIONS));
         putVectorEntities(1);
 
         assertThrows(IllegalStateException.class,
@@ -149,18 +153,18 @@ public class HnswLateInitTest extends AbstractVectorTest {
     @Test
     public void initHnswIndex_invalidArguments_throw() {
         assertThrows(IllegalArgumentException.class,
-                () -> initHnswIndex(new HnswIndexParams(0), HnswInitMode.KEEP_OBJECTS));
+                () -> initHnswIndex(new HnswIndexParams(0)));
         assertThrows(IllegalArgumentException.class,
-                () -> initHnswIndex(new HnswIndexParams(DIMENSIONS).quantizationOversample(0.5f),
-                        HnswInitMode.KEEP_OBJECTS));
+                () -> initHnswIndex(new HnswIndexParams(DIMENSIONS).quantizationOversample(0.5f)));
         assertThrows(IllegalArgumentException.class,
-                () -> store.initHnswIndex(VectorEntity_.name, new HnswIndexParams(DIMENSIONS),
-                        HnswInitMode.KEEP_OBJECTS));
+                () -> store.initHnswIndex(VectorEntity_.name, new HnswIndexParams(DIMENSIONS)));
+        assertThrows(IllegalArgumentException.class,
+                () -> initHnswIndex(new HnswIndexParams(DIMENSIONS), null));
 
         // No late init
         reopenStore(new HnswIndexParams(DIMENSIONS));
         assertThrows(IllegalArgumentException.class,
-                () -> initHnswIndex(new HnswIndexParams(DIMENSIONS), HnswInitMode.KEEP_OBJECTS));
+                () -> initHnswIndex(new HnswIndexParams(DIMENSIONS)));
     }
 
 }

@@ -1213,6 +1213,19 @@ public class BoxStore implements Closeable {
     }
 
     /**
+     * Like {@link #initHnswIndex(Property, HnswIndexParams, HnswInitMode)} with {@link HnswInitMode#KEEP_OBJECTS}:
+     * keeps the existing objects of the type and indexes them if needed (the first init or other parameters requiring
+     * re-indexing).
+     *
+     * @param property the property with the HNSW index, e.g. {@code Example_.embedding}.
+     * @param params the full set of parameters: values not given use their defaults; the dimensions are required.
+     * @return what was done.
+     */
+    public HnswInitResult initHnswIndex(Property<?> property, HnswIndexParams params) {
+        return initHnswIndex(property, params, HnswInitMode.KEEP_OBJECTS);
+    }
+
+    /**
      * Initializes the HNSW index of a property with late init ({@link io.objectbox.annotation.HnswFlags#lateInit()})
      * with parameters only known at runtime, e.g. the dimensions of an embedding model chosen at runtime.
      * <p>
@@ -1238,7 +1251,8 @@ public class BoxStore implements Closeable {
      *
      * @param property the property with the HNSW index, e.g. {@code Example_.embedding}.
      * @param params the full set of parameters: values not given use their defaults; the dimensions are required.
-     * @param mode what to do with the existing objects of the type; {@link HnswInitMode#KEEP_OBJECTS} to keep them.
+     * @param mode what to do with the existing objects of the type; without it
+     * ({@link #initHnswIndex(Property, HnswIndexParams)}), keeps them ({@link HnswInitMode#KEEP_OBJECTS}).
      * @return what was done, e.g. to recompute the vectors of the objects if they were removed.
      * @throws IllegalArgumentException if the property has no HNSW index with late init or for invalid parameters.
      * @throws IllegalStateException for other parameters than in effect if the index was already used in this

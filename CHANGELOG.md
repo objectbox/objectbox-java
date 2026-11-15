@@ -38,9 +38,9 @@ For more insights into what changed in the database libraries, [check the Object
     as e.g. `vectorSearchLevel()`.
 - Late init for HNSW indexes with dimensions (and other parameters) known only at runtime, e.g. if the embedding model
   is chosen at runtime: flag the index with `@HnswFlags(lateInit = true)` (makes `@HnswIndex(dimensions)` optional)
-  and set its parameters after opening the store with `BoxStore.initHnswIndex(property, HnswIndexParams, HnswInitMode)`;
-  they are persisted and can be changed later (e.g. for another embedding model). `BoxStore.getHnswIndexParams()`
-  returns the parameters in effect.
+  and set its parameters after opening the store with `BoxStore.initHnswIndex(property, HnswIndexParams)`; they are
+  persisted and can be changed later (e.g. for another embedding model). To remove the objects instead of indexing
+  them, pass an `HnswInitMode`. `BoxStore.getHnswIndexParams()` returns the parameters in effect.
 - Reproducible graph builds, e.g. for tests: `HnswIndexParams.randomSeed()` seeds the random levels of new graph nodes
   (default: a random seed).
 - Nearest neighbor search with other conditions now returns the nearest among the matching objects (previously: the
