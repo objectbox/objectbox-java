@@ -37,14 +37,6 @@ public @interface HnswFlags {
     boolean vectorCacheSimdPaddingOff() default false;
 
     /**
-     * No longer has any effect: since 6.0, removing objects is fast without it.
-     *
-     * @deprecated Ignored since 6.0; just remove it.
-     */
-    @Deprecated
-    boolean reparationLimitCandidates() default false;
-
-    /**
      * Late init: for vectors whose dimensions (and other index parameters) are only known at runtime, e.g. if the
      * embedding model is chosen at runtime.
      * <p>
