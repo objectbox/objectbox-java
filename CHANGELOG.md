@@ -4,7 +4,7 @@ Notable changes to the ObjectBox Java library.
 
 For more insights into what changed in the database libraries, [check the ObjectBox C changelog](https://github.com/objectbox/objectbox-c/blob/main/CHANGELOG.md).
 
-## Next release
+## 6.0.0-rc - 2026-11-16
 
 - Requires Android apps to compile with SDK 36 (Android 16).
 - Update Android and JVM libraries to database version `6.0.0-rc-2026-11-13`.
