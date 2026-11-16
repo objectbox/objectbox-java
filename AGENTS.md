@@ -39,6 +39,6 @@
 ## Commit & Pull Request Guidelines
 - The default branch for development and PRs is `dev`; the `publish` branch is used for releases to Maven Central.
 - Recent history uses a short area prefix, e.g., `QueryTest: use new API...` or `TargetIdProperty: improve...`. Follow this pattern for new commits.
-- Add user-facing changes to the "Next release" section of `CHANGELOG.md`.
+- Add user-facing changes to the "Next release" section of `CHANGELOG.md`. Don't wrap paragraphs (to avoid formatting issues when pasting to GitHub and GitLab). Avoid detailed explanations, prefer brief code examples and linking to online or API documentation.
 - PRs should include a concise summary, rationale, and the exact test commands run.
 - If changes affect native or CI behavior, call that out explicitly (CI tests against the oldest supported JDK 8 and a recent JDK, see `.gitlab-ci.yml`).
