@@ -37,6 +37,18 @@ public @interface HnswFlags {
     boolean vectorCacheSimdPaddingOff() default false;
 
     /**
+     * If the speed of removing nodes becomes a concern in your use case, you can speed it up by
+     * setting this flag. By default, repairing the graph after node removals creates more
+     * connections to improve the graph's quality. The extra costs for this are relatively low (e.g.
+     * vs. regular indexing), and thus the default is recommended.
+     *
+     * @deprecated Since version 6.0 this no longer has any effect. Removing objects is fast without
+     * it. Remove it.
+     */
+    @Deprecated
+    boolean reparationLimitCandidates() default false;
+
+    /**
      * Late init: for vectors whose dimensions (and other index parameters) are only known at runtime, e.g. if the
      * embedding model is chosen at runtime.
      * <p>

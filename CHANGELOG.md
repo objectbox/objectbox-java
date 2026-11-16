@@ -51,8 +51,7 @@ For more insights into what changed in the database libraries, [check the Object
 - Faster vector search, also without quantization, faster index builds and much faster removal of objects.
 - The default `indexingSearchCount` (efConstruction) is now 128 instead of 100. Existing indexes keep their value and
   are not re-indexed.
-- Remove `@HnswFlags(reparationLimitCandidates)`: removing objects from an HNSW index is fast now, so the database no
-  longer supports this flag.
+- `@HnswFlags(reparationLimitCandidates)` is deprecated and ignored: removing objects from an HNSW index is fast now, so the database no longer supports this flag.
 
 ### Sync
 
