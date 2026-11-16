@@ -93,7 +93,7 @@ public class BoxStore implements Closeable {
      * This is used (currently only in tests) to make sure a database library has a compatible JNI API by checking the
      * version number matches exactly and the date is the same or newer.
      */
-    private static final String VERSION = "6.0.0-2026-10-16";
+    private static final String VERSION = "6.0.0-2026-11-13";
 
     private static final String OBJECTBOX_PACKAGE_NAME = "objectbox";
     private static BoxStore defaultStore;

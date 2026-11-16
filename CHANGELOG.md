@@ -7,6 +7,7 @@ For more insights into what changed in the database libraries, [check the Object
 ## Next release
 
 - Requires Android apps to compile with SDK 36 (Android 16).
+- Update Android and JVM libraries to database version `6.0.0-rc-2026-11-13`.
 - The Android database libraries no longer prevent R8 from minifying an Android app build ("Missing classes detected while running R8.").
 - ToOne: `setAndPutTarget()` and `setAndPutTargetAlways()` actually create the relation to the source object when the target object is new (its ID is 0).
 - Query: `setParameters()` supports flex key/value conditions with integer and floating point values, e.g. of `equalKeyValue(key, long)` or `greaterKeyValue(key, double)`.
