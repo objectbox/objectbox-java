@@ -942,17 +942,6 @@ public class QueryBuilder<T> {
     }
 
     /**
-     * @deprecated Use {@link Property#equalKeyValue(String, String, StringOrder)} with the
-     * {@link Box#query(QueryCondition) new query API} instead.
-     */
-    @Deprecated
-    public QueryBuilder<T> containsKeyValue(Property<T> property, String key, String value, StringOrder order) {
-        verifyHandle();
-        checkCombineCondition(nativeEqualKeyValue(handle, property.getId(), key, value, order == StringOrder.CASE_SENSITIVE));
-        return this;
-    }
-
-    /**
      * Note: Use {@link Property#equalKeyValue(String, String, StringOrder)} with the
      * {@link Box#query(QueryCondition) new query API} instead.
      */

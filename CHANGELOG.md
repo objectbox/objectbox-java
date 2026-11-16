@@ -11,6 +11,7 @@ For more insights into what changed in the database libraries, [check the Object
 - The Android database libraries no longer prevent R8 from minifying an Android app build ("Missing classes detected while running R8.").
 - ToOne: `setAndPutTarget()` and `setAndPutTargetAlways()` actually create the relation to the source object when the target object is new (its ID is 0).
 - Query: `setParameters()` supports flex key/value conditions with integer and floating point values, e.g. of `equalKeyValue(key, long)` or `greaterKeyValue(key, double)`.
+- Queries: remove deprecated `containsKeyValue()` condition, use the `equalKeyValue()` condition instead.
 - Admin: remove deprecated `AndroidObjectBrowser` helper class, use `Admin` instead.
 - **Experimental support for KSP**
   - Add back support for inline value classes like `UInt`.

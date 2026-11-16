@@ -497,30 +497,6 @@ public class Property<ENTITY> implements Serializable {
     }
 
     /**
-     * For a String-key map property, matches if at least one key and value combination equals the given values
-     * using {@link StringOrder#CASE_SENSITIVE StringOrder#CASE_SENSITIVE}.
-     *
-     * @deprecated Use the {@link #equalKeyValue(String, String, StringOrder)} condition instead.
-     *
-     * @see #containsKeyValue(String, String, StringOrder)
-     */
-    @Deprecated
-    public PropertyQueryCondition<ENTITY> containsKeyValue(String key, String value) {
-        return new StringStringCondition<>(this, StringStringCondition.Operation.EQUAL_KEY_VALUE,
-                key, value, StringOrder.CASE_SENSITIVE);
-    }
-
-    /**
-     * @deprecated Use the {@link #equalKeyValue(String, String, StringOrder)} condition instead.
-     * @see #containsKeyValue(String, String)
-     */
-    @Deprecated
-    public PropertyQueryCondition<ENTITY> containsKeyValue(String key, String value, StringOrder order) {
-        return new StringStringCondition<>(this, StringStringCondition.Operation.EQUAL_KEY_VALUE,
-                key, value, order);
-    }
-
-    /**
      * For a String-key map property, matches the combination where the key and value of at least one map entry is equal
      * to the given {@code key} and {@code value}.
      */
