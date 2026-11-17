@@ -17,16 +17,20 @@
 package io.objectbox.relation;
 
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import java.util.Comparator;
 import java.util.List;
 
+import io.objectbox.exception.DbDetachedException;
 import io.objectbox.query.Query;
 
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class RelationTest extends AbstractRelationTest {
 
@@ -106,6 +110,89 @@ public class RelationTest extends AbstractRelationTest {
         customerNew.setName("Jake");
         customerBox.put(customerNew);
         assertEquals("Jake", customerBox.get(customer.getId()).getName());
+    }
+
+    /**
+     * Resolving a relation of an object that is neither put nor attached throws
+     * {@link DbDetachedException}, as documented. The message text is asserted as well because it
+     * tells users the fix ({@code box.attach(object)}).
+     */
+    @Test
+    public void toOne_getTarget_detachedEntity_throws() {
+        Customer customer = putCustomer();
+        Order order = new Order(); // Not put, so not attached to a store.
+        order.getCustomer().setTargetId(customer.getId());
+
+        assertThrowsDetached(() -> order.getCustomer().getTarget());
+
+        orderBox.attach(order);
+        assertEquals(customer.getId(), order.getCustomer().getTarget().getId());
+    }
+
+    /**
+     * Same as {@link #toOne_getTarget_detachedEntity_throws()} for ToMany.
+     */
+    @Test
+    public void toMany_detachedEntity_throws() {
+        Customer customer = putCustomer();
+        putOrder(customer, "Bananas");
+        Customer detached = new Customer();
+        detached.setId(customer.getId());
+
+        assertThrowsDetached(() -> detached.getOrders().size());
+    }
+
+    private static void assertThrowsDetached(ThrowingRunnable runnable) {
+        DbDetachedException e = assertThrows(DbDetachedException.class, runnable);
+        assertEquals("Cannot resolve relation for detached objects, call box.attach(object) beforehand.",
+                e.getMessage());
+    }
+
+    /**
+     * The docs require attaching a new (not put) source before calling {@code setAndPutTarget()}.
+     * That a source without a store can borrow the store of a target that was put is a convenience
+     * of the implementation (see {@code ToOne.ensureBoxes()}), not a documented promise; it is
+     * documented here so a change is noticed.
+     */
+    @Test
+    public void setAndPutTarget_newSource_existingTarget() {
+        Customer target = putCustomer();
+
+        // Neither source nor target is attached: there is no store to put through.
+        Order order = new Order();
+        assertThrows(DbDetachedException.class, () -> order.getCustomer().setAndPutTarget(new Customer()));
+
+        // Attaching the source is enough.
+        orderBox.attach(order);
+        order.getCustomer().setAndPutTarget(target);
+        assertTrue(order.getId() != 0);
+        assertEquals(target.getId(), orderBox.get(order.getId()).getCustomerId());
+
+        // A target that was put is attached; its store is used for a new, not attached source.
+        Order order2 = new Order();
+        order2.getCustomer().setAndPutTarget(target);
+        assertTrue(order2.getId() != 0);
+        assertEquals(target.getId(), orderBox.get(order2.getId()).getCustomerId());
+    }
+
+    /**
+     * Per the {@code setAndPutTarget()} javadoc a target that was not put yet is put before the
+     * source, and the source points to it.
+     */
+    @Test
+    public void setAndPutTarget_newSource_newTarget() {
+        Order order = new Order();
+        orderBox.attach(order);
+        Customer target = new Customer();
+        target.setName("target");
+
+        // The new target is put first, then the source.
+        order.getCustomer().setAndPutTarget(target);
+        assertTrue(target.getId() != 0);
+        assertTrue(order.getId() != 0);
+        // The source must point to the new target.
+        assertEquals(target.getId(), order.getCustomer().getTargetId());
+        assertEquals(target.getId(), orderBox.get(order.getId()).getCustomerId());
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ObjectBox Ltd.
+ * Copyright 2026 ObjectBox Ltd. https://objectbox.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,8 @@ public final class HnswParams extends Table {
    */
   public long neighborsPerNode() { int o = __offset(6); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
   /**
-   * Aka "efConstruction": the number of neighbor searched for while indexing (default: 100).
+   * Aka "efConstruction": the number of neighbor searched for while indexing.
+   * 0/absent: the default (currently 128) for a new index; an existing index keeps its persisted value.
    * The higher the value, the more accurate the search, but the longer the indexing.
    * If indexing time is not a major concern, a value of at least 200 is recommended to improve search quality.
    * Changing this value causes re-indexing.
@@ -93,6 +94,63 @@ public final class HnswParams extends Table {
    *         e.g. for large changes, it can double due to multi-version transactions.
    */
   public long vectorCacheHintSizeKb() { int o = __offset(16); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
+  /**
+   * Quantization of the vectors held in memory (default: TurboQuant4 for new indexes with at least 32 dimensions
+   * and a supported distance type, otherwise None; indexes created before 6.0 keep None; "Undefined" selects the
+   * default).
+   * Memory only: the persisted vectors are unaffected; thus, changing this value does not cause re-indexing.
+   */
+  public int quantization() { int o = __offset(18); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 0; }
+  /**
+   * With quantization: candidates a search explores per result (ef = oversample * k, rounded, at least k) for
+   * searches that do not set it. 0 (default): 1.25 with rescoring, 1.5 without it; otherwise at least 1.
+   * Changing it does not cause re-indexing.
+   */
+  public float quantizationOversample() { int o = __offset(20); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  /**
+   * With quantization and rescoring: rescores only the rescoreFactor * k explored candidates with the nearest
+   * estimates, for searches that do not set it. 0 (default): max(1.5, sqrt(oversample)) of the search;
+   * otherwise at least 1. Changing it does not cause re-indexing.
+   */
+  public float quantizationRescoreFactor() { int o = __offset(22); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  /**
+   * The search level of queries that do not set one (1: fastest ... 10: highest recall; 0: default, currently 4).
+   * Only affects searching; thus, changing this value does not cause re-indexing.
+   */
+  public int searchLevel() { int o = __offset(24); return o != 0 ? bb.get(o + bb_pos) & 0xFF : 0; }
+  /**
+   * For queries with other conditions: if the other lookups leave at most this many candidates, the nearest
+   * neighbors among the matching ones are found by brute force (exact without quantization) instead of a filtered
+   * graph search. Queries use this value unless they set their own (search params), which overrides it.
+   * 0 (default): currently 10,000. Changing it does not cause re-indexing.
+   */
+  public long bruteForceMaxCandidates() { int o = __offset(26); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  /**
+   * A graph search with a filter (e.g. a query's other conditions) explores at most this many nodes.
+   * Queries use this value unless they set their own (search params), which overrides it.
+   * 0 (default): currently 25,000. Changing it does not cause re-indexing.
+   */
+  public long filteredSearchMaxNodes() { int o = __offset(28); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  /**
+   * The build level (1: fastest build ... 10: highest graph quality; 0/absent: not set) selects measured values for
+   * neighborsPerNode and indexingSearchCount (e.g. 4: the defaults 30 and 128; 10: 96 and 256), which trade
+   * indexing time and memory for graph quality; for data that does not reach your recall target at the highest
+   * search levels. If neighborsPerNode or indexingSearchCount are given too, they take precedence over the level.
+   * The level is resolved when the params are read (e.g. from the model): the DB schema stores the resolved
+   * neighborsPerNode and indexingSearchCount, not the level.
+   * Changing this value causes re-indexing (if the resolved values change).
+   */
+  public int buildLevel() { int o = __offset(30); return o != 0 ? bb.get(o + bb_pos) & 0xFF : 0; }
+  /**
+   * Seeds the random levels of new graph nodes (0/absent: a random seed, the default), e.g. for reproducible tests:
+   * putting the same objects in the same order builds the same graph.
+   * Each store opening restarts the random sequence, transactions do not.
+   * The seed semantics may change in future versions;
+   * currently, seeds up to 32 bits give the same levels on all platforms (larger seeds may not).
+   * Graphs may still differ between platforms, as distance calculations depend on the CPU and SIMD instructions.
+   * Changing this value causes re-indexing.
+   */
+  public long randomSeed() { int o = __offset(32); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
 
   public static int createHnswParams(FlatBufferBuilder builder,
       long dimensions,
@@ -101,19 +159,35 @@ public final class HnswParams extends Table {
       long flags,
       int distanceType,
       float reparationBacklinkProbability,
-      long vectorCacheHintSizeKb) {
-    builder.startTable(7);
+      long vectorCacheHintSizeKb,
+      int quantization,
+      float quantizationOversample,
+      float quantizationRescoreFactor,
+      int searchLevel,
+      long bruteForceMaxCandidates,
+      long filteredSearchMaxNodes,
+      int buildLevel,
+      long randomSeed) {
+    builder.startTable(15);
+    HnswParams.addRandomSeed(builder, randomSeed);
     HnswParams.addVectorCacheHintSizeKb(builder, vectorCacheHintSizeKb);
+    HnswParams.addFilteredSearchMaxNodes(builder, filteredSearchMaxNodes);
+    HnswParams.addBruteForceMaxCandidates(builder, bruteForceMaxCandidates);
+    HnswParams.addQuantizationRescoreFactor(builder, quantizationRescoreFactor);
+    HnswParams.addQuantizationOversample(builder, quantizationOversample);
     HnswParams.addReparationBacklinkProbability(builder, reparationBacklinkProbability);
     HnswParams.addFlags(builder, flags);
     HnswParams.addIndexingSearchCount(builder, indexingSearchCount);
     HnswParams.addNeighborsPerNode(builder, neighborsPerNode);
     HnswParams.addDimensions(builder, dimensions);
+    HnswParams.addQuantization(builder, quantization);
     HnswParams.addDistanceType(builder, distanceType);
+    HnswParams.addBuildLevel(builder, buildLevel);
+    HnswParams.addSearchLevel(builder, searchLevel);
     return HnswParams.endHnswParams(builder);
   }
 
-  public static void startHnswParams(FlatBufferBuilder builder) { builder.startTable(7); }
+  public static void startHnswParams(FlatBufferBuilder builder) { builder.startTable(15); }
   public static void addDimensions(FlatBufferBuilder builder, long dimensions) { builder.addInt(0, (int) dimensions, (int) 0L); }
   public static void addNeighborsPerNode(FlatBufferBuilder builder, long neighborsPerNode) { builder.addInt(1, (int) neighborsPerNode, (int) 0L); }
   public static void addIndexingSearchCount(FlatBufferBuilder builder, long indexingSearchCount) { builder.addInt(2, (int) indexingSearchCount, (int) 0L); }
@@ -121,6 +195,14 @@ public final class HnswParams extends Table {
   public static void addDistanceType(FlatBufferBuilder builder, int distanceType) { builder.addShort(4, (short) distanceType, (short) 0); }
   public static void addReparationBacklinkProbability(FlatBufferBuilder builder, float reparationBacklinkProbability) { builder.addFloat(5, reparationBacklinkProbability, 0.0f); }
   public static void addVectorCacheHintSizeKb(FlatBufferBuilder builder, long vectorCacheHintSizeKb) { builder.addLong(6, vectorCacheHintSizeKb, 0L); }
+  public static void addQuantization(FlatBufferBuilder builder, int quantization) { builder.addShort(7, (short) quantization, (short) 0); }
+  public static void addQuantizationOversample(FlatBufferBuilder builder, float quantizationOversample) { builder.addFloat(8, quantizationOversample, 0.0f); }
+  public static void addQuantizationRescoreFactor(FlatBufferBuilder builder, float quantizationRescoreFactor) { builder.addFloat(9, quantizationRescoreFactor, 0.0f); }
+  public static void addSearchLevel(FlatBufferBuilder builder, int searchLevel) { builder.addByte(10, (byte) searchLevel, (byte) 0); }
+  public static void addBruteForceMaxCandidates(FlatBufferBuilder builder, long bruteForceMaxCandidates) { builder.addInt(11, (int) bruteForceMaxCandidates, (int) 0L); }
+  public static void addFilteredSearchMaxNodes(FlatBufferBuilder builder, long filteredSearchMaxNodes) { builder.addInt(12, (int) filteredSearchMaxNodes, (int) 0L); }
+  public static void addBuildLevel(FlatBufferBuilder builder, int buildLevel) { builder.addByte(13, (byte) buildLevel, (byte) 0); }
+  public static void addRandomSeed(FlatBufferBuilder builder, long randomSeed) { builder.addLong(14, randomSeed, 0L); }
   public static int endHnswParams(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;

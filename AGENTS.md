@@ -19,7 +19,9 @@
 ## Coding Style & Naming Conventions
 - No repo-wide formatter config is present; follow existing Java/Kotlin style in the touched files and keep changes minimal.
 - Use 4-space indentation and standard Java/Kotlin naming conventions; prefer package naming under `io.objectbox`.
+- When changing a file, update its copyright notice to the current year (only the year, no range) with the link, e.g. `Copyright 2017-2025 ObjectBox Ltd.` -> `Copyright 2026 ObjectBox Ltd. <https://objectbox.io>`; new files use the same form. Keep the header of FlatBuffers generated files as the generator script writes it (`Copyright 2026 ObjectBox Ltd. https://objectbox.io`).
 - New tests in `tests/objectbox-java-test` should name methods as `{attribute}_{queryCondition}_{expectation}` (see `tests/README.md`).
+- To be removed APIs should be deprecated first (annotated with `@Deprecated` and adding the `@deprecated` javadoc tag it recommends) and only be removed in the next major release (following https://semver.org/) to make it easier for users to migrate.
 
 ## Testing Guidelines
 - Tests are JUnit-based (see `tests/objectbox-java-test/build.gradle.kts`).
@@ -37,6 +39,6 @@
 ## Commit & Pull Request Guidelines
 - The default branch for development and PRs is `dev`; the `publish` branch is used for releases to Maven Central.
 - Recent history uses a short area prefix, e.g., `QueryTest: use new API...` or `TargetIdProperty: improve...`. Follow this pattern for new commits.
-- Add user-facing changes to the "Next release" section of `CHANGELOG.md`.
+- Add user-facing changes to the "Next release" section of `CHANGELOG.md`. Don't wrap paragraphs (to avoid formatting issues when pasting to GitHub and GitLab). Avoid detailed explanations, prefer brief code examples and linking to online or API documentation.
 - PRs should include a concise summary, rationale, and the exact test commands run.
 - If changes affect native or CI behavior, call that out explicitly (CI tests against the oldest supported JDK 8 and a recent JDK, see `.gitlab-ci.yml`).

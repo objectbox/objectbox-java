@@ -1,7 +1,7 @@
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
 plugins {
-    alias(libs.plugins.android.library)
+    id("objectbox.android-conventions")
     id("objectbox.kotlin-conventions")
     id("objectbox.publishing-conventions")
 }
@@ -13,30 +13,20 @@ val buildTypeRelease = "release"
 val variantAdminExcludedRelease = "${flavorAdminExcluded}${buildTypeRelease.uppercaseFirstChar()}"
 val variantAdminIncludedRelease = "${flavorAdminIncluded}${buildTypeRelease.uppercaseFirstChar()}"
 
+// Note: common settings applied by objectbox.android-conventions plugin
 android {
     namespace = "io.objectbox.meshsync.android"
-    // Note: increasing compile SDK also signals this library is compatible with any changes in that
-    // API level, see "behavior changes" for each Android version at https://developer.android.com/about/versions
-    compileSdk = 35 // Android 15 (Vanilla Ice Cream)
 
     defaultConfig {
-        minSdk = 21 // Android 5.0 (Lollipop), like objectbox-android
-
         // Dependencies: objectbox-android also has a "database" dimension,
         // always pick its "sync" flavor.
         missingDimensionStrategy("database", "sync")
-    }
 
-    buildTypes {
-        release {
-            // Currently not obfuscating/minifying with ProGuard/R8.
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
-        }
+        consumerProguardFiles("consumer-proguard-rules.pro")
     }
 
     // Configure a flavor dimension based on if Admin is included in the Android database library.
-    // Note: common configuration defined in defaultConfig and buildTypes blocks above.
+    // Note: common configuration defined in defaultConfig and buildTypes blocks.
     // https://developer.android.com/studio/build/build-variants#product-flavors
     // Note: the name of this flavor should match the one of the depended on objectbox-android
     // subproject, otherwise, additonal configuration is necessary to depend on the correct variant
@@ -63,18 +53,6 @@ android {
             withJavadocJar()
             withSourcesJar()
         }
-    }
-
-    // Java 8 features support https://developer.android.com/studio/write/java8-support
-    // Note: this requires consuming projects to also enable this.
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    // For local unit tests enable use of Android framework with Robolectric
-    testOptions {
-        unitTests.isIncludeAndroidResources = true
     }
 }
 

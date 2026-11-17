@@ -74,7 +74,7 @@ public interface SyncClient extends Closeable {
     boolean isStarted();
 
     /**
-     * Flag indicating if the sync client was started.
+     * Flag indicating if the sync client was logged in.
      * Logged in clients can sync with the sync destination to exchange data.
      */
     boolean isLoggedIn();
@@ -93,10 +93,9 @@ public interface SyncClient extends Closeable {
     long getServerTimeNanos();
 
     /**
-     * Returns the estimated difference in nanoseconds between the server time and the local timestamp.
-     * urns the difference in nanoseconds between the current local time of this client
-     * Equivalent to calculating {@link #getServerTimeNanos()} - "current time" (nanos since epoch),
-     * except for when the server time is unknown, then the result is zero.
+     * Returns the estimated difference in nanoseconds between the server time and the local
+     * timestamp. Equivalent to calculating {@link #getServerTimeNanos()} - "current time" (nanos
+     * since epoch), except for when the server time is unknown, then the result is zero.
      *
      * @return time difference in nanoseconds; e.g. positive if server time is ahead of local time;
      * or 0 if there has not been a server contact yet and thus the server's time is unknown
@@ -246,7 +245,16 @@ public interface SyncClient extends Closeable {
     boolean awaitFirstLogin(long millisToWait);
 
     /**
-     * Starts the client. It will connect to the server, log in (authenticate) and start syncing.
+     * Starts this Sync client to initiate synchronization.
+     * <p>
+     * This method triggers communication in the background and will return immediately. If the
+     * synchronization destination is reachable, this client's background thread will connect to the
+     * server, log in (authenticate) and, depending on "update request mode"
+     * ({@link SyncBuilder#requestUpdatesMode(RequestUpdatesMode)}), start syncing data. If the
+     * device, network or server is currently offline, connection attempts will be retried later
+     * using increasing backoff intervals.
+     * <p>
+     * A Sync client may be started only once (subsequent calls will likely throw).
      */
     void start();
 
@@ -298,12 +306,52 @@ public interface SyncClient extends Closeable {
      * Temporary only, try not to use it.
      * <p>
      * Request a sync of all previous changes from the server.
+     * <p>
+     * For clients with existing data, consider {@link #requestResync()}, which keeps the local data and only transfers
+     * the differences.
      *
      * @return 'true' if the request was likely sent (e.g. the sync client is in "logged in" state)
      * or 'false' if the request was not sent (and will not be sent in the future).
      */
     @Experimental
     boolean requestFullSync();
+
+    /**
+     * Requests a resync with the server: like a full sync, but this client keeps its local data and only the
+     * differences are transferred (objects and relations are compared via their IDs and content hashes). Use this e.g.
+     * if the data of this client may have diverged from the server.
+     * <p>
+     * To ensure the server has all local changes first, the request is only sent once the outgoing queue is empty.
+     * Note: building the request reads all synced objects, which may take a while for large databases (it is done on
+     * the calling thread or on a sync thread once the outgoing queue is empty).
+     * <p>
+     * If the server does not support resync (it requires a server supporting Sync protocol version 12) or the request
+     * would be too large, this client falls back to a full sync, which first removes all local synced data.
+     * <p>
+     * Do not call this while holding a write transaction on the calling thread (the fallback writes).
+     *
+     * @return 'true' if the resync was requested (the sync client is in "logged in" state)
+     * or 'false' if the sync client is not logged in (no resync will be done).
+     * @throws io.objectbox.exception.DbException if building the request or the fallback fails on the calling thread
+     * (e.g. a database error).
+     * @see #setResyncAssumedChanges(int)
+     */
+    boolean requestResync();
+
+    /**
+     * Advanced optimization, typically not needed (the default fits most cases): sets the estimated number of objects
+     * that differ between this client and the server for resyncs ({@link #requestResync()} and resyncs after sync
+     * filter changes); the resync request is optimized for it.
+     * <p>
+     * A higher value results in a larger resync request, but less data sent back by the server; a lower value results
+     * in a smaller request, but potentially more data sent back (e.g. unchanged objects next to changed ones).
+     * <p>
+     * Takes effect with the next resync request built (also if a resync is already pending).
+     *
+     * @param count the estimated number of differing objects (greater than 0); 200 by default (or as set with
+     * {@link SyncBuilder#resyncAssumedChanges(int)}).
+     */
+    void setResyncAssumedChanges(int count);
 
     /**
      * Lets the sync client know that a working network connection

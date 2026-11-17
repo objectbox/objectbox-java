@@ -34,9 +34,8 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
     private static final String TEST_MESH_ID = "test-mesh";
     private static final String TEST_SERVER_URL = "ws://127.0.0.1:9999";
 
-    @Test
-    public void meshConfig_setsAllValues() {
-        MeshConfig config = InternalSyncAccess.createMeshConfig(TEST_MESH_ID)
+    private static MeshConfig createMeshConfigWithAllValues() {
+        return InternalSyncAccess.createMeshConfig(TEST_MESH_ID)
                 .maxConnectionCount(4)
                 .backoffMillis(5000)
                 .evictionBackoffMillis(20000)
@@ -50,7 +49,13 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
                 .discoveryPauseSeconds(30)
                 .discoveryPauseJitterSeconds(10)
                 .txLogBatchSizeKb(50)
-                .txLogBatchMaxCount(500);
+                .txLogBatchMaxCount(500)
+                .txLogMaxAgeSeconds(3600);
+    }
+
+    @Test
+    public void meshConfig_setsAllValues() {
+        MeshConfig config = createMeshConfigWithAllValues();
         InternalSyncAccess.addNetworkInternalHandle(config, 12345);
 
         assertEquals(TEST_MESH_ID, config.meshId);
@@ -68,6 +73,7 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
         assertEquals(Integer.valueOf(10), config.discoveryPauseJitterSeconds);
         assertEquals(Integer.valueOf(50), config.txLogBatchSizeKb);
         assertEquals(Integer.valueOf(500), config.txLogBatchMaxCount);
+        assertEquals(Long.valueOf(3600), config.txLogMaxAgeSeconds);
         assertEquals(1, config.networkInternalHandles.size());
         assertEquals(Long.valueOf(12345), config.networkInternalHandles.get(0));
     }
@@ -91,6 +97,7 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
         assertNull(config.discoveryPauseJitterSeconds);
         assertNull(config.txLogBatchSizeKb);
         assertNull(config.txLogBatchMaxCount);
+        assertNull(config.txLogMaxAgeSeconds);
         assertEquals(0, config.networkInternalHandles.size());
     }
 
@@ -114,6 +121,29 @@ public class SyncMeshTest extends AbstractObjectBoxTest {
         assertEquals(MeshState.UNKNOWN, MeshState.fromId(-1));
         MeshState[] states = MeshState.values();
         assertEquals(MeshState.UNKNOWN, MeshState.fromId(states[states.length - 1].id + 1));
+    }
+
+    @Test
+    public void clientWithMesh_allValues_builds() {
+        // Applies all values to the native options, which validate them
+        try (SyncClient client = Sync.client(store)
+                .url(TEST_SERVER_URL)
+                .credentials(SyncCredentials.none())
+                .mesh(createMeshConfigWithAllValues())
+                .build()) {
+            assertNotNull(client.getMesh());
+        }
+    }
+
+    @Test
+    public void clientWithMesh_negativeTxLogMaxAge_throws() {
+        MeshConfig config = InternalSyncAccess.createMeshConfig(TEST_MESH_ID).txLogMaxAgeSeconds(-1);
+        assertThrows(IllegalArgumentException.class, () -> Sync.client(store)
+                .url(TEST_SERVER_URL)
+                .credentials(SyncCredentials.none())
+                .mesh(config)
+                .build());
+        assertNull(store.getSyncClient());
     }
 
     @Test

@@ -56,6 +56,7 @@ public final class SyncBuilder {
     @Nullable
     String[] trustedCertPaths;
     int flags;
+    int resyncAssumedChanges; // 0: not set
     @Nullable MeshConfig meshConfig;
     boolean uncommittedAcks;
 
@@ -204,6 +205,25 @@ public final class SyncBuilder {
     public SyncBuilder flags(int flags) {
         this.flags = flags;
         return this;
+    }
+
+    /**
+     * Advanced optimization, typically not needed (the default fits most cases): sets the initial estimated number of
+     * objects that differ between the client and the server for resyncs; see
+     * {@link SyncClient#setResyncAssumedChanges(int)}, which can change it later.
+     *
+     * @param count the estimated number of differing objects (greater than 0); 200 by default.
+     */
+    public SyncBuilder resyncAssumedChanges(int count) {
+        checkResyncAssumedChanges(count);
+        this.resyncAssumedChanges = count;
+        return this;
+    }
+
+    static void checkResyncAssumedChanges(int count) {
+        if (count <= 0) {
+            throw new IllegalArgumentException("The resync assumed changes count must be greater than 0, but is " + count);
+        }
     }
 
     /**

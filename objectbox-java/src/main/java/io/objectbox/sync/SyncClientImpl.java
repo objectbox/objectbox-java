@@ -91,6 +91,10 @@ public final class SyncClientImpl implements SyncClient {
                 nativeSyncOptFlags(optHandle, builder.flags);
             }
 
+            if (builder.resyncAssumedChanges != 0) {
+                nativeSyncOptResyncAssumedChanges(optHandle, builder.resyncAssumedChanges);
+            }
+
             // Attach a mesh sync configuration if set
             if (builder.meshConfig != null) {
                 applyMeshConfig(optHandle, builder.meshConfig);
@@ -196,6 +200,9 @@ public final class SyncClientImpl implements SyncClient {
             }
             if (config.txLogBatchMaxCount != null) {
                 nativeMeshOptTxLogBatchMaxCount(meshOptHandle, config.txLogBatchMaxCount);
+            }
+            if (config.txLogMaxAgeSeconds != null) {
+                nativeMeshOptTxLogMaxAgeSeconds(meshOptHandle, config.txLogMaxAgeSeconds);
             }
             for (long networkInternalHandle : config.networkInternalHandles) {
                 nativeMeshOptNetworkInternal(meshOptHandle, networkInternalHandle);
@@ -471,6 +478,17 @@ public final class SyncClientImpl implements SyncClient {
     }
 
     @Override
+    public boolean requestResync() {
+        return nativeRequestResync(getHandle());
+    }
+
+    @Override
+    public void setResyncAssumedChanges(int count) {
+        SyncBuilder.checkResyncAssumedChanges(count);
+        nativeSetResyncAssumedChanges(getHandle(), count);
+    }
+
+    @Override
     public boolean requestUpdates() {
         return nativeRequestUpdates(getHandle(), true);
     }
@@ -529,6 +547,11 @@ public final class SyncClientImpl implements SyncClient {
      * Combine multiple flags using bitwise OR.
      */
     private static native void nativeSyncOptFlags(long optHandle, int flags);
+
+    /**
+     * Sets the initial estimated number of objects that differ between the client and the server for resyncs (> 0).
+     */
+    private static native void nativeSyncOptResyncAssumedChanges(long optHandle, int count);
 
     /**
      * Creates a sync client with the given options.
@@ -596,6 +619,8 @@ public final class SyncClientImpl implements SyncClient {
     private static native void nativeMeshOptTxLogBatchSizeKb(long meshOptHandle, int sizeKb);
 
     private static native void nativeMeshOptTxLogBatchMaxCount(long meshOptHandle, int count);
+
+    private static native void nativeMeshOptTxLogMaxAgeSeconds(long meshOptHandle, long seconds);
 
     /**
      * Registers an internal mesh network (transport) implementation with the mesh options.
@@ -673,6 +698,12 @@ public final class SyncClientImpl implements SyncClient {
 
     /** @param subscribeForPushes Pass true to automatically receive updates for future changes. */
     private native boolean nativeRequestFullSync(long handle, boolean subscribeForPushes);
+
+    /** @return false if the client is not logged in (no resync will be done). */
+    private native boolean nativeRequestResync(long handle);
+
+    /** @param count the estimated number of objects that differ between the client and the server (> 0). */
+    private native void nativeSetResyncAssumedChanges(long handle, int count);
 
     /** (Optional) Pause sync updates. */
     private native boolean nativeCancelUpdates(long handle);
